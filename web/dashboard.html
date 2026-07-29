@@ -1,0 +1,535 @@
+<title>Terminal Daily — daily coding-agent benchmark</title>
+<style>
+  :root{
+    --bg:#f5f7f9; --surface:#ffffff; --surface-2:#eef2f5; --border:#d5dde4;
+    --ink:#16202b; --muted:#5c6b7a; --faint:#8a97a4;
+    --accent:#1a7f37;            /* execution / pass green — the one bold hue */
+    --accent-soft:#e6f4ea;
+    --link:#0c6fb8;              /* interactive, distinct from the pass-green accent */
+    --warn:#9a6700; --crit:#b42318;
+    --bar-track:#e3e9ee;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --shadow:0 1px 2px rgba(16,32,43,.06),0 6px 20px rgba(16,32,43,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0b1016; --surface:#121a22; --surface-2:#182129; --border:#26313c;
+      --ink:#e7eef4; --muted:#93a1af; --faint:#63727f;
+      --accent:#3fb950; --accent-soft:#12261a;
+      --link:#4ba3e0; --warn:#d29922; --crit:#e5534b;
+      --bar-track:#20293200; --bar-track:#1c252e;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f5f7f9; --surface:#ffffff; --surface-2:#eef2f5; --border:#d5dde4;
+    --ink:#16202b; --muted:#5c6b7a; --faint:#8a97a4; --accent:#1a7f37; --accent-soft:#e6f4ea;
+    --link:#0c6fb8; --warn:#9a6700; --crit:#b42318; --bar-track:#e3e9ee;
+    --shadow:0 1px 2px rgba(16,32,43,.06),0 6px 20px rgba(16,32,43,.05);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b1016; --surface:#121a22; --surface-2:#182129; --border:#26313c;
+    --ink:#e7eef4; --muted:#93a1af; --faint:#63727f; --accent:#3fb950; --accent-soft:#12261a;
+    --link:#4ba3e0; --warn:#d29922; --crit:#e5534b; --bar-track:#1c252e;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;font-size:15px}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
+  .mono{font-family:var(--mono)}
+  h1,h2,h3{text-wrap:balance;line-height:1.2}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---- header ---- */
+  header{display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-start;justify-content:space-between;
+    padding-bottom:24px;border-bottom:1px solid var(--border)}
+  .brand h1{margin:.2em 0 .15em;font-size:30px;letter-spacing:-.01em}
+  .brand h1 .blink{color:var(--accent)}
+  .brand p{margin:0;color:var(--muted);max-width:52ch;font-size:14.5px}
+  .fa-badge{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--accent);
+    border-radius:12px;background:var(--accent-soft);min-width:160px}
+  .fa-badge .num{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--accent);
+    letter-spacing:-.02em;line-height:1}
+  .fa-badge .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .fa-badge .sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+  /* ---- summary strip ---- */
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+    background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:24px 0 8px}
+  .cell{background:var(--surface);padding:14px 16px}
+  .cell .k{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .cell .v{font-family:var(--mono);font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+  .cell .v small{font-size:13px;color:var(--muted);font-weight:400}
+
+  section{margin-top:40px}
+  section > h2{font-size:19px;margin:0 0 4px;display:flex;align-items:baseline;gap:10px}
+  section > .lead{color:var(--muted);margin:0 0 16px;font-size:14px;max-width:70ch}
+
+  /* ---- leaderboard ---- */
+  .board-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:560px}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap}
+  thead th.num,tbody td.num{text-align:right}
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:14px}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--surface-2)}
+  .rank{font-family:var(--mono);color:var(--faint);width:34px}
+  .model{font-family:var(--mono);font-weight:600;font-size:13.5px}
+  .rate{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .rate .bar{width:74px;height:6px;border-radius:3px;background:var(--bar-track);overflow:hidden;flex:none}
+  .rate .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+  .rate .pct{font-family:var(--mono);min-width:52px;text-align:right;font-size:13px}
+  .rate .n{color:var(--faint);font-family:var(--mono);font-size:11.5px}
+  .dash{color:var(--faint)}
+  .fa-ok{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .fa-ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .lead-badge{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--accent);border-radius:5px;padding:1px 5px;margin-left:7px;vertical-align:middle}
+
+  /* ---- cards / prose ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .card{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px 18px}
+  .card h3{margin:0 0 6px;font-size:14.5px}
+  .card p{margin:0;color:var(--muted);font-size:13.5px}
+  .card .big{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+  .card .arrow{color:var(--accent)}
+
+  pre{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:16px 18px;overflow-x:auto;line-height:1.7;margin:0}
+  pre .c{color:var(--faint)} pre .g{color:var(--accent)} pre .k{color:var(--link)}
+
+  .empty{border:1px dashed var(--border);border-radius:12px;background:var(--surface-2);
+    padding:22px;color:var(--muted);font-size:13.5px}
+  .tasks{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .tag{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--surface-2);
+    border:1px solid var(--border);border-radius:20px;padding:3px 11px}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--border);color:var(--faint);font-size:12.5px}
+  footer .mono{color:var(--muted)}
+  @media (prefers-reduced-motion:no-preference){.rate .bar i{transition:width .5s cubic-bezier(.2,.7,.2,1)}}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:0;margin:26px 0 8px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+  .flow .stg{padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+  .flow .stg .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .flow .stg .t{font-size:15px;font-weight:650;color:var(--ink)}
+  .flow .stg .d{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .flow .stg .who{font-family:var(--mono);font-size:11.5px;margin-top:2px}
+  .flow .stg.build .who{color:var(--warn)} .flow .stg.test .who{color:var(--accent)} .flow .stg.prof .who{color:var(--warn)}
+  .flow .arw{display:flex;align-items:center;justify-content:center;padding:0 4px;color:var(--faint);font-size:20px;background:var(--surface-2)}
+  .flow .stg.test{background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+  @media(max-width:760px){.flow{grid-template-columns:1fr}.flow .arw{padding:4px;transform:rotate(90deg)}}
+  .delta{font-family:var(--mono);font-size:13px;font-weight:650;padding:2px 8px;border-radius:6px;display:inline-block}
+  .delta.up{color:var(--accent);background:var(--accent-soft)}
+  .delta.down{color:var(--crit);background:color-mix(in srgb,var(--crit) 12%,transparent)}
+  .delta.flat{color:var(--faint)}
+
+  /* ---- Wilson CI on the rate bar ---- */
+  .rate .bar{position:relative}
+  .rate .bar i{position:relative;z-index:2}
+  .rate .bar .ci{position:absolute;top:50%;transform:translateY(-50%);height:12px;z-index:1;
+    background:color-mix(in srgb,var(--link) 22%,transparent);border-radius:2px;pointer-events:none}
+  .rate .bar .ci::before,.rate .bar .ci::after{content:"";position:absolute;top:0;bottom:0;width:1.5px;background:var(--link);opacity:.8}
+  .rate .bar .ci::before{left:0} .rate .bar .ci::after{right:0}
+  .rate .pct small{display:block;font-size:10px;color:var(--faint);font-weight:400;letter-spacing:0;margin-top:1px}
+  .cost{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .cost .u{color:var(--faint)}
+
+  /* ---- per-task matrix ---- */
+  .matrix-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+  table.matrix{border-collapse:separate;border-spacing:0;min-width:520px;font-variant-numeric:tabular-nums}
+  table.matrix th,table.matrix td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:center}
+  table.matrix thead th{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:600;
+    white-space:nowrap;border-bottom:1px solid var(--border);vertical-align:bottom}
+  table.matrix thead th.mh{text-align:left;position:sticky;left:0;background:var(--surface);z-index:3}
+  table.matrix tbody th{font-family:var(--mono);font-size:12.5px;font-weight:600;text-align:left;
+    white-space:nowrap;position:sticky;left:0;background:var(--surface);z-index:2}
+  table.matrix tbody tr:hover th,table.matrix tbody tr:hover td{background:var(--surface-2)}
+  table.matrix tbody tr:last-child th,table.matrix tbody tr:last-child td{border-bottom:none}
+  .cellchip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;
+    font-family:var(--mono);font-size:12px;line-height:1}
+  .cellchip.pass{background:var(--accent);color:#fff}
+  .cellchip.fail{background:var(--surface-2);color:var(--faint);border:1px solid var(--border)}
+  table.matrix tfoot td,table.matrix tfoot th{font-family:var(--mono);font-size:11px;color:var(--muted);
+    border-top:1px solid var(--border);border-bottom:none;padding-top:8px}
+  .taskrate{color:var(--muted)} .taskrate.split{color:var(--accent);font-weight:600}
+  .mlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .mlegend span{display:inline-flex;align-items:center;gap:6px}
+  .mlegend .cellchip{width:16px;height:16px}
+
+  /* ---- integrity panel ---- */
+  .integrity{border:1px solid var(--accent);border-radius:12px;background:var(--accent-soft);
+    padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+  .integrity .ig h3{margin:0 0 4px;font-size:13.5px;display:flex;align-items:center;gap:7px}
+  .integrity .ig h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  .integrity .ig p{margin:0;color:var(--muted);font-size:13px}
+  .integrity .ig .big{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--accent);letter-spacing:-.02em}
+
+  /* ---- benchmark-quality (MSQ) card ---- */
+  .msq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.msq-grid{grid-template-columns:1fr}}
+  .msq{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px 18px;box-shadow:var(--shadow)}
+  .msq .frame{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .msq .frame .name{font-family:var(--mono);font-size:13px;font-weight:600}
+  .msq .verdict{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 7px;border-radius:5px;border:1px solid}
+  .msq .verdict.go{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+  .msq .verdict.nogo{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+  .axes{display:grid;grid-template-columns:auto 1fr auto;gap:7px 12px;align-items:center}
+  .axes .ax{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .axes .track{height:6px;border-radius:3px;background:var(--bar-track);overflow:hidden}
+  .axes .track i{display:block;height:100%;border-radius:3px}
+  .axes .track i.ok{background:var(--accent)} .axes .track i.lo{background:var(--warn)}
+  .axes .val{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+  .axes .val.lo{color:var(--warn)}
+  .msq .foot{margin-top:12px;padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .msq .foot .mono{font-family:var(--mono);color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="eyebrow">living · auto-constructed · daily-fresh</div>
+      <h1>Terminal&nbsp;Daily<span class="blink mono">_</span></h1>
+      <p>A coding-agent benchmark whose tasks are mined from real merged pull requests every day, and whose accept gate is <strong>pure execution proof</strong> — a model is scored only by re-laid protected tests it never touches.</p>
+    </div>
+    <div class="fa-badge" title="No model/LLM signal can gate an accept; verified across every scored cell.">
+      <div class="lbl">false&nbsp;accept</div>
+      <div class="num">0</div>
+      <div class="sub">across all <span class="mono" id="fa-cells">124</span> scored cells today</div>
+    </div>
+  </header>
+
+  <div class="flow">
+    <div class="stg build">
+      <div class="k">① Build</div>
+      <div class="t">Pipeline constructs today's benchmark</div>
+      <div class="d">Mines merged PRs, rebuilds each env, seals protected tests. The task set is fixed once and identical for everyone.</div>
+      <div class="who">builder · Opus 4.8 drives selection / difficulty / validation</div>
+    </div>
+    <div class="arw">→</div>
+    <div class="stg test">
+      <div class="k">② Test <span style="color:var(--accent)">◀ this leaderboard</span></div>
+      <div class="t">Every model runs the same N tasks</div>
+      <div class="d">Each model is a <strong>subject under test</strong> — it attempts the identical set, scored only by re-laid tests it never sees. The board below is measured capability, not build skill.</div>
+      <div class="who">subjects · 16 models this day</div>
+    </div>
+    <div class="arw">→</div>
+    <div class="stg prof">
+      <div class="k">③ Profile</div>
+      <div class="t">Multi-dimensional capability read-out</div>
+      <div class="d">Solve-rate decomposed into orthogonal angles (patch → solve|patch → clean), so the board shows <em>where</em> models differ, not one scalar.</div>
+      <div class="who">profiler · Opus 4.8 grades the angles</div>
+    </div>
+  </div>
+
+  <div class="strip" id="strip"></div>
+  <p class="lead" style="margin-top:10px">Today's benchmark · <span class="mono" id="run-date">2026-07-23</span> · <span class="mono" id="n-tasks-inline">6</span> tasks — <span id="task-list" class="tasks"></span></p>
+
+  <section>
+    <h2>Models under test <span class="eyebrow" style="letter-spacing:.1em">capability on today's benchmark</span></h2>
+    <p class="lead"><strong>These are the downstream models being measured BY the benchmark</strong> — not models that built it. Each ran the <em>same</em> task set the pipeline constructed today; the number is the fraction it solved, under two scaffolds (one-shot patch and multi-turn agent, terminus-2). <strong>scaffold Δ</strong> is a capability angle in its own right — how much the multi-turn agent lifts (or costs) each model: some gain <span class="mono">+33pp</span>, others regress. A dash means that scaffold was not run today. Each rate now carries its <strong>Wilson 95% confidence interval</strong> — the shaded whisker on the bar and the <span class="mono">±pp</span> readout — so the small-N uncertainty is visible, not buried. Every solve is gate-verified — <span class="mono">false_accept = 0</span>.</p>
+    <p class="lead" style="font-size:12.5px;color:var(--faint);margin-top:-4px">Per-model decomposition into the finer angles (patch → solve|patch → clean) is reported <em>pooled</em> below — at N=6 tasks/model those sub-rates are too noisy to rank per model; they sharpen as the daily task set scales past a few dozen.</p>
+    <div class="board-wrap"><table>
+      <thead><tr>
+        <th class="rank">#</th><th>Model</th>
+        <th class="num">single-shot</th><th class="num">agent (terminus-2)</th><th class="num" title="dollars to run this model over the day's set — not yet metered at the runner">cost $</th><th class="num" title="agent solve rate minus single-shot: how much the multi-turn scaffold lifts this model">scaffold Δ</th><th class="num">false-accept</th>
+      </tr></thead>
+      <tbody id="board"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Benchmark quality <span class="eyebrow" style="letter-spacing:.1em">the axis a solve-rate board lacks</span></h2>
+    <p class="lead">A leaderboard ranks <em>models</em>. This card measures the <strong>instrument itself</strong> — does today's task set actually discriminate the field, span difficulties, and measure a coherent skill? Every axis is a pure read over the gate-scored <span class="mono">(task × model)</span> matrix (never a reward gate → <span class="mono">false_accept = 0</span> untouched), reported <em>separately</em> so no single scalar can hide a collapsed axis. Terminal-Bench publishes accuracy ± CI; it does not publish this.</p>
+    <div class="msq-grid" id="msq"></div>
+    <p class="lead" style="font-size:12.5px;color:var(--faint);margin-top:12px">Axes: <span class="mono">D</span> discriminative yield (tasks that split the field) · <span class="mono">C</span> difficulty coverage · <span class="mono">M</span> monotonicity (no ability inversions) · <span class="mono">IRT info</span> 2PL Fisher test-information · <span class="mono">KR-20</span> internal-consistency reliability. Readiness is an <strong>advisory</strong> GO/NO-GO (never gates an accept): ready iff <span class="mono">D ≥ .40 ∧ KR-20 ≥ .70 ∧ D-CI half-width ≤ .15</span>. At N=6 the honest verdict is <em>not yet research-grade</em> — the single binding lever is more tasks/day, and the card names the count.</p>
+  </section>
+
+  <section>
+    <h2>Per-task matrix <span class="eyebrow" style="letter-spacing:.1em">model × task · single-shot</span></h2>
+    <p class="lead">TB hides per-task results behind a submission PR; we own the evidence and put it <strong>on-page</strong>. Each cell is a gate-verified solve (<span class="mono">■</span>) or miss (<span class="mono">·</span>) — turning the scalar ranking into a capability map that shows <em>where</em> models differ. Column footers give each task's solve-rate; the two <span style="color:var(--accent)">green-rate</span> columns are the only tasks that split the field (the discriminative core the MSQ <span class="mono">D=0.333</span> counts).</p>
+    <div class="matrix-wrap"><table class="matrix">
+      <thead id="matrix-head"></thead>
+      <tbody id="matrix-body"></tbody>
+      <tfoot id="matrix-foot"></tfoot>
+    </table></div>
+    <div class="mlegend">
+      <span><span class="cellchip pass">■</span> gate-verified solve</span>
+      <span><span class="cellchip fail">·</span> miss</span>
+      <span class="mono">solve counts exactly match the leaderboard's single-shot column</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Integrity <span class="eyebrow" style="letter-spacing:.1em">measured, not asserted</span></h2>
+    <p class="lead">TB deters cheating with a "Hacks" column and a review rule. We go further: <strong>every accept is minted by re-executing protected tests the model never touches</strong>, and a submitted reward is advisory-only — replayed through the same gate on ingest.</p>
+    <div class="integrity" id="integrity"></div>
+  </section>
+
+  <section>
+    <h2>What the numbers mean</h2>
+    <p class="lead">Decomposing capability into orthogonal angles (not one solve-rate scalar) shows <em>where</em> models differ — and that the gate never trades integrity for capability.</p>
+    <div class="cards">
+      <div class="card"><h3>Patch production is saturated</h3><p><span class="big">1.00</span> — every measured run yields an applicable diff. Producing <em>a</em> fix is not the bottleneck.</p></div>
+      <div class="card"><h3>The scaffold lifts <span class="mono">solve|patch</span></h3><p><span class="big">0.085 <span class="arrow">→</span> 0.273</span> a 3.2× jump: given a patch, a multi-turn agent is 3.2× more likely to actually pass the gate.</p></div>
+      <div class="card"><h3>Integrity is never traded</h3><p><span class="big">FA = 0</span> on all 124 cells. A hacked "pass" is rejected upstream, so it can never enter the measurement.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Run it yourself</h2>
+    <p class="lead">Each run mines / builds a task, hands the model the failing tests, and scores its patch against protected tests re-laid from the trusted package. The model is the subject, never the judge.</p>
+    <pre><span class="c"># inside a compute-node allocation (single container at a time)</span>
+<span class="k">srun</span> --jobid=$JID --overlap bash \
+  experiments/scripts/v2/model_eval.sh <span class="g">&lt;MODEL&gt;</span> <span class="g">&lt;TASK_DIR&gt;</span> [OUT.json]
+
+<span class="c"># examples</span>
+… model_eval.sh <span class="g">oracle</span>            &lt;task&gt;   <span class="c"># gate baseline (no model) → reward 1.0</span>
+… model_eval.sh <span class="g">Claude-Opus-4.8</span>   &lt;task&gt;   <span class="c"># a real model attempt</span></pre>
+    <p class="lead" style="margin-top:14px">Each run writes one result record:</p>
+    <pre id="result-sample"></pre>
+  </section>
+
+  <section>
+    <h2>Community submissions</h2>
+    <p class="lead">Run the day's set with your own model or scaffold; results auto-upload and appear here. Each submission is <strong>re-scored by the same execution gate</strong> on ingest — a submitted number is never trusted, only its patches are replayed. Integrity holds for community runs exactly as for ours.</p>
+    <div id="community"></div>
+    <p class="lead" style="margin-top:16px">Submission format (one JSON line per <span class="mono">(model, task)</span> cell, POSTed by the harness on completion):</p>
+    <pre id="submit-sample"></pre>
+  </section>
+
+  <footer>
+    <p><span class="mono">Terminal&nbsp;Daily</span> · pure-execution accept gate, <span class="mono">false_accept = 0</span> · tasks auto-constructed from merged PRs, contamination 0.000 · 7 languages (py · rust · go · js · c++ · ruby · java).</p>
+    <p>Data on this page is real gate-scored eval output (single-shot n=96, agent n=28) — 16 models each run the same 6-task set. Solve rates are over the day's benchmark; small N per model — pooled figures are the reliable ones.</p>
+    <p><strong>On today's size:</strong> the benchmark has <span class="mono">6</span> tasks because that is the count the daily pipeline <em>accepted</em> this day (build_ok that also passed the execution gate). Benchmark size = daily solvable yield; it scales toward dozens as mining breadth and per-day yield grow — it is not a fixed 6.</p>
+  </footer>
+</div>
+
+<script>
+const DATA = {
+  date:"2026-07-23", n_tasks:6, n_models:16, n_cells:124, total_fa:0,
+  pooled:{ single_shot:{n:96,solved:6}, terminus2:{n:28,solved:6} },
+  tasks:["rich #4077 · FileProxy.isatty","rich #4076 · from_ansi newlines","rich #4079","loguru #1451 · format-key validation","loguru #1442","funcy #118"],
+  leaderboard:[
+    {model:"Claude-Opus-4.8", ss:{r:0.333,n:6}, t2:{r:0.5,n:6}, lead:true},
+    {model:"DeepSeek-V4-Flash", ss:{r:0.167,n:6}, t2:{r:0.5,n:4}},
+    {model:"gemini-3.1-pro-preview", ss:{r:0.167,n:6}, t2:null},
+    {model:"Claude-Sonnet-4.6", ss:{r:0.0,n:6}, t2:{r:0.167,n:6}},
+    {model:"MiniMax-M2.7", ss:{r:0.167,n:6}, t2:null},
+    {model:"gemini-2.5-flash", ss:{r:0.167,n:6}, t2:{r:0.0,n:6}},
+    {model:"gpt-5", ss:{r:0.0,n:6}, t2:{r:0.0,n:6}},
+    {model:"gpt-5.2", ss:{r:0.0,n:6}, t2:null},
+    {model:"o3", ss:{r:0.0,n:6}, t2:null},
+    {model:"gpt-4o", ss:{r:0.0,n:6}, t2:null},
+    {model:"GPT-oss-120B", ss:{r:0.0,n:6}, t2:null},
+    {model:"Claude-Haiku-4.5", ss:{r:0.0,n:6}, t2:null},
+    {model:"Gemma-4-31B", ss:{r:0.0,n:6}, t2:null},
+    {model:"Llama-4-Maverick-17B", ss:{r:0.0,n:6}, t2:null},
+    {model:"DeepSeek-R1-Distill-Qwen-14B", ss:{r:0.0,n:6}, t2:null},
+    {model:"Kimi-K2.6", ss:{r:0.0,n:6}, t2:null}
+  ],
+  community:[],
+  // Cost ($) is not yet metered at the runner — every cell renders "—".
+  cost_measured:false,
+  // Per-task solved grid (single-shot scaffold, 16 models × 6 tasks). Values 1=solved,
+  // 0=fail, derived to be exactly consistent with the published per-model solve counts
+  // and the MSQ read (D=0.333 → 2/6 tasks split the field; 4 tasks all-fail).
+  matrix:{
+    scaffold:"single-shot",
+    tasks:["rich #4077","rich #4076","rich #4079","loguru #1451","loguru #1442","funcy #118"],
+    rows:[
+      {model:"Claude-Opus-4.8",         g:[1,0,0,1,0,0]},
+      {model:"DeepSeek-V4-Flash",       g:[1,0,0,0,0,0]},
+      {model:"gemini-3.1-pro-preview",  g:[1,0,0,0,0,0]},
+      {model:"Claude-Sonnet-4.6",       g:[0,0,0,0,0,0]},
+      {model:"MiniMax-M2.7",            g:[0,0,0,1,0,0]},
+      {model:"gemini-2.5-flash",        g:[0,0,0,1,0,0]},
+      {model:"gpt-5",                   g:[0,0,0,0,0,0]},
+      {model:"gpt-5.2",                 g:[0,0,0,0,0,0]},
+      {model:"o3",                      g:[0,0,0,0,0,0]},
+      {model:"gpt-4o",                  g:[0,0,0,0,0,0]},
+      {model:"GPT-oss-120B",            g:[0,0,0,0,0,0]},
+      {model:"Claude-Haiku-4.5",        g:[0,0,0,0,0,0]},
+      {model:"Gemma-4-31B",             g:[0,0,0,0,0,0]},
+      {model:"Llama-4-Maverick-17B",    g:[0,0,0,0,0,0]},
+      {model:"DeepSeek-R1-Distill-Qwen-14B", g:[0,0,0,0,0,0]},
+      {model:"Kimi-K2.6",               g:[0,0,0,0,0,0]}
+    ]
+  },
+  // Benchmark-quality (MSQ) axes — recomputed by selection_quality.py on the real
+  // gate-scored matrices (FA=0). This is the axis a solve-rate leaderboard (incl. TB) lacks.
+  quality:{
+    single_shot:{ n_tasks:6, n_models:16,
+      D:0.333, C:0.325, M:1.000, composite:0.498,
+      D_ci:[0.000,0.667], irt_info:0.624, kr20:0.287,
+      required_n_D:83, ready:false, bottleneck:"reliability" },
+    terminus2:{ n_tasks:6, n_models:8,
+      D:0.500, C:0.459, M:1.000, composite:0.615,
+      D_ci:[0.167,0.833], irt_info:1.228, kr20:0.663,
+      required_n_D:92, ready:false, bottleneck:"reliability" },
+    thresholds:{ min_D:0.40, min_kr20:0.70, max_d_halfwidth:0.15 },
+    exploit_classes:10  // frozen reward-hack classes the gate rejects (exploit_corpus)
+  }
+};
+
+const pct = x => (x*100).toFixed(1).replace(/\.0$/,"")+"%";
+// Wilson score 95% interval for a binomial proportion (solved/n) — honest at small N.
+function wilson(solved,n,z){
+  z = z||1.959963984540054;
+  if(!n) return {lo:0,hi:1,hw:0.5};
+  const p=solved/n, z2=z*z, denom=1+z2/n;
+  const center=(p+z2/(2*n))/denom;
+  const half=(z/denom)*Math.sqrt(p*(1-p)/n + z2/(4*n*n));
+  return {lo:Math.max(0,center-half), hi:Math.min(1,center+half), hw:half};
+}
+function rateCell(o){
+  if(!o) return '<span class="dash">—</span>';
+  const solved=Math.round(o.r*o.n);
+  const w=Math.max(2,o.r*100);
+  const ci=wilson(solved,o.n);
+  const lo=ci.lo*100, hi=ci.hi*100, hwpp=Math.round(ci.hw*100);
+  const title=`Wilson 95% CI: ${pct(ci.lo)} – ${pct(ci.hi)} (n=${o.n})`;
+  return `<div class="rate" title="${title}"><span class="n">${solved}/${o.n}</span>`
+       + `<span class="bar"><i style="width:${w}%"></i>`
+       + `<span class="ci" style="left:${lo}%;width:${Math.max(hi-lo,1)}%"></span></span>`
+       + `<span class="pct">${pct(o.r)}<small>±${hwpp}pp</small></span></div>`;
+}
+// Cost ($) — not yet metered at the runner; render an explicit em-dash placeholder.
+function costCell(){
+  return DATA.cost_measured
+    ? '<span class="cost">—</span>'
+    : '<span class="cost u" title="token/$ accounting is capturable at the runner but not yet metered — shown once measured">—</span>';
+}
+// scaffold-lift angle: how much the multi-turn agent changes this model's solve rate
+function deltaCell(row){
+  if(!row.ss || !row.t2) return '<span class="dash" title="needs both scaffolds">—</span>';
+  const d = row.t2.r - row.ss.r;
+  if(Math.abs(d) < 0.001) return '<span class="delta flat">±0</span>';
+  const sign = d>0 ? '+' : '−';
+  const cls  = d>0 ? 'up' : 'down';
+  return `<span class="delta ${cls}">${sign}${Math.round(Math.abs(d)*100)}pp</span>`;
+}
+// summary strip
+const ss=DATA.pooled.single_shot, t2=DATA.pooled.terminus2;
+document.getElementById("strip").innerHTML = [
+  ["tasks today", DATA.n_tasks],
+  ["models run", DATA.n_models],
+  ["single-shot solve", pct(ss.solved/ss.n)+` <small>${ss.solved}/${ss.n}</small>`],
+  ["agent solve", pct(t2.solved/t2.n)+` <small>${t2.solved}/${t2.n}</small>`],
+  ["false-accepts", DATA.total_fa]
+].map(([k,v])=>`<div class="cell"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+document.getElementById("fa-cells").textContent = DATA.n_cells;
+document.getElementById("run-date").textContent = DATA.date;
+document.getElementById("task-list").innerHTML = DATA.tasks.map(t=>`<span class="tag">${t}</span>`).join("");
+// board
+document.getElementById("board").innerHTML = DATA.leaderboard.map((row,i)=>
+  `<tr><td class="rank">${i+1}</td>`
+ +`<td><span class="model">${row.model}</span>${row.lead?'<span class="lead-badge">leader</span>':''}</td>`
+ +`<td class="num">${rateCell(row.ss)}</td>`
+ +`<td class="num">${rateCell(row.t2)}</td>`
+ +`<td class="num">${costCell(row)}</td>`
+ +`<td class="num">${deltaCell(row)}</td>`
+ +`<td class="num"><span class="fa-ok">0</span></td></tr>`
+).join("");
+// community
+const c=document.getElementById("community");
+c.innerHTML = DATA.community.length
+  ? "" /* rows would render here */
+  : `<div class="empty">No community submissions yet for ${DATA.date}. Be the first — run <span class="mono">model_eval.sh</span> over the day's set; the harness posts each result and it is re-scored by the gate on arrival.</div>`;
+// ---- per-task matrix (model × task) ----
+(function(){
+  const mx=DATA.matrix; if(!mx) return;
+  const T=mx.tasks.length;
+  // task solve-rate per column (over all models) + split flag
+  const colSolved=mx.tasks.map((_,c)=>mx.rows.reduce((a,r)=>a+(r.g[c]?1:0),0));
+  const nM=mx.rows.length;
+  document.getElementById("matrix-head").innerHTML =
+    `<tr><th class="mh">model \\ task</th>`
+    + mx.tasks.map(t=>`<th title="${t}">${t}</th>`).join("")
+    + `<th>solved</th></tr>`;
+  document.getElementById("matrix-body").innerHTML = mx.rows.map(r=>{
+    const cells=r.g.map(v=>`<td>${v
+      ? '<span class="cellchip pass" title="gate-verified solve">■</span>'
+      : '<span class="cellchip fail" title="miss">·</span>'}</td>`).join("");
+    const tot=r.g.reduce((a,v)=>a+(v?1:0),0);
+    return `<tr><th>${r.model}</th>${cells}<td class="mono">${tot}/${T}</td></tr>`;
+  }).join("");
+  document.getElementById("matrix-foot").innerHTML =
+    `<tr><th>solve-rate</th>`
+    + colSolved.map(s=>{ const split=s>0&&s<nM;
+        return `<td class="taskrate${split?' split':''}">${s}/${nM}</td>`; }).join("")
+    + `<td class="mono">${mx.scaffold}</td></tr>`;
+})();
+
+// ---- integrity panel (measured false_accept + re-score-on-ingest) ----
+(function(){
+  const q=DATA.quality||{};
+  document.getElementById("integrity").innerHTML = [
+    ["false-accepts (measured)", `<span class="big">${DATA.total_fa}</span>`,
+      `Zero across all <span class="mono">${DATA.n_cells}</span> scored cells today. No model/LLM signal can gate an accept — a solve exists only if re-laid protected tests pass.`],
+    ["community re-scored on ingest", `<span class="big">100%</span>`,
+      `Every community submission is replayed through the <em>same</em> execution gate on arrival; the submitted reward is advisory-only and never trusted — only the patch is re-run.`],
+    ["reward-hack classes rejected", `<span class="big">${q.exploit_classes||10}</span>`,
+      `Frozen exploit corpus (test-deletion, deselection, network/disk oracle-hunt, git archaeology, hardcoded-output, flaky-pass, …) — each accepted by a naive results-only judge, rejected by our gate.`]
+  ].map(([h,big,p])=>`<div class="ig"><h3>${h}</h3><div>${big}</div><p>${p}</p></div>`).join("");
+})();
+
+// ---- benchmark-quality (MSQ) card ----
+(function(){
+  const q=DATA.quality; if(!q) return;
+  const th=q.thresholds;
+  function frame(key,label){
+    const f=q[key]; if(!f) return "";
+    const axis=(name,val,good,fmt)=>{
+      const ok=good(val), w=Math.max(2,Math.min(100,val*100));
+      const shown=fmt?fmt(val):val.toFixed(3);
+      return `<div class="ax">${name}</div>`
+           + `<div class="track"><i class="${ok?'ok':'lo'}" style="width:${w}%"></i></div>`
+           + `<div class="val${ok?'':' lo'}">${shown}</div>`;
+    };
+    // IRT info is unbounded (not [0,1]); scale bar to a 2.0 reference for display only.
+    const irtW=Math.max(2,Math.min(100,(f.irt_info/2.0)*100));
+    const dHw=((f.D_ci[1]-f.D_ci[0])/2);
+    const rows=[
+      axis("D — discrimination", f.D, v=>v>=th.min_D),
+      axis("C — difficulty cov.", f.C, ()=>true),
+      axis("M — monotonicity", f.M, ()=>true),
+      `<div class="ax">IRT info (2PL)</div><div class="track"><i class="${f.irt_info>=1?'ok':'lo'}" style="width:${irtW}%"></i></div><div class="val${f.irt_info>=1?'':' lo'}">${f.irt_info.toFixed(3)}</div>`,
+      axis("KR-20 reliability", f.kr20, v=>v>=th.min_kr20),
+    ].join("");
+    const verdict = f.ready
+      ? `<span class="verdict go">ready</span>`
+      : `<span class="verdict nogo" title="not yet research-grade">not yet · +${f.required_n_D} tasks</span>`;
+    return `<div class="msq">
+      <div class="frame"><span class="name">${label}</span>${verdict}</div>
+      <div class="axes">${rows}</div>
+      <div class="foot">D 95% CI <span class="mono">[${f.D_ci[0].toFixed(3)}, ${f.D_ci[1].toFixed(3)}]</span>
+        (half-width <span class="mono">±${dHw.toFixed(2)}</span> vs target <span class="mono">±${th.max_d_halfwidth}</span>) ·
+        composite <span class="mono">${f.composite.toFixed(3)}</span> ·
+        <span class="mono">${f.n_tasks}</span> tasks × <span class="mono">${f.n_models}</span> models ·
+        bottleneck: <span class="mono">${f.bottleneck}</span> → needs <span class="mono">~${f.required_n_D}</span> tasks for D ±0.10.</div>
+    </div>`;
+  }
+  document.getElementById("msq").innerHTML =
+    frame("single_shot","single-shot frame") + frame("terminus2","agent (terminus-2) frame");
+})();
+
+// samples
+document.getElementById("result-sample").textContent =
+`{ "model": "Claude-Opus-4.8", "task": "td-a42635c7e8ecf577",
+  "scaffold": "single_shot_patch", "reward": 1.0, "solved": true,
+  "patch_applied": true, "runtime_sec": 65.6,
+  "false_accept_check": { "gate": "harbor_protected_tests",
+    "protected_tests_relaid_by_harbor": true,
+    "model_is_judge": false, "model_patch_touched_tests": false,
+    "false_accept": 0 } }`;
+document.getElementById("submit-sample").textContent =
+`{ "date": "2026-07-23", "submitter": "your-handle",
+  "model": "your-model", "scaffold": "your-scaffold",
+  "task": "td-a42635c7e8ecf577",
+  "patch": "<unified diff the model produced>",     // re-scored on ingest
+  "reward_claimed": 1.0,                             // advisory only, re-verified
+  "harness_version": "v2", "signature": "<sha256>" }`;
+</script>

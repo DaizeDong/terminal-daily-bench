@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+.tdb_work/
+*.egg-info/

@@ -1,0 +1,15 @@
+# Moat contract for the PUBLIC terminal-daily-bench package.
+# The released package must NEVER import the private construction pipeline
+# (td_pipeline) or the RC-VH accept gate (rcvh). Scoring is stdlib + harbor only.
+[importlinter]
+root_package = terminal_daily_bench
+include_external_packages = False
+
+[importlinter:contract:moat]
+name = released package must not import the private construction pipeline or accept gate
+type = forbidden
+source_modules =
+    terminal_daily_bench
+forbidden_modules =
+    td_pipeline
+    rcvh

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "terminal-daily-bench"
+version = "0.1.0"
+description = "A living, execution-graded coding-agent benchmark (false_accept = 0)."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"  # tomllib (stdlib) since 3.11
+keywords = ["benchmark", "coding-agent", "llm-evaluation", "execution", "living-benchmark"]
+authors = [{ name = "terminal-daily-bench contributors" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = []            # scoring core is pure stdlib; harbor/apptainer are host tools
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+tdb = "terminal_daily_bench.cli:main"
+
+[project.urls]
+Homepage = "https://tbench-daily.example"       # set to the public site on publish
+Repository = "https://github.com/OWNER/terminal-daily-bench"
+
+[tool.hatch.build.targets.wheel]
+packages = ["terminal_daily_bench"]

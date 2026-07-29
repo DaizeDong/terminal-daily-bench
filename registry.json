@@ -1,0 +1,41 @@
+{
+  "name": "terminal-daily-bench",
+  "versioning": "daily",
+  "_comment": "Living benchmark: each day is a versioned suite (contamination-resistant). This PUBLIC bundle ships 1 sample task per split (archive/live) as a template; the full daily suites are served from the site (live suites scored server-side, gold+protected withheld).",
+  "archive_weeks": 2,
+  "languages": [
+    "python",
+    "rust",
+    "go",
+    "javascript",
+    "typescript",
+    "java",
+    "ruby",
+    "cpp"
+  ],
+  "suites": [
+    {
+      "id": "sample",
+      "status": "archive",
+      "n_tasks": 1,
+      "path": "tasks/archive",
+      "note": "one sample task; full dated suites are served from the site"
+    },
+    {
+      "id": "sample-live",
+      "status": "live",
+      "n_tasks": 1,
+      "path": "tasks/live",
+      "note": "one sample live task (gold+protected withheld, scored server-side)"
+    }
+  ],
+  "quality_axes": [
+    "D_discrimination",
+    "C_difficulty_coverage",
+    "M_monotonicity",
+    "A_angle_coverage",
+    "R_diversity",
+    "I_irt_information",
+    "KR20_reliability"
+  ]
+}

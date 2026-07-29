@@ -1,0 +1,27 @@
+{
+  "task_id": "td-fc90ea8b76d5f6b6",
+  "repo": "Delgan/loguru",
+  "pr_number": 1451,
+  "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",
+  "merge_sha": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8",
+  "test_files": [
+    "tests/test_add_option_format.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_add_option_format.py::test_invalid_format_key_emits_helpful_error_with_catch",
+    "tests/test_add_option_format.py::test_invalid_format_key_raises_enhanced_error_without_catch",
+    "tests/test_add_option_format.py::test_invalid_format_key_error_message_content",
+    "tests/test_add_option_format.py::test_patcher_added_keys_work_in_format"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}
