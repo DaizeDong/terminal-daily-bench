@@ -100,9 +100,21 @@
         <tbody id="board"><tr><td colspan="7" class="mono" style="color:var(--faint)">loading&hellip;</td></tr></tbody>
       </table>
     </div>
+    <div class="legend">
+      <span><span class="rate" style="pointer-events:none"><span class="bar"><i style="left:20%;width:55%"></i><b style="left:45%"></b></span></span>
+        the shaded band is the Wilson 95% interval; the tick is the point estimate</span>
+      <span><span class="dash">&mdash;</span> scaffold not run on this suite</span>
+      <span><span class="pill pass">0</span> false-accepts, re-verified per cell</span>
+    </div>
     <p class="lead" style="margin-top:10px;font-size:12.5px;color:var(--faint)">Per-model decomposition into the
       finer angles (patch &rarr; solve|patch &rarr; clean) is reported pooled &mdash; at this many tasks per model
       those sub-rates are too noisy to rank. They sharpen as the daily set grows.</p>
+    <p class="lead" style="margin-top:6px;font-size:12.5px;color:var(--faint)">
+      <strong>Rules.</strong> Every model runs the identical task set for the day. A run may not modify task
+      timeouts or resource limits &mdash; they are pinned in each task's <code>task.toml</code>
+      (<code>cpus</code>, <code>memory_mb</code>, <code>storage_mb</code>) and enforced by the container, not by
+      review. No row is published from a claimed number: every cell on this board, ours or a community
+      submission, is minted by re-executing the protected tests. <a href="../submit/">submission rules &rarr;</a></p>
   </section>
 
   <section>
@@ -203,6 +215,19 @@
   };
   var empty = function (msg) { return '<div class="empty">' + msg + "</div>"; };
 
+  /* Task ids that actually have a generated registry page. A task can be scored on
+     today's board before its page is published (live suites publish late), so we only
+     link the ones we know exist — a dead link is worse than a plain label. */
+  var PUBLISHED = null;
+  function taskLabel(id, cls) {
+    if (PUBLISHED && !PUBLISHED[id]) {
+      return '<span class="' + (cls || "pill") + '" title="no task page published yet — live suites ' +
+        'publish the package when they archive">' + esc(id) + "</span>";
+    }
+    return '<a class="' + (cls || "pill") + '" href="../registry/' + encodeURIComponent(id) + '/">' +
+      esc(id) + "</a>";
+  }
+
   /* cost: rendered only when the runner actually metered it */
   function costCell(row, measured) {
     var c = row && (row.cost != null ? row.cost : (row.cost_usd != null ? row.cost_usd : null));
@@ -278,7 +303,7 @@
       return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
     }).join("");
     $("task-list").innerHTML = (b.tasks || []).map(function (t) {
-      return '<a class="pill" href="../registry/' + encodeURIComponent(t) + '/">' + esc(t) + "</a>";
+      return taskLabel(t);
     }).join("") || '<span class="pill">no tasks listed</span>';
   }
 
@@ -286,6 +311,8 @@
     var mx = b.matrix;
     if (!mx || !mx.rows || !mx.rows.length) {
       $("matrix-head").innerHTML = "";
+      $("matrix-foot").innerHTML = "";
+      $("matrix-sub").textContent = "model × task · not published";
       $("matrix-body").innerHTML = '<tr><td colspan="9">' +
         empty("No per-task grid published for this day.") + "</td></tr>";
       return;
@@ -295,7 +322,11 @@
     $("matrix-head").innerHTML = '<tr><th class="mh">model \\ task</th>' +
       mx.tasks.map(function (t) {
         var s = String(t);
-        return '<th title="' + esc(s) + '">' + esc(s.length > 13 ? s.slice(0, 12) + "…" : s) + "</th>";
+        var short = esc(s.length > 13 ? s.slice(0, 12) + "…" : s);
+        var inner = (PUBLISHED && !PUBLISHED[s])
+          ? short
+          : '<a href="../registry/' + encodeURIComponent(s) + '/">' + short + "</a>";
+        return '<th title="' + esc(s) + '">' + inner + "</th>";
       }).join("") + "<th>solved</th></tr>";
     $("matrix-body").innerHTML = mx.rows.map(function (r) {
       var cells = r.g.map(function (v) {
@@ -383,13 +414,21 @@
         ". Be the first &mdash; run the day's set; the harness posts each result and it is re-scored on arrival.");
       return;
     }
+    /* row shape is submit_result.rebuild_leaderboard():
+       {submitter, model, scaffold, n, solved, pending, false_accept, rate} */
     $("community").innerHTML = '<div class="table-wrap"><table><thead><tr>' +
-      '<th>submitter</th><th>model</th><th>scaffold</th><th class="num">accuracy</th><th class="num">false-accept</th>' +
+      "<th>submitter</th><th>model</th><th>scaffold</th>" +
+      '<th class="num">verified rate</th><th>state</th><th class="num">false-accept</th>' +
       "</tr></thead><tbody>" + c.map(function (r) {
+        var fa = r.false_accept != null ? r.false_accept : 0;
+        var state = (r.pending || 0) > 0
+          ? '<span class="pill pending">' + r.pending + " pending</span>"
+          : '<span class="pill pass">all verified</span>';
         return "<tr><td>" + esc(r.submitter) + '</td><td class="mono">' + esc(r.model) + "</td>" +
           '<td class="mono" style="font-size:12px">' + esc(r.scaffold || "") + "</td>" +
-          '<td class="num">' + T.rateCell(r.result || r) + "</td>" +
-          '<td class="num"><span class="pill pass">' + (r.fa || 0) + "</span></td></tr>";
+          '<td class="num">' + T.rateCell({ n: r.n, solved: r.solved }) + "</td>" +
+          "<td>" + state + "</td>" +
+          '<td class="num"><span class="pill ' + (fa ? "pending" : "pass") + '">' + fa + "</span></td></tr>";
       }).join("") + "</tbody></table></div>";
   }
 
@@ -415,6 +454,11 @@
   ]).then(function (res) {
     var b = res[0], site = res[1];
 
+    if (site && Array.isArray(site.tasks)) {
+      PUBLISHED = {};
+      site.tasks.forEach(function (t) { if (t && t.id) PUBLISHED[t.id] = 1; });
+    }
+
     if (site && site.suites && site.suites.length) {
       T.dayRail($("rail"), site.suites, b && b.date);
     } else {
@@ -427,7 +471,11 @@
         "root and this page fills in.");
       $("strip").className = "";
       ["strip", "msq", "integrity", "community"].forEach(function (id) { $(id).innerHTML = msg; });
-      $("board").innerHTML = '<tr><td colspan="7" class="mono" style="color:var(--faint)">no data</td></tr>';
+      $("board").innerHTML = '<tr><td colspan="7">' +
+        empty("No models scored yet. The board fills in from <code>leaderboard_data.json</code>.") + "</td></tr>";
+      $("hero-meta").textContent = "no suite published yet";
+      $("glance-sub").textContent = "nothing scored yet";
+      $("task-list").innerHTML = '<span class="pill">no tasks listed</span>';
       renderMatrix({});
       return;
     }

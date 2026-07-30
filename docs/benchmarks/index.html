@@ -20,6 +20,11 @@
       <strong>live</strong> while it is fresh &mdash; the gold patch and protected tests stay withheld and
       scoring happens server-side &mdash; then it is <strong>archived</strong> and released in full so anyone
       can reproduce it.</p>
+    <div class="cta">
+      <a class="btn" href="../registry/">browse every task</a>
+      <a class="btn" href="../leaderboard/">today's leaderboard</a>
+      <a class="btn" href="../guide/task-format/">task format</a>
+    </div>
   </section>
 
   <section style="padding-top:0;border-top:none">
@@ -87,6 +92,82 @@
         <span class="foot"><a href="../quality/">how we measure the suites &rarr;</a></span>
       </div>
     </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>the two-week window</h2>
+      <span class="eyebrow">live &rarr; archive, on a date, not on a decision</span>
+      <a class="more" href="../guide/task-format/">the full task format &rarr;</a>
+    </div>
+    <!-- The cutoff is a constant, not a judgement call: ARCHIVE_WEEKS = 2 and
+         `(today - merge_date).days >= ARCHIVE_WEEKS * 7` in tasks/publish_tasks.py:16,45 -->
+    <p class="lead">The split is mechanical. <code>tasks/publish_tasks.py</code> sets
+      <span class="mono">ARCHIVE_WEEKS = 2</span> and publishes a task as <em>archive</em> when
+      <span class="mono">(today &minus; merge_date).days &ge; 14</span>, otherwise as <em>live</em>.
+      Nobody decides per task; the merge date of the upstream pull request does. That is why a suite's
+      status can be read off its own name.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>part of the task package</th>
+          <th class="num">live <span class="pill pending">&lt; 14 days</span></th>
+          <th class="num">archive <span class="pill pass">&ge; 14 days</span></th>
+        </tr></thead>
+        <!-- Row-for-row from the release policy table in docs/task-format.md
+             "Archive vs. live", and the short form in tasks/SCHEMA.md -->
+        <tbody>
+          <tr><td class="mono">task.toml</td><td class="num">shipped, sanitized</td><td class="num">shipped, sanitized</td></tr>
+          <tr><td class="mono">instruction.md</td><td class="num">shipped</td><td class="num">shipped</td></tr>
+          <tr><td class="mono">environment/</td><td class="num">shipped</td><td class="num">shipped</td></tr>
+          <tr><td class="mono">tests/test.sh</td><td class="num">shipped</td><td class="num">shipped</td></tr>
+          <tr><td class="mono">PROVENANCE.json</td><td class="num">shipped</td><td class="num">shipped</td></tr>
+          <tr><td class="mono">tests/test_outputs.py</td>
+              <td class="num"><span class="pill pending">withheld</span></td>
+              <td class="num"><span class="pill pass">shipped</span></td></tr>
+          <tr><td class="mono">tests/test_patch.diff</td>
+              <td class="num"><span class="pill pending">withheld</span></td>
+              <td class="num"><span class="pill pass">shipped</span></td></tr>
+          <tr><td class="mono">solution/ (solve.sh, oracle.patch)</td>
+              <td class="num"><span class="pill pending">withheld</span></td>
+              <td class="num"><span class="pill pass">shipped</span></td></tr>
+          <tr><td class="mono">record.json</td>
+              <td class="num">replaced by <code>FAILING_TESTS.json</code></td>
+              <td class="num">shipped, sanitized</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid c3" style="margin-top:14px">
+      <div class="card">
+        <span class="pill pending">withheld</span>
+        <h3>what a live task holds back</h3>
+        <p>The protected assertion bodies, the test patch and the reference solution. What you do get is
+          the environment, the runner and <code>FAILING_TESTS.json</code> &mdash; the failing-test IDs and
+          nothing else. Enough to attempt the task, not enough to read the answer.</p>
+        <span class="foot">FAILING_TESTS.json &middot; failing_test_ids only</span>
+      </div>
+      <div class="card">
+        <span class="pill">why</span>
+        <h3>the reason it is withheld</h3>
+        <p>Publishing the gold patch on day one hands a future training run the fix, and publishing the
+          assertion bodies invites a patch written against the assertions rather than the bug. Holding both
+          back for the window blocks memorization and test-fitting while the suite is being scored.</p>
+        <span class="foot">task-format.md &middot; release policy</span>
+      </div>
+      <div class="card">
+        <span class="pill pass">released</span>
+        <h3>what the archive owes you</h3>
+        <p>After the window the same suite ships whole &mdash; protected tests, test patch and reference
+          solution &mdash; so any published number on it can be re-derived locally, including the oracle
+          baseline. The withholding buys freshness; it does not buy permanent opacity.</p>
+        <span class="foot">tdb run &middot; tdb oracle</span>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:12px;font-size:12.5px">The contract cuts both ways: while a suite is
+      live we score it and you cannot; once it is archived you can reproduce every cell of it and we no
+      longer have anything you do not. Nothing about the <em>gate</em> differs between the two &mdash; the
+      same protected tests are re-laid either way, so an archived re-run and our live score are the same
+      measurement.</p>
   </section>
 
   <section>

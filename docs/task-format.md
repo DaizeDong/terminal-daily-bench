@@ -7,8 +7,8 @@ between the *archive* and *live* releases, how scoring re-lays the protected tes
 and the 2-week archive window.
 
 Everything below reflects the code in this bundle
-(`terminal_daily_bench/`, `tasks/publish_tasks.py`, `web/submit_result.py`); no APIs
-are invented.
+(`terminal_daily_bench/`, `tasks/publish_tasks.py`, `scripts/build_task_image.sh`,
+`web/submit_result.py`); no APIs are invented.
 
 ## Package layout
 
@@ -58,7 +58,11 @@ storage_mb = 16384
 - **`environment.docker_image`** is rewritten to the portable value
   `"environment/Dockerfile"` on publish (see `publish_tasks.py::_sanitize_task_toml`).
   The host-specific absolute `.sif` path is never shipped; you build the image from
-  the task's own `environment/Dockerfile`.
+  the task's own `environment/Dockerfile` — see
+  [Building the task image](#building-the-task-image) below. Until you do, the
+  field is a *recipe pointer*, not a runnable image: `eval.py` passes
+  `docker_image` straight to harbor and `os.path.exists()`-checks it when reading
+  repo files out of the image.
 - **`environment.allow_internet`** drives the runtime network cut. When `false`, the
   singularity backend gets the no-network `--ek` switch injected automatically
   (`harbor_score.py::maybe_inject_offline_eks`), physically cutting egress during
@@ -92,6 +96,9 @@ The build recipe (parity/audit artifact). Layered: a language/system base image,
 repo cloned at `REPO_BASE_SHA` with its `.git` re-initialized to a single `baseline`
 commit, then search-based dependency resolution (`pip install -e .` / `pip install .`
 / `-r requirements.txt` — first shape that builds wins; it hard-fails if none do).
+
+The repo lands at **`/app/repo`** inside the image; that is the path `instruction.md`,
+`solution/solve.sh` and the `single_shot_patch` scaffold all assume.
 
 ### `solution/` (archive only)
 
@@ -141,6 +148,67 @@ on publish (`publish_tasks.py::_sanitize_record`). What remains:
   "capability_labels": ["C5", "C4"]
 }
 ```
+
+## Building the task image
+
+A downloaded task ships a **recipe, not an image**. Turn it into a runnable one with
+
+```bash
+IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
+sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
+    tasks/archive/td-fc90ea8b76d5f6b6/task.toml
+tdb oracle tasks/archive/td-fc90ea8b76d5f6b6      # expect reward = 1.0
+```
+
+`scripts/build_task_image.sh` prints exactly one line on stdout — the built image
+path (`.sif`) or docker tag — and sends all logs to stderr, so it composes in a
+`$( )`. Options: `--force`, `--builder auto|apptainer|docker`, `--via-docker`,
+`--cache DIR`, `--no-server-deps`, `--help`.
+
+**Cache / idempotency.** Images go to `$TDB_SIF_CACHE` (default
+`./.tdb_work/sif_cache`, the same default `eval.py` hands harbor as
+`singularity_image_cache_dir`) as `<task-id>-<sha256(Dockerfile)[:12]>.sif`. An
+unchanged Dockerfile therefore hits the cache and the script exits immediately with
+`already built`; `--force` rebuilds (deleting the cached `.sif` first). On the
+apptainer path the generated definition file is kept next to the image as
+`<task-id>-<hash>.def`, so the recipe that produced a given image stays auditable.
+With the docker builder the cache key is the tag
+`terminal-daily/<task-id>:<hash>` and the check is `docker image inspect`.
+
+**Builder selection.** It probes the host and picks:
+
+| host has | what happens |
+| --- | --- |
+| apptainer/singularity | Dockerfile is **translated** to an apptainer definition and built with `apptainer build` (`--fakeroot`/`--force` are used only if that binary's own `--help` lists them; on a base image with no usable fakeroot helper it retries once with `--ignore-fakeroot-command`) |
+| docker only | `docker build -t terminal-daily/<task-id>:<hash>` — then drive harbor with `-e docker` |
+| both, with `--via-docker` | `docker build`, then `apptainer build … docker-daemon://<tag>` — highest fidelity for Dockerfiles the translator refuses |
+| neither | **hard error** naming both missing builders and how to install them |
+
+**Translation subset.** apptainer cannot read a Dockerfile, so the script converts
+one: `FROM` → `Bootstrap: docker` / `From:`; `ARG` → `export K="${K:-default}"` (so
+you can still override it from the environment); `ENV` → `export` in `%post` *and*
+`%environment`; `WORKDIR` → `mkdir -p` + `cd` (and every `RUN` is preceded by a `cd`
+back to it, matching docker's per-`RUN` reset); `RUN` → a `%post` line under `set -e`;
+`COPY` → a `%files` entry (with a warning: `%files` runs *before* `%post`).
+`CMD`/`ENTRYPOINT`/`EXPOSE`/`LABEL`/`MAINTAINER`/`VOLUME`/`STOPSIGNAL`/`HEALTHCHECK`
+are skipped — harbor execs its own command inside the image. Anything else
+(`ADD`, `USER`, `SHELL`, `ONBUILD`, multi-stage `FROM … AS`, `COPY --from=`,
+`RUN --mount`, JSON-form `RUN`) is a **hard error** telling you to rerun with
+`--via-docker`; the translator never guesses.
+
+Two additions the generated definition makes on top of the Dockerfile, both
+mirroring the reference build:
+
+- `PIP_BREAK_SYSTEM_PACKAGES=1` + `PIP_ROOT_USER_ACTION=ignore` at the top of
+  `%post`, so a root `pip install` works on PEP 668 (Debian 12+/Ubuntu 24.04) bases.
+- a best-effort `pip install uvicorn fastapi` (never fatal): harbor's singularity
+  backend starts an in-container HTTP server, and a run-offline task has no egress
+  to fetch it at run time. Pass `--no-server-deps` to build the Dockerfile verbatim.
+
+**Network.** The *build* needs internet (base image, `git clone`, dependency
+install) — `network_profile = "build-online/run-offline"`. Only the scored run is
+offline. Point `APPTAINER_CACHEDIR` at a roomy shared filesystem and
+`APPTAINER_TMPDIR` at fast local disk for large repos.
 
 ## Archive vs. live
 
@@ -230,6 +298,12 @@ apptainer/singularity host; the model call uses any OpenAI-compatible endpoint):
 pip install -e .
 export OPENAI_BASE_URL=...          # OpenAI / OpenRouter / vLLM / LiteLLM / local
 export OPENAI_API_KEY=...
+
+# ONCE per task: build environment/Dockerfile into a local image and point the
+# task at it (a published task ships the recipe, not the image)
+IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
+sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
+    tasks/archive/td-fc90ea8b76d5f6b6/task.toml
 
 # baseline: the task's own oracle.patch -> reward 1.0 (no model call, archive only)
 tdb oracle tasks/archive/td-fc90ea8b76d5f6b6

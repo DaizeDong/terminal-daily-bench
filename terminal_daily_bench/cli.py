@@ -1,18 +1,24 @@
 """cli.py -- the `tdb` command-line interface.
 
+  tdb doctor [TASK_DIR]                    preflight: is this host able to score?
   tdb run <MODEL> <TASK_DIR> [--out OUT]   score a model on a task (execution gate)
   tdb oracle <TASK_DIR>                    the gate baseline (task's own solution -> 1.0)
   tdb quality <RESULTS.jsonl|json>         multi-angle quality card + readiness verdict
   tdb version
 
 The model call uses a generic OpenAI-compatible endpoint (OPENAI_BASE_URL /
-OPENAI_API_KEY). Scoring needs an apptainer/singularity host. `oracle` needs no model.
+OPENAI_API_KEY). Scoring shells out to `harbor` and needs an apptainer/singularity
+host. `oracle` needs no model. Run `tdb doctor` first -- it reports exactly which of
+those pieces are present on this host, and the harbor build we score against is not
+yet public (see README "Requirements").
 """
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import shutil
+import subprocess
 import sys
 from typing import List
 
@@ -104,10 +110,137 @@ def _cmd_publish(a) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# doctor -- preflight. Reports honestly; never fixes anything, never guesses.
+# ---------------------------------------------------------------------------
+_REQUIRED = "required"        # scoring is impossible without it
+_RUN_ONLY = "required-for-run"  # only `tdb run` (a real model) needs it
+_OPTIONAL = "optional"
+
+
+def _probe_version(exe: str) -> str:
+    """Best-effort `<exe> --version`; returns '' if it cannot be read."""
+    try:
+        p = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=60)
+    except Exception as e:  # noqa: BLE001 -- a broken binary must not crash the doctor
+        return f"(--version failed: {type(e).__name__})"
+    line = ((p.stdout or "") + (p.stderr or "")).strip().splitlines()
+    return line[0].strip() if line else "(--version printed nothing)"
+
+
+def _check_task_dir(task: str):
+    """Structural sanity of a task package (see tasks/SCHEMA.md). Never executes it."""
+    if not os.path.isdir(task):
+        return False, f"not a directory: {task}"
+    missing = [n for n in ("task.toml", "instruction.md", "tests", "environment")
+               if not os.path.exists(os.path.join(task, n))]
+    if missing:
+        return False, f"{task}: missing {', '.join(missing)}"
+    split = ("archive-style (solution/ present)"
+             if os.path.isdir(os.path.join(task, "solution"))
+             else "live-style (no solution/ -- `tdb oracle` will not work; scored server-side)")
+    note = f"{os.path.basename(task.rstrip('/'))}: task.toml + instruction.md + tests/ + environment/, {split}"
+    # What the gate would execute. `environment.docker_image` is either a build
+    # recipe relative to the task dir (harbor builds the SIF) or an absolute
+    # image/SIF path. Informational only -- harbor, not this bundle, materializes it.
+    try:
+        import tomllib
+        with open(os.path.join(task, "task.toml"), "rb") as fh:
+            img = (tomllib.load(fh).get("environment", {}) or {}).get("docker_image", "")
+    except Exception:  # noqa: BLE001
+        return False, note + "; task.toml unreadable as TOML"
+    if img:
+        local = img if os.path.isabs(img) else os.path.join(task, img)
+        if os.path.exists(local):
+            kind = ("build recipe present, SIF built by harbor"
+                    if not local.endswith(".sif") else "image present")
+        else:
+            kind = "not on this host; harbor pulls/builds it"
+        note += f"; image={img} ({kind})"
+    return True, note
+
+
+def _cmd_doctor(a) -> int:
+    """Preflight the host: python, harbor, apptainer/singularity, endpoint env, task dir.
+
+    Prints one OK/MISSING line per check and exits non-zero if anything required is
+    absent. This is deliberately blunt: the execution gate shells out to `harbor`, and
+    the harbor build these tasks are scored against is a patched fork that is not yet
+    published (README "Requirements"), so a fresh third-party host is EXPECTED to see
+    `harbor  MISSING` here.
+    """
+    checks = []  # (ok, level, name, detail)
+
+    v = sys.version_info
+    checks.append((v >= (3, 10), _REQUIRED, "python >= 3.10",
+                   f"{v.major}.{v.minor}.{v.micro} at {sys.executable}"))
+
+    harbor = shutil.which("harbor")
+    checks.append((bool(harbor), _REQUIRED, "harbor on PATH",
+                   f"{harbor} -- {_probe_version('harbor')}" if harbor else
+                   "not on PATH. Scoring shells out to `harbor run -p <task> -a oracle "
+                   "-e singularity --ek singularity_*=...`; the build we score against "
+                   "is a patched fork that is not yet public (README 'Requirements')."))
+
+    apptainer = shutil.which("apptainer") or shutil.which("singularity")
+    checks.append((bool(apptainer), _REQUIRED, "apptainer/singularity on PATH",
+                   f"{apptainer} -- {_probe_version(apptainer)}" if apptainer else
+                   "not on PATH; the harbor singularity backend executes each task's SIF"))
+
+    base = os.environ.get("OPENAI_BASE_URL")
+    checks.append((True, _OPTIONAL, "OPENAI_BASE_URL",
+                   base if base else "unset -> defaults to https://api.openai.com/v1"))
+
+    key = os.environ.get("OPENAI_API_KEY")
+    key_level = _OPTIONAL if a.oracle_only else _RUN_ONLY
+    checks.append((bool(key), key_level, "OPENAI_API_KEY",
+                   f"set (len={len(key)}, ...{key[-4:]})" if key else
+                   "unset -- needed by `tdb run` only (`tdb oracle` / `tdb quality` do "
+                   "not call a model; pass --oracle-only to stop treating this as a failure)"))
+
+    if a.task:
+        ok, detail = _check_task_dir(a.task)
+        checks.append((ok, _REQUIRED, "task dir well-formed", detail))
+    else:
+        checks.append((True, _OPTIONAL, "task dir well-formed",
+                       "no TASK_DIR given -- pass one to check it, e.g. "
+                       "`tdb doctor tasks/archive/<task-id>`"))
+
+    print(f"tdb doctor -- terminal-daily-bench {__version__}")
+    failures = []
+    for ok, level, name, detail in checks:
+        if ok:
+            status = "OK     "
+        elif level == _OPTIONAL:
+            status = "MISSING"  # reported, not fatal
+        else:
+            status = "MISSING"
+            failures.append((name, level))
+        suffix = "" if level == _REQUIRED else f"  [{level}]"
+        print(f"{status}  {name}{suffix}: {detail}")
+
+    if failures:
+        print("\nNOT ready: " + ", ".join(n for n, _ in failures))
+        if any(n == "harbor on PATH" for n, _ in failures):
+            print("Note: `harbor` is the execution gate. The build these tasks are scored "
+                  "against is a patched fork of harbor-framework/harbor that we have NOT "
+                  "published yet; vendoring/publishing it is tracked as the next release "
+                  "step. Until then `tdb run`/`tdb oracle` cannot run on a third-party "
+                  "host. `tdb quality` and `tdb publish` work without harbor.")
+        return 1
+    print("\nready: this host can run the execution gate.")
+    return 0
+
+
 def main(argv: List[str] = None) -> int:
     p = argparse.ArgumentParser(prog="tdb", description="terminal-daily-bench")
     p.add_argument("--version", action="version", version=f"terminal-daily-bench {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
+    d = sub.add_parser("doctor", help="preflight this host (run me first)")
+    d.add_argument("task", nargs="?", default=None, help="optional task dir to sanity-check")
+    d.add_argument("--oracle-only", action="store_true",
+                   help="do not fail on a missing OPENAI_API_KEY (oracle/quality need no model)")
+    d.set_defaults(fn=_cmd_doctor)
     r = sub.add_parser("run", help="score a model on a task"); r.add_argument("model"); r.add_argument("task"); r.add_argument("--out", default=None); r.set_defaults(fn=_cmd_run)
     o = sub.add_parser("oracle", help="gate baseline"); o.add_argument("task"); o.add_argument("--out", default=None); o.set_defaults(fn=_cmd_oracle)
     q = sub.add_parser("quality", help="multi-angle quality card"); q.add_argument("results"); q.set_defaults(fn=_cmd_quality)

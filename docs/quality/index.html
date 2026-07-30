@@ -40,8 +40,9 @@
       gate-scored <span class="mono">(task &times; model)</span> matrix and reports, separately, how well
       today's set discriminates &mdash; plus how far it is from supporting a research-grade claim.</p>
     <div class="cta">
-      <a class="btn" href="../quality-methods.md">full methods</a>
+      <a class="btn" href="../guide/quality-methods/">full methods</a>
       <a class="btn" href="../leaderboard/">the leaderboard it grades</a>
+      <a class="btn" href="../registry/">the tasks it reads</a>
     </div>
     <p class="note" style="margin-top:16px">MSQ is a pure function over plain lists. It reads no reward
       gate and gates no accept, so <span class="mono">false_accept = 0</span> cannot be perturbed by
@@ -56,7 +57,7 @@
     <div class="sec-head">
       <h2>the quality card, per scaffold frame</h2>
       <span class="eyebrow" id="frames-sub">one card per scaffold</span>
-      <a class="more" href="../quality-methods.md">how each axis is computed &rarr;</a>
+      <a class="more" href="../guide/quality-methods/">how each axis is computed &rarr;</a>
     </div>
     <div class="grid c2" id="frames"><div class="empty">loading quality card&hellip;</div></div>
     <p class="note" style="margin-top:14px">Axes are reported <strong>separately</strong> &mdash; the
@@ -119,7 +120,86 @@
       <span class="mono">A</span> angle coverage (build &rarr; partial &rarr; full-F2P &rarr; clean, each
       conditioned on reaching the previous stage) and <span class="mono">R</span> diversity
       (1 &minus; the near-duplicate rate over <span class="mono">{repo, files, f2p}</span> signatures).
-      Both are advisory. See <a href="../quality-methods.md">the methods note</a>.</p>
+      Both are advisory. See <a href="../guide/quality-methods/">the methods note</a>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>how to read these axes</h2>
+      <span class="eyebrow">what a bad value actually looks like</span>
+      <a class="more" href="../guide/quality-methods/">methods &rarr;</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>axis</th><th>what it means</th><th>what a bad value looks like</th>
+          <th class="num">measured</th>
+        </tr></thead>
+        <tbody>
+          <tr><th class="mono">D</th>
+              <td>Fraction of tasks that split the field &mdash; strictly between 0 and all models solving it.</td>
+              <td>Low D: the set is mostly all-pass or all-fail rows, which carry no information about
+                  who is better. Below the <span class="mono">min_D = 0.40</span> gate the day cannot rank anyone.</td>
+              <!-- D=0.333 single-shot / 0.500 terminus-2; "only 2/6 tasks split the field":
+                   the internal MSQ methods note §4 table + §5 -->
+              <td class="num mono">0.333 <span class="dash">/</span> 0.500</td></tr>
+          <tr><th class="mono">C</th>
+              <td>Normalized entropy of the per-task solve-rate buckets &mdash; does the set span easy to hard?</td>
+              <td>C near 0: every task sits in one difficulty band, so the set measures a single point on
+                  the ability curve rather than a range.</td>
+              <!-- C=0.325 single-shot / 0.459 terminus-2: the internal MSQ methods note §4 table -->
+              <td class="num mono">0.325 <span class="dash">/</span> 0.459</td></tr>
+          <tr><th class="mono">M</th>
+              <td>Fraction of tasks with no strong ability inversion (a clearly weaker model passing what
+                  an abler one misses).</td>
+              <td>M below 1 flags flaky, mislabeled or gameable tasks. But M is <em>vacuously</em> 1.0 when
+                  no model pair is clearly separated &mdash; a perfect M on a thin day is not an achievement.</td>
+              <!-- M=1.000 in both frames: the internal MSQ methods note §4 table; vacuity is in the
+                   monotonicity() docstring, terminal_daily_bench/quality.py:203 -->
+              <td class="num mono">1.000 <span class="dash">/</span> 1.000</td></tr>
+          <tr><th class="mono">I</th>
+              <td>2PL Fisher test-information &mdash; additive across tasks, and
+                  <span class="mono">SE = 1/&radic;I</span>.</td>
+              <td>Information concentrated in one or two items: the rest of the suite is decorative.
+                  In the single-shot frame 2 tasks carry 99% of the information and 4 all-fail tasks carry ~0.</td>
+              <!-- IRT total information 0.624 single-shot / 1.228 terminus-2, and the
+                   "2 tasks carry 99%" read: the internal MSQ methods note §4 table + §5 -->
+              <td class="num mono">0.624 <span class="dash">/</span> 1.228</td></tr>
+          <tr><th class="mono">KR-20</th>
+              <td>Internal-consistency reliability over binary items &mdash; do the tasks measure one
+                  coherent ability?</td>
+              <td>Below the conventional 0.70 bar the set is not yet one instrument; a
+                  <em>negative</em> KR-20 means items actively contradict each other.</td>
+              <!-- KR-20 0.287 (flagged "low") single-shot / 0.663 terminus-2: the internal MSQ methods note §4 table;
+                   the >0.7 acceptable convention: terminal_daily_bench/quality.py:1014 docstring -->
+              <td class="num mono">0.287 <span class="dash">/</span> 0.663</td></tr>
+          <tr><th class="mono">A</th>
+              <td>Angle coverage: each of the 4 conditional capability angles needs enough cells to
+                  reach its conditioning stage.</td>
+              <td>An angle whose conditioning population is under
+                  <span class="mono">min_support = 3</span> is undefined &mdash; e.g. a set where nothing
+                  reaches full-F2P cannot measure "fixes it without breaking passing tests" at all.</td>
+              <td class="num mono">advisory</td></tr>
+          <tr><th class="mono">R</th>
+              <td>Diversity: <span class="mono">1 &minus; redundancy</span> over
+                  <span class="mono">{repo, changed files, F2P}</span> signatures.</td>
+              <td>Low R: the day filled with near-clones of one PR family. Two tasks in the same repo
+                  scoring <span class="mono">&ge; 0.6</span> similarity count as duplicates.</td>
+              <td class="num mono">advisory</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- 6x16 and 6x8 matrices, and the ~83 / ~92 required-N figures:
+         the internal MSQ methods note §4 ("single-shot (6 tasks x 16 models) and
+         terminus-2 agent (6 tasks x 8 models)"; "required N for D +/-0.10: 83 / 92") -->
+    <p class="note" style="margin-top:14px"><strong>The small-N caveat, stated plainly.</strong> The
+      "measured" column is two real gate-scored matrices of <strong>6 tasks</strong> each &mdash; 16 models
+      under single-shot, 8 under the terminus-2 agent. Six tasks is far too few to certify any of these
+      numbers: D can only take a handful of discrete values, one task flipping moves it by a sixth, and the
+      bootstrap interval on D is correspondingly <span class="mono">[0.000, 0.667]</span> in the single-shot
+      frame. Reaching a &plusmn;0.10 interval on D needs roughly <strong>83</strong> tasks single-shot and
+      <strong>92</strong> under the agent frame. Read the column as the current reading of a thin day, not
+      as a property of the benchmark.</p>
   </section>
 
   <section>

@@ -306,19 +306,22 @@ class HarnessAdapter(abc.ABC):
     return;
   }
 
+  /* row shape is submit_result.rebuild_leaderboard():
+     {submitter, model, scaffold, n, solved, pending, false_accept, rate} */
   el.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
     "<th>submitter</th><th>model</th><th>scaffold</th>" +
-    '<th class="num">verified</th><th>status</th>' +
+    '<th class="num">verified rate</th><th class="num">re-scored</th><th>state</th>' +
     "</tr></thead><tbody>" +
     rows.map(function (r) {
-      var verified = r.verify_status === "verified";
+      var n = r.n || 0, pending = r.pending || 0;
       return "<tr>" +
         "<th>" + (r.submitter || "&mdash;") + "</th>" +
         '<td><span class="mono">' + (r.model || "&mdash;") + "</span></td>" +
-        "<td>" + (r.scaffold || "&mdash;") + "</td>" +
-        '<td class="num">' + T.rateCell(r.verified || r.rate_obj) + "</td>" +
-        '<td><span class="pill ' + (verified ? "pass" : "pending") + '">' +
-          (r.verify_status || "pending") + "</span></td></tr>";
+        '<td><span class="pill">' + (r.scaffold || "&mdash;") + "</span></td>" +
+        '<td class="num">' + T.rateCell({ n: n, solved: r.solved || 0 }) + "</td>" +
+        '<td class="num mono">' + (n - pending) + "/" + n + "</td>" +
+        '<td><span class="pill ' + (pending ? "pending" : "pass") + '">' +
+          (pending ? pending + " pending" : "all verified") + "</span></td></tr>";
     }).join("") + "</tbody></table></div>";
 })();
 </script>

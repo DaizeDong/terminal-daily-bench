@@ -9,13 +9,66 @@ This page walks you from install to a scored result and a quality card.
 
 ## Requirements
 
-- Python **≥ 3.10** (the scoring core is pure stdlib; there are no runtime
-  dependencies).
-- An **apptainer/singularity** host for the execution gate. `tdb run` and
-  `tdb oracle` invoke `harbor run ... -e singularity`, which executes each task's
-  SIF image. `tdb quality` needs neither harbor nor a model.
-- Network access to an **OpenAI-compatible endpoint** (only for `tdb run` with a
-  real model; `tdb oracle` needs no model).
+Scoring is **not** self-contained. `tdb run` and `tdb oracle` **shell out to
+[harbor](https://github.com/harbor-framework/harbor)** — the container-native
+agent/task execution framework that applies the patch, re-lays the protected
+tests and produces the reward — as
+
+```
+harbor run -p <task-copy> -a oracle -e singularity --ek singularity_...=... -o <jobs>
+```
+
+and read the reward out of harbor's `result.json`
+(`terminal_daily_bench/eval.py::run_harbor_oracle`). Concretely you need:
+
+- **Python ≥ 3.10** — the scoring core is pure stdlib; there are no runtime
+  dependencies.
+- **`harbor` on `PATH`** — upstream `harbor-framework/harbor` **0.13.1** *plus our
+  patches to its singularity backend* (next bullet). This is the only hard
+  external dependency of the execution gate.
+- **An apptainer/singularity host** — the singularity backend executes each task's
+  SIF image (we develop against apptainer 1.4.5). No Docker required.
+- **`OPENAI_BASE_URL` + `OPENAI_API_KEY`** — only for `tdb run` with a real model.
+  `tdb oracle` calls no model; `tdb quality` needs neither harbor nor a model.
+
+### Honest status of the harbor dependency
+
+The harbor build we score against is a **private, locally patched fork**, not a
+released artifact. Our patches add the Docker-less singularity knobs that
+`eval.py` passes on every run — `singularity_image_cache_dir`,
+`singularity_overlay_size_mb`, `singularity_overlay_dir`,
+`singularity_health_timeout_sec`, `singularity_mksquashfs_mem` — and **stock
+upstream harbor 0.13.1 does not accept them**. Installing harbor from
+PyPI/GitHub today is therefore *not* sufficient to reproduce our numbers.
+
+**That fork is not public yet. Vendoring or publishing it — ideally upstreaming
+the singularity patches — is tracked as the next release step.** We are not
+promising a date, and we would rather say this here than let you discover it
+from a stack trace.
+
+Practical consequence: **a third party cannot currently run `tdb run` /
+`tdb oracle` end-to-end.** What *does* work from this bundle with no harbor at
+all: `tdb doctor`, `tdb quality`, `tdb publish`, and reading/inspecting the task
+packages.
+
+## Step 0: run `tdb doctor` FIRST
+
+Before anything else, ask the bundle whether this host can score at all. It
+prints one **OK/MISSING** line per requirement — python version, `harbor` (and
+its `--version`), apptainer/singularity, `OPENAI_BASE_URL`/`OPENAI_API_KEY`, and
+whether a given task dir is well-formed — and **exits non-zero** if anything
+required is missing:
+
+```bash
+tdb doctor tasks/archive/td-fc90ea8b76d5f6b6
+# from a checkout without installing:
+PYTHONPATH=. python -m terminal_daily_bench.cli doctor tasks/archive/td-fc90ea8b76d5f6b6
+```
+
+On a host without the (not-yet-public) harbor fork you will see
+`MISSING  harbor on PATH` and a non-zero exit — that is the truthful answer, not
+a bug. Add `--oracle-only` if you only intend to run the oracle baseline and the
+quality card, so a missing `OPENAI_API_KEY` is not counted as a failure.
 
 ## Install
 
@@ -53,6 +106,39 @@ export OPENAI_API_KEY=sk-...                        # bearer key, read from env,
   to `<base>/chat/completions`.
 - If the upstream rejects `max_tokens` (some reasoning models), the client
   automatically retries with `max_completion_tokens`.
+
+## Build the task image first
+
+A published task does **not** ship a prebuilt image. Its `task.toml` carries the
+portable reference
+
+```toml
+[environment]
+docker_image = "environment/Dockerfile"   # build from the task Dockerfile
+```
+
+because the producer's host-specific `.sif` path is stripped on publish
+(`tasks/publish_tasks.py`). Nothing can execute that string as-is, so build the
+task's own `environment/Dockerfile` once, then point `docker_image` at the result:
+
+```bash
+IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
+sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
+    tasks/archive/td-fc90ea8b76d5f6b6/task.toml
+```
+
+The script prints **only** the image path on stdout (logs go to stderr), so it
+composes. It picks a builder automatically — apptainer/singularity if present
+(translating the Dockerfile into an apptainer definition), otherwise docker — and
+fails with an explicit message if neither is installed. Images are cached in
+`$TDB_SIF_CACHE` (default `./.tdb_work/sif_cache`) keyed by task id + Dockerfile
+hash, so a second run is a no-op; `--force` rebuilds. Full option list:
+`scripts/build_task_image.sh --help`, details in
+[`task-format.md`](task-format.md#building-the-task-image).
+
+> The **build** stage needs internet (base image, `git clone`, dependency
+> install). The **scored run** is the offline one — `allow_internet = false` cuts
+> egress at scoring time only.
 
 ## Score a model on a task
 

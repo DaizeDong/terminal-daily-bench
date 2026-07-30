@@ -397,12 +397,18 @@ def main(argv=None) -> int:
 
 
 def _finish(result: Dict[str, Any], out: str, t0: float) -> int:
+    """Write the result record and exit with a TRUTHFUL status.
+
+    A scoring FAILURE (no patch, harbor never ran, an exception) must not look like
+    a clean zero-reward run: it exits non-zero so a harness/CI notices. A genuine
+    unsolved attempt (no error, reward 0.0) still exits 0 -- that is a real result.
+    """
     result["runtime_sec"] = round(time.time() - t0, 1)
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w") as fh:
         json.dump(result, fh, indent=2)
     print(json.dumps(result, indent=2))
-    return 0
+    return 1 if result.get("error") else 0
 
 
 def _read(path: str) -> str:

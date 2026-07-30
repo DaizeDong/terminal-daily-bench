@@ -8,7 +8,7 @@ false_accept=0 is a property of execution scoring, preserved here.
 Pure stdlib (json/os/glob/pathlib/subprocess-env); no td_pipeline / rcvh import.
 """
 from __future__ import annotations
-import glob, json, os
+import glob, json, os, re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 

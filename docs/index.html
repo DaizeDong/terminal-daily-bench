@@ -63,6 +63,44 @@
 
   <section>
     <div class="sec-head">
+      <h2>how a task is made</h2>
+      <span class="eyebrow">five steps, every one of them executed</span>
+      <a class="more" href="guide/task-format/">the task format &rarr;</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th class="rank">#</th><th>step</th><th>what happens</th><th class="num">what it proves</th></tr></thead>
+        <tbody>
+          <tr><td class="rank">1</td><th class="mono">mine a merged PR</th>
+              <!-- prefilter name: the internal universe-expansion note ("selection.pr_touches_test_file — exactly the pipeline's own F2P prefilter") -->
+              <td>A pull request that already merged in the curated repo universe and <em>touches a test file</em> is pulled as a candidate.</td>
+              <td class="num mono">freshness</td></tr>
+          <tr><td class="rank">2</td><th class="mono">rebuild the env</th>
+              <!-- oracle_pass / nop_fail tokens: the internal certified-yield proof §"the accept certificate's 7th token" -->
+              <td>The repository is rebuilt into a container at the parent commit; the fail-to-pass tests must fail there, and the gold patch must take them to reward 1.0.</td>
+              <td class="num mono">solvability</td></tr>
+          <tr><td class="rank">3</td><th class="mono">seal the tests</th>
+              <!-- withheld set: tasks/SCHEMA.md + docs/task-format.md "Archive vs. live" table -->
+              <td>Protected assertions and the reference solution are withheld; only the failing-test IDs are published, in <code>FAILING_TESTS.json</code>.</td>
+              <td class="num mono">no leakage</td></tr>
+          <tr><td class="rank">4</td><th class="mono">certify</th>
+              <!-- 7 tokens, verbatim: the internal certified-yield proof ("rcvh.types.Certificate requires all 7 tokens true") -->
+              <td>All <strong>7</strong> execution tokens must come back true &mdash; <span class="mono">oracle_pass, nop_fail, no_mutant_escape, rerun_unanimous, env_clean, egress_clear, evidence_gate_ok</span>. Any one missing is a reject.</td>
+              <td class="num mono">soundness</td></tr>
+          <tr><td class="rank">5</td><th class="mono">ship</th>
+              <!-- 14 days = ARCHIVE_WEEKS(2) * 7, tasks/publish_tasks.py:16,45 -->
+              <td>The task joins that date's sealed suite as <span class="pill pending">live</span>, and is released whole after <strong>14 days</strong>.</td>
+              <td class="num mono">reproducibility</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead" style="margin-top:10px;font-size:12.5px">Every step is a program that runs, not a
+      review that happens. A candidate that fails any one of them never becomes a task &mdash; the funnel
+      is the quality guarantee. <a href="benchmarks/">how a suite lives &rarr;</a></p>
+  </section>
+
+  <section>
+    <div class="sec-head">
       <h2>today's leaderboard</h2>
       <span class="eyebrow" id="board-sub">models under test</span>
       <a class="more" href="leaderboard/">full leaderboard &rarr;</a>
@@ -127,6 +165,17 @@ export OPENAI_BASE_URL=&hellip; OPENAI_API_KEY=&hellip;
 
   if (site && site.suites) T.dayRail(document.getElementById("rail"), site.suites, board && board.date);
 
+  if (!board) {
+    document.getElementById("board-sub").textContent = "no board published yet";
+    document.getElementById("strip").innerHTML =
+      '<div class="empty">No <code>leaderboard_data.json</code> at the site root yet, so today has ' +
+      "no scored cells to show.</div>";
+    document.getElementById("board").innerHTML =
+      '<tr><td colspan="5"><div class="empty">No models scored yet. Run the day\'s set and ' +
+      '<a href="submit/">submit the patch</a> &mdash; it is re-scored by the same gate on ingest.' +
+      "</div></td></tr>";
+  }
+
   if (board) {
     document.getElementById("board-sub").textContent =
       board.date + " · " + board.n_models + " models × " + board.n_tasks + " tasks";
@@ -143,13 +192,19 @@ export OPENAI_BASE_URL=&hellip; OPENAI_API_KEY=&hellip;
     }).join("");
 
     const rows = (board.leaderboard || []).slice(0, 6).map(function (r, i) {
+      /* false-accepts are read off the row, never hardcoded — the seal has to be measured */
+      const fa = ["single_shot", "terminus2"].reduce(function (a, k) {
+        return a + ((r[k] && r[k].fa) || 0);
+      }, 0);
       return '<tr><td class="rank">' + (i + 1) + "</td>" +
-        '<td><span class="mono">' + r.model + "</span></td>" +
+        '<td><span class="mono">' + r.model + "</span>" +
+        (r.lead ? ' <span class="pill pass">leader</span>' : "") + "</td>" +
         '<td class="num">' + T.rateCell(r.single_shot) + "</td>" +
         '<td class="num">' + T.rateCell(r.terminus2) + "</td>" +
-        '<td class="num"><span class="pill pass">0</span></td></tr>';
+        '<td class="num"><span class="pill ' + (fa ? "pending" : "pass") + '">' + fa + "</span></td></tr>";
     }).join("");
-    document.getElementById("board").innerHTML = rows || '<tr><td colspan="5">no results yet</td></tr>';
+    document.getElementById("board").innerHTML = rows ||
+      '<tr><td colspan="5"><div class="empty">No models scored on this suite yet.</div></td></tr>';
   }
 
   const gal = document.getElementById("task-gallery");
@@ -161,9 +216,13 @@ export OPENAI_BASE_URL=&hellip; OPENAI_API_KEY=&hellip;
           (t.difficulty ? '<span class="pill">' + t.difficulty + "</span>" : "") +
           (t.status === "live" ? '<span class="pill pending">live</span>'
                                : '<span class="pill pass">archive</span>') +
+          (t.suite ? '<span class="pill">suite ' + t.suite + "</span>" : "") +
         "</div><h3>" + (t.repo || t.id) + "</h3><p>" +
         (t.title || "a merged pull request, rebuilt as an executable task") +
-        '</p><span class="foot">' + t.id + "</span></a>";
+        '</p><span class="foot">' + t.id +
+        (t.pr_number != null ? " &middot; PR #" + t.pr_number : "") +
+        (t.n_fail_to_pass != null ? " &middot; " + t.n_fail_to_pass + " f2p tests" : "") +
+        "</span></a>";
     }).join("");
   } else {
     gal.innerHTML = '<div class="empty">No task catalogue published yet. Run <code>tdb publish</code> to generate <code>site_data.json</code>.</div>';
@@ -175,12 +234,17 @@ export OPENAI_BASE_URL=&hellip; OPENAI_API_KEY=&hellip;
       return '<a class="card" href="benchmarks/' + encodeURIComponent(s.id) + '/">' +
         '<div class="tags"><span class="pill ' + (s.status === "live" ? "pending" : "pass") + '">' +
         s.status + "</span>" +
-        (s.languages ? '<span class="pill">' + s.languages.length + " languages</span>" : "") +
+        '<span class="pill">' + (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span>" +
+        ((s.languages && s.languages.length)
+          ? '<span class="pill">' + s.languages.length +
+            (s.languages.length === 1 ? " language" : " languages") + "</span>"
+          : "") +
+        (board && s.id === board.date ? '<span class="pill pass">today</span>' : "") +
         "</div><h3>suite " + s.id + "</h3><p>" +
-        (s.n_tasks != null ? s.n_tasks + " tasks" : "—") +
-        (s.status === "live" ? " · gold patch and protected tests withheld; scored server-side"
-                             : " · released in full, including the reference solution") +
-        '</p><span class="foot">' + (s.note || "") + "</span></a>";
+        (s.status === "live" ? "Gold patch and protected tests withheld; submissions scored server-side."
+                             : "Released in full, including the protected tests and the reference solution.") +
+        '</p><span class="foot">' + (s.note || (s.status === "live" ? "live suite" : "archived suite")) +
+        "</span></a>";
     }).join("");
   } else {
     su.innerHTML = '<div class="empty">No suites published yet.</div>';

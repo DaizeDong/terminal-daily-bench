@@ -29,6 +29,74 @@
     </div>
   </section>
 
+  <!-- ------------------------------------------------- THE ONE MECHANIC -->
+  <section style="padding-top:0;border-top:none">
+    <div class="strip">
+      <div class="cell"><div class="k">on ingest</div><div class="v" style="color:var(--pending)">pending</div></div>
+      <div class="cell"><div class="k">reward_claimed</div><div class="v"><span class="dash">ignored</span></div></div>
+      <div class="cell"><div class="k">verified_reward</div><div class="v">null <small>until replayed</small></div></div>
+      <div class="cell"><div class="k">what the board reads</div><div class="v" style="color:var(--pass)">verified_reward</div></div>
+      <!-- solved threshold is exact: `(e.get("verified_reward") or 0) >= 0.999`
+           in web/submit_result.py:114 (rebuild_leaderboard) -->
+      <div class="cell"><div class="k">counts as solved</div><div class="v">&ge; 0.999</div></div>
+      <div class="cell"><div class="k">false-accepts</div><div class="v" style="color:var(--pass)">0</div></div>
+    </div>
+    <div class="card" style="margin-top:12px;border-color:var(--pass)">
+      <div class="tags">
+        <span class="pill pass">the whole mechanic, in one line</span>
+        <span class="seal" style="margin-left:auto"><b>false_accept</b> 0</span>
+      </div>
+      <h3 style="font-size:19px;letter-spacing:-.2px">Your claimed reward is advisory. Only the replayed
+        patch counts.</h3>
+      <p style="font-size:14.5px">Send whatever <span class="mono">reward_claimed</span> you like &mdash;
+        <!-- "reward_claimed is advisory; it is NOT validated against anything" —
+             web/submit_result.py:46-47; verified_reward is "the ONLY figure the board trusts" — :69 -->
+        the field is validated against <em>nothing</em> and never read by the board. What is read is
+        <span class="mono">verified_reward</span>, and that number does not exist until a worker has taken
+        your <span class="mono">patch</span> string, applied it inside the task container, let harbor re-lay
+        the protected tests from the trusted package, and recorded what they actually returned. Claim
+        <span class="mono">1.0</span> on a patch that verifies <span class="mono">0.0</span> and you have
+        contributed a <span class="mono">0.0</span>, publicly, under your handle.</p>
+      <!-- lifecycle field values verbatim from web/submit_result.py:67-69 (record)
+           and :87-88 (apply_verified) -->
+      <pre style="margin-top:4px"><span class="c"># the only state machine on this page</span>
+record()          <span class="k">verify_status</span> = "pending"    <span class="k">verified_reward</span> = null   <span class="c"># listed, contributes 0</span>
+        &darr;         <span class="c">a worker replays the PATCH through the execution gate</span>
+apply_verified()  <span class="k">verify_status</span> = "verified"   <span class="k">verified_reward</span> = 0.0    <span class="c"># the only figure that counts</span>
+
+<span class="c"># reward_claimed is carried along the whole way, and read by nothing.</span></pre>
+      <div class="grid c3" style="margin-top:6px">
+        <div class="card">
+          <span class="pill pending">pending</span>
+          <h3>listed, worth zero</h3>
+          <!-- "Only verify_status=='verified' entries contribute a solved/attempt; a pending
+               submission is listed but contributes 0 to any rate" — web/submit_result.py:98-99;
+               a["n"] += 1 happens unconditionally at :112 -->
+          <p>A pending row is public immediately and increments your attempt count
+            (<code>n</code>), but can never increment <code>solved</code>. Submitting a flood of
+            unverified claims lowers your rate; it cannot raise it.</p>
+          <span class="foot">rebuild_leaderboard() &middot; n += 1, solved += 0</span>
+        </div>
+        <div class="card">
+          <span class="pill pass">verified</span>
+          <h3>whatever the tests returned</h3>
+          <p>Once the worker writes back, <code>verified_reward</code> is the reward harbor measured,
+            byte-for-byte out of its <code>result.json</code>. <code>solved</code> increments only when
+            that figure is <code>&ge; 0.999</code>.</p>
+          <span class="foot">apply_verified() &middot; execution truth</span>
+        </div>
+        <div class="card">
+          <span class="pill">no third state</span>
+          <h3>there is no appeal step</h3>
+          <p>Nothing between <em>pending</em> and <em>verified</em> involves a human or a model reading
+            your submission. A well-formed lie passes validation and dies at the replay, which is the
+            only place a score is ever created.</p>
+          <span class="foot">no model ever grades a model</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ---------------------------------------------------------------- run -->
   <section id="run">
     <div class="sec-head">

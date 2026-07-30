@@ -74,6 +74,11 @@
     <p class="sub">One task is one real merged pull request, rebuilt into a package an agent can be
       dropped into. Nothing here is authored by a model. Search it, filter it, then open a task to
       read its provenance and the tests that grade it.</p>
+    <div class="cta">
+      <a class="btn" href="../benchmarks/">browse by suite</a>
+      <a class="btn" href="../leaderboard/">today's leaderboard</a>
+      <a class="btn" href="../guide/task-format/">task format</a>
+    </div>
   </section>
 
   <section style="padding-top:0;border-top:none">
@@ -84,7 +89,7 @@
     <div class="sec-head">
       <h2>what is in a task package</h2>
       <span class="eyebrow">five files, no surprises</span>
-      <a class="more" href="../task-format.md">task format &rarr;</a>
+      <a class="more" href="../guide/task-format/">task format &rarr;</a>
     </div>
     <p class="lead" style="max-width:78ch">
       A package holds <code>task.toml</code> (id, suite, language, the fail-to-pass test ids, resource
@@ -116,6 +121,10 @@
         <div class="tags" id="langs"></div>
       </div>
       <div class="f-row">
+        <span class="f-label">difficulty</span>
+        <div class="tags" id="diffs"></div>
+      </div>
+      <div class="f-row">
         <span class="f-label">status</span>
         <div class="tags" id="stats"></div>
         <button type="button" class="pill f-btn" id="reset">reset</button>
@@ -130,13 +139,14 @@
           <th>task</th>
           <th>repo</th>
           <th>lang</th>
+          <th>difficulty</th>
           <th>suite</th>
           <th>status</th>
           <th class="num">f2p tests</th>
           <th class="num">solved by</th>
         </tr></thead>
         <tbody id="rows">
-          <tr><td colspan="7" class="mono" style="color:var(--faint)">loading&hellip;</td></tr>
+          <tr><td colspan="8" class="mono" style="color:var(--faint)">loading&hellip;</td></tr>
         </tbody>
       </table>
     </div>
@@ -217,10 +227,11 @@
   }
 
   /* ---- header numbers ---- */
-  var suites = {}, langs = {}, live = 0, f2p = 0;
+  var suites = {}, langs = {}, diffs = {}, live = 0, f2p = 0;
   tasks.forEach(function (t) {
     if (t.suite) suites[t.suite] = 1;
     if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
+    if (t.difficulty) diffs[t.difficulty] = (diffs[t.difficulty] || 0) + 1;
     if (t.status === "live") live++;
     f2p += Number(t.n_fail_to_pass) || 0;
   });
@@ -236,13 +247,20 @@
   }).join("");
 
   /* ---- filter controls ---- */
-  var state = { q: "", lang: null, status: null };
+  var state = { q: "", lang: null, difficulty: null, status: null };
   var langNames = Object.keys(langs).sort(function (a, b) { return langs[b] - langs[a] || a.localeCompare(b); });
 
   var langsEl = document.getElementById("langs");
   langsEl.innerHTML = langNames.map(function (l) {
     return '<button type="button" class="pill lang" data-lang="' + esc(l) + '" aria-pressed="true">' +
       esc(l) + ' <span style="opacity:.6">' + langs[l] + "</span></button>";
+  }).join("") || '<span class="pill" style="opacity:.6">not recorded</span>';
+
+  var diffsEl = document.getElementById("diffs");
+  var diffNames = Object.keys(diffs).sort(function (a, b) { return diffs[b] - diffs[a] || a.localeCompare(b); });
+  diffsEl.innerHTML = diffNames.map(function (d) {
+    return '<button type="button" class="pill" data-difficulty="' + esc(d) + '" aria-pressed="true">' +
+      esc(d) + ' <span style="opacity:.6">' + diffs[d] + "</span></button>";
   }).join("") || '<span class="pill" style="opacity:.6">not recorded</span>';
 
   var statsEl = document.getElementById("stats");
@@ -267,6 +285,13 @@
     setPressed(langsEl, "lang", state.lang);
     render();
   });
+  diffsEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-difficulty]");
+    if (!b) return;
+    state.difficulty = state.difficulty === b.dataset.difficulty ? null : b.dataset.difficulty;
+    setPressed(diffsEl, "difficulty", state.difficulty);
+    render();
+  });
   statsEl.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-status]");
     if (!b) return;
@@ -277,9 +302,10 @@
   var qEl = document.getElementById("q");
   qEl.addEventListener("input", function () { state.q = qEl.value.trim().toLowerCase(); render(); });
   document.getElementById("reset").addEventListener("click", function () {
-    state = { q: "", lang: null, status: null };
+    state = { q: "", lang: null, difficulty: null, status: null };
     qEl.value = "";
     setPressed(langsEl, "lang", null);
+    setPressed(diffsEl, "difficulty", null);
     setPressed(statsEl, "status", null);
     render();
     qEl.focus();
@@ -302,13 +328,30 @@
     var suite = t.suite
       ? '<a class="mono" href="../benchmarks/' + encodeURIComponent(t.suite) + '/">' + esc(t.suite) + "</a>"
       : '<span class="dash">&mdash;</span>';
+    /* the repo/PR cell is the provenance claim — make it clickable, like the suite page does */
+    var repoUrl = t.repo ? "https://github.com/" + t.repo : null;
+    var repo = repoUrl
+      ? '<a class="mono" style="font-size:12.5px" href="' + esc(repoUrl) + '">' + esc(t.repo) + "</a>"
+      : '<span class="mono" style="font-size:12.5px">&mdash;</span>';
+    var pr = (t.pr_number != null)
+      ? '<span class="sub">' + (repoUrl
+          ? '<a href="' + esc(repoUrl) + "/pull/" + encodeURIComponent(t.pr_number) + '">PR #' +
+            esc(t.pr_number) + "</a>"
+          : "PR #" + esc(t.pr_number)) + "</span>"
+      : "";
+    /* Task pages are generated from the catalogue. In the derived fallback the ids come from the
+       day's matrix, so a page may not exist yet — label them instead of linking into a 404. */
+    var idCell = derived
+      ? '<span class="tid" title="no task page published yet">' + esc(t.id) + "</span>"
+      : '<a class="tid" href="./' + encodeURIComponent(t.id) + '/">' + esc(t.id) + "</a>";
     return "<tr>" +
-      '<td><a class="tid" href="./' + encodeURIComponent(t.id) + '/">' + esc(t.id) + "</a>" +
+      "<td>" + idCell +
         (t.title ? '<span class="sub">' + esc(t.title) + "</span>" : "") + "</td>" +
-      '<td><span class="mono" style="font-size:12.5px">' + (t.repo ? esc(t.repo) : "&mdash;") + "</span>" +
-        (t.pr_number != null ? '<span class="sub">PR #' + esc(t.pr_number) + "</span>" : "") + "</td>" +
+      "<td>" + repo + pr + "</td>" +
       "<td>" + (t.language ? '<span class="pill lang">' + esc(t.language) + "</span>"
                            : '<span class="dash">&mdash;</span>') + "</td>" +
+      "<td>" + (t.difficulty ? '<span class="pill">' + esc(t.difficulty) + "</span>"
+                             : '<span class="dash">&mdash;</span>') + "</td>" +
       "<td>" + suite + "</td>" +
       "<td>" + st + "</td>" +
       '<td class="num">' + (t.n_fail_to_pass != null ? esc(t.n_fail_to_pass) : '<span class="dash">&mdash;</span>') + "</td>" +
@@ -319,6 +362,7 @@
   function render() {
     var out = tasks.filter(function (t) {
       if (state.lang && t.language !== state.lang) return false;
+      if (state.difficulty && t.difficulty !== state.difficulty) return false;
       if (state.status && t.status !== state.status) return false;
       if (state.q && t._h.indexOf(state.q) === -1) return false;
       return true;
