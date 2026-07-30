@@ -1,5 +1,7 @@
 # terminal-daily-bench
 
+**Leaderboard: https://daizedong.github.io/terminal-daily-bench/**
+
 A **living** coding-agent benchmark: tasks are mined from real merged GitHub pull
 requests **every day**, and every model is scored by **execution proof only** — a
 re-laid, protected test suite the model never sees. There is **no LLM judge**, so
@@ -34,7 +36,12 @@ export OPENAI_API_KEY=...
 tdb run <MODEL> tasks/archive/<task-id>     # score a model on a task (execution gate)
 tdb oracle tasks/archive/<task-id>          # baseline: the gold solution -> reward 1.0
 tdb quality results.jsonl                   # multi-angle quality card + readiness verdict
+tdb publish <results-dir>[:scaffold],...    # results -> docs/leaderboard_data.json (the site's data)
 ```
+
+Publishing a day is one loop: `tdb publish ...` regenerates `docs/leaderboard_data.json`,
+you commit and push it, and GitHub Pages redeploys the leaderboard automatically —
+the page renders straight from that JSON.
 
 Each run writes one result record:
 
