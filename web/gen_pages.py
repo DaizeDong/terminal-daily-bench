@@ -526,6 +526,28 @@ def _section(inner) -> str:
     return f'<div class="flex flex-col py-12 sm:pb-16">{inner}</div>'
 
 
+def _retrievability_note() -> str:
+    """The honest caveat that belongs on every LIVE suite page.
+
+    A live task withholds the gold patch and the protected assertions, and we redact the
+    upstream commit from its metadata. But environment/Dockerfile has to name the source
+    repo and the base commit or the task cannot be built and run at all -- and the merged
+    PR is a descendant of that base commit in a public repository. Recovery is expensive,
+    not impossible. Every PR-derived benchmark inherits this; what is avoidable is
+    letting a reader assume we solved it.
+    """
+    return (
+        '<p class="text-muted-foreground mx-auto mt-4 max-w-3xl text-center font-mono '
+        'text-sm/relaxed">These tasks are built from <span class="text-foreground">public '
+        "merged pull requests</span>, so the reference fix exists upstream. The commit is "
+        "redacted from a live package, but the task must name its source repo and base "
+        "commit to be buildable, and the fix is a descendant of that commit. An agent with "
+        "network access can therefore retrieve rather than solve. Read any online score on "
+        'a live task as an <span class="text-foreground">upper bound</span>; the figures we '
+        "publish are produced with egress severed.</p>"
+    )
+
+
 def suite_page_body(suite: dict, suite_tasks: list) -> str:
     sid = suite.get("id", "")
     live = suite.get("status") == "live"
@@ -605,7 +627,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         )
 
     cmd = (
-        ["tdb submit &lt;RESULTS.jsonl&gt;   # re-scored by the same gate on ingest"]
+        ["tdb submit &lt;RESULTS.jsonl&gt;   # listed as pending; worth zero until replayed"]
         if live
         else [
             "tdb run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;",
@@ -632,8 +654,11 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
               'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
               "workspace tests are discarded, the protected tests are re-laid from the trusted "
               "package, and they run with the network cut. The reward is that run's outcome and "
-              'nothing else, so <span class="text-foreground">false_accept = 0</span> holds by '
-              "construction.</p>"
+              'nothing else. <span class="text-foreground">false_accept = 0</span> is certified '
+              "for task admission, where the gate faces an oracle patch and a no-op; it is not "
+              "yet certified against an adversarial agent holding a shell in the same container "
+              "as the verifier.</p>"
+            + (_retrievability_note() if live else "")
         ),
     ])
 
@@ -773,7 +798,9 @@ def task_page_body(task: dict, pkg: dict) -> str:
         + code_figure("Score a model on this task, then prove it is solvable", cmd)
         + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
           'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
-          "else. A submitted reward is advisory and is replayed on ingest. "
+          "else. A submitted reward is advisory: it is recorded, read by nothing, and "
+          "counts as an attempt worth zero until a replay worker adjudicates the patch. "
+          "That worker is not running yet, so every submission stays pending. "
           f'<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
           "how to submit &rarr;</a></p>"
     )

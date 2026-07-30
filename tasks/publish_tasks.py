@@ -41,6 +41,27 @@ _PORTABLE_IMAGE = "environment/Dockerfile"
 _LIVE_REDACT_KEYS = ("pr_number", "base_sha", "merge_sha", "source_ref",
                      "oracle_patch_sha256", "pr_url", "commit_sha")
 
+# Redaction raises the cost of gold recovery; it does not make it impossible, and we
+# say so in the package itself rather than only in a commit message.
+#
+# environment/Dockerfile must carry REPO_URL and the base commit or the task cannot be
+# built and run locally at all -- and the merged PR is the CHILD of that base commit in
+# a public repository. A determined party can therefore still walk to the gold. This is
+# structural to every PR-derived benchmark (SWE-bench and its descendants share it);
+# what is not acceptable is letting the reader assume otherwise.
+#
+# Consequence for reading the numbers: an online run on a LIVE task is an UPPER BOUND.
+# The defensible number is the one produced under severed egress, which is what
+# server-side scoring runs.
+RETRIEVABILITY_NOTE = (
+    "The upstream commit is redacted while this task is live, but environment/"
+    "Dockerfile must name the source repo and base commit for the task to be "
+    "buildable, and the merged PR is a descendant of that commit in a public "
+    "repository. Gold recovery is therefore made expensive, not impossible. Treat any "
+    "score obtained with network access as an UPPER BOUND; scores we publish are "
+    "produced under severed egress."
+)
+
 
 def _sanitize_task_toml(text: str, *, live: bool = False) -> str:
     """Rewrite a host-specific ``docker_image = "<abs .sif>"`` to a portable ref.
@@ -150,7 +171,8 @@ def publish(src: Path, merge_date: str, today: str, out_root: Path) -> dict:
         (dest / "FAILING_TESTS.json").write_text(
             json.dumps({"failing_test_ids": _failing_test_ids(src),
                         "note": "protected assertions + gold solution withheld; "
-                                "submit a patch, scored server-side"}, indent=2))
+                                "submit a patch, scored server-side",
+                        "retrievability": RETRIEVABILITY_NOTE}, indent=2))
 
     return {"task": src.name, "mode": "archive" if archive else "live",
             "shipped_solution": archive, "dest": str(dest)}

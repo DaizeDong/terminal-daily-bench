@@ -3,17 +3,25 @@
 
 A community member runs the day's task set with their own model/scaffold; the harness
 POSTs one submission record per (model, task) cell here. The IRON discipline: a
-submitted ``reward_claimed`` is ADVISORY ONLY — on ingest we RE-SCORE the submitted
-patch through the same execution gate (harbor's re-laid protected tests), and record the
-RE-VERIFIED reward. A community number is never trusted; only its patch is replayed. So
-``false_accept = 0`` holds for community runs exactly as for ours.
+submitted ``reward_claimed`` is ADVISORY ONLY. Nothing a submitter sends is ever read
+as a score — only ``verified_reward``, written by a replay of the submitted PATCH
+through the execution gate, counts toward any rate.
+
+STATE OF THE REPLAY WORKER — read this before quoting any property of this module.
+The worker is NOT RUNNING. ``apply_verified`` is the only function that can promote a
+row, and nothing in this repository calls it. The consequence is not a hole, it is the
+opposite: every submission stays ``pending`` forever, and ``rebuild_leaderboard``
+counts a pending row as zero solved out of one attempt. A third party therefore cannot
+raise their number by submitting anything — verified or forged. What they also cannot
+do, today, is raise it at all. Do not describe ingest re-scoring in the present tense
+until a worker exists and this paragraph is deleted.
 
 Flow:
   1. ``validate(sub)``  — schema + required fields + patch present.
   2. ``record(sub)``    — append to submissions.jsonl as ``verify_status="pending"``.
-  3. re-score           — a node worker replays ``sub['patch']`` via the gate (needs
-                          apptainer); ``verified_reward`` + ``verify_status="verified"``
-                          are written back. Until then the cell shows "pending".
+  3. re-score           — NOT IMPLEMENTED. When built, a node worker replays
+                          ``sub['patch']`` via the gate (needs apptainer) and writes
+                          back ``verified_reward`` + ``verify_status="verified"``.
   4. ``rebuild_leaderboard`` — fold verified submissions into leaderboard_data.json.
 
 CLI:
@@ -67,7 +75,11 @@ def record(sub: Dict[str, Any], store: str = STORE_DEFAULT) -> Dict[str, Any]:
         "reward_claimed": sub.get("reward_claimed"),   # advisory only
         "verify_status": "pending",                    # until a node re-scores the patch
         "verified_reward": None,                       # the ONLY figure the board trusts
-        "false_accept": 0,                             # structural: gate re-scores, model never judges
+        # NOT a measured 0. false_accept is a property of a GATE DECISION, and a pending
+        # row has had no decision made about it -- writing 0 here would let an aggregate
+        # report "0 false accepts" over rows nothing ever adjudicated. It becomes a
+        # number when the replay worker adjudicates the patch, and not before.
+        "false_accept": None,
     }
     p = Path(store) / f"{sub['date']}.jsonl"
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -97,6 +109,11 @@ def rebuild_leaderboard(store: str, out: str) -> Dict[str, Any]:
 
     Only ``verify_status=="verified"`` entries contribute a solved/attempt; a pending
     submission is listed but contributes 0 to any rate (its number is not yet trusted).
+
+    ``false_accept`` aggregates over VERIFIED rows only, and stays ``None`` when a
+    submitter has none. Summing it over pending rows would print "0 false accepts"
+    about submissions the gate has never adjudicated -- an unearned safety claim, which
+    is the one thing this project treats as worse than an acknowledged gap.
     """
     board = json.loads(Path(out).read_text(encoding="utf-8")) if Path(out).exists() else {"community": []}
     agg: Dict[tuple, Dict[str, Any]] = {}
@@ -108,10 +125,13 @@ def rebuild_leaderboard(store: str, out: str) -> Dict[str, Any]:
             key = (e["submitter"], e["model"], e["scaffold"])
             a = agg.setdefault(key, {"submitter": e["submitter"], "model": e["model"],
                                      "scaffold": e["scaffold"], "n": 0, "solved": 0,
-                                     "pending": 0, "false_accept": 0})
+                                     "pending": 0, "verified": 0,
+                                     "false_accept": None})
             a["n"] += 1
             if e["verify_status"] == "verified":
+                a["verified"] += 1
                 a["solved"] += int((e.get("verified_reward") or 0) >= 0.999)
+                a["false_accept"] = (a["false_accept"] or 0) + int(e.get("false_accept") or 0)
             else:
                 a["pending"] += 1
     board["community"] = [

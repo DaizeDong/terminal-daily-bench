@@ -5,5 +5,6 @@
     "tests/test_add_option_format.py::test_invalid_format_key_error_message_content",
     "tests/test_add_option_format.py::test_patcher_added_keys_work_in_format"
   ],
-  "note": "protected assertions + gold solution withheld; submit a patch, scored server-side"
+  "note": "protected assertions + gold solution withheld; submit a patch, scored server-side",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
 }
