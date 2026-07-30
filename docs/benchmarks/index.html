@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>benchmarks — terminal-daily-bench</title>
+<meta name="description" content="One suite per day. Live suites keep the gold patch and protected tests withheld and are scored server-side; suites older than two weeks are archived and released in full.">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">one suite per day &middot; date-versioned &middot; sealed on build</p>
+    <h1>benchmarks</h1>
+    <p class="sub">The benchmark is not a fixed set. Each day the pipeline mines merged pull requests,
+      rebuilds their environments and seals a suite named after that date. A suite is
+      <strong>live</strong> while it is fresh &mdash; the gold patch and protected tests stay withheld and
+      scoring happens server-side &mdash; then it is <strong>archived</strong> and released in full so anyone
+      can reproduce it.</p>
+  </section>
+
+  <section style="padding-top:0;border-top:none">
+    <div id="rail"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>all suites</h2>
+      <span class="eyebrow" id="suite-sub">catalogue</span>
+      <a class="more" href="../registry/">browse every task &rarr;</a>
+    </div>
+    <div id="strip" class="strip"></div>
+    <div class="grid c2" id="suites" style="margin-top:14px">
+      <div class="empty">loading suites&hellip;</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>how a daily suite lives</h2>
+      <span class="eyebrow">mined &rarr; built &rarr; sealed &rarr; archived</span>
+    </div>
+    <div class="grid c3">
+      <div class="card">
+        <span class="pill">step 1</span>
+        <h3>mined</h3>
+        <p>The day's candidate pull requests are pulled from public repositories after they merged,
+          so no released model can have trained on the fix. Freshness is certified per task.</p>
+        <span class="foot">source: real merged PRs</span>
+      </div>
+      <div class="card">
+        <span class="pill">step 2</span>
+        <h3>built</h3>
+        <p>Each candidate is rebuilt into a container at the parent commit. A task is kept only if its
+          fail-to-pass tests actually fail before the fix and pass after it.</p>
+        <span class="foot">oracle must reach reward 1.0</span>
+      </div>
+      <div class="card">
+        <span class="pill pending">step 3</span>
+        <h3>sealed &mdash; live</h3>
+        <p>The suite is frozen. Gold patch and protected test bodies are withheld; only the failing test
+          IDs are published. Submissions are scored server-side by re-laying the protected tests.</p>
+        <span class="foot">withheld for two weeks</span>
+      </div>
+      <div class="card">
+        <span class="pill pass">step 4</span>
+        <h3>archived</h3>
+        <p>After two weeks the suite is released whole &mdash; environment, protected tests and the
+          reference solution &mdash; so results can be reproduced locally with <code>tdb run</code>.</p>
+        <span class="foot">released in full</span>
+      </div>
+      <div class="card">
+        <span class="pill pass">invariant</span>
+        <h3>the gate never changes</h3>
+        <p>Live or archived, a solve is minted the same way: apply the patch, throw the workspace tests
+          away, re-lay the protected tests from the trusted package, run them with the network cut.</p>
+        <span class="foot">no model ever grades a model</span>
+      </div>
+      <div class="card">
+        <span class="pill pass">false_accept 0</span>
+        <h3>what a suite guarantees</h3>
+        <p>Every published number on a suite page comes from that gate. A claimed reward is advisory
+          only &mdash; it is replayed on ingest before it can appear anywhere.</p>
+        <span class="foot"><a href="../quality/">how we measure the suites &rarr;</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>run a suite locally</h2>
+      <span class="eyebrow">archived suites ship complete</span>
+    </div>
+    <pre><span class="c"># archived suites include solution/ and the protected tests</span>
+pip install terminal-daily-bench
+
+<span class="k">tdb</span> run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;   <span class="c"># score a model on one task</span>
+<span class="k">tdb</span> oracle tasks/archive/&lt;task-id&gt;           <span class="c"># gate baseline &rarr; reward 1.0</span></pre>
+    <p class="lead" style="margin-top:12px">Live suites cannot be scored locally &mdash; the protected
+      tests are the thing being withheld. Run the model, then
+      <a href="../submit/">submit the patch</a>; the same gate scores it on our side.</p>
+  </section>
+
+</main>
+
+<script src="../assets/site.js" data-root=".." data-page="benchmarks"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+
+  var suites = (site && site.suites) || [];
+  var tasks = (site && site.tasks) || [];
+  var active = board && board.date;
+
+  if (suites.length) T.dayRail(document.getElementById("rail"), suites, active);
+
+  var strip = document.getElementById("strip");
+  var box = document.getElementById("suites");
+
+  if (!suites.length) {
+    strip.style.display = "none";
+    box.innerHTML = '<div class="empty">No suites published yet. The publisher writes ' +
+      '<code>site_data.json</code> at the site root; this page renders whatever it finds there.</div>';
+    return;
+  }
+
+  var live = suites.filter(function (s) { return s.status === "live"; });
+  var arch = suites.filter(function (s) { return s.status !== "live"; });
+  var nTasks = suites.reduce(function (a, s) { return a + (s.n_tasks || 0); }, 0);
+  var langs = {};
+  suites.forEach(function (s) {
+    (s.languages || []).forEach(function (l) { langs[l] = 1; });
+  });
+  Object.keys(langs).length || tasks.forEach(function (t) { if (t.language) langs[t.language] = 1; });
+
+  document.getElementById("suite-sub").textContent =
+    suites.length + " suites" + (site.generated ? " · generated " + site.generated : "");
+
+  strip.innerHTML = [
+    ["suites", suites.length],
+    ["live", live.length],
+    ["archived", arch.length],
+    ["tasks total", nTasks],
+    ["languages", Object.keys(langs).length]
+  ].map(function (c) {
+    return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
+  }).join("");
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  box.innerHTML = suites.map(function (s) {
+    var isLive = s.status === "live";
+    var id = esc(s.id);
+    var ls = (s.languages || []).slice(0, 6).map(function (l) {
+      return '<span class="pill lang">' + esc(l) + "</span>";
+    }).join("");
+    var extra = (s.languages || []).length > 6
+      ? '<span class="pill">+' + ((s.languages || []).length - 6) + "</span>" : "";
+    return '<a class="card" href="./' + encodeURIComponent(s.id) + '/">' +
+      '<div class="tags">' +
+        '<span class="pill ' + (isLive ? "pending" : "pass") + '">' + esc(s.status || "unknown") + "</span>" +
+        '<span class="pill">' + (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span>" +
+        (s.id === active ? '<span class="pill pass">today</span>' : "") +
+      "</div>" +
+      "<h3>suite " + id + "</h3>" +
+      "<p>" + (isLive
+        ? "Gold patch and protected tests withheld; submissions scored server-side."
+        : "Released in full, including the protected tests and the reference solution.") +
+      "</p>" +
+      (ls || extra ? '<div class="tags">' + ls + extra + "</div>" : "") +
+      '<span class="foot">' + esc(s.note || (isLive ? "live suite" : "archived suite")) + "</span></a>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

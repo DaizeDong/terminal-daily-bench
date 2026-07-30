@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>suite sample-live — terminal-daily-bench</title>
+<meta name="description" content="The sample-live daily suite: 1 tasks mined from merged pull requests, scored by re-laid protected tests.">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+<section class="hero">
+<p class="eyebrow">daily suite &middot; live</p>
+<h1>suite sample-live</h1>
+<p class="sub">Gold patch and protected tests are withheld while this suite is live; submissions are scored server-side by re-laying the protected tests.</p>
+<div class="cta">
+<a class="btn" href="../">all suites</a>
+<a class="btn" href="../../leaderboard/">leaderboard</a>
+<a class="btn" href="../../registry/">task registry</a>
+</div>
+</section>
+<section style="padding-top:0;border-top:none"><div id="rail"></div></section>
+<section>
+<div class="sec-head"><h2>tasks in this suite</h2><span class="eyebrow">one sample live task (gold+protected withheld, scored server-side)</span><a class="more" href="../../registry/">all tasks &rarr;</a></div>
+<div class="strip"><div class="cell"><div class="k">tasks</div><div class="v">1</div></div><div class="cell"><div class="k">languages</div><div class="v">&mdash;</div></div><div class="cell"><div class="k">fail-to-pass tests</div><div class="v">&mdash;</div></div><div class="cell"><div class="k">solved by ≥ 1 model</div><div class="v">0</div></div><div class="cell"><div class="k">false-accepts</div><div class="v">0</div></div></div>
+<div style="margin-top:14px"><div class="empty">This suite has no published task list. Live suites expose their tasks only through the scoring endpoint until they are archived.</div></div>
+</section>
+<section>
+<div class="sec-head"><h2>how this suite is scored</h2><span class="eyebrow">execution proof only</span></div>
+<p class="lead">A patch is applied to a throwaway copy of the workspace. The workspace tests are discarded, the protected tests are re-laid from the trusted package, and they run with the network cut. The reward is that run's outcome and nothing else, so <span class="mono">false_accept = 0</span> holds by construction.</p>
+<pre><span class="c"># live suite: run your model, then submit the patch</span>
+<span class="k">tdb</span> submit &lt;RESULTS.jsonl&gt;   <span class="c"># re-scored by the same gate on ingest</span></pre>
+</section>
+</main>
+
+<script src="../../assets/site.js" data-root="../.." data-page="benchmarks"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+  if (site && site.suites) {
+    T.dayRail(document.getElementById("rail"), site.suites, "sample-live");
+  }
+})();
+</script>
+</body>
+</html>

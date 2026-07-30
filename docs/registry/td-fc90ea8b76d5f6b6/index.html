@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validate format string keys in logger.add() for early error feedback — terminal-daily-bench</title>
+<meta name="description" content="Task td-fc90ea8b76d5f6b6 from suite sample, mined from Delgan/loguru. Scored by re-laid protected tests.">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+<section class="hero">
+<p class="eyebrow">task &middot; suite sample &middot; archive</p>
+<h1>Validate format string keys in logger.add() for early error feedback</h1>
+<p class="sub mono">td-fc90ea8b76d5f6b6</p>
+<div class="cta">
+<a class="btn" href="../../benchmarks/sample/">suite sample</a>
+<a class="btn" href="../">all tasks</a>
+<a class="btn" href="https://github.com/Delgan/loguru/pull/1451">source pull request</a>
+</div>
+</section>
+<section><div class="sec-head"><h2>provenance</h2><span class="eyebrow">mined from a real merged pull request</span></div><div class="strip"><div class="cell"><div class="k">language</div><div class="v">python</div></div><div class="cell"><div class="k">difficulty</div><div class="v">unsolved</div></div><div class="cell"><div class="k">fail-to-pass tests</div><div class="v">4</div></div><div class="cell"><div class="k">solved by</div><div class="v">0/5</div></div><div class="cell"><div class="k">false-accepts</div><div class="v">0</div></div></div><div style="margin-top:14px"><div class="table-wrap"><table><tbody><tr><th>task id</th><td><span class="mono">td-fc90ea8b76d5f6b6</span></td></tr><tr><th>suite</th><td><a class="mono" href="../../benchmarks/sample/">sample</a></td></tr><tr><th>status</th><td><span class="pill pass">archive</span></td></tr><tr><th>source</th><td><a href="https://github.com/Delgan/loguru/pull/1451">Delgan/loguru#1451</a></td></tr><tr><th>base commit</th><td><span class="mono">2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e</span></td></tr><tr><th>merge commit</th><td><span class="mono">b782e56fcf07fecf9545ff6ee2350baacb0968ce</span></td></tr><tr><th>network at run time</th><td>build-online/run-offline</td></tr><tr><th>upstream license</th><td>see source repository</td></tr></tbody></table></div></div></section>
+<section><div class="sec-head"><h2>what the agent is asked to do</h2><span class="eyebrow">the instruction it sees</span></div><div class="prose"><p>You are working in a checked-out source repository. The upstream provenance (origin remote, project name, and commit identifiers) has been removed; solve the task from the working tree and the description below alone. [redacted-ref] When an invalid key is used in a format string passed to logger.add() (e.g., format=&quot;{nonexistent}&quot;), the error previously only surfaced at logging time as a generic &quot;Logging error in [redacted-repo] Handler&quot; message with a bare KeyError. This made it difficult to identify and fix configuration issues, especially in larger applications where the error could go unnoticed. This PR adds early validation of format string field names at logger.add() time: Parses the f…</p></div></section>
+<section><div class="sec-head"><h2>fail-to-pass tests</h2><span class="eyebrow">must fail before the patch, pass after</span></div><div class="prose"><ul><li><span class="mono">tests/test_add_option_format.py::test_invalid_format_key_emits_helpful_error_with_catch</span></li><li><span class="mono">tests/test_add_option_format.py::test_invalid_format_key_raises_enhanced_error_without_catch</span></li><li><span class="mono">tests/test_add_option_format.py::test_invalid_format_key_error_message_content</span></li><li><span class="mono">tests/test_add_option_format.py::test_patcher_added_keys_work_in_format</span></li></ul></div></section>
+<section><div class="sec-head"><h2>reproduce it</h2><span class="eyebrow">archived tasks ship complete</span></div><pre><span class="c"># the whole package ships with the archived suite</span>
+<span class="k">tdb</span> run    &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
+<span class="k">tdb</span> oracle tasks/archive/td-fc90ea8b76d5f6b6   <span class="c"># gate baseline &rarr; reward 1.0</span></pre><p class="lead" style="margin-top:12px">The reward is the outcome of the re-laid protected tests, nothing else. A submitted reward is advisory and is replayed on ingest. <a href="../../submit/">how to submit &rarr;</a></p></section>
+</main>
+
+<script src="../../assets/site.js" data-root="../.." data-page="tasks"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>quality — terminal-daily-bench</title>
+<meta name="description" content="Multi-angle Selection-Quality (MSQ): we measure the benchmark, not just the models. Discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, and an honest readiness verdict.">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<style>
+  /* Local layout only — every colour, radius and font comes from site.css tokens. */
+  .axes { display: grid; grid-template-columns: minmax(112px, auto) 1fr auto; gap: 9px 12px; align-items: center; }
+  .axes .ax { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .axes .val { font-family: var(--mono); font-size: 12.5px; text-align: right;
+               font-variant-numeric: tabular-nums; min-width: 52px; }
+  .axes .val.lo { color: var(--pending); }
+  .axes .val .dash { color: var(--faint); }
+  .abar { position: relative; height: 6px; border-radius: 3px; background: var(--line); }
+  .abar i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px;
+            background: var(--pass); opacity: .55; }
+  .abar i.lo { background: var(--pending); }
+  .abar b { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--fg); opacity: .5; }
+  .abar u { position: absolute; top: -2px; bottom: -2px; border: 1px solid var(--link);
+            border-radius: 3px; background: color-mix(in srgb, var(--link) 18%, transparent); }
+  .card .hd { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .card .hd .pill { margin-left: auto; }
+  .note { font-size: 12.5px; color: var(--faint); max-width: 76ch; }
+  @media (prefers-reduced-motion: no-preference) { .abar i, .abar u { transition: all .45s cubic-bezier(.2,.7,.2,1); } }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">msq &middot; multi-angle selection-quality</p>
+    <h1>we measure the <span class="accent">benchmark</span>, not just the models</h1>
+    <p class="sub">A solve-rate column tells you who scored higher. It never tells you whether the task
+      set can separate models at all. This page is the instrument for that missing axis: it reads the
+      gate-scored <span class="mono">(task &times; model)</span> matrix and reports, separately, how well
+      today's set discriminates &mdash; plus how far it is from supporting a research-grade claim.</p>
+    <div class="cta">
+      <a class="btn" href="../quality-methods.md">full methods</a>
+      <a class="btn" href="../leaderboard/">the leaderboard it grades</a>
+    </div>
+    <p class="note" style="margin-top:16px">MSQ is a pure function over plain lists. It reads no reward
+      gate and gates no accept, so <span class="mono">false_accept = 0</span> cannot be perturbed by
+      anything on this page. Every randomized routine is seeded, so a re-run reproduces the interval.</p>
+  </section>
+
+  <section style="padding-top:0;border-top:none">
+    <div id="strip" class="strip"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>the quality card, per scaffold frame</h2>
+      <span class="eyebrow" id="frames-sub">one card per scaffold</span>
+      <a class="more" href="../quality-methods.md">how each axis is computed &rarr;</a>
+    </div>
+    <div class="grid c2" id="frames"><div class="empty">loading quality card&hellip;</div></div>
+    <p class="note" style="margin-top:14px">Axes are reported <strong>separately</strong> &mdash; the
+      composite never hides an axis that has collapsed. A bar in
+      <span class="mono" style="color:var(--pending)">amber</span> is below its threshold; the tick on the
+      track is the threshold itself. The blue band on the D row is the bootstrap 95% interval, which at
+      this task count is wide on purpose.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>how far from a claim</h2>
+      <span class="eyebrow">tasks we have vs tasks the interval needs</span>
+    </div>
+    <div id="power"><div class="empty">loading power read&hellip;</div></div>
+    <p class="note" style="margin-top:14px">Standard error scales as
+      <span class="mono">1/&radic;N</span>, so the bootstrap SE at today's N extrapolates to the task
+      count that would buy a research-grade interval. This is the number the daily pipeline is aimed at
+      &mdash; it is a target, not a promise.</p>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>what each axis means</h2><span class="eyebrow">one sentence each</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>axis</th><th>what it asks</th><th class="num">reads</th></tr></thead>
+        <tbody>
+          <tr><th class="mono">D</th>
+              <td>Discriminative yield: the fraction of tasks that split the field
+                  (<span class="mono">0 &lt; solvers &lt; n_models</span>) &mdash; a task everyone or no one
+                  solves carries zero information about who is better.</td>
+              <td class="num mono">[0,1]</td></tr>
+          <tr><th class="mono">C</th>
+              <td>Difficulty coverage: the normalized entropy of per-task solve-rate buckets &mdash; 1 when
+                  the set spans easy to hard, 0 when every task sits at the same difficulty.</td>
+              <td class="num mono">[0,1]</td></tr>
+          <tr><th class="mono">M</th>
+              <td>Monotonicity: the fraction of tasks with no strong ability inversion &mdash; a weaker
+                  model passing a task an abler one misses is a noise, mislabel or gameability signal.</td>
+              <td class="num mono">[0,1]</td></tr>
+          <tr><th class="mono">IRT</th>
+              <td>2PL Fisher test-information: each task is fit an <span class="mono">a</span>
+                  (discrimination, from its point-biserial correlation) and <span class="mono">b</span>
+                  (difficulty, from its solve-rate); information is additive, and
+                  <span class="mono">SE = 1/&radic;I</span>.</td>
+              <td class="num mono">&ge; 0</td></tr>
+          <tr><th class="mono">KR-20</th>
+              <td>Internal-consistency reliability for binary items: do the tasks measure one coherent
+                  latent ability, or noise? It can go negative when items contradict each other.</td>
+              <td class="num mono">&le; 1</td></tr>
+          <tr><th class="mono">D&nbsp;CI</th>
+              <td>A bootstrap over resampled task rows (seeded, 95% central interval) &mdash; the honest
+                  width of D at the current task count.</td>
+              <td class="num mono">[0,1]</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:12px">Two further axes ship in the library but are not on this card
+      because they read task signatures and ordinal gate-states rather than the solve matrix:
+      <span class="mono">A</span> angle coverage (build &rarr; partial &rarr; full-F2P &rarr; clean, each
+      conditioned on reaching the previous stage) and <span class="mono">R</span> diversity
+      (1 &minus; the near-duplicate rate over <span class="mono">{repo, files, f2p}</span> signatures).
+      Both are advisory. See <a href="../quality-methods.md">the methods note</a>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>why we do not claim more than this</h2><span class="eyebrow">the honest part</span></div>
+    <div class="prose">
+      <p>The readiness verdict on this page is almost always <em>not yet</em>, and we publish it anyway.
+        Here is what a small-N day genuinely cannot support:</p>
+      <ul>
+        <li><strong>A ranking is not a result.</strong> At a handful of tasks per model, the Wilson
+          interval on any single model's rate covers most of the other models. The order on the
+          leaderboard is a reading of one day, not a finding.</li>
+        <li><strong>D at small N is coarse and jumpy.</strong> With few tasks, D can only take a few
+          discrete values, and one task flipping moves it by a large step &mdash; which is exactly why the
+          bootstrap interval is so wide.</li>
+        <li><strong>KR-20 below the bar means the set is not yet one instrument.</strong> Under the
+          conventional 0.70 rule of thumb, the items are not yet demonstrably measuring a single coherent
+          ability; treating the total score as a skill estimate would be overreach.</li>
+        <li><strong>Vacuous highs are not achievements.</strong> M is 1.0 whenever there is no ability
+          separation left to violate, so a perfect M on a thin day is the absence of evidence against the
+          set, not evidence for it. We show the raw value rather than hiding it behind a composite.</li>
+        <li><strong>The required-N figure is an extrapolation.</strong> It assumes the next tasks are
+          drawn like today's, and it comes from a bootstrap SE that is itself noisy at this size. Read it
+          as an order of magnitude.</li>
+      </ul>
+      <p>What the card <em>is</em> good for: catching a day whose set has quietly collapsed &mdash; every
+        task all-pass or all-fail, an item correlating negatively with total score, a difficulty band
+        entirely missing &mdash; before anyone reports a leaderboard from it. That is a defect detector
+        with an explicit threshold, and it runs every day.</p>
+      <p>Readiness is advisory only. It never gates an accept, never touches the reward path, and cannot
+        promote or demote a task.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>run the card yourself</h2></div>
+    <pre><span class="c"># results.jsonl — one record per (model, task) run, exactly as `tdb run` emits</span>
+<span class="c"># {"task":"td-1","model":"A","reward":1.0}</span>
+
+<span class="k">tdb</span> quality results.jsonl</pre>
+    <p class="note" style="margin-top:12px">It builds the <span class="mono">(task &times; model)</span>
+      matrix (records with <span class="mono">model == "oracle"</span> are excluded), prints the axes and
+      the readiness line, then emits the full machine-readable card as JSON. It requires at least 1 task
+      and 2 models &mdash; multi-angle quality is undefined with a single model column &mdash; and exits
+      <span class="mono">2</span> otherwise.</p>
+  </section>
+
+</main>
+
+<script src="../assets/site.js" data-root=".." data-page="quality"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+
+  var strip = document.getElementById("strip");
+  var frames = document.getElementById("frames");
+  var power = document.getElementById("power");
+  var q = board && board.quality;
+
+  if (!q) {
+    strip.outerHTML = '<div class="empty">No quality card published yet. Run ' +
+      "<code>tdb quality results.jsonl</code> and publish " +
+      "<code>leaderboard_data.json</code> to populate this page.</div>";
+    frames.innerHTML = '<div class="empty">no quality data</div>';
+    power.innerHTML = '<div class="empty">no power read</div>';
+    return;
+  }
+
+  var TH = q.thresholds || { min_D: 0.4, min_kr20: 0.7, max_d_halfwidth: 0.15 };
+  var FRAMES = [["single_shot", "single-shot frame"], ["terminus2", "agent frame (terminus-2)"]]
+    .filter(function (f) { return q[f[0]]; });
+
+  function num(x, d) { return x == null ? null : Number(x).toFixed(d == null ? 3 : d); }
+  function clamp(x) { return Math.max(0, Math.min(100, x)); }
+
+  /* one axis row: label, track (fill + optional threshold tick + optional CI band), value */
+  function row(label, val, opts) {
+    opts = opts || {};
+    var scale = opts.scale || 1;
+    var ok = opts.ok == null ? true : opts.ok;
+    var fill = val == null ? 0 : clamp((val / scale) * 100);
+    var tick = opts.threshold != null
+      ? '<b style="left:calc(' + clamp((opts.threshold / scale) * 100) + '% - 1px)" title="threshold ' +
+        num(opts.threshold, 2) + '"></b>' : "";
+    var band = "";
+    if (opts.ci) {
+      var lo = clamp(opts.ci[0] * 100 / scale), hi = clamp(opts.ci[1] * 100 / scale);
+      band = '<u style="left:' + lo + "%;width:" + Math.max(1, hi - lo) + '%" title="95% CI [' +
+        num(opts.ci[0]) + ", " + num(opts.ci[1]) + ']"></u>';
+    }
+    var shown = val == null ? '<span class="dash">&mdash;</span>' : num(val, opts.digits);
+    return '<div class="ax" title="' + (opts.title || label) + '">' + label + "</div>" +
+      '<div class="abar">' + band +
+        '<i class="' + (ok ? "" : "lo") + '" style="width:' + Math.max(val == null ? 0 : 1.5, fill) + '%"></i>' +
+        tick + "</div>" +
+      '<div class="val' + (ok ? "" : " lo") + '">' + shown + "</div>";
+  }
+
+  function frameCard(key, label) {
+    var f = q[key];
+    var hw = (f.D_ci && f.D_ci.length === 2) ? (f.D_ci[1] - f.D_ci[0]) / 2 : null;
+    var verdict = f.ready
+      ? '<span class="pill pass">ready</span>'
+      : '<span class="pill pending">not yet' +
+        (f.required_n_D ? " &middot; ~" + f.required_n_D + " tasks" : "") + "</span>";
+
+    var rows = [
+      row("D discrimination", f.D, { ok: f.D >= TH.min_D, threshold: TH.min_D, ci: f.D_ci,
+        title: "fraction of tasks that split the field" }),
+      row("C coverage", f.C, { title: "normalized entropy of the difficulty buckets" }),
+      row("M monotonicity", f.M, { title: "fraction of tasks with no strong ability inversion" }),
+      row("IRT info (2PL)", f.irt_info, { scale: 2, ok: f.irt_info >= 1,
+        title: "Fisher test-information; bar scaled to a 2.0 reference, the value is unbounded" }),
+      row("KR-20 reliability", f.kr20, { ok: f.kr20 != null && f.kr20 >= TH.min_kr20,
+        threshold: TH.min_kr20, title: "internal-consistency reliability over binary items" })
+    ].join("");
+
+    var ciLine = hw == null ? "D interval unavailable"
+      : "D 95% CI <span class=\"mono\">[" + num(f.D_ci[0]) + ", " + num(f.D_ci[1]) +
+        "]</span> &mdash; half-width <span class=\"mono\">&plusmn;" + num(hw, 2) +
+        "</span> vs target <span class=\"mono\">&plusmn;" + num(TH.max_d_halfwidth, 2) + "</span>";
+
+    return '<div class="card">' +
+      '<div class="hd"><h3>' + label + "</h3>" + verdict + "</div>" +
+      "<p>" + f.n_tasks + " tasks &times; " + f.n_models + " models" +
+        (f.composite != null ? " &middot; composite " + num(f.composite) +
+          " <span class=\"mono\" style=\"color:var(--faint)\">(D&nbsp;.5 / C&nbsp;.25 / M&nbsp;.25)</span>" : "") +
+      "</p>" +
+      '<div class="axes" style="margin-top:4px">' + rows + "</div>" +
+      '<p style="font-size:12.5px">' + ciLine + "</p>" +
+      '<span class="foot">' +
+        (f.ready ? "ready: D &ge; " + num(TH.min_D, 2) + " &and; KR-20 &ge; " + num(TH.min_kr20, 2) +
+                   " &and; D half-width &le; " + num(TH.max_d_halfwidth, 2) + " all hold"
+                 : "binding bottleneck: " + (f.bottleneck || "unknown") +
+                   (f.required_n_D ? " &rarr; ~" + f.required_n_D + " tasks close the gap" : "")) +
+      "</span></div>";
+  }
+
+  /* ---- strip ---- */
+  var readyCount = FRAMES.filter(function (f) { return q[f[0]].ready; }).length;
+  var any = q[FRAMES[0][0]];
+  strip.innerHTML = [
+    ["suite date", board.date || "&mdash;"],
+    ["tasks scored", any.n_tasks],
+    ["scaffold frames", FRAMES.length],
+    ["frames ready", readyCount + " <small>/ " + FRAMES.length + "</small>"],
+    ["gate threshold", "D &ge; " + num(TH.min_D, 2)],
+    ["false-accepts", board.total_fa != null ? board.total_fa : 0]
+  ].map(function (c) {
+    return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
+  }).join("");
+
+  document.getElementById("frames-sub").textContent =
+    FRAMES.length + " frame" + (FRAMES.length === 1 ? "" : "s") + " measured on " +
+    (board.date || "this suite");
+
+  /* ---- frame cards ---- */
+  frames.innerHTML = FRAMES.map(function (f) { return frameCard(f[0], f[1]); }).join("");
+
+  /* ---- power read: tasks now vs tasks required ---- */
+  var maxReq = Math.max.apply(null, FRAMES.map(function (f) { return q[f[0]].required_n_D || 0; }).concat([1]));
+  var prows = FRAMES.map(function (f) {
+    var d = q[f[0]], req = d.required_n_D;
+    var have = clamp((d.n_tasks / maxReq) * 100);
+    var need = req ? clamp((req / maxReq) * 100) : 0;
+    return "<tr><td>" + f[1] + "</td>" +
+      '<td class="num mono">' + d.n_tasks + "</td>" +
+      '<td class="num mono">' + (req ? "~" + req : '<span class="dash">&mdash;</span>') + "</td>" +
+      '<td style="min-width:180px"><div class="abar">' +
+        (req ? '<b style="left:calc(' + need + '% - 1px)" title="required ~' + req + ' tasks"></b>' : "") +
+        '<i class="lo" style="width:' + Math.max(1.5, have) + '%"></i></div></td>' +
+      '<td class="mono" style="color:var(--faint)">' + (d.bottleneck || "&mdash;") + "</td></tr>";
+  }).join("");
+  power.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+    "<th>frame</th><th class=\"num\">tasks now</th><th class=\"num\">tasks needed</th>" +
+    "<th>progress</th><th>bottleneck</th>" +
+    "</tr></thead><tbody>" + prows + "</tbody></table></div>";
+})();
+</script>
+</body>
+</html>

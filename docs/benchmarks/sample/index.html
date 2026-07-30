@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>suite sample — terminal-daily-bench</title>
+<meta name="description" content="The sample daily suite: 1 tasks mined from merged pull requests, scored by re-laid protected tests.">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+<section class="hero">
+<p class="eyebrow">daily suite &middot; archive</p>
+<h1>suite sample</h1>
+<p class="sub">Archived and released in full &mdash; environment, protected tests and the reference solution &mdash; so every number here can be reproduced locally.</p>
+<div class="cta">
+<a class="btn" href="../">all suites</a>
+<a class="btn" href="../../leaderboard/">leaderboard</a>
+<a class="btn" href="../../registry/">task registry</a>
+</div>
+</section>
+<section style="padding-top:0;border-top:none"><div id="rail"></div></section>
+<section>
+<div class="sec-head"><h2>tasks in this suite</h2><span class="eyebrow">one sample task; full dated suites are served from the site</span><a class="more" href="../../registry/">all tasks &rarr;</a></div>
+<div class="strip"><div class="cell"><div class="k">tasks</div><div class="v">1</div></div><div class="cell"><div class="k">languages</div><div class="v">1</div></div><div class="cell"><div class="k">fail-to-pass tests</div><div class="v">4</div></div><div class="cell"><div class="k">solved by ≥ 1 model</div><div class="v">0</div></div><div class="cell"><div class="k">false-accepts</div><div class="v">0</div></div></div>
+<div style="margin-top:14px"><div class="table-wrap"><table><thead><tr><th>task</th><th>what it asks for</th><th>source pull request</th><th>language</th><th>difficulty</th><th class="num">f2p tests</th><th class="num">solved by</th></tr></thead><tbody><tr><td><a class="mono" href="../../registry/td-fc90ea8b76d5f6b6/">td-fc90ea8b76d5f6b6</a></td><td>Validate format string keys in logger.add() for early error feedback</td><td><a href="https://github.com/Delgan/loguru/pull/1451">Delgan/loguru#1451</a></td><td><span class="pill lang">python</span></td><td><span class="pill">unsolved</span></td><td class="num">4</td><td class="num"><span class="pill ">0/5</span></td></tr></tbody></table></div></div>
+<div style="margin-top:12px"><div class="tags"><span class="pill lang">python</span></div></div>
+</section>
+<section>
+<div class="sec-head"><h2>how this suite is scored</h2><span class="eyebrow">execution proof only</span></div>
+<p class="lead">A patch is applied to a throwaway copy of the workspace. The workspace tests are discarded, the protected tests are re-laid from the trusted package, and they run with the network cut. The reward is that run's outcome and nothing else, so <span class="mono">false_accept = 0</span> holds by construction.</p>
+<pre><span class="c"># archived suite: everything needed to reproduce ships with it</span>
+<span class="k">tdb</span> run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;
+<span class="k">tdb</span> oracle tasks/archive/&lt;task-id&gt;   <span class="c"># gate baseline &rarr; reward 1.0</span></pre>
+</section>
+</main>
+
+<script src="../../assets/site.js" data-root="../.." data-page="benchmarks"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+  if (site && site.suites) {
+    T.dayRail(document.getElementById("rail"), site.suites, "sample");
+  }
+})();
+</script>
+</body>
+</html>

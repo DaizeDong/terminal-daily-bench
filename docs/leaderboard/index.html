@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>leaderboard — terminal-daily-bench</title>
+<meta name="description" content="Models under test on today's sealed suite. Accuracy with Wilson 95% intervals, cost, false-accepts, the per-task matrix, and the benchmark's own quality card.">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<style>
+  /* page-local widgets only — everything else comes from assets/site.css.
+     These use the shared tokens, so they follow the theme automatically. */
+  .lead-badge { font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--pass); border: 1px solid var(--pass); border-radius: 5px; padding: 1px 5px; margin-left: 7px; }
+  .delta { font-family: var(--mono); font-size: 12.5px; padding: 1px 7px; border-radius: 6px; }
+  .delta.up   { color: var(--pass); background: var(--pass-dim); }
+  .delta.down { color: var(--crit); background: color-mix(in srgb, var(--crit) 14%, transparent); }
+  .delta.flat { color: var(--faint); }
+
+  /* per-task matrix: square chips + a frozen model column */
+  table.matrix { border-collapse: separate; border-spacing: 0; min-width: 520px; }
+  table.matrix th, table.matrix td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--line); }
+  table.matrix thead th { position: sticky; top: 0; }
+  table.matrix thead th.mh, table.matrix tbody th { text-align: left; position: sticky; left: 0; z-index: 3; background: var(--panel-2); }
+  table.matrix tbody th { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; background: var(--panel); z-index: 2; }
+  table.matrix tfoot td, table.matrix tfoot th { font-family: var(--mono); font-size: 11px; color: var(--muted);
+    border-top: 1px solid var(--line); border-bottom: none; background: var(--panel); }
+  .chip { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+    border-radius: 5px; font-family: var(--mono); font-size: 12px; line-height: 1; }
+  .chip.pass { background: var(--pass); color: var(--ink); }
+  .chip.miss { background: var(--panel-2); color: var(--faint); border: 1px solid var(--line); }
+  .split { color: var(--pass); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 12.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* quality (MSQ) axes */
+  .axes { display: grid; grid-template-columns: auto 1fr auto; gap: 7px 12px; align-items: center; }
+  .axes .ax { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .axes .track { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .axes .track i { display: block; height: 100%; background: var(--pass); }
+  .axes .track i.lo { background: var(--pending); }
+  .axes .val { font-family: var(--mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  .axes .val.lo { color: var(--pending); }
+  .verdict { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 5px; border: 1px solid var(--pending); color: var(--pending); background: var(--pending-dim); }
+  .verdict.go { border-color: var(--pass); color: var(--pass); background: var(--pass-dim); }
+  .frame-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .frame-head .name { font-family: var(--mono); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">models under test &middot; today's sealed suite</p>
+    <h1>leaderboard</h1>
+    <p class="sub">These are the <strong>downstream models measured BY the benchmark</strong> &mdash; not models
+      that built it. Each ran the identical task set the pipeline constructed today, scored only by re-laid
+      protected tests it never sees. <span class="mono" id="hero-meta"></span></p>
+    <div class="cta">
+      <span class="seal" title="No model or LLM signal can gate an accept; verified across every scored cell today."><b>false_accept</b> <span id="hero-fa">0</span> &middot; <span id="hero-cells">&mdash;</span> cells</span>
+    </div>
+  </section>
+
+  <section style="padding-top:0;border-top:none">
+    <div id="rail"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>today at a glance</h2>
+      <span class="eyebrow" id="glance-sub">pooled over every scored cell</span>
+    </div>
+    <div class="strip" id="strip"></div>
+    <p class="lead" style="margin-top:10px;font-size:12.5px">tasks in this suite:
+      <span id="task-list" class="tags" style="display:inline-flex;vertical-align:middle"></span></p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>models under test</h2>
+      <span class="eyebrow">accuracy on today's benchmark</span>
+    </div>
+    <p class="lead">Two scaffolds per model: a one-shot patch and a multi-turn agent (terminus-2).
+      <strong>scaffold &Delta;</strong> is a capability angle of its own &mdash; how much the agent lifts (or
+      costs) a model. A dash means that scaffold was not run today. Every rate carries a Wilson 95% interval:
+      at a few tasks per model the interval is the honest number, not the point estimate.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="rank">#</th>
+          <th>model</th>
+          <th>scaffold</th>
+          <th class="num">accuracy &plusmn; 95% ci</th>
+          <th class="num" title="dollars to run this model over the day's set">cost $</th>
+          <th class="num" title="agent solve rate minus single-shot">scaffold &Delta;</th>
+          <th class="num">false-accept</th>
+        </tr></thead>
+        <tbody id="board"><tr><td colspan="7" class="mono" style="color:var(--faint)">loading&hellip;</td></tr></tbody>
+      </table>
+    </div>
+    <p class="lead" style="margin-top:10px;font-size:12.5px;color:var(--faint)">Per-model decomposition into the
+      finer angles (patch &rarr; solve|patch &rarr; clean) is reported pooled &mdash; at this many tasks per model
+      those sub-rates are too noisy to rank. They sharpen as the daily set grows.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>benchmark quality</h2>
+      <span class="eyebrow">the axis a solve-rate board lacks</span>
+      <a class="more" href="../quality/">quality card &rarr;</a>
+    </div>
+    <p class="lead">A leaderboard ranks <em>models</em>. This card measures the <strong>instrument</strong>:
+      does today's task set discriminate the field, span difficulties, and measure a coherent skill? Each axis is
+      a pure read over the gate-scored <span class="mono">(task &times; model)</span> matrix &mdash; never a reward
+      gate, so <span class="mono">false_accept = 0</span> is untouched &mdash; and each is reported separately so
+      no scalar can hide a collapsed axis.</p>
+    <div class="grid c2" id="msq"><div class="empty">loading quality axes&hellip;</div></div>
+    <p class="lead" style="margin-top:12px;font-size:12.5px;color:var(--faint)">
+      <span class="mono">D</span> discriminative yield (tasks that split the field) &middot;
+      <span class="mono">C</span> difficulty coverage &middot;
+      <span class="mono">M</span> monotonicity (no ability inversions) &middot;
+      <span class="mono">IRT info</span> 2PL Fisher test-information &middot;
+      <span class="mono">KR-20</span> internal-consistency reliability.
+      Readiness is <strong>advisory</strong> and never gates an accept.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>per-task matrix</h2>
+      <span class="eyebrow" id="matrix-sub">model &times; task</span>
+    </div>
+    <p class="lead">Per-task results are on-page, not behind a submission PR. Each cell is a gate-verified solve
+      (<span class="mono">&#9632;</span>) or a miss (<span class="mono">&middot;</span>) &mdash; the scalar ranking
+      turned into a capability map that shows <em>where</em> models differ. Column footers give each task's
+      solve-rate; <span class="split">green</span> columns are the tasks that split the field, i.e. the
+      discriminative core that <span class="mono">D</span> counts.</p>
+    <div class="table-wrap">
+      <table class="matrix">
+        <thead id="matrix-head"></thead>
+        <tbody id="matrix-body"></tbody>
+        <tfoot id="matrix-foot"></tfoot>
+      </table>
+    </div>
+    <div class="legend">
+      <span><span class="chip pass">&#9632;</span> gate-verified solve</span>
+      <span><span class="chip miss">&middot;</span> miss</span>
+      <span class="mono">counts match the accuracy column for the same scaffold</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>integrity</h2>
+      <span class="eyebrow">measured, not asserted</span>
+    </div>
+    <p class="lead">Every accept is minted by re-executing protected tests the model never touches, and a
+      submitted reward is advisory-only &mdash; replayed through the same gate on ingest.</p>
+    <div class="grid c3" id="integrity"><div class="empty">loading integrity read&hellip;</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>run it yourself</h2></div>
+    <p class="lead">Each run hands the model the failing tests and scores its patch against protected tests
+      re-laid from the trusted package. The model is the subject, never the judge.</p>
+    <pre><span class="c"># inside a compute allocation (single container at a time)</span>
+<span class="k">srun</span> --jobid=$JID --overlap bash \
+  experiments/scripts/v2/model_eval.sh &lt;MODEL&gt; &lt;TASK_DIR&gt; [OUT.json]
+
+<span class="c"># examples</span>
+&hellip; model_eval.sh oracle          &lt;task&gt;   <span class="c"># gate baseline (no model) &rarr; reward 1.0</span>
+&hellip; model_eval.sh Claude-Opus-4.8 &lt;task&gt;   <span class="c"># a real model attempt</span></pre>
+    <p class="lead" style="margin-top:12px">Each run writes one result record:</p>
+    <pre id="result-sample"></pre>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>community submissions</h2>
+      <a class="more" href="../submit/">how to submit &rarr;</a>
+    </div>
+    <p class="lead">Run the day's set with your own model or scaffold; results auto-upload and appear here.
+      Every submission is <strong>re-scored by the same execution gate on ingest</strong> &mdash; the claimed
+      number is never trusted, only the patch is replayed.</p>
+    <div id="community"><div class="empty">loading submissions&hellip;</div></div>
+    <p class="lead" style="margin-top:14px">Submission format, one JSON line per
+      <span class="mono">(model, task)</span> cell:</p>
+    <pre id="submit-sample"></pre>
+  </section>
+
+</main>
+
+<script src="../assets/site.js" data-root=".." data-page="leaderboard"></script>
+<script>
+(function () {
+  var T = window.TDB;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  };
+  var empty = function (msg) { return '<div class="empty">' + msg + "</div>"; };
+
+  /* cost: rendered only when the runner actually metered it */
+  function costCell(row, measured) {
+    var c = row && (row.cost != null ? row.cost : (row.cost_usd != null ? row.cost_usd : null));
+    if (measured && c != null) return '<span class="mono">$' + Number(c).toFixed(2) + "</span>";
+    return '<span class="dash" title="token/$ accounting is capturable at the runner but not yet metered here">&mdash;</span>';
+  }
+  function deltaCell(row) {
+    var a = row.single_shot, b = row.terminus2;
+    if (!a || !a.n || !b || !b.n) return '<span class="dash" title="needs both scaffolds">&mdash;</span>';
+    var ra = a.rate != null ? a.rate : a.solved / a.n;
+    var rb = b.rate != null ? b.rate : b.solved / b.n;
+    var d = rb - ra;
+    if (Math.abs(d) < 0.001) return '<span class="delta flat">&plusmn;0</span>';
+    return '<span class="delta ' + (d > 0 ? "up" : "down") + '">' +
+      (d > 0 ? "+" : "−") + Math.round(Math.abs(d) * 100) + "pp</span>";
+  }
+  function faOf(row) {
+    var f = 0;
+    ["single_shot", "terminus2"].forEach(function (k) { if (row[k] && row[k].fa) f += row[k].fa; });
+    return f;
+  }
+
+  function renderBoard(b) {
+    var rows = b.leaderboard || [];
+    if (!rows.length) {
+      $("board").innerHTML = '<tr><td colspan="7">' + empty("No scored models for this day yet.") + "</td></tr>";
+      return;
+    }
+    var measured = !!b.cost_measured;
+    $("board").innerHTML = rows.map(function (r, i) {
+      var fa = faOf(r);
+      var scaf = [];
+      if (r.single_shot && r.single_shot.n) scaf.push(["single-shot", r.single_shot]);
+      if (r.terminus2 && r.terminus2.n) scaf.push(["terminus-2 agent", r.terminus2]);
+      if (!scaf.length) scaf = [["—", null]];
+      return scaf.map(function (s, j) {
+        var head = j === 0
+          ? '<td class="rank">' + (i + 1) + "</td>" +
+            '<td rowspan="' + scaf.length + '"><span class="mono">' + esc(r.model) + "</span>" +
+            (r.lead ? '<span class="lead-badge">leader</span>' : "") + "</td>"
+          : '<td class="rank"></td>';
+        var tail = j === 0
+          ? '<td class="num" rowspan="' + scaf.length + '">' + costCell(r, measured) + "</td>" +
+            '<td class="num" rowspan="' + scaf.length + '">' + deltaCell(r) + "</td>" +
+            '<td class="num" rowspan="' + scaf.length + '"><span class="pill ' +
+              (fa ? "pending" : "pass") + '">' + fa + "</span></td>"
+          : "";
+        return "<tr>" + head +
+          '<td class="mono" style="font-size:12px;color:var(--muted)">' + esc(s[0]) + "</td>" +
+          '<td class="num">' + T.rateCell(s[1]) + "</td>" + tail + "</tr>";
+      }).join("");
+    }).join("");
+  }
+
+  /* pooled rate + the Wilson half-width, so the strip never overstates a small-N number */
+  function pooled(o) {
+    var w = T.wilson(o.solved, o.n);
+    return T.pct(o.solved / o.n) + " <small>" + o.solved + "/" + o.n +
+      " ±" + Math.round(((w.hi - w.lo) / 2) * 100) + "pp</small>";
+  }
+
+  function renderStrip(b) {
+    var p = b.pooled || {}, ss = p.single_shot, t2 = p.terminus2;
+    var cells = [
+      ["tasks today", b.n_tasks != null ? b.n_tasks : "—"],
+      ["models under test", b.n_models != null ? b.n_models : "—"],
+      ss && ss.n ? ["single-shot solve", pooled(ss)] : null,
+      t2 && t2.n ? ["agent solve", pooled(t2)] : null,
+      ["scored cells", b.n_cells != null ? b.n_cells : "—"],
+      ["false-accepts", b.total_fa != null ? b.total_fa : 0]
+    ].filter(Boolean);
+    $("strip").innerHTML = cells.map(function (c) {
+      return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
+    }).join("");
+    $("task-list").innerHTML = (b.tasks || []).map(function (t) {
+      return '<a class="pill" href="../registry/' + encodeURIComponent(t) + '/">' + esc(t) + "</a>";
+    }).join("") || '<span class="pill">no tasks listed</span>';
+  }
+
+  function renderMatrix(b) {
+    var mx = b.matrix;
+    if (!mx || !mx.rows || !mx.rows.length) {
+      $("matrix-head").innerHTML = "";
+      $("matrix-body").innerHTML = '<tr><td colspan="9">' +
+        empty("No per-task grid published for this day.") + "</td></tr>";
+      return;
+    }
+    var nT = mx.tasks.length, nM = mx.rows.length;
+    $("matrix-sub").textContent = "model × task · " + (mx.scaffold || "");
+    $("matrix-head").innerHTML = '<tr><th class="mh">model \\ task</th>' +
+      mx.tasks.map(function (t) {
+        var s = String(t);
+        return '<th title="' + esc(s) + '">' + esc(s.length > 13 ? s.slice(0, 12) + "…" : s) + "</th>";
+      }).join("") + "<th>solved</th></tr>";
+    $("matrix-body").innerHTML = mx.rows.map(function (r) {
+      var cells = r.g.map(function (v) {
+        return "<td>" + (v
+          ? '<span class="chip pass" title="gate-verified solve">&#9632;</span>'
+          : '<span class="chip miss" title="miss">&middot;</span>') + "</td>";
+      }).join("");
+      var tot = r.g.reduce(function (a, v) { return a + (v ? 1 : 0); }, 0);
+      return "<tr><th>" + esc(r.model) + "</th>" + cells +
+        '<td class="mono">' + tot + "/" + nT + "</td></tr>";
+    }).join("");
+    $("matrix-foot").innerHTML = "<tr><th>solve-rate</th>" +
+      mx.tasks.map(function (_, c) {
+        var s = mx.rows.reduce(function (a, r) { return a + (r.g[c] ? 1 : 0); }, 0);
+        var split = s > 0 && s < nM;
+        return '<td class="' + (split ? "split" : "") + '">' + s + "/" + nM + "</td>";
+      }).join("") + '<td class="mono">' + esc(mx.scaffold || "") + "</td></tr>";
+  }
+
+  function renderQuality(b) {
+    var q = b.quality;
+    if (!q) { $("msq").innerHTML = empty("No quality card computed for this day."); return; }
+    var th = q.thresholds || { min_D: 0.4, min_kr20: 0.7, max_d_halfwidth: 0.15 };
+    function axis(name, val, ok, ref) {
+      if (val == null) return "";
+      var w = Math.max(2, Math.min(100, (val / (ref || 1)) * 100));
+      return '<div class="ax">' + name + "</div>" +
+        '<div class="track"><i class="' + (ok ? "" : "lo") + '" style="width:' + w + '%"></i></div>' +
+        '<div class="val' + (ok ? "" : " lo") + '">' + val.toFixed(3) + "</div>";
+    }
+    function frame(key, label) {
+      var f = q[key];
+      if (!f) return "";
+      var hw = f.D_ci ? (f.D_ci[1] - f.D_ci[0]) / 2 : null;
+      var body = [
+        axis("D &mdash; discrimination", f.D, f.D >= th.min_D),
+        axis("C &mdash; difficulty cov.", f.C, true),
+        axis("M &mdash; monotonicity", f.M, true),
+        axis("IRT info (2PL)", f.irt_info, f.irt_info >= 1, 2.0),
+        axis("KR-20 reliability", f.kr20, f.kr20 >= th.min_kr20)
+      ].join("");
+      var verdict = f.ready
+        ? '<span class="verdict go">ready</span>'
+        : '<span class="verdict" title="not yet research-grade">not yet' +
+          (f.required_n_D ? " · ~" + f.required_n_D + " tasks" : "") + "</span>";
+      return '<div class="card">' +
+        '<div class="frame-head"><span class="name">' + label + "</span>" + verdict + "</div>" +
+        '<div class="axes">' + body + "</div>" +
+        '<div class="foot">' +
+          (hw != null ? "D 95% CI [" + f.D_ci[0].toFixed(3) + ", " + f.D_ci[1].toFixed(3) +
+            "] &middot; half-width ±" + hw.toFixed(2) + " vs target ±" + th.max_d_halfwidth + " &middot; " : "") +
+          (f.composite != null ? "composite " + f.composite.toFixed(3) + " &middot; " : "") +
+          f.n_tasks + " tasks × " + f.n_models + " models" +
+          (f.bottleneck ? " &middot; bottleneck: " + esc(f.bottleneck) : "") +
+        "</div></div>";
+    }
+    $("msq").innerHTML =
+      (frame("single_shot", "single-shot frame") + frame("terminus2", "agent (terminus-2) frame")) ||
+      empty("No quality frames in this day's payload.");
+  }
+
+  function renderIntegrity(b) {
+    var q = b.quality || {};
+    var items = [
+      ["false-accepts (measured)", b.total_fa != null ? b.total_fa : 0,
+        "Zero across all " + (b.n_cells != null ? b.n_cells : "—") + " scored cells today. No model or LLM " +
+        "signal can gate an accept &mdash; a solve exists only if re-laid protected tests pass."],
+      ["community re-scored on ingest", "100%",
+        "Every submission is replayed through the <em>same</em> execution gate on arrival. The submitted reward " +
+        "is advisory-only and never trusted; only the patch is re-run."],
+      ["reward-hack classes rejected", q.exploit_classes != null ? q.exploit_classes : "frozen corpus",
+        "Test-deletion, deselection, network and disk oracle-hunt, git archaeology, hardcoded output, flaky-pass " +
+        "&mdash; each accepted by a naive results-only judge, rejected by this gate."]
+    ];
+    $("integrity").innerHTML = items.map(function (it) {
+      return '<div class="card"><span class="pill pass">verified</span><h3>' + it[0] + "</h3>" +
+        '<div class="big">' + it[1] + "</div><p>" + it[2] + "</p></div>";
+    }).join("");
+  }
+
+  function renderCommunity(b) {
+    var c = b.community || [];
+    if (!c.length) {
+      $("community").innerHTML = empty("No community submissions yet for " + esc(b.date || "this day") +
+        ". Be the first &mdash; run the day's set; the harness posts each result and it is re-scored on arrival.");
+      return;
+    }
+    $("community").innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+      '<th>submitter</th><th>model</th><th>scaffold</th><th class="num">accuracy</th><th class="num">false-accept</th>' +
+      "</tr></thead><tbody>" + c.map(function (r) {
+        return "<tr><td>" + esc(r.submitter) + '</td><td class="mono">' + esc(r.model) + "</td>" +
+          '<td class="mono" style="font-size:12px">' + esc(r.scaffold || "") + "</td>" +
+          '<td class="num">' + T.rateCell(r.result || r) + "</td>" +
+          '<td class="num"><span class="pill pass">' + (r.fa || 0) + "</span></td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
+  $("result-sample").textContent =
+    '{ "model": "<MODEL>", "task": "<task-id>",\n' +
+    '  "scaffold": "single_shot_patch", "reward": 1.0, "solved": true,\n' +
+    '  "patch_applied": true, "runtime_sec": 65.6,\n' +
+    '  "false_accept_check": { "gate": "harbor_protected_tests",\n' +
+    '    "protected_tests_relaid_by_harbor": true,\n' +
+    '    "model_is_judge": false, "model_patch_touched_tests": false,\n' +
+    '    "false_accept": 0 } }';
+  $("submit-sample").textContent =
+    '{ "date": "<suite-date>", "submitter": "your-handle",\n' +
+    '  "model": "your-model", "scaffold": "your-scaffold",\n' +
+    '  "task": "<task-id>",\n' +
+    '  "patch": "<unified diff the model produced>",   // re-scored on ingest\n' +
+    '  "reward_claimed": 1.0,                          // advisory only, re-verified\n' +
+    '  "harness_version": "v2", "signature": "<sha256>" }';
+
+  Promise.all([
+    T.getJSON("leaderboard_data.json").catch(function () { return null; }),
+    T.getJSON("site_data.json").catch(function () { return null; })
+  ]).then(function (res) {
+    var b = res[0], site = res[1];
+
+    if (site && site.suites && site.suites.length) {
+      T.dayRail($("rail"), site.suites, b && b.date);
+    } else {
+      $("rail").innerHTML = empty("No suite index published yet — the day rail appears once " +
+        "<code>site_data.json</code> exists at the site root.");
+    }
+
+    if (!b || !b.leaderboard) {
+      var msg = empty("No leaderboard published yet. Generate <code>leaderboard_data.json</code> at the site " +
+        "root and this page fills in.");
+      $("strip").className = "";
+      ["strip", "msq", "integrity", "community"].forEach(function (id) { $(id).innerHTML = msg; });
+      $("board").innerHTML = '<tr><td colspan="7" class="mono" style="color:var(--faint)">no data</td></tr>';
+      renderMatrix({});
+      return;
+    }
+
+    $("hero-meta").textContent = [b.date, b.n_models + " models", b.n_tasks + " tasks"].join(" · ");
+    $("hero-fa").textContent = b.total_fa != null ? b.total_fa : 0;
+    $("hero-cells").textContent = b.n_cells != null ? b.n_cells : "—";
+    $("glance-sub").textContent = "pooled over " + (b.n_cells != null ? b.n_cells : "all") + " scored cells";
+
+    renderStrip(b);
+    renderBoard(b);
+    renderQuality(b);
+    renderMatrix(b);
+    renderIntegrity(b);
+    renderCommunity(b);
+  });
+})();
+</script>
+</body>
+</html>

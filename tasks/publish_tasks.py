@@ -54,13 +54,19 @@ def _failing_test_ids(src: Path) -> list:
         d = json.loads(rec.read_text())
     except Exception:
         return []
-    for k in ("f2p_selectors", "expected_f2p_selectors", "f2p"):
+    # `fail_to_pass` is the key real mined records use; the *_selectors names are
+    # older/alternate shapes. Missing it shipped live tasks with an EMPTY failing-test
+    # list, which makes a live task unusable (you get no target to fix).
+    for k in ("fail_to_pass", "f2p_selectors", "expected_f2p_selectors", "f2p"):
         v = d.get(k)
         if isinstance(v, list) and v:
             return v
     src_obj = d.get("source", {})
     if isinstance(src_obj, dict):
-        return src_obj.get("f2p_selectors", []) or []
+        for k in ("fail_to_pass", "f2p_selectors"):
+            v = src_obj.get(k)
+            if isinstance(v, list) and v:
+                return v
     return []
 
 

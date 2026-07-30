@@ -92,10 +92,16 @@ def _cmd_publish(a) -> int:
     if a.date:
         cmd.append(f"--date={a.date}")
     rc = subprocess.run(cmd).returncode
-    if rc == 0:
-        print(f"\nsite data updated: {out}\n"
-              f"  commit + push it and the leaderboard site redeploys (GitHub Pages).")
-    return rc
+    if rc != 0:
+        return rc
+    # the site has TWO data files: the board (who solved what) and the catalogue
+    # (what the benchmark contains). Regenerate both so one command refreshes the site.
+    gen = os.path.join(here, "..", "web", "gen_site_data.py")
+    if os.path.exists(gen):
+        subprocess.run([sys.executable, gen])
+    print(f"\nsite data updated: {out}\n"
+          f"  commit + push it and the site redeploys (GitHub Pages).")
+    return 0
 
 
 def main(argv: List[str] = None) -> int:

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>submit results — terminal-daily-bench</title>
+<meta name="description" content="Run the day's tasks with your own model or scaffold and submit the patch. A claimed reward is advisory only: on ingest the patch is replayed through the same execution gate, and only the re-verified reward counts.">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">submit &middot; re-scored on ingest &middot; advisory rewards</p>
+    <h1>submit results: we <span class="accent">replay your patch</span>, not your number</h1>
+    <p class="sub">You do not need the private construction pipeline to contribute. Run the day's tasks
+      with your own model or scaffold and send us the diff. The <span class="mono">reward_claimed</span>
+      field is <strong>advisory only</strong> &mdash; on ingest the patch is replayed through the same
+      execution gate, and the board counts <span class="mono">verified_reward</span> and nothing else.
+      A fake <span class="mono">1.0</span> whose patch verifies <span class="mono">0.0</span> contributes
+      <span class="mono">0</span>.</p>
+    <div class="cta">
+      <a class="btn primary" href="#run">run the benchmark</a>
+      <a class="btn" href="#schema">submission schema</a>
+      <a class="btn" href="#board">community board</a>
+      <a class="btn" href="#adapter">add a scaffold</a>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------- run -->
+  <section id="run">
+    <div class="sec-head">
+      <h2>1 &mdash; run it in one command</h2>
+      <span class="eyebrow">tdb cli &middot; any openai-compatible endpoint</span>
+    </div>
+    <pre><span class="c"># scoring needs an apptainer/singularity host; the model needs only an HTTP endpoint</span>
+pip install -e .                       <span class="c"># installs the `tdb` console script</span>
+export OPENAI_BASE_URL=https://api.openai.com/v1
+export OPENAI_API_KEY=sk-&hellip;              <span class="c"># read from env, never stored</span>
+
+<span class="k">tdb</span> run    gpt-4o tasks/archive/td-fc90ea8b76d5f6b6   <span class="c"># score a model on one task</span>
+<span class="k">tdb</span> oracle        tasks/archive/td-fc90ea8b76d5f6b6   <span class="c"># replay the gold patch -&gt; 1.0</span>
+<span class="k">tdb</span> quality results.jsonl                            <span class="c"># quality card (needs &gt;=2 models)</span></pre>
+    <div class="grid c3" style="margin-top:14px">
+      <div class="card">
+        <h3>endpoint agnostic</h3>
+        <p>OpenAI, OpenRouter, vLLM, LiteLLM or a local server &mdash; anything that speaks the
+          OpenAI wire format. The model id <code>oracle</code> replays the task's own
+          <code>solution/oracle.patch</code> and needs no key at all.</p>
+        <span class="foot">OPENAI_BASE_URL &middot; OPENAI_API_KEY</span>
+      </div>
+      <div class="card">
+        <h3>where scoring happens</h3>
+        <p>Harbor applies your patch inside the task container, then re-lays the protected
+          <code>tests/</code> from the trusted package and runs them under a network cut.
+          Paths: <code>TDB_SIF_CACHE</code>, <code>TDB_OVERLAY_DIR</code>, <code>TDB_WORK</code>.</p>
+        <span class="foot">apptainer / singularity required</span>
+      </div>
+      <div class="card">
+        <h3>archive vs live</h3>
+        <p>Archived tasks (&ge; 2 weeks old) ship in full, gold patch included, so you can reproduce
+          locally. Live tasks withhold the solution and the protected test bodies &mdash; submit the
+          patch and it is scored on our side.</p>
+        <span class="foot"><span class="pill pass">archive</span> <span class="pill pending">live</span></span>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:12px;font-size:12.5px">Each run writes one JSON record per
+      <span class="mono">(model, task)</span> cell. <code>solved</code> is <code>reward &gt;= 0.999</code>;
+      any failure &mdash; no diff, patch does not apply, trial error, unparseable result &mdash; yields
+      <code>reward 0.0</code> with the cause in <code>error</code>. A crash never produces a positive
+      score.</p>
+  </section>
+
+  <!-- ------------------------------------------------------------- schema -->
+  <section id="schema">
+    <div class="sec-head">
+      <h2>2 &mdash; the submission record</h2>
+      <span class="eyebrow">jsonl &middot; one line per (model, task) cell</span>
+    </div>
+    <div class="grid c2">
+      <div>
+        <pre>{
+  <span class="k">"date"</span>:      "2026-07-22",
+  <span class="k">"submitter"</span>: "your-handle",
+  <span class="k">"model"</span>:     "your-model",
+  <span class="k">"scaffold"</span>:  "your-scaffold",
+  <span class="k">"task"</span>:      "td-fc90ea8b76d5f6b6",
+  <span class="k">"patch"</span>:     "diff --git a/&hellip; b/&hellip;\n@@ &hellip;",
+
+  <span class="c">// advisory only, never trusted:</span>
+  "reward_claimed":  1.0,
+  "harness_version": "v2",
+  "signature":       "&lt;sha256&gt;"
+}</pre>
+        <pre style="margin-top:12px"><span class="c"># 1. structure check (exit 0 = valid, 1 = errors)</span>
+python web/submit_result.py validate &lt; submission.json
+
+<span class="c"># 2. record as PENDING (appends to &lt;store&gt;/&lt;date&gt;.jsonl)</span>
+python web/submit_result.py record \
+  --store community_submissions &lt; submission.json
+
+<span class="c"># 3. server-side, after re-scoring: fold verified rows in</span>
+python web/submit_result.py rebuild \
+  --store community_submissions \
+  --out web/leaderboard_data.json</pre>
+      </div>
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>field</th><th>required</th><th>rule</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">date</td><td><span class="pill pass">yes</span></td><td>non-empty; names the store file</td></tr>
+              <tr><td class="mono">submitter</td><td><span class="pill pass">yes</span></td><td>your handle; groups the board row</td></tr>
+              <tr><td class="mono">model</td><td><span class="pill pass">yes</span></td><td>model id under test</td></tr>
+              <tr><td class="mono">scaffold</td><td><span class="pill pass">yes</span></td><td>adapter <code>name</code>, see below</td></tr>
+              <tr><td class="mono">task</td><td><span class="pill pass">yes</span></td><td>must start with <code>td-</code></td></tr>
+              <tr><td class="mono">patch</td><td><span class="pill pass">yes</span></td><td>unified-diff <em>string</em>; this is what we replay</td></tr>
+              <tr><td class="mono">reward_claimed</td><td><span class="pill">no</span></td><td>validated against nothing; overwritten by <code>verified_reward</code></td></tr>
+              <tr><td class="mono">harness_version</td><td><span class="pill">no</span></td><td>carried through as metadata</td></tr>
+              <tr><td class="mono">signature</td><td><span class="pill">no</span></td><td>carried through as metadata</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>content-addressed id</h3>
+          <p><code>record</code> hashes the six required fields (sha256, first 16 hex chars) into
+            <code>id</code>. That gives dedup and tamper-evidence: change any required field and it
+            is a different submission.</p>
+          <span class="foot">submit_result.content_id()</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- lifecycle -->
+  <section id="lifecycle">
+    <div class="sec-head">
+      <h2>3 &mdash; pending &rarr; verified</h2>
+      <span class="eyebrow">the part that matters</span>
+      <span class="seal"><b>false_accept</b> 0</span>
+    </div>
+    <p class="lead">Your number never enters the board. On ingest the entry is stored with
+      <span class="pill pending">pending</span> and <span class="mono">verified_reward = null</span>.
+      A node worker replays the <em>patch</em> through the execution gate; only then does the entry
+      flip to <span class="pill pass">verified</span> and start contributing. Until it flips it is
+      listed and counts as an attempt worth <span class="mono">0</span>.</p>
+    <div class="grid c3">
+      <div class="card">
+        <span class="eyebrow">step 1 &middot; validate</span>
+        <h3>structure only</h3>
+        <p>Six required fields present, <code>patch</code> is a string, <code>task</code> starts with
+          <code>td-</code>. Nothing semantic is trusted &mdash; a well-formed lie passes this step
+          and dies at the next one.</p>
+        <span class="foot"><span class="pill">no state yet</span></span>
+      </div>
+      <div class="card">
+        <span class="eyebrow">step 2 &middot; record</span>
+        <h3>stored as pending</h3>
+        <p>Appended to <code>&lt;store&gt;/&lt;date&gt;.jsonl</code> with
+          <code>verify_status="pending"</code>, <code>verified_reward=null</code> and your
+          <code>reward_claimed</code> kept beside it, clearly marked advisory.</p>
+        <span class="foot"><span class="pill pending">pending</span> contributes 0</span>
+      </div>
+      <div class="card">
+        <span class="eyebrow">step 3 &middot; re-score</span>
+        <h3>the gate decides</h3>
+        <p>A worker applies your patch in the task container, harbor re-lays the protected tests,
+          <code>apply_verified()</code> writes back the reward it actually measured and flips the
+          status.</p>
+        <span class="foot"><span class="pill pass">verified</span> counts</span>
+      </div>
+    </div>
+    <pre style="margin-top:14px"><span class="c"># what a submission looks like at each stage</span>
+record   -&gt; {"id":"9f2c&hellip;", "reward_claimed": 1.0, <span class="k">"verify_status":"pending"</span>,  "verified_reward": null}
+re-score -&gt; {"id":"9f2c&hellip;", "reward_claimed": 1.0, <span class="k">"verify_status":"verified"</span>, "verified_reward": 0.0}
+                                  <span class="c">^ advisory, ignored          ^ the only figure the board reads</span></pre>
+    <div class="grid c2" style="margin-top:14px">
+      <div class="card">
+        <h3>why a patch cannot cheat the score</h3>
+        <p>The protected <code>tests/</code> are re-laid by harbor <em>after</em> your patch is
+          applied, from the trusted task package. A patch that edits tests only changes an agent-side
+          workspace that is thrown away before scoring. Runtime egress is cut
+          (<code>--network=none</code>), so a "fix" cannot phone home. The reward is byte-for-byte
+          execution truth out of harbor's <code>result.json</code> &mdash; never a string a model
+          emitted.</p>
+        <span class="foot">no model ever grades a model</span>
+      </div>
+      <div class="card">
+        <h3>integrity rules (enforced, not requested)</h3>
+        <p>1. Scoring is execution-only; no scaffold ever scores.<br>
+          2. Patches may not edit tests &mdash; the edit is discarded.<br>
+          3. Runtime egress is cut; a submission that needs live network is rejected.<br>
+          4. Live tasks are scored server-side, gold patch withheld.</p>
+        <span class="foot">CONTRIBUTING.md &middot; enforced in the gate, not in review</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------- the board -->
+  <section id="board">
+    <div class="sec-head">
+      <h2>4 &mdash; community board</h2>
+      <span class="eyebrow" id="board-sub">verified submissions only</span>
+      <a class="more" href="../leaderboard/">our own leaderboard &rarr;</a>
+    </div>
+    <div id="board-strip"></div>
+    <div id="board-slot" style="margin-top:14px">
+      <div class="empty">loading community submissions&hellip;</div>
+    </div>
+    <p class="lead" style="margin-top:10px;font-size:12.5px">
+      Rows are grouped by <span class="mono">(submitter, model, scaffold)</span>. The rate is
+      verified solves over <em>all</em> submitted attempts, with a Wilson 95% interval &mdash; pending
+      cells sit in the denominator, so submitting more before verification lowers your rate rather
+      than inflating it.</p>
+  </section>
+
+  <!-- --------------------------------------------------------- the adapter -->
+  <section id="adapter">
+    <div class="sec-head">
+      <h2>5 &mdash; adding a scaffold: the HarnessAdapter contract</h2>
+      <span class="eyebrow">terminal_daily_bench/adapters/base.py</span>
+    </div>
+    <p class="lead">The contract is deliberately narrow:
+      <span class="mono">input = (task dir, failing test ids, model id/endpoint)</span>,
+      <span class="mono">output = (unified diff, telemetry)</span>. An adapter produces a candidate
+      patch and <strong>must not score</strong>. Keeping scoring out of the adapter is exactly what
+      keeps <span class="mono">false_accept = 0</span> as harnesses are added.</p>
+    <pre>@dataclass
+class <span class="k">AdapterResult</span>:
+    patch: str                                               <span class="c"># unified diff the harness produced</span>
+    telemetry: Dict[str, Any] = field(default_factory=dict)  <span class="c"># tokens, cost_usd, turns, wall_s</span>
+    error: Optional[str] = None
+
+class <span class="k">HarnessAdapter</span>(abc.ABC):
+    name: str = "base"
+
+    @abc.abstractmethod
+    def <span class="k">produce_patch</span>(self, task_dir: str, failing_test_ids: List[str],
+                      model: str, **kwargs: Any) -&gt; AdapterResult:
+        ...</pre>
+    <div class="grid c3" style="margin-top:14px">
+      <div class="card">
+        <h3>rules produce_patch must obey</h3>
+        <p>MUST NOT read or write the protected tests or the gold solution. MUST NOT compute a
+          reward. A harness failure returns an <code>AdapterResult</code> with <code>error</code> set
+          and an empty <code>patch</code> &mdash; a 0-reward attempt, not a crash.</p>
+        <span class="foot">from the base-class docstring</span>
+      </div>
+      <div class="card">
+        <h3>reference implementation</h3>
+        <p><code>adapters/single_shot.py</code> loads the task, finds the files the reference solution
+          touches, reads them out of the SIF for context, builds a strict one-diff prompt, calls the
+          model, extracts the diff, returns telemetry. No scoring anywhere.</p>
+        <span class="foot">SingleShotAdapter &middot; name = "single_shot"</span>
+      </div>
+      <div class="card">
+        <h3>multi-turn agents</h3>
+        <p><code>adapters/terminus.py</code> is a stub marking where to wire terminus-2, Claude Code,
+          Aider, OpenHands or SWE-agent. Any harness that accepts a custom OpenAI base URL drives an
+          arbitrary model unchanged.</p>
+        <span class="foot">TerminusAdapter &middot; name = "terminus"</span>
+      </div>
+    </div>
+    <h3 style="margin-top:22px">registering it</h3>
+    <pre><span class="c"># terminal_daily_bench/adapters/__init__.py</span>
+REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter, <span class="k">YourAdapter</span>)}</pre>
+    <p class="lead" style="margin-top:10px;font-size:12.5px">Add your class to that tuple (and to
+      <code>__all__</code>) with a unique <code>name</code>, then set the <code>scaffold</code> field of
+      your submission records to that name &mdash; the board groups runs by
+      <span class="mono">(submitter, model, scaffold)</span>.</p>
+    <p class="lead" style="font-size:12.5px">The failing test IDs you pass as
+      <code>failing_test_ids</code> are the <code>fail_to_pass</code> selectors in each task's
+      <code>record.json</code>. Live tasks ship those selectors but withhold
+      <code>solution/</code> and the protected <code>test_outputs.py</code> body.
+      <a href="../guide/">full docs &rarr;</a></p>
+  </section>
+
+</main>
+
+<script src="../assets/site.js" data-root=".." data-page="submit"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+
+  var slot = document.getElementById("board-slot");
+  var strip = document.getElementById("board-strip");
+  var sub = document.getElementById("board-sub");
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  if (!board) {
+    slot.innerHTML = '<div class="empty">No <code>leaderboard_data.json</code> published yet, so the ' +
+      'community board cannot be rendered. Run <code>python web/submit_result.py rebuild</code> to ' +
+      'generate it.</div>';
+    return;
+  }
+
+  var rows = board.community || [];
+
+  if (!rows.length) {
+    slot.innerHTML = '<div class="empty">' +
+      '<strong>No community submissions yet — the first one is open.</strong><br>' +
+      'Run any model on a task with your own scaffold, then ' +
+      '<code>python web/submit_result.py record &lt; submission.json</code>. ' +
+      'It lands as <span class="pill pending">pending</span>, a worker replays your patch through ' +
+      'the gate, and it appears here as <span class="pill pass">verified</span> with whatever reward ' +
+      'the tests actually returned.</div>';
+    sub.textContent = "no submissions yet";
+    return;
+  }
+
+  var tot = { n: 0, solved: 0, pending: 0 };
+  rows.forEach(function (r) {
+    tot.n += r.n || 0;
+    tot.solved += r.solved || 0;
+    tot.pending += r.pending || 0;
+  });
+
+  strip.className = "strip";
+  strip.innerHTML = [
+    ["submissions", tot.n],
+    ["verified solves", tot.solved],
+    ["awaiting re-score", tot.pending],
+    ["submitters", new Set(rows.map(function (r) { return r.submitter; })).size],
+    ["false-accepts", board.total_fa != null ? board.total_fa : 0]
+  ].map(function (c) {
+    return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
+  }).join("");
+
+  sub.textContent = rows.length + " rows · " + tot.n + " submissions · " + tot.pending + " pending";
+
+  var sorted = rows.slice().sort(function (a, b) {
+    return (b.solved || 0) - (a.solved || 0) || (b.n || 0) - (a.n || 0);
+  });
+
+  var body = sorted.map(function (r, i) {
+    var verified = (r.n || 0) - (r.pending || 0);
+    var state = (r.pending || 0) > 0
+      ? '<span class="pill pending">' + r.pending + " pending</span>"
+      : '<span class="pill pass">all verified</span>';
+    return '<tr><td class="rank">' + (i + 1) + "</td>" +
+      '<td><span class="mono">' + esc(r.submitter) + "</span></td>" +
+      '<td><span class="mono">' + esc(r.model) + "</span></td>" +
+      '<td><span class="pill">' + esc(r.scaffold) + "</span></td>" +
+      '<td class="num">' + T.rateCell({ n: r.n, solved: r.solved }) + "</td>" +
+      '<td class="num mono">' + verified + "/" + (r.n || 0) + "</td>" +
+      "<td>" + state + "</td>" +
+      '<td class="num"><span class="pill pass">' + (r.false_accept != null ? r.false_accept : 0) +
+      "</span></td></tr>";
+  }).join("");
+
+  slot.innerHTML =
+    '<div class="table-wrap"><table>' +
+      "<thead><tr>" +
+        '<th class="rank">#</th><th>submitter</th><th>model</th><th>scaffold</th>' +
+        '<th class="num">verified rate</th><th class="num">re-scored</th>' +
+        "<th>state</th><th class=\"num\">false-accept</th>" +
+      "</tr></thead><tbody>" + body + "</tbody></table></div>";
+})();
+</script>
+</body>
+</html>

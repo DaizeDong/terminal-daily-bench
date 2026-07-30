@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>task format — terminal-daily-bench docs</title>
+<meta name="description" content="The on-disk schema of a terminal-daily-bench task package: task.toml, instruction.md, tests/, environment/, solution/, PROVENANCE.json, record.json — plus archive vs. live and how scoring re-lays the protected tests.">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero" style="padding-bottom:18px">
+    <p class="eyebrow"><a href="../">docs</a> / task format</p>
+    <h1>task format</h1>
+    <p class="sub">Every terminal-daily-bench task is a self-contained, <strong>harbor-native</strong>
+      package: one directory per task under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>. A task
+      id looks like <code>td-fc90ea8b76d5f6b6</code>. This page documents the on-disk schema, the
+      difference between the <em>archive</em> and <em>live</em> releases, how scoring re-lays the
+      protected tests, and the 2-week archive window.</p>
+    <p class="sub">Everything below reflects the code in this bundle
+      (<code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code>,
+      <code>web/submit_result.py</code>); no APIs are invented.</p>
+  </section>
+
+  <section style="border-top:none;padding-top:0">
+  <article class="prose">
+
+    <h2 id="layout">Package layout</h2>
+<pre>tasks/archive/&lt;task-id&gt;/
+  task.toml           environment.docker_image &middot; environment.allow_internet &middot; timeouts
+  instruction.md      the natural-language task shown to the model (de-identified)
+  tests/              test.sh (runner) &middot; test_outputs.py (protected assertions) &middot; test_patch.diff
+  environment/        Dockerfile (build recipe: base image + repo @ base_sha + deps)
+  solution/           solve.sh (git apply driver) &middot; oracle.patch (the gold fix)
+  PROVENANCE.json     source_repo &middot; source_ref &middot; source_license_spdx
+  record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p selectors)</pre>
+    <p>The canonical short schema also lives in
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
+
+    <h3 id="task-toml"><code>task.toml</code></h3>
+    <p>Harbor's task descriptor. The fields the eval framework actually reads live under
+      <code>[environment]</code> (<code>terminal_daily_bench/eval.py::load_task</code>):</p>
+<pre>schema_version = "1.1"
+
+[task]
+name = "terminal-daily/td-fc90ea8b76d5f6b6"
+description = "Validate format string keys in logger.add() for early error feedback"
+keywords = ["C5", "C4"]                 <span class="c"># capability labels</span>
+
+[metadata]
+source_repo = "Delgan/loguru"
+pr_number = 1451
+base_sha  = "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e"
+merge_sha = "b782e56fcf07fecf9545ff6ee2350baacb0968ce"
+oracle_patch_sha256 = "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8"
+difficulty = "medium"
+network_profile = "build-online/run-offline"
+
+[environment]
+docker_image  = "environment/Dockerfile"   <span class="c"># portable ref: build from the task Dockerfile</span>
+allow_internet = false                      <span class="c"># run-offline -&gt; egress cut at scoring time</span>
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384</pre>
+    <ul>
+      <li><strong><code>environment.docker_image</code></strong> is rewritten to the portable value
+        <code>"environment/Dockerfile"</code> on publish (see
+        <code>publish_tasks.py::_sanitize_task_toml</code>). The host-specific absolute
+        <code>.sif</code> path is never shipped; you build the image from the task's own
+        <code>environment/Dockerfile</code>.</li>
+      <li><strong><code>environment.allow_internet</code></strong> drives the runtime network cut.
+        When <code>false</code>, the singularity backend gets the no-network <code>--ek</code> switch
+        injected automatically (<code>harbor_score.py::maybe_inject_offline_eks</code>), physically
+        cutting egress during scoring.</li>
+    </ul>
+
+    <h3 id="instruction"><code>instruction.md</code></h3>
+    <p>The natural-language problem statement shown to the model. Upstream provenance (origin
+      remote, project name, commit ids) is stripped ("de-identified") so the task is solved from the
+      working tree and description alone.</p>
+
+    <h3 id="tests"><code>tests/</code></h3>
+    <p>The protected verification suite. It is re-laid from the trusted package <strong>after</strong>
+      a model's patch is applied, so a patch can never tamper with the judge.</p>
+    <ul>
+      <li><strong><code>test.sh</code></strong> &mdash; the runner. It installs <code>pytest</code> +
+        project test extras, applies anti-tamper hardening (removes stray
+        <code>conftest.py</code>/<code>sitecustomize.py</code>, unsets <code>PYTHONPATH</code>, pins
+        <code>PATH</code>), runs <code>pytest -q -rA /tests/test_outputs.py</code>, and writes the
+        reward (<code>1</code> on all-pass, else <code>0</code>) to
+        <code>/logs/verifier/reward.txt</code>.</li>
+      <li><strong><code>test_outputs.py</code></strong> &mdash; the protected assertions. It carries
+        the <code>FAIL_TO_PASS</code> / <code>PASS_TO_PASS</code> selectors, lands the PR's
+        <code>test_patch.diff</code> onto the tree (<code>_ensure_tests_applied</code>), then runs
+        the fail-to-pass tests. <strong>Archive only</strong> &mdash; the body is withheld for live
+        tasks.</li>
+      <li><strong><code>test_patch.diff</code></strong> &mdash; the PR's test diff, applied at verify
+        time so the test signal is never baked into the environment image.</li>
+    </ul>
+
+    <h3 id="environment"><code>environment/Dockerfile</code></h3>
+    <p>The build recipe (parity/audit artifact). Layered: a language/system base image, the repo
+      cloned at <code>REPO_BASE_SHA</code> with its <code>.git</code> re-initialized to a single
+      <code>baseline</code> commit, then search-based dependency resolution
+      (<code>pip install -e .</code> / <code>pip install .</code> /
+      <code>-r requirements.txt</code> &mdash; first shape that builds wins; it hard-fails if none
+      do).</p>
+
+    <h3 id="solution"><code>solution/</code> (archive only)</h3>
+    <ul>
+      <li><strong><code>solve.sh</code></strong> &mdash; the git-apply driver. It
+        <code>git apply --check</code>s <code>oracle.patch</code>, applies it
+        (<code>--3way</code>, falling back to plain apply), treats an already-applied tree as an
+        idempotent no-op, and <strong>fails loudly</strong> if the patch is genuinely inapplicable
+        (never pretends success on an unpatched tree). If the patch touches native/build inputs it
+        rebuilds the extension offline.</li>
+      <li><strong><code>oracle.patch</code></strong> &mdash; the gold fix from the merged PR. Its
+        sha256 is recorded in <code>task.toml</code>/<code>record.json</code>
+        (<code>oracle_patch_sha256</code>).</li>
+    </ul>
+    <p>During scoring the model's own diff is written to this same
+      <code>solution/oracle.patch</code> path in a <strong>run copy</strong> of the task, so
+      <code>solve.sh</code> applies the model's patch exactly as it would the gold one.</p>
+
+    <h3 id="provenance"><code>PROVENANCE.json</code></h3>
+    <p>Upstream attribution shipped with every task (archive and live):</p>
+<pre>{
+  "source_repo": "Delgan/loguru",
+  "source_ref": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+  "source_license_spdx": ""
+}</pre>
+    <p>Tasks are derived only from permissively-licensed repositories.</p>
+
+    <h3 id="record"><code>record.json</code> (archive only)</h3>
+    <p>Portable machine metadata. Host-specific / internal build fields (<code>image_ref</code>,
+      <code>image_build</code>, <code>generator</code>, <code>repro</code>,
+      <code>netns_available</code>, <code>needs_network</code>) are stripped on publish
+      (<code>publish_tasks.py::_sanitize_record</code>). What remains:</p>
+<pre>{
+  "task_id": "td-fc90ea8b76d5f6b6",
+  "repo": "Delgan/loguru",
+  "pr_number": 1451,
+  "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",
+  "merge_sha": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+  "oracle_patch_sha256": "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8",
+  "test_files": ["tests/test_add_option_format.py"],
+  "fail_to_pass": ["tests/test_add_option_format.py::test_invalid_format_key_...", "..."],
+  "pass_to_pass": [],
+  "capability_labels": ["C5", "C4"]
+}</pre>
+
+    <h2 id="archive-vs-live">Archive vs. live</h2>
+    <p>The release policy is applied by <code>tasks/publish_tasks.py::publish</code>. The cutoff is
+      2 weeks (<code>ARCHIVE_WEEKS = 2</code>); a task is <em>archive</em> when
+      <code>(today - merge_date).days &gt;= 14</code>, otherwise <em>live</em>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th></th>
+          <th>shipped in <strong>archive</strong></th>
+          <th>shipped in <strong>live</strong></th>
+        </tr></thead>
+        <tbody>
+          <tr><th><code>task.toml</code></th><td>yes (sanitized)</td><td>yes (sanitized)</td></tr>
+          <tr><th><code>instruction.md</code></th><td>yes</td><td>yes</td></tr>
+          <tr><th><code>PROVENANCE.json</code></th><td>yes</td><td>yes</td></tr>
+          <tr><th><code>environment/</code></th><td>yes</td><td>yes</td></tr>
+          <tr><th><code>tests/test.sh</code></th><td>yes</td><td>yes</td></tr>
+          <tr><th><code>tests/test_outputs.py</code> (protected body)</th>
+              <td><span class="pill pass">yes</span></td>
+              <td><span class="pill pending">withheld</span></td></tr>
+          <tr><th><code>tests/test_patch.diff</code></th>
+              <td>yes</td><td><span class="pill pending">withheld</span></td></tr>
+          <tr><th><code>solution/</code> (<code>solve.sh</code>, <code>oracle.patch</code>)</th>
+              <td><span class="pill pass">yes</span></td>
+              <td><span class="pill pending">withheld</span></td></tr>
+          <tr><th><code>record.json</code></th><td>yes (sanitized)</td>
+              <td>replaced by <code>FAILING_TESTS.json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Live tasks</strong> give you the task, the environment, and the runner &mdash; but the
+      gold patch and the protected test bodies are held back, and scoring happens
+      <strong>server-side</strong> on submission. Instead of <code>record.json</code>, a live task
+      ships <code>FAILING_TESTS.json</code> exposing only the failing-test IDs (drawn from the F2P
+      selectors via <code>publish_tasks.py::_failing_test_ids</code>):</p>
+<pre>{
+  "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
+  "note": "protected assertions + gold solution withheld; submit a patch, scored server-side"
+}</pre>
+    <p>Withholding the gold patch and protected test bodies on live tasks blocks memorization and
+      test-editing; releasing archived tasks in full supports reproducibility.</p>
+
+    <h2 id="scoring">How scoring re-lays the protected tests</h2>
+    <p>Scoring is <strong>execution-only</strong> &mdash; there is no LLM judge, so
+      <code>false_accept = 0</code> holds by construction. The flow
+      (<code>terminal_daily_bench/eval.py</code>,
+      <code>terminal_daily_bench/harbor_score.py</code>):</p>
+    <ol>
+      <li>The task package is copied to a <strong>run copy</strong>
+        (<code>.tdb_work/runs/...</code>); the model never touches the trusted original.</li>
+      <li>For a model run, the model is shown the instruction plus the source file(s) the reference
+        solution touches and asked for a single unified diff. That diff is extracted
+        (<code>eval.py::extract_diff</code>) and written into the run copy at
+        <code>solution/oracle.patch</code>.</li>
+      <li>Harbor runs its built-in <code>oracle</code> agent
+        (<code>harbor run -p &lt;run_task&gt; -a oracle -e singularity ...</code>,
+        <code>eval.py::run_harbor_oracle</code>). <code>solution/solve.sh</code> applies the (now
+        model-authored) patch via <code>git apply</code> inside the task's container.</li>
+      <li>Harbor then <strong>re-lays <code>tests/</code> from the trusted package</strong> and runs
+        them under a network cut, on a face the agent never touched. A patch that edits
+        <code>tests/</code> only changes the discarded run-copy workspace &mdash; the protected tests
+        come from the trusted package, not the patch.</li>
+      <li>The reward is read from harbor's <code>result.json</code> by
+        <code>harbor_score.read_harbor_reward</code> (the same reader the private admission gate
+        uses). <code>reward &gt;= 0.999</code> -&gt; <code>solved: true</code>.</li>
+    </ol>
+    <p>The no-network switch is injected for offline tasks by
+      <code>harbor_score.maybe_inject_offline_eks</code> (singularity-gated, task-driven,
+      idempotent), and the subprocess env is scrubbed of host conda/venv pollution by
+      <code>harbor_score.clean_subprocess_env</code>.</p>
+    <p>Each run writes one result record:</p>
+<pre>{ "model": "...", "task": "td-fc90ea8b76d5f6b6", "scaffold": "single_shot_patch",
+  "reward": 1.0, "solved": true, "patch_applied": true,
+  "false_accept_check": { "gate": "harbor_protected_tests",
+    "reward_source": "result.json via harbor_score.read_harbor_reward",
+    "protected_tests_relaid_by_harbor": true, "model_is_judge": false,
+    "model_patch_touched_tests": false, "false_accept": 0 } }</pre>
+    <p>Scoring is BAD-safe: no patch, a patch that fails to apply, a hung trial, or an unparseable
+      result all yield <code>reward 0.0</code> / <code>solved: false</code> with the cause recorded
+      &mdash; never a positive score on a crash.</p>
+
+    <h2 id="examples">Runnable examples</h2>
+    <p>Score a model, or run the oracle baseline, on an <strong>archive</strong> task (needs an
+      apptainer/singularity host; the model call uses any OpenAI-compatible endpoint):</p>
+<pre>pip install -e .
+export OPENAI_BASE_URL=...          <span class="c"># OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
+export OPENAI_API_KEY=...
+
+<span class="c"># baseline: the task's own oracle.patch -&gt; reward 1.0 (no model call, archive only)</span>
+tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
+
+<span class="c"># score a model with the single_shot_patch scaffold</span>
+tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
+
+<span class="c"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models in the results file)</span>
+tdb quality results.jsonl</pre>
+    <p><code>tdb run</code> / <code>tdb oracle</code> write a result JSON under
+      <code>$TDB_WORK</code> (default <code>./.tdb_work</code>) or to an explicit
+      <code>--out PATH</code>. Under the hood these call
+      <code>terminal_daily_bench.eval</code>, which also accepts <code>--max-tokens</code>,
+      <code>--call-timeout</code>, and <code>--harbor-timeout</code>.</p>
+    <p>Inspect a <strong>live</strong> task (no gold patch, no protected test bodies):</p>
+<pre>cat tasks/live/td-fc90ea8b76d5f6b6/instruction.md
+cat tasks/live/td-fc90ea8b76d5f6b6/FAILING_TESTS.json     <span class="c"># only the failing-test IDs</span></pre>
+    <p>Publish a source task package under the release policy (idempotent; picks archive vs. live
+      from the dates):</p>
+<pre><span class="c"># publish_tasks.py &lt;src_task_dir&gt; &lt;merge_date&gt; &lt;today&gt; &lt;out_root&gt;</span>
+python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./tasks
+<span class="c"># -&gt; {"task": "td-...", "mode": "archive", "shipped_solution": true, "dest": "tasks/archive/td-..."}</span></pre>
+    <p>Submit a result for a live task (re-scored on ingest &mdash; the claimed reward is advisory,
+      only the patch is replayed; see
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>):</p>
+<pre><span class="c"># validate the submission JSON, then record it as pending re-verification</span>
+python web/submit_result.py validate &lt; submission.json
+python web/submit_result.py record   &lt; submission.json --store community_submissions</pre>
+    <p>A submission is one JSON object per <code>(model, task)</code> cell; required fields are
+      <code>date</code>, <code>submitter</code>, <code>model</code>, <code>scaffold</code>,
+      <code>task</code> (must start with <code>td-</code>), and <code>patch</code> (the unified
+      diff). <code>reward_claimed</code> is advisory only.</p>
+
+    <h2 id="scaffold">Plugging in your own scaffold</h2>
+    <p>The built-in scaffold is <code>single_shot_patch</code> (one localized shot at a diff). A
+      multi-turn agent plugs in via the adapter contract
+      (<code>terminal_daily_bench/adapters/base.py::HarnessAdapter</code>):</p>
+<pre>input  = (task dir, failing test ids, model id/endpoint)
+output = AdapterResult(patch: str, telemetry: dict, error: str | None)</pre>
+    <p>An adapter's <code>produce_patch(...)</code> must <strong>not</strong> read or write the
+      protected tests or the gold solution, and must <strong>not</strong> compute a reward. The
+      execution gate stays the sole reward authority &mdash; which is what keeps
+      <code>false_accept = 0</code> as more harnesses are added.</p>
+
+    <hr>
+    <p class="mono" style="font-size:12.5px">next:
+      <a href="../submission/">submission</a> &middot;
+      <a href="../quality-methods/">quality methods</a> &middot;
+      <a href="../quickstart/">quickstart</a> &middot;
+      <a href="../../task-format.md">markdown source</a></p>
+  </article>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>packages in the wild</h2>
+      <span class="eyebrow">published task directories</span>
+      <a class="more" href="../../registry/">task registry &rarr;</a>
+    </div>
+    <div id="pkgs"><div class="empty">loading published tasks&hellip;</div></div>
+  </section>
+
+</main>
+
+<script src="../../assets/site.js" data-root="../.." data-page="docs"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var el = document.getElementById("pkgs");
+  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+
+  if (!site || !site.tasks || !site.tasks.length) {
+    el.innerHTML = '<div class="empty">No task catalogue published yet ' +
+      '(<code>site_data.json</code> is missing), so there is nothing to list here. The schema ' +
+      'above is the whole contract &mdash; a task directory is valid on its own.</div>';
+    return;
+  }
+
+  var rows = site.tasks.slice(0, 8).map(function (t) {
+    var live = t.status === "live";
+    var dir = "tasks/" + (live ? "live" : "archive") + "/" + t.id;
+    return "<tr>" +
+      '<th><a class="mono" href="' + T.ROOT + "/registry/" + encodeURIComponent(t.id) + '/">' +
+        t.id + "</a></th>" +
+      "<td>" + (live ? '<span class="pill pending">live</span>'
+                     : '<span class="pill pass">archive</span>') + "</td>" +
+      '<td class="mono" style="font-size:12px">' + dir + "</td>" +
+      "<td>" + (live ? "FAILING_TESTS.json" : "record.json + solution/") + "</td>" +
+      '<td class="num">' + (t.n_fail_to_pass != null ? t.n_fail_to_pass : "&mdash;") + "</td></tr>";
+  }).join("");
+
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+    "<th>task id</th><th>release</th><th>directory</th><th>metadata shipped</th>" +
+    '<th class="num">f2p</th>' +
+    "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+})();
+</script>
+</body>
+</html>

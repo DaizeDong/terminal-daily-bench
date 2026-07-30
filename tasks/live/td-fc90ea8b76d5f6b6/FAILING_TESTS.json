@@ -1,4 +1,9 @@
 {
-  "failing_test_ids": [],
+  "failing_test_ids": [
+    "tests/test_add_option_format.py::test_invalid_format_key_emits_helpful_error_with_catch",
+    "tests/test_add_option_format.py::test_invalid_format_key_raises_enhanced_error_without_catch",
+    "tests/test_add_option_format.py::test_invalid_format_key_error_message_content",
+    "tests/test_add_option_format.py::test_patcher_added_keys_work_in_format"
+  ],
   "note": "protected assertions + gold solution withheld; submit a patch, scored server-side"
 }

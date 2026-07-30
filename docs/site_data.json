@@ -1,0 +1,42 @@
+{
+ "generated": "2026-07-30T03:49:12Z",
+ "suites": [
+  {
+   "id": "sample",
+   "status": "archive",
+   "n_tasks": 1,
+   "note": "one sample task; full dated suites are served from the site",
+   "languages": [
+    "python"
+   ]
+  },
+  {
+   "id": "sample-live",
+   "status": "live",
+   "n_tasks": 1,
+   "note": "one sample live task (gold+protected withheld, scored server-side)",
+   "languages": []
+  }
+ ],
+ "tasks": [
+  {
+   "id": "td-fc90ea8b76d5f6b6",
+   "suite": "sample",
+   "status": "archive",
+   "repo": "Delgan/loguru",
+   "pr_number": 1451,
+   "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",
+   "merge_sha": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+   "license": "",
+   "language": "python",
+   "title": "Validate format string keys in logger.add() for early error feedback",
+   "n_fail_to_pass": 4,
+   "solved_by": 0,
+   "n_models": 5,
+   "difficulty": "unsolved",
+   "also_in": [
+    "live"
+   ]
+  }
+ ]
+}

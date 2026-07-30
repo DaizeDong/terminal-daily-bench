@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>task registry — terminal-daily-bench</title>
+<meta name="description" content="Every task ever mined: repo, language, suite date, protected fail-to-pass tests, and how many models solved it. Each task is one real merged pull request rebuilt as an executable package.">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+
+<!--
+  ============================================================================
+  SPEC — per-task page:  docs/registry/<task-id>/index.html
+  Owned by the 'benchmarks' agent (release/web/gen_pages.py). NOT written here.
+  This page (the registry index) links every row to ./<task-id>/ and expects
+  the generated page to answer, in this order:
+
+  1. HEADER
+     - task id (mono, the <task-id> in the URL), suite date, status pill
+       (archive = released in full · live = gold patch withheld),
+       language pill, difficulty pill.
+
+  2. PROVENANCE  — the contamination claim, made checkable by a reader
+     - upstream repo (owner/name) with a link to it
+     - PR number, PR title, and a link to the merged pull request
+     - base sha (the commit the task environment is built at) and
+       merge sha (the commit that contains the fix), both full 40-char,
+       both linked to the upstream commit view
+     - PR merge timestamp, and the mining date — the gap that makes
+       "merged after the model shipped" auditable
+     - upstream license (SPDX id) + a note that the task package
+       redistributes only what that license permits
+
+  3. INSTRUCTION
+     - the verbatim instruction.md the agent is given, in a <pre>.
+       It must be the exact bytes the harness serves — this page is
+       also how a reader audits that the instruction leaks no fix.
+
+  4. PROTECTED TESTS
+     - the fail-to-pass test ids, one per line, fully qualified
+       (path::class::test), plus the pass-to-pass count
+     - the statement that these are re-laid after the agent's patch, in a
+       network-cut container, and that the agent's copy is discarded first
+     - for LIVE tasks: list the ids but state the test bodies are withheld
+
+  5. RESULTS — which models solved it
+     - one row per model evaluated on this task: model, scaffold
+       (single-shot / terminus-2), solved yes/no, and the reward
+     - a solved-by count consistent with the registry table's column
+     - link back to the suite (../../benchmarks/<suite>/) and to the
+       leaderboard row
+
+  6. RELEASE POLICY for this task
+     - archive: gold patch, protected test bodies, and environment recipe
+       are all public; the task can be run entirely offline
+     - live: instruction + environment public; gold patch and test bodies
+       withheld; submissions are scored server-side by the same gate
+     - the date the task flips from live to archive
+     - reproduction command:  tdb run <MODEL> tasks/<suite>/<task-id>
+                              tdb oracle tasks/<suite>/<task-id>   -> reward 1.0
+
+  Data source: the same site_data.json task record, plus a per-task
+  task.json emitted next to the page. Degrade with the .empty pattern.
+  ============================================================================
+-->
+</head>
+<body>
+
+<main class="wrap">
+
+  <section class="hero">
+    <p class="eyebrow">task registry</p>
+    <h1>every task, and what it is made of</h1>
+    <p class="sub">One task is one real merged pull request, rebuilt into a package an agent can be
+      dropped into. Nothing here is authored by a model. Search it, filter it, then open a task to
+      read its provenance and the tests that grade it.</p>
+  </section>
+
+  <section style="padding-top:0;border-top:none">
+    <div id="strip" class="strip"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>what is in a task package</h2>
+      <span class="eyebrow">five files, no surprises</span>
+      <a class="more" href="../task-format.md">task format &rarr;</a>
+    </div>
+    <p class="lead" style="max-width:78ch">
+      A package holds <code>task.toml</code> (id, suite, language, the fail-to-pass test ids, resource
+      limits), <code>instruction.md</code> (the only text the agent sees), the
+      <strong>protected tests</strong> (kept outside the agent's workspace and re-laid over it after
+      the patch, so editing them changes nothing), the <strong>environment</strong> (a pinned
+      container recipe built at the PR's base commit, run with the network cut), and
+      <code>PROVENANCE</code> (repo, PR number, base and merge sha, merge timestamp, upstream
+      license). Archive tasks ship the gold patch too. <strong>Live tasks withhold it</strong> —
+      along with the protected test bodies — so a live suite cannot be solved by reading it; those
+      submissions are re-scored server-side by the same gate.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>tasks</h2>
+      <span class="eyebrow" id="count">loading&hellip;</span>
+      <a class="more" href="../benchmarks/">browse by suite &rarr;</a>
+    </div>
+
+    <div class="filters" id="filters" hidden>
+      <label class="f-search">
+        <span class="sr-only">search tasks</span>
+        <input id="q" type="search" placeholder="search task id, repo, title, PR number&hellip;"
+               autocomplete="off" spellcheck="false">
+      </label>
+      <div class="f-row">
+        <span class="f-label">language</span>
+        <div class="tags" id="langs"></div>
+      </div>
+      <div class="f-row">
+        <span class="f-label">status</span>
+        <div class="tags" id="stats"></div>
+        <button type="button" class="pill f-btn" id="reset">reset</button>
+      </div>
+    </div>
+
+    <div id="note" hidden style="margin-top:14px"></div>
+
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr>
+          <th>task</th>
+          <th>repo</th>
+          <th>lang</th>
+          <th>suite</th>
+          <th>status</th>
+          <th class="num">f2p tests</th>
+          <th class="num">solved by</th>
+        </tr></thead>
+        <tbody id="rows">
+          <tr><td colspan="7" class="mono" style="color:var(--faint)">loading&hellip;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="none" hidden style="margin-top:12px"></div>
+    <p class="lead" style="margin-top:10px;font-size:12.5px">
+      <span class="mono">solved by</span> counts the models that produced an execution-verified solve
+      on that task, out of the models run against its suite. A task nobody solved is kept, not
+      dropped &mdash; the oracle patch proves it is solvable.</p>
+  </section>
+
+</main>
+
+<style>
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .filters { display:flex; flex-direction:column; gap:10px; }
+  .f-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .f-label { font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+             text-transform:uppercase; color:var(--faint); min-width:64px; }
+  .f-search { display:block; }
+  .f-search input {
+    width:100%; font-family:var(--mono); font-size:13px; color:var(--fg);
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:9px 12px;
+  }
+  .f-search input::placeholder { color:var(--faint); }
+  .f-search input:focus { border-color:var(--line-2); outline:2px solid var(--link); outline-offset:1px; }
+  .f-btn { cursor:pointer; font:inherit; font-family:var(--mono); font-size:11px; margin-left:auto; }
+  button.pill { cursor:pointer; font-family:var(--mono); font-size:11px; }
+  button.pill[aria-pressed="true"] { color:var(--fg); border-color:var(--line-2); background:var(--panel); }
+  button.pill.lang[aria-pressed="true"] { color:var(--link); background:var(--panel); }
+  button.pill.pass[aria-pressed="true"], button.pill.pending[aria-pressed="true"] { background:var(--panel-2); }
+  button.pill[aria-pressed="false"] { opacity:.5; }
+  td .tid { font-family:var(--mono); font-size:12.5px; }
+  td .sub { color:var(--faint); font-size:11.5px; display:block; }
+  .solved { font-family:var(--mono); }
+  .solved.zero { color:var(--faint); }
+</style>
+
+<script src="../assets/site.js" data-root=".." data-page="tasks"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var esc = function (s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  };
+
+  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+
+  /* Prefer the catalogue. If it has not been published yet, fall back to the
+     day's leaderboard matrix, which at least knows the ids and who solved them. */
+  var tasks = (site && Array.isArray(site.tasks) && site.tasks.length) ? site.tasks.slice() : null;
+  var derived = false;
+  if (!tasks && board && board.matrix && Array.isArray(board.matrix.tasks)) {
+    derived = true;
+    var rowsM = board.matrix.rows || [];
+    tasks = board.matrix.tasks.map(function (id, i) {
+      var solved = rowsM.reduce(function (a, r) { return a + ((r.g && r.g[i]) ? 1 : 0); }, 0);
+      return { id: id, suite: board.date, status: "live",
+               solved_by: solved, n_models: rowsM.length };
+    });
+  }
+
+  var rowsEl = document.getElementById("rows");
+  var countEl = document.getElementById("count");
+  var noneEl = document.getElementById("none");
+  var stripEl = document.getElementById("strip");
+
+  if (!tasks || !tasks.length) {
+    countEl.textContent = "no catalogue";
+    rowsEl.innerHTML = "";
+    document.querySelector(".table-wrap").hidden = true;
+    noneEl.hidden = false;
+    noneEl.innerHTML = '<div class="empty">No task catalogue published yet. Run ' +
+      '<code>tdb publish</code> to generate <code>site_data.json</code> at the site root; ' +
+      'this table renders straight from it.</div>';
+    return;
+  }
+
+  /* ---- header numbers ---- */
+  var suites = {}, langs = {}, live = 0, f2p = 0;
+  tasks.forEach(function (t) {
+    if (t.suite) suites[t.suite] = 1;
+    if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
+    if (t.status === "live") live++;
+    f2p += Number(t.n_fail_to_pass) || 0;
+  });
+  var strip = [
+    ["tasks", tasks.length],
+    ["suites", Object.keys(suites).length || 1],
+    ["languages", Object.keys(langs).length || "—"],
+    ["live now", live],
+    ["protected f2p tests", f2p || "—"]
+  ];
+  stripEl.innerHTML = strip.map(function (c) {
+    return '<div class="cell"><div class="k">' + esc(c[0]) + '</div><div class="v">' + esc(c[1]) + "</div></div>";
+  }).join("");
+
+  /* ---- filter controls ---- */
+  var state = { q: "", lang: null, status: null };
+  var langNames = Object.keys(langs).sort(function (a, b) { return langs[b] - langs[a] || a.localeCompare(b); });
+
+  var langsEl = document.getElementById("langs");
+  langsEl.innerHTML = langNames.map(function (l) {
+    return '<button type="button" class="pill lang" data-lang="' + esc(l) + '" aria-pressed="true">' +
+      esc(l) + ' <span style="opacity:.6">' + langs[l] + "</span></button>";
+  }).join("") || '<span class="pill" style="opacity:.6">not recorded</span>';
+
+  var statsEl = document.getElementById("stats");
+  statsEl.innerHTML =
+    '<button type="button" class="pill pending" data-status="live" aria-pressed="true">live ' +
+      '<span style="opacity:.6">' + live + "</span></button>" +
+    '<button type="button" class="pill pass" data-status="archive" aria-pressed="true">archive ' +
+      '<span style="opacity:.6">' + (tasks.length - live) + "</span></button>";
+
+  document.getElementById("filters").hidden = false;
+
+  function setPressed(container, attr, value) {
+    Array.prototype.forEach.call(container.querySelectorAll("button.pill"), function (b) {
+      b.setAttribute("aria-pressed", (value === null || b.dataset[attr] === value) ? "true" : "false");
+    });
+  }
+
+  langsEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-lang]");
+    if (!b) return;
+    state.lang = state.lang === b.dataset.lang ? null : b.dataset.lang;
+    setPressed(langsEl, "lang", state.lang);
+    render();
+  });
+  statsEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-status]");
+    if (!b) return;
+    state.status = state.status === b.dataset.status ? null : b.dataset.status;
+    setPressed(statsEl, "status", state.status);
+    render();
+  });
+  var qEl = document.getElementById("q");
+  qEl.addEventListener("input", function () { state.q = qEl.value.trim().toLowerCase(); render(); });
+  document.getElementById("reset").addEventListener("click", function () {
+    state = { q: "", lang: null, status: null };
+    qEl.value = "";
+    setPressed(langsEl, "lang", null);
+    setPressed(statsEl, "status", null);
+    render();
+    qEl.focus();
+  });
+
+  /* ---- rows ---- */
+  function hay(t) {
+    return [t.id, t.repo, t.title, t.language, t.suite, t.status, t.difficulty,
+            t.pr_number != null ? "#" + t.pr_number : ""].join(" ").toLowerCase();
+  }
+  tasks.forEach(function (t) { t._h = hay(t); });
+
+  function row(t) {
+    var n = Number(t.n_models) || 0, s = Number(t.solved_by) || 0;
+    var solved = n ? '<span class="solved' + (s ? "" : " zero") + '">' + s + "/" + n + "</span>"
+                   : '<span class="dash">&mdash;</span>';
+    var st = t.status === "live"
+      ? '<span class="pill pending">live</span>'
+      : '<span class="pill pass">archive</span>';
+    var suite = t.suite
+      ? '<a class="mono" href="../benchmarks/' + encodeURIComponent(t.suite) + '/">' + esc(t.suite) + "</a>"
+      : '<span class="dash">&mdash;</span>';
+    return "<tr>" +
+      '<td><a class="tid" href="./' + encodeURIComponent(t.id) + '/">' + esc(t.id) + "</a>" +
+        (t.title ? '<span class="sub">' + esc(t.title) + "</span>" : "") + "</td>" +
+      '<td><span class="mono" style="font-size:12.5px">' + (t.repo ? esc(t.repo) : "&mdash;") + "</span>" +
+        (t.pr_number != null ? '<span class="sub">PR #' + esc(t.pr_number) + "</span>" : "") + "</td>" +
+      "<td>" + (t.language ? '<span class="pill lang">' + esc(t.language) + "</span>"
+                           : '<span class="dash">&mdash;</span>') + "</td>" +
+      "<td>" + suite + "</td>" +
+      "<td>" + st + "</td>" +
+      '<td class="num">' + (t.n_fail_to_pass != null ? esc(t.n_fail_to_pass) : '<span class="dash">&mdash;</span>') + "</td>" +
+      '<td class="num">' + solved + "</td>" +
+    "</tr>";
+  }
+
+  function render() {
+    var out = tasks.filter(function (t) {
+      if (state.lang && t.language !== state.lang) return false;
+      if (state.status && t.status !== state.status) return false;
+      if (state.q && t._h.indexOf(state.q) === -1) return false;
+      return true;
+    });
+    countEl.textContent = out.length === tasks.length
+      ? tasks.length + " tasks"
+      : out.length + " of " + tasks.length + " tasks";
+    if (!out.length) {
+      rowsEl.innerHTML = "";
+      noneEl.hidden = false;
+      noneEl.innerHTML = '<div class="empty">Nothing matches that filter. ' +
+        '<button type="button" class="pill f-btn" id="reset2" style="margin-left:0">reset</button></div>';
+      document.getElementById("reset2").addEventListener("click", function () {
+        document.getElementById("reset").click();
+      });
+      return;
+    }
+    noneEl.hidden = true;
+    rowsEl.innerHTML = out.map(row).join("");
+  }
+
+  render();
+
+  if (derived) {
+    var noteEl = document.getElementById("note");
+    noteEl.hidden = false;
+    noteEl.innerHTML = '<div class="empty">Showing the current day only, reconstructed from ' +
+      '<code>leaderboard_data.json</code>: <code>site_data.json</code> is not published yet, so repo, ' +
+      'language and test counts are missing.</div>';
+  }
+})();
+</script>
+</body>
+</html>
