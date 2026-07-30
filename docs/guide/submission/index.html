@@ -5,57 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submission — terminal-daily-bench docs</title>
 <meta name="description" content="How to run the benchmark, submit results that are re-scored on ingest, and extend it with a new scaffold through the HarnessAdapter contract.">
+<link rel="stylesheet" href="../../assets/tw.css">
+<link rel="stylesheet" href="../../assets/tw-extra.css">
 <link rel="stylesheet" href="../../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+<div class="flex flex-1 flex-col items-center px-4 py-6">
+<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
 
-  <section class="hero" style="padding-bottom:18px">
-    <p class="eyebrow"><a href="../">docs</a> / submission</p>
-    <h1>submitting to terminal-daily-bench</h1>
-    <p class="sub">This page documents how to run the benchmark, submit results, and extend it with a
-      new scaffold/agent. Everything here maps to code in this bundle &mdash; no external services or
-      hidden APIs are required to score a patch.</p>
-    <p class="sub">The one invariant behind all of it: <strong>a scaffold produces a candidate patch;
-      the execution gate is the sole reward authority.</strong> A claimed reward is never trusted
-      &mdash; only the patch is replayed against protected tests. This is what makes
-      <code>false_accept = 0</code> a structural property rather than a promise.</p>
-  </section>
+  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
 
-  <section style="border-top:none;padding-top:0">
-  <article class="prose">
+    <!-- ===================== the prose column ===================== -->
+    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
 
-    <h2 id="run">1. Run a model on a task</h2>
-    <p>The <code>tdb</code> CLI (<code>terminal_daily_bench/cli.py</code>) is the entry point.</p>
-<pre>pip install -e .                          <span class="c"># installs the `tdb` console script</span>
+      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
+        <a class="hover:text-foreground transition-colors" href="../../">home</a>
+        <span>/</span>
+        <a class="hover:text-foreground transition-colors" href="../">docs</a>
+        <span>/</span>
+        <span class="text-foreground">submission</span>
+      </nav>
 
-export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="c"># any OpenAI-compatible endpoint</span>
-export OPENAI_API_KEY=sk-...                        <span class="c"># bearer key, read from env, never stored</span>
+      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
+        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">submitting to terminal-daily-bench</h1>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">This page documents how to run the benchmark, submit results, and extend it with a
+          new scaffold/agent. Everything here maps to code in this bundle &mdash; no external services or
+          hidden APIs are required to score a patch.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">The one invariant behind all of it: <strong>a scaffold produces a candidate patch;
+          the execution gate is the sole reward authority.</strong> A claimed reward is never trusted
+          &mdash; only the patch is replayed against protected tests. This is what makes
+          <code>false_accept = 0</code> a structural property rather than a promise.</p>
+      </header>
 
-<span class="c"># Score a model on one task (single-shot patch scaffold + execution gate)</span>
+      <article class="prose prose-no-margin">
+
+        <h2 id="run" class="scroll-m-28 font-mono">1. Run a model on a task</h2>
+        <p>The <code>tdb</code> CLI (<code>terminal_daily_bench/cli.py</code>) is the entry point.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .                          <span class="text-muted-foreground"># installs the `tdb` console script</span>
+
+export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="text-muted-foreground"># any OpenAI-compatible endpoint</span>
+export OPENAI_API_KEY=sk-...                        <span class="text-muted-foreground"># bearer key, read from env, never stored</span>
+
+<span class="text-muted-foreground"># Score a model on one task (single-shot patch scaffold + execution gate)</span>
 tdb run gpt-4o tasks/archive/td-fc90ea8b76d5f6b6
 
-<span class="c"># Baseline: replay the task's own gold patch &mdash; proves the gate returns 1.0</span>
+<span class="text-muted-foreground"># Baseline: replay the task's own gold patch &mdash; proves the gate returns 1.0</span>
 tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
 
-<span class="c"># Multi-angle quality card over a results file (needs &gt;=2 models)</span>
-tdb quality results.jsonl</pre>
-    <p><code>OPENAI_BASE_URL</code> defaults to <code>https://api.openai.com/v1</code> and can point
-      at OpenAI, OpenRouter, vLLM, LiteLLM, or a local server. The special model id
-      <code>oracle</code> runs the task's real <code>solution/oracle.patch</code> and needs no
-      endpoint or key.</p>
-    <p>Scoring requires an <strong>apptainer/singularity</strong> host: harbor applies the patch
-      inside the task container, then re-lays the protected <code>tests/</code> and runs them under a
-      network cut. Override the singularity scratch paths with <code>TDB_SIF_CACHE</code>,
-      <code>TDB_OVERLAY_DIR</code>, and the work root with <code>TDB_WORK</code> if the defaults
-      don't fit your host.</p>
+<span class="text-muted-foreground"># Multi-angle quality card over a results file (needs &gt;=2 models)</span>
+tdb quality results.jsonl</pre></div>
+        <p><code>OPENAI_BASE_URL</code> defaults to <code>https://api.openai.com/v1</code> and can point
+          at OpenAI, OpenRouter, vLLM, LiteLLM, or a local server. The special model id
+          <code>oracle</code> runs the task's real <code>solution/oracle.patch</code> and needs no
+          endpoint or key.</p>
+        <p>Scoring requires an <strong>apptainer/singularity</strong> host: harbor applies the patch
+          inside the task container, then re-lays the protected <code>tests/</code> and runs them under a
+          network cut. Override the singularity scratch paths with <code>TDB_SIF_CACHE</code>,
+          <code>TDB_OVERLAY_DIR</code>, and the work root with <code>TDB_WORK</code> if the defaults
+          don't fit your host.</p>
 
-    <h3 id="record">The result record</h3>
-    <p>Each run writes one JSON record (via <code>terminal_daily_bench/eval.py</code>) to
-      <code>--out</code> (default under <code>$TDB_WORK/results/</code>). Its shape:</p>
-<pre>{
+        <h3 id="record" class="scroll-m-28 font-mono">The result record</h3>
+        <p>Each run writes one JSON record (via <code>terminal_daily_bench/eval.py</code>) to
+          <code>--out</code> (default under <code>$TDB_WORK/results/</code>). Its shape:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
   "model": "gpt-4o",
   "task": "td-fc90ea8b76d5f6b6",
   "scaffold": "single_shot_patch",
@@ -72,59 +87,59 @@ tdb quality results.jsonl</pre>
     "model_patch_touched_tests": false,
     "false_accept": 0
   }
-}</pre>
-    <p><code>solved</code> is <code>reward &gt;= 0.999</code>. Any failure &mdash; no diff produced,
-      patch doesn't apply, trial error, unparseable result &mdash; yields <code>reward 0.0</code> /
-      <code>solved false</code> with the cause in <code>error</code>. A crash never produces a
-      positive score (BAD-safe by construction).</p>
+}</pre></div>
+        <p><code>solved</code> is <code>reward &gt;= 0.999</code>. Any failure &mdash; no diff produced,
+          patch doesn't apply, trial error, unparseable result &mdash; yields <code>reward 0.0</code> /
+          <code>solved false</code> with the cause in <code>error</code>. A crash never produces a
+          positive score (BAD-safe by construction).</p>
 
-    <hr>
+        <hr>
 
-    <h2 id="scoring">2. How scoring works &mdash; re-scored on ingest</h2>
-    <p>The reward is read from harbor's structured <code>result.json</code> by
-      <code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong> reader the
-      private admission gate uses. The model is the <em>subject</em> under test; it is never the
-      <em>judge</em>.</p>
-    <p>Why a patch can't cheat the score:</p>
-    <ul>
-      <li>The protected <code>tests/</code> are <strong>re-laid by harbor from the trusted task
-        package</strong> <em>after</em> the patch is applied. A patch that edits <code>tests/</code>
-        only changes an agent-side workspace that is discarded before scoring.</li>
-      <li>Runtime egress is cut (<code>--network=none</code> / the offline <code>--ek</code> switch
-        injected by <code>harbor_score._maybe_inject_offline_eks</code>), so a "fix" cannot phone
-        home.</li>
-      <li>The reward is byte-for-byte execution truth from <code>result.json</code>, not any string
-        the model emitted.</li>
-    </ul>
+        <h2 id="scoring" class="scroll-m-28 font-mono">2. How scoring works &mdash; re-scored on ingest</h2>
+        <p>The reward is read from harbor's structured <code>result.json</code> by
+          <code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong> reader the
+          private admission gate uses. The model is the <em>subject</em> under test; it is never the
+          <em>judge</em>.</p>
+        <p>Why a patch can't cheat the score:</p>
+        <ul>
+          <li>The protected <code>tests/</code> are <strong>re-laid by harbor from the trusted task
+            package</strong> <em>after</em> the patch is applied. A patch that edits <code>tests/</code>
+            only changes an agent-side workspace that is discarded before scoring.</li>
+          <li>Runtime egress is cut (<code>--network=none</code> / the offline <code>--ek</code> switch
+            injected by <code>harbor_score._maybe_inject_offline_eks</code>), so a "fix" cannot phone
+            home.</li>
+          <li>The reward is byte-for-byte execution truth from <code>result.json</code>, not any string
+            the model emitted.</li>
+        </ul>
 
-    <h3 id="ingest">Submission ingest re-scores, too</h3>
-    <p>When you submit results to the leaderboard, the same discipline applies at ingest. In
-      <code>web/submit_result.py</code>:</p>
-    <ul>
-      <li><code>reward_claimed</code> is <strong>advisory only</strong> &mdash; it is validated
-        against nothing.</li>
-      <li>On record, the entry is stored as <code>verify_status="pending"</code> with
-        <code>verified_reward=null</code>. The board trusts <strong>only</strong>
-        <code>verified_reward</code>.</li>
-      <li>A node worker replays the submitted <code>patch</code> through the execution gate and calls
-        <code>apply_verified(store, sub_id, verified_reward)</code>, which flips the entry to
-        <code>verify_status="verified"</code>.</li>
-      <li><code>rebuild_leaderboard(store, out)</code> folds only <strong>verified</strong> rows into
-        a solved/attempt rate; a pending submission is listed but contributes <code>0</code> to any
-        rate.</li>
-    </ul>
-    <p>A fake <code>1.0</code> whose patch verifies <code>0.0</code> therefore contributes
-      <code>0</code>. The claimed number is never trusted; only its patch is replayed.</p>
+        <h3 id="ingest" class="scroll-m-28 font-mono">Submission ingest re-scores, too</h3>
+        <p>When you submit results to the leaderboard, the same discipline applies at ingest. In
+          <code>web/submit_result.py</code>:</p>
+        <ul>
+          <li><code>reward_claimed</code> is <strong>advisory only</strong> &mdash; it is validated
+            against nothing.</li>
+          <li>On record, the entry is stored as <code>verify_status="pending"</code> with
+            <code>verified_reward=null</code>. The board trusts <strong>only</strong>
+            <code>verified_reward</code>.</li>
+          <li>A node worker replays the submitted <code>patch</code> through the execution gate and calls
+            <code>apply_verified(store, sub_id, verified_reward)</code>, which flips the entry to
+            <code>verify_status="verified"</code>.</li>
+          <li><code>rebuild_leaderboard(store, out)</code> folds only <strong>verified</strong> rows into
+            a solved/attempt rate; a pending submission is listed but contributes <code>0</code> to any
+            rate.</li>
+        </ul>
+        <p>A fake <code>1.0</code> whose patch verifies <code>0.0</code> therefore contributes
+          <code>0</code>. The claimed number is never trusted; only its patch is replayed.</p>
 
-    <hr>
+        <hr>
 
-    <h2 id="submitting">3. Submitting results</h2>
+        <h2 id="submitting" class="scroll-m-28 font-mono">3. Submitting results</h2>
 
-    <h3 id="schema">Submission schema (JSONL, one line per <code>(model, task)</code> cell)</h3>
-    <p>Required fields are enforced by <code>submit_result.validate</code> (the <code>REQUIRED</code>
-      tuple): <code>date</code>, <code>submitter</code>, <code>model</code>, <code>scaffold</code>,
-      <code>task</code>, <code>patch</code>.</p>
-<pre>{
+        <h3 id="schema" class="scroll-m-28 font-mono">Submission schema (JSONL, one line per <code>(model, task)</code> cell)</h3>
+        <p>Required fields are enforced by <code>submit_result.validate</code> (the <code>REQUIRED</code>
+          tuple): <code>date</code>, <code>submitter</code>, <code>model</code>, <code>scaffold</code>,
+          <code>task</code>, <code>patch</code>.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
   "date": "2026-07-22",
   "submitter": "your-handle",
   "model": "your-model",
@@ -134,54 +149,54 @@ tdb quality results.jsonl</pre>
   "reward_claimed": 1.0,
   "harness_version": "v2",
   "signature": "&lt;sha256&gt;"
-}</pre>
-    <p>Validation rules:</p>
-    <ul>
-      <li>All six required fields must be present and non-empty.</li>
-      <li><code>patch</code> must be a unified-diff <strong>string</strong>.</li>
-      <li><code>task</code> must start with <code>td-</code>.</li>
-      <li><code>reward_claimed</code> (and any extra fields like <code>harness_version</code> /
-        <code>signature</code>) are accepted but never trusted &mdash; they carry through as advisory
-        metadata.</li>
-    </ul>
+}</pre></div>
+        <p>Validation rules:</p>
+        <ul>
+          <li>All six required fields must be present and non-empty.</li>
+          <li><code>patch</code> must be a unified-diff <strong>string</strong>.</li>
+          <li><code>task</code> must start with <code>td-</code>.</li>
+          <li><code>reward_claimed</code> (and any extra fields like <code>harness_version</code> /
+            <code>signature</code>) are accepted but never trusted &mdash; they carry through as advisory
+            metadata.</li>
+        </ul>
 
-    <h3 id="cli">CLI</h3>
-    <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>:</p>
-<pre><span class="c"># 1. Validate structure (exit 0 = valid, 1 = errors)</span>
+        <h3 id="cli" class="scroll-m-28 font-mono">CLI</h3>
+        <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># 1. Validate structure (exit 0 = valid, 1 = errors)</span>
 python web/submit_result.py validate &lt; submission.json
 
-<span class="c"># 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)</span>
+<span class="text-muted-foreground"># 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)</span>
 python web/submit_result.py record --store community_submissions &lt; submission.json
 
-<span class="c"># 3. (server-side, after re-scoring) fold verified rows into the board</span>
-python web/submit_result.py rebuild --store community_submissions --out web/leaderboard_data.json</pre>
-    <p><code>record</code> computes a content-addressed <code>id</code> (sha256 over the required
-      fields, first 16 hex chars) for dedup and tamper-evidence, then writes an entry with
-      <code>verify_status="pending"</code>. The store defaults to
-      <code>community_submissions/</code>.</p>
-    <p>For <strong>live</strong> (this-week) tasks the gold patch and protected test bodies are
-      withheld and scoring happens server-side: submit your patch and it is scored on our side.
-      <strong>Archived</strong> tasks (&ge; 2 weeks old) ship in full for local reproduction.</p>
+<span class="text-muted-foreground"># 3. (server-side, after re-scoring) fold verified rows into the board</span>
+python web/submit_result.py rebuild --store community_submissions --out web/leaderboard_data.json</pre></div>
+        <p><code>record</code> computes a content-addressed <code>id</code> (sha256 over the required
+          fields, first 16 hex chars) for dedup and tamper-evidence, then writes an entry with
+          <code>verify_status="pending"</code>. The store defaults to
+          <code>community_submissions/</code>.</p>
+        <p>For <strong>live</strong> (this-week) tasks the gold patch and protected test bodies are
+          withheld and scoring happens server-side: submit your patch and it is scored on our side.
+          <strong>Archived</strong> tasks (&ge; 2 weeks old) ship in full for local reproduction.</p>
 
-    <hr>
+        <hr>
 
-    <h2 id="adapter">4. Adding a scaffold / agent &mdash; the <code>HarnessAdapter</code> contract</h2>
-    <p>Any coding-agent harness plugs in by implementing the contract in
-      <code>terminal_daily_bench/adapters/base.py</code>. The contract is deliberately narrow:</p>
-<pre>input  = (task dir, failing test ids, model id/endpoint)
-output = (unified diff, telemetry)</pre>
-    <p>An adapter <strong>only produces a candidate patch &mdash; it must not score.</strong> Keeping
-      scoring out of the adapter is what preserves <code>false_accept = 0</code> as harnesses are
-      added.</p>
+        <h2 id="adapter" class="scroll-m-28 font-mono">4. Adding a scaffold / agent &mdash; the <code>HarnessAdapter</code> contract</h2>
+        <p>Any coding-agent harness plugs in by implementing the contract in
+          <code>terminal_daily_bench/adapters/base.py</code>. The contract is deliberately narrow:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">input  = (task dir, failing test ids, model id/endpoint)
+output = (unified diff, telemetry)</pre></div>
+        <p>An adapter <strong>only produces a candidate patch &mdash; it must not score.</strong> Keeping
+          scoring out of the adapter is what preserves <code>false_accept = 0</code> as harnesses are
+          added.</p>
 
-    <h3 id="interface">The interface</h3>
-<pre>from dataclasses import dataclass, field
+        <h3 id="interface" class="scroll-m-28 font-mono">The interface</h3>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 @dataclass
 class AdapterResult:
-    patch: str                                               <span class="c"># unified diff the harness produced</span>
-    telemetry: Dict[str, Any] = field(default_factory=dict)  <span class="c"># tokens, cost_usd, turns, wall_s</span>
+    patch: str                                               <span class="text-muted-foreground"># unified diff the harness produced</span>
+    telemetry: Dict[str, Any] = field(default_factory=dict)  <span class="text-muted-foreground"># tokens, cost_usd, turns, wall_s</span>
     error: Optional[str] = None
 
 class HarnessAdapter(abc.ABC):
@@ -190,117 +205,164 @@ class HarnessAdapter(abc.ABC):
     @abc.abstractmethod
     def produce_patch(self, task_dir: str, failing_test_ids: List[str],
                       model: str, **kwargs: Any) -&gt; AdapterResult:
-        ...</pre>
-    <p>Rules <code>produce_patch</code> must obey (from the base-class docstring):</p>
-    <ul>
-      <li><strong>MUST NOT</strong> read or write the protected tests or the gold solution.</li>
-      <li><strong>MUST NOT</strong> compute a reward &mdash; scoring is done afterward by the
-        execution gate.</li>
-      <li>A harness failure should be returned as an <code>AdapterResult</code> with
-        <code>error</code> set and an empty <code>patch</code> (a 0-reward attempt),
-        <strong>not</strong> raised as a crash.</li>
-    </ul>
+        ...</pre></div>
+        <p>Rules <code>produce_patch</code> must obey (from the base-class docstring):</p>
+        <ul>
+          <li><strong>MUST NOT</strong> read or write the protected tests or the gold solution.</li>
+          <li><strong>MUST NOT</strong> compute a reward &mdash; scoring is done afterward by the
+            execution gate.</li>
+          <li>A harness failure should be returned as an <code>AdapterResult</code> with
+            <code>error</code> set and an empty <code>patch</code> (a 0-reward attempt),
+            <strong>not</strong> raised as a crash.</li>
+        </ul>
 
-    <h3 id="reference">Reference implementation</h3>
-    <p><code>terminal_daily_bench/adapters/single_shot.py</code> (<code>SingleShotAdapter</code>,
-      <code>name = "single_shot"</code>) is a complete, working example. It:</p>
-    <ol>
-      <li>loads the task (<code>eval.load_task</code>),</li>
-      <li>finds the file(s) the reference solution touches
-        (<code>eval.solution_target_files</code>),</li>
-      <li>reads those files out of the SIF image for context
-        (<code>eval.extract_repo_files</code>),</li>
-      <li>builds a strict prompt (<code>eval.build_prompt</code>) asking for one unified diff,</li>
-      <li>calls the model (<code>eval.call_model</code>) and extracts the diff
-        (<code>eval.extract_diff</code>),</li>
-      <li>returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry &mdash; no
-        scoring.</li>
-    </ol>
-    <p><code>terminal_daily_bench/adapters/terminus.py</code> (<code>TerminusAdapter</code>,
-      <code>name = "terminus"</code>) is a stub documenting where to wire a multi-turn agent
-      (terminus-2 / Claude Code / Aider / OpenHands / SWE-agent). Any harness that accepts a custom
-      OpenAI base URL can drive an arbitrary model unchanged; implement its
-      <code>produce_patch</code> to run your agent CLI and return the resulting diff.</p>
+        <h3 id="reference" class="scroll-m-28 font-mono">Reference implementation</h3>
+        <p><code>terminal_daily_bench/adapters/single_shot.py</code> (<code>SingleShotAdapter</code>,
+          <code>name = "single_shot"</code>) is a complete, working example. It:</p>
+        <ol>
+          <li>loads the task (<code>eval.load_task</code>),</li>
+          <li>finds the file(s) the reference solution touches
+            (<code>eval.solution_target_files</code>),</li>
+          <li>reads those files out of the SIF image for context
+            (<code>eval.extract_repo_files</code>),</li>
+          <li>builds a strict prompt (<code>eval.build_prompt</code>) asking for one unified diff,</li>
+          <li>calls the model (<code>eval.call_model</code>) and extracts the diff
+            (<code>eval.extract_diff</code>),</li>
+          <li>returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry &mdash; no
+            scoring.</li>
+        </ol>
+        <p><code>terminal_daily_bench/adapters/terminus.py</code> (<code>TerminusAdapter</code>,
+          <code>name = "terminus"</code>) is a stub documenting where to wire a multi-turn agent
+          (terminus-2 / Claude Code / Aider / OpenHands / SWE-agent). Any harness that accepts a custom
+          OpenAI base URL can drive an arbitrary model unchanged; implement its
+          <code>produce_patch</code> to run your agent CLI and return the resulting diff.</p>
 
-    <h3 id="registering">Registering it</h3>
-    <p>Adapters are discovered through the registry in
-      <code>terminal_daily_bench/adapters/__init__.py</code>:</p>
-<pre>REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</pre>
-    <p>Add your adapter class to that tuple (and to <code>__all__</code>) with a unique
-      <code>name</code>. Set the <code>scaffold</code> field of your submission records to that
-      <code>name</code> so the leaderboard groups runs by
-      <code>(submitter, model, scaffold)</code>.</p>
+        <h3 id="registering" class="scroll-m-28 font-mono">Registering it</h3>
+        <p>Adapters are discovered through the registry in
+          <code>terminal_daily_bench/adapters/__init__.py</code>:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</pre></div>
+        <p>Add your adapter class to that tuple (and to <code>__all__</code>) with a unique
+          <code>name</code>. Set the <code>scaffold</code> field of your submission records to that
+          <code>name</code> so the leaderboard groups runs by
+          <code>(submitter, model, scaffold)</code>.</p>
 
-    <hr>
+        <hr>
 
-    <h2 id="layout">5. Task package layout (reference)</h2>
-    <p>Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code> (see
-      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>):</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><th><code>task.toml</code></th>
-              <td><code>environment.docker_image</code> (the SIF) &middot;
-                  <code>environment.allow_internet</code></td></tr>
-          <tr><th><code>instruction.md</code></th>
-              <td>the natural-language task shown to the model</td></tr>
-          <tr><th><code>tests/</code></th>
-              <td><code>test.sh</code> runner &middot; <code>test_outputs.py</code> protected
-                  assertions (archive only)</td></tr>
-          <tr><th><code>environment/</code></th><td>Dockerfile / build recipe</td></tr>
-          <tr><th><code>solution/</code></th>
-              <td><code>solve.sh</code> &middot; <code>oracle.patch</code> (archive only &mdash;
-                  withheld for live)</td></tr>
-          <tr><th><code>PROVENANCE.json</code></th>
-              <td>repo &middot; pr_number &middot; base/merge SHAs &middot; upstream license</td></tr>
-          <tr><th><code>record.json</code></th>
-              <td><code>task_id</code>, source PR metadata, <code>fail_to_pass</code>
-                  selectors</td></tr>
-        </tbody>
-      </table>
+        <h2 id="layout" class="scroll-m-28 font-mono">5. Task package layout (reference)</h2>
+        <p>Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code> (see
+          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>):</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><th><code>task.toml</code></th>
+                  <td><code>environment.docker_image</code> (the SIF) &middot;
+                      <code>environment.allow_internet</code></td></tr>
+              <tr><th><code>instruction.md</code></th>
+                  <td>the natural-language task shown to the model</td></tr>
+              <tr><th><code>tests/</code></th>
+                  <td><code>test.sh</code> runner &middot; <code>test_outputs.py</code> protected
+                      assertions (archive only)</td></tr>
+              <tr><th><code>environment/</code></th><td>Dockerfile / build recipe</td></tr>
+              <tr><th><code>solution/</code></th>
+                  <td><code>solve.sh</code> &middot; <code>oracle.patch</code> (archive only &mdash;
+                      withheld for live)</td></tr>
+              <tr><th><code>PROVENANCE.json</code></th>
+                  <td>repo &middot; pr_number &middot; base/merge SHAs &middot; upstream license</td></tr>
+              <tr><th><code>record.json</code></th>
+                  <td><code>task_id</code>, source PR metadata, <code>fail_to_pass</code>
+                      selectors</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The <code>fail_to_pass</code> selectors in <code>record.json</code> are the failing test IDs
+          you pass as <code>failing_test_ids</code> to an adapter. Live tasks ship the failing-test IDs
+          but withhold the <code>solution/</code> directory and the protected
+          <code>test_outputs.py</code> body.</p>
+
+      </article>
+
+      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">next:
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quality-methods/">quality methods</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../task-format/">task format</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quickstart/">quickstart</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../submission.md">markdown source</a></p>
     </div>
-    <p>The <code>fail_to_pass</code> selectors in <code>record.json</code> are the failing test IDs
-      you pass as <code>failing_test_ids</code> to an adapter. Live tasks ship the failing-test IDs
-      but withhold the <code>solution/</code> directory and the protected
-      <code>test_outputs.py</code> body.</p>
 
-    <hr>
-    <p class="mono" style="font-size:12.5px">next:
-      <a href="../quality-methods/">quality methods</a> &middot;
-      <a href="../task-format/">task format</a> &middot;
-      <a href="../quickstart/">quickstart</a> &middot;
-      <a href="../../submission.md">markdown source</a></p>
-  </article>
-  </section>
+    <!-- ===================== on this page ===================== -->
+    <aside id="toc" class="sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem" aria-label="On this page"></aside>
 
-  <section>
-    <div class="sec-head">
-      <h2>community submissions</h2>
-      <span class="eyebrow">verified rows only count toward a rate</span>
-      <a class="more" href="../../submit/">submit &rarr;</a>
+  </div>
+
+  <!-- ===================== community submissions ===================== -->
+  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">community submissions</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs">verified rows only count toward a rate</p>
     </div>
-    <div id="community"><div class="empty">loading submissions&hellip;</div></div>
-  </section>
 
+    <div id="community" class="w-full"></div>
+
+    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../submit/">submit &rarr;</a>
+  </div>
+
+</div>
+</div>
 </main>
 
 <script src="../../assets/site.js" data-root="../.." data-page="docs"></script>
 <script>
+/* the "on this page" rail — built from the section ids already in the prose,
+   so the navigation can never drift from the text. */
+(function buildToc() {
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var hs = document.querySelectorAll(".prose h2[id], .prose h3[id]");
+  if (!hs.length) { toc.style.display = "none"; return; }
+  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
+             '<div class="flex flex-col border-l">'];
+  for (var i = 0; i < hs.length; i++) {
+    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
+    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
+    var pad = hs[i].tagName === "H3" ? "ps-6" : "pl-4";
+    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 ' + pad +
+      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
+      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
+  }
+  out.push("</div>");
+  toc.innerHTML = out.join("");
+})();
+
 (async function () {
   var T = window.TDB;
   var el = document.getElementById("community");
+
+  /* their badge, verbatim; the caller appends the colour pair */
+  var BADGE =
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
+    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
+    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
+    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
+    "transition-[color,box-shadow] overflow-hidden border-transparent ";
+  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
+  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
+  var NOTE =
+    "bg-card text-card-foreground -mx-4 border rounded-none border-x-0 px-6 py-6 " +
+    "font-mono text-sm/relaxed text-muted-foreground sm:mx-0 sm:border-x";
+
   var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
 
   if (!board) {
-    el.innerHTML = '<div class="empty">No leaderboard data published yet ' +
+    el.innerHTML = '<div class="' + NOTE + '">No leaderboard data published yet ' +
       '(<code>leaderboard_data.json</code> is missing).</div>';
     return;
   }
 
   var rows = board.community || [];
   if (!rows.length) {
-    el.innerHTML = '<div class="empty">No community submissions on the ' + board.date +
+    el.innerHTML = '<div class="' + NOTE + '">No community submissions on the ' + board.date +
       ' board yet. Yours would land here as <code>verify_status="pending"</code> and start ' +
       'counting once the gate has replayed the patch.</div>';
     return;
@@ -308,20 +370,29 @@ class HarnessAdapter(abc.ABC):
 
   /* row shape is submit_result.rebuild_leaderboard():
      {submitter, model, scaffold, n, solved, pending, false_accept, rate} */
-  el.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
-    "<th>submitter</th><th>model</th><th>scaffold</th>" +
-    '<th class="num">verified rate</th><th class="num">re-scored</th><th>state</th>' +
+  el.innerHTML =
+    '<div class="bg-card text-card-foreground -mx-4 overflow-x-auto border rounded-none ' +
+      'border-x-0 font-mono text-sm sm:mx-0 sm:border-x">' +
+    '<table class="w-full"><thead class="text-muted-foreground"><tr class="border-b">' +
+      '<th class="px-4 py-3 text-left font-medium">submitter</th>' +
+      '<th class="px-4 py-3 text-left font-medium">model</th>' +
+      '<th class="px-4 py-3 text-left font-medium">scaffold</th>' +
+      '<th class="px-4 py-3 text-right font-medium">verified rate</th>' +
+      '<th class="px-4 py-3 text-right font-medium">re-scored</th>' +
+      '<th class="px-4 py-3 text-left font-medium">state</th>' +
     "</tr></thead><tbody>" +
     rows.map(function (r) {
       var n = r.n || 0, pending = r.pending || 0;
-      return "<tr>" +
-        "<th>" + (r.submitter || "&mdash;") + "</th>" +
-        '<td><span class="mono">' + (r.model || "&mdash;") + "</span></td>" +
-        '<td><span class="pill">' + (r.scaffold || "&mdash;") + "</span></td>" +
-        '<td class="num">' + T.rateCell({ n: n, solved: r.solved || 0 }) + "</td>" +
-        '<td class="num mono">' + (n - pending) + "/" + n + "</td>" +
-        '<td><span class="pill ' + (pending ? "pending" : "pass") + '">' +
-          (pending ? pending + " pending" : "all verified") + "</span></td></tr>";
+      return '<tr class="border-b">' +
+        '<th class="px-4 py-3 text-left font-medium">' + (r.submitter || "&mdash;") + "</th>" +
+        '<td class="px-4 py-3">' + (r.model || "&mdash;") + "</td>" +
+        '<td class="px-4 py-3"><span class="' + BADGE +
+          SECONDARY + '">' + (r.scaffold || "&mdash;") + "</span></td>" +
+        '<td class="px-4 py-3">' + T.rateCell({ n: n, solved: r.solved || 0 }) + "</td>" +
+        '<td class="px-4 py-3 text-right tabular-nums">' + (n - pending) + "/" + n + "</td>" +
+        '<td class="px-4 py-3"><span class="' + BADGE +
+          (pending ? SECONDARY : PRIMARY) +
+          '">' + (pending ? pending + " pending" : "all verified") + "</span></td></tr>";
     }).join("") + "</tbody></table></div>";
 })();
 </script>

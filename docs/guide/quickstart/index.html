@@ -5,88 +5,103 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quickstart — terminal-daily-bench docs</title>
 <meta name="description" content="Install terminal-daily-bench, point it at an OpenAI-compatible endpoint, score a model on a task, run the oracle baseline, and read the quality card.">
+<link rel="stylesheet" href="../../assets/tw.css">
+<link rel="stylesheet" href="../../assets/tw-extra.css">
 <link rel="stylesheet" href="../../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+<div class="flex flex-1 flex-col items-center px-4 py-6">
+<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
 
-  <section class="hero" style="padding-bottom:18px">
-    <p class="eyebrow"><a href="../">docs</a> / quickstart</p>
-    <h1>quickstart</h1>
-    <p class="sub"><strong>terminal-daily-bench</strong> is a living, execution-graded coding-agent
-      benchmark. A model produces a patch; harbor re-lays a protected test suite the model never
-      sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
-      opinion &mdash; so <code>false_accept = 0</code> by construction.</p>
-    <p class="sub">This page walks you from install to a scored result and a quality card.</p>
-  </section>
+  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
 
-  <section style="border-top:none;padding-top:0">
-  <article class="prose">
+    <!-- ===================== the prose column ===================== -->
+    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
 
-    <h2 id="requirements">Requirements</h2>
-    <ul>
-      <li>Python <strong>&ge; 3.10</strong> (the scoring core is pure stdlib; there are no runtime
-        dependencies).</li>
-      <li>An <strong>apptainer/singularity</strong> host for the execution gate. <code>tdb run</code>
-        and <code>tdb oracle</code> invoke <code>harbor run ... -e singularity</code>, which executes
-        each task's SIF image. <code>tdb quality</code> needs neither harbor nor a model.</li>
-      <li>Network access to an <strong>OpenAI-compatible endpoint</strong> (only for
-        <code>tdb run</code> with a real model; <code>tdb oracle</code> needs no model).</li>
-    </ul>
+      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
+        <a class="hover:text-foreground transition-colors" href="../../">home</a>
+        <span>/</span>
+        <a class="hover:text-foreground transition-colors" href="../">docs</a>
+        <span>/</span>
+        <span class="text-foreground">quickstart</span>
+      </nav>
 
-    <h2 id="install">Install</h2>
-    <p>From a checkout of the release bundle:</p>
-<pre>pip install -e .</pre>
-    <p>Or with uv:</p>
-<pre>uv tool install terminal-daily-bench</pre>
-    <p>Either way you get the <code>tdb</code> console script (declared as
-      <code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>). Verify:</p>
-<pre>tdb --version          <span class="c"># -&gt; terminal-daily-bench 0.1.0</span></pre>
+      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
+        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">quickstart</h1>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>terminal-daily-bench</strong> is a living, execution-graded coding-agent
+          benchmark. A model produces a patch; harbor re-lays a protected test suite the model never
+          sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
+          opinion &mdash; so <code>false_accept = 0</code> by construction.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">This page walks you from install to a scored result and a quality card.</p>
+      </header>
 
-    <h2 id="endpoint">Configure the model endpoint</h2>
-    <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint, configured by
-      environment variables so the bundle is not tied to any vendor. Point it at OpenAI, OpenRouter,
-      vLLM, LiteLLM, or a local server:</p>
-<pre>export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="c"># any OpenAI-compatible endpoint</span>
-export OPENAI_API_KEY=sk-...                        <span class="c"># bearer key, read from env, never stored</span></pre>
-    <ul>
-      <li><code>OPENAI_BASE_URL</code> defaults to <code>https://api.openai.com/v1</code> if unset.
-        Requests go to <code>&lt;base&gt;/chat/completions</code>.</li>
-      <li>If the upstream rejects <code>max_tokens</code> (some reasoning models), the client
-        automatically retries with <code>max_completion_tokens</code>.</li>
-    </ul>
+      <article class="prose prose-no-margin">
 
-    <h2 id="score">Score a model on a task</h2>
-<pre>tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6</pre>
-    <p><code>&lt;MODEL&gt;</code> is any model id your endpoint accepts (e.g.
-      <code>gpt-4o-mini</code>). The <code>single_shot_patch</code> scaffold shows the model the task
-      instruction plus the source file(s) the reference solution touches, and asks for a
-      <code>git apply</code>-ready unified diff. That diff is applied inside the task container,
-      harbor re-lays the protected <code>tests/</code>, and the reward is written to
-      <code>result.json</code>.</p>
-    <p>By default the result record is written under <code>./.tdb_work/results/</code> (override the
-      work root with <code>TDB_WORK</code>). Choose an explicit path with <code>--out</code>:</p>
-<pre>tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.json</pre>
-    <p>The record is also printed to stdout.</p>
+        <h2 id="requirements" class="scroll-m-28 font-mono">Requirements</h2>
+        <ul>
+          <li>Python <strong>&ge; 3.10</strong> (the scoring core is pure stdlib; there are no runtime
+            dependencies).</li>
+          <li>An <strong>apptainer/singularity</strong> host for the execution gate. <code>tdb run</code>
+            and <code>tdb oracle</code> invoke <code>harbor run ... -e singularity</code>, which executes
+            each task's SIF image. <code>tdb quality</code> needs neither harbor nor a model.</li>
+          <li>Network access to an <strong>OpenAI-compatible endpoint</strong> (only for
+            <code>tdb run</code> with a real model; <code>tdb oracle</code> needs no model).</li>
+        </ul>
 
-    <h2 id="oracle">Run the oracle baseline</h2>
-    <p>The <code>oracle</code> model id runs the task's real <code>solution/oracle.patch</code>
-      &mdash; no model is called. It is the gate's own baseline and proves the execution gate returns
-      <strong>reward 1.0</strong> on a correct patch:</p>
-<pre>tdb oracle tasks/archive/td-fc90ea8b76d5f6b6</pre>
-    <p>Use this to confirm your apptainer/singularity host is wired up correctly before spending
-      model calls: if <code>oracle</code> does not yield <code>reward = 1.0</code>, the environment,
-      not the model, is the problem.</p>
-    <div class="empty">Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship with
-      <code>solution/</code>. <strong>Live</strong> tasks withhold the gold patch and the protected
-      test bodies and are scored server-side. See
-      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</div>
+        <h2 id="install" class="scroll-m-28 font-mono">Install</h2>
+        <p>From a checkout of the release bundle:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .</pre></div>
+        <p>Or with uv:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">uv tool install terminal-daily-bench</pre></div>
+        <p>Either way you get the <code>tdb</code> console script (declared as
+          <code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>). Verify:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb --version          <span class="text-muted-foreground"># -&gt; terminal-daily-bench 0.1.0</span></pre></div>
 
-    <h2 id="record">The result record</h2>
-    <p>Each run writes one JSON record. A solved run looks like:</p>
-<pre>{
+        <h2 id="endpoint" class="scroll-m-28 font-mono">Configure the model endpoint</h2>
+        <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint, configured by
+          environment variables so the bundle is not tied to any vendor. Point it at OpenAI, OpenRouter,
+          vLLM, LiteLLM, or a local server:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="text-muted-foreground"># any OpenAI-compatible endpoint</span>
+export OPENAI_API_KEY=sk-...                        <span class="text-muted-foreground"># bearer key, read from env, never stored</span></pre></div>
+        <ul>
+          <li><code>OPENAI_BASE_URL</code> defaults to <code>https://api.openai.com/v1</code> if unset.
+            Requests go to <code>&lt;base&gt;/chat/completions</code>.</li>
+          <li>If the upstream rejects <code>max_tokens</code> (some reasoning models), the client
+            automatically retries with <code>max_completion_tokens</code>.</li>
+        </ul>
+
+        <h2 id="score" class="scroll-m-28 font-mono">Score a model on a task</h2>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
+        <p><code>&lt;MODEL&gt;</code> is any model id your endpoint accepts (e.g.
+          <code>gpt-4o-mini</code>). The <code>single_shot_patch</code> scaffold shows the model the task
+          instruction plus the source file(s) the reference solution touches, and asks for a
+          <code>git apply</code>-ready unified diff. That diff is applied inside the task container,
+          harbor re-lays the protected <code>tests/</code>, and the reward is written to
+          <code>result.json</code>.</p>
+        <p>By default the result record is written under <code>./.tdb_work/results/</code> (override the
+          work root with <code>TDB_WORK</code>). Choose an explicit path with <code>--out</code>:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.json</pre></div>
+        <p>The record is also printed to stdout.</p>
+
+        <h2 id="oracle" class="scroll-m-28 font-mono">Run the oracle baseline</h2>
+        <p>The <code>oracle</code> model id runs the task's real <code>solution/oracle.patch</code>
+          &mdash; no model is called. It is the gate's own baseline and proves the execution gate returns
+          <strong>reward 1.0</strong> on a correct patch:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb oracle tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
+        <p>Use this to confirm your apptainer/singularity host is wired up correctly before spending
+          model calls: if <code>oracle</code> does not yield <code>reward = 1.0</code>, the environment,
+          not the model, is the problem.</p>
+        <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed">Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship with
+          <code>solution/</code>. <strong>Live</strong> tasks withhold the gold patch and the protected
+          test bodies and are scored server-side. See
+          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</div>
+
+        <h2 id="record" class="scroll-m-28 font-mono">The result record</h2>
+        <p>Each run writes one JSON record. A solved run looks like:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
   "model": "gpt-4o-mini",
   "task": "td-fc90ea8b76d5f6b6",
   "task_dir": "/abs/path/tasks/archive/td-fc90ea8b76d5f6b6",
@@ -105,90 +120,140 @@ export OPENAI_API_KEY=sk-...                        <span class="c"># bearer key
     "model_patch_touched_tests": false,
     "false_accept": 0
   }
-}</pre>
-    <p>Field notes:</p>
-    <ul>
-      <li><code>scaffold</code> is <code>single_shot_patch</code> for a model run,
-        <code>oracle_baseline</code> for <code>tdb oracle</code>.</li>
-      <li><code>reward</code> is the protected-test outcome; <code>solved</code> is
-        <code>reward &gt;= 0.999</code>.</li>
-      <li><code>patch_applied</code> is <code>true</code> once a reward is parsed,
-        <code>false</code> if the patch failed to apply, <code>null</code> if the gate never reached
-        the apply step.</li>
-      <li>Runs are BAD-safe: any failure (no diff, patch does not apply, hung trial, unparseable
-        result) yields <code>reward = 0.0</code> / <code>solved = false</code> with the cause in
-        <code>error</code> &mdash; never a positive score on a crash.</li>
-    </ul>
+}</pre></div>
+        <p>Field notes:</p>
+        <ul>
+          <li><code>scaffold</code> is <code>single_shot_patch</code> for a model run,
+            <code>oracle_baseline</code> for <code>tdb oracle</code>.</li>
+          <li><code>reward</code> is the protected-test outcome; <code>solved</code> is
+            <code>reward &gt;= 0.999</code>.</li>
+          <li><code>patch_applied</code> is <code>true</code> once a reward is parsed,
+            <code>false</code> if the patch failed to apply, <code>null</code> if the gate never reached
+            the apply step.</li>
+          <li>Runs are BAD-safe: any failure (no diff, patch does not apply, hung trial, unparseable
+            result) yields <code>reward = 0.0</code> / <code>solved = false</code> with the cause in
+            <code>error</code> &mdash; never a positive score on a crash.</li>
+        </ul>
 
-    <h3 id="fa-block">The <code>false_accept_check</code> block</h3>
-    <p>This block records <em>why</em> the score cannot be gamed by the model:</p>
-    <ul>
-      <li><code>gate: "harbor_protected_tests"</code> &mdash; scoring is the harbor execution gate
-        and nothing else.</li>
-      <li><code>reward_source</code> &mdash; the reward is read from <code>result.json</code> with
-        the same reader the admission gate uses
-        (<code>harbor_score.read_harbor_reward</code>), i.e. byte-for-byte execution truth.</li>
-      <li><code>protected_tests_relaid_by_harbor: true</code> &mdash; the trusted
-        <code>tests/</code> are re-laid from the task package <em>after</em> the patch, so a patch
-        that edits tests only changes a discarded workspace.</li>
-      <li><code>model_is_judge: false</code> &mdash; the model is the subject under test, never the
-        judge.</li>
-      <li><code>model_patch_touched_tests</code> &mdash; flags whether the model's diff touched any
-        <code>test</code>-named path (informational; it cannot affect the score).</li>
-      <li><code>false_accept: 0</code> &mdash; a property of execution scoring, held by
-        construction.</li>
-    </ul>
+        <h3 id="fa-block" class="scroll-m-28 font-mono">The <code>false_accept_check</code> block</h3>
+        <p>This block records <em>why</em> the score cannot be gamed by the model:</p>
+        <ul>
+          <li><code>gate: "harbor_protected_tests"</code> &mdash; scoring is the harbor execution gate
+            and nothing else.</li>
+          <li><code>reward_source</code> &mdash; the reward is read from <code>result.json</code> with
+            the same reader the admission gate uses
+            (<code>harbor_score.read_harbor_reward</code>), i.e. byte-for-byte execution truth.</li>
+          <li><code>protected_tests_relaid_by_harbor: true</code> &mdash; the trusted
+            <code>tests/</code> are re-laid from the task package <em>after</em> the patch, so a patch
+            that edits tests only changes a discarded workspace.</li>
+          <li><code>model_is_judge: false</code> &mdash; the model is the subject under test, never the
+            judge.</li>
+          <li><code>model_patch_touched_tests</code> &mdash; flags whether the model's diff touched any
+            <code>test</code>-named path (informational; it cannot affect the score).</li>
+          <li><code>false_accept: 0</code> &mdash; a property of execution scoring, held by
+            construction.</li>
+        </ul>
 
-    <h2 id="quality">Aggregate a quality card</h2>
-    <p>Collect one or more result records into a single file (JSON Lines, one record per line, or a
-      JSON array) and read the multi-angle quality card:</p>
-<pre>cat results/*.json | jq -c . &gt; results.jsonl
-tdb quality results.jsonl</pre>
-    <p><code>tdb quality</code> builds a (task &times; model) solved matrix and needs
-      <strong>&ge; 1 task and &ge; 2 models</strong> (records with <code>model: "oracle"</code> are
-      excluded from the matrix). Example output:</p>
-<pre>tasks=40 models=6
+        <h2 id="quality" class="scroll-m-28 font-mono">Aggregate a quality card</h2>
+        <p>Collect one or more result records into a single file (JSON Lines, one record per line, or a
+          JSON array) and read the multi-angle quality card:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">cat results/*.json | jq -c . &gt; results.jsonl
+tdb quality results.jsonl</pre></div>
+        <p><code>tdb quality</code> builds a (task &times; model) solved matrix and needs
+          <strong>&ge; 1 task and &ge; 2 models</strong> (records with <code>model: "oracle"</code> are
+          excluded from the matrix). Example output:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks=40 models=6
   D(discrimination)=0.517  C(coverage)=0.750  M(monotonicity)=0.912
   IRT test-information=8.431  KR-20 reliability=0.78
   D 95% CI=[0.402, 0.631]
-  readiness: NOT-ready (bottleneck=discrimination, need ~64 tasks)</pre>
-    <p>The final line of stdout is the full card as JSON (<code>msq</code>, <code>irt</code>,
-      <code>reliability</code>, <code>readiness</code>) for machine consumption. The metrics come
-      from <code>terminal_daily_bench.quality</code> &mdash; discrimination (<code>D</code>),
-      difficulty coverage (<code>C</code>), monotonicity (<code>M</code>), 2PL IRT
-      test-information, KR-20 reliability, a bootstrap CI on <code>D</code>, and a readiness verdict
-      with the bottleneck axis and a recommended task count.</p>
+  readiness: NOT-ready (bottleneck=discrimination, need ~64 tasks)</pre></div>
+        <p>The final line of stdout is the full card as JSON (<code>msq</code>, <code>irt</code>,
+          <code>reliability</code>, <code>readiness</code>) for machine consumption. The metrics come
+          from <code>terminal_daily_bench.quality</code> &mdash; discrimination (<code>D</code>),
+          difficulty coverage (<code>C</code>), monotonicity (<code>M</code>), 2PL IRT
+          test-information, KR-20 reliability, a bootstrap CI on <code>D</code>, and a readiness verdict
+          with the bottleneck axis and a recommended task count.</p>
 
-    <h2 id="submitting">Submitting results</h2>
-    <p>Every submission is <strong>re-scored by the same execution gate on ingest</strong> &mdash; a
-      claimed number is never trusted, only the patch is replayed. See
-      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>../CONTRIBUTING.md</code></a>.</p>
+        <h2 id="submitting" class="scroll-m-28 font-mono">Submitting results</h2>
+        <p>Every submission is <strong>re-scored by the same execution gate on ingest</strong> &mdash; a
+          claimed number is never trusted, only the patch is replayed. See
+          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>../CONTRIBUTING.md</code></a>.</p>
 
-    <hr>
-    <p class="mono" style="font-size:12.5px">next:
-      <a href="../task-format/">task format</a> &middot;
-      <a href="../submission/">submission</a> &middot;
-      <a href="../quality-methods/">quality methods</a> &middot;
-      <a href="../../quickstart.md">markdown source</a></p>
-  </article>
-  </section>
+      </article>
 
-  <section>
-    <div class="sec-head">
-      <h2>a task id you can paste</h2>
-      <span class="eyebrow">from the published catalogue</span>
-      <a class="more" href="../../registry/">all tasks &rarr;</a>
+      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">next:
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../task-format/">task format</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../submission/">submission</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quality-methods/">quality methods</a> &middot;
+        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../quickstart.md">markdown source</a></p>
     </div>
-    <div id="task-ids"><div class="empty">loading task ids&hellip;</div></div>
-  </section>
 
+    <!-- ===================== on this page ===================== -->
+    <aside id="toc" class="sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem" aria-label="On this page"></aside>
+
+  </div>
+
+  <!-- ===================== a task id you can paste ===================== -->
+  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">a task id you can paste</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs">from the published catalogue</p>
+    </div>
+
+    <div id="task-ids" class="w-full"></div>
+
+    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../registry/">all tasks &rarr;</a>
+  </div>
+
+</div>
+</div>
 </main>
 
 <script src="../../assets/site.js" data-root="../.." data-page="docs"></script>
 <script>
+/* the "on this page" rail — built from the section ids already in the prose,
+   so the navigation can never drift from the text. */
+(function buildToc() {
+  var toc = document.getElementById("toc");
+  if (!toc) return;
+  var hs = document.querySelectorAll(".prose h2[id], .prose h3[id]");
+  if (!hs.length) { toc.style.display = "none"; return; }
+  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
+             '<div class="flex flex-col border-l">'];
+  for (var i = 0; i < hs.length; i++) {
+    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
+    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
+    var pad = hs[i].tagName === "H3" ? "ps-6" : "pl-4";
+    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 ' + pad +
+      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
+      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
+  }
+  out.push("</div>");
+  toc.innerHTML = out.join("");
+})();
+
 (async function () {
   var T = window.TDB;
   var el = document.getElementById("task-ids");
+
+  var CARD =
+    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
+    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
+    "transition-all duration-200 sm:-mr-px sm:border-x";
+  /* their badge, verbatim; the caller appends the colour pair */
+  var BADGE =
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
+    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
+    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
+    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
+    "transition-[color,box-shadow] overflow-hidden border-transparent ";
+  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
+  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
+  var NOTE =
+    "bg-card text-card-foreground -mx-4 border rounded-none border-x-0 px-6 py-6 " +
+    "font-mono text-sm/relaxed text-muted-foreground sm:mx-0 sm:border-x";
 
   var results = await Promise.all([
     T.getJSON("site_data.json").catch(function () { return null; }),
@@ -205,30 +270,43 @@ tdb quality results.jsonl</pre>
   }
 
   if (!ids.length) {
-    el.innerHTML = '<div class="empty">No task catalogue published yet. The commands on this page ' +
-      'work against any task directory you have locally; run <code>tdb publish</code> to generate ' +
-      '<code>site_data.json</code>.</div>';
+    el.innerHTML = '<div class="' + NOTE + '">No task catalogue published yet. The commands on this ' +
+      'page work against any task directory you have locally; run <code>tdb publish</code> to ' +
+      'generate <code>site_data.json</code>.</div>';
     return;
   }
 
-  el.className = "grid c3";
-  el.innerHTML = ids.map(function (t) {
-    var pill = "", cmd = "";
-    if (t.status === "live") {
-      pill = '<span class="pill pending">live</span>';
-      cmd = "tdb run &lt;MODEL&gt; tasks/live/" + t.id;
-    } else if (t.status === "archive") {
-      pill = '<span class="pill pass">archive</span>';
-      cmd = "tdb oracle tasks/archive/" + t.id;
-    } else {
-      pill = '<span class="pill">task</span>';
-      cmd = "tdb run &lt;MODEL&gt; tasks/&lt;archive|live&gt;/" + t.id;
-    }
-    return '<a class="card" href="' + T.ROOT + '/registry/' + encodeURIComponent(t.id) + '/">' +
-      '<div class="tags">' + pill + "</div>" +
-      '<h3 class="mono" style="font-size:13px">' + t.id + "</h3>" +
-      '<p class="mono" style="font-size:11.5px">' + cmd + "</p></a>";
-  }).join("");
+  el.innerHTML =
+    '<div class="-mx-4 grid grid-cols-1 sm:mx-0 md:grid-cols-2 lg:grid-cols-3">' +
+    ids.map(function (t) {
+      var pill, cmd;
+      if (t.status === "live") {
+        pill = '<span class="' + BADGE + SECONDARY + '">live</span>';
+        cmd = "tdb run &lt;MODEL&gt; tasks/live/" + t.id;
+      } else if (t.status === "archive") {
+        pill = '<span class="' + BADGE + PRIMARY + '">archive</span>';
+        cmd = "tdb oracle tasks/archive/" + t.id;
+      } else {
+        pill = '<span class="' + BADGE + SECONDARY + '">task</span>';
+        cmd = "tdb run &lt;MODEL&gt; tasks/&lt;archive|live&gt;/" + t.id;
+      }
+      return '<div data-slot="card" class="' + CARD + '">' +
+        '<a class="flex flex-1" href="' + T.ROOT + "/registry/" + encodeURIComponent(t.id) + '/">' +
+          '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
+            '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
+              'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
+              'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
+              '<div class="mb-2 flex items-center gap-2">' +
+                '<div data-slot="card-title" class="leading-none font-semibold">' +
+                  '<h2 class="line-clamp-1 font-mono text-sm font-medium">' + t.id + "</h2></div></div>" +
+              '<div class="flex gap-2">' + pill + "</div>" +
+            "</div>" +
+            '<div data-slot="card-content" class="px-6">' +
+              '<p class="text-muted-foreground font-mono text-xs wrap-anywhere">' + cmd + "</p>" +
+            "</div>" +
+          "</div>" +
+        "</a></div>";
+    }).join("") + "</div>";
 })();
 </script>
 </body>

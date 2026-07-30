@@ -1,255 +1,65 @@
-/* terminal-daily-bench — shared design system.
-   A sibling of tbench.ai's language (dark, minimal, monospace-accented, card-based)
-   with our own semantics: colour carries GATE STATE, not decoration.
-     pass    = an execution-verified solve
-     pending = submitted, awaiting re-score by the gate
-   The recurring signature is the DAY RAIL: suites are date-versioned because the
-   benchmark is living, so the calendar IS the navigation. */
+/* terminal-daily-bench — thin additive layer.
+   -------------------------------------------------------------------------
+   Everything visual comes from the vendored Tailwind build (tw.css +
+   tw-extra.css): the design tokens live in :root / .dark there, and every
+   spacing, border, radius, colour and type utility we use is already
+   compiled. This file therefore holds ONLY what that build cannot give us:
 
+     1. the font stacks, because its --font-* values point at webfont
+        variables that a self-contained, request-free site can never define;
+     2. color-scheme, so form controls and scrollbars follow the theme;
+     3. the day rail — our one component, restyled to the same idiom
+        (square, hairline, mono, no shadow).
+
+   If something here starts to look like a component, it belongs in their
+   utilities on their DOM structure instead.
+   ------------------------------------------------------------------------- */
+
+
+/* 1 -----------------------------------------------------------------------
+   The build resolves --font-sans / --font-mono through --font-geist-sans,
+   --font-geist-mono and --font-google-sans-code, which are injected by a
+   webfont loader we deliberately do not run. Undefined custom properties
+   make every font-family declaration that references them invalid at
+   computed-value time — the page would fall back to the browser's default
+   serif. Defining the three variables as the documented fallback stacks
+   restores their exact intent with zero requests.
+   ------------------------------------------------------------------------- */
 :root {
-  /* ink */
-  --ink:      #0b0e11;   /* page */
-  --panel:    #12171c;   /* cards */
-  --panel-2:  #171e25;   /* raised */
-  --line:     #232c34;   /* hairlines */
-  --line-2:   #2f3a44;
-
-  /* text */
-  --fg:       #e6edf3;
-  --muted:    #8b99a6;
-  --faint:    #5d6a76;
-
-  /* gate state (semantic, never decorative) */
-  --pass:     #3fb950;   /* execution-verified */
-  --pass-dim: #12261a;
-  --pending:  #d29922;   /* awaiting re-score */
-  --pending-dim: #221a08;
-  --crit:     #e5534b;
-
-  --link:     #58a6ff;
-
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
-
-  --w: 1120px;
-  --r: 10px;
+  --font-geist-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                     "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
+                     sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco,
+                     Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-google-sans-code: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --ink: #ffffff; --panel: #f7f9fb; --panel-2: #eef2f6;
-    --line: #dde4ea; --line-2: #c7d1da;
-    --fg: #10161c; --muted: #5b6874; --faint: #8a97a3;
-    --pass: #1a7f37; --pass-dim: #e8f5ec;
-    --pending: #9a6700; --pending-dim: #fdf5e3;
-    --crit: #b42318; --link: #0c6fb8;
-  }
-}
-:root[data-theme="light"] {
-  --ink: #ffffff; --panel: #f7f9fb; --panel-2: #eef2f6;
-  --line: #dde4ea; --line-2: #c7d1da;
-  --fg: #10161c; --muted: #5b6874; --faint: #8a97a3;
-  --pass: #1a7f37; --pass-dim: #e8f5ec;
-  --pending: #9a6700; --pending-dim: #fdf5e3;
-  --crit: #b42318; --link: #0c6fb8;
-}
 
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; background: var(--ink); color: var(--fg);
-  font: 15px/1.6 var(--sans);
-  font-feature-settings: "kern" 1;
-}
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; }
-:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
-.mono { font-family: var(--mono); }
-.wrap { max-width: var(--w); margin: 0 auto; padding: 0 20px; }
+/* 2 ----------------------------------------------------------------------- */
+:root { color-scheme: light; }
+:root.dark { color-scheme: dark; }
 
-/* ---------- top nav (slim, sticky) ---------- */
-.nav {
-  position: sticky; top: 0; z-index: 40;
-  background: color-mix(in srgb, var(--ink) 88%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--line);
-}
-.nav .wrap { display: flex; align-items: center; gap: 22px; height: 54px; }
-.brand {
-  font-family: var(--mono); font-size: 14px; font-weight: 600;
-  color: var(--fg); letter-spacing: -.2px; white-space: nowrap;
-}
-.brand:hover { text-decoration: none; }
-.brand .dot { color: var(--pass); }
-.nav nav { display: flex; gap: 18px; margin-left: auto; align-items: center; flex-wrap: wrap; }
-.nav nav a {
-  font-family: var(--mono); font-size: 12.5px; color: var(--muted);
-  padding: 4px 0; border-bottom: 1px solid transparent;
-}
-.nav nav a:hover { color: var(--fg); text-decoration: none; border-bottom-color: var(--line-2); }
-.nav nav a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--pass); }
-.theme-btn {
-  font-family: var(--mono); font-size: 11.5px; color: var(--muted); cursor: pointer;
-  background: none; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
-}
-.theme-btn:hover { color: var(--fg); border-color: var(--line-2); }
 
-/* ---------- type ---------- */
-h1, h2, h3 { font-family: var(--mono); font-weight: 650; letter-spacing: -.4px; text-wrap: balance; }
-h1 { font-size: clamp(26px, 4.2vw, 40px); line-height: 1.15; margin: 0 0 14px; }
-h2 { font-size: 19px; margin: 0 0 6px; }
-h3 { font-size: 14.5px; margin: 0 0 4px; }
-.eyebrow {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--faint);
+/* 3 -----------------------------------------------------------------------
+   THE DAY RAIL — the living-benchmark signature: suites are date-versioned,
+   so the calendar is the navigation. Layout, borders, type and hover all come
+   from their utilities in site.js; only the horizontal scroller's chrome and
+   the selected-day marker need real CSS.
+   ------------------------------------------------------------------------- */
+.tdb-rail {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  overscroll-behavior-x: contain;
 }
-.lead { color: var(--muted); max-width: 68ch; margin: 0 0 14px; }
-section { padding: 40px 0; border-top: 1px solid var(--line); }
-section:first-of-type { border-top: none; }
-.sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-.sec-head .more { margin-left: auto; font-family: var(--mono); font-size: 12px; }
+.tdb-rail::-webkit-scrollbar { height: 6px; }
+.tdb-rail::-webkit-scrollbar-track { background: transparent; }
+.tdb-rail::-webkit-scrollbar-thumb { background: var(--border); }
 
-/* ---------- hero ---------- */
-.hero { padding: 56px 0 34px; border-top: none; }
-.hero h1 { text-transform: lowercase; }
-.hero h1 .accent { color: var(--pass); }
-.hero .sub { font-size: 16.5px; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
-.cta { display: flex; gap: 10px; flex-wrap: wrap; }
-.btn {
-  font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 8px;
-  border: 1px solid var(--line-2); color: var(--fg); background: var(--panel);
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.btn:hover { border-color: var(--pass); text-decoration: none; }
-.btn.primary { background: var(--pass-dim); border-color: var(--pass); color: var(--pass); }
+.tdb-rail > :last-child { border-right-width: 0; }
 
-/* ---------- THE SIGNATURE: day rail ----------
-   Suites are date-versioned because the benchmark is living. The rail is both the
-   identity and the navigation: each cell is one day's sealed suite. */
-.rail-wrap { border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); overflow: hidden; }
-.rail-head {
-  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-  border-bottom: 1px solid var(--line); background: var(--panel-2);
+.tdb-day { box-shadow: inset 0 -2px 0 0 transparent; }
+.tdb-day[data-active="true"] {
+  background: var(--secondary);
+  box-shadow: inset 0 -2px 0 0 var(--foreground);
 }
-.rail-head .t { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.rail-head .seal { margin-left: auto; }
-.rail { display: flex; gap: 0; overflow-x: auto; scrollbar-width: thin; }
-.day {
-  flex: 0 0 auto; min-width: 92px; padding: 12px 14px; border-right: 1px solid var(--line);
-  display: flex; flex-direction: column; gap: 3px; color: var(--fg);
-}
-.day:last-child { border-right: none; }
-.day:hover { background: var(--panel-2); text-decoration: none; }
-.day .d { font-family: var(--mono); font-size: 12.5px; }
-.day .n { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
-.day.on { background: var(--pass-dim); box-shadow: inset 0 -2px 0 var(--pass); }
-.day.on .d { color: var(--pass); }
-.day.future { opacity: .45; }
-
-/* ---------- the FA seal (recurring integrity stamp) ---------- */
-.seal {
-  display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px;
-  border: 1px solid var(--pass); color: var(--pass); background: var(--pass-dim);
-  border-radius: 999px; padding: 3px 10px; white-space: nowrap;
-}
-.seal b { font-weight: 700; }
-
-/* ---------- cards ---------- */
-.grid { display: grid; gap: 12px; }
-.grid.c2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.grid.c3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.card {
-  border: 1px solid var(--line); border-radius: var(--r); background: var(--panel);
-  padding: 16px; display: flex; flex-direction: column; gap: 8px; color: var(--fg);
-}
-a.card:hover { border-color: var(--line-2); background: var(--panel-2); text-decoration: none; }
-.card p { margin: 0; color: var(--muted); font-size: 13.5px; }
-.card .big { font-family: var(--mono); font-size: 26px; color: var(--fg); line-height: 1; }
-.card .foot { margin-top: auto; padding-top: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
-
-/* ---------- pills / tags ---------- */
-.tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.pill {
-  font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 999px;
-  border: 1px solid var(--line-2); color: var(--muted); background: var(--panel-2);
-  white-space: nowrap;
-}
-.pill.pass    { color: var(--pass);    border-color: var(--pass);    background: var(--pass-dim); }
-.pill.pending { color: var(--pending); border-color: var(--pending); background: var(--pending-dim); }
-.pill.lang    { color: var(--link); border-color: color-mix(in srgb, var(--link) 45%, transparent); }
-
-/* ---------- stat strip ---------- */
-.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px;
-  background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-.strip .cell { background: var(--panel); padding: 13px 15px; }
-.strip .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-.strip .v { font-family: var(--mono); font-size: 21px; margin-top: 3px; }
-.strip .v small { font-size: 12px; color: var(--faint); }
-
-/* ---------- tables ---------- */
-.table-wrap { border: 1px solid var(--line); border-radius: var(--r); overflow: auto; background: var(--panel); }
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-thead th {
-  position: sticky; top: 0; background: var(--panel-2); text-align: left; padding: 10px 12px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--faint); border-bottom: 1px solid var(--line); white-space: nowrap;
-}
-tbody td, tbody th { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; font-weight: 400; }
-tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
-tbody tr:hover { background: var(--panel-2); }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
-.rank { color: var(--faint); font-family: var(--mono); width: 34px; }
-
-/* rate cell with a Wilson interval */
-.rate { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-.rate .n { color: var(--faint); font-size: 11.5px; min-width: 42px; text-align: right; }
-.rate .bar { position: relative; width: 96px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
-.rate .bar i { position: absolute; top: 0; bottom: 0; background: var(--pass); opacity: .35; }
-.rate .bar b { position: absolute; top: -2px; width: 2px; height: 10px; background: var(--pass); }
-.rate .pct { min-width: 46px; text-align: right; }
-.dash { color: var(--faint); }
-
-/* ---------- code ---------- */
-pre {
-  font-family: var(--mono); font-size: 12.5px; line-height: 1.65; margin: 0;
-  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
-  padding: 14px 16px; overflow-x: auto; color: var(--fg);
-}
-pre .c { color: var(--faint); }
-pre .k { color: var(--pass); }
-code:not(pre code) {
-  font-family: var(--mono); font-size: .92em; background: var(--panel-2);
-  border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
-}
-
-/* ---------- prose (docs pages) ---------- */
-.prose { max-width: 76ch; }
-.prose h2 { margin: 30px 0 8px; }
-.prose h3 { margin: 22px 0 6px; }
-.prose p, .prose li { color: var(--muted); }
-.prose li { margin: 3px 0; }
-.prose table { margin: 12px 0; }
-.prose hr { border: none; border-top: 1px solid var(--line); margin: 26px 0; }
-
-/* ---------- footer ---------- */
-footer {
-  border-top: 1px solid var(--line); margin-top: 48px; padding: 26px 0 40px;
-  color: var(--faint); font-size: 12.5px;
-}
-footer .row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-footer .row .sp { margin-left: auto; }
-footer a { color: var(--muted); }
-
-.empty {
-  border: 1px dashed var(--line-2); border-radius: var(--r); padding: 18px;
-  color: var(--muted); font-size: 13.5px; background: var(--panel);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .rate .bar i, .rate .bar b { transition: all .45s cubic-bezier(.2,.7,.2,1); }
-}
-@media (max-width: 640px) {
-  .nav .wrap { height: auto; padding-top: 10px; padding-bottom: 10px; flex-wrap: wrap; }
-  .nav nav { margin-left: 0; width: 100%; }
-  .hero { padding: 34px 0 24px; }
-}
+.tdb-day[data-active="true"] > :first-child { font-weight: 500; }

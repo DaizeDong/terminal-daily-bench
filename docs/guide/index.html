@@ -5,140 +5,301 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>docs — terminal-daily-bench</title>
 <meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Four guides: quickstart, task format, submission, quality methods.">
+<link rel="stylesheet" href="../assets/tw.css">
+<link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+<div class="flex flex-1 flex-col items-center px-4 py-6">
+<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
 
-  <section class="hero">
-    <p class="eyebrow">docs</p>
-    <h1>run the benchmark, read the score, submit a patch</h1>
-    <p class="sub">A model produces a patch. Harbor re-lays a protected test suite the model never
-      sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
-      opinion. These four guides cover install, the on-disk task package, the submission contract,
-      and how we measure the benchmark itself.</p>
-    <div class="cta">
-      <a class="btn primary" href="quickstart/">quickstart</a>
-      <a class="btn" href="../submit/">submit results</a>
-      <a class="btn" href="https://github.com/DaizeDong/terminal-daily-bench">source</a>
+  <!-- ===================== breadcrumb ===================== -->
+  <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
+    <a class="hover:text-foreground transition-colors" href="../">home</a>
+    <span>/</span>
+    <span class="text-foreground">docs</span>
+  </nav>
+
+  <!-- ===================== hero ===================== -->
+  <div class="flex flex-col justify-center gap-16 pt-12 sm:pt-24 sm:pb-0">
+    <div class="space-y-8">
+      <div class="flex flex-col items-center gap-2">
+        <p class="text-muted-foreground font-mono text-sm">docs</p>
+      </div>
+      <h2 class="text-center font-mono text-3xl/tight font-medium tracking-tighter text-balance sm:mb-8 sm:text-6xl/tight">run the benchmark, read the score, submit a patch</h2>
+      <p class="text-fd-muted-foreground mx-auto max-w-3xl text-center font-mono tracking-tight text-balance sm:text-xl/relaxed">A model produces a patch. Harbor re-lays a protected test suite the model never
+        sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
+        opinion. These four guides cover install, the on-disk task package, the submission contract,
+        and how we measure the benchmark itself.</p>
     </div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>install and first run</h2>
-      <span class="eyebrow">python &ge; 3.10 &middot; apptainer/singularity for the gate</span>
-      <a class="more" href="quickstart/">full quickstart &rarr;</a>
+    <div class="mx-auto grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base rounded-none" href="quickstart/">quickstart</a>
+      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../submit/">submit results</a>
+      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">source</a>
+      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard</a>
     </div>
-<pre><span class="c"># the scoring core is pure stdlib; there are no runtime dependencies</span>
-pip install -e .                     <span class="c"># or: uv tool install terminal-daily-bench</span>
-tdb --version                        <span class="c"># -> terminal-daily-bench 0.1.0</span>
+  </div>
 
-<span class="c"># any OpenAI-compatible endpoint: OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
+  <!-- ===================== install and first run ===================== -->
+  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">install and first run</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs">python &ge; 3.10 &middot; apptainer/singularity for the gate</p>
+    </div>
+
+    <div data-slot="card" class="bg-card text-card-foreground -mx-4 flex w-full flex-col gap-6 self-stretch border rounded-none border-x-0 py-6 font-mono shadow-none sm:mx-0 sm:border-x">
+      <div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between">
+        <p class="font-mono text-sm">first commands</p>
+        <a class="text-muted-foreground hover:text-foreground inline-flex shrink-0 items-center justify-center gap-2 font-mono text-sm font-normal whitespace-nowrap underline-offset-4 transition-all hover:underline" href="quickstart/">full quickstart &rarr;</a>
+      </div>
+      <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border h-px w-full shrink-0"></div>
+      <div data-slot="card-content" class="px-6">
+        <pre class="overflow-x-auto font-mono text-sm/relaxed"><span class="text-muted-foreground"># the scoring core is pure stdlib; there are no runtime dependencies</span>
+pip install -e .                     <span class="text-muted-foreground"># or: uv tool install terminal-daily-bench</span>
+tdb --version                        <span class="text-muted-foreground"># -&gt; terminal-daily-bench 0.1.0</span>
+
+<span class="text-muted-foreground"># any OpenAI-compatible endpoint: OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
 export OPENAI_BASE_URL=https://api.openai.com/v1
 export OPENAI_API_KEY=sk-...
 
-<span class="c"># baseline first: the task's own oracle.patch -> reward 1.0, no model call</span>
-<span class="k">tdb</span> oracle  tasks/archive/&lt;task-id&gt;
+<span class="text-muted-foreground"># baseline first: the task's own oracle.patch -&gt; reward 1.0, no model call</span>
+tdb oracle  tasks/archive/&lt;task-id&gt;
 
-<span class="c"># then score a model with the single_shot_patch scaffold</span>
-<span class="k">tdb</span> run     &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;
+<span class="text-muted-foreground"># then score a model with the single_shot_patch scaffold</span>
+tdb run     &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;
 
-<span class="c"># multi-angle quality card (needs >=1 task and >=2 models)</span>
-<span class="k">tdb</span> quality results.jsonl</pre>
-    <p class="lead" style="margin-top:12px">If <code>tdb oracle</code> does not yield
-      <code>reward = 1.0</code>, the environment &mdash; not the model &mdash; is the problem.</p>
-    <div id="live-task" style="margin-top:14px"></div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>guides</h2>
-      <span class="eyebrow">four pages, each mapped to code in the bundle</span>
+<span class="text-muted-foreground"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models)</span>
+tdb quality results.jsonl</pre>
+      </div>
+      <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border h-px w-full shrink-0"></div>
+      <div data-slot="card-footer" class="flex items-center px-6">
+        <p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono text-sm/relaxed">If <code>tdb oracle</code> does not yield
+          <code>reward = 1.0</code>, the environment &mdash; not the model &mdash; is the problem.</p>
+      </div>
     </div>
-    <div class="grid c2">
-      <a class="card" href="quickstart/">
-        <div class="tags"><span class="pill">cli</span><span class="pill pass">execution gate</span></div>
-        <h3>quickstart</h3>
-        <p>Requirements, install, endpoint configuration, scoring one task, the oracle baseline,
-          the result record and its <code>false_accept_check</code> block, and the quality card.</p>
-        <span class="foot">install &rarr; scored result &rarr; quality card</span>
-      </a>
-      <a class="card" href="task-format/">
-        <div class="tags"><span class="pill">schema</span><span class="pill pending">live</span><span class="pill pass">archive</span></div>
-        <h3>task format</h3>
-        <p>The on-disk package: <code>task.toml</code>, <code>instruction.md</code>,
-          <code>tests/</code>, <code>environment/</code>, <code>solution/</code>,
-          <code>PROVENANCE.json</code>, <code>record.json</code> &mdash; plus archive vs. live and
-          how scoring re-lays the protected tests.</p>
-        <span class="foot">one directory per task, harbor-native</span>
-      </a>
-      <a class="card" href="submission/">
-        <div class="tags"><span class="pill">jsonl</span><span class="pill">adapters</span></div>
-        <h3>submission</h3>
-        <p>The submission schema and validation rules, why ingest re-scores every patch, and the
-          <code>HarnessAdapter</code> contract for plugging in your own scaffold or multi-turn
-          agent.</p>
-        <span class="foot">a claimed reward is never trusted</span>
-      </a>
-      <a class="card" href="quality-methods/">
-        <div class="tags"><span class="pill">msq</span><span class="pill">irt</span><span class="pill">kr-20</span></div>
-        <h3>quality methods</h3>
-        <p>Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle
-          coverage, diversity, 2PL test information, KR-20 reliability, bootstrap intervals,
-          required-N power, and the daily readiness verdict.</p>
-        <span class="foot">does the task set separate models at all?</span>
-      </a>
-    </div>
-  </section>
 
-  <section>
-    <div class="sec-head">
-      <h2>what you are scoring against</h2>
-      <span class="eyebrow" id="board-sub">today's suite</span>
-      <a class="more" href="../leaderboard/">leaderboard &rarr;</a>
+    <div id="live-task" class="mt-8 w-full"></div>
+  </div>
+
+  <!-- ===================== guides ===================== -->
+  <div class="flex min-h-[90vh] flex-col justify-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">guides</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs">four pages, each mapped to code in the bundle</p>
     </div>
-    <div id="strip"></div>
-    <p class="lead" style="margin-top:12px">Archived tasks (&ge; 2 weeks old) ship in full, including
+
+    <div class="-mx-4 flex flex-col gap-12 sm:mx-0 sm:gap-16">
+      <div class="grid grid-cols-1 md:grid-cols-2">
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <a class="flex flex-1" href="quickstart/">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                  <div class="flex items-center gap-2">
+                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">quickstart</h2></div>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">cli</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">execution gate</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+                <p class="font-mono wrap-anywhere sm:text-sm">Requirements, install, endpoint configuration, scoring one task, the oracle baseline,
+                  the result record and its <code>false_accept_check</code> block, and the quality card.</p>
+                <div class="space-y-6">
+                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">install &rarr; scored result &rarr; quality card</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <a class="flex flex-1" href="task-format/">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                  <div class="flex items-center gap-2">
+                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">task format</h2></div>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">schema</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">live</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">archive</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+                <p class="font-mono wrap-anywhere sm:text-sm">The on-disk package: <code>task.toml</code>, <code>instruction.md</code>,
+                  <code>tests/</code>, <code>environment/</code>, <code>solution/</code>,
+                  <code>PROVENANCE.json</code>, <code>record.json</code> &mdash; plus archive vs. live and
+                  how scoring re-lays the protected tests.</p>
+                <div class="space-y-6">
+                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">one directory per task, harbor-native</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <a class="flex flex-1" href="submission/">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                  <div class="flex items-center gap-2">
+                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">submission</h2></div>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">jsonl</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">adapters</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+                <p class="font-mono wrap-anywhere sm:text-sm">The submission schema and validation rules, why ingest re-scores every patch, and the
+                  <code>HarnessAdapter</code> contract for plugging in your own scaffold or multi-turn
+                  agent.</p>
+                <div class="space-y-6">
+                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">a claimed reward is never trusted</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <a class="flex flex-1" href="quality-methods/">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                  <div class="flex items-center gap-2">
+                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">quality methods</h2></div>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">msq</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">irt</span>
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">kr-20</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+                <p class="font-mono wrap-anywhere sm:text-sm">Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle
+                  coverage, diversity, 2PL test information, KR-20 reliability, bootstrap intervals,
+                  required-N power, and the daily readiness verdict.</p>
+                <div class="space-y-6">
+                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">does the task set separate models at all?</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== what you are scoring against ===================== -->
+  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">what you are scoring against</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs" id="board-sub">today's suite</p>
+    </div>
+
+    <div id="strip" class="w-full"></div>
+
+    <p class="text-muted-foreground mx-auto mt-8 max-w-3xl text-center font-mono text-sm/relaxed">Archived tasks (&ge; 2 weeks old) ship in full, including
       the reference solution, so you can reproduce a number locally. Live tasks withhold the gold
       patch and the protected test bodies and are scored server-side on submission.</p>
-  </section>
 
-  <section>
-    <div class="sec-head">
-      <h2>the markdown sources</h2>
-      <span class="eyebrow">the same text, rendered by github</span>
-    </div>
-    <div class="grid c2">
-      <div class="card">
-        <h3>in the repository</h3>
-        <p>Each guide on this site is a hand-rendered copy of a markdown file that ships with the
-          bundle. Read whichever you prefer &mdash; the text is identical.</p>
-        <p class="mono" style="font-size:12.5px">
-          <a href="../quickstart.md">quickstart.md</a> &middot;
-          <a href="../task-format.md">task-format.md</a> &middot;
-          <a href="../submission.md">submission.md</a> &middot;
-          <a href="../quality-methods.md">quality-methods.md</a></p>
-        <span class="foot">no APIs are invented; everything maps to code in the bundle</span>
-      </div>
-      <div class="card">
-        <h3>the invariant behind all of it</h3>
-        <p>A scaffold produces a candidate patch; the execution gate is the sole reward authority.
-          The protected tests are re-laid from the trusted package after the patch is applied, so a
-          patch that edits tests only changes a workspace that is discarded before scoring.</p>
-        <span class="foot"><span class="seal"><b>false_accept</b> 0</span></span>
-      </div>
-    </div>
-  </section>
+    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard &rarr;</a>
+  </div>
 
+  <!-- ===================== the markdown sources ===================== -->
+  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">the markdown sources</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      <p class="text-muted-foreground font-mono text-xs">the same text, rendered by github</p>
+    </div>
+
+    <div class="-mx-4 flex w-full flex-col gap-12 sm:mx-0 sm:gap-16">
+      <div class="grid grid-cols-1 md:grid-cols-2">
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+            <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+              <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                <div class="flex items-center gap-2">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">in the repository</h2></div>
+                </div>
+              </div>
+            </div>
+            <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+              <p class="font-mono wrap-anywhere sm:text-sm">Each guide on this site is a hand-rendered copy of a markdown file that ships with the
+                bundle. Read whichever you prefer &mdash; the text is identical.</p>
+              <p class="font-mono text-sm sm:text-xs">
+                <a class="underline-offset-4 hover:underline" href="../quickstart.md">quickstart.md</a> &middot;
+                <a class="underline-offset-4 hover:underline" href="../task-format.md">task-format.md</a> &middot;
+                <a class="underline-offset-4 hover:underline" href="../submission.md">submission.md</a> &middot;
+                <a class="underline-offset-4 hover:underline" href="../quality-methods.md">quality-methods.md</a></p>
+              <div class="space-y-6">
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">no APIs are invented; everything maps to code in the bundle</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+            <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+              <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                <div class="flex items-center gap-2">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">the invariant behind all of it</h2></div>
+                </div>
+              </div>
+            </div>
+            <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
+              <p class="font-mono wrap-anywhere sm:text-sm">A scaffold produces a candidate patch; the execution gate is the sole reward authority.
+                The protected tests are re-laid from the trusted package after the patch is applied, so a
+                patch that edits tests only changes a workspace that is discarded before scoring.</p>
+              <div class="space-y-6">
+                <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono"><span class="text-muted-foreground">false_accept</span> 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
 </main>
 
 <script src="../assets/site.js" data-root=".." data-page="docs"></script>
 <script>
 (async function () {
   var T = window.TDB;
+
+  /* their card string, verbatim — the padding lives on the inner row, as it
+     does in every reference card */
+  var CARD =
+    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
+    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
+    "transition-all duration-200 sm:-mr-px sm:border-x";
+  var NOTE =
+    "bg-card text-card-foreground -mx-4 border rounded-none border-x-0 px-6 py-6 " +
+    "font-mono text-sm/relaxed text-muted-foreground sm:mx-0 sm:border-x";
 
   var results = await Promise.all([
     T.getJSON("leaderboard_data.json").catch(function () { return null; }),
@@ -154,13 +315,16 @@ export OPENAI_API_KEY=sk-...
   else if (board && board.tasks && board.tasks.length) taskId = board.tasks[0];
 
   if (taskId) {
-    lt.innerHTML = '<div class="card" style="flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap">' +
-      '<span class="eyebrow">a real task id to paste in</span>' +
-      '<code>' + taskId + '</code>' +
-      '<a class="mono" style="font-size:12px;margin-left:auto" href="' +
-        T.ROOT + '/registry/' + encodeURIComponent(taskId) + '/">task page &rarr;</a></div>';
+    lt.innerHTML =
+      '<div class="' + CARD + ' flex-row flex-wrap items-center gap-3 px-6 py-6">' +
+        '<span class="text-muted-foreground text-xs">a real task id to paste in</span>' +
+        '<code class="text-sm">' + taskId + "</code>" +
+        '<a class="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-4 ' +
+          'transition-colors hover:underline" href="' +
+          T.ROOT + "/registry/" + encodeURIComponent(taskId) + '/">task page &rarr;</a>' +
+      "</div>";
   } else {
-    lt.innerHTML = '<div class="empty">No task catalogue published yet, so no id to paste. ' +
+    lt.innerHTML = '<div class="' + NOTE + '">No task catalogue published yet, so no id to paste. ' +
       'Run <code>tdb publish</code> to generate <code>site_data.json</code>.</div>';
   }
 
@@ -175,17 +339,23 @@ export OPENAI_API_KEY=sk-...
     var cells = [
       ["tasks in suite", board.n_tasks],
       ["models under test", board.n_models],
-      ss && ss.n ? ["single-shot solve", T.pct(ss.solved / ss.n) + " <small>" + ss.solved + "/" + ss.n + "</small>"] : null,
-      t2 && t2.n ? ["agent solve", T.pct(t2.solved / t2.n) + " <small>" + t2.solved + "/" + t2.n + "</small>"] : null,
+      ss && ss.n ? ["single-shot solve", T.pct(ss.solved / ss.n) +
+        ' <span class="text-muted-foreground text-xs">' + ss.solved + "/" + ss.n + "</span>"] : null,
+      t2 && t2.n ? ["agent solve", T.pct(t2.solved / t2.n) +
+        ' <span class="text-muted-foreground text-xs">' + t2.solved + "/" + t2.n + "</span>"] : null,
       ["false-accepts", board.total_fa]
     ].filter(Boolean);
-    strip.className = "strip";
-    strip.innerHTML = cells.map(function (c) {
-      return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
-    }).join("");
+
+    strip.innerHTML =
+      '<div class="-mx-4 grid grid-cols-2 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">' +
+      cells.map(function (c) {
+        return '<div class="bg-card text-card-foreground flex flex-col gap-1.5 border ' +
+          '-mb-px rounded-none border-x-0 px-6 py-6 font-mono shadow-none sm:-mr-px sm:border-x">' +
+          '<p class="text-muted-foreground text-xs">' + c[0] + "</p>" +
+          '<p class="text-xl font-medium tabular-nums">' + c[1] + "</p></div>";
+      }).join("") + "</div>";
   } else {
-    strip.className = "";
-    strip.innerHTML = '<div class="empty">No leaderboard data published yet ' +
+    strip.innerHTML = '<div class="' + NOTE + '">No leaderboard data published yet ' +
       '(<code>leaderboard_data.json</code> is missing). The commands above still run offline ' +
       'against any archived task.</div>';
   }

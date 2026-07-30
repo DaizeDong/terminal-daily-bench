@@ -3,234 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>benchmarks — terminal-daily-bench</title>
-<meta name="description" content="One suite per day. Live suites keep the gold patch and protected tests withheld and are scored server-side; suites older than two weeks are archived and released in full.">
+<title>Benchmarks — terminal-daily-bench</title>
+<meta name="description" content="Browse terminal-daily-bench suites and their tasks. One suite per day: mined from real merged pull requests, built and proven, sealed on ship, released in full after two weeks.">
+<link rel="stylesheet" href="../assets/tw.css">
+<link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+  <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
+    <div class="flex w-full max-w-7xl flex-1 flex-col">
 
-  <section class="hero">
-    <p class="eyebrow">one suite per day &middot; date-versioned &middot; sealed on build</p>
-    <h1>benchmarks</h1>
-    <p class="sub">The benchmark is not a fixed set. Each day the pipeline mines merged pull requests,
-      rebuilds their environments and seals a suite named after that date. A suite is
-      <strong>live</strong> while it is fresh &mdash; the gold patch and protected tests stay withheld and
-      scoring happens server-side &mdash; then it is <strong>archived</strong> and released in full so anyone
-      can reproduce it.</p>
-    <div class="cta">
-      <a class="btn" href="../registry/">browse every task</a>
-      <a class="btn" href="../leaderboard/">today's leaderboard</a>
-      <a class="btn" href="../guide/task-format/">task format</a>
-    </div>
-  </section>
+      <h2 class="mb-6 font-mono text-4xl tracking-tighter">Benchmarks</h2>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Browse terminal-daily-bench suites and their tasks.</p>
 
-  <section style="padding-top:0;border-top:none">
-    <div id="rail"></div>
-  </section>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -mx-4 sm:mx-0" id="suites">
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+          <div class="flex flex-1 flex-col gap-6 py-6">
+            <div data-slot="card-content" class="px-6">
+              <p class="text-muted-foreground font-mono text-sm">loading suites…</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <section>
-    <div class="sec-head">
-      <h2>all suites</h2>
-      <span class="eyebrow" id="suite-sub">catalogue</span>
-      <a class="more" href="../registry/">browse every task &rarr;</a>
-    </div>
-    <div id="strip" class="strip"></div>
-    <div class="grid c2" id="suites" style="margin-top:14px">
-      <div class="empty">loading suites&hellip;</div>
-    </div>
-  </section>
+      <!-- ================= how a daily suite lives ================= -->
+      <div class="flex flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">how a daily suite lives</p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down animate-float size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </div>
 
-  <section>
-    <div class="sec-head">
-      <h2>how a daily suite lives</h2>
-      <span class="eyebrow">mined &rarr; built &rarr; sealed &rarr; archived</span>
-    </div>
-    <div class="grid c3">
-      <div class="card">
-        <span class="pill">step 1</span>
-        <h3>mined</h3>
-        <p>The day's candidate pull requests are pulled from public repositories after they merged,
-          so no released model can have trained on the fix. Freshness is certified per task.</p>
-        <span class="foot">source: real merged PRs</span>
-      </div>
-      <div class="card">
-        <span class="pill">step 2</span>
-        <h3>built</h3>
-        <p>Each candidate is rebuilt into a container at the parent commit. A task is kept only if its
-          fail-to-pass tests actually fail before the fix and pass after it.</p>
-        <span class="foot">oracle must reach reward 1.0</span>
-      </div>
-      <div class="card">
-        <span class="pill pending">step 3</span>
-        <h3>sealed &mdash; live</h3>
-        <p>The suite is frozen. Gold patch and protected test bodies are withheld; only the failing test
-          IDs are published. Submissions are scored server-side by re-laying the protected tests.</p>
-        <span class="foot">withheld for two weeks</span>
-      </div>
-      <div class="card">
-        <span class="pill pass">step 4</span>
-        <h3>archived</h3>
-        <p>After two weeks the suite is released whole &mdash; environment, protected tests and the
-          reference solution &mdash; so results can be reproduced locally with <code>tdb run</code>.</p>
-        <span class="foot">released in full</span>
-      </div>
-      <div class="card">
-        <span class="pill pass">invariant</span>
-        <h3>the gate never changes</h3>
-        <p>Live or archived, a solve is minted the same way: apply the patch, throw the workspace tests
-          away, re-lay the protected tests from the trusted package, run them with the network cut.</p>
-        <span class="foot">no model ever grades a model</span>
-      </div>
-      <div class="card">
-        <span class="pill pass">false_accept 0</span>
-        <h3>what a suite guarantees</h3>
-        <p>Every published number on a suite page comes from that gate. A claimed reward is advisory
-          only &mdash; it is replayed on ingest before it can appear anywhere.</p>
-        <span class="foot"><a href="../quality/">how we measure the suites &rarr;</a></span>
-      </div>
-    </div>
-  </section>
+        <div class="grid grid-cols-1 md:grid-cols-2 -mx-4 sm:mx-0 lg:grid-cols-4">
 
-  <section>
-    <div class="sec-head">
-      <h2>the two-week window</h2>
-      <span class="eyebrow">live &rarr; archive, on a date, not on a decision</span>
-      <a class="more" href="../guide/task-format/">the full task format &rarr;</a>
-    </div>
-    <!-- The cutoff is a constant, not a judgement call: ARCHIVE_WEEKS = 2 and
-         `(today - merge_date).days >= ARCHIVE_WEEKS * 7` in tasks/publish_tasks.py:16,45 -->
-    <p class="lead">The split is mechanical. <code>tasks/publish_tasks.py</code> sets
-      <span class="mono">ARCHIVE_WEEKS = 2</span> and publishes a task as <em>archive</em> when
-      <span class="mono">(today &minus; merge_date).days &ge; 14</span>, otherwise as <em>live</em>.
-      Nobody decides per task; the merge date of the upstream pull request does. That is why a suite's
-      status can be read off its own name.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>part of the task package</th>
-          <th class="num">live <span class="pill pending">&lt; 14 days</span></th>
-          <th class="num">archive <span class="pill pass">&ge; 14 days</span></th>
-        </tr></thead>
-        <!-- Row-for-row from the release policy table in docs/task-format.md
-             "Archive vs. live", and the short form in tasks/SCHEMA.md -->
-        <tbody>
-          <tr><td class="mono">task.toml</td><td class="num">shipped, sanitized</td><td class="num">shipped, sanitized</td></tr>
-          <tr><td class="mono">instruction.md</td><td class="num">shipped</td><td class="num">shipped</td></tr>
-          <tr><td class="mono">environment/</td><td class="num">shipped</td><td class="num">shipped</td></tr>
-          <tr><td class="mono">tests/test.sh</td><td class="num">shipped</td><td class="num">shipped</td></tr>
-          <tr><td class="mono">PROVENANCE.json</td><td class="num">shipped</td><td class="num">shipped</td></tr>
-          <tr><td class="mono">tests/test_outputs.py</td>
-              <td class="num"><span class="pill pending">withheld</span></td>
-              <td class="num"><span class="pill pass">shipped</span></td></tr>
-          <tr><td class="mono">tests/test_patch.diff</td>
-              <td class="num"><span class="pill pending">withheld</span></td>
-              <td class="num"><span class="pill pass">shipped</span></td></tr>
-          <tr><td class="mono">solution/ (solve.sh, oracle.patch)</td>
-              <td class="num"><span class="pill pending">withheld</span></td>
-              <td class="num"><span class="pill pass">shipped</span></td></tr>
-          <tr><td class="mono">record.json</td>
-              <td class="num">replaced by <code>FAILING_TESTS.json</code></td>
-              <td class="num">shipped, sanitized</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="grid c3" style="margin-top:14px">
-      <div class="card">
-        <span class="pill pending">withheld</span>
-        <h3>what a live task holds back</h3>
-        <p>The protected assertion bodies, the test patch and the reference solution. What you do get is
-          the environment, the runner and <code>FAILING_TESTS.json</code> &mdash; the failing-test IDs and
-          nothing else. Enough to attempt the task, not enough to read the answer.</p>
-        <span class="foot">FAILING_TESTS.json &middot; failing_test_ids only</span>
-      </div>
-      <div class="card">
-        <span class="pill">why</span>
-        <h3>the reason it is withheld</h3>
-        <p>Publishing the gold patch on day one hands a future training run the fix, and publishing the
-          assertion bodies invites a patch written against the assertions rather than the bug. Holding both
-          back for the window blocks memorization and test-fitting while the suite is being scored.</p>
-        <span class="foot">task-format.md &middot; release policy</span>
-      </div>
-      <div class="card">
-        <span class="pill pass">released</span>
-        <h3>what the archive owes you</h3>
-        <p>After the window the same suite ships whole &mdash; protected tests, test patch and reference
-          solution &mdash; so any published number on it can be re-derived locally, including the oracle
-          baseline. The withholding buys freshness; it does not buy permanent opacity.</p>
-        <span class="foot">tdb run &middot; tdb oracle</span>
-      </div>
-    </div>
-    <p class="lead" style="margin-top:12px;font-size:12.5px">The contract cuts both ways: while a suite is
-      live we score it and you cannot; once it is archived you can reproduce every cell of it and we no
-      longer have anything you do not. Nothing about the <em>gate</em> differs between the two &mdash; the
-      same protected tests are re-laid either way, so an archived re-run and our live score are the same
-      measurement.</p>
-  </section>
+          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div data-slot="card-title" class="leading-none font-semibold">
+                  <h2 class="line-clamp-1 font-mono text-xl font-medium">mined</h2>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">step 1</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
+                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Every morning the miner walks a curated universe of public repositories and takes pull requests that merged upstream today and touch a test file.</p>
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">the fix is younger than the model</p>
+              </div>
+            </div>
+          </div>
 
-  <section>
-    <div class="sec-head">
-      <h2>run a suite locally</h2>
-      <span class="eyebrow">archived suites ship complete</span>
+          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div data-slot="card-title" class="leading-none font-semibold">
+                  <h2 class="line-clamp-1 font-mono text-xl font-medium">built</h2>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">step 2</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
+                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Each candidate is rebuilt into a container at the parent commit. It survives only if its fail-to-pass tests really fail before the patch and reach reward 1.0 after it.</p>
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">solvability is executed, never assumed</p>
+              </div>
+            </div>
+          </div>
+
+          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div data-slot="card-title" class="leading-none font-semibold">
+                  <h2 class="line-clamp-1 font-mono text-xl font-medium">sealed</h2>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">live</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
+                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">The day's survivors are frozen into one dated suite. The reference patch and the protected test bodies stay withheld; only the failing-test identifiers ship.</p>
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">scored server-side by re-laying the tests</p>
+              </div>
+            </div>
+          </div>
+
+          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                <div data-slot="card-title" class="leading-none font-semibold">
+                  <h2 class="line-clamp-1 font-mono text-xl font-medium">released</h2>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">archive</span>
+                </div>
+              </div>
+              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
+                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Two weeks later the same suite is released in full — environment, protected tests and reference solution — so every number published on it can be re-derived locally.</p>
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">tdb run · tdb oracle</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="text-muted-foreground mx-auto mt-6 max-w-3xl text-center font-mono text-sm/relaxed">mined → built → sealed → released. The live/archive split is mechanical, not editorial: a suite becomes archive once its pull requests are two weeks old. The gate never differs between the two — the same protected tests are re-laid either way, so an archived re-run and our live score are the same measurement.</p>
+      </div>
+
     </div>
-    <pre><span class="c"># archived suites include solution/ and the protected tests</span>
-pip install terminal-daily-bench
-
-<span class="k">tdb</span> run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;   <span class="c"># score a model on one task</span>
-<span class="k">tdb</span> oracle tasks/archive/&lt;task-id&gt;           <span class="c"># gate baseline &rarr; reward 1.0</span></pre>
-    <p class="lead" style="margin-top:12px">Live suites cannot be scored locally &mdash; the protected
-      tests are the thing being withheld. Run the model, then
-      <a href="../submit/">submit the patch</a>; the same gate scores it on our side.</p>
-  </section>
-
+  </div>
 </main>
 
 <script src="../assets/site.js" data-root=".." data-page="benchmarks"></script>
 <script>
-(async function () {
+(function () {
+  "use strict";
   var T = window.TDB;
-  var site = await T.getJSON("site_data.json").catch(function () { return null; });
-  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
-
-  var suites = (site && site.suites) || [];
-  var tasks = (site && site.tasks) || [];
-  var active = board && board.date;
-
-  if (suites.length) T.dayRail(document.getElementById("rail"), suites, active);
-
-  var strip = document.getElementById("strip");
-  var box = document.getElementById("suites");
-
-  if (!suites.length) {
-    strip.style.display = "none";
-    box.innerHTML = '<div class="empty">No suites published yet. The publisher writes ' +
-      '<code>site_data.json</code> at the site root; this page renders whatever it finds there.</div>';
-    return;
-  }
-
-  var live = suites.filter(function (s) { return s.status === "live"; });
-  var arch = suites.filter(function (s) { return s.status !== "live"; });
-  var nTasks = suites.reduce(function (a, s) { return a + (s.n_tasks || 0); }, 0);
-  var langs = {};
-  suites.forEach(function (s) {
-    (s.languages || []).forEach(function (l) { langs[l] = 1; });
-  });
-  Object.keys(langs).length || tasks.forEach(function (t) { if (t.language) langs[t.language] = 1; });
-
-  document.getElementById("suite-sub").textContent =
-    suites.length + " suites" + (site.generated ? " · generated " + site.generated : "");
-
-  strip.innerHTML = [
-    ["suites", suites.length],
-    ["live", live.length],
-    ["archived", arch.length],
-    ["tasks total", nTasks],
-    ["languages", Object.keys(langs).length]
-  ].map(function (c) {
-    return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
-  }).join("");
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -238,28 +127,119 @@ pip install terminal-daily-bench
     });
   }
 
-  box.innerHTML = suites.map(function (s) {
-    var isLive = s.status === "live";
-    var id = esc(s.id);
-    var ls = (s.languages || []).slice(0, 6).map(function (l) {
-      return '<span class="pill lang">' + esc(l) + "</span>";
+  /* their badge, verbatim; only the colour pair varies */
+  var BADGE =
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
+    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
+    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
+    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
+    "transition-[color,box-shadow] overflow-hidden border-transparent ";
+  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
+  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
+
+  var CARD =
+    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
+    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
+    "transition-all duration-200 sm:-mr-px sm:border-x";
+  var HEADER =
+    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start " +
+    "gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
+
+  function badge(text, variant) {
+    return '<span data-slot="badge" class="' + BADGE + variant + '">' + esc(text) + "</span>";
+  }
+
+  function emptyCard(html) {
+    return '<div data-slot="card" class="' + CARD + '">' +
+      '<div class="flex flex-1 flex-col gap-6 py-6">' +
+        '<div data-slot="card-content" class="px-6">' +
+          '<p class="text-muted-foreground font-mono text-sm">' + html + "</p>" +
+        "</div></div></div>";
+  }
+
+  /* languages: prefer what the suite declares, else derive from its tasks */
+  function langsOf(suite, tasks) {
+    var ls = (suite.languages || []).slice();
+    if (!ls.length) {
+      var seen = {};
+      tasks.forEach(function (t) {
+        if (t.suite === suite.id && t.language && !seen[t.language]) {
+          seen[t.language] = 1;
+          ls.push(t.language);
+        }
+      });
+    }
+    return ls;
+  }
+
+  function describe(suite) {
+    if (suite.note) return suite.note;
+    return suite.status === "live"
+      ? "Sealed and running. The reference patch and the protected tests are withheld; a submission is scored server-side by re-laying the same tests."
+      : "Released in full — environment, protected tests and reference solution — so every number published on this suite can be re-derived locally.";
+  }
+
+  function suiteCard(suite, tasks, today) {
+    var live = suite.status === "live";
+    var ls = langsOf(suite, tasks);
+
+    var pills = badge(suite.status || "unknown", live ? PRIMARY : SECONDARY);
+    if (today && suite.id === today) pills += badge("today", SECONDARY);
+
+    var facts = [];
+    if (suite.n_tasks != null) {
+      facts.push(suite.n_tasks + (suite.n_tasks === 1 ? " task" : " tasks"));
+    }
+    if (ls.length) {
+      facts.push(ls.length + (ls.length === 1 ? " language" : " languages") +
+                 " · " + ls.slice(0, 6).join(", ") + (ls.length > 6 ? ", …" : ""));
+    }
+
+    return '<div data-slot="card" class="' + CARD + '">' +
+      '<a class="flex flex-1" href="./' + encodeURIComponent(suite.id) + '/">' +
+        '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
+          '<div data-slot="card-header" class="' + HEADER + '">' +
+            '<div data-slot="card-title" class="leading-none font-semibold">' +
+              '<h2 class="line-clamp-1 font-mono text-xl font-medium">suite ' + esc(suite.id) + "</h2>" +
+            "</div>" +
+            '<div class="mt-2 flex gap-2">' + pills + "</div>" +
+          "</div>" +
+          '<div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">' +
+            '<p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">' +
+              esc(describe(suite)) + "</p>" +
+            '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' +
+              (facts.length ? esc(facts.join(" · ")) : "&mdash;") + "</p>" +
+          "</div>" +
+        "</div>" +
+      "</a></div>";
+  }
+
+  function render(site, board) {
+    var box = document.getElementById("suites");
+    if (!box) return;
+
+    var suites = (site && site.suites) || [];
+    var tasks = (site && site.tasks) || [];
+    var today = board && board.date;
+
+    if (!suites.length) {
+      box.innerHTML = emptyCard(
+        "No suites published yet. The publisher writes <code>site_data.json</code> at the " +
+        "site root; this page renders whatever it finds there.");
+      return;
+    }
+
+    box.innerHTML = suites.map(function (s) {
+      return suiteCard(s, tasks, today);
     }).join("");
-    var extra = (s.languages || []).length > 6
-      ? '<span class="pill">+' + ((s.languages || []).length - 6) + "</span>" : "";
-    return '<a class="card" href="./' + encodeURIComponent(s.id) + '/">' +
-      '<div class="tags">' +
-        '<span class="pill ' + (isLive ? "pending" : "pass") + '">' + esc(s.status || "unknown") + "</span>" +
-        '<span class="pill">' + (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span>" +
-        (s.id === active ? '<span class="pill pass">today</span>' : "") +
-      "</div>" +
-      "<h3>suite " + id + "</h3>" +
-      "<p>" + (isLive
-        ? "Gold patch and protected tests withheld; submissions scored server-side."
-        : "Released in full, including the protected tests and the reference solution.") +
-      "</p>" +
-      (ls || extra ? '<div class="tags">' + ls + extra + "</div>" : "") +
-      '<span class="foot">' + esc(s.note || (isLive ? "live suite" : "archived suite")) + "</span></a>";
-  }).join("");
+  }
+
+  Promise.all([
+    T.getJSON("site_data.json").catch(function () { return null; }),
+    T.getJSON("leaderboard_data.json").catch(function () { return null; })
+  ]).then(function (r) { render(r[0], r[1]); })
+    .catch(function () { render(null, null); });
 })();
 </script>
 </body>

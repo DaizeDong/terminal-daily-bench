@@ -3,253 +3,462 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>terminal-daily-bench — a living benchmark for coding agents</title>
-<meta name="description" content="Tasks mined from real merged pull requests every day. Agents are scored by execution proof only — re-laid protected tests they never see. false_accept = 0.">
-<link rel="stylesheet" href="assets/site.css">
+<title>terminal-daily-bench: a benchmark rebuilt every day</title>
+<meta name="description" content="terminal-daily-bench is a living benchmark. Tasks are mined from real merged pull requests every day and scored by execution proof only: false_accept = 0, eight languages, plus a multi-angle quality instrument that measures the benchmark itself.">
+<link rel="stylesheet" href="./assets/tw.css">
+<link rel="stylesheet" href="./assets/tw-extra.css">
+<link rel="stylesheet" href="./assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+<div class="flex flex-1 flex-col items-center px-4 py-6">
+<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
 
-  <section class="hero">
-    <p class="eyebrow">living &middot; auto-constructed &middot; execution-graded</p>
-    <h1>terminal-daily-bench: a benchmark that is <span class="accent">rebuilt every day</span></h1>
-    <p class="sub">Tasks are mined from real merged pull requests each day, so an agent cannot have
-      trained on the fix. Every attempt is scored by <strong>execution proof only</strong> &mdash; a protected
-      test suite the model never sees, re-laid after its patch. No LLM judge, so
-      <span class="mono">false_accept = 0</span> by construction.</p>
-    <div class="cta">
-      <a class="btn primary" href="guide/">i want to test my agent</a>
-      <a class="btn" href="leaderboard/">see the leaderboard</a>
-      <a class="btn" href="quality/">how good is this benchmark?</a>
+  <!-- ==================================================================
+       HERO
+       ================================================================== -->
+  <div class="flex flex-col justify-center gap-16 sm:pt-24 sm:pb-0">
+    <div class="space-y-8">
+      <h2 class="text-center font-mono text-3xl/tight font-medium tracking-tighter text-balance sm:mb-8 sm:text-6xl/tight">terminal-daily-bench: a benchmark rebuilt every day</h2>
+      <p class="text-fd-muted-foreground text-center font-mono tracking-tight text-balance sm:text-xl/relaxed">tasks are mined from real merged pull requests each day and scored by <a class="hover:text-foreground underline underline-offset-4" href="./quality/">execution proof</a> only<span data-tdb="fa-clause"></span></p>
     </div>
-  </section>
 
-  <!-- THE SIGNATURE: every day is its own sealed suite -->
-  <section style="padding-top:0;border-top:none">
-    <div id="rail"></div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>what makes it different</h2>
-      <span class="eyebrow">three claims, each measurable</span>
+    <div class="mx-auto grid max-w-5xl grid-cols-1 gap-2 lg:grid-cols-2">
+      <a class="flex-1" href="./benchmarks/">
+        <div class="dark:bg-card hover:bg-accent/50 dark:hover:bg-accent bg-background relative h-full border px-6 py-4">
+          <div class="bg-muted absolute inset-0 -z-10 mb-0 blur-xl"></div>
+          <div class="mb-2 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" x2="6" y1="9" y2="21"></line></svg>
+            <p class="font-mono text-base" data-tdb="universe-line">a mined universe of maintained repositories</p>
+          </div>
+          <p class="text-fd-muted-foreground font-mono text-sm">how the universe is grown &#8599;</p>
+        </div>
+      </a>
+      <a class="flex-1" href="./quality/">
+        <div class="dark:bg-card hover:bg-accent/50 dark:hover:bg-accent bg-background relative h-full border px-6 py-4">
+          <div class="bg-muted absolute inset-0 -z-10 mb-0 blur-xl"></div>
+          <div class="mb-2 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+            <p class="font-mono text-base">we measure the benchmark itself</p>
+          </div>
+          <p class="text-fd-muted-foreground font-mono text-sm">the multi-angle quality card &#8599;</p>
+        </div>
+      </a>
     </div>
-    <div class="grid c3">
-      <div class="card">
-        <span class="pill pass">contamination 0.000</span>
-        <h3>fresh by construction</h3>
-        <p>Each day's tasks come from pull requests merged after the models shipped. Freshness is
-          certified per task, not assumed from a date.</p>
-        <span class="foot">mined &rarr; built &rarr; sealed, daily</span>
+
+    <div class="mx-auto grid grid-cols-1 gap-4 sm:grid-cols-1 sm:gap-2">
+      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base has-[>svg]:px-6 rounded-none" href="./guide/">i want to test my agent</a>
+    </div>
+
+    <div class="mx-auto flex max-w-xl flex-col justify-center gap-4">
+      <p class="text-center font-mono text-sm sm:text-base" data-tdb="creed">execution-graded &middot; no llm judge</p>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       THE DAY RAIL — our one addition. Every day is its own sealed suite.
+       ================================================================== -->
+  <div class="flex w-full flex-col items-center py-12">
+    <div class="-mx-4 self-stretch sm:mx-0" id="tdb-rail"></div>
+  </div>
+
+  <!-- ==================================================================
+       AGENT PERFORMANCE
+       ================================================================== -->
+  <div class="flex w-full flex-col items-center py-12">
+    <div class="mb-6 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm" data-tdb="board-eyebrow">terminal-daily-bench leaderboard</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+    </div>
+
+    <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border py-6 rounded-none border-x-0 shadow-none sm:mx-0 sm:border-x -mx-4 mb-16 self-stretch">
+      <div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between">
+        <p class="font-mono text-sm">agent performance</p>
+        <a class="shrink-0 items-center justify-center gap-2 text-sm whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 underline-offset-4 hover:underline h-9 px-4 py-2 has-[>svg]:px-3 text-muted-foreground hover:text-foreground -my-2 hidden rounded-none font-mono font-normal sm:inline-flex" href="./leaderboard/">view full leaderboard<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></a>
       </div>
-      <div class="card">
-        <span class="pill pass">false_accept 0</span>
-        <h3>execution is the only judge</h3>
-        <p>A patch is scored by re-laid protected tests running in a network-cut container. Editing
-          the tests changes a workspace that is thrown away before scoring.</p>
-        <span class="foot">no model ever grades a model</span>
-      </div>
-      <div class="card">
-        <span class="pill">7 quality axes</span>
-        <h3>we measure the benchmark too</h3>
-        <p>Discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, plus
-          the task count it would take to make a claim stick.</p>
-        <span class="foot"><a href="quality/">read the quality card &rarr;</a></span>
+
+      <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"></div>
+
+      <div data-slot="table-container" class="relative w-full overflow-x-auto font-mono" id="hp-board"></div>
+
+      <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px"></div>
+
+      <div data-slot="card-footer" class="flex items-center px-6 [.border-t]:pt-6">
+        <p class="text-muted-foreground mx-auto max-w-xl text-center font-mono text-sm/relaxed" data-tdb="board-foot">task resolution rate on the current terminal-daily-bench suite, graded by execution proof only</p>
       </div>
     </div>
-  </section>
 
-  <section>
-    <div class="sec-head">
-      <h2>how a task is made</h2>
-      <span class="eyebrow">five steps, every one of them executed</span>
-      <a class="more" href="guide/task-format/">the task format &rarr;</a>
+    <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base has-[>svg]:px-6 rounded-none" href="./leaderboard/">view the full leaderboard &#8599;</a>
+  </div>
+
+  <!-- ==================================================================
+       VIEW TASK EXAMPLES
+       ================================================================== -->
+  <div class="flex min-h-[90vh] flex-col justify-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">view task examples</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th class="rank">#</th><th>step</th><th>what happens</th><th class="num">what it proves</th></tr></thead>
-        <tbody>
-          <tr><td class="rank">1</td><th class="mono">mine a merged PR</th>
-              <!-- prefilter name: the internal universe-expansion note ("selection.pr_touches_test_file — exactly the pipeline's own F2P prefilter") -->
-              <td>A pull request that already merged in the curated repo universe and <em>touches a test file</em> is pulled as a candidate.</td>
-              <td class="num mono">freshness</td></tr>
-          <tr><td class="rank">2</td><th class="mono">rebuild the env</th>
-              <!-- oracle_pass / nop_fail tokens: the internal certified-yield proof §"the accept certificate's 7th token" -->
-              <td>The repository is rebuilt into a container at the parent commit; the fail-to-pass tests must fail there, and the gold patch must take them to reward 1.0.</td>
-              <td class="num mono">solvability</td></tr>
-          <tr><td class="rank">3</td><th class="mono">seal the tests</th>
-              <!-- withheld set: tasks/SCHEMA.md + docs/task-format.md "Archive vs. live" table -->
-              <td>Protected assertions and the reference solution are withheld; only the failing-test IDs are published, in <code>FAILING_TESTS.json</code>.</td>
-              <td class="num mono">no leakage</td></tr>
-          <tr><td class="rank">4</td><th class="mono">certify</th>
-              <!-- 7 tokens, verbatim: the internal certified-yield proof ("rcvh.types.Certificate requires all 7 tokens true") -->
-              <td>All <strong>7</strong> execution tokens must come back true &mdash; <span class="mono">oracle_pass, nop_fail, no_mutant_escape, rerun_unanimous, env_clean, egress_clear, evidence_gate_ok</span>. Any one missing is a reject.</td>
-              <td class="num mono">soundness</td></tr>
-          <tr><td class="rank">5</td><th class="mono">ship</th>
-              <!-- 14 days = ARCHIVE_WEEKS(2) * 7, tasks/publish_tasks.py:16,45 -->
-              <td>The task joins that date's sealed suite as <span class="pill pending">live</span>, and is released whole after <strong>14 days</strong>.</td>
-              <td class="num mono">reproducibility</td></tr>
-        </tbody>
-      </table>
+    <div class="-mx-4 flex flex-col gap-12 sm:mx-0 sm:gap-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="hp-tasks"></div>
+      <a class="inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base has-[>svg]:px-6 mx-auto rounded-none font-mono" href="./registry/">view all tasks &#8599;</a>
     </div>
-    <p class="lead" style="margin-top:10px;font-size:12.5px">Every step is a program that runs, not a
-      review that happens. A candidate that fails any one of them never becomes a task &mdash; the funnel
-      is the quality guarantee. <a href="benchmarks/">how a suite lives &rarr;</a></p>
-  </section>
+  </div>
 
-  <section>
-    <div class="sec-head">
-      <h2>today's leaderboard</h2>
-      <span class="eyebrow" id="board-sub">models under test</span>
-      <a class="more" href="leaderboard/">full leaderboard &rarr;</a>
+  <!-- ==================================================================
+       EXPLORE OUR BENCHMARKS
+       ================================================================== -->
+  <div class="flex flex-col items-center py-12 sm:pb-16">
+    <div class="mb-4 flex flex-col items-center gap-2">
+      <p class="font-mono text-sm">explore our benchmarks</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
     </div>
-    <div id="strip" class="strip"></div>
-    <div class="table-wrap" style="margin-top:14px">
-      <table>
-        <thead><tr>
-          <th class="rank">#</th><th>model</th>
-          <th class="num">single-shot</th><th class="num">agent</th><th class="num">false-accept</th>
-        </tr></thead>
-        <tbody id="board"><tr><td colspan="5" class="mono" style="color:var(--faint)">loading&hellip;</td></tr></tbody>
-      </table>
-    </div>
-    <p class="lead" style="margin-top:10px;font-size:12.5px">
-      Rates carry a Wilson 95% interval &mdash; at a few tasks per model the interval is the honest
-      number, not the point estimate.</p>
-  </section>
+    <div class="grid grid-cols-1 md:grid-cols-2 -mx-4 sm:mx-0 lg:grid-cols-2" id="hp-suites"></div>
+  </div>
 
-  <section>
-    <div class="sec-head">
-      <h2>today's tasks</h2>
-      <span class="eyebrow">real merged pull requests</span>
-      <a class="more" href="registry/">all tasks &rarr;</a>
-    </div>
-    <div class="grid c3" id="task-gallery"><div class="empty">loading tasks&hellip;</div></div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>benchmarks</h2>
-      <span class="eyebrow">one suite per day, plus the rolling archive</span>
-      <a class="more" href="benchmarks/">explore &rarr;</a>
-    </div>
-    <div class="grid c2" id="suites"><div class="empty">loading suites&hellip;</div></div>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>run it in one command</h2></div>
-    <pre><span class="c"># any OpenAI-compatible endpoint; scoring needs apptainer/singularity</span>
-pip install terminal-daily-bench
-export OPENAI_BASE_URL=&hellip; OPENAI_API_KEY=&hellip;
-
-<span class="k">tdb</span> run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;   <span class="c"># score a model on a task</span>
-<span class="k">tdb</span> oracle tasks/archive/&lt;task-id&gt;           <span class="c"># gate baseline &rarr; reward 1.0</span>
-<span class="k">tdb</span> quality results.jsonl                   <span class="c"># the multi-angle quality card</span></pre>
-    <p class="lead" style="margin-top:12px">Submitted results are <strong>re-scored by the same gate on
-      ingest</strong> &mdash; a claimed number is never trusted, only the patch is replayed.
-      <a href="submit/">how to submit &rarr;</a></p>
-  </section>
-
+</div>
+</div>
 </main>
 
-<script src="assets/site.js" data-root="." data-page="home"></script>
 <script>
-(async function () {
-  const T = window.TDB;
-  const [site, board] = await Promise.all([
-    T.getJSON("site_data.json").catch(function(){ return null; }),
-    T.getJSON("leaderboard_data.json").catch(function(){ return null; })
-  ]);
+/* ---------------------------------------------------------------------------
+   Homepage data wiring.
 
-  if (site && site.suites) T.dayRail(document.getElementById("rail"), site.suites, board && board.date);
+   This runs on DOMContentLoaded, so window.TDB (defined synchronously by the
+   site.js tag below, which is a classic script and therefore executes before
+   that event) is always available. Every number on this page comes from the
+   two JSON files at the site root; when a file is missing or a field is absent
+   the page keeps the neutral, claim-free copy that is already in the markup.
 
-  if (!board) {
-    document.getElementById("board-sub").textContent = "no board published yet";
-    document.getElementById("strip").innerHTML =
-      '<div class="empty">No <code>leaderboard_data.json</code> at the site root yet, so today has ' +
-      "no scored cells to show.</div>";
-    document.getElementById("board").innerHTML =
-      '<tr><td colspan="5"><div class="empty">No models scored yet. Run the day\'s set and ' +
-      '<a href="submit/">submit the patch</a> &mdash; it is re-scored by the same gate on ingest.' +
-      "</div></td></tr>";
-  }
+   All markup produced here reuses the reference class strings that are already
+   compiled into tw.css — no styling is invented.
+   --------------------------------------------------------------------------- */
+(function () {
+  "use strict";
 
-  if (board) {
-    document.getElementById("board-sub").textContent =
-      board.date + " · " + board.n_models + " models × " + board.n_tasks + " tasks";
-    const p = board.pooled || {}, ss = p.single_shot, t2 = p.terminus2;
-    const cells = [
-      ["tasks today", board.n_tasks],
-      ["models under test", board.n_models],
-      ss ? ["single-shot solve", T.pct(ss.solved / ss.n) + " <small>" + ss.solved + "/" + ss.n + "</small>"] : null,
-      t2 ? ["agent solve", T.pct(t2.solved / t2.n) + " <small>" + t2.solved + "/" + t2.n + "</small>"] : null,
-      ["false-accepts", board.total_fa]
-    ].filter(Boolean);
-    document.getElementById("strip").innerHTML = cells.map(function (c) {
-      return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
-    }).join("");
+  document.addEventListener("DOMContentLoaded", function () {
+    var TDB = window.TDB || {};
+    var R = TDB.ROOT || ".";
+    function url(p) { return R + "/" + p; }
 
-    const rows = (board.leaderboard || []).slice(0, 6).map(function (r, i) {
-      /* false-accepts are read off the row, never hardcoded — the seal has to be measured */
-      const fa = ["single_shot", "terminus2"].reduce(function (a, k) {
-        return a + ((r[k] && r[k].fa) || 0);
-      }, 0);
-      return '<tr><td class="rank">' + (i + 1) + "</td>" +
-        '<td><span class="mono">' + r.model + "</span>" +
-        (r.lead ? ' <span class="pill pass">leader</span>' : "") + "</td>" +
-        '<td class="num">' + T.rateCell(r.single_shot) + "</td>" +
-        '<td class="num">' + T.rateCell(r.terminus2) + "</td>" +
-        '<td class="num"><span class="pill ' + (fa ? "pending" : "pass") + '">' + fa + "</span></td></tr>";
-    }).join("");
-    document.getElementById("board").innerHTML = rows ||
-      '<tr><td colspan="5"><div class="empty">No models scored on this suite yet.</div></td></tr>';
-  }
+    var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ENT[c]; });
+    }
+    function set(sel, html) {
+      var el = document.querySelector(sel);
+      if (el) el.innerHTML = html;
+    }
 
-  const gal = document.getElementById("task-gallery");
-  if (site && site.tasks && site.tasks.length) {
-    gal.innerHTML = site.tasks.slice(0, 6).map(function (t) {
-      return '<a class="card" href="registry/' + encodeURIComponent(t.id) + '/">' +
-        '<div class="tags">' +
-          (t.language ? '<span class="pill lang">' + t.language + "</span>" : "") +
-          (t.difficulty ? '<span class="pill">' + t.difficulty + "</span>" : "") +
-          (t.status === "live" ? '<span class="pill pending">live</span>'
-                               : '<span class="pill pass">archive</span>') +
-          (t.suite ? '<span class="pill">suite ' + t.suite + "</span>" : "") +
-        "</div><h3>" + (t.repo || t.id) + "</h3><p>" +
-        (t.title || "a merged pull request, rebuilt as an executable task") +
-        '</p><span class="foot">' + t.id +
-        (t.pr_number != null ? " &middot; PR #" + t.pr_number : "") +
-        (t.n_fail_to_pass != null ? " &middot; " + t.n_fail_to_pass + " f2p tests" : "") +
-        "</span></a>";
-    }).join("");
-  } else {
-    gal.innerHTML = '<div class="empty">No task catalogue published yet. Run <code>tdb publish</code> to generate <code>site_data.json</code>.</div>';
-  }
+    /* ---- the reference class strings ------------------------------------ */
 
-  const su = document.getElementById("suites");
-  if (site && site.suites && site.suites.length) {
-    su.innerHTML = site.suites.map(function (s) {
-      return '<a class="card" href="benchmarks/' + encodeURIComponent(s.id) + '/">' +
-        '<div class="tags"><span class="pill ' + (s.status === "live" ? "pending" : "pass") + '">' +
-        s.status + "</span>" +
-        '<span class="pill">' + (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span>" +
-        ((s.languages && s.languages.length)
-          ? '<span class="pill">' + s.languages.length +
-            (s.languages.length === 1 ? " language" : " languages") + "</span>"
-          : "") +
-        (board && s.id === board.date ? '<span class="pill pass">today</span>' : "") +
-        "</div><h3>suite " + s.id + "</h3><p>" +
-        (s.status === "live" ? "Gold patch and protected tests withheld; submissions scored server-side."
-                             : "Released in full, including the protected tests and the reference solution.") +
-        '</p><span class="foot">' + (s.note || (s.status === "live" ? "live suite" : "archived suite")) +
-        "</span></a>";
-    }).join("");
-  } else {
-    su.innerHTML = '<div class="empty">No suites published yet.</div>';
-  }
+    var CARD =
+      "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
+      "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
+      "transition-all duration-200 sm:-mr-px sm:border-x";
+
+    var CARD_HEADER =
+      "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 " +
+      "px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
+
+    var BADGE_BASE =
+      "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+      "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
+      "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
+      "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
+      "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive ";
+
+    /* their hoverable secondary badge, verbatim */
+    var BADGE_SECONDARY =
+      BADGE_BASE + "overflow-hidden border-transparent bg-secondary text-secondary-foreground " +
+      "[a&]:hover:bg-secondary/90 hover:bg-muted-foreground/15 font-mono " +
+      "transition-colors duration-200";
+
+    /* their primary badge, verbatim */
+    var BADGE_PRIMARY =
+      BADGE_BASE + "transition-[color,box-shadow] overflow-hidden border-transparent " +
+      "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
+
+    var GH_BTN =
+      "text-muted-foreground hover:text-foreground flex items-center gap-2 font-mono " +
+      "underline-offset-4 hover:underline sm:text-sm";
+
+    var TH =
+      "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
+      "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
+
+    var TD =
+      "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
+      "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
+
+    var TR =
+      "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
+
+    var ICON_GH =
+      '<svg role="img" viewBox="0 0 24 24" fill="currentColor" class="size-4" aria-hidden="true">' +
+      '<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 ' +
+      '0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 ' +
+      '17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 ' +
+      '1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465' +
+      '-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 ' +
+      '3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 ' +
+      '3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 ' +
+      '1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627' +
+      '-5.373-12-12-12"></path></svg>';
+
+    /* ---- small helpers --------------------------------------------------- */
+
+    function badge(text, primary) {
+      return '<span data-slot="badge" class="' + (primary ? BADGE_PRIMARY : BADGE_SECONDARY) +
+        '">' + esc(text) + "</span>";
+    }
+
+    /* the accuracy cell, from site.js when it is there, plain otherwise */
+    function rate(o) {
+      if (TDB.rateCell) return TDB.rateCell(o);
+      if (!o || !o.n) return '<p class="text-right text-muted-foreground">&mdash;</p>';
+      var s = (o.solved != null) ? o.solved : Math.round((o.rate || 0) * o.n);
+      return '<p class="text-right tabular-nums">' + Math.round((s / o.n) * 1000) / 10 + "%</p>";
+    }
+
+    function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+
+    /* ======================================================================
+       leaderboard_data.json — the hero's integrity clause, the suite eyebrow
+       and the top-N board.
+       ====================================================================== */
+
+    var TOP_N = 8;
+
+    function board(d) {
+      var rows = (d && d.leaderboard) || [];
+      var hasT2 = rows.some(function (r) { return r.terminus2 && r.terminus2.n; });
+
+      /* the integrity clause is a measurement, so it only appears once the
+         published run backs it */
+      if (d && typeof d.total_fa === "number") {
+        set('[data-tdb="fa-clause"]', " &mdash; false_accept = " + d.total_fa);
+        set('[data-tdb="creed"]',
+            "execution-graded &middot; no llm judge &middot; false_accept = " + d.total_fa);
+      }
+
+      if (d && d.date) {
+        set('[data-tdb="board-eyebrow"]',
+            "terminal-daily-bench@" + esc(d.date) + " leaderboard");
+      }
+
+      if (!rows.length) {
+        set("#hp-board",
+            '<p class="text-muted-foreground px-6 py-8 text-center font-mono text-sm">' +
+            "no published run yet &mdash; the board fills in as soon as a suite is scored</p>");
+        return;
+      }
+
+      var shown = rows.slice(0, TOP_N);
+
+      var head =
+        '<tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">' +
+          '<th data-slot="table-head" class="' + TH + '">Rank</th>' +
+          '<th data-slot="table-head" class="' + TH + '">Model</th>' +
+          '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">single-shot</div></th>' +
+          (hasT2 ? '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">terminus-2</div></th>' : "") +
+          '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">false_accept</div></th>' +
+        "</tr>";
+
+      var body = shown.map(function (r, i) {
+        var fa = 0;
+        if (r.single_shot && typeof r.single_shot.fa === "number") fa += r.single_shot.fa;
+        if (r.terminus2 && typeof r.terminus2.fa === "number") fa += r.terminus2.fa;
+        return '<tr data-slot="table-row" class="' + TR + '">' +
+          '<td data-slot="table-cell" class="' + TD + '"><p class="text-left tabular-nums">' + (i + 1) + "</p></td>" +
+          '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + esc(r.model) +
+            (r.lead ? ' <span class="text-muted-foreground text-xs">lead</span>' : "") + "</p></td>" +
+          '<td data-slot="table-cell" class="' + TD + '">' + rate(r.single_shot) + "</td>" +
+          (hasT2 ? '<td data-slot="table-cell" class="' + TD + '">' + rate(r.terminus2) + "</td>" : "") +
+          '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + fa + "</p></td>" +
+        "</tr>";
+      }).join("");
+
+      set("#hp-board",
+        '<table data-slot="table" class="w-full caption-bottom text-sm ' +
+        "[&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 " +
+        '[&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6">' +
+          '<thead data-slot="table-header" class="[&_tr]:border-b">' + head + "</thead>" +
+          '<tbody data-slot="table-body" class="[&_tr:last-child]:border-0">' + body + "</tbody>" +
+        "</table>");
+
+      /* the footer states the scope of what is above it */
+      var bits = [];
+      if (d.n_models) bits.push(plural(d.n_models, "model", "models"));
+      if (d.n_tasks) bits.push(plural(d.n_tasks, "task", "tasks"));
+      var scope = bits.length ? bits.join(" × ") + ", " : "";
+      var more = rows.length > shown.length ?
+        " showing the top " + shown.length + " of " + rows.length + "." : "";
+      set('[data-tdb="board-foot"]',
+        esc(scope) + "task resolution rate on the terminal-daily-bench" +
+        (d.date ? "@" + esc(d.date) : "") + " suite, graded by execution proof only." + more);
+    }
+
+    /* ======================================================================
+       site_data.json — the day rail, the task cards and the suite cards.
+       ====================================================================== */
+
+    function universeLine(sd) {
+      var u = sd.universe || {};
+      var langs = {};
+      (sd.tasks || []).forEach(function (t) { if (t.language) langs[t.language] = 1; });
+      (sd.suites || []).forEach(function (s) {
+        (s.languages || []).forEach(function (l) { if (l) langs[l] = 1; });
+      });
+      var nLang = (typeof u.n_languages === "number") ? u.n_languages : Object.keys(langs).length;
+      var nRepo = (typeof u.n_repos === "number") ? u.n_repos : null;
+      if (nRepo != null && nLang) {
+        return plural(nRepo, "repository", "repositories") + " across " +
+               plural(nLang, "language", "languages");
+      }
+      if (nRepo != null) return plural(nRepo, "repository", "repositories") + " in the universe";
+      if (nLang) return "a mined universe across " + plural(nLang, "language", "languages");
+      return "a mined universe of maintained repositories";
+    }
+
+    function taskCard(t) {
+      var pills = "";
+      if (t.language) pills += badge(t.language, false);
+      if (t.difficulty) pills += badge(t.difficulty, false);
+      if (t.status) pills += badge(t.status, t.status === "live");
+
+      var repo = t.repo || "";
+      var repoUrl = repo ? "https://github.com/" + repo : "";
+      var prUrl = (repo && t.pr_number) ? repoUrl + "/pull/" + t.pr_number : repoUrl;
+
+      var provenance = repo
+        ? "mined from " + repo + (t.pr_number ? " #" + t.pr_number : "")
+        : "mined from a merged pull request";
+      var f2p = (typeof t.n_fail_to_pass === "number")
+        ? plural(t.n_fail_to_pass, "protected test", "protected tests") + " must flip"
+        : "";
+      var solved = (typeof t.solved_by === "number" && t.n_models)
+        ? "solved by " + t.solved_by + " of " + t.n_models
+        : "";
+
+      return '<div data-slot="card" class="' + CARD + '">' +
+        '<a class="flex flex-1" href="' + esc(url("registry/" + encodeURIComponent(t.id) + "/")) + '">' +
+          '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
+            '<div data-slot="card-header" class="' + CARD_HEADER + '">' +
+              '<div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">' +
+                '<div class="flex items-center gap-2">' +
+                  '<div data-slot="card-title" class="leading-none font-semibold">' +
+                    '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(t.id) + "</h2>" +
+                  "</div>" +
+                "</div>" +
+                (prUrl
+                  ? '<button type="button" class="' + GH_BTN + '" data-open="' + esc(prUrl) +
+                    '" aria-label="open the source pull request on GitHub">Github' + ICON_GH + "</button>"
+                  : "") +
+              "</div>" +
+              '<div class="flex gap-2">' + pills + "</div>" +
+            "</div>" +
+            '<div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">' +
+              '<pre class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">' +
+                esc(t.title || "(no summary line in the instruction)") + "</pre>" +
+              '<div class="space-y-6">' +
+                '<p class="text-muted-foreground line-clamp-2 font-mono text-sm lowercase sm:text-xs">' +
+                  esc([f2p, solved].filter(Boolean).join(", ")) + "</p>" +
+                '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(provenance) + "</p>" +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+        "</a></div>";
+    }
+
+    function suiteCard(s) {
+      var live = s.status === "live";
+      var langs = (s.languages || []).filter(Boolean);
+      var lines = [];
+      if (typeof s.n_tasks === "number") lines.push(plural(s.n_tasks, "task", "tasks"));
+      lines.push(langs.length ? langs.join(", ") : "languages not yet declared");
+      var note = s.note ? s.note + "\n\n" : "";
+
+      return '<div data-slot="card" class="' + CARD + '">' +
+        '<a class="flex flex-1" href="' + esc(url("benchmarks/" + encodeURIComponent(s.id) + "/")) + '">' +
+          '<div class="flex flex-1 flex-col gap-6 py-6">' +
+            '<div data-slot="card-header" class="' + CARD_HEADER + '">' +
+              '<div data-slot="card-title" class="leading-none font-semibold">' +
+                '<h2 class="line-clamp-1 font-mono text-xl font-medium">' +
+                  "terminal-daily-bench@" + esc(s.id) + "</h2>" +
+              "</div>" +
+              '<div class="mt-2 flex gap-2">' + badge(s.status || "archive", live) + "</div>" +
+            "</div>" +
+            '<div data-slot="card-content" class="px-6">' +
+              '<p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">' +
+                esc(note + lines.join(" · ")) + "</p>" +
+            "</div>" +
+          "</div>" +
+        "</a></div>";
+    }
+
+    /* an empty rail is not a rail: fold the strip away rather than leaving a
+       band of blank page where the calendar should be */
+    function tidyRail() {
+      var host = document.getElementById("tdb-rail");
+      if (host && !host.firstChild && host.parentNode) host.parentNode.classList.add("hidden");
+    }
+
+    function site(sd) {
+      set('[data-tdb="universe-line"]', esc(universeLine(sd)));
+
+      var suites = (sd.suites || []).slice();
+      /* newest first: dated ids sort lexicographically, which is also
+         chronologically for YYYY-MM-DD */
+      suites.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
+
+      if (TDB.dayRail) {
+        TDB.dayRail(document.getElementById("tdb-rail"), suites,
+                    (suites[0] || {}).id);
+      }
+      tidyRail();
+
+      var tasks = (sd.tasks || []).slice(0, 6);
+      set("#hp-tasks", tasks.length
+        ? tasks.map(taskCard).join("")
+        : '<p class="text-muted-foreground px-6 py-8 font-mono text-sm">' +
+          "no task has been published yet</p>");
+
+      set("#hp-suites", suites.length
+        ? suites.map(suiteCard).join("")
+        : '<p class="text-muted-foreground px-6 py-8 font-mono text-sm">' +
+          "no suite has been published yet</p>");
+    }
+
+    /* the Github affordance inside a card is a button, so it can act without
+       nesting one link inside another */
+    document.addEventListener("click", function (ev) {
+      var t = ev.target;
+      var btn = (t && t.closest) ? t.closest("button[data-open]") : null;
+      if (!btn) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      window.open(btn.getAttribute("data-open"), "_blank", "noopener,noreferrer");
+    });
+
+    /* ---- load ------------------------------------------------------------ */
+
+    if (!TDB.getJSON) return;
+
+    TDB.getJSON("leaderboard_data.json").then(board, function () {
+      set("#hp-board",
+          '<p class="text-muted-foreground px-6 py-8 text-center font-mono text-sm">' +
+          "leaderboard data is not available</p>");
+    });
+
+    TDB.getJSON("site_data.json").then(site, tidyRail);
+  });
 })();
 </script>
+
+<script src="./assets/site.js" data-root="." data-page="home"></script>
+
 </body>
 </html>

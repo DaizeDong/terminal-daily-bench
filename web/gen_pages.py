@@ -11,8 +11,17 @@ Writes
     release/docs/benchmarks/<suite-id>/index.html    one page per daily suite
     release/docs/registry/<task-id>/index.html       one page per task
 
-Both live two directories below the site root, so every generated page uses the
-same shell:  ../../assets/site.css  +  ../../assets/site.js  data-root="../.."
+Both live two directories below the site root, so every generated page loads the
+same three stylesheets, in this order, and ends with the same script tag:
+
+    ../../assets/tw.css        the vendored Tailwind build (all utilities)
+    ../../assets/tw-extra.css  its second chunk
+    ../../assets/site.css      our thin additive layer
+    ../../assets/site.js       data-root="../.." data-page="<key>"
+
+NOTHING here hand-rolls CSS. Every class string below is copied verbatim from the
+reference DOM and is already compiled into tw.css; if a look cannot be expressed
+with those utilities the DOM structure is wrong, not the stylesheet.
 
 No third-party dependencies. Idempotent: a page is only rewritten when its bytes
 change, and every action is printed (write / update / unchanged).
@@ -27,11 +36,12 @@ rename without updating that caller):
            it drives both asset hrefs and the data-root attribute.
     write_page(path, html)      idempotent write + a printed line
     esc(s)                      HTML-escape any value
-    pill(text, kind="")         <span class="pill [kind]">   kind: pass|pending|lang
-    status_pill(status)         archive -> pass pill, live -> pending pill
-    tags(*pills)                <div class="tags"> wrapper
-    strip(pairs)                the .strip stat band, from [(label, value), ...]
-    sec_head(title, eyebrow="", more=None)   the .sec-head row
+    cls(s)                      escape a class string for an HTML attribute
+    pill(text, kind="")         a <span data-slot="badge">   kind: primary|outline|""
+    status_pill(status)         live -> primary badge, archive -> secondary badge
+    tags(*pills)                a flex row of badges
+    strip(pairs)                the stat band, as their card grid
+    sec_head(title, eyebrow="", more=None)   their centred section header
     task_page_body(task, pkg)   the shared BODY for one task page
     load_task_package(task_id)  best-effort dict from tasks/{archive,live}/<id>/
 --------------------------------------------------------------------------------
@@ -53,6 +63,81 @@ TASKS = RELEASE / "tasks"
 REPO_URL = "https://github.com/DaizeDong/terminal-daily-bench"
 
 
+# ============================================================================
+# THE REFERENCE CLASS STRINGS
+# Copied verbatim from the reference DOM. Do not "tidy" them: byte-equality with
+# the reference is the whole point, and every token is compiled into tw.css.
+# ============================================================================
+
+CARD = (
+    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar "
+    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none "
+    "transition-all duration-200 sm:-mr-px sm:border-x"
+)
+CARD_HEADER = (
+    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start "
+    "gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"
+)
+
+_BADGE_BASE = (
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs "
+    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 "
+    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 "
+    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 "
+    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive "
+    "transition-[color,box-shadow] overflow-hidden "
+)
+BADGE_PRIMARY = _BADGE_BASE + (
+    "border-transparent bg-primary text-primary-foreground "
+    "[a&]:hover:bg-primary/90 font-mono"
+)
+BADGE_SECONDARY = _BADGE_BASE + (
+    "border-transparent bg-secondary text-secondary-foreground "
+    "[a&]:hover:bg-secondary/90 font-mono"
+)
+BADGE_OUTLINE = _BADGE_BASE + "text-foreground font-mono"
+
+_BTN = (
+    "font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium "
+    "whitespace-nowrap transition-all outline-none focus-visible:border-ring "
+    "focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none "
+    "disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 "
+    "dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 "
+    "[&_svg:not([class*='size-'])]:size-4 "
+)
+BTN_PRIMARY = _BTN + "bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base has-[>svg]:px-6 rounded-none"
+BTN_SECONDARY = _BTN + "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base has-[>svg]:px-6 rounded-none"
+
+TABLE = (
+    "w-full caption-bottom text-sm [&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 "
+    "[&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6"
+)
+_CHK = "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+TH = ("text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap "
+      + _CHK + " py-3 text-base")
+TD = "p-2 align-middle whitespace-nowrap " + _CHK + " py-4 text-base"
+# their cells are always nowrap; a descriptive column drops that one token, which
+# is how Tailwind spells "wrap normally" (there is no whitespace-normal compiled)
+TD_PROSE = "p-2 align-middle " + _CHK + " py-4 text-base"
+TR_HEAD = "data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent"
+TR_BODY = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"
+
+LINK = "hover:underline hover:underline-offset-4"
+DASH = '<span class="text-muted-foreground">&mdash;</span>'
+
+CHEVRON = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" '
+    'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    'stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true">'
+    '<path d="m6 9 6 6 6-6"></path></svg>'
+)
+CARET = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" '
+    'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    'stroke-linejoin="round" class="lucide"><path d="m9 18 6-6-6-6"></path></svg>'
+)
+
+
 # ----------------------------------------------------------------- primitives
 
 def esc(value) -> str:
@@ -68,42 +153,191 @@ def esc(value) -> str:
     )
 
 
+def cls(value: str) -> str:
+    """Escape a class string for an HTML attribute, the way the reference does:
+    `&` -> `&amp;` and `>` -> `&gt;`, so arbitrary variants survive round-tripping."""
+    return value.replace("&", "&amp;").replace(">", "&gt;")
+
+
 def pill(text, kind: str = "") -> str:
-    cls = "pill" + (" " + kind if kind else "")
-    return f'<span class="{cls}">{esc(text)}</span>'
+    """A badge in their treatment. kind: primary | outline | "" (secondary)."""
+    variant = {"primary": BADGE_PRIMARY, "outline": BADGE_OUTLINE}.get(kind, BADGE_SECONDARY)
+    return f'<span data-slot="badge" class="{cls(variant)}">{esc(text)}</span>'
 
 
 def status_pill(status: str) -> str:
-    """archive = released in full (pass) · live = withheld, server-side (pending)."""
-    return pill(status or "unknown", "pending" if status == "live" else "pass")
+    """live = sealed, gold withheld (primary) · archive = released in full (secondary)."""
+    return pill(status or "unknown", "primary" if status == "live" else "")
 
 
 def tags(*items) -> str:
     inner = "".join(i for i in items if i)
-    return f'<div class="tags">{inner}</div>' if inner else ""
+    return f'<div class="mb-6 flex flex-wrap gap-2">{inner}</div>' if inner else ""
+
+
+def stat_card(label, value, note: str = "") -> str:
+    """One cell of the stat band, in their card idiom."""
+    shown = DASH if value in (None, "") else esc(value)
+    body = (
+        f'<div data-slot="card" class="{cls(CARD)}">'
+        f'<div class="flex flex-1 flex-col justify-between gap-6 py-6">'
+        f'<div data-slot="card-header" class="{cls(CARD_HEADER)}">'
+        f'<p class="text-muted-foreground font-mono text-sm sm:text-xs">{esc(label)}</p>'
+        f'<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums">{shown}</h2>'
+        f"</div>"
+    )
+    if note:
+        body += (
+            f'<div data-slot="card-content" class="px-6">'
+            f'<p class="text-muted-foreground line-clamp-2 font-mono text-sm sm:text-xs">'
+            f"{esc(note)}</p></div>"
+        )
+    return body + "</div></div>"
 
 
 def strip(pairs) -> str:
+    """The stat band: their hairline card grid, edge to edge on mobile.
+
+    `pairs` is [(label, value)] or [(label, value, note)].
+    """
     cells = "".join(
-        f'<div class="cell"><div class="k">{esc(k)}</div><div class="v">{v}</div></div>'
-        for k, v in pairs
+        stat_card(p[0], p[1], p[2] if len(p) > 2 else "") for p in pairs
     )
-    return f'<div class="strip">{cells}</div>'
+    return (
+        '<div class="-mx-4 mb-6 flex flex-col sm:mx-0">'
+        f'<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">{cells}</div>'
+        "</div>"
+    )
 
 
 def sec_head(title, eyebrow: str = "", more=None) -> str:
-    out = [f'<div class="sec-head"><h2>{esc(title)}</h2>']
+    """Their centred section header: eyebrow line, chevron, optional sub-line."""
+    out = [
+        '<div class="mb-4 flex flex-col items-center gap-2">',
+        f'<p class="font-mono text-sm">{esc(title)}</p>',
+        CHEVRON,
+    ]
     if eyebrow:
-        out.append(f'<span class="eyebrow">{esc(eyebrow)}</span>')
+        out.append(f'<p class="text-muted-foreground font-mono text-xs">{esc(eyebrow)}</p>')
     if more:
         href, label = more
-        out.append(f'<a class="more" href="{esc(href)}">{esc(label)} &rarr;</a>')
+        out.append(
+            '<a class="text-muted-foreground hover:text-foreground font-mono text-xs '
+            f'underline-offset-4 hover:underline" href="{esc(href)}">{esc(label)} &rarr;</a>'
+        )
     out.append("</div>")
     return "".join(out)
 
 
 def empty(msg_html: str) -> str:
-    return f'<div class="empty">{msg_html}</div>'
+    """A hairline notice block in the same idiom as the tables."""
+    return (
+        '<div class="bg-card border-y px-6 py-8 font-mono text-sm '
+        f'text-muted-foreground md:border-x">{msg_html}</div>'
+    )
+
+
+def prose_block(html: str) -> str:
+    """A block of running text, in the card idiom (their tables never hold prose)."""
+    return (
+        '<div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x">'
+        f"{html}</div>"
+    )
+
+
+def code_figure(caption: str, lines) -> str:
+    """Their code-block treatment (figure > caption row > pre.shiki)."""
+    body = "".join(f'<span class="line">{l}</span>' for l in lines)
+    return (
+        '<figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border '
+        'outline-none overflow-hidden text-sm my-0 mb-6 font-mono">'
+        '<div class="flex text-fd-muted-foreground items-center gap-2 ps-3 h-9.5">'
+        f'<figcaption class="flex-1 truncate">{esc(caption)}</figcaption></div>'
+        '<div class="bg-fd-secondary rounded-lg border text-[13px] py-3.5 overflow-auto '
+        'max-h-[600px] fd-scroll-container">'
+        '<pre class="min-w-full w-max *:flex *:flex-col shiki" tabindex="0"><code>'
+        f"{body}</code></pre></div></figure>"
+    )
+
+
+def breadcrumb(trail) -> str:
+    """Their breadcrumb: [(label, href_or_None), ...]; the last item is the page."""
+    items = []
+    for i, (label, href) in enumerate(trail):
+        if i:
+            items.append(
+                '<li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" '
+                f'class="{cls("[&>svg]:size-3.5")}">{CARET}</li>'
+            )
+        if href:
+            items.append(
+                '<li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5">'
+                '<a data-slot="breadcrumb-link" class="hover:text-foreground transition-colors" '
+                f'href="{esc(href)}">{esc(label)}</a></li>'
+            )
+        else:
+            items.append(
+                '<li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5">'
+                '<span data-slot="breadcrumb-page" role="link" aria-disabled="true" '
+                f'aria-current="page" class="text-foreground font-normal">{esc(label)}</span>'
+                "</li>"
+            )
+    return (
+        '<nav aria-label="breadcrumb" data-slot="breadcrumb" class="mb-6 hidden font-mono sm:block">'
+        '<ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap '
+        'items-center gap-1.5 text-sm break-words sm:gap-2.5">'
+        + "".join(items)
+        + "</ol></nav>"
+    )
+
+
+def button_row(buttons) -> str:
+    """Their CTA grid: [(label, href, primary_bool)].
+
+    Only grid-cols variants actually compiled into tw.css are emitted
+    (sm:grid-cols-{1,2}, lg:grid-cols-{2,3,4}); a single button gets no lg track.
+    """
+    n = min(len(buttons), 4)
+    track = f" lg:grid-cols-{n}" if n >= 2 else ""
+    cells = "".join(
+        f'<a class="{cls(BTN_PRIMARY if primary else BTN_SECONDARY)}" href="{esc(href)}">'
+        f"{esc(label)}</a>"
+        for label, href, primary in buttons
+    )
+    return (
+        f'<div class="mx-auto mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2{track}">'
+        f"{cells}</div>"
+    )
+
+
+def table_block(headers, rows) -> str:
+    """Their table, wrapped in the bg-card hairline block.
+
+    headers -- [(label, align)] where align is "left" | "right"
+    rows    -- list of already-rendered "<td …>…</td>" strings
+    """
+    ths = []
+    for label, align in headers:
+        inner = (f'<div class="flex justify-end">{esc(label)}</div>'
+                 if align == "right" else esc(label))
+        ths.append(f'<th data-slot="table-head" class="{cls(TH)}">{inner}</th>')
+    return (
+        '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+        '<div class="bg-card border-y font-mono md:border-x">'
+        '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
+        f'<table data-slot="table" class="{cls(TABLE)}">'
+        f'<thead data-slot="table-header" class="{cls("[&_tr]:border-b")}">'
+        f'<tr data-slot="table-row" class="{cls(TR_HEAD)}">' + "".join(ths) + "</tr></thead>"
+        f'<tbody data-slot="table-body" class="{cls("[&_tr:last-child]:border-0")}">'
+        + "".join(f'<tr data-slot="table-row" class="{cls(TR_BODY)}">{r}</tr>' for r in rows)
+        + "</tbody></table></div></div></div>"
+    )
+
+
+def td(html, align: str = "left", extra: str = "", prose: bool = False) -> str:
+    base = TD_PROSE if prose else TD
+    p_cls = ("text-right" if align == "right" else "text-left") + (" " + extra if extra else "")
+    return f'<td data-slot="table-cell" class="{cls(base)}"><p class="{cls(p_cls)}">{html}</p></td>'
 
 
 FAVICON = (
@@ -113,11 +347,11 @@ FAVICON = (
 
 
 def render_page(title, description, page_key, depth, body, script="", head="") -> str:
-    """The one shell every generated page uses.
+    """The one shell every generated page uses -- the reference page frame.
 
     depth  -- directories below the site root (2 for benchmarks/<id>/ and
               registry/<id>/). Drives asset hrefs and data-root.
-    body   -- HTML placed inside <main class="wrap">.
+    body   -- HTML placed inside the max-w-7xl content column.
     script -- optional JS, emitted after site.js (window.TDB is available).
     head   -- optional extra <head> markup.
     """
@@ -130,13 +364,20 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
+<link rel="stylesheet" href="{root}/assets/tw.css">
+<link rel="stylesheet" href="{root}/assets/tw-extra.css">
 <link rel="stylesheet" href="{root}/assets/site.css">
 <link rel="icon" href="{FAVICON}">
 {head}</head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+  <!-- the fixed header is injected here by assets/site.js -->
+  <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
+    <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 {body}
+    </div>
+  </div>
 </main>
 
 <script src="{root}/assets/site.js" data-root="{root}" data-page="{esc(page_key)}"></script>
@@ -265,10 +506,24 @@ def instruction_excerpt(text: str, limit: int = 700) -> str:
 def _pr_link(repo, pr_number) -> str:
     if repo and pr_number:
         url = f"https://github.com/{repo}/pull/{pr_number}"
-        return f'<a href="{esc(url)}">{esc(repo)}#{esc(pr_number)}</a>'
+        return (f'<a class="{cls(LINK)}" href="{esc(url)}" target="_blank" '
+                f'rel="noopener noreferrer">{esc(repo)}#{esc(pr_number)}</a>')
     if repo:
-        return f'<a href="https://github.com/{esc(repo)}">{esc(repo)}</a>'
-    return '<span class="dash">&mdash;</span>'
+        return (f'<a class="{cls(LINK)}" href="https://github.com/{esc(repo)}" '
+                f'target="_blank" rel="noopener noreferrer">{esc(repo)}</a>')
+    return DASH
+
+
+def _h2(text) -> str:
+    return f'<h2 class="mb-6 font-mono text-4xl tracking-tighter">{esc(text)}</h2>'
+
+
+def _lede(html) -> str:
+    return f'<p class="text-muted-foreground mb-6 font-mono text-sm">{html}</p>'
+
+
+def _section(inner) -> str:
+    return f'<div class="flex flex-col py-12 sm:pb-16">{inner}</div>'
 
 
 def suite_page_body(suite: dict, suite_tasks: list) -> str:
@@ -284,37 +539,33 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
     f2p = sum(t.get("n_fail_to_pass") or 0 for t in suite_tasks)
 
     head = [
-        '<section class="hero">',
-        f'<p class="eyebrow">daily suite &middot; {esc(suite.get("status", ""))}</p>',
-        f"<h1>suite {esc(sid)}</h1>",
-        '<p class="sub">'
-        + (
+        breadcrumb([("Home", "../../"), ("Benchmarks", "../"), (f"suite {sid}", None)]),
+        _h2(f"suite {sid}"),
+        _lede(
             "Gold patch and protected tests are withheld while this suite is live; "
             "submissions are scored server-side by re-laying the protected tests."
             if live
             else "Archived and released in full &mdash; environment, protected tests and the "
             "reference solution &mdash; so every number here can be reproduced locally."
-        )
-        + "</p>",
-        '<div class="cta">',
-        '<a class="btn" href="../">all suites</a>',
-        '<a class="btn" href="../../leaderboard/">leaderboard</a>',
-        '<a class="btn" href="../../registry/">task registry</a>',
-        "</div>",
-        "</section>",
+        ),
+        tags(status_pill(suite.get("status", "")),
+             *[pill(l, "outline") for l in langs]),
+        button_row([
+            ("all suites", "../", False),
+            ("leaderboard", "../../leaderboard/", False),
+            ("task registry", "../../registry/", False),
+        ]),
+        '<div class="-mx-4 mb-6 sm:mx-0" id="rail"></div>',
     ]
 
-    rail = '<section style="padding-top:0;border-top:none"><div id="rail"></div></section>'
-
-    stats = strip(
-        [
-            ("tasks", n_tasks),
-            ("languages", len(langs) or "&mdash;"),
-            ("fail-to-pass tests", f2p or "&mdash;"),
-            ("solved by ≥ 1 model", solved_any),
-            ("false-accepts", 0),
-        ]
-    )
+    stats = strip([
+        ("tasks", n_tasks, "one merged pull request each"),
+        ("languages", len(langs) or None, "mined across the ecosystem"),
+        ("fail-to-pass tests", f2p or None, "re-laid over the agent's workspace"),
+        ("solved by a model", solved_any, "execution-verified"),
+        ("false-accepts", 0, "the gate cannot be talked into a pass"),
+        ("status", suite.get("status") or None, "live is sealed; archive is released in full"),
+    ])
 
     if suite_tasks:
         rows = []
@@ -324,64 +575,67 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
             solved = t.get("solved_by")
             n_models = t.get("n_models")
             if solved is None or not n_models:
-                cell = '<span class="dash">&mdash;</span>'
+                cell = DASH
             else:
-                cls = "pass" if solved else ""
-                cell = f'<span class="pill {cls}">{esc(solved)}/{esc(n_models)}</span>'
+                muted = "" if solved else " text-muted-foreground"
+                cell = f'<span class="tabular-nums{muted}">{esc(solved)}/{esc(n_models)}</span>'
             rows.append(
-                "<tr>"
-                f'<td><a class="mono" href="{esc(href)}">{esc(tid)}</a></td>'
-                f"<td>{esc(t.get('title') or '')}</td>"
-                f"<td>{_pr_link(t.get('repo'), t.get('pr_number'))}</td>"
-                f"<td>{pill(t.get('language'), 'lang') if t.get('language') else ''}</td>"
-                f"<td>{pill(t.get('difficulty')) if t.get('difficulty') else ''}</td>"
-                f'<td class="num">{esc(t.get("n_fail_to_pass") or 0)}</td>'
-                f'<td class="num">{cell}</td>'
-                "</tr>"
+                td(f'<a class="{cls(LINK)}" href="{esc(href)}">{esc(tid)}</a>')
+                + td(esc(t.get("title") or ""), prose=True)
+                + td(_pr_link(t.get("repo"), t.get("pr_number")))
+                + td(pill(t.get("language"), "outline") if t.get("language") else DASH)
+                + td(pill(t.get("difficulty")) if t.get("difficulty") else DASH)
+                + td(esc(t.get("n_fail_to_pass") or 0), "right", "tabular-nums")
+                + td(cell, "right")
             )
-        table = (
-            '<div class="table-wrap"><table><thead><tr>'
-            "<th>task</th><th>what it asks for</th><th>source pull request</th>"
-            "<th>language</th><th>difficulty</th>"
-            '<th class="num">f2p tests</th><th class="num">solved by</th>'
-            "</tr></thead><tbody>" + "".join(rows) + "</tbody></table></div>"
+        table = table_block(
+            [("Task", "left"), ("What it asks for", "left"), ("Source pull request", "left"),
+             ("Language", "left"), ("Difficulty", "left"),
+             ("F2P Tests", "right"), ("Solved By", "right")],
+            rows,
         )
     else:
-        table = empty(
-            "This suite has no published task list. Live suites expose their tasks only "
-            "through the scoring endpoint until they are archived."
+        table = (
+            '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+            + empty(
+                "This suite has no published task list. Live suites expose their tasks only "
+                "through the scoring endpoint until they are archived."
+            )
+            + "</div>"
         )
 
-    lang_tags = tags(*[pill(l, "lang") for l in langs]) if langs else ""
+    cmd = (
+        ["tdb submit &lt;RESULTS.jsonl&gt;   # re-scored by the same gate on ingest"]
+        if live
+        else [
+            "tdb run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;",
+            "tdb oracle tasks/archive/&lt;task-id&gt;   # -&gt; reward 1.0",
+        ]
+    )
 
-    body = [
+    return "\n".join([
         "\n".join(head),
-        rail,
-        "<section>",
-        sec_head("tasks in this suite", suite.get("note") or "", (("../../registry/"), "all tasks")),
-        stats,
-        f'<div style="margin-top:14px">{table}</div>',
-        (f'<div style="margin-top:12px">{lang_tags}</div>' if lang_tags else ""),
-        "</section>",
-        "<section>",
-        sec_head("how this suite is scored", "execution proof only"),
-        '<p class="lead">A patch is applied to a throwaway copy of the workspace. The workspace tests '
-        "are discarded, the protected tests are re-laid from the trusted package, and they run with "
-        "the network cut. The reward is that run's outcome and nothing else, so "
-        '<span class="mono">false_accept = 0</span> holds by construction.</p>',
-        "<pre>"
-        + (
-            "<span class=\"c\"># live suite: run your model, then submit the patch</span>\n"
-            "<span class=\"k\">tdb</span> submit &lt;RESULTS.jsonl&gt;   <span class=\"c\"># re-scored by the same gate on ingest</span>"
-            if live
-            else "<span class=\"c\"># archived suite: everything needed to reproduce ships with it</span>\n"
-            f"<span class=\"k\">tdb</span> run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;\n"
-            "<span class=\"k\">tdb</span> oracle tasks/archive/&lt;task-id&gt;   <span class=\"c\"># gate baseline &rarr; reward 1.0</span>"
-        )
-        + "</pre>",
-        "</section>",
-    ]
-    return "\n".join(b for b in body if b)
+        _section(
+            sec_head("tasks in this suite", suite.get("note") or "",
+                     ("../../registry/", "all tasks"))
+            + stats
+            + table
+        ),
+        _section(
+            sec_head("how this suite is scored", "execution proof only")
+            + code_figure(
+                "Run one task, then prove it is solvable with the oracle patch"
+                if not live else "Run your model, then submit the patch",
+                cmd,
+            )
+            + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
+              'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
+              "workspace tests are discarded, the protected tests are re-laid from the trusted "
+              "package, and they run with the network cut. The reward is that run's outcome and "
+              'nothing else, so <span class="text-foreground">false_accept = 0</span> holds by '
+              "construction.</p>"
+        ),
+    ])
 
 
 SUITE_SCRIPT = """(async function () {
@@ -407,108 +661,130 @@ def task_page_body(task: dict, pkg: dict) -> str:
     title = task.get("title") or tom.get("description") or instruction_title(instruction)
     f2p = rec.get("fail_to_pass") or []
     n_f2p = task.get("n_fail_to_pass") or len(f2p) or None
+    language = task.get("language") or rec.get("language")
+    difficulty = task.get("difficulty") or tom.get("difficulty")
+
+    buttons = []
+    if safe_id(suite):
+        buttons.append((f"suite {suite}", f"../../benchmarks/{suite}/", False))
+    buttons.append(("all tasks", "../", False))
+    if repo and pr:
+        buttons.append(("source pull request", f"https://github.com/{repo}/pull/{pr}", False))
+    buttons.append(("how to submit", "../../submit/", False))
 
     head = [
-        '<section class="hero">',
-        f'<p class="eyebrow">task &middot; suite {esc(suite)} &middot; {esc(task.get("status", ""))}</p>',
-        f"<h1>{esc(title or tid)}</h1>",
-        f'<p class="sub mono">{esc(tid)}</p>',
-        '<div class="cta">',
-        (f'<a class="btn" href="../../benchmarks/{esc(suite)}/">suite {esc(suite)}</a>' if safe_id(suite) else ""),
-        '<a class="btn" href="../">all tasks</a>',
-        (
-            f'<a class="btn" href="https://github.com/{esc(repo)}/pull/{esc(pr)}">source pull request</a>'
-            if repo and pr
-            else ""
+        breadcrumb([("Home", "../../"), ("Tasks", "../"), (tid, None)]),
+        _h2(title or tid),
+        _lede(
+            f'<span class="text-foreground">{esc(tid)}</span> &middot; mined from a real merged '
+            "pull request, rebuilt into a package an agent can be dropped into. Nothing here is "
+            "authored by a model, and the solve is minted by re-executing protected tests."
         ),
-        "</div>",
-        "</section>",
+        tags(status_pill(task.get("status", "")),
+             pill(language, "outline") if language else "",
+             pill(difficulty) if difficulty else ""),
+        button_row(buttons),
     ]
 
     solved, n_models = task.get("solved_by"), task.get("n_models")
-    stats = strip(
-        [
-            ("language", esc(task.get("language") or rec.get("language") or "&mdash;")),
-            ("difficulty", esc(task.get("difficulty") or tom.get("difficulty") or "&mdash;")),
-            ("fail-to-pass tests", n_f2p if n_f2p else "&mdash;"),
-            (
-                "solved by",
-                f"{solved}/{n_models}" if solved is not None and n_models else "&mdash;",
-            ),
-            ("false-accepts", 0),
-        ]
-    )
+    stats = strip([
+        ("language", language or None, "the upstream repository's language"),
+        ("difficulty", difficulty or None, "derived from who solved it"),
+        ("fail-to-pass tests", n_f2p, "must fail before the patch, pass after"),
+        ("solved by",
+         f"{solved}/{n_models}" if solved is not None and n_models else None,
+         "execution-verified solves"),
+        ("false-accepts", 0, "the gate cannot be talked into a pass"),
+        ("suite", suite or None, "every day is its own sealed suite"),
+    ])
 
+    suite_cell = (
+        f'<a class="{cls(LINK)}" href="../../benchmarks/{esc(suite)}/">{esc(suite)}</a>'
+        if safe_id(suite) else (esc(suite) or DASH)
+    )
     facts = [
-        ("task id", f'<span class="mono">{esc(tid)}</span>'),
-        ("suite", f'<a class="mono" href="../../benchmarks/{esc(suite)}/">{esc(suite)}</a>'
-                  if safe_id(suite) else esc(suite)),
-        ("status", status_pill(task.get("status", ""))),
-        ("source", _pr_link(repo, pr)),
-        ("base commit", f'<span class="mono">{esc(rec.get("base_sha", ""))}</span>' if rec.get("base_sha") else None),
-        ("merge commit", f'<span class="mono">{esc(rec.get("merge_sha", ""))}</span>' if rec.get("merge_sha") else None),
-        ("network at run time", esc(rec.get("network_profile") or "run-offline")),
-        ("upstream license", esc(rec.get("source_license_spdx") or "see source repository")),
+        ("Task id", f'<span class="text-foreground">{esc(tid)}</span>'),
+        ("Suite", suite_cell),
+        ("Status", status_pill(task.get("status", ""))),
+        ("Source", _pr_link(repo, pr)),
+        ("Base commit", esc(rec.get("base_sha", "")) if rec.get("base_sha") else None),
+        ("Merge commit", esc(rec.get("merge_sha", "")) if rec.get("merge_sha") else None),
+        ("Network at run time", esc(rec.get("network_profile") or "run-offline")),
+        ("Upstream license", esc(rec.get("source_license_spdx") or "see source repository")),
     ]
-    fact_rows = "".join(
-        f"<tr><th>{esc(k)}</th><td>{v}</td></tr>" for k, v in facts if v
+    fact_rows = [
+        f'<th data-slot="table-head" class="{cls(TH)}">{esc(k)}</th>' + td(v)
+        for k, v in facts if v
+    ]
+    fact_table = (
+        '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+        '<div class="bg-card border-y font-mono md:border-x">'
+        '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
+        f'<table data-slot="table" class="{cls(TABLE)}">'
+        f'<tbody data-slot="table-body" class="{cls("[&_tr:last-child]:border-0")}">'
+        + "".join(f'<tr data-slot="table-row" class="{cls(TR_BODY)}">{r}</tr>' for r in fact_rows)
+        + "</tbody></table></div></div></div>"
     )
-    fact_table = f'<div class="table-wrap"><table><tbody>{fact_rows}</tbody></table></div>'
 
+    brief = ""
     if instruction:
-        brief = (
-            "<section>"
-            + sec_head("what the agent is asked to do", "the instruction it sees")
-            + f'<div class="prose"><p>{esc(instruction_excerpt(instruction))}</p></div>'
-            + "</section>"
+        brief = _section(
+            sec_head("what the agent is asked to do", "the instruction it sees")
+            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+            + prose_block(f"<p>{esc(instruction_excerpt(instruction))}</p>")
+            + "</div>"
         )
-    else:
-        brief = ""
 
     if f2p and not live:
-        items = "".join(f"<li><span class=\"mono\">{esc(x)}</span></li>" for x in f2p)
-        f2p_block = (
-            "<section>"
-            + sec_head("fail-to-pass tests", "must fail before the patch, pass after")
-            + f'<div class="prose"><ul>{items}</ul></div>'
-            + "</section>"
+        items = "".join(
+            f'<li class="border-b py-2 last:border-b-0">{esc(x)}</li>' for x in f2p
+        )
+        f2p_block = _section(
+            sec_head("fail-to-pass tests", "must fail before the patch, pass after")
+            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+            + prose_block(f'<ul class="flex flex-col">{items}</ul>')
+            + "</div>"
         )
     elif live:
-        f2p_block = (
-            "<section>"
-            + sec_head("protected tests", "withheld while the suite is live")
+        f2p_block = _section(
+            sec_head("protected tests", "withheld while the suite is live")
+            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
             + empty(
-                "This task is in a live suite: the protected test bodies and the reference solution "
-                "are withheld. Only the failing-test identifiers are exposed to the agent, and "
-                "scoring happens server-side. The package is released in full when the suite is "
-                "archived, two weeks after it was sealed."
+                "This task is in a live suite: the protected test bodies and the reference "
+                "solution are withheld. Only the failing-test identifiers are exposed to the "
+                "agent, and scoring happens server-side. The package is released in full when "
+                "the suite is archived, two weeks after it was sealed."
             )
-            + "</section>"
+            + "</div>"
         )
     else:
         f2p_block = ""
 
-    run = (
-        "<section>"
-        + sec_head("reproduce it", "archived tasks ship complete" if not live else "live task")
-        + (
-            "<pre><span class=\"c\"># the whole package ships with the archived suite</span>\n"
-            f"<span class=\"k\">tdb</span> run    &lt;MODEL&gt; tasks/archive/{esc(tid)}\n"
-            f"<span class=\"k\">tdb</span> oracle tasks/archive/{esc(tid)}   <span class=\"c\"># gate baseline &rarr; reward 1.0</span></pre>"
-            if not live
-            else "<pre><span class=\"c\"># live task: run your model, submit the patch, we score it</span>\n"
-            "<span class=\"k\">tdb</span> submit &lt;RESULTS.jsonl&gt;</pre>"
-        )
-        + '<p class="lead" style="margin-top:12px">The reward is the outcome of the re-laid protected '
-        "tests, nothing else. A submitted reward is advisory and is replayed on ingest. "
-        '<a href="../../submit/">how to submit &rarr;</a></p>'
-        + "</section>"
+    cmd = (
+        ["tdb submit &lt;RESULTS.jsonl&gt;"]
+        if live
+        else [
+            f"tdb run    &lt;MODEL&gt; tasks/archive/{esc(tid)}",
+            f"tdb oracle tasks/archive/{esc(tid)}   # -&gt; reward 1.0",
+        ]
+    )
+    run = _section(
+        sec_head("reproduce it", "archived tasks ship complete" if not live else "live task")
+        + code_figure("Score a model on this task, then prove it is solvable", cmd)
+        + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
+          'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
+          "else. A submitted reward is advisory and is replayed on ingest. "
+          f'<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
+          "how to submit &rarr;</a></p>"
     )
 
     body = [
         "\n".join(h for h in head if h),
-        "<section>" + sec_head("provenance", "mined from a real merged pull request") + stats
-        + f'<div style="margin-top:14px">{fact_table}</div>' + "</section>",
+        _section(
+            sec_head("provenance", "mined from a real merged pull request")
+            + stats
+            + fact_table
+        ),
         brief,
         f2p_block,
         run,

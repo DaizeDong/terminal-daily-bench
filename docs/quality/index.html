@@ -5,378 +5,646 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality — terminal-daily-bench</title>
 <meta name="description" content="Multi-angle Selection-Quality (MSQ): we measure the benchmark, not just the models. Discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, and an honest readiness verdict.">
+<link rel="stylesheet" href="../assets/tw.css">
+<link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
-<style>
-  /* Local layout only — every colour, radius and font comes from site.css tokens. */
-  .axes { display: grid; grid-template-columns: minmax(112px, auto) 1fr auto; gap: 9px 12px; align-items: center; }
-  .axes .ax { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .axes .val { font-family: var(--mono); font-size: 12.5px; text-align: right;
-               font-variant-numeric: tabular-nums; min-width: 52px; }
-  .axes .val.lo { color: var(--pending); }
-  .axes .val .dash { color: var(--faint); }
-  .abar { position: relative; height: 6px; border-radius: 3px; background: var(--line); }
-  .abar i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px;
-            background: var(--pass); opacity: .55; }
-  .abar i.lo { background: var(--pending); }
-  .abar b { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--fg); opacity: .5; }
-  .abar u { position: absolute; top: -2px; bottom: -2px; border: 1px solid var(--link);
-            border-radius: 3px; background: color-mix(in srgb, var(--link) 18%, transparent); }
-  .card .hd { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .card .hd .pill { margin-left: auto; }
-  .note { font-size: 12.5px; color: var(--faint); max-width: 76ch; }
-  @media (prefers-reduced-motion: no-preference) { .abar i, .abar u { transition: all .45s cubic-bezier(.2,.7,.2,1); } }
-</style>
 </head>
 <body>
 
-<main class="wrap">
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+  <!-- the fixed header is injected here by assets/site.js -->
+  <div class="flex flex-1 flex-col items-center px-4 py-6">
+    <div class="flex w-full max-w-7xl flex-1 flex-col items-center">
 
-  <section class="hero">
-    <p class="eyebrow">msq &middot; multi-angle selection-quality</p>
-    <h1>we measure the <span class="accent">benchmark</span>, not just the models</h1>
-    <p class="sub">A solve-rate column tells you who scored higher. It never tells you whether the task
-      set can separate models at all. This page is the instrument for that missing axis: it reads the
-      gate-scored <span class="mono">(task &times; model)</span> matrix and reports, separately, how well
-      today's set discriminates &mdash; plus how far it is from supporting a research-grade claim.</p>
-    <div class="cta">
-      <a class="btn" href="../guide/quality-methods/">full methods</a>
-      <a class="btn" href="../leaderboard/">the leaderboard it grades</a>
-      <a class="btn" href="../registry/">the tasks it reads</a>
+      <!-- ============================== HERO ============================== -->
+      <div class="flex flex-col justify-center gap-16 sm:pt-24 sm:pb-0">
+        <div class="space-y-8">
+          <h2 class="text-center font-mono text-3xl/tight font-medium tracking-tighter text-balance sm:mb-8 sm:text-6xl/tight">we measure the benchmark, not just the models</h2>
+          <p class="text-fd-muted-foreground text-center font-mono tracking-tight text-balance sm:text-xl/relaxed">a solve-rate column tells you who scored higher. it never tells you whether the task set can separate models at all &mdash; <a class="hover:text-foreground underline underline-offset-4" href="../guide/quality-methods/">msq</a> is the instrument for that missing axis</p>
+        </div>
+
+        <div class="mx-auto grid max-w-5xl grid-cols-1 gap-2 lg:grid-cols-2">
+          <a class="flex-1" href="../guide/quality-methods/">
+            <div class="dark:bg-card hover:bg-accent/50 dark:hover:bg-accent bg-background relative h-full border px-6 py-4">
+              <div class="bg-muted absolute inset-0 -z-10 mb-0 blur-xl"></div>
+              <div class="mb-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide size-4" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                <p class="font-mono text-base">six axes, reported separately</p>
+              </div>
+              <p class="text-fd-muted-foreground font-mono text-sm">no composite is allowed to hide a collapsed axis &#8599;</p>
+            </div>
+          </a>
+          <a class="flex-1" href="../leaderboard/">
+            <div class="dark:bg-card hover:bg-accent/50 dark:hover:bg-accent bg-background relative h-full border px-6 py-4">
+              <div class="bg-muted absolute inset-0 -z-10 mb-0 blur-xl"></div>
+              <div class="mb-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide size-4" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
+                <p class="font-mono text-base">advisory only, by construction</p>
+              </div>
+              <p class="text-fd-muted-foreground font-mono text-sm">msq gates no accept and cannot perturb <span class="font-mono">false_accept = 0</span> &#8599;</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="mx-auto grid grid-cols-1 gap-4 sm:gap-2">
+          <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base rounded-none" href="../guide/quality-methods/">read the full methods</a>
+        </div>
+
+        <div class="mx-auto flex max-w-xl flex-col justify-center gap-4">
+          <p class="text-center font-mono text-sm sm:text-base">msq is a pure function over plain lists &mdash; every randomized routine is seeded</p>
+        </div>
+      </div>
+
+      <!-- ============================= THE STRIP ============================= -->
+      <div class="flex w-full flex-col items-center py-12">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">today&#x27;s card at a glance</p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </div>
+        <div class="-mx-4 w-full sm:mx-0">
+          <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3" id="strip"></div>
+        </div>
+      </div>
+
+      <!-- ========================= THE FRAME CARDS ========================= -->
+      <div class="flex min-h-[90vh] flex-col justify-center py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">the quality card, per scaffold frame</p>
+          <p class="text-muted-foreground font-mono text-xs" id="frames-sub">one card per scaffold</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-12 sm:mx-0 sm:gap-16">
+          <div class="grid grid-cols-1 md:grid-cols-2" id="frames"></div>
+          <p class="text-muted-foreground mx-auto max-w-4xl text-center font-mono text-sm/relaxed">axes are reported <strong class="text-foreground font-medium">separately</strong> &mdash; the composite never hides an axis that has collapsed. a track filled in solid ink is at or above its threshold; a dimmed fill, marked <span class="font-mono">&darr;</span> on the value, is below it, and the notch on the track is the threshold itself. the interval on D is a seeded bootstrap, and at this task count it is wide on purpose.</p>
+        </div>
+      </div>
+
+      <!-- ========================== THE POWER READ ========================== -->
+      <div class="flex w-full flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">how far from a claim</p>
+          <p class="text-muted-foreground font-mono text-xs">tasks we have vs tasks the interval needs</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-6 sm:mx-0">
+          <div id="power"></div>
+          <p class="text-muted-foreground mx-auto max-w-4xl text-center font-mono text-sm/relaxed">standard error scales as <span class="font-mono">1/&radic;N</span>, so the bootstrap SE at today&#x27;s N extrapolates to the task count that would buy a research-grade interval. this is the number the daily pipeline is aimed at &mdash; a target, not a promise.</p>
+        </div>
+      </div>
+
+      <!-- ======================= WHAT EACH AXIS MEANS ======================= -->
+      <div class="flex w-full flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">what each axis means</p>
+          <p class="text-muted-foreground font-mono text-xs">one sentence each</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-6 sm:mx-0">
+          <div class="bg-card border-y font-mono md:border-x">
+            <div data-slot="table-container" class="relative w-full overflow-x-auto">
+              <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
+                <thead data-slot="table-header" class="[&amp;_tr]:border-b">
+                  <tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">axis</th>
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">what it asks</th>
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base"><div class="flex justify-end">reads</div></th>
+                  </tr>
+                </thead>
+                <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0">
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">D</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">discriminative yield: the fraction of tasks that split the field (<span class="font-mono">0 &lt; solvers &lt; n_models</span>) &mdash; a task everyone or no one solves carries zero information about who is better.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">[0,1]</p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">C</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">difficulty coverage: the normalized entropy of per-task solve-rate buckets &mdash; 1 when the set spans easy to hard, 0 when every task sits at the same difficulty.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">[0,1]</p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">M</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">monotonicity: the fraction of tasks with no strong ability inversion &mdash; a weaker model passing a task an abler one misses is a noise, mislabel or gameability signal.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">[0,1]</p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">IRT</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">2PL Fisher test-information: each task is fit an <span class="font-mono">a</span> (discrimination, from its point-biserial correlation) and <span class="font-mono">b</span> (difficulty, from its solve-rate); information is additive, and <span class="font-mono">SE = 1/&radic;I</span>.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">&ge; 0</p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">KR-20</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">internal-consistency reliability for binary items: do the tasks measure one coherent latent ability, or noise? it can go negative when items contradict each other.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">&le; 1</p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">D CI</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">a bootstrap over resampled task rows (seeded, 95% central interval) &mdash; the honest width of D at the current task count.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums">[0,1]</p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="text-muted-foreground mx-auto max-w-4xl text-center font-mono text-sm/relaxed">two further axes ship in the library but are not on this card, because they read task signatures and ordinal gate-states rather than the solve matrix: <span class="font-mono">A</span> angle coverage (build &rarr; partial &rarr; full-F2P &rarr; clean, each conditioned on reaching the previous stage) and <span class="font-mono">R</span> diversity (1 &minus; the near-duplicate rate over <span class="font-mono">{repo, files, f2p}</span> signatures). both are advisory. see <a class="hover:text-foreground underline underline-offset-4" href="../guide/quality-methods/">the methods note</a>.</p>
+        </div>
+      </div>
+
+      <!-- ====================== HOW TO READ THESE AXES ====================== -->
+      <div class="flex w-full flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">how to read these axes</p>
+          <p class="text-muted-foreground font-mono text-xs">what a bad value actually looks like</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-6 sm:mx-0">
+          <div class="bg-card border-y font-mono md:border-x">
+            <div data-slot="table-container" class="relative w-full overflow-x-auto">
+              <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
+                <thead data-slot="table-header" class="[&amp;_tr]:border-b">
+                  <tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">axis</th>
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">what it means</th>
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">what a bad value looks like</th>
+                    <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base"><div class="flex justify-end">measured</div></th>
+                  </tr>
+                </thead>
+                <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0">
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">D</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">fraction of tasks that split the field &mdash; strictly between 0 and all models solving it.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">low D: the set is mostly all-pass or all-fail rows, which carry no information about who is better. below the <span id="th-minD" class="font-mono">min_D</span> gate the day cannot rank anyone.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums" id="msq-D"><span class="text-muted-foreground">&mdash;</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">C</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">normalized entropy of the per-task solve-rate buckets &mdash; does the set span easy to hard?</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">C near 0: every task sits in one difficulty band, so the set measures a single point on the ability curve rather than a range.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums" id="msq-C"><span class="text-muted-foreground">&mdash;</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">M</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">fraction of tasks with no strong ability inversion (a clearly weaker model passing what an abler one misses).</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">M below 1 flags flaky, mislabeled or gameable tasks. but M is <em>vacuously</em> 1.0 when no model pair is clearly separated &mdash; a perfect M on a thin day is not an achievement.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums" id="msq-M"><span class="text-muted-foreground">&mdash;</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">I</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">2PL Fisher test-information &mdash; additive across tasks, and <span class="font-mono">SE = 1/&radic;I</span>.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">information concentrated in one or two items: the rest of the suite is decorative, since an all-pass or all-fail task contributes almost none of it.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums" id="msq-I"><span class="text-muted-foreground">&mdash;</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">KR-20</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">internal-consistency reliability over binary items &mdash; do the tasks measure one coherent ability?</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">below the conventional bar (<span id="th-minKR" class="font-mono">min_kr20</span>) the set is not yet one instrument; a <em>negative</em> KR-20 means items actively contradict each other.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right tabular-nums" id="msq-KR"><span class="text-muted-foreground">&mdash;</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">A</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">angle coverage: each of the four conditional capability angles needs enough cells to reach its conditioning stage.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">an angle whose conditioning population is under <span class="font-mono">min_support</span> is undefined &mdash; a set where nothing reaches full-F2P cannot measure &quot;fixes it without breaking passing tests&quot; at all.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right"><span class="text-muted-foreground">advisory</span></p></td>
+                  </tr>
+                  <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">R</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">diversity: <span class="font-mono">1 &minus; redundancy</span> over <span class="font-mono">{repo, changed files, F2P}</span> signatures.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base">low R: the day filled with near-clones of one PR family. two tasks in the same repo scoring above the similarity cut count as duplicates.</td>
+                    <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base"><p class="text-right"><span class="text-muted-foreground">advisory</span></p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-card text-card-foreground border font-mono" id="caveat-box">
+            <div class="flex items-center gap-3 border-b px-6 py-2">
+              <p class="text-muted-foreground text-xs">the small-N caveat, stated plainly</p>
+              <span class="ml-auto inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono"><span class="text-muted-foreground">readiness</span> advisory</span>
+            </div>
+            <div class="px-6 py-4">
+              <p class="text-muted-foreground font-mono text-sm/relaxed" id="caveat">the &quot;measured&quot; column is read from real gate-scored matrices of the current day. a handful of tasks is far too few to certify any of these numbers: D can only take a few discrete values, one task flipping moves it by a large step, and the bootstrap interval on D is correspondingly wide. read the column as the current reading of a thin day, not as a property of the benchmark.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== WHY WE DO NOT CLAIM MORE THAN THIS ================== -->
+      <div class="flex w-full flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">why we do not claim more than this</p>
+          <p class="text-muted-foreground font-mono text-xs">the honest part</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-12 sm:mx-0 sm:gap-16">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">a ranking is not a result</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">at a handful of tasks per model, the Wilson interval on any single model&#x27;s rate covers most of the other models. the order on the leaderboard is a reading of one day, not a finding.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">D is coarse at small N</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">with few tasks, D can only take a few discrete values, and one task flipping moves it by a large step &mdash; which is exactly why the bootstrap interval is so wide.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">not yet one instrument</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">under the conventional KR-20 rule of thumb, items below the bar are not yet demonstrably measuring a single coherent ability; treating the total score as a skill estimate would be overreach.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">vacuous highs are not wins</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">M is 1.0 whenever there is no ability separation left to violate, so a perfect M on a thin day is the absence of evidence against the set, not evidence for it. we show the raw value rather than hiding it behind a composite.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">required-N is an estimate</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">it assumes the next tasks are drawn like today&#x27;s, and it comes from a bootstrap SE that is itself noisy at this size. read it as an order of magnitude.</p>
+                </div>
+              </div>
+            </div>
+
+            <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
+              <div class="flex flex-1 flex-col justify-between gap-6 py-6">
+                <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">what it is good for</h2></div>
+                </div>
+                <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between">
+                  <p class="font-mono wrap-anywhere sm:text-sm">catching a day whose set has quietly collapsed &mdash; every task all-pass or all-fail, an item correlating negatively with total score, a difficulty band entirely missing &mdash; before anyone reports a leaderboard from it. a defect detector with an explicit threshold, run every day.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <p class="text-muted-foreground mx-auto max-w-4xl text-center font-mono text-sm/relaxed">the readiness verdict on this page is almost always <em>not yet</em>, and we publish it anyway. readiness is advisory only: it never gates an accept, never touches the reward path, and cannot promote or demote a task.</p>
+        </div>
+      </div>
+
+      <!-- ======================= RUN THE CARD YOURSELF ======================= -->
+      <div class="flex w-full flex-col py-12 sm:pb-16">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">run the card yourself</p>
+          <p class="text-muted-foreground font-mono text-xs">the same function that produced everything above</p>
+        </div>
+        <div class="-mx-4 flex flex-col gap-6 sm:mx-0">
+          <div class="bg-card text-card-foreground flex flex-col border font-mono">
+            <div class="flex items-center gap-3 border-b px-6 py-2">
+              <p class="text-muted-foreground text-xs">one record per (model, task) run, exactly as <span class="font-mono">tdb run</span> emits</p>
+              <button type="button" id="copy-cmd" class="text-muted-foreground hover:text-foreground ml-auto flex shrink-0 items-center gap-2 font-mono text-xs underline-offset-4 hover:underline">copy</button>
+            </div>
+            <div class="relative w-full overflow-x-auto">
+              <pre class="w-max min-w-full px-6 py-4 font-mono text-sm" id="cmd-text">tdb quality results.jsonl</pre>
+            </div>
+            <div class="relative w-full overflow-x-auto border-t">
+              <pre class="text-muted-foreground w-max min-w-full px-6 py-4 font-mono text-sm">{&quot;task&quot;:&quot;td-1&quot;,&quot;model&quot;:&quot;A&quot;,&quot;reward&quot;:1.0}</pre>
+            </div>
+          </div>
+          <p class="text-muted-foreground mx-auto max-w-4xl text-center font-mono text-sm/relaxed">it builds the <span class="font-mono">(task &times; model)</span> matrix (records with <span class="font-mono">model == &quot;oracle&quot;</span> are excluded), prints the axes and the readiness line, then emits the full machine-readable card as JSON. it requires at least 1 task and 2 models &mdash; multi-angle quality is undefined with a single model column &mdash; and exits <span class="font-mono">2</span> otherwise.</p>
+        </div>
+      </div>
+
+      <!-- the canary footer is appended here by assets/site.js -->
     </div>
-    <p class="note" style="margin-top:16px">MSQ is a pure function over plain lists. It reads no reward
-      gate and gates no accept, so <span class="mono">false_accept = 0</span> cannot be perturbed by
-      anything on this page. Every randomized routine is seeded, so a re-run reproduces the interval.</p>
-  </section>
-
-  <section style="padding-top:0;border-top:none">
-    <div id="strip" class="strip"></div>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>the quality card, per scaffold frame</h2>
-      <span class="eyebrow" id="frames-sub">one card per scaffold</span>
-      <a class="more" href="../guide/quality-methods/">how each axis is computed &rarr;</a>
-    </div>
-    <div class="grid c2" id="frames"><div class="empty">loading quality card&hellip;</div></div>
-    <p class="note" style="margin-top:14px">Axes are reported <strong>separately</strong> &mdash; the
-      composite never hides an axis that has collapsed. A bar in
-      <span class="mono" style="color:var(--pending)">amber</span> is below its threshold; the tick on the
-      track is the threshold itself. The blue band on the D row is the bootstrap 95% interval, which at
-      this task count is wide on purpose.</p>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>how far from a claim</h2>
-      <span class="eyebrow">tasks we have vs tasks the interval needs</span>
-    </div>
-    <div id="power"><div class="empty">loading power read&hellip;</div></div>
-    <p class="note" style="margin-top:14px">Standard error scales as
-      <span class="mono">1/&radic;N</span>, so the bootstrap SE at today's N extrapolates to the task
-      count that would buy a research-grade interval. This is the number the daily pipeline is aimed at
-      &mdash; it is a target, not a promise.</p>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>what each axis means</h2><span class="eyebrow">one sentence each</span></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>axis</th><th>what it asks</th><th class="num">reads</th></tr></thead>
-        <tbody>
-          <tr><th class="mono">D</th>
-              <td>Discriminative yield: the fraction of tasks that split the field
-                  (<span class="mono">0 &lt; solvers &lt; n_models</span>) &mdash; a task everyone or no one
-                  solves carries zero information about who is better.</td>
-              <td class="num mono">[0,1]</td></tr>
-          <tr><th class="mono">C</th>
-              <td>Difficulty coverage: the normalized entropy of per-task solve-rate buckets &mdash; 1 when
-                  the set spans easy to hard, 0 when every task sits at the same difficulty.</td>
-              <td class="num mono">[0,1]</td></tr>
-          <tr><th class="mono">M</th>
-              <td>Monotonicity: the fraction of tasks with no strong ability inversion &mdash; a weaker
-                  model passing a task an abler one misses is a noise, mislabel or gameability signal.</td>
-              <td class="num mono">[0,1]</td></tr>
-          <tr><th class="mono">IRT</th>
-              <td>2PL Fisher test-information: each task is fit an <span class="mono">a</span>
-                  (discrimination, from its point-biserial correlation) and <span class="mono">b</span>
-                  (difficulty, from its solve-rate); information is additive, and
-                  <span class="mono">SE = 1/&radic;I</span>.</td>
-              <td class="num mono">&ge; 0</td></tr>
-          <tr><th class="mono">KR-20</th>
-              <td>Internal-consistency reliability for binary items: do the tasks measure one coherent
-                  latent ability, or noise? It can go negative when items contradict each other.</td>
-              <td class="num mono">&le; 1</td></tr>
-          <tr><th class="mono">D&nbsp;CI</th>
-              <td>A bootstrap over resampled task rows (seeded, 95% central interval) &mdash; the honest
-                  width of D at the current task count.</td>
-              <td class="num mono">[0,1]</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="note" style="margin-top:12px">Two further axes ship in the library but are not on this card
-      because they read task signatures and ordinal gate-states rather than the solve matrix:
-      <span class="mono">A</span> angle coverage (build &rarr; partial &rarr; full-F2P &rarr; clean, each
-      conditioned on reaching the previous stage) and <span class="mono">R</span> diversity
-      (1 &minus; the near-duplicate rate over <span class="mono">{repo, files, f2p}</span> signatures).
-      Both are advisory. See <a href="../guide/quality-methods/">the methods note</a>.</p>
-  </section>
-
-  <section>
-    <div class="sec-head">
-      <h2>how to read these axes</h2>
-      <span class="eyebrow">what a bad value actually looks like</span>
-      <a class="more" href="../guide/quality-methods/">methods &rarr;</a>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>axis</th><th>what it means</th><th>what a bad value looks like</th>
-          <th class="num">measured</th>
-        </tr></thead>
-        <tbody>
-          <tr><th class="mono">D</th>
-              <td>Fraction of tasks that split the field &mdash; strictly between 0 and all models solving it.</td>
-              <td>Low D: the set is mostly all-pass or all-fail rows, which carry no information about
-                  who is better. Below the <span class="mono">min_D = 0.40</span> gate the day cannot rank anyone.</td>
-              <!-- D=0.333 single-shot / 0.500 terminus-2; "only 2/6 tasks split the field":
-                   the internal MSQ methods note §4 table + §5 -->
-              <td class="num mono">0.333 <span class="dash">/</span> 0.500</td></tr>
-          <tr><th class="mono">C</th>
-              <td>Normalized entropy of the per-task solve-rate buckets &mdash; does the set span easy to hard?</td>
-              <td>C near 0: every task sits in one difficulty band, so the set measures a single point on
-                  the ability curve rather than a range.</td>
-              <!-- C=0.325 single-shot / 0.459 terminus-2: the internal MSQ methods note §4 table -->
-              <td class="num mono">0.325 <span class="dash">/</span> 0.459</td></tr>
-          <tr><th class="mono">M</th>
-              <td>Fraction of tasks with no strong ability inversion (a clearly weaker model passing what
-                  an abler one misses).</td>
-              <td>M below 1 flags flaky, mislabeled or gameable tasks. But M is <em>vacuously</em> 1.0 when
-                  no model pair is clearly separated &mdash; a perfect M on a thin day is not an achievement.</td>
-              <!-- M=1.000 in both frames: the internal MSQ methods note §4 table; vacuity is in the
-                   monotonicity() docstring, terminal_daily_bench/quality.py:203 -->
-              <td class="num mono">1.000 <span class="dash">/</span> 1.000</td></tr>
-          <tr><th class="mono">I</th>
-              <td>2PL Fisher test-information &mdash; additive across tasks, and
-                  <span class="mono">SE = 1/&radic;I</span>.</td>
-              <td>Information concentrated in one or two items: the rest of the suite is decorative.
-                  In the single-shot frame 2 tasks carry 99% of the information and 4 all-fail tasks carry ~0.</td>
-              <!-- IRT total information 0.624 single-shot / 1.228 terminus-2, and the
-                   "2 tasks carry 99%" read: the internal MSQ methods note §4 table + §5 -->
-              <td class="num mono">0.624 <span class="dash">/</span> 1.228</td></tr>
-          <tr><th class="mono">KR-20</th>
-              <td>Internal-consistency reliability over binary items &mdash; do the tasks measure one
-                  coherent ability?</td>
-              <td>Below the conventional 0.70 bar the set is not yet one instrument; a
-                  <em>negative</em> KR-20 means items actively contradict each other.</td>
-              <!-- KR-20 0.287 (flagged "low") single-shot / 0.663 terminus-2: the internal MSQ methods note §4 table;
-                   the >0.7 acceptable convention: terminal_daily_bench/quality.py:1014 docstring -->
-              <td class="num mono">0.287 <span class="dash">/</span> 0.663</td></tr>
-          <tr><th class="mono">A</th>
-              <td>Angle coverage: each of the 4 conditional capability angles needs enough cells to
-                  reach its conditioning stage.</td>
-              <td>An angle whose conditioning population is under
-                  <span class="mono">min_support = 3</span> is undefined &mdash; e.g. a set where nothing
-                  reaches full-F2P cannot measure "fixes it without breaking passing tests" at all.</td>
-              <td class="num mono">advisory</td></tr>
-          <tr><th class="mono">R</th>
-              <td>Diversity: <span class="mono">1 &minus; redundancy</span> over
-                  <span class="mono">{repo, changed files, F2P}</span> signatures.</td>
-              <td>Low R: the day filled with near-clones of one PR family. Two tasks in the same repo
-                  scoring <span class="mono">&ge; 0.6</span> similarity count as duplicates.</td>
-              <td class="num mono">advisory</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- 6x16 and 6x8 matrices, and the ~83 / ~92 required-N figures:
-         the internal MSQ methods note §4 ("single-shot (6 tasks x 16 models) and
-         terminus-2 agent (6 tasks x 8 models)"; "required N for D +/-0.10: 83 / 92") -->
-    <p class="note" style="margin-top:14px"><strong>The small-N caveat, stated plainly.</strong> The
-      "measured" column is two real gate-scored matrices of <strong>6 tasks</strong> each &mdash; 16 models
-      under single-shot, 8 under the terminus-2 agent. Six tasks is far too few to certify any of these
-      numbers: D can only take a handful of discrete values, one task flipping moves it by a sixth, and the
-      bootstrap interval on D is correspondingly <span class="mono">[0.000, 0.667]</span> in the single-shot
-      frame. Reaching a &plusmn;0.10 interval on D needs roughly <strong>83</strong> tasks single-shot and
-      <strong>92</strong> under the agent frame. Read the column as the current reading of a thin day, not
-      as a property of the benchmark.</p>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>why we do not claim more than this</h2><span class="eyebrow">the honest part</span></div>
-    <div class="prose">
-      <p>The readiness verdict on this page is almost always <em>not yet</em>, and we publish it anyway.
-        Here is what a small-N day genuinely cannot support:</p>
-      <ul>
-        <li><strong>A ranking is not a result.</strong> At a handful of tasks per model, the Wilson
-          interval on any single model's rate covers most of the other models. The order on the
-          leaderboard is a reading of one day, not a finding.</li>
-        <li><strong>D at small N is coarse and jumpy.</strong> With few tasks, D can only take a few
-          discrete values, and one task flipping moves it by a large step &mdash; which is exactly why the
-          bootstrap interval is so wide.</li>
-        <li><strong>KR-20 below the bar means the set is not yet one instrument.</strong> Under the
-          conventional 0.70 rule of thumb, the items are not yet demonstrably measuring a single coherent
-          ability; treating the total score as a skill estimate would be overreach.</li>
-        <li><strong>Vacuous highs are not achievements.</strong> M is 1.0 whenever there is no ability
-          separation left to violate, so a perfect M on a thin day is the absence of evidence against the
-          set, not evidence for it. We show the raw value rather than hiding it behind a composite.</li>
-        <li><strong>The required-N figure is an extrapolation.</strong> It assumes the next tasks are
-          drawn like today's, and it comes from a bootstrap SE that is itself noisy at this size. Read it
-          as an order of magnitude.</li>
-      </ul>
-      <p>What the card <em>is</em> good for: catching a day whose set has quietly collapsed &mdash; every
-        task all-pass or all-fail, an item correlating negatively with total score, a difficulty band
-        entirely missing &mdash; before anyone reports a leaderboard from it. That is a defect detector
-        with an explicit threshold, and it runs every day.</p>
-      <p>Readiness is advisory only. It never gates an accept, never touches the reward path, and cannot
-        promote or demote a task.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>run the card yourself</h2></div>
-    <pre><span class="c"># results.jsonl — one record per (model, task) run, exactly as `tdb run` emits</span>
-<span class="c"># {"task":"td-1","model":"A","reward":1.0}</span>
-
-<span class="k">tdb</span> quality results.jsonl</pre>
-    <p class="note" style="margin-top:12px">It builds the <span class="mono">(task &times; model)</span>
-      matrix (records with <span class="mono">model == "oracle"</span> are excluded), prints the axes and
-      the readiness line, then emits the full machine-readable card as JSON. It requires at least 1 task
-      and 2 models &mdash; multi-angle quality is undefined with a single model column &mdash; and exits
-      <span class="mono">2</span> otherwise.</p>
-  </section>
-
+  </div>
 </main>
 
 <script src="../assets/site.js" data-root=".." data-page="quality"></script>
 <script>
-(async function () {
-  var T = window.TDB;
-  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+(function () {
+  "use strict";
 
-  var strip = document.getElementById("strip");
-  var frames = document.getElementById("frames");
-  var power = document.getElementById("power");
-  var q = board && board.quality;
+  var T = window.TDB || {};
 
-  if (!q) {
-    strip.outerHTML = '<div class="empty">No quality card published yet. Run ' +
-      "<code>tdb quality results.jsonl</code> and publish " +
-      "<code>leaderboard_data.json</code> to populate this page.</div>";
-    frames.innerHTML = '<div class="empty">no quality data</div>';
-    power.innerHTML = '<div class="empty">no power read</div>';
-    return;
+  /* ---- their badge, verbatim class strings ------------------------------ */
+  var BADGE_BASE =
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "font-medium w-fit whitespace-nowrap shrink-0 gap-1 overflow-hidden " +
+    "border-transparent font-mono transition-colors duration-200 ";
+  var BADGE_SEC = BADGE_BASE + "bg-secondary text-secondary-foreground";
+  var BADGE_PRI = BADGE_BASE + "bg-primary text-primary-foreground";
+
+  var CARD =
+    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
+    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
+    "transition-all duration-200 sm:-mr-px sm:border-x";
+
+  /* their exact table cell strings; TD_PROSE is the same minus whitespace-nowrap,
+     for the one descriptive column their tables never have */
+  var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
+    "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
+  var TD_PROSE = "p-2 align-middle [&:has([role=checkbox])]:pr-0 " +
+    "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
+  var TH = "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
+    "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
-
-  var TH = q.thresholds || { min_D: 0.4, min_kr20: 0.7, max_d_halfwidth: 0.15 };
-  var FRAMES = [["single_shot", "single-shot frame"], ["terminus2", "agent frame (terminus-2)"]]
-    .filter(function (f) { return q[f[0]]; });
-
   function num(x, d) { return x == null ? null : Number(x).toFixed(d == null ? 3 : d); }
   function clamp(x) { return Math.max(0, Math.min(100, x)); }
+  function dash() { return '<span class="text-muted-foreground">&mdash;</span>'; }
 
-  /* one axis row: label, track (fill + optional threshold tick + optional CI band), value */
-  function row(label, val, opts) {
+  /* the copyable run command */
+  var copyBtn = document.getElementById("copy-cmd");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      var node = document.getElementById("cmd-text");
+      var txt = node ? node.textContent : "";
+      var done = function () {
+        copyBtn.textContent = "copied";
+        setTimeout(function () { copyBtn.textContent = "copy"; }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(done, function () {});
+      } else { done(); }
+    });
+  }
+
+  /* one stat cell of the strip, in the card idiom */
+  function statCell(k, v) {
+    return '<div data-slot="card" class="' + CARD + '">' +
+      '<div class="flex flex-1 flex-col justify-between gap-2 px-6 py-6">' +
+        '<p class="text-muted-foreground font-mono text-xs">' + k + "</p>" +
+        '<p class="font-mono text-xl font-medium tabular-nums">' + v + "</p>" +
+      "</div></div>";
+  }
+
+  /* one axis row: label, hairline track (fill + threshold notch), value */
+  function axis(label, val, opts) {
     opts = opts || {};
     var scale = opts.scale || 1;
     var ok = opts.ok == null ? true : opts.ok;
     var fill = val == null ? 0 : clamp((val / scale) * 100);
-    var tick = opts.threshold != null
-      ? '<b style="left:calc(' + clamp((opts.threshold / scale) * 100) + '% - 1px)" title="threshold ' +
-        num(opts.threshold, 2) + '"></b>' : "";
-    var band = "";
-    if (opts.ci) {
-      var lo = clamp(opts.ci[0] * 100 / scale), hi = clamp(opts.ci[1] * 100 / scale);
-      band = '<u style="left:' + lo + "%;width:" + Math.max(1, hi - lo) + '%" title="95% CI [' +
-        num(opts.ci[0]) + ", " + num(opts.ci[1]) + ']"></u>';
-    }
-    var shown = val == null ? '<span class="dash">&mdash;</span>' : num(val, opts.digits);
-    return '<div class="ax" title="' + (opts.title || label) + '">' + label + "</div>" +
-      '<div class="abar">' + band +
-        '<i class="' + (ok ? "" : "lo") + '" style="width:' + Math.max(val == null ? 0 : 1.5, fill) + '%"></i>' +
-        tick + "</div>" +
-      '<div class="val' + (ok ? "" : " lo") + '">' + shown + "</div>";
+    var notch = opts.threshold != null
+      ? '<div class="bg-background absolute inset-y-0 w-px" style="left:' +
+        clamp((opts.threshold / scale) * 100) + '%" title="threshold ' +
+        num(opts.threshold, 2) + '"></div>'
+      : "";
+    var shown = val == null
+      ? dash()
+      : (ok ? "" : "&darr; ") + num(val, opts.digits);
+    return '<div class="flex items-center gap-3" title="' + esc(opts.title || label) + '">' +
+      '<p class="text-muted-foreground min-w-32 shrink-0 font-mono text-xs">' + label + "</p>" +
+      '<div class="bg-border relative h-1.5 flex-1">' +
+        '<div class="' + (ok ? "bg-foreground" : "bg-foreground opacity-50") +
+          ' absolute inset-y-0 left-0" style="width:' +
+          Math.max(val == null ? 0 : 1.5, fill) + '%"></div>' + notch +
+      "</div>" +
+      '<p class="min-w-10 shrink-0 text-right font-mono text-xs tabular-nums' +
+        (ok ? "" : " text-muted-foreground") + '">' + shown + "</p>" +
+    "</div>";
   }
 
-  function frameCard(key, label) {
-    var f = q[key];
+  function frameCard(f, label, TH_) {
     var hw = (f.D_ci && f.D_ci.length === 2) ? (f.D_ci[1] - f.D_ci[0]) / 2 : null;
     var verdict = f.ready
-      ? '<span class="pill pass">ready</span>'
-      : '<span class="pill pending">not yet' +
+      ? '<span data-slot="badge" class="' + BADGE_PRI + '">ready</span>'
+      : '<span data-slot="badge" class="' + BADGE_SEC + '">not yet' +
         (f.required_n_D ? " &middot; ~" + f.required_n_D + " tasks" : "") + "</span>";
 
+    var chips =
+      '<span data-slot="badge" class="' + BADGE_SEC + '">' + f.n_tasks + " tasks</span>" +
+      '<span data-slot="badge" class="' + BADGE_SEC + '">' + f.n_models + " models</span>" +
+      (f.composite != null
+        ? '<span data-slot="badge" class="' + BADGE_SEC + '" title="D .5 / C .25 / M .25">composite ' +
+          num(f.composite) + "</span>" : "") +
+      (f.bottleneck
+        ? '<span data-slot="badge" class="' + BADGE_SEC + '">bottleneck: ' + esc(f.bottleneck) + "</span>"
+        : "");
+
     var rows = [
-      row("D discrimination", f.D, { ok: f.D >= TH.min_D, threshold: TH.min_D, ci: f.D_ci,
+      axis("D discrimination", f.D, {
+        ok: f.D >= TH_.min_D, threshold: TH_.min_D,
         title: "fraction of tasks that split the field" }),
-      row("C coverage", f.C, { title: "normalized entropy of the difficulty buckets" }),
-      row("M monotonicity", f.M, { title: "fraction of tasks with no strong ability inversion" }),
-      row("IRT info (2PL)", f.irt_info, { scale: 2, ok: f.irt_info >= 1,
-        title: "Fisher test-information; bar scaled to a 2.0 reference, the value is unbounded" }),
-      row("KR-20 reliability", f.kr20, { ok: f.kr20 != null && f.kr20 >= TH.min_kr20,
-        threshold: TH.min_kr20, title: "internal-consistency reliability over binary items" })
+      axis("C coverage", f.C, { title: "normalized entropy of the difficulty buckets" }),
+      axis("M monotonicity", f.M, { title: "fraction of tasks with no strong ability inversion" }),
+      axis("IRT info (2PL)", f.irt_info, { scale: 2, ok: f.irt_info >= 1,
+        title: "Fisher test-information; the track is scaled to a 2.0 reference, the value is unbounded" }),
+      axis("KR-20 reliability", f.kr20, {
+        ok: f.kr20 != null && f.kr20 >= TH_.min_kr20, threshold: TH_.min_kr20,
+        title: "internal-consistency reliability over binary items" })
     ].join("");
 
-    var ciLine = hw == null ? "D interval unavailable"
-      : "D 95% CI <span class=\"mono\">[" + num(f.D_ci[0]) + ", " + num(f.D_ci[1]) +
-        "]</span> &mdash; half-width <span class=\"mono\">&plusmn;" + num(hw, 2) +
-        "</span> vs target <span class=\"mono\">&plusmn;" + num(TH.max_d_halfwidth, 2) + "</span>";
+    var ciLine = hw == null
+      ? "D interval unavailable"
+      : "D 95% CI [" + num(f.D_ci[0]) + ", " + num(f.D_ci[1]) +
+        "] &mdash; half-width &plusmn;" + num(hw, 2) +
+        " vs target &plusmn;" + num(TH_.max_d_halfwidth, 2);
 
-    return '<div class="card">' +
-      '<div class="hd"><h3>' + label + "</h3>" + verdict + "</div>" +
-      "<p>" + f.n_tasks + " tasks &times; " + f.n_models + " models" +
-        (f.composite != null ? " &middot; composite " + num(f.composite) +
-          " <span class=\"mono\" style=\"color:var(--faint)\">(D&nbsp;.5 / C&nbsp;.25 / M&nbsp;.25)</span>" : "") +
-      "</p>" +
-      '<div class="axes" style="margin-top:4px">' + rows + "</div>" +
-      '<p style="font-size:12.5px">' + ciLine + "</p>" +
-      '<span class="foot">' +
-        (f.ready ? "ready: D &ge; " + num(TH.min_D, 2) + " &and; KR-20 &ge; " + num(TH.min_kr20, 2) +
-                   " &and; D half-width &le; " + num(TH.max_d_halfwidth, 2) + " all hold"
-                 : "binding bottleneck: " + (f.bottleneck || "unknown") +
-                   (f.required_n_D ? " &rarr; ~" + f.required_n_D + " tasks close the gap" : "")) +
-      "</span></div>";
+    var footLine = f.ready
+      ? "ready: D &ge; " + num(TH_.min_D, 2) + " &and; KR-20 &ge; " + num(TH_.min_kr20, 2) +
+        " &and; D half-width &le; " + num(TH_.max_d_halfwidth, 2) + " all hold"
+      : "binding bottleneck: " + esc(f.bottleneck || "unknown") +
+        (f.required_n_D ? " &rarr; ~" + f.required_n_D + " tasks close the gap" : "");
+
+    return '<div data-slot="card" class="' + CARD + '">' +
+      '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
+        '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
+          'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
+          'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
+          '<div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">' +
+            '<div data-slot="card-title" class="leading-none font-semibold">' +
+              '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(label) + "</h2></div>" +
+            verdict +
+          "</div>" +
+          '<div class="flex flex-wrap gap-2">' + chips + "</div>" +
+        "</div>" +
+        '<div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between gap-6">' +
+          '<div class="space-y-3">' + rows + "</div>" +
+          '<div class="space-y-2">' +
+            '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + ciLine + "</p>" +
+            '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + footLine + "</p>" +
+          "</div>" +
+        "</div>" +
+      "</div></div>";
   }
 
-  /* ---- strip ---- */
-  var readyCount = FRAMES.filter(function (f) { return q[f[0]].ready; }).length;
-  var any = q[FRAMES[0][0]];
-  strip.innerHTML = [
-    ["suite date", board.date || "&mdash;"],
-    ["tasks scored", any.n_tasks],
-    ["scaffold frames", FRAMES.length],
-    ["frames ready", readyCount + " <small>/ " + FRAMES.length + "</small>"],
-    ["gate threshold", "D &ge; " + num(TH.min_D, 2)],
-    ["false-accepts", board.total_fa != null ? board.total_fa : 0]
-  ].map(function (c) {
-    return '<div class="cell"><div class="k">' + c[0] + '</div><div class="v">' + c[1] + "</div></div>";
-  }).join("");
+  function empty(msg) {
+    return '<div class="bg-card text-card-foreground border px-6 py-6 font-mono">' +
+      '<p class="text-muted-foreground text-sm">' + msg + "</p></div>";
+  }
 
-  document.getElementById("frames-sub").textContent =
-    FRAMES.length + " frame" + (FRAMES.length === 1 ? "" : "s") + " measured on " +
-    (board.date || "this suite");
+  function paint(board) {
+    var strip = document.getElementById("strip");
+    var frames = document.getElementById("frames");
+    var power = document.getElementById("power");
+    var q = board && board.quality;
 
-  /* ---- frame cards ---- */
-  frames.innerHTML = FRAMES.map(function (f) { return frameCard(f[0], f[1]); }).join("");
+    if (!q) {
+      strip.innerHTML = "";
+      frames.innerHTML = empty(
+        "no quality card published yet &mdash; run <span class=\"font-mono\">tdb quality " +
+        "results.jsonl</span> and publish <span class=\"font-mono\">leaderboard_data.json</span> " +
+        "to populate this page.");
+      power.innerHTML = empty("no power read");
+      return;
+    }
 
-  /* ---- power read: tasks now vs tasks required ---- */
-  var maxReq = Math.max.apply(null, FRAMES.map(function (f) { return q[f[0]].required_n_D || 0; }).concat([1]));
-  var prows = FRAMES.map(function (f) {
-    var d = q[f[0]], req = d.required_n_D;
-    var have = clamp((d.n_tasks / maxReq) * 100);
-    var need = req ? clamp((req / maxReq) * 100) : 0;
-    return "<tr><td>" + f[1] + "</td>" +
-      '<td class="num mono">' + d.n_tasks + "</td>" +
-      '<td class="num mono">' + (req ? "~" + req : '<span class="dash">&mdash;</span>') + "</td>" +
-      '<td style="min-width:180px"><div class="abar">' +
-        (req ? '<b style="left:calc(' + need + '% - 1px)" title="required ~' + req + ' tasks"></b>' : "") +
-        '<i class="lo" style="width:' + Math.max(1.5, have) + '%"></i></div></td>' +
-      '<td class="mono" style="color:var(--faint)">' + (d.bottleneck || "&mdash;") + "</td></tr>";
-  }).join("");
-  power.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
-    "<th>frame</th><th class=\"num\">tasks now</th><th class=\"num\">tasks needed</th>" +
-    "<th>progress</th><th>bottleneck</th>" +
-    "</tr></thead><tbody>" + prows + "</tbody></table></div>";
+    var TH_ = q.thresholds || { min_D: 0.4, min_kr20: 0.7, max_d_halfwidth: 0.15 };
+    var FRAMES = [
+      ["single_shot", "single-shot frame", "under single-shot"],
+      ["terminus2", "agent frame (terminus-2)", "under the terminus-2 agent"]
+    ].filter(function (f) { return q[f[0]]; });
+
+    if (!FRAMES.length) {
+      frames.innerHTML = empty("no scaffold frame scored on this suite");
+      power.innerHTML = empty("no power read");
+      return;
+    }
+
+    /* ---- strip ---- */
+    var readyCount = FRAMES.filter(function (f) { return q[f[0]].ready; }).length;
+    var any = q[FRAMES[0][0]];
+    strip.innerHTML = [
+      ["suite date", board.date || "&mdash;"],
+      ["tasks scored", any.n_tasks],
+      ["scaffold frames", FRAMES.length],
+      ["frames ready", readyCount + " / " + FRAMES.length],
+      ["gate threshold", "D &ge; " + num(TH_.min_D, 2)],
+      ["false-accepts", board.total_fa != null ? board.total_fa : 0]
+    ].map(function (c) { return statCell(c[0], c[1]); }).join("");
+
+    var sub = document.getElementById("frames-sub");
+    if (sub) {
+      sub.textContent = FRAMES.length + " frame" + (FRAMES.length === 1 ? "" : "s") +
+        " measured on " + (board.date || "this suite");
+    }
+
+    /* ---- frame cards ---- */
+    frames.innerHTML = FRAMES.map(function (f) {
+      return frameCard(q[f[0]], f[1], TH_);
+    }).join("");
+
+    /* ---- power read ---- */
+    var maxReq = Math.max.apply(null, FRAMES.map(function (f) {
+      return Math.max(q[f[0]].required_n_D || 0, q[f[0]].n_tasks || 0);
+    }).concat([1]));
+    var prows = FRAMES.map(function (f) {
+      var d = q[f[0]], req = d.required_n_D;
+      var have = clamp((d.n_tasks / maxReq) * 100);
+      var need = req ? clamp((req / maxReq) * 100) : 0;
+      return '<tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">' +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' +
+          esc(f[1]) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
+          d.n_tasks + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
+          (req ? "~" + req : dash()) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD_PROSE + '">' +
+          '<div class="bg-border relative h-1.5 w-full min-w-24">' +
+            '<div class="bg-foreground opacity-50 absolute inset-y-0 left-0" style="width:' +
+              Math.max(1.5, have) + '%"></div>' +
+            (req ? '<div class="bg-background absolute inset-y-0 w-px" style="left:' + need +
+                   '%" title="required ~' + req + ' tasks"></div>' : "") +
+          "</div></td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' +
+          '<p class="text-muted-foreground text-left">' +
+          esc(d.bottleneck || "—") + "</p></td></tr>";
+    }).join("");
+
+    power.innerHTML =
+      '<div class="bg-card border-y font-mono md:border-x">' +
+        '<div data-slot="table-container" class="relative w-full overflow-x-auto">' +
+          '<table data-slot="table" class="w-full caption-bottom text-sm ' +
+            '[&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 ' +
+            '[&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6">' +
+            '<thead data-slot="table-header" class="[&_tr]:border-b">' +
+              '<tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">' +
+                '<th data-slot="table-head" class="' + TH + '">frame</th>' +
+                '<th data-slot="table-head" class="' + TH + '">' +
+                  '<div class="flex justify-end">tasks now</div></th>' +
+                '<th data-slot="table-head" class="' + TH + '">' +
+                  '<div class="flex justify-end">tasks needed</div></th>' +
+                '<th data-slot="table-head" class="' + TH + '">progress</th>' +
+                '<th data-slot="table-head" class="' + TH + '">bottleneck</th>' +
+              "</tr></thead>" +
+            '<tbody data-slot="table-body" class="[&_tr:last-child]:border-0">' + prows + "</tbody>" +
+          "</table></div></div>";
+
+    /* ---- the "measured" column of the how-to-read table ---- */
+    var ss = q.single_shot, ag = q.terminus2;
+    function pair(key, digits) {
+      var a = ss ? ss[key] : null, b = ag ? ag[key] : null;
+      if (a == null && b == null) return dash();
+      return (a == null ? "&mdash;" : num(a, digits)) +
+        ' <span class="text-muted-foreground">/</span> ' +
+        (b == null ? "&mdash;" : num(b, digits));
+    }
+    var cells = { "msq-D": "D", "msq-C": "C", "msq-M": "M", "msq-I": "irt_info", "msq-KR": "kr20" };
+    Object.keys(cells).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = pair(cells[id]);
+    });
+
+    var thD = document.getElementById("th-minD");
+    if (thD && TH_.min_D != null) thD.textContent = "min_D = " + num(TH_.min_D, 2);
+    var thKR = document.getElementById("th-minKR");
+    if (thKR && TH_.min_kr20 != null) thKR.textContent = "KR-20 ≥ " + num(TH_.min_kr20, 2);
+
+    /* ---- the small-N caveat, written from the data ---- */
+    var cav = document.getElementById("caveat");
+    if (cav) {
+      var parts = FRAMES.map(function (f) {
+        return q[f[0]].n_models + " models " + f[2];
+      });
+      var ciTxt = (ss && ss.D_ci)
+        ? " the bootstrap interval on D is [" + num(ss.D_ci[0]) + ", " + num(ss.D_ci[1]) +
+          "] in the single-shot frame."
+        : "";
+      var reqTxt = FRAMES
+        .filter(function (f) { return q[f[0]].required_n_D; })
+        .map(function (f, i) {
+          return q[f[0]].required_n_D + (i === 0 ? " tasks " : " ") + f[2];
+        })
+        .join(" and ");
+      cav.innerHTML =
+        "the &quot;measured&quot; column is " + FRAMES.length + " real gate-scored " +
+        (FRAMES.length === 1 ? "matrix" : "matrices") + " of <strong class=\"text-foreground " +
+        "font-medium\">" + any.n_tasks + " task" + (any.n_tasks === 1 ? "" : "s") +
+        "</strong> each &mdash; " + parts.join(", ") + ". that is far too few to certify any of " +
+        "these numbers: D can only take a handful of discrete values, one task flipping moves it " +
+        "by 1/" + any.n_tasks + ", and" + (ciTxt || " the interval is correspondingly wide.") +
+        (reqTxt
+          ? " reaching a &plusmn;" + num(TH_.max_d_halfwidth, 2) + " interval on D needs roughly " +
+            reqTxt + "."
+          : "") +
+        " read the column as the current reading of a thin day, not as a property of the benchmark.";
+    }
+  }
+
+  function boot() {
+    if (!T.getJSON) { paint(null); return; }
+    T.getJSON("leaderboard_data.json").then(paint, function () { paint(null); });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else { boot(); }
 })();
 </script>
 </body>
