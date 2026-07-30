@@ -101,3 +101,56 @@ def test_no_private_doc_paths_in_shipped_pages():
                          r"|CERTIFIED_YIELD_PROOF\.md|UNIVERSE_EXPANSION\.md", line):
                 leaks.append(f"{f.relative_to(ROOT)}:{i}")
     assert not leaks, leaks
+
+
+def test_live_packages_do_not_publish_the_upstream_merge():
+    """A LIVE task withholds solution/ and the protected test bodies. That premise is
+    void if the package also publishes the upstream merge coordinates: our tasks come
+    from PUBLIC merged GitHub PRs, so `git show <merge_sha>` returns both the withheld
+    gold patch AND the withheld tests -- offline, from inside a fully network-severed
+    container. `oracle_patch_sha256` is worse than a hint: it lets an attacker confirm
+    byte-equality with the gold before submitting.
+
+    ARCHIVE packages ship solution/ anyway, so they keep full provenance -- that is
+    what makes an archived task reproducible.
+    """
+    import json as _json
+    sys.path.insert(0, str(ROOT / "tasks"))
+    import publish_tasks as pt
+
+    toml = ('[metadata]\nsource_repo = "o/r"\npr_number = 1451\n'
+            'base_sha = "2abeb0f"\nmerge_sha = "b782e56"\n'
+            'oracle_patch_sha256 = "1e843ef"\ndocker_image = "/host/x.sif"\n')
+    prov = _json.dumps({"source_repo": "o/r", "source_ref": "b782e56"})
+
+    live_toml = pt._sanitize_task_toml(toml, live=True)
+    for key in ("pr_number", "base_sha", "merge_sha", "oracle_patch_sha256"):
+        assert key not in live_toml, f"{key} leaked into a LIVE task.toml"
+    assert "source_repo" in live_toml, "repo identity is not the secret; the commit is"
+
+    live_prov = _json.loads(pt._sanitize_provenance(prov, live=True))
+    assert "source_ref" not in live_prov, "merge sha leaked into LIVE PROVENANCE.json"
+
+    # ARCHIVE keeps everything (minus the host image path, which is unrelated).
+    arch_toml = pt._sanitize_task_toml(toml, live=False)
+    for key in ("pr_number", "merge_sha", "oracle_patch_sha256"):
+        assert key in arch_toml, f"{key} must survive on an ARCHIVE task"
+    assert "source_ref" in _json.loads(pt._sanitize_provenance(prov, live=False))
+
+    # An unparseable provenance must fail CLOSED on a live task, never pass through.
+    assert "b782e56" not in pt._sanitize_provenance("{not json", live=True)
+
+
+def test_shipped_live_tasks_carry_no_merge_sha():
+    """Regression on the actual shipped tree, not just the function: the release we
+    push to GitHub Pages must contain no upstream commit pointer under tasks/live/."""
+    import re
+    live = ROOT / "tasks" / "live"
+    if not live.is_dir():
+        return
+    leaks = []
+    for f in list(live.rglob("task.toml")) + list(live.rglob("PROVENANCE.json")):
+        for i, line in enumerate(f.read_text(errors="replace").splitlines(), 1):
+            if re.search(r"merge_sha|source_ref|oracle_patch_sha256|pr_number", line):
+                leaks.append(f"{f.relative_to(ROOT)}:{i}: {line.strip()}")
+    assert not leaks, "LIVE package leaks the gold's coordinates:\n" + "\n".join(leaks)

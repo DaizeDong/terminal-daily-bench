@@ -8,11 +8,7 @@ keywords = ["C5", "C4"]
 
 [metadata]
 source_repo = "Delgan/loguru"
-pr_number = 1451
-base_sha = "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e"
-merge_sha = "b782e56fcf07fecf9545ff6ee2350baacb0968ce"
 created_at = "2026-03-25T02:34:06Z"
-oracle_patch_sha256 = "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8"
 source_license_spdx = ""
 difficulty = "medium"
 track = "merged"
