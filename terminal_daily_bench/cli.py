@@ -75,6 +75,29 @@ def _cmd_quality(a) -> int:
     return 0
 
 
+def _cmd_publish(a) -> int:
+    """Regenerate the website's data file from a day's result JSONs.
+
+    The site renders from `web/leaderboard_data.json`, so publishing a new day is
+    exactly: run this, commit the JSON, push -- GitHub Pages redeploys automatically.
+    """
+    import subprocess
+    here = os.path.dirname(os.path.abspath(__file__))
+    agg = os.path.join(here, "..", "web", "aggregate_leaderboard.py")
+    if not os.path.exists(agg):
+        print(f"aggregator not found at {agg}", file=sys.stderr)
+        return 2
+    out = a.out or os.path.join(here, "..", "docs", "leaderboard_data.json")
+    cmd = [sys.executable, agg, f"--results={a.results}", f"--out={out}"]
+    if a.date:
+        cmd.append(f"--date={a.date}")
+    rc = subprocess.run(cmd).returncode
+    if rc == 0:
+        print(f"\nsite data updated: {out}\n"
+              f"  commit + push it and the leaderboard site redeploys (GitHub Pages).")
+    return rc
+
+
 def main(argv: List[str] = None) -> int:
     p = argparse.ArgumentParser(prog="tdb", description="terminal-daily-bench")
     p.add_argument("--version", action="version", version=f"terminal-daily-bench {__version__}")
@@ -82,6 +105,11 @@ def main(argv: List[str] = None) -> int:
     r = sub.add_parser("run", help="score a model on a task"); r.add_argument("model"); r.add_argument("task"); r.add_argument("--out", default=None); r.set_defaults(fn=_cmd_run)
     o = sub.add_parser("oracle", help="gate baseline"); o.add_argument("task"); o.add_argument("--out", default=None); o.set_defaults(fn=_cmd_oracle)
     q = sub.add_parser("quality", help="multi-angle quality card"); q.add_argument("results"); q.set_defaults(fn=_cmd_quality)
+    pb = sub.add_parser("publish", help="results -> website data file (leaderboard_data.json)")
+    pb.add_argument("results", help="DIR[:scaffold][,DIR[:scaffold] ...] of result JSONs")
+    pb.add_argument("--out", default=None, help="default: web/leaderboard_data.json")
+    pb.add_argument("--date", default=None, help="YYYY-MM-DD shown on the site")
+    pb.set_defaults(fn=_cmd_publish)
     a = p.parse_args(argv)
     return a.fn(a)
 

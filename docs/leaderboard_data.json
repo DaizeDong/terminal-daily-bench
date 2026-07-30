@@ -1,8 +1,18 @@
 {
  "date": "2026-07-23",
  "n_tasks": 6,
+ "n_models": 16,
  "n_cells": 124,
  "total_fa": 0,
+ "cost_measured": false,
+ "tasks": [
+  "td-965d562cfcb587f7",
+  "td-a42635c7e8ecf577",
+  "td-c02f3fb045d717f4",
+  "td-da0a145bd7cb2bee",
+  "td-f6a1098ed7f3b990",
+  "td-fc90ea8b76d5f6b6"
+ ],
  "pooled": {
   "single_shot": {
    "n": 96,
@@ -27,7 +37,8 @@
     "solved": 3,
     "rate": 0.5,
     "fa": 0
-   }
+   },
+   "lead": true
   },
   {
    "model": "DeepSeek-V4-Flash",
@@ -41,15 +52,6 @@
     "n": 4,
     "solved": 2,
     "rate": 0.5,
-    "fa": 0
-   }
-  },
-  {
-   "model": "gemini-3.1-pro-preview",
-   "single_shot": {
-    "n": 6,
-    "solved": 1,
-    "rate": 0.167,
     "fa": 0
    }
   },
@@ -93,25 +95,25 @@
    }
   },
   {
-   "model": "DeepSeek-R1-Distill-Qwen-14B",
+   "model": "gemini-3.1-pro-preview",
    "single_shot": {
     "n": 6,
-    "solved": 0,
-    "rate": 0.0,
-    "fa": 0
-   }
-  },
-  {
-   "model": "gpt-4o",
-   "single_shot": {
-    "n": 6,
-    "solved": 0,
-    "rate": 0.0,
+    "solved": 1,
+    "rate": 0.167,
     "fa": 0
    }
   },
   {
    "model": "Claude-Haiku-4.5",
+   "single_shot": {
+    "n": 6,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": 0
+   }
+  },
+  {
+   "model": "DeepSeek-R1-Distill-Qwen-14B",
    "single_shot": {
     "n": 6,
     "solved": 0,
@@ -129,7 +131,7 @@
    }
   },
   {
-   "model": "Llama-4-Maverick-17B",
+   "model": "Gemma-4-31B",
    "single_shot": {
     "n": 6,
     "solved": 0,
@@ -147,7 +149,7 @@
    }
   },
   {
-   "model": "Gemma-4-31B",
+   "model": "Llama-4-Maverick-17B",
    "single_shot": {
     "n": 6,
     "solved": 0,
@@ -156,7 +158,7 @@
    }
   },
   {
-   "model": "gpt-5.2",
+   "model": "gpt-4o",
    "single_shot": {
     "n": 6,
     "solved": 0,
@@ -180,6 +182,15 @@
    }
   },
   {
+   "model": "gpt-5.2",
+   "single_shot": {
+    "n": 6,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": 0
+   }
+  },
+  {
    "model": "o3",
    "single_shot": {
     "n": 6,
@@ -189,6 +200,114 @@
    }
   }
  ],
- "community": [],
- "_note": "Reference results from the full evaluation. This bundle ships the single-shot scaffold + the HarnessAdapter contract; reproduce the 'agent (terminus-2)' column by wiring a multi-turn agent via terminal_daily_bench/adapters (see docs/submission.md)."
+ "matrix": {
+  "tasks": [
+   "td-965d562cfcb587f7",
+   "td-a42635c7e8ecf577",
+   "td-c02f3fb045d717f4",
+   "td-da0a145bd7cb2bee",
+   "td-f6a1098ed7f3b990",
+   "td-fc90ea8b76d5f6b6"
+  ],
+  "scaffold": "terminus2",
+  "rows": [
+   {
+    "model": "Claude-Opus-4.8",
+    "g": [
+     0,
+     1,
+     1,
+     0,
+     1,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Sonnet-4.6",
+    "g": [
+     0,
+     1,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "DeepSeek-V4-Flash",
+    "g": [
+     0,
+     1,
+     1,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "gemini-2.5-flash",
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "gpt-5",
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "quality": {
+  "single_shot": {
+   "D": 0.3333333333333333,
+   "C": 0.32501121082417705,
+   "M": 1.0,
+   "composite": 0.4979194693727109,
+   "irt_info": 0.6241573468257081,
+   "kr20": 0.2869565217391304,
+   "D_ci": [
+    0.0,
+    0.6666666666666666
+   ],
+   "n_tasks": 6,
+   "n_models": 16,
+   "ready": false,
+   "bottleneck": "discrimination",
+   "required_n_D": 35
+  },
+  "terminus2": {
+   "D": 0.5,
+   "C": 0.6258145836939114,
+   "M": 1.0,
+   "composite": 0.6564536459234779,
+   "irt_info": 1.8689315528032109,
+   "kr20": 0.6352941176470587,
+   "D_ci": [
+    0.16666666666666666,
+    0.8333333333333334
+   ],
+   "n_tasks": 6,
+   "n_models": 5,
+   "ready": false,
+   "bottleneck": "precision",
+   "required_n_D": 42
+  },
+  "thresholds": {
+   "min_D": 0.4,
+   "min_kr20": 0.7,
+   "max_d_halfwidth": 0.15
+  }
+ },
+ "community": []
 }

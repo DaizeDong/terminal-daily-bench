@@ -308,7 +308,12 @@
 </div>
 
 <script>
-const DATA = {
+// ---------------------------------------------------------------------------
+// Data source. The page RENDERS FROM leaderboard_data.json (fetched at load), so
+// publishing a new day is just: upload the JSON -> the site shows it. The object
+// below is an EMBEDDED SNAPSHOT used only as a fallback when the fetch cannot run
+// (opening the file over file://, or the JSON is missing) so the page is never blank.
+const EMBEDDED_SNAPSHOT = {
   date:"2026-07-23", n_tasks:6, n_models:16, n_cells:124, total_fa:0,
   pooled:{ single_shot:{n:96,solved:6}, terminus2:{n:28,solved:6} },
   tasks:["rich #4077 · FileProxy.isatty","rich #4076 · from_ansi newlines","rich #4079","loguru #1451 · format-key validation","loguru #1442","funcy #118"],
@@ -373,6 +378,8 @@ const DATA = {
     exploit_classes:10  // frozen reward-hack classes the gate rejects (exploit_corpus)
   }
 };
+let DATA = EMBEDDED_SNAPSHOT;
+
 
 const pct = x => (x*100).toFixed(1).replace(/\.0$/,"")+"%";
 // Wilson score 95% interval for a binomial proportion (solved/n) — honest at small N.
@@ -411,6 +418,7 @@ function deltaCell(row){
   const cls  = d>0 ? 'up' : 'down';
   return `<span class="delta ${cls}">${sign}${Math.round(Math.abs(d)*100)}pp</span>`;
 }
+function render(){
 // summary strip
 const ss=DATA.pooled.single_shot, t2=DATA.pooled.terminus2;
 document.getElementById("strip").innerHTML = [
@@ -532,4 +540,23 @@ document.getElementById("submit-sample").textContent =
   "patch": "<unified diff the model produced>",     // re-scored on ingest
   "reward_claimed": 1.0,                             // advisory only, re-verified
   "harness_version": "v2", "signature": "<sha256>" }`;
+
+}  // end render()
+
+// --- boot: render from the published JSON; fall back to the embedded snapshot ---
+(async function boot(){
+  try {
+    const r = await fetch("leaderboard_data.json", {cache: "no-store"});
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.leaderboard) DATA = j;      // only accept a well-formed payload
+    }
+  } catch (e) { /* file:// or offline -> keep the embedded snapshot */ }
+  try { render(); }
+  catch (e) {
+    console.error("render failed", e);
+    document.getElementById("board").innerHTML =
+      '<tr><td colspan="6">Could not render the board — see console.</td></tr>';
+  }
+})();
 </script>

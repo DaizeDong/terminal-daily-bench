@@ -35,7 +35,7 @@ assert callable(m.read_harbor_reward)
 PY
 
 echo; echo "=== 3. RELEASE ARTIFACTS present ==="
-for f in README.md LICENSE CONTRIBUTING.md MANIFEST.md pyproject.toml registry.json .importlinter terminal_daily_bench/__init__.py terminal_daily_bench/harbor_score.py terminal_daily_bench/quality.py terminal_daily_bench/cli.py terminal_daily_bench/eval.py web/dashboard.html tasks/SCHEMA.md; do
+for f in README.md LICENSE CONTRIBUTING.md MANIFEST.md pyproject.toml registry.json .importlinter terminal_daily_bench/__init__.py terminal_daily_bench/harbor_score.py terminal_daily_bench/quality.py terminal_daily_bench/cli.py terminal_daily_bench/eval.py docs/index.html tasks/SCHEMA.md; do
   [ -e "$f" ] && say "$f" "OK" || { say "$f" "MISSING"; FAIL=1; }
 done
 
