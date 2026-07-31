@@ -1,0 +1,43 @@
+diff --git a/pathspec/pathspec.py b/pathspec/pathspec.py
+index bb88cbf..97422ca 100644
+--- a/pathspec/pathspec.py
++++ b/pathspec/pathspec.py
+@@ -98,6 +98,12 @@ def __init__(
+ 		contains the compiled patterns.
+ 		"""
+ 
++	def __repr__(self) -> str:
++		"""
++		Returns a debug representation of this path-spec.
++		"""
++		return f"{self.__class__.__name__}(patterns={self.patterns!r}, backend={self._backend_name!r})"
++
+ 	def __add__(self: Self, other: PathSpec) -> Self:
+ 		"""
+ 		Combines the :attr:`self.patterns <.PathSpec.patterns>` patterns from two
+diff --git a/pathspec/pattern.py b/pathspec/pattern.py
+index a4b8a2c..a1803a8 100644
+--- a/pathspec/pattern.py
++++ b/pathspec/pattern.py
+@@ -158,6 +158,21 @@ def __init__(
+ 		expression for the pattern.
+ 		"""
+ 
++	def __repr__(self) -> str:
++		"""
++		Returns a debug representation of this regex pattern.
++		"""
++		return f"{self.__class__.__name__}(pattern={self.pattern!r}, include={self.include!r})"
++
++	def __str__(self) -> str:
++		"""
++		Returns a string representation of this regex pattern. Equivalent to uncompiled pattern.
++
++		The string representation is the uncompiled pattern if it is not
++		:data:`None`; otherwise, an empty string.
++		"""
++		return str(self.pattern or "")
++
+ 	def __copy__(self: RegexPatternSelf) -> RegexPatternSelf:
+ 		"""
+ 		Performa a shallow copy of the pattern.

@@ -1,0 +1,24 @@
+{
+  "task_id": "td-e48d3444c4c946d6",
+  "repo": "agittins/bermuda",
+  "pr_number": 783,
+  "base_sha": "0de65b9e97c2d9aa9754aa470b9825b8d4ccdafc",
+  "merge_sha": "2fa41ae13b17fcd01ff88bfb6df1e4b21bdcd6ec",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "7ffc0215a41d02d865e3455ca7d87aecdfa7264bc8e11628540bf3f167e2fba1",
+  "test_files": [
+    "tests/test_coordinator.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_coordinator.py::test_handle_devreg_malformed_identifier"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

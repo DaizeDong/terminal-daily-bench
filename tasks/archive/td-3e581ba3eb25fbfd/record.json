@@ -1,0 +1,25 @@
+{
+  "task_id": "td-3e581ba3eb25fbfd",
+  "repo": "python-validators/validators",
+  "pr_number": 420,
+  "base_sha": "7c97eca2990f6d42e27f0f211475eb0d4809de59",
+  "merge_sha": "bafe62e757bd99526129f8dffcfc9795817d08d8",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "428c05e1cb14a373af0f2654e573bf6d807fd142994d8c10012f67d5e64b17b3",
+  "test_files": [
+    "tests/test_card.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_card.py::test_returns_true_on_valid_mir",
+    "tests/test_card.py::test_returns_failed_on_valid_mir"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

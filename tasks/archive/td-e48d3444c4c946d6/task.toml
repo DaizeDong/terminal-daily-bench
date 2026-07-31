@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-e48d3444c4c946d6"
+description = "Skip malformed device identifiers in handle_devreg_changes"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "agittins/bermuda"
+pr_number = 783
+base_sha = "0de65b9e97c2d9aa9754aa470b9825b8d4ccdafc"
+merge_sha = "2fa41ae13b17fcd01ff88bfb6df1e4b21bdcd6ec"
+created_at = "2026-07-17T08:19:58Z"
+oracle_patch_sha256 = "7ffc0215a41d02d865e3455ca7d87aecdfa7264bc8e11628540bf3f167e2fba1"
+source_license_spdx = ""
+difficulty = "medium"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

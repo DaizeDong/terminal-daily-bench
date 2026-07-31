@@ -1,0 +1,27 @@
+diff --git a/argcomplete/finders.py b/argcomplete/finders.py
+index 793b462..8d248fd 100644
+--- a/argcomplete/finders.py
++++ b/argcomplete/finders.py
+@@ -515,7 +515,7 @@ def quote_completions(
+             # Bash mangles completions which contain characters in COMP_WORDBREAKS.
+             # This workaround has the same effect as __ltrim_colon_completions in bash_completion
+             # (extended to characters other than the colon).
+-            if last_wordbreak_pos:
++            if last_wordbreak_pos is not None:
+                 completions = [c[last_wordbreak_pos + 1 :] for c in completions]
+             special_chars += "();<>|&!`$* \t\n\"'"
+         elif cword_prequote == '"':
+diff --git a/argcomplete/packages/_shlex.py b/argcomplete/packages/_shlex.py
+index ecd785b..890a38f 100644
+--- a/argcomplete/packages/_shlex.py
++++ b/argcomplete/packages/_shlex.py
+@@ -177,6 +177,9 @@ def read_token(self):
+                 elif self.whitespace_split:
+                     self.token = nextchar
+                     self.state = 'a'
++                    # Modified by argcomplete: Record last wordbreak position
++                    if nextchar in self.wordbreaks:
++                        self.last_wordbreak_pos = len(self.token) - 1
+                 else:
+                     self.token = nextchar
+                     if self.token or (self.posix and quoted):

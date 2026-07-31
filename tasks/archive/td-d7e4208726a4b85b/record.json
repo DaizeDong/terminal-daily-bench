@@ -1,0 +1,24 @@
+{
+  "task_id": "td-d7e4208726a4b85b",
+  "repo": "keleshev/schema",
+  "pr_number": 348,
+  "base_sha": "27e268d4fc36a169b9a3296fe03d3b897fc0bf2f",
+  "merge_sha": "310a1239b62f500284ce3bd91b7dabf70467f23e",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "0f0b12f7b9e5f3440c2d04eea3c20dc5397adf03c88d64230c12f14fbc2a43cf",
+  "test_files": [
+    "test_schema.py"
+  ],
+  "fail_to_pass": [
+    "test_schema.py::test_wrong_key_reports_key_schema_error"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

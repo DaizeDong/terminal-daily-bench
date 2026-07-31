@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/unit/eval/test_regression_significance.py::test_benjamini_hochberg_matches_hand_verified_step_up",
+    "tests/unit/eval/test_regression_significance.py::test_benjamini_hochberg_rejects_all_when_every_p_is_tiny",
+    "tests/unit/eval/test_regression_significance.py::test_benjamini_hochberg_is_more_conservative_than_uncorrected",
+    "tests/unit/eval/test_regression_significance.py::test_benjamini_hochberg_validates_inputs",
+    "tests/unit/eval/test_regression_significance.py::test_regression_p_value_is_directional_and_deterministic",
+    "tests/unit/eval/test_regression_significance.py::test_leakage_regression_blocks_while_f1_movement_is_advisory",
+    "tests/unit/eval/test_regression_significance.py::test_verdict_is_advisory_when_only_f1_regresses",
+    "tests/unit/eval/test_regression_significance.py::test_injected_leakage_step_change_is_flagged_within_three_windows",
+    "tests/unit/eval/test_regression_significance.py::test_pure_noise_false_positive_rate_stays_at_or_below_five_percent",
+    "tests/unit/eval/test_regression_significance.py::test_fifty_nights_of_noise_produce_zero_blocking_flags",
+    "tests/unit/eval/test_regression_significance.py::test_classification_payload_is_deterministic_and_json_ready",
+    "tests/unit/eval/test_regression_significance.py::test_clean_verdict_when_nothing_regresses"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, scored server-side",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

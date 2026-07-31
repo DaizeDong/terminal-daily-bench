@@ -1,0 +1,24 @@
+{
+  "task_id": "td-6c1b1fcb31cdc49f",
+  "repo": "hukkin/tomli",
+  "pr_number": 286,
+  "base_sha": "c20c49113890c226ffb27a67befe20d14fcf0c73",
+  "merge_sha": "e1fdb94bc998377f1c2545c7cd4f70ff2a3fb4e4",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "41de7e72e03ab838a7532b49e24240617bec57f0a21bb5cd6fac28c3d042e672",
+  "test_files": [
+    "tests/test_misc.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_misc.py::test_key_recursion_limit"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

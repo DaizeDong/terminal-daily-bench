@@ -1,0 +1,34 @@
+diff --git a/tests/test_02_gitignore_basic.py b/tests/test_02_gitignore_basic.py
+index 537212e..3dbcd78 100644
+--- a/tests/test_02_gitignore_basic.py
++++ b/tests/test_02_gitignore_basic.py
+@@ -926,3 +926,11 @@ def test_15_issue_93_c_2(self):
+ 		pattern = GitIgnoreBasicPattern('[!]')
+ 		self.assertIs(pattern.include, True)
+ 		self.assertEqual(pattern.regex.pattern, f'^(?:.+/)?\\[!\\]{_DIR_OPT}')
++
++	def test_16_repr_str(self):
++		"""
++		Test debug and string representations.
++		"""
++		pattern = GitIgnoreBasicPattern('*.py')
++		self.assertEqual(repr(pattern), "GitIgnoreBasicPattern(pattern='*.py', include=True)")
++		self.assertEqual(str(pattern), '*.py')
+diff --git a/tests/test_04_pathspec.py b/tests/test_04_pathspec.py
+index d71ecd2..df5c463 100644
+--- a/tests/test_04_pathspec.py
++++ b/tests/test_04_pathspec.py
+@@ -1041,3 +1041,13 @@ def test_10_issue_100(self):
+ 				includes = get_includes(results)
+ 				debug = debug_results(spec, results)
+ 				self.assertEqual(includes, set(), debug)
++
++	def test_11_repr(self):
++		"""
++		Test the path-spec debug representation.
++		"""
++		spec = PathSpec.from_lines('gitignore', ['*.py'], backend='simple')
++		self.assertEqual(
++			repr(spec),
++			"PathSpec(patterns=[GitIgnoreBasicPattern(pattern='*.py', include=True)], backend='simple')",
++		)

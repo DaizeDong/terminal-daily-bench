@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-d7e4208726a4b85b"
+description = "Fix custom error on a key schema being lost for wrong keys"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "keleshev/schema"
+pr_number = 348
+base_sha = "27e268d4fc36a169b9a3296fe03d3b897fc0bf2f"
+merge_sha = "310a1239b62f500284ce3bd91b7dabf70467f23e"
+created_at = "2026-06-15T08:07:07Z"
+oracle_patch_sha256 = "0f0b12f7b9e5f3440c2d04eea3c20dc5397adf03c88d64230c12f14fbc2a43cf"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

@@ -1,0 +1,24 @@
+{
+  "task_id": "td-428e3784c727ef72",
+  "repo": "skorokithakis/shortuuid",
+  "pr_number": 115,
+  "base_sha": "b8898871c5b977549b4ecbecbb638d8e06d7359e",
+  "merge_sha": "496cddf186b6598ebebe7be5c99c0715e7fc5ab5",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "e673e897d3bf3011dbacfdffed5d111bffca7bc07862daebe5bbf7d76299703e",
+  "test_files": [
+    "shortuuid/test_shortuuid.py"
+  ],
+  "fail_to_pass": [
+    "shortuuid/test_shortuuid.py::test_string_to_int_ignores_alphabet_when_index_given"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

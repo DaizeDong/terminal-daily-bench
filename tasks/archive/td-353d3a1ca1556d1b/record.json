@@ -1,0 +1,24 @@
+{
+  "task_id": "td-353d3a1ca1556d1b",
+  "repo": "mahmoud/boltons",
+  "pr_number": 429,
+  "base_sha": "57cb026b7f47cd2765a0d5acdc83849ed5f1f6a3",
+  "merge_sha": "8c3fc2850693eacd2f2f8c95e7581adbb65b1269",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "e5f3802d77481345d5f5034049a22dae88612b9bd78ca3553bbb3cf2f2d7c3bc",
+  "test_files": [
+    "tests/test_strutils.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_strutils.py::test_pluralize_x"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

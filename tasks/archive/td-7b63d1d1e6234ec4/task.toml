@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-7b63d1d1e6234ec4"
+description = "fix: nicer debug print outs (and str for regex pattern)"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "cpburnz/python-pathspec"
+pr_number = 110
+base_sha = "3199cd43f74c22bafcff9848458dd04613fbe64e"
+merge_sha = "77285463b0ae50aecd901599e7baf83c29b5486a"
+created_at = "2026-03-06T15:23:46Z"
+oracle_patch_sha256 = "8cd1a10793e594fe3f70c49522673ebbc3756939341b929f911694c025693f75"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

@@ -1,0 +1,54 @@
+diff --git a/src/validators/__init__.py b/src/validators/__init__.py
+index 635a835..daa31f2 100644
+--- a/src/validators/__init__.py
++++ b/src/validators/__init__.py
+@@ -2,7 +2,7 @@
+ 
+ # local
+ from .between import between
+-from .card import amex, card_number, diners, discover, jcb, mastercard, unionpay, visa
++from .card import amex, card_number, diners, discover, jcb, mastercard, mir, unionpay, visa
+ from .country import calling_code, country_code, currency
+ from .cron import cron
+ from .crypto_addresses import bsc_address, btc_address, eth_address, trx_address
+@@ -49,8 +49,9 @@
+     "discover",
+     "jcb",
+     "mastercard",
+-    "visa",
+     "unionpay",
++    "visa",
++    "mir",
+     # country
+     "calling_code",
+     "country_code",
+diff --git a/src/validators/card.py b/src/validators/card.py
+index d95643c..94b6637 100644
+--- a/src/validators/card.py
++++ b/src/validators/card.py
+@@ -192,3 +192,25 @@ def discover(value: str, /):
+     """
+     pattern = re.compile(r"^(60|64|65)")
+     return card_number(value) and len(value) == 16 and pattern.match(value)
++
++
++@validator
++def mir(value: str, /):
++    """Return whether or not given value is a valid Mir card number.
++
++    Examples:
++        >>> mir('2200123456789019')
++        True
++        >>> mir('4242424242424242')
++        ValidationError(func=mir, args={'value': '4242424242424242'})
++
++    Args:
++        value:
++            Mir card number string to validate.
++
++    Returns:
++        (Literal[True]): If `value` is a valid Mir card number.
++        (ValidationError): If `value` is an invalid Mir card number.
++    """
++    pattern = re.compile(r"^(220[0-4])")
++    return card_number(value) and len(value) == 16 and pattern.match(value)

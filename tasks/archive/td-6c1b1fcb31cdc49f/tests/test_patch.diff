@@ -1,0 +1,28 @@
+diff --git a/tests/test_misc.py b/tests/test_misc.py
+index c2f6bb7..e5e5637 100644
+--- a/tests/test_misc.py
++++ b/tests/test_misc.py
+@@ -130,6 +130,23 @@ def test_inline_table_recursion_limit(self):
+         ):
+             tomllib.loads(recursive_table_toml)
+ 
++    def test_key_recursion_limit(self):
++        nest_count = 310
++        nested_key_toml = "a." * nest_count + "a = 1"
++        tomllib.loads(nested_key_toml)
++
++        nest_count = sys.getrecursionlimit() - 2
++        nested_key_toml = "a." * nest_count + "a = 1"
++        tomllib.loads(nested_key_toml)
++
++        nest_count = sys.getrecursionlimit() + 2
++        nested_key_toml = "a." * nest_count + "a = 1"
++        with self.assertRaisesRegex(
++            RecursionError,
++            r"TOML key has more than the allowed [0-9]+ parts",
++        ):
++            tomllib.loads(nested_key_toml)
++
+     def test_types_import(self):
+         """Test that `_types` module runs.
+ 

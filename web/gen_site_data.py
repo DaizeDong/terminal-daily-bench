@@ -98,9 +98,28 @@ def collect(release: Path, board: dict) -> dict:
     # which registry suite does each split belong to? (a task's suite is the suite it
     # SHIPPED in; the mine date is provenance, not a suite id)
     reg0 = _read_json(release / "registry.json")
+
+    # Per-TASK membership, written by the emitter alongside the packages. Suites
+    # share the archive/ and live/ directories, so attributing by split alone
+    # gave whichever suite was declared first every task in that split: with 13
+    # dated tasks published, registry.json said 13 and this catalogue said 4,
+    # because `sample` (status=archive) had claimed all eleven archive packages.
+    suite_of_task = {}
+    for member_file in sorted((release / "tasks").glob(".suite-*.json")):
+        sid = member_file.name[len(".suite-"):-len(".json")]
+        for m in (_read_json(member_file) or []):
+            if isinstance(m, dict) and m.get("task"):
+                suite_of_task[str(m["task"])] = sid
+
+    # Fallback for packages that predate membership files: only a suite that
+    # DECLARES a path owns that split wholesale. The shipped samples do
+    # (path: tasks/archive, tasks/live); a dated suite does not, so it cannot
+    # absorb the samples the way keying on status alone made it.
     suite_of = {}
     for s_ in reg0.get("suites") or []:
-        suite_of.setdefault(s_.get("status") or "archive", str(s_.get("id")))
+        path = str(s_.get("path") or "")
+        if path:
+            suite_of.setdefault(path.rstrip("/").rsplit("/", 1)[-1], str(s_.get("id")))
 
     tasks, suites_langs = [], {}
     for status in ("archive", "live"):
@@ -113,7 +132,9 @@ def collect(release: Path, board: dict) -> dict:
             failing = _read_json(d / "FAILING_TESTS.json")
             f2p = rec.get("fail_to_pass") or failing.get("failing_test_ids") or []
             lang = _language(rec, d)
-            suite = suite_of.get(status) or str(rec.get("date") or board.get("date") or status)
+            suite = (suite_of_task.get(d.name)
+                     or suite_of.get(status)
+                     or str(rec.get("date") or board.get("date") or status))
             sb = solved_by.get(d.name)
             tasks.append({
                 "id": d.name, "suite": suite, "status": status,

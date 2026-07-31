@@ -1,0 +1,24 @@
+{
+  "task_id": "td-5cf14361c19fc401",
+  "repo": "sdispater/pendulum",
+  "pr_number": 977,
+  "base_sha": "1d9e31a678caf4b4881fe93709c7eaa166116a2a",
+  "merge_sha": "cbab60ca95562b96ad10fd4af83133be61f0783e",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "cba70e4f917754c68caf18d55336963edbe0df924d0594385f021b9873fe35b8",
+  "test_files": [
+    "tests/formatting/test_formatter.py"
+  ],
+  "fail_to_pass": [
+    "tests/formatting/test_formatter.py::test_date_formats"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

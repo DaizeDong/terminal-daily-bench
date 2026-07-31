@@ -1,0 +1,24 @@
+{
+  "task_id": "td-6fedde17c75ca4cb",
+  "repo": "jazzband/docopt-ng",
+  "pr_number": 71,
+  "base_sha": "fab01f5f19c9c7ca30f05e79a06d79bd066b475a",
+  "merge_sha": "ca3bb1f2c44d5e8b022537c48f88443d5f676dd5",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "8a39a5a9aa11ee62bdd2ffea6625c72bdee3d83bc9f7e15cf5196d10962685d2",
+  "test_files": [
+    "tests/test_docopt.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_docopt.py::test_issue_60_repeated_options_across_usage_alternatives"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

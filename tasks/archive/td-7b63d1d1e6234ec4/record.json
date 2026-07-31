@@ -1,0 +1,26 @@
+{
+  "task_id": "td-7b63d1d1e6234ec4",
+  "repo": "cpburnz/python-pathspec",
+  "pr_number": 110,
+  "base_sha": "3199cd43f74c22bafcff9848458dd04613fbe64e",
+  "merge_sha": "77285463b0ae50aecd901599e7baf83c29b5486a",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "8cd1a10793e594fe3f70c49522673ebbc3756939341b929f911694c025693f75",
+  "test_files": [
+    "tests/test_02_gitignore_basic.py",
+    "tests/test_04_pathspec.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_02_gitignore_basic.py::test_16_repr_str",
+    "tests/test_04_pathspec.py::test_11_repr"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

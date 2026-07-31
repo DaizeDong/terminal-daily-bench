@@ -1,0 +1,20 @@
+diff --git a/docopt/__init__.py b/docopt/__init__.py
+index 182e043..b1e92b4 100644
+--- a/docopt/__init__.py
++++ b/docopt/__init__.py
+@@ -314,7 +314,14 @@ def parse(cls, option_description: str) -> _Option:
+     def single_match(self, left: list[_LeafPattern]) -> _SingleMatch:
+         for n, pattern in enumerate(left):
+             if self.name == pattern.name:
+-                return n, pattern
++                value = (
++                    pattern.value.copy()
++                    if isinstance(pattern.value, list)
++                    else pattern.value
++                )
++                return n, _Option(
++                    pattern.short, pattern.longer, pattern.argcount, value
++                )
+         return None, None
+ 
+     @property
