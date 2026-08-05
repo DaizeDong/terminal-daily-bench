@@ -154,3 +154,35 @@ def test_shipped_live_tasks_carry_no_merge_sha():
             if re.search(r"merge_sha|source_ref|oracle_patch_sha256|pr_number", line):
                 leaks.append(f"{f.relative_to(ROOT)}:{i}: {line.strip()}")
     assert not leaks, "LIVE package leaks the gold's coordinates:\n" + "\n".join(leaks)
+
+
+def test_pending_submission_never_reports_a_false_accept_number():
+    """`false_accept` is a property of a GATE DECISION. A pending submission has had no
+    decision made about it, so writing 0 there would let the community board print
+    "0 false accepts" about rows nothing ever adjudicated -- an unearned safety claim.
+
+    Also pins the fail-closed posture: a pending row counts as an attempt and zero
+    solved, so submitting claims can only lower a submitter's rate, never raise it.
+    """
+    import json as _json, tempfile, os
+    sys.path.insert(0, str(ROOT / "web"))
+    import submit_result as sr
+
+    d = tempfile.mkdtemp()
+    out = os.path.join(d, "lb.json")
+    sub = {"date": "2026-07-30", "submitter": "x", "model": "m", "scaffold": "s",
+           "task": "td-fc90ea8b76d5f6b6", "patch": "diff --git a/a b/a\n",
+           "reward_claimed": 1.0}
+    entry = sr.record(sub, d)
+    assert entry["false_accept"] is None, "a pending row must not claim a measured FA"
+    assert entry["verified_reward"] is None
+
+    row = sr.rebuild_leaderboard(d, out)["community"][0]
+    assert row["false_accept"] is None, "FA must stay unmeasured until something verifies"
+    assert (row["n"], row["solved"], row["rate"]) == (1, 0, 0.0), \
+        "an unverified claim must count as an attempt worth zero"
+
+    # Only after a real adjudication does the number exist.
+    sr.apply_verified(d, entry["id"], 1.0)
+    row = sr.rebuild_leaderboard(d, out)["community"][0]
+    assert row["false_accept"] == 0 and row["solved"] == 1 and row["verified"] == 1
