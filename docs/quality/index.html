@@ -340,7 +340,7 @@
 
   var T = window.TDB || {};
 
-  /* ---- their badge, verbatim class strings ------------------------------ */
+  /* ---- shared metadata badges ------------------------------------------ */
   var BADGE_BASE =
     "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
     "font-medium w-fit whitespace-nowrap shrink-0 gap-1 overflow-hidden " +
@@ -349,12 +349,10 @@
   var BADGE_PRI = BADGE_BASE + "bg-primary text-primary-foreground";
 
   var CARD =
-    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
-    "transition-all duration-200 sm:-mr-px sm:border-x";
+    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
+    "transition-all duration-200";
 
-  /* their exact table cell strings; TD_PROSE is the same minus whitespace-nowrap,
-     for the one descriptive column their tables never have */
+  /* Data cells stay compact; the descriptive column is allowed to wrap. */
   var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
     "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
   var TD_PROSE = "p-2 align-middle [&:has([role=checkbox])]:pr-0 " +
@@ -385,7 +383,7 @@
     });
   }
 
-  /* one stat cell of the strip, in the card idiom */
+  /* One stat cell in the metric-card band. */
   function statCell(k, v) {
     return '<div data-slot="card" class="' + CARD + '">' +
       '<div class="flex flex-1 flex-col justify-between gap-2 px-6 py-6">' +
@@ -394,7 +392,7 @@
       "</div></div>";
   }
 
-  /* one axis row: label, hairline track (fill + threshold notch), value */
+  /* One axis row: label, meter (fill + threshold notch), and value. */
   function axis(label, val, opts) {
     opts = opts || {};
     var scale = opts.scale || 1;

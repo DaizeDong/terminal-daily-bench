@@ -13,6 +13,7 @@ REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
     encoding="utf-8"
 )
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
+SITE_CSS = (ROOT / "docs" / "assets" / "site.css").read_text(encoding="utf-8")
 PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
 DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
@@ -118,7 +119,9 @@ def test_stat_values_are_not_document_headings():
 def test_mobile_menu_is_opaque_non_overlapping_and_accessible():
     assert "bg-fd-background px-4 py-3 lg:hidden" in SHELL
     assert 'menu.setAttribute("aria-hidden", open ? "false" : "true")' in SHELL
-    assert 'pageMain.style.paddingTop = open ? head.offsetHeight + "px" : ""' in SHELL
+    assert 'Math.ceil(head.getBoundingClientRect().bottom) + "px"' in SHELL
+    assert 'pageMain.style.setProperty(' in SHELL
+    assert 'pageMain.style.removeProperty("padding-top")' in SHELL
     assert 'ev.key === "Escape"' in SHELL
 
 
@@ -151,3 +154,32 @@ def test_homepage_previews_stay_short_and_link_to_full_views():
     assert "scoped.slice(0, TASK_PREVIEW_LIMIT)" in HOME
     assert 'href="./leaderboard/">full leaderboard' in HOME
     assert 'href="./registry/">all tasks' in HOME
+
+
+def test_terminal_daily_has_an_independent_visual_identity():
+    for marker in (
+        "--td-paper",
+        "--td-night",
+        "--td-coral",
+        "--td-font-display",
+        ".tdb-brand-mark",
+        '[data-tdb-section="intro"]',
+        "conic-gradient",
+        '[data-slot="card"]',
+        '[data-slot="table-container"]',
+        "@media (prefers-reduced-motion: reduce)",
+    ):
+        assert marker in SITE_CSS
+
+    for retired in (
+        "square, hairline, mono, no shadow",
+        "copied verbatim from the reference",
+        "byte-equality with the reference",
+    ):
+        assert retired not in SITE_CSS.lower()
+        assert retired not in PAGE_GENERATOR.lower()
+
+    assert "Terminal Daily" in SHELL
+    assert "tdb-brand-mark" in SHELL
+    assert "tdb-page-" in SHELL
+    assert "<span>Terminal</span> <span>Daily</span>" in HOME

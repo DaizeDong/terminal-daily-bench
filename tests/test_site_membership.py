@@ -21,6 +21,23 @@ def _write_json(path: Path, payload) -> None:
     path.write_text(json.dumps(payload, indent=1), encoding="utf-8")
 
 
+def test_site_catalogue_retains_timestamp_only_for_identical_payload():
+    old = {
+        "generated": "2026-08-06T12:00:00Z",
+        "scoring": {"official_ranking": False},
+        "suites": [],
+        "tasks": [],
+    }
+    same = dict(old, generated="2026-08-06T12:10:00Z")
+    kept = gen_site_data.retain_generated_timestamp(old, same)
+    assert kept["generated"] == "2026-08-06T12:00:00Z"
+    assert same["generated"] == "2026-08-06T12:10:00Z"
+
+    changed = dict(same, tasks=[{"id": "td-new"}])
+    refreshed = gen_site_data.retain_generated_timestamp(old, changed)
+    assert refreshed["generated"] == "2026-08-06T12:10:00Z"
+
+
 def _package(release: Path, split: str, tid: str, pr: int) -> None:
     package = release / "tasks" / split / tid
     package.mkdir(parents=True, exist_ok=True)

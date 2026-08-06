@@ -4,10 +4,9 @@
      <script src="<depth>/assets/site.js" data-root="<depth>" data-page="<key>"></script>
 
    It injects the header and the canary footer, so the shell has exactly one
-   source of truth and pages cannot drift apart. The markup below reproduces
-   the reference shell's structure and class strings verbatim; all of those
-   utilities are already present in the vendored tw.css / tw-extra.css, so no
-   hand-written CSS is needed to make it look right.
+   source of truth and pages cannot drift apart. Utility classes provide the
+   resilient layout; semantic tdb-* hooks let site.css express Terminal Daily's
+   own day-window identity without coupling behavior to presentation.
 
    window.TDB = { ROOT, getJSON, taskSuites, taskInSuite, wilson, pct,
                   rateCell, dayRail, CANARY }
@@ -40,12 +39,6 @@
   var L = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" ' +
           'viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" ' +
           'stroke-linejoin="round"';
-
-  var ICON_TERMINAL =
-    '<svg ' + L + ' fill="none" stroke="currentColor" ' +
-    'class="lucide lucide-terminal size-4" aria-hidden="true">' +
-    '<polyline points="4 17 10 11 4 5"></polyline>' +
-    '<line x1="12" x2="20" y1="19" y2="19"></line></svg>';
 
   var ICON_SUN =
     '<svg ' + L + ' fill="currentColor" stroke="currentColor" class="lucide size-full">' +
@@ -118,7 +111,7 @@
     applyTheme(pref);
   }
 
-  /* their badge, verbatim */
+  /* Shared badge structure; site.css owns its branded treatment. */
   var BADGE_SECONDARY =
     "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
     "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
@@ -163,7 +156,7 @@
   var LINK_CLS =
     "inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors " +
     "hover:text-fd-accent-foreground data-[active=true]:text-fd-primary " +
-    "[&_svg]:size-4 text-sm";
+    "[&_svg]:size-4 text-sm tdb-nav-link";
 
   var ICON_BTN_CLS =
     "inline-flex items-center justify-center rounded-md text-sm font-medium " +
@@ -187,15 +180,17 @@
     return '' +
       '<div style="position:relative">' +
         '<nav class="flex h-14 w-full items-center px-4">' +
-          '<a class="inline-flex items-center gap-2.5 font-semibold" href="' + url("") + '">' +
-            '<div class="flex items-center gap-2">' + ICON_TERMINAL +
-              '<p class="font-mono text-base font-medium tracking-tight">terminal-daily-bench</p>' +
-            "</div></a>" +
+          '<a class="tdb-brand inline-flex items-center gap-2.5 font-semibold" href="' + url("") + '" aria-label="Terminal Daily home">' +
+            '<span class="tdb-brand-mark" aria-hidden="true"></span>' +
+            '<span class="tdb-brand-copy">' +
+              '<span class="tdb-brand-name">Terminal Daily</span>' +
+              '<span class="tdb-brand-kicker">living benchmark</span>' +
+            "</span></a>" +
           '<ul class="flex flex-row items-center gap-2 px-6 max-sm:hidden">' +
             navLinks("") +
           "</ul>" +
           '<div class="flex flex-row items-center justify-end gap-1.5 flex-1">' +
-            '<div class="inline-flex items-center rounded-full border p-1 max-lg:hidden" data-theme-toggle="">' +
+            '<div class="tdb-theme-switch inline-flex items-center rounded-full border p-1 max-lg:hidden" data-theme-toggle="">' +
               '<button type="button" aria-label="light" data-theme-value="light" class="' + TOGGLE_BASE + '">' + ICON_SUN + "</button>" +
               '<button type="button" aria-label="dark" data-theme-value="dark" class="' + TOGGLE_BASE + '">' + ICON_MOON + "</button>" +
               '<button type="button" aria-label="system" data-theme-value="system" class="' + TOGGLE_BASE + '">' + ICON_MONITOR + "</button>" +
@@ -211,7 +206,7 @@
         "</nav>" +
       "</div>" +
       '<div class="flex w-full justify-center">' +
-        '<div id="tdb-menu" aria-hidden="true" class="hidden w-full flex-col border-t ' +
+        '<div id="tdb-menu" aria-hidden="true" class="tdb-mobile-menu hidden w-full flex-col border-t ' +
           'bg-fd-background px-4 py-3 lg:hidden">' +
           '<ul class="flex flex-col">' + navLinks(" w-full") + "</ul>" +
         "</div>" +
@@ -221,9 +216,10 @@
   function mountHeader() {
     if (document.getElementById("nd-nav")) return;
 
-    /* their body is the page's flex column; make sure ours is too */
+    /* The body is the page's flex column; PAGE also scopes visual accents. */
     var b = document.body;
-    b.classList.add("flex", "min-h-screen", "flex-col");
+    var pageClass = "tdb-page-" + String(PAGE || "page").replace(/[^a-z0-9_-]+/gi, "-");
+    b.classList.add("flex", "min-h-screen", "flex-col", "tdb-page", pageClass);
 
     var head = document.createElement("header");
     head.id = "nd-nav";
@@ -234,8 +230,7 @@
     head.setAttribute("aria-label", "Main");
     head.innerHTML = headerHTML();
 
-    /* the reference shell puts the header first inside <main …pt-14>, and the
-       pt-14 is what clears the fixed bar. Fall back to the body. */
+    /* Keep the header with the page landmark; site.css reserves its clearance. */
     var main = document.querySelector("main");
     if (main) main.insertBefore(head, main.firstChild);
     else b.insertBefore(head, b.firstChild);
@@ -268,7 +263,17 @@
       menu.classList.toggle("flex", open);
       /* The fixed header grows when its mobile menu opens. Keep the first page
          section below that complete, opaque surface instead of covering it. */
-      if (pageMain) pageMain.style.paddingTop = open ? head.offsetHeight + "px" : "";
+      if (pageMain) {
+        if (open) {
+          pageMain.style.setProperty(
+            "padding-top",
+            Math.ceil(head.getBoundingClientRect().bottom) + "px",
+            "important"
+          );
+        } else {
+          pageMain.style.removeProperty("padding-top");
+        }
+      }
     }
 
     trig.addEventListener("click", function () {
@@ -299,7 +304,7 @@
     footer.className = "mt-auto flex w-full justify-center border-t px-4 py-4";
     footer.setAttribute("aria-label", "Site footer");
     footer.innerHTML =
-      '<div class="flex w-full max-w-7xl flex-col">' +
+      '<div class="tdb-footer-inner flex w-full max-w-7xl flex-col">' +
         '<p id="tdb-canary" class="text-muted-foreground/50 font-mono text-xs">' +
           CANARY +
         "</p>" +
@@ -382,7 +387,7 @@
           (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span></a>";
     }).join("");
     el.innerHTML =
-      '<div class="bg-card text-card-foreground flex flex-col border font-mono">' +
+      '<div class="tdb-day-window bg-card text-card-foreground flex flex-col border font-mono">' +
         '<div class="flex items-center gap-3 border-b px-4 py-2">' +
           '<p class="text-muted-foreground text-xs">published suites</p>' +
           '<span data-slot="badge" class="ml-auto ' + BADGE_SECONDARY + '">' +

@@ -18,7 +18,7 @@
 
       <section class="mx-auto flex max-w-4xl flex-col items-center gap-6 py-8 text-center sm:pt-24" data-tdb-section="intro">
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
-        <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance sm:text-6xl/tight">terminal-daily-bench</h1>
+        <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance sm:text-6xl/tight"><span>Terminal</span> <span>Daily</span></h1>
         <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance sm:text-xl/relaxed">Fresh merged pull requests become executable tasks. The catalogue is public; the certified 50-task relative ranking is still awaiting formal results.</p>
         <div class="grid grid-cols-1 gap-2 lg:grid-cols-3">
           <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-primary px-8 text-base font-medium text-primary-foreground transition-all hover:bg-primary/90" href="#status">current status</a>
@@ -108,9 +108,8 @@
   var TASK_PREVIEW_LIMIT = 3;
 
   var CARD =
-    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
-    "transition-all duration-200 sm:-mr-px sm:border-x";
+    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
+    "transition-all duration-200";
   var HEADER =
     "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 " +
     "px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
@@ -189,7 +188,7 @@
   }
 
   function statCard(label, value, note) {
-    return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col border -mb-px rounded-none border-x-0 py-0 font-mono shadow-none sm:-mr-px sm:border-x">' +
+    return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col border py-0">' +
       '<div class="flex flex-1 flex-col justify-between gap-4 py-6">' +
         '<div data-slot="card-header" class="px-6">' +
           '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +

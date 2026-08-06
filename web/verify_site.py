@@ -23,7 +23,7 @@ publish. It checks, for every docs/**/*.html:
   4. CLASS COVERAGE       every class token in a static class="..." attribute has
      a matching selector somewhere in the concatenated CSS. Tokens produced by
      JS string concatenation are skipped (they are checked by rendering), as are
-     the framework marker classes that carry no CSS in the reference either.
+     framework marker classes that intentionally carry no standalone rule.
 
   5. INTERNAL LINKS       every relative href/src resolves to a real file, or to a
      directory holding an index.html; every #fragment resolves to a real id.
@@ -33,8 +33,10 @@ publish. It checks, for every docs/**/*.html:
 
   7. UNIQUE IDS           no id appears twice in one document.
 
-  8. site.css STAYS THIN  it may not define border-radius, and may not redefine a
-     design token that the vendored build already owns.
+  8. TERMINAL DAILY IDENTITY  site.css must own a complete, self-contained brand
+     layer (day-window palette, type hierarchy, floating shell, rounded cards,
+     data surfaces, responsive hero, and reduced-motion handling). It must not
+     regress to the retired square/hairline/all-mono reference treatment.
 
   9. PUBLIC INFORMATION ARCHITECTURE  the home page presents status, leaderboard,
      then tasks; core catalogue pages put published data ahead of explanation;
@@ -58,8 +60,7 @@ DOCS = HERE.parent / "docs"
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
         "meta", "param", "source", "track", "wbr"}
 
-# marker classes the framework emits with no CSS behind them; the reference does
-# the same, so their absence from the stylesheet is faithful, not a bug
+# Marker classes emitted by framework integrations with no standalone CSS rule.
 NO_CSS_MARKERS = re.compile(
     r"^(lucide(-[a-z0-9-]+)?|shiki|shiki-themes|github-light|github-dark|not-prose)$")
 
@@ -233,15 +234,41 @@ def check_no_external(pages: list[Path]) -> list[str]:
 def check_site_css() -> list[str]:
     bad = []
     text = (DOCS / "assets" / "site.css").read_text(encoding="utf-8")
-    body = re.sub(r"/\*.*?\*/", "", text, flags=re.S)      # drop the header comment
-    if "border-radius" in body:
-        bad.append("site.css defines border-radius (radius belongs to the vendored build)")
-    owned = ("--background", "--foreground", "--primary", "--secondary", "--border",
-             "--card", "--muted", "--accent", "--radius", "--ring", "--input",
-             "--destructive", "--popover", "--chart", "--sidebar")
-    for tok in owned:
-        if re.search(re.escape(tok) + r"\s*:", body):
-            bad.append(f"site.css redefines the vendored design token {tok}")
+    body = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+
+    required = {
+        "day-window palette": ("--td-paper", "--td-night", "--td-coral", "--td-sun"),
+        "humanist/display/data type hierarchy": (
+            "--td-font-body", "--td-font-display", "--td-font-data"
+        ),
+        "floating branded shell": ("#nd-nav", ".tdb-brand", ".tdb-brand-mark"),
+        "editorial daily-window hero": ('[data-tdb-section="intro"]', "conic-gradient"),
+        "independent metric cards": ('[data-slot="card"]', "border-radius"),
+        "data-table surface": ('[data-slot="table-container"]', "border-collapse"),
+        "daily suite rail": (".tdb-day-window", ".tdb-day"),
+        "mobile layout": ("@media (max-width: 639px)",),
+        "reduced motion": ("@media (prefers-reduced-motion: reduce)",),
+    }
+    for label, markers in required.items():
+        missing = [marker for marker in markers if marker not in body]
+        if missing:
+            bad.append(f"site.css missing {label}: {', '.join(missing)}")
+
+    retired = (
+        "square, hairline, mono, no shadow",
+        "copied verbatim from the reference",
+        "byte-equality with the reference",
+        "everything visual comes from the vendored",
+    )
+    lower = text.lower()
+    for phrase in retired:
+        if phrase in lower:
+            bad.append(f"site.css retains retired reference treatment: {phrase!r}")
+
+    if re.search(r"--radius\s*:\s*0(?:rem|px)?\s*;", body):
+        bad.append("site.css collapses the Terminal Daily rounded geometry to zero")
+    if body.count("border-radius") < 8:
+        bad.append("site.css rounded component geometry is incomplete")
     return bad
 
 

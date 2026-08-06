@@ -357,7 +357,7 @@ tdb quality results.jsonl</pre></div>
   var T = window.TDB;
   var el = document.getElementById("quality-card");
 
-  /* their badge, verbatim; the caller appends the colour pair */
+  /* Shared metadata badge; the caller appends the semantic colour pair. */
   var BADGE =
     "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
     "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
@@ -368,8 +368,8 @@ tdb quality results.jsonl</pre></div>
   var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
   var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
   var NOTE =
-    "bg-card text-card-foreground -mx-4 border rounded-none border-x-0 px-6 py-6 " +
-    "font-mono text-sm/relaxed text-muted-foreground sm:mx-0 sm:border-x";
+    "tdb-panel bg-card text-card-foreground -mx-4 border px-6 py-6 " +
+    "text-sm/relaxed text-muted-foreground sm:mx-0";
 
   var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
   var q = board && board.quality;

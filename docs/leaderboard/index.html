@@ -209,7 +209,7 @@
   }
 
   function statCard(label, value, note) {
-    return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col border -mb-px rounded-none border-x-0 py-0 font-mono shadow-none sm:-mr-px sm:border-x">' +
+    return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col border py-0">' +
       '<div class="flex flex-1 flex-col justify-between gap-4 py-6"><div data-slot="card-header" class="px-6">' +
       '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +
       '<p data-tdb-stat-value class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' + shown(value) + "</p>" +

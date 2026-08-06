@@ -566,6 +566,31 @@ def collect(release: Path, board: dict) -> dict:
     }
 
 
+_UTC_SECOND = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+
+def retain_generated_timestamp(existing, candidate: dict) -> dict:
+    """Keep the build timestamp when the emitted catalogue is byte-stable.
+
+    ``generated`` is publication metadata, not catalogue content. Re-running the
+    generator over identical inputs must therefore preserve it; otherwise a
+    no-op site build changes bytes every second and cannot be reproduced.
+    """
+    if not isinstance(candidate, dict):
+        raise TypeError("candidate catalogue must be a dict")
+    result = dict(candidate)
+    if not isinstance(existing, dict):
+        return result
+    timestamp = existing.get("generated")
+    if not isinstance(timestamp, str) or not _UTC_SECOND.fullmatch(timestamp):
+        return result
+    old_payload = {key: value for key, value in existing.items() if key != "generated"}
+    new_payload = {key: value for key, value in result.items() if key != "generated"}
+    if canonical_sha256(old_payload) == canonical_sha256(new_payload):
+        result["generated"] = timestamp
+    return result
+
+
 def main() -> int:
     here = Path(__file__).resolve().parent
     ap = argparse.ArgumentParser()
@@ -575,7 +600,7 @@ def main() -> int:
     release = Path(a.release)
     out = Path(a.out) if a.out else release / "docs" / "site_data.json"
     board = _read_json(release / "docs" / "leaderboard_data.json")
-    data = collect(release, board)
+    data = retain_generated_timestamp(_read_json(out), collect(release, board))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, indent=1), encoding="utf-8")
     print(f"site catalogue: {len(data['suites'])} suites, {len(data['tasks'])} tasks -> {out}")

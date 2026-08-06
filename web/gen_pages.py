@@ -16,12 +16,12 @@ same three stylesheets, in this order, and ends with the same script tag:
 
     ../../assets/tw.css        the vendored Tailwind build (all utilities)
     ../../assets/tw-extra.css  its second chunk
-    ../../assets/site.css      our thin additive layer
+    ../../assets/site.css      the Terminal Daily visual system
     ../../assets/site.js       data-root="../.." data-page="<key>"
 
-NOTHING here hand-rolls CSS. Every class string below is copied verbatim from the
-reference DOM and is already compiled into tw.css; if a look cannot be expressed
-with those utilities the DOM structure is wrong, not the stylesheet.
+The utility build provides stable layout primitives. Semantic tdb-* hooks name
+our own components, while site.css owns their product-specific geometry, type,
+colour, and interaction. Generated markup remains dependency-free and readable.
 
 No third-party dependencies. Idempotent: a page is only rewritten when its bytes
 change, and every action is printed (write / update / unchanged).
@@ -40,8 +40,8 @@ rename without updating that caller):
     pill(text, kind="")         a <span data-slot="badge">   kind: primary|outline|""
     status_pill(status)         live -> primary badge, archive -> secondary badge
     tags(*pills)                a flex row of badges
-    strip(pairs)                the stat band, as their card grid
-    sec_head(title, eyebrow="", more=None)   their centred section header
+    strip(pairs)                the Terminal Daily metric-card band
+    sec_head(title, eyebrow="", more=None)   an editorial section header
     task_page_body(task, pkg)   the shared BODY for one task page
     load_task_package(task_id)  best-effort dict from tasks/{archive,live}/<id>/
 --------------------------------------------------------------------------------
@@ -64,23 +64,22 @@ REPO_URL = "https://github.com/DaizeDong/terminal-daily-bench"
 
 
 # ============================================================================
-# THE REFERENCE CLASS STRINGS
-# Copied verbatim from the reference DOM. Do not "tidy" them: byte-equality with
-# the reference is the whole point, and every token is compiled into tw.css.
+# TERMINAL DAILY COMPONENT STRUCTURE
+# The utility tokens keep layout deterministic; tdb-* hooks carry our identity
+# and remain stable if the vendored utility build changes.
 # ============================================================================
 
 CARD = (
-    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar "
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none "
-    "transition-all duration-200 sm:-mr-px sm:border-x"
+    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 "
+    "transition-all duration-200"
 )
 CARD_HEADER = (
-    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start "
+    "tdb-card-header @container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start "
     "gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6"
 )
 
 _BADGE_BASE = (
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs "
+    "tdb-badge inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs "
     "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 "
     "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 "
     "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 "
@@ -89,35 +88,34 @@ _BADGE_BASE = (
 )
 BADGE_PRIMARY = _BADGE_BASE + (
     "border-transparent bg-primary text-primary-foreground "
-    "[a&]:hover:bg-primary/90 font-mono"
+    "[a&]:hover:bg-primary/90"
 )
 BADGE_SECONDARY = _BADGE_BASE + (
     "border-transparent bg-secondary text-secondary-foreground "
-    "[a&]:hover:bg-secondary/90 font-mono"
+    "[a&]:hover:bg-secondary/90"
 )
-BADGE_OUTLINE = _BADGE_BASE + "text-foreground font-mono"
+BADGE_OUTLINE = _BADGE_BASE + "text-foreground"
 
 _BTN = (
-    "font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium "
+    "tdb-button inline-flex shrink-0 items-center justify-center gap-2 font-medium "
     "whitespace-nowrap transition-all outline-none focus-visible:border-ring "
     "focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none "
     "disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 "
     "dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 "
     "[&_svg:not([class*='size-'])]:size-4 "
 )
-BTN_PRIMARY = _BTN + "bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base has-[>svg]:px-6 rounded-none"
-BTN_SECONDARY = _BTN + "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base has-[>svg]:px-6 rounded-none"
+BTN_PRIMARY = _BTN + "bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base has-[>svg]:px-6"
+BTN_SECONDARY = _BTN + "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base has-[>svg]:px-6"
 
 TABLE = (
-    "w-full caption-bottom text-sm [&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 "
+    "tdb-table w-full caption-bottom text-sm [&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 "
     "[&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6"
 )
 _CHK = "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
 TH = ("text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap "
       + _CHK + " py-3 text-base")
 TD = "p-2 align-middle whitespace-nowrap " + _CHK + " py-4 text-base"
-# their cells are always nowrap; a descriptive column drops that one token, which
-# is how Tailwind spells "wrap normally" (there is no whitespace-normal compiled)
+# Most cells stay on one line; a descriptive cell deliberately drops nowrap.
 TD_PROSE = "p-2 align-middle " + _CHK + " py-4 text-base"
 TR_HEAD = "data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent"
 TR_BODY = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"
@@ -154,13 +152,12 @@ def esc(value) -> str:
 
 
 def cls(value: str) -> str:
-    """Escape a class string for an HTML attribute, the way the reference does:
-    `&` -> `&amp;` and `>` -> `&gt;`, so arbitrary variants survive round-tripping."""
+    """Escape a class string so arbitrary variants survive round-tripping."""
     return value.replace("&", "&amp;").replace(">", "&gt;")
 
 
 def pill(text, kind: str = "") -> str:
-    """A badge in their treatment. kind: primary | outline | "" (secondary)."""
+    """A compact metadata badge. kind: primary | outline | "" (secondary)."""
     variant = {"primary": BADGE_PRIMARY, "outline": BADGE_OUTLINE}.get(kind, BADGE_SECONDARY)
     return f'<span data-slot="badge" class="{cls(variant)}">{esc(text)}</span>'
 
@@ -176,13 +173,13 @@ def tags(*items) -> str:
 
 
 def stat_card(label, value, note: str = "") -> str:
-    """One cell of the stat band, in their card idiom."""
+    """One metric card in the daily-window stat band."""
     shown = DASH if value in (None, "") else esc(value)
     body = (
         f'<div data-slot="card" class="{cls(CARD)}">'
         f'<div class="flex flex-1 flex-col justify-between gap-6 py-6">'
         f'<div data-slot="card-header" class="{cls(CARD_HEADER)}">'
-        f'<p class="text-muted-foreground font-mono text-sm sm:text-xs">{esc(label)}</p>'
+        f'<p class="text-muted-foreground text-sm sm:text-xs">{esc(label)}</p>'
         f'<p data-tdb-stat-value class="line-clamp-1 font-mono text-xl font-medium '
         f'tabular-nums">{shown}</p>'
         f"</div>"
@@ -190,14 +187,14 @@ def stat_card(label, value, note: str = "") -> str:
     if note:
         body += (
             f'<div data-slot="card-content" class="px-6">'
-            f'<p class="text-muted-foreground line-clamp-2 font-mono text-sm sm:text-xs">'
+            f'<p class="text-muted-foreground line-clamp-2 text-sm sm:text-xs">'
             f"{esc(note)}</p></div>"
         )
     return body + "</div></div>"
 
 
 def strip(pairs) -> str:
-    """The stat band: their hairline card grid, edge to edge on mobile.
+    """The stat band: independent metric cards, edge to edge on mobile.
 
     `pairs` is [(label, value)] or [(label, value, note)].
     """
@@ -212,18 +209,17 @@ def strip(pairs) -> str:
 
 
 def sec_head(title, eyebrow: str = "", more=None) -> str:
-    """Their centred section header: eyebrow line, chevron, optional sub-line."""
+    """Editorial section header with an optional context line and deep link."""
     out = [
-        '<div class="mb-4 flex flex-col items-center gap-2">',
-        f'<p class="font-mono text-sm">{esc(title)}</p>',
-        CHEVRON,
+        '<div class="tdb-section-head mb-4 flex flex-col items-start gap-2">',
+        f'<p class="text-sm">{esc(title)}</p>',
     ]
     if eyebrow:
-        out.append(f'<p class="text-muted-foreground font-mono text-xs">{esc(eyebrow)}</p>')
+        out.append(f'<p class="text-muted-foreground text-xs">{esc(eyebrow)}</p>')
     if more:
         href, label = more
         out.append(
-            '<a class="text-muted-foreground hover:text-foreground font-mono text-xs '
+            '<a class="text-muted-foreground hover:text-foreground text-xs '
             f'underline-offset-4 hover:underline" href="{esc(href)}">{esc(label)} &rarr;</a>'
         )
     out.append("</div>")
@@ -231,23 +227,23 @@ def sec_head(title, eyebrow: str = "", more=None) -> str:
 
 
 def empty(msg_html: str) -> str:
-    """A hairline notice block in the same idiom as the tables."""
+    """A quiet empty-state panel."""
     return (
-        '<div class="bg-card border-y px-6 py-8 font-mono text-sm '
+        '<div class="tdb-panel bg-card border-y px-6 py-8 text-sm '
         f'text-muted-foreground md:border-x">{msg_html}</div>'
     )
 
 
 def prose_block(html: str) -> str:
-    """A block of running text, in the card idiom (their tables never hold prose)."""
+    """A readable long-form panel kept separate from dense data tables."""
     return (
-        '<div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x">'
+        '<div class="tdb-panel bg-card border-y px-6 py-6 text-sm/relaxed md:border-x">'
         f"{html}</div>"
     )
 
 
 def code_figure(caption: str, lines) -> str:
-    """Their code-block treatment (figure > caption row > pre.shiki)."""
+    """Self-contained command figure (caption row plus scrollable code)."""
     body = "".join(f'<span class="line">{line}</span>' for line in lines)
     return (
         '<figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border '
@@ -262,7 +258,7 @@ def code_figure(caption: str, lines) -> str:
 
 
 def breadcrumb(trail) -> str:
-    """Their breadcrumb: [(label, href_or_None), ...]; the last item is the page."""
+    """Breadcrumb trail; the final item names the current page."""
     items = []
     for i, (label, href) in enumerate(trail):
         if i:
@@ -293,7 +289,7 @@ def breadcrumb(trail) -> str:
 
 
 def button_row(buttons) -> str:
-    """Their CTA grid: [(label, href, primary_bool)].
+    """Responsive CTA grid: [(label, href, primary_bool)].
 
     Only grid-cols variants actually compiled into tw.css are emitted
     (sm:grid-cols-{1,2}, lg:grid-cols-{2,3,4}); a single button gets no lg track.
@@ -312,7 +308,7 @@ def button_row(buttons) -> str:
 
 
 def table_block(headers, rows) -> str:
-    """Their table, wrapped in the bg-card hairline block.
+    """A horizontally scrollable Terminal Daily data surface.
 
     headers -- [(label, align)] where align is "left" | "right"
     rows    -- list of already-rendered "<td …>…</td>" strings
@@ -324,7 +320,7 @@ def table_block(headers, rows) -> str:
         ths.append(f'<th data-slot="table-head" class="{cls(TH)}">{inner}</th>')
     return (
         '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-        '<div class="bg-card border-y font-mono md:border-x">'
+        '<div class="tdb-table-shell bg-card border-y md:border-x">'
         '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
         f'<table data-slot="table" class="{cls(TABLE)}">'
         f'<thead data-slot="table-header" class="{cls("[&_tr]:border-b")}">'
@@ -348,7 +344,7 @@ FAVICON = (
 
 
 def render_page(title, description, page_key, depth, body, script="", head="") -> str:
-    """The one shell every generated page uses -- the reference page frame.
+    """The shared Terminal Daily page frame.
 
     depth  -- directories below the site root (2 for benchmarks/<id>/ and
               registry/<id>/). Drives asset hrefs and data-root.
@@ -370,11 +366,11 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 <link rel="stylesheet" href="{root}/assets/site.css">
 <link rel="icon" href="{FAVICON}">
 {head}</head>
-<body>
+<body class="tdb-generated-page">
 
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
   <!-- the fixed header is injected here by assets/site.js -->
-  <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
+  <div class="tdb-page-frame flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 {body}
     </div>
@@ -544,15 +540,15 @@ def _pr_link(repo, pr_number) -> str:
 
 
 def _h2(text) -> str:
-    return f'<h2 class="mb-6 font-mono text-4xl tracking-tighter">{esc(text)}</h2>'
+    return f'<h2 class="tdb-page-title mb-6 text-4xl tracking-tighter">{esc(text)}</h2>'
 
 
 def _lede(html) -> str:
-    return f'<p class="text-muted-foreground mb-6 font-mono text-sm">{html}</p>'
+    return f'<p class="tdb-page-lede text-muted-foreground mb-6 text-sm">{html}</p>'
 
 
 def _section(inner) -> str:
-    return f'<div class="flex flex-col py-12 sm:pb-16">{inner}</div>'
+    return f'<section class="tdb-content-section flex flex-col py-12 sm:pb-16">{inner}</section>'
 
 
 def _retrievability_note() -> str:
@@ -566,7 +562,7 @@ def _retrievability_note() -> str:
     letting a reader assume we solved it.
     """
     return (
-        '<p class="text-muted-foreground mx-auto mt-4 max-w-3xl text-center font-mono '
+        '<p class="text-muted-foreground mx-auto mt-4 max-w-3xl text-center '
         'text-sm/relaxed">These tasks are built from <span class="text-foreground">public '
         "merged pull requests</span>, so the reference fix exists upstream. The commit is "
         "redacted from a live package, but the task must name its source repo and base "
@@ -686,7 +682,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
                 if not live else "Run your model, then submit the patch",
                 cmd,
             )
-            + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
+            + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
               'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
               "workspace tests are discarded and protected tests are re-laid from the trusted "
               "package. The receipt contract requires a verified network cut. A paired staged-SIF "
@@ -783,7 +779,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
     ]
     fact_table = (
         '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-        '<div class="bg-card border-y font-mono md:border-x">'
+        '<div class="tdb-table-shell bg-card border-y font-mono md:border-x">'
         '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
         f'<table data-slot="table" class="{cls(TABLE)}">'
         f'<tbody data-slot="table-body" class="{cls("[&_tr:last-child]:border-0")}">'
@@ -839,7 +835,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
             "requires the unpublished patched Harbor fork" if not live else "live task",
         )
         + code_figure("Score a model on this task, then prove it is solvable", cmd)
-        + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
+        + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
           'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
           "else. A submitted reward is advisory and never becomes a score by itself. "
           "The production receipt authority is inactive, so every submission stays pending "

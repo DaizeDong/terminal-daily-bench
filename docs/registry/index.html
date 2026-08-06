@@ -35,7 +35,7 @@
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
       <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Catalogue membership is not a score; official coverage appears only after the certified 50-task v3 campaign publishes.</p>
 
-      <!-- catalogue summary, in their card-grid idiom -->
+      <!-- catalogue summary in the Terminal Daily metric-card system -->
       <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="tdb-stats"></div>
       </div>
@@ -108,11 +108,7 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  /* ---------------------------------------------------------------------
-     class strings — every one of these is compiled into the vendored build.
-     They are kept verbatim so the rendered rows are indistinguishable from
-     server-rendered ones.
-     --------------------------------------------------------------------- */
+  /* Shared table primitives; Terminal Daily presentation lives in site.css. */
   var TH = "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
            "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
   var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
@@ -130,7 +126,7 @@
     "whitespace-nowrap transition-all outline-none focus-visible:border-ring " +
     "focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none " +
     "disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 " +
-    "[&_svg:not([class*='size-'])]:size-4 border h-8 px-3 rounded-none shadow-none font-mono ";
+    "[&_svg:not([class*='size-'])]:size-4 border h-8 px-3 ";
   var CHIP_OFF = CHIP + "bg-background text-muted-foreground hover:bg-accent " +
     "hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50";
   var CHIP_ON = CHIP + "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80";
@@ -178,10 +174,9 @@
   var qEl     = document.getElementById("tdb-q");
   var clearEl = document.getElementById("tdb-clear");
 
-  /* a hairline block in the same idiom as the table: square, bg-card, edge to
-     edge on mobile. `edges` picks whether it draws its own top rule. */
+  /* A quiet empty-state panel; `edges` selects its boundary treatment. */
   function emptyBlock(html, edges) {
-    return '<div class="bg-card ' + (edges || "border-b") + ' px-6 py-8 font-mono text-sm ' +
+    return '<div class="tdb-panel bg-card ' + (edges || "border-b") + ' px-6 py-8 text-sm ' +
       'text-muted-foreground md:border-x">' + html + "</div>";
   }
 
@@ -227,16 +222,15 @@
         scoredTasks ? "bound to the formal matrix" : "awaiting certified 50-task results"]
     ];
     statsEl.innerHTML = stats.map(function (s) {
-      return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 ' +
-        'border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 ' +
-        'font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">' +
+      return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col gap-6 ' +
+        'border py-0 transition-all duration-200">' +
         '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
           '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
             'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
             'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
             '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(s[0]) + "</p>" +
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
-              (s[1] == null ? "&mdash;" : esc(s[1])) + "</h2>" +
+            '<p data-tdb-stat-value class="line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
+              (s[1] == null ? "&mdash;" : esc(s[1])) + "</p>" +
           "</div>" +
           '<div data-slot="card-content" class="px-6">' +
             '<p class="text-muted-foreground line-clamp-2 font-mono text-sm sm:text-xs">' +
@@ -415,7 +409,7 @@
       "</tr>";
     }
 
-    /* whole-row navigation, the way their leaderboard rows behave */
+    /* Whole-row navigation keeps the catalogue fast to scan. */
     rowsEl.addEventListener("click", function (ev) {
       if (ev.target && ev.target.closest && ev.target.closest("a")) return;
       var tr = ev.target && ev.target.closest ? ev.target.closest("tr[data-href]") : null;

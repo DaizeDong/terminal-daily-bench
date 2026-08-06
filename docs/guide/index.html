@@ -297,15 +297,13 @@ tdb quality results.jsonl</pre>
 (async function () {
   var T = window.TDB;
 
-  /* their card string, verbatim — the padding lives on the inner row, as it
-     does in every reference card */
+  /* Shared Terminal Daily card and notice structures. */
   var CARD =
-    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
-    "transition-all duration-200 sm:-mr-px sm:border-x";
+    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
+    "transition-all duration-200";
   var NOTE =
-    "bg-card text-card-foreground -mx-4 border rounded-none border-x-0 px-6 py-6 " +
-    "font-mono text-sm/relaxed text-muted-foreground sm:mx-0 sm:border-x";
+    "tdb-panel bg-card text-card-foreground -mx-4 border px-6 py-6 " +
+    "text-sm/relaxed text-muted-foreground sm:mx-0";
 
   var results = await Promise.all([
     T.getJSON("leaderboard_data.json").catch(function () { return null; }),
@@ -355,8 +353,8 @@ tdb quality results.jsonl</pre>
     strip.innerHTML =
       '<div class="-mx-4 grid grid-cols-2 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">' +
       cells.map(function (c) {
-        return '<div class="bg-card text-card-foreground flex flex-col gap-1.5 border ' +
-          '-mb-px rounded-none border-x-0 px-6 py-6 font-mono shadow-none sm:-mr-px sm:border-x">' +
+        return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col gap-1.5 border ' +
+          'px-6 py-6">' +
           '<p class="text-muted-foreground text-xs">' + c[0] + "</p>" +
           '<p class="text-xl font-medium tabular-nums">' + c[1] + "</p></div>";
       }).join("") + "</div>";
