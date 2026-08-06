@@ -14,6 +14,8 @@ HOME = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
 LEADERBOARD = (ROOT / "docs" / "leaderboard" / "index.html").read_text(
     encoding="utf-8"
 )
+SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
+GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
 
 
 def _fixture_harnesses(board: dict) -> list[str]:
@@ -96,3 +98,57 @@ def test_semantic_false_accept_always_renders_as_fraction_or_dash():
     assert "hacks_n: measuredFa ? s.fa_n : null" in LEADERBOARD
     assert 'esc(e.hacks) + "/" + esc(e.hacks_n)' in LEADERBOARD
     assert "e.hacks == null" in LEADERBOARD
+
+
+def test_stat_values_are_not_document_headings():
+    assert "<p data-tdb-stat-value" in HOME
+    assert "<p data-tdb-stat-value" in GENERATOR
+    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in HOME
+    assert (
+        '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
+        not in GENERATOR
+    )
+
+    generated = sorted((ROOT / "docs" / "benchmarks").glob("*/index.html"))
+    generated += sorted((ROOT / "docs" / "registry").glob("*/index.html"))
+    assert generated
+    for page in generated:
+        source = page.read_text(encoding="utf-8")
+        assert "<p data-tdb-stat-value" in source, page
+        assert (
+            '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
+            not in source
+        ), page
+
+
+def test_mobile_menu_is_opaque_non_overlapping_and_accessible():
+    assert "bg-fd-background px-4 py-3 lg:hidden" in SHELL
+    assert 'menu.setAttribute("aria-hidden", open ? "false" : "true")' in SHELL
+    assert 'pageMain.style.paddingTop = open ? head.offsetHeight + "px" : ""' in SHELL
+    assert 'ev.key === "Escape"' in SHELL
+
+
+def test_shell_mounts_a_real_footer_landmark():
+    assert 'document.createElement("footer")' in SHELL
+    assert 'footer.id = "tdb-footer"' in SHELL
+    assert 'footer.setAttribute("aria-label", "Site footer")' in SHELL
+    assert "document.body.appendChild(footer)" in SHELL
+
+
+def test_homepage_integrity_limits_use_progressive_disclosure():
+    assert "data-tdb-integrity-details" in HOME
+    assert "integrity limits and current blockers" in HOME
+    assert "Protected tests decide published scores" in HOME
+    assert "deployment egress canary is still pending" in HOME
+    assert "unpublished patched Harbor fork" in HOME
+    assert "stock Harbor 0.13.1 is insufficient" in HOME
+    assert "completed gate decisions only" in HOME
+
+
+def test_homepage_previews_stay_short_and_link_to_full_views():
+    assert "var BOARD_PREVIEW_LIMIT = 5;" in HOME
+    assert "rows.slice(0, BOARD_PREVIEW_LIMIT)" in HOME
+    assert "var TASK_PREVIEW_LIMIT = 3;" in HOME
+    assert "scoped.slice(0, TASK_PREVIEW_LIMIT)" in HOME
+    assert 'href="./leaderboard/">full leaderboard' in HOME
+    assert 'href="./registry/">all tasks' in HOME

@@ -183,7 +183,8 @@ def stat_card(label, value, note: str = "") -> str:
         f'<div class="flex flex-1 flex-col justify-between gap-6 py-6">'
         f'<div data-slot="card-header" class="{cls(CARD_HEADER)}">'
         f'<p class="text-muted-foreground font-mono text-sm sm:text-xs">{esc(label)}</p>'
-        f'<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums">{shown}</h2>'
+        f'<p data-tdb-stat-value class="line-clamp-1 font-mono text-xl font-medium '
+        f'tabular-nums">{shown}</p>'
         f"</div>"
     )
     if note:

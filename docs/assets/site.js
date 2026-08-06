@@ -211,7 +211,8 @@
         "</nav>" +
       "</div>" +
       '<div class="flex w-full justify-center">' +
-        '<div id="tdb-menu" class="hidden w-full flex-col border-t px-4 py-3 lg:hidden">' +
+        '<div id="tdb-menu" aria-hidden="true" class="hidden w-full flex-col border-t ' +
+          'bg-fd-background px-4 py-3 lg:hidden">' +
           '<ul class="flex flex-col">' + navLinks(" w-full") + "</ul>" +
         "</div>" +
       "</div>";
@@ -227,8 +228,8 @@
     var head = document.createElement("header");
     head.id = "nd-nav";
     head.className =
-      "fixed top-(--fd-banner-height) z-40 left-0 backdrop-blur-lg border-b " +
-      "transition-colors *:mx-auto *:max-w-fd-container bg-fd-background/80";
+      "fixed top-(--fd-banner-height) z-40 left-0 border-b " +
+      "transition-colors *:mx-auto *:max-w-fd-container bg-fd-background";
     head.setAttribute("style", "right:var(--removed-body-scroll-bar-size, 0px)");
     head.setAttribute("aria-label", "Main");
     head.innerHTML = headerHTML();
@@ -257,46 +258,53 @@
     /* mobile menu */
     var trig = head.querySelector("#tdb-menu-trigger");
     var menu = head.querySelector("#tdb-menu");
+    var pageMain = document.querySelector("main");
+
+    function setMenuOpen(open) {
+      trig.setAttribute("data-state", open ? "open" : "closed");
+      trig.setAttribute("aria-expanded", open ? "true" : "false");
+      menu.setAttribute("aria-hidden", open ? "false" : "true");
+      menu.classList.toggle("hidden", !open);
+      menu.classList.toggle("flex", open);
+      /* The fixed header grows when its mobile menu opens. Keep the first page
+         section below that complete, opaque surface instead of covering it. */
+      if (pageMain) pageMain.style.paddingTop = open ? head.offsetHeight + "px" : "";
+    }
+
     trig.addEventListener("click", function () {
-      var open = trig.getAttribute("data-state") === "open";
-      trig.setAttribute("data-state", open ? "closed" : "open");
-      trig.setAttribute("aria-expanded", open ? "false" : "true");
-      if (open) { menu.classList.add("hidden"); menu.classList.remove("flex"); }
-      else { menu.classList.remove("hidden"); menu.classList.add("flex"); }
+      setMenuOpen(trig.getAttribute("data-state") !== "open");
     });
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && trig.getAttribute("data-state") === "open") {
+        setMenuOpen(false);
+        trig.focus();
+      }
+    });
+    if (window.matchMedia) {
+      var desktop = window.matchMedia("(min-width: 1024px)");
+      var closeAtDesktop = function (ev) { if (ev.matches) setMenuOpen(false); };
+      if (desktop.addEventListener) desktop.addEventListener("change", closeAtDesktop);
+      else if (desktop.addListener) desktop.addListener(closeAtDesktop);
+    }
   }
 
   /* ======================================================================
-     footer — the canary, in their treatment: last block of the content
-     column, pushed to the bottom by flex-1 + justify-end.
+     footer — a real contentinfo landmark, with the canary as its quiet line.
      ====================================================================== */
 
   function mountFooter() {
     if (document.getElementById("tdb-canary")) return;
-    var host =
-      document.querySelector("[data-tdb-canary-host]") ||
-      document.querySelector("main > div > div.max-w-7xl") ||
-      document.querySelector("main .max-w-7xl") ||
-      document.querySelector("main") ||
-      document.body;
-
-    var box = document.createElement("div");
-    box.className = "flex flex-1 flex-col justify-end";
-    box.innerHTML =
-      '<p id="tdb-canary" class="text-muted-foreground/50 font-mono text-xs">' +
-      CANARY + "</p>";
-
-    if (host === document.body || host.tagName === "MAIN") {
-      var pad = document.createElement("div");
-      pad.className = "flex w-full flex-col items-center px-4 pb-6";
-      var inner = document.createElement("div");
-      inner.className = "flex w-full max-w-7xl flex-col";
-      inner.appendChild(box);
-      pad.appendChild(inner);
-      host.appendChild(pad);
-    } else {
-      host.appendChild(box);
-    }
+    var footer = document.createElement("footer");
+    footer.id = "tdb-footer";
+    footer.className = "mt-auto flex w-full justify-center border-t px-4 py-4";
+    footer.setAttribute("aria-label", "Site footer");
+    footer.innerHTML =
+      '<div class="flex w-full max-w-7xl flex-col">' +
+        '<p id="tdb-canary" class="text-muted-foreground/50 font-mono text-xs">' +
+          CANARY +
+        "</p>" +
+      "</div>";
+    document.body.appendChild(footer);
   }
 
   /* ======================================================================

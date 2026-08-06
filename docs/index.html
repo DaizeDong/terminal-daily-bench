@@ -16,7 +16,7 @@
   <div class="flex flex-1 flex-col items-center px-4 py-6">
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
-      <section class="mx-auto flex max-w-4xl flex-col items-center gap-6 py-12 text-center sm:pt-24" data-tdb-section="intro">
+      <section class="mx-auto flex max-w-4xl flex-col items-center gap-6 py-8 text-center sm:pt-24" data-tdb-section="intro">
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
         <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance sm:text-6xl/tight">terminal-daily-bench</h1>
         <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance sm:text-xl/relaxed">Fresh merged pull requests become executable tasks. Agents submit patches; protected tests decide the score.</p>
@@ -27,7 +27,7 @@
         </div>
       </section>
 
-      <section id="status" class="flex w-full flex-col py-12" data-tdb-section="status">
+      <section id="status" class="flex w-full flex-col py-8" data-tdb-section="status">
         <div class="mb-4 flex flex-col items-center gap-2">
           <p class="font-mono text-sm">benchmark status</p>
           <p class="text-muted-foreground font-mono text-xs">suite catalogue and scored snapshot are versioned separately</p>
@@ -42,13 +42,20 @@
         <div class="-mx-4 mb-6 sm:mx-0" id="tdb-rail"></div>
 
         <div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-          <p><span class="font-medium">Scoring invariant.</span> A model proposes a patch; deterministic code re-lays and executes the protected tests. A claimed reward is never accepted as a score. Offline paths request runtime egress isolation, but the deployment egress canary is still pending; installed vendor CLI runs remain online for provider access.</p>
-          <p class="text-muted-foreground mt-4"><span class="text-foreground">Live tasks</span> withhold gold and protected test bodies; submitted patches remain unranked until official replay. <span class="text-foreground">Archived tasks</span> publish those artifacts, but end-to-end <code>tdb run</code> and <code>tdb oracle</code> currently require an unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
-          <p class="text-muted-foreground mt-4"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> is reported only for completed gate decisions. <span id="hp-data-note"></span></p>
+          <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores; a submitted reward is only a claim.</p>
+          <details class="mt-4 border-t py-4" data-tdb-integrity-details>
+            <summary class="cursor-pointer font-medium">integrity limits and current blockers</summary>
+            <div class="text-muted-foreground mt-4">
+              <p>Deterministic code re-lays and executes protected tests. A claimed reward is never accepted as a score.</p>
+              <p class="mt-4">Offline runs request runtime egress isolation, but the deployment egress canary is still pending; installed vendor CLI runs remain online for provider access.</p>
+              <p class="mt-4"><span class="text-foreground">Live tasks</span> withhold gold and protected tests; submissions remain unranked until official replay. <span class="text-foreground">Archives</span> publish those artifacts, but local runs require an unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+            </div>
+          </details>
+          <p class="text-muted-foreground mt-4"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> covers completed gate decisions only. <span id="hp-data-note"></span></p>
         </div>
       </section>
 
-      <section class="flex w-full flex-col py-12" data-tdb-section="leaderboard">
+      <section class="flex w-full flex-col py-8" data-tdb-section="leaderboard">
         <div class="mb-4 flex items-center justify-between gap-4">
           <div>
             <p class="font-mono text-sm" id="hp-board-title">leaderboard snapshot</p>
@@ -65,7 +72,7 @@
         </div>
       </section>
 
-      <section class="flex w-full flex-col py-12 sm:pb-16" data-tdb-section="tasks">
+      <section class="flex w-full flex-col py-8 sm:pb-16" data-tdb-section="tasks">
         <div class="mb-4 flex items-center justify-between gap-4">
           <div>
             <p class="font-mono text-sm">published tasks</p>
@@ -101,6 +108,8 @@
     date: 1, pr: 1, cost: 1, cost_usd: 1
   };
   var HARNESS_LABELS = { single_shot: "single-shot", terminus2: "terminus-2" };
+  var BOARD_PREVIEW_LIMIT = 5;
+  var TASK_PREVIEW_LIMIT = 3;
 
   function isHarnessCell(value) {
     return value && typeof value === "object" && !Array.isArray(value) &&
@@ -175,8 +184,8 @@
       '<div class="flex flex-1 flex-col justify-between gap-4 py-6">' +
         '<div data-slot="card-header" class="px-6">' +
           '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +
-          '<h2 class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
-            (value == null || value === "" ? "&mdash;" : esc(value)) + "</h2>" +
+          '<p data-tdb-stat-value class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
+            (value == null || value === "" ? "&mdash;" : esc(value)) + "</p>" +
         "</div>" +
         (note ? '<div data-slot="card-content" class="px-6"><p class="text-muted-foreground font-mono text-xs">' + esc(note) + "</p></div>" : "") +
       "</div></div>";
@@ -238,7 +247,7 @@
           esc(harnessLabel(key)) + "</div></th>";
       }).join("") +
       "</tr>";
-    var body = rows.slice(0, 8).map(function (r, i) {
+    var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r, i) {
       return '<tr data-slot="table-row" class="' + TR + '">' +
         '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums">' + (i + 1) + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(r.model) + "</p></td>" +
@@ -256,7 +265,9 @@
     if (board.n_tasks != null) bits.push(plural(board.n_tasks, "task", "tasks"));
     if (board.n_cells != null) bits.push(plural(board.n_cells, "scored cell", "scored cells"));
     set("hp-board-foot", esc(bits.join(" · ")) +
-      (rows.length > 8 ? " · showing 8 of " + rows.length + " models" : ""));
+      (rows.length > BOARD_PREVIEW_LIMIT
+        ? " · showing " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " models"
+        : ""));
   }
 
   function taskCard(task) {
@@ -288,7 +299,7 @@
     var scoped = latest.id ? all.filter(function (t) {
       return T.taskInSuite(t, latest.id);
     }) : all;
-    var shown = scoped.slice(0, 6);
+    var shown = scoped.slice(0, TASK_PREVIEW_LIMIT);
     set("hp-task-scope", latest.id ? "suite " + esc(latest.id) + " · " + scoped.length + " tasks" : "published catalogue");
     set("hp-tasks", shown.length ? shown.map(taskCard).join("") :
       '<div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">No tasks are published.</div>');
