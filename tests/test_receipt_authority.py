@@ -21,7 +21,9 @@ SOURCE = "a" * 40
 KEY_ID = "test-authority-2026"
 SIGNER_EUID = 3225
 CHECK_APP_ID = 4242
-WRITER_APP_ID = 15368
+CHECK_APP_SLUG = "external-source-authorizer"
+WRITER_APP_ID = 7654321
+WRITER_APP_SLUG = "terminal-daily-ledger-writer"
 RULESET_ID = 314
 REVIEWER_ID = 7
 CANDIDATE_ACTOR_ID = 101
@@ -37,6 +39,13 @@ class FakeGitHub:
                  importer_reviewer=REVIEWER_ID,
                  publisher_reviewer=REVIEWER_ID,
                  check_app_id=CHECK_APP_ID, writer_app_id=WRITER_APP_ID,
+                 check_app_slug=CHECK_APP_SLUG,
+                 writer_app_slug=WRITER_APP_SLUG,
+                 environment_admin_bypass=False,
+                 include_environment_admin_bypass=True,
+                 source_check_status="completed",
+                 source_check_conclusion="success",
+                 include_source_check=True,
                  ledger_genesis=LEDGER_GENESIS, ledger_merge_base=None,
                  main_heads=None, ruleset_id=RULESET_ID):
         self.existing = set()
@@ -52,6 +61,13 @@ class FakeGitHub:
         self.publisher_reviewer = publisher_reviewer
         self.check_app_id = check_app_id
         self.writer_app_id = writer_app_id
+        self.check_app_slug = check_app_slug
+        self.writer_app_slug = writer_app_slug
+        self.environment_admin_bypass = environment_admin_bypass
+        self.include_environment_admin_bypass = include_environment_admin_bypass
+        self.source_check_status = source_check_status
+        self.source_check_conclusion = source_check_conclusion
+        self.include_source_check = include_source_check
         self.ruleset_id = ruleset_id
         self.ledger_genesis = ledger_genesis
         self.ledger_merge_base = ledger_genesis if ledger_merge_base is None else ledger_merge_base
@@ -78,7 +94,7 @@ class FakeGitHub:
             }
         if suffix in {"environments/receipt-importer", "environments/receipt-publisher"}:
             name = suffix.split("/", 1)[1]
-            return {
+            environment = {
                 "name": name,
                 "protection_rules": [{
                     "type": "required_reviewers",
@@ -90,6 +106,20 @@ class FakeGitHub:
                     "custom_branch_policies": False,
                 },
             }
+            if self.include_environment_admin_bypass:
+                environment["can_admins_bypass"] = self.environment_admin_bypass
+            return environment
+        if suffix == f"commits/{SOURCE}/check-runs?filter=latest&per_page=100":
+            runs = []
+            if self.include_source_check:
+                runs.append({
+                    "name": "authority-check",
+                    "head_sha": SOURCE,
+                    "status": self.source_check_status,
+                    "conclusion": self.source_check_conclusion,
+                    "app": {"id": self.check_app_id, "slug": self.check_app_slug},
+                })
+            return {"total_count": len(runs), "check_runs": runs}
         if suffix == "git/ref/heads/main":
             index = min(self.main_ref_reads, len(self.main_heads) - 1)
             self.main_ref_reads += 1
@@ -101,7 +131,10 @@ class FakeGitHub:
                 "allow_force_pushes": {"enabled": False},
                 "allow_deletions": {"enabled": False},
                 "restrictions": {
-                    "apps": [{"id": self.writer_app_id}], "users": [], "teams": [],
+                    "apps": [{
+                        "id": self.writer_app_id, "slug": self.writer_app_slug,
+                    }],
+                    "users": [], "teams": [],
                 },
             }
         if suffix == "rules/branches/receipt-authority-ledger?per_page=100":
@@ -393,6 +426,7 @@ def _authority_tree(tmp_path: pathlib.Path, *, wrong_subject=False):
             "path_prefix": ".github/receipt-authority/ledger",
             "genesis_commit": LEDGER_GENESIS,
             "trusted_writer_app_id": WRITER_APP_ID,
+            "trusted_writer_app_slug": WRITER_APP_SLUG,
             "ruleset_id": RULESET_ID,
             "enforce_admins": True, "require_linear_history": True,
             "block_force_pushes": True, "block_deletions": True,
@@ -474,6 +508,7 @@ def test_committed_registry_is_honestly_inactive_and_workflows_fail_closed():
     assert registry["active"] is False
     assert registry["deployment_status"]["state"] == "blocked"
     assert "independent_environment_reviewer_missing" in registry["deployment_status"]["blockers"]
+    assert "independent_workflow_dispatcher_missing" in registry["deployment_status"]["blockers"]
     assert all(value is False for value in registry["deployment_declarations"].values())
     assert registry["signers"] == []
     assert registry["suites"] == []
@@ -486,6 +521,7 @@ def test_committed_registry_is_honestly_inactive_and_workflows_fail_closed():
     assert registry["publisher_ledger"]["active"] is False
     assert registry["publisher_ledger"]["genesis_commit"] is None
     assert registry["publisher_ledger"]["trusted_writer_app_id"] is None
+    assert registry["publisher_ledger"]["trusted_writer_app_slug"] is None
     assert registry["publisher_ledger"]["ruleset_id"] is None
     assert all(not item["reviewer_ids"] for item in registry["environments"])
     assert all(item["app_id"] is None
@@ -496,7 +532,11 @@ def test_committed_registry_is_honestly_inactive_and_workflows_fail_closed():
         "publisher_ledger_ruleset_missing",
         "publisher_ledger_genesis_pin_missing",
         "publisher_ledger_trusted_writer_missing",
+        "publisher_ledger_external_app_custody_missing",
         "required_status_check_app_pin_missing",
+        "external_source_authorization_missing",
+        "external_control_reader_missing",
+        "environment_admin_bypass_policy_unverified",
         "environment_reviewer_registry_empty",
         "trusted_workflow_registry_inactive",
     }.issubset(blockers)
@@ -540,10 +580,94 @@ def test_import_rejects_source_commit_that_is_no_longer_live_main(tmp_path):
     assert api.main_ref_reads == 1
 
 
+@pytest.mark.parametrize(
+    "api_kwargs",
+    [
+        {"include_environment_admin_bypass": False},
+        {"environment_admin_bypass": True},
+        {"environment_admin_bypass": None},
+        {"environment_admin_bypass": 0},
+        {"environment_admin_bypass": "false"},
+    ],
+)
+def test_import_rejects_missing_enabled_or_type_confused_admin_bypass_policy(
+    tmp_path, api_kwargs,
+):
+    with pytest.raises(authority.AuthorityError) as raised:
+        _import(tmp_path, api=FakeGitHub(**api_kwargs))
+    assert raised.value.code == "environment_admin_bypass_enabled"
+
+
+@pytest.mark.parametrize(
+    "api_kwargs",
+    [
+        {"include_source_check": False},
+        {"source_check_status": "queued", "source_check_conclusion": None},
+        {"source_check_conclusion": "failure"},
+        {"check_app_slug": authority.GITHUB_ACTIONS_APP_SLUG},
+    ],
+)
+def test_current_protection_snapshot_does_not_replace_external_source_authorization(
+    tmp_path, api_kwargs,
+):
+    with pytest.raises(authority.AuthorityError) as raised:
+        _import(tmp_path, api=FakeGitHub(**api_kwargs))
+    assert raised.value.code in {
+        "source_authorization_missing", "source_authorization_failed",
+    }
+
+
 def test_import_rejects_same_named_status_check_from_wrong_app(tmp_path):
     with pytest.raises(authority.AuthorityError) as raised:
         _import(tmp_path, api=FakeGitHub(check_app_id=CHECK_APP_ID + 1))
     assert raised.value.code == "branch_protection_insufficient"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("trusted_writer_app_id", authority.GITHUB_ACTIONS_APP_ID),
+        ("trusted_writer_app_slug", authority.GITHUB_ACTIONS_APP_SLUG),
+    ],
+)
+def test_same_repository_actions_oidc_is_not_a_dedicated_ledger_writer(
+    tmp_path, field, value,
+):
+    _, registry_path, _ = _authority_tree(tmp_path)
+    payload = registry_path.read_bytes()
+    registry = authority._strict_json(payload, label="test registry")
+    registry["publisher_ledger"][field] = value
+    hostile = authority._canonical_json(registry) + b"\n"
+    with pytest.raises(authority.AuthorityError) as raised:
+        authority._validate_registry(registry, hostile)
+    assert raised.value.code == "invalid_registry"
+
+
+def test_source_authorizer_and_ledger_writer_apps_must_be_distinct(tmp_path):
+    _, registry_path, _ = _authority_tree(tmp_path)
+    payload = registry_path.read_bytes()
+    registry = authority._strict_json(payload, label="test registry")
+    registry["publisher_ledger"]["trusted_writer_app_id"] = CHECK_APP_ID
+    hostile = authority._canonical_json(registry) + b"\n"
+    with pytest.raises(authority.AuthorityError) as raised:
+        authority._validate_registry(registry, hostile)
+    assert raised.value.code == "invalid_registry"
+
+
+def test_repository_github_token_is_never_an_authority_credential(tmp_path):
+    root, registry, suite_sha = _authority_tree(tmp_path)
+    candidate_path = tmp_path / "candidate.json"
+    _, candidate_sha = _candidate(candidate_path, suite_sha)
+    runtime = _runtime("importer")
+    runtime["GITHUB_TOKEN"] = "repository-wide-built-in-token"
+    with pytest.raises(authority.AuthorityError) as raised:
+        authority.import_candidate(
+            candidate_path=candidate_path, registry_path=registry,
+            authority_root=root, expected_run_id="7001", expected_run_attempt="1",
+            expected_candidate_sha256=candidate_sha, out=tmp_path / "out.json",
+            environ=runtime,
+        )
+    assert raised.value.code == "missing_github_token"
 
 
 @pytest.mark.parametrize("actor_field", ["candidate_actor", "importer_actor"])
@@ -558,6 +682,7 @@ def test_import_rejects_candidate_actor_or_dispatcher_self_approval(tmp_path, ac
     [
         ({"ruleset_id": RULESET_ID + 1}, "publisher_ledger_ruleset_invalid"),
         ({"writer_app_id": WRITER_APP_ID + 1}, "publisher_ledger_unprotected"),
+        ({"writer_app_slug": "wrong-ledger-writer"}, "publisher_ledger_unprotected"),
         ({"ledger_merge_base": "f" * 40}, "publisher_ledger_history_invalid"),
     ],
 )
@@ -753,14 +878,21 @@ def test_workflows_separate_read_only_import_from_protected_writer():
         assert "pull_request_target" not in text
     assert "environment: receipt-importer" in importer
     assert "actions: read" in importer
+    assert "checks: read" in importer
     assert "contents: read" in importer
     assert "contents: write" not in importer
+    assert "GH_TOKEN: ${{ secrets.RECEIPT_AUTHORITY_READER_TOKEN }}" in importer
+    assert "GH_TOKEN: ${{ github.token }}" not in importer
     assert "permissions: {}" in importer
     assert "needs: preflight" in importer
     assert "Refuse to enter an authority environment for an inactive deployment" in importer
     assert "environment: receipt-publisher" in publisher
     assert "actions: read" in publisher
-    assert "contents: write" in publisher
+    assert "checks: read" in publisher
+    assert "contents: read" in publisher
+    assert "contents: write" not in publisher
+    assert "GH_TOKEN: ${{ secrets.RECEIPT_LEDGER_WRITER_TOKEN }}" in publisher
+    assert "GH_TOKEN: ${{ github.token }}" not in publisher
     assert "permissions: {}" in publisher
     assert "needs: preflight" in publisher
     assert publisher.index("Refuse to start a writer for an inactive deployment") < publisher.index(

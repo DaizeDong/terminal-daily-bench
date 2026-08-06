@@ -84,7 +84,8 @@ jobs:
     permissions:
       actions: read
       attestations: read
-      contents: write
+      checks: read
+      contents: read
     env:
       IMPORTER_RUN_ID: ${{ inputs.importer_run_id }}
       IMPORTER_RUN_ATTEMPT: ${{ inputs.importer_run_attempt }}
@@ -149,7 +150,10 @@ jobs:
         id: authority_publish
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Only a short-lived installation token for the registry-pinned
+          # dedicated writer App may update the ledger.  The built-in
+          # GITHUB_TOKEN deliberately remains read-only.
+          GH_TOKEN: ${{ secrets.RECEIPT_LEDGER_WRITER_TOKEN }}
           TDB_RUNNER_ENVIRONMENT: ${{ runner.environment }}
           TDB_AUTHORITY_WORKFLOW_SHA: ${{ github.workflow_sha }}
         run: |

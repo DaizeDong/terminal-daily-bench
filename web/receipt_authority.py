@@ -48,6 +48,14 @@ SLSA_PREDICATE = "https://slsa.dev/provenance/v1"
 MAX_JSON_BYTES = 8 * 1024 * 1024
 MAX_VERIFIER_VERSION_BYTES = 4096
 
+# Every repository workflow receives an installation token for this built-in
+# GitHub App.  It is therefore a repository-wide execution identity, not a
+# workflow-specific publisher identity.  In particular, an OIDC certificate
+# naming one workflow does not narrow a later GITHUB_TOKEN branch write to that
+# workflow.  Authority checks and the ledger writer must use dedicated Apps.
+GITHUB_ACTIONS_APP_ID = 15368
+GITHUB_ACTIONS_APP_SLUG = "github-actions"
+
 CONTROLS = receipt_bundle.DEPLOYMENT_CONTROLS
 ROLES = ("candidate", "importer", "publisher")
 
@@ -383,6 +391,11 @@ def _validate_registry(data: Any, payload: bytes) -> Dict[str, Any]:
         check_identities.add(identity)
         if registry["active"] and app_id is None:
             _fail("invalid_registry", "active status check is not bound to a GitHub App")
+        if registry["active"] and app_id == GITHUB_ACTIONS_APP_ID:
+            _fail(
+                "invalid_registry",
+                "the repository-wide GitHub Actions App cannot authorize authority source",
+            )
     if registry["active"] and not required_checks:
         _fail("invalid_registry", "active authority requires pinned status checks")
 
@@ -458,8 +471,9 @@ def _validate_registry(data: Any, payload: bytes) -> Dict[str, Any]:
     ledger = _exact_fields(
         registry["publisher_ledger"], frozenset({
             "active", "branch", "path_prefix", "genesis_commit",
-            "trusted_writer_app_id", "ruleset_id", "enforce_admins", "require_linear_history",
-            "block_force_pushes", "block_deletions",
+            "trusted_writer_app_id", "trusted_writer_app_slug", "ruleset_id",
+            "enforce_admins", "require_linear_history", "block_force_pushes",
+            "block_deletions",
         }),
         code="invalid_registry", label="publisher ledger registry",
     )
@@ -478,13 +492,34 @@ def _validate_registry(data: Any, payload: bytes) -> Dict[str, Any]:
                 or not _COMMIT_RE.fullmatch(ledger["genesis_commit"])
                 or type(ledger["trusted_writer_app_id"]) is not int
                 or ledger["trusted_writer_app_id"] < 1
+                or ledger["trusted_writer_app_id"] == GITHUB_ACTIONS_APP_ID
+                or not isinstance(ledger["trusted_writer_app_slug"], str)
+                or not re.fullmatch(
+                    r"[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?",
+                    ledger["trusted_writer_app_slug"],
+                )
+                or ledger["trusted_writer_app_slug"] == GITHUB_ACTIONS_APP_SLUG
                 or type(ledger["ruleset_id"]) is not int
                 or ledger["ruleset_id"] < 1):
-            _fail("invalid_registry", "active publisher ledger lacks immutable authority pins")
+            _fail(
+                "invalid_registry",
+                "active publisher ledger lacks a dedicated external writer App",
+            )
     elif (ledger["genesis_commit"] is not None
           or ledger["trusted_writer_app_id"] is not None
+          or ledger["trusted_writer_app_slug"] is not None
           or ledger["ruleset_id"] is not None):
         _fail("invalid_registry", "inactive publisher ledger must not claim authority pins")
+
+    if registry["active"]:
+        source_authorizer_ids = {
+            item["app_id"] for item in required_checks
+        }
+        if ledger["trusted_writer_app_id"] in source_authorizer_ids:
+            _fail(
+                "invalid_registry",
+                "source authorizer and ledger writer must be distinct GitHub Apps",
+            )
 
     declarations = _exact_fields(
         registry["deployment_declarations"], frozenset(CONTROLS),
@@ -693,7 +728,8 @@ def _verify_live_main_head(api: Any, registry: Mapping[str, Any],
         )
 
 
-def _verify_main_branch(api: Any, registry: Mapping[str, Any]) -> None:
+def _verify_main_branch(api: Any, registry: Mapping[str, Any],
+                        source_commit: str) -> None:
     policy = registry["branch_protection"]
     data = api.get(f"branches/{quote(policy['branch'], safe='')}/protection")
     if type(data) is not dict:
@@ -731,11 +767,61 @@ def _verify_main_branch(api: Any, registry: Mapping[str, Any]) -> None:
             or _bool_field(data, "allow_deletions") is not False):
         _fail("branch_protection_insufficient", "main mutation protection is insufficient")
 
+    # A snapshot of today's protection settings does not prove that the live
+    # commit entered main while those settings were enabled.  Require a
+    # successful check on the exact source commit from every externally pinned
+    # authority App.  The built-in GitHub Actions App is rejected by registry
+    # validation because any same-repository workflow can obtain that identity.
+    evidence = api.get(
+        f"commits/{source_commit}/check-runs?filter=latest&per_page=100"
+    )
+    runs = evidence.get("check_runs") if type(evidence) is dict else None
+    total = evidence.get("total_count") if type(evidence) is dict else None
+    if (type(total) is not int or isinstance(total, bool) or total < 0 or total > 100
+            or type(runs) is not list or len(runs) != total):
+        _fail(
+            "source_authorization_unavailable",
+            "current main protection does not provide bounded source authorization history",
+        )
+    for expected in policy["required_status_checks"]:
+        matches = []
+        for run in runs:
+            app = run.get("app") if type(run) is dict else None
+            identity = (
+                run.get("name") if type(run) is dict else None,
+                app.get("id") if type(app) is dict else None,
+            )
+            if identity == (expected["context"], expected["app_id"]):
+                matches.append((run, app))
+        if len(matches) != 1:
+            _fail(
+                "source_authorization_missing",
+                "live main lacks one unambiguous external authority check",
+            )
+        run, app = matches[0]
+        if (run.get("head_sha") != source_commit
+                or run.get("status") != "completed"
+                or run.get("conclusion") != "success"
+                or app.get("id") == GITHUB_ACTIONS_APP_ID
+                or app.get("slug") == GITHUB_ACTIONS_APP_SLUG):
+            _fail(
+                "source_authorization_failed",
+                "external authority did not authorize the live main source commit",
+            )
+
 
 def _verify_environment(api: Any, policy: Mapping[str, Any]) -> None:
     data = api.get(f"environments/{quote(policy['name'], safe='')}")
     if type(data) is not dict or data.get("name") != policy["name"]:
         _fail("environment_missing", "protected authority environment is unavailable")
+    # GitHub permits administrators to bypass environment protection by
+    # default.  Reviewer and prevent-self-review facts are not an authority
+    # boundary while that escape hatch remains enabled (or cannot be observed).
+    if data.get("can_admins_bypass") is not False:
+        _fail(
+            "environment_admin_bypass_enabled",
+            "authority environment permits or does not expose administrator bypass",
+        )
     rules = data.get("protection_rules")
     if type(rules) is not list:
         _fail("environment_unprotected", "authority environment has no protection rules")
@@ -944,10 +1030,14 @@ def _verify_ledger_exists(api: Any, registry: Mapping[str, Any], *,
     apps = restrictions.get("apps") if type(restrictions) is dict else None
     users = restrictions.get("users") if type(restrictions) is dict else None
     teams = restrictions.get("teams") if type(restrictions) is dict else None
-    app_ids = {
-        item.get("id") for item in apps
-        if type(item) is dict and type(item.get("id")) is int
+    app_identities = {
+        (item.get("id"), item.get("slug")) for item in apps
+        if (type(item) is dict and type(item.get("id")) is int
+            and isinstance(item.get("slug"), str))
     } if type(apps) is list else set()
+    trusted_writer = (
+        ledger["trusted_writer_app_id"], ledger["trusted_writer_app_slug"],
+    )
     if (type(protection) is not dict
             or _bool_field(protection, "enforce_admins") is not True
             or _bool_field(protection, "required_linear_history") is not True
@@ -955,8 +1045,11 @@ def _verify_ledger_exists(api: Any, registry: Mapping[str, Any], *,
             or _bool_field(protection, "allow_deletions") is not False
             or type(restrictions) is not dict
             or type(apps) is not list or len(apps) != 1
-            or any(type(item) is not dict or type(item.get("id")) is not int for item in apps)
-            or app_ids != {ledger["trusted_writer_app_id"]}
+            or any(type(item) is not dict or type(item.get("id")) is not int
+                   or not isinstance(item.get("slug"), str) for item in apps)
+            or app_identities != {trusted_writer}
+            or trusted_writer[0] == GITHUB_ACTIONS_APP_ID
+            or trusted_writer[1] == GITHUB_ACTIONS_APP_SLUG
             or type(users) is not list or users
             or type(teams) is not list or teams):
         _fail(
@@ -1263,7 +1356,7 @@ def _evaluate_controls(candidate: Mapping[str, Any], *, candidate_path: Path,
     controls = {name: False for name in CONTROLS}
 
     _verify_live_main_head(api, registry, runtime["source_commit"])
-    _verify_main_branch(api, registry)
+    _verify_main_branch(api, registry, runtime["source_commit"])
     controls["main_branch_protection_verified"] = True
     _verify_environment(api, _environment_policy(registry, "importer"))
     controls["replay_promoter_environment_verified"] = True
@@ -1314,7 +1407,10 @@ def import_candidate(*, candidate_path: Path, registry_path: Path,
     )
     if api is None:
         source_env = os.environ if environ is None else environ
-        token = source_env.get("GH_TOKEN", "") or source_env.get("GITHUB_TOKEN", "")
+        # Never silently upgrade the repository-wide GITHUB_TOKEN into an
+        # authority credential.  Workflows must inject the externally issued,
+        # least-privilege token explicitly as GH_TOKEN.
+        token = source_env.get("GH_TOKEN", "")
         api = GitHubAPI(token, repository=registry["repository"])
     controls, public_key_sha, attestation_sha, actor_evidence = _evaluate_controls(
         candidate, candidate_path=candidate_path, candidate_sha256=candidate_sha,
@@ -1525,7 +1621,7 @@ def _publisher_controls(record: Mapping[str, Any], *, import_path: Path,
         _fail("deployment_inactive", "receipt authority deployment is inactive or incomplete")
     controls = {name: False for name in CONTROLS}
     _verify_live_main_head(api, registry, runtime["source_commit"])
-    _verify_main_branch(api, registry)
+    _verify_main_branch(api, registry, runtime["source_commit"])
     controls["main_branch_protection_verified"] = True
     _verify_environment(api, _environment_policy(registry, "importer"))
     controls["replay_promoter_environment_verified"] = True
@@ -1653,7 +1749,7 @@ def publish_import(*, import_path: Path, registry_path: Path, authority_root: Pa
     record = _validate_import_record(payload, registry, runtime)
     if api is None:
         source_env = os.environ if environ is None else environ
-        token = source_env.get("GH_TOKEN", "") or source_env.get("GITHUB_TOKEN", "")
+        token = source_env.get("GH_TOKEN", "")
         api = GitHubAPI(token, repository=registry["repository"])
     controls, import_attestation_sha, actor_evidence = _publisher_controls(
         record, import_path=import_path, import_sha256=import_sha,

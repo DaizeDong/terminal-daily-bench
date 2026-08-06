@@ -118,7 +118,12 @@
             "required": ["context", "app_id"],
             "properties": {
               "context": {"type": "string", "minLength": 1, "maxLength": 200},
-              "app_id": {"type": ["integer", "null"], "minimum": 1}
+              "app_id": {
+                "anyOf": [
+                  {"type": "integer", "minimum": 1, "not": {"const": 15368}},
+                  {"type": "null"}
+                ]
+              }
             }
           },
           "uniqueItems": true
@@ -175,8 +180,9 @@
       "additionalProperties": false,
       "required": [
         "active", "branch", "path_prefix", "genesis_commit",
-        "trusted_writer_app_id", "ruleset_id", "enforce_admins", "require_linear_history",
-        "block_force_pushes", "block_deletions"
+        "trusted_writer_app_id", "trusted_writer_app_slug", "ruleset_id",
+        "enforce_admins", "require_linear_history", "block_force_pushes",
+        "block_deletions"
       ],
       "properties": {
         "active": {"type": "boolean"},
@@ -191,7 +197,22 @@
             {"type": "null"}
           ]
         },
-        "trusted_writer_app_id": {"type": ["integer", "null"], "minimum": 1},
+        "trusted_writer_app_id": {
+          "anyOf": [
+            {"type": "integer", "minimum": 1, "not": {"const": 15368}},
+            {"type": "null"}
+          ]
+        },
+        "trusted_writer_app_slug": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$",
+              "not": {"const": "github-actions"}
+            },
+            {"type": "null"}
+          ]
+        },
         "ruleset_id": {"type": ["integer", "null"], "minimum": 1},
         "enforce_admins": {"const": true},
         "require_linear_history": {"const": true},

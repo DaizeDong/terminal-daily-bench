@@ -84,6 +84,7 @@ jobs:
     permissions:
       actions: read
       attestations: write
+      checks: read
       contents: read
       id-token: write
     env:
@@ -150,7 +151,9 @@ jobs:
         id: authority_import
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Must be a short-lived, read-only token supplied by the external
+          # authority App/broker; the repository GITHUB_TOKEN is not authority.
+          GH_TOKEN: ${{ secrets.RECEIPT_AUTHORITY_READER_TOKEN }}
           TDB_RUNNER_ENVIRONMENT: ${{ runner.environment }}
           TDB_AUTHORITY_WORKFLOW_SHA: ${{ github.workflow_sha }}
         run: |
