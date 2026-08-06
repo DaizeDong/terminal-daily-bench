@@ -29,8 +29,13 @@ from . import __version__, eval as _eval, quality as _q
 def _cmd_run(a) -> int:
     harness = getattr(a, "harness", "single_shot")
     suffix = "" if harness in {"single_shot", "single-shot"} else f"__{_slug(harness)}"
-    out = a.out or os.path.join(os.environ.get("TDB_WORK", "./.tdb_work"), "results",
-                                f"{os.path.basename(a.task.rstrip('/'))}__{_slug(a.model)}{suffix}.json")
+    out = os.path.abspath(
+        a.out or os.path.join(
+            os.environ.get("TDB_WORK", "./.tdb_work"),
+            "results",
+            f"{os.path.basename(a.task.rstrip('/'))}__{_slug(a.model)}{suffix}.json",
+        )
+    )
     os.makedirs(os.path.dirname(out), exist_ok=True)
     argv = ["--model", a.model, "--task", a.task, "--out", out,
             "--harness", harness]
@@ -42,6 +47,10 @@ def _cmd_run(a) -> int:
         argv.append("--dry-run")
     if getattr(a, "keep_task_network_policy", False):
         argv.append("--keep-task-network-policy")
+    if getattr(a, "task_sif", None):
+        argv += ["--task-sif", a.task_sif]
+    if getattr(a, "task_sif_sha256", None):
+        argv += ["--task-sif-sha256", a.task_sif_sha256]
     if getattr(a, "harbor_timeout", None) is not None:
         argv += ["--harbor-timeout", str(a.harbor_timeout)]
     return _eval.main(argv)
@@ -52,6 +61,8 @@ def _cmd_oracle(a) -> int:
         model="oracle", task=a.task, out=a.out, harness="single_shot",
         harness_base_url=None, agent_kwarg=[], dry_run=getattr(a, "dry_run", False),
         keep_task_network_policy=False, harbor_timeout=getattr(a, "harbor_timeout", None),
+        task_sif=getattr(a, "task_sif", None),
+        task_sif_sha256=getattr(a, "task_sif_sha256", None),
     ))
 
 
@@ -163,9 +174,9 @@ def _check_task_dir(task: str):
              if os.path.isdir(os.path.join(task, "solution"))
              else "live-style (no solution/ -- `tdb oracle` will not work; official replay required)")
     note = f"{os.path.basename(task.rstrip('/'))}: task.toml + instruction.md + tests/ + environment/, {split}"
-    # What the gate would execute. `environment.docker_image` is either a build
-    # recipe relative to the task dir (harbor builds the SIF) or an absolute
-    # image/SIF path. Informational only -- harbor, not this bundle, materializes it.
+    # What the gate would execute.  The patched Singularity backend requires a
+    # prebuilt SIF; a task-shipped Dockerfile is an audit/build recipe and must
+    # be paired with the digest-pinned --task-sif run option.
     try:
         import tomllib
         with open(os.path.join(task, "task.toml"), "rb") as fh:
@@ -175,10 +186,10 @@ def _check_task_dir(task: str):
     if img:
         local = img if os.path.isabs(img) else os.path.join(task, img)
         if os.path.exists(local):
-            kind = ("build recipe present, SIF built by harbor"
+            kind = ("build recipe present; singularity run needs --task-sif"
                     if not local.endswith(".sif") else "image present")
         else:
-            kind = "not on this host; harbor pulls/builds it"
+            kind = "not on this host; provide a prebuilt digest-pinned SIF"
         note += f"; image={img} ({kind})"
     return True, note
 
@@ -218,11 +229,20 @@ def _cmd_doctor(a) -> int:
         "unset -> vendor CLI default"
         if is_claude else "unset -> defaults to https://api.openai.com/v1"
     )
-    checks.append((True, _OPTIONAL, base_name, base if base else default_note))
+    checks.append((
+        True,
+        _OPTIONAL,
+        base_name,
+        "<configured, redacted>" if base else default_note,
+    ))
 
+    is_codex = harness in {"codex", "codex-cli", "codex_cli"}
     key_names = (
         ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN")
-        if is_claude else ("OPENAI_API_KEY",)
+        if is_claude else
+        ("OPENAI_API_KEY", "CODEX_AUTH_JSON_PATH")
+        if is_codex else
+        ("OPENAI_API_KEY",)
     )
     selected_key = next((name for name in key_names if os.environ.get(name)), None)
     key = os.environ.get(selected_key, "") if selected_key else ""
@@ -293,12 +313,20 @@ def main(argv: List[str] = None) -> int:
     r.add_argument("--keep-task-network-policy", action="store_true",
                    help="do not enable network in the installed-agent run copy")
     r.add_argument("--harbor-timeout", type=int, default=None)
+    r.add_argument("--task-sif", default=None,
+                   help="absolute prebuilt SIF path used only in the disposable task copy")
+    r.add_argument("--task-sif-sha256", default=None,
+                   help="required expected SHA-256 for --task-sif")
     r.set_defaults(fn=_cmd_run)
     o = sub.add_parser("oracle", help="gate baseline")
     o.add_argument("task")
     o.add_argument("--out", default=None)
     o.add_argument("--dry-run", action="store_true")
     o.add_argument("--harbor-timeout", type=int, default=None)
+    o.add_argument("--task-sif", default=None,
+                   help="absolute prebuilt SIF path used only in the disposable task copy")
+    o.add_argument("--task-sif-sha256", default=None,
+                   help="required expected SHA-256 for --task-sif")
     o.set_defaults(fn=_cmd_oracle)
     q = sub.add_parser("quality", help="multi-angle quality card"); q.add_argument("results"); q.set_defaults(fn=_cmd_quality)
     pb = sub.add_parser("publish", help="results -> website data file (leaderboard_data.json)")

@@ -22,6 +22,22 @@ class HarborResultSnapshot(NamedTuple):
     data: bytes
 
 
+class HarborAggregateStatus(NamedTuple):
+    """Strict terminal counters parsed from the same fd-pinned aggregate bytes."""
+
+    reward: float
+    n_total_trials: int
+    n_completed_trials: int
+    n_errored_trials: int
+    n_running_trials: int
+    n_pending_trials: int
+    n_cancelled_trials: int
+    n_retries: int
+    eval_n_trials: int
+    eval_n_errors: int
+    clean: bool
+
+
 def _read_harbor_reward(jobs_dir: str) -> Optional[float]:
     """Parse the Harbor trial reward out of a ``result.json`` under ``jobs_dir``.
 
@@ -43,11 +59,15 @@ def _read_harbor_reward(jobs_dir: str) -> Optional[float]:
     is ``stats.evals.<eval_key>.metrics[0].mean``; for a single trial it is also
     recoverable as the (max) float key of ``reward_stats.reward``.
 
-    Exactly one non-symlink ``result.json`` must exist under ``jobs_dir`` and it
-    must have the single-eval aggregate schema.  Multiple files, fallback shapes,
-    booleans, NaN/Inf and out-of-range values all fail closed to ``None``.  This
-    prevents a candidate-created early-sorting result from shadowing the Harbor
-    authority file.
+    Exactly one direct-child aggregate ``<run>/result.json`` must exist under
+    ``jobs_dir`` and it must have the single-eval aggregate schema.  Harbor
+    0.13.1 also writes one ``<run>/<trial>/result.json`` per trial; those nested
+    records are path- and metadata-validated but never participate in reward
+    selection.  A second aggregate, cross-run/deeper shadow, fallback shape,
+    boolean, NaN/Inf or out-of-range value all fail closed to ``None``.  The
+    aggregate must also contain complete, internally consistent terminal
+    counters.  Errored, cancelled, running or pending trials and non-empty
+    ``exception_stats`` are diagnostic artifacts, not accepted scores.
     """
     snapshot = authoritative_harbor_result_snapshot(jobs_dir)
     return (
@@ -72,19 +92,35 @@ def authoritative_harbor_result_snapshot(
         root = Path(jobs_dir).resolve(strict=True)
         if not root.is_dir():
             return None
-        all_named = list(root.rglob("result.json"))
-        candidates = list(root.glob("*/result.json"))
-        if (len(all_named) != 1 or len(candidates) != 1
-                or candidates[0].is_symlink() or candidates[0].parent.is_symlink()):
+        all_named = sorted(root.rglob("result.json"))
+        candidates = sorted(root.glob("*/result.json"))
+        if (len(candidates) != 1 or candidates[0].is_symlink()
+                or candidates[0].parent.is_symlink()):
             return None
         candidate = candidates[0]
+        candidate_relative = candidate.relative_to(root)
+        nested = [path for path in all_named if path != candidate]
+        nested_facts = []
+        for path in nested:
+            relative = path.relative_to(root)
+            if (len(relative.parts) != 3
+                    or relative.parts[0] != candidate_relative.parts[0]
+                    or relative.name != "result.json"
+                    or path.is_symlink() or path.parent.is_symlink()
+                    or not path.is_file()):
+                return None
+            path_stat = path.lstat()
+            parent_stat = path.parent.lstat()
+            if path_stat.st_nlink != 1 or not path.parent.is_dir():
+                return None
+            nested_facts.append((path, path_stat, parent_stat))
         candidate_stat = candidate.lstat()
         parent_stat = candidate.parent.lstat()
         root_stat = root.lstat()
         if (not os.path.isfile(candidate) or candidate_stat.st_nlink != 1
                 or not os.path.isdir(candidate.parent)):
             return None
-        relative = candidate.relative_to(root)
+        relative = candidate_relative
         if len(relative.parts) != 2 or relative.name != "result.json":
             return None
 
@@ -128,6 +164,44 @@ def authoritative_harbor_result_snapshot(
         )
         if any(getattr(before, field) != getattr(after, field) for field in stable_fields):
             return None
+        if nested:
+            try:
+                aggregate = json.loads(b"".join(chunks).decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return None
+            if not isinstance(aggregate, dict):
+                return None
+            n_total = aggregate.get("n_total_trials")
+            if (isinstance(n_total, bool) or not isinstance(n_total, int)
+                    or n_total != len(nested)):
+                return None
+            try:
+                evals = aggregate["stats"]["evals"]
+            except (KeyError, TypeError):
+                return None
+            if not isinstance(evals, dict):
+                return None
+            bound_trials = set()
+
+            def collect_trial_names(value: Any) -> None:
+                if isinstance(value, dict):
+                    for child in value.values():
+                        collect_trial_names(child)
+                elif isinstance(value, list):
+                    for child in value:
+                        if isinstance(child, str):
+                            bound_trials.add(child)
+                        else:
+                            collect_trial_names(child)
+
+            for eval_result in evals.values():
+                if not isinstance(eval_result, dict):
+                    return None
+                collect_trial_names(eval_result.get("reward_stats", {}))
+                collect_trial_names(eval_result.get("exception_stats", {}))
+            nested_names = {path.parent.name for path in nested}
+            if bound_trials != nested_names:
+                return None
         current_root = root.lstat()
         current_parent = candidate.parent.lstat()
         current_candidate = candidate.lstat()
@@ -139,9 +213,23 @@ def authoritative_harbor_result_snapshot(
                 != (before.st_dev, before.st_ino)
                 or current_candidate.st_nlink != 1):
             return None
+        for nested_path, nested_before, nested_parent_before in nested_facts:
+            nested_after = nested_path.lstat()
+            nested_parent_after = nested_path.parent.lstat()
+            if (nested_after.st_nlink != 1
+                    or any(getattr(nested_before, field)
+                           != getattr(nested_after, field)
+                           for field in stable_fields)
+                    or (nested_parent_before.st_dev, nested_parent_before.st_ino,
+                        nested_parent_before.st_mtime_ns,
+                        nested_parent_before.st_ctime_ns)
+                    != (nested_parent_after.st_dev, nested_parent_after.st_ino,
+                        nested_parent_after.st_mtime_ns,
+                        nested_parent_after.st_ctime_ns)):
+                return None
         # Re-enumeration closes insertion/removal races around the single path.
-        if (list(root.rglob("result.json")) != [candidate]
-                or list(root.glob("*/result.json")) != [candidate]):
+        if (sorted(root.rglob("result.json")) != all_named
+                or sorted(root.glob("*/result.json")) != [candidate]):
             return None
         return HarborResultSnapshot(relative.as_posix(), b"".join(chunks))
     except (OSError, RuntimeError, ValueError):
@@ -314,9 +402,10 @@ maybe_inject_offline_eks = _maybe_inject_offline_eks
 clean_subprocess_env = _clean_subprocess_env
 
 __all__ = [
-    "HarborResultSnapshot", "read_harbor_reward",
+    "HarborAggregateStatus", "HarborResultSnapshot", "read_harbor_reward",
     "authoritative_harbor_result_path", "authoritative_harbor_result_snapshot",
-    "reward_from_harbor_result_snapshot", "maybe_inject_offline_eks",
+    "harbor_aggregate_status_from_snapshot", "reward_from_harbor_result_snapshot",
+    "maybe_inject_offline_eks",
     "clean_subprocess_env", "_read_harbor_reward", "_maybe_inject_offline_eks",
     "_clean_subprocess_env",
 ]
@@ -386,24 +475,66 @@ def _disable_internet_enabled() -> bool:
     return raw in ("1", "true", "yes", "on")
 
 
-def reward_from_harbor_result_snapshot(
+def harbor_aggregate_status_from_snapshot(
     snapshot: HarborResultSnapshot,
-) -> Optional[float]:
-    """Extract one strict aggregate reward from the already-pinned bytes."""
+) -> Optional[HarborAggregateStatus]:
+    """Parse reward plus strict terminal counters from one pinned aggregate.
+
+    Harbor can exit zero while recording a model-level agent exception.  Such an
+    aggregate is useful diagnostics, but it must not look like a clean scored
+    completion.  Missing counters fail closed; there is no compatibility path
+    that infers success from ``metrics.mean`` alone.
+    """
     try:
         data = json.loads(snapshot.data.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError):
         return None
-    try:
-        evals = (data.get("stats", {}) or {}).get("evals", {}) or {}
-    except AttributeError:
+    if not isinstance(data, dict):
         return None
-    if not isinstance(evals, dict):
+    stats = data.get("stats")
+    if not isinstance(stats, dict):
         return None
-    if len(evals) != 1:
+    evals = stats.get("evals")
+    if not isinstance(evals, dict) or len(evals) != 1:
         return None
+
+    def bounded_int(value: Any, *, upper: int = 1_000_000) -> Optional[int]:
+        if type(value) is not int or value < 0 or value > upper:
+            return None
+        return value
+
+    n_total = bounded_int(data.get("n_total_trials"))
+    n_completed = bounded_int(stats.get("n_completed_trials"))
+    n_errored = bounded_int(stats.get("n_errored_trials"))
+    n_running = bounded_int(stats.get("n_running_trials"))
+    n_pending = bounded_int(stats.get("n_pending_trials"))
+    n_cancelled = bounded_int(stats.get("n_cancelled_trials"))
+    n_retries = bounded_int(stats.get("n_retries"))
+    counters = (
+        n_total, n_completed, n_errored, n_running, n_pending, n_cancelled,
+        n_retries,
+    )
+    # ``tdb run`` requests exactly one MODEL x TASK trial.  Accepting an
+    # unexpected multi-trial aggregate would silently change the cell's score
+    # denominator and make its provenance ambiguous.
+    if any(value is None for value in counters) or n_total != 1:
+        return None
+    assert n_total is not None and n_completed is not None
+    assert n_errored is not None and n_running is not None
+    assert n_pending is not None and n_cancelled is not None
+    assert n_retries is not None
+    if (n_completed != n_total or n_errored > n_total
+            or n_cancelled > n_total or n_running > n_total
+            or n_pending > n_total):
+        return None
+
     ev = next(iter(evals.values()))
     if not isinstance(ev, dict):
+        return None
+    eval_n_trials = bounded_int(ev.get("n_trials"))
+    eval_n_errors = bounded_int(ev.get("n_errors"))
+    if (eval_n_trials is None or eval_n_errors is None
+            or eval_n_trials != n_total or eval_n_errors != n_errored):
         return None
     metrics = ev.get("metrics")
     if not isinstance(metrics, list) or len(metrics) != 1 or not isinstance(metrics[0], dict):
@@ -414,7 +545,79 @@ def reward_from_harbor_result_snapshot(
     reward = float(mean)
     if not math.isfinite(reward) or not 0.0 <= reward <= 1.0:
         return None
-    return reward
+
+    reward_stats = ev.get("reward_stats")
+    if not isinstance(reward_stats, dict):
+        return None
+    reward_distribution = reward_stats.get("reward")
+    if not isinstance(reward_distribution, dict) or not reward_distribution:
+        return None
+    reward_trials: List[str] = []
+    weighted_reward = 0.0
+    for reward_key, trial_names in reward_distribution.items():
+        try:
+            reward_value = float(reward_key)
+        except (TypeError, ValueError):
+            return None
+        if (not math.isfinite(reward_value) or not 0.0 <= reward_value <= 1.0
+                or not isinstance(trial_names, list) or not trial_names
+                or any(not isinstance(name, str) or not name for name in trial_names)):
+            return None
+        reward_trials.extend(trial_names)
+        weighted_reward += reward_value * len(trial_names)
+    if len(reward_trials) != n_total or len(set(reward_trials)) != n_total:
+        return None
+    if not math.isclose(
+        reward, weighted_reward / n_total, rel_tol=0.0, abs_tol=1e-12
+    ):
+        return None
+
+    exception_stats = ev.get("exception_stats")
+    if not isinstance(exception_stats, dict):
+        return None
+    exception_trials: List[str] = []
+    for exception_name, trial_names in exception_stats.items():
+        if (not isinstance(exception_name, str) or not exception_name
+                or not isinstance(trial_names, list)
+                or any(not isinstance(name, str) or not name for name in trial_names)):
+            return None
+        exception_trials.extend(trial_names)
+    if (len(exception_trials) != n_errored
+            or len(set(exception_trials)) != n_errored
+            or not set(exception_trials).issubset(reward_trials)):
+        return None
+
+    clean = (
+        n_errored == 0
+        and n_running == 0
+        and n_pending == 0
+        and n_cancelled == 0
+        and eval_n_errors == 0
+        and not exception_stats
+    )
+    return HarborAggregateStatus(
+        reward=reward,
+        n_total_trials=n_total,
+        n_completed_trials=n_completed,
+        n_errored_trials=n_errored,
+        n_running_trials=n_running,
+        n_pending_trials=n_pending,
+        n_cancelled_trials=n_cancelled,
+        n_retries=n_retries,
+        eval_n_trials=eval_n_trials,
+        eval_n_errors=eval_n_errors,
+        clean=clean,
+    )
+
+
+def reward_from_harbor_result_snapshot(
+    snapshot: HarborResultSnapshot,
+) -> Optional[float]:
+    """Return reward only for a complete, internally clean aggregate."""
+    status = harbor_aggregate_status_from_snapshot(snapshot)
+    if status is None or not status.clean:
+        return None
+    return status.reward
 
 
 def _reward_from_result_file(path: str) -> Optional[float]:

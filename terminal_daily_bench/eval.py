@@ -52,14 +52,18 @@ positive score on a crash.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import os
 import re
 import shlex
 import shutil
 import signal
+import stat
 import subprocess
 import sys
+import tempfile
 import time
 import tomllib
 from pathlib import Path
@@ -72,8 +76,13 @@ from urllib.request import Request, urlopen
 #   * _read_harbor_reward  -> the reward-truth reader the admission gate uses
 #   * _maybe_inject_offline_eks -> the task-driven no-network `--ek` switch
 #   * _clean_subprocess_env -> the host-conda scrub the live eval path uses
-from .harbor_score import _read_harbor_reward, _maybe_inject_offline_eks
-from .harbor_score import _clean_subprocess_env
+from .harbor_score import (
+    _clean_subprocess_env,
+    _maybe_inject_offline_eks,
+    _read_harbor_reward,
+    authoritative_harbor_result_snapshot,
+    harbor_aggregate_status_from_snapshot,
+)
 from .adapters import REGISTRY, create_adapter
 from .adapters.base import HarborRunSpec
 
@@ -384,19 +393,12 @@ def _write_private_text(path: Path, text: str) -> None:
             os.close(fd)
 
 
-def _vendor_child_env(
+def _base_harbor_child_env(
     environ: Dict[str, str] | os._Environ[str],
-    spec: HarborRunSpec,
     runtime_root: str,
+    private_dir_name: str,
 ) -> Dict[str, str]:
-    """Build an explicit, minimal environment for a vendor Harbor child.
-
-    Host values enter only through ``_VENDOR_HOST_ENV_ALLOWLIST``.  A private
-    HOME/tmp/XDG tree prevents tools from implicitly consulting login-session
-    credential files.  The only adapter values added are those the adapter put
-    in ``spec.process_env``; credential entries must use the matching
-    ``${NAME}`` template in ``agent_env`` so a literal can never enter argv.
-    """
+    """Build the credential-free host baseline shared by every Harbor child."""
     inherited = {
         name: value
         for name in _VENDOR_HOST_ENV_ALLOWLIST
@@ -404,7 +406,7 @@ def _vendor_child_env(
     }
     child = _clean_subprocess_env(inherited)
 
-    private_root = Path(runtime_root) / "vendor-runtime"
+    private_root = Path(runtime_root) / private_dir_name
     private_root.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(private_root, 0o700)
     private_paths = {
@@ -421,6 +423,23 @@ def _vendor_child_env(
         path.mkdir(parents=True, exist_ok=True, mode=0o700)
         os.chmod(path, 0o700)
     child.update({name: str(path) for name, path in private_paths.items()})
+    return child
+
+
+def _vendor_child_env(
+    environ: Dict[str, str] | os._Environ[str],
+    spec: HarborRunSpec,
+    runtime_root: str,
+) -> Dict[str, str]:
+    """Build an explicit, minimal environment for a vendor Harbor child.
+
+    Host values enter only through ``_VENDOR_HOST_ENV_ALLOWLIST``.  A private
+    HOME/tmp/XDG tree prevents tools from implicitly consulting login-session
+    credential files.  The only adapter values added are those the adapter put
+    in ``spec.process_env``; credential entries must use the matching
+    ``${NAME}`` template in ``agent_env`` so a literal can never enter argv.
+    """
+    child = _base_harbor_child_env(environ, runtime_root, "vendor-runtime")
 
     credential_names = set(spec.credential_env_names)
     for name, value in spec.process_env.items():
@@ -506,6 +525,182 @@ def _set_task_allow_internet(task_toml: str, allow: bool) -> bool:
     return True
 
 
+_SIF_STABLE_FIELDS = (
+    "st_dev", "st_ino", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns",
+)
+_SIF_IDENTITY_FIELDS = ("st_dev", "st_ino", "st_nlink", "st_size")
+
+
+def _stable_sif_facts(value: os.stat_result) -> tuple[int, ...]:
+    return tuple(getattr(value, field) for field in _SIF_STABLE_FIELDS)
+
+
+def _sif_identity_facts(value: os.stat_result) -> tuple[int, ...]:
+    return tuple(getattr(value, field) for field in _SIF_IDENTITY_FIELDS)
+
+
+def _stage_pinned_task_sif(
+    path: str, expected_sha256: str, run_root: str,
+) -> tuple[str, str, str, tuple[int, ...]]:
+    """Copy a stable source SIF into the disposable run before Harbor opens it."""
+    if not os.path.isabs(path):
+        raise ValueError("--task-sif must be an absolute path")
+    if not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256 or ""):
+        raise ValueError("--task-sif-sha256 must be exactly 64 hexadecimal characters")
+    supplied = Path(path)
+    resolved = supplied.resolve(strict=True)
+    if os.path.abspath(path) != str(resolved):
+        raise ValueError("--task-sif must not traverse a symbolic link")
+    if resolved.suffix.lower() != ".sif":
+        raise ValueError("--task-sif must resolve to a regular .sif file")
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    cloexec = getattr(os, "O_CLOEXEC", 0)
+    source_fd = destination_fd = None
+    staged_dir = Path(run_root) / "pinned-image"
+    staged_path = staged_dir / "task.sif"
+    try:
+        source_lstat = resolved.lstat()
+        source_fd = os.open(resolved, os.O_RDONLY | nofollow | cloexec)
+        source_before = os.fstat(source_fd)
+        if (not stat.S_ISREG(source_before.st_mode) or source_before.st_nlink != 1
+                or (source_before.st_dev, source_before.st_ino)
+                != (source_lstat.st_dev, source_lstat.st_ino)):
+            raise ValueError("--task-sif must be a single-link regular file")
+        staged_dir.mkdir(mode=0o700)
+        os.chmod(staged_dir, 0o700)
+        destination_fd = os.open(
+            staged_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | nofollow | cloexec,
+            0o400,
+        )
+        digest = hashlib.sha256()
+        copied = 0
+        while True:
+            chunk = os.read(source_fd, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+            copied += len(chunk)
+            view = memoryview(chunk)
+            while view:
+                written = os.write(destination_fd, view)
+                if written <= 0:
+                    raise OSError("short write while staging task SIF")
+                view = view[written:]
+        os.fchmod(destination_fd, 0o400)
+        os.fsync(destination_fd)
+        source_after = os.fstat(source_fd)
+        if _stable_sif_facts(source_before) != _stable_sif_facts(source_after):
+            raise ValueError("source task SIF changed while it was staged")
+        destination_after = os.fstat(destination_fd)
+        if (not stat.S_ISREG(destination_after.st_mode)
+                or destination_after.st_nlink != 1
+                or destination_after.st_size != copied
+                or stat.S_IMODE(destination_after.st_mode) != 0o400):
+            raise ValueError("staged task SIF failed private-file validation")
+        actual = digest.hexdigest()
+        if actual != expected_sha256.lower():
+            raise ValueError(
+                f"task SIF digest mismatch: expected {expected_sha256.lower()}, got {actual}"
+            )
+        # WekaFS may finalize ctime/mtime after close.  Bind the cross-process
+        # identity to the inode and size; each hashing window independently
+        # requires ctime/mtime stability and the full digest binds the bytes.
+        facts = _sif_identity_facts(destination_after)
+        return str(staged_path), str(resolved), actual, facts
+    except Exception:
+        if destination_fd is not None:
+            os.close(destination_fd)
+            destination_fd = None
+        try:
+            staged_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    finally:
+        for fd in (destination_fd, source_fd):
+            if fd is not None:
+                os.close(fd)
+
+
+def _verify_staged_task_sif(
+    path: str, expected_sha256: str, expected_facts: tuple[int, ...],
+) -> str:
+    """Recheck the exact staged SIF after Harbor exits, before accepting reward."""
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    cloexec = getattr(os, "O_CLOEXEC", 0)
+    fd = None
+    try:
+        candidate = Path(path)
+        path_stat = candidate.lstat()
+        fd = os.open(candidate, os.O_RDONLY | nofollow | cloexec)
+        before = os.fstat(fd)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+                or stat.S_IMODE(before.st_mode) != 0o400
+                or (before.st_dev, before.st_ino) != (path_stat.st_dev, path_stat.st_ino)
+                or _sif_identity_facts(before) != expected_facts):
+            raise ValueError("staged task SIF identity changed before post-run verification")
+        digest = hashlib.sha256()
+        remaining = before.st_size
+        while remaining:
+            chunk = os.read(fd, min(1024 * 1024, remaining))
+            if not chunk:
+                raise ValueError("staged task SIF was truncated during verification")
+            digest.update(chunk)
+            remaining -= len(chunk)
+        if os.read(fd, 1):
+            raise ValueError("staged task SIF grew during verification")
+        after = os.fstat(fd)
+        if _stable_sif_facts(before) != _stable_sif_facts(after):
+            raise ValueError("staged task SIF changed during post-run verification")
+        actual = digest.hexdigest()
+        if actual != expected_sha256:
+            raise ValueError("staged task SIF digest changed during Harbor execution")
+        return actual
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def _set_task_docker_image(task_toml: str, image: str) -> None:
+    """Point only a disposable task copy at a verified, absolute task SIF."""
+    text = Path(task_toml).read_text()
+    lines = text.splitlines(keepends=True)
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip() == "[environment]"),
+        None,
+    )
+    if start is None:
+        raise ValueError("task.toml has no [environment] table")
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].lstrip().startswith("[")),
+        len(lines),
+    )
+    encoded = json.dumps(image)
+    replaced = False
+    for index in range(start + 1, end):
+        match = re.match(
+            r"^(\s*docker_image\s*=\s*)(?:\"(?:[^\"\\]|\\.)*\"|'[^']*')"
+            r"(\s*(?:#.*)?)(\r?\n)?$",
+            lines[index],
+        )
+        if match:
+            lines[index] = (
+                match.group(1) + encoded + match.group(2) + (match.group(3) or "")
+            )
+            replaced = True
+            break
+    if not replaced:
+        if end > 0 and not lines[end - 1].endswith(("\n", "\r")):
+            lines[end - 1] += "\n"
+        lines.insert(end, f"docker_image = {encoded}\n")
+    Path(task_toml).write_text("".join(lines))
+    with Path(task_toml).open("rb") as fh:
+        effective = (tomllib.load(fh).get("environment", {}) or {}).get("docker_image")
+    if effective != image:
+        raise ValueError("failed to set the verified task SIF on the disposable copy")
+
+
 def _parse_agent_kwargs(items: Optional[List[str]]) -> Dict[str, str]:
     parsed: Dict[str, str] = {}
     for item in items or []:
@@ -537,9 +732,8 @@ def build_harbor_agent_command(run_task_dir: str, jobs_dir: str,
     return _maybe_inject_offline_eks(cmd)
 
 
-def _redact_trace(text: str, spec: HarborRunSpec) -> str:
-    """Remove every adapter-injected secret if a child unexpectedly echoes it."""
-    redacted = text
+def _credential_replacements(spec: HarborRunSpec) -> List[tuple[str, str]]:
+    """Return every selected credential value, longest first, with its label."""
     secret_names = set(spec.credential_env_names)
     secret_names.update(
         name for name in spec.process_env
@@ -550,18 +744,55 @@ def _redact_trace(text: str, spec: HarborRunSpec) -> str:
         for name in secret_names
         if spec.process_env.get(name, "")
     ]
-    # Longest first prevents a short credential that prefixes another one from
-    # partially replacing the longer value and leaving its suffix in the trace.
-    for name, value in sorted(values, key=lambda item: (-len(item[1]), item[0])):
-        redacted = redacted.replace(value, f"<redacted:{name}>")
-    return redacted
+    return sorted(values, key=lambda item: (-len(item[1]), item[0]))
+
+
+def _redact_credentials(value: Any, spec: HarborRunSpec) -> Any:
+    """Recursively remove selected credential values before persistence.
+
+    Trajectory JSON is agent-controlled.  Redacting only the captured Harbor
+    stdout is insufficient because a credential can be copied into a telemetry
+    string or even a nested mapping key.  Preserve JSON structure while replacing
+    every occurrence of every selected value, including auth-file paths.
+    """
+    replacements = _credential_replacements(spec)
+
+    def redact(item: Any) -> Any:
+        if isinstance(item, str):
+            for name, secret in replacements:
+                item = item.replace(secret, f"<redacted:{name}>")
+            return item
+        if isinstance(item, dict):
+            return {
+                redact(key) if isinstance(key, str) else key: redact(child)
+                for key, child in item.items()
+            }
+        if isinstance(item, list):
+            return [redact(child) for child in item]
+        if isinstance(item, tuple):
+            return tuple(redact(child) for child in item)
+        return item
+
+    return redact(value)
+
+
+def _redact_trace(text: str, spec: HarborRunSpec) -> str:
+    """Remove every adapter-injected secret if a child unexpectedly echoes it."""
+    return _redact_credentials(text, spec)
 
 
 def _require_harbor() -> str:
     executable = shutil.which("harbor")
     if not executable:
+        # Console scripts do not add their own virtualenv to the caller's PATH.
+        # Use the same deterministic PATH cleanup as the child as a fallback,
+        # then pin the resolved launcher below so validation and execution
+        # cannot silently select different Harbor installations.
+        cleaned = _clean_subprocess_env(os.environ)
+        executable = shutil.which("harbor", path=cleaned.get("PATH"))
+    if not executable:
         raise RuntimeError("harbor is not on PATH; run `tdb doctor` first")
-    return executable
+    return os.path.abspath(executable)
 
 
 def _failing_test_ids(task_dir: str) -> List[str]:
@@ -574,79 +805,220 @@ def _failing_test_ids(task_dir: str) -> List[str]:
     return [str(value) for value in values] if isinstance(values, list) else []
 
 
-def _public_endpoint(url: str) -> str:
+def _public_endpoint(url: str) -> Optional[str]:
     """Strip URL credentials/query data before persisting endpoint metadata."""
-    parsed = urlsplit(url)
+    try:
+        parsed = urlsplit(url)
+        port = parsed.port
+    except ValueError:
+        return None
     host = parsed.hostname or ""
-    if parsed.port is not None:
-        host += f":{parsed.port}"
+    if ":" in host and not host.startswith("["):
+        host = f"[{host}]"
+    if port is not None:
+        host += f":{port}"
     return urlunsplit((parsed.scheme, host, parsed.path, "", ""))
 
 
+_MAX_TRAJECTORY_BYTES = 16 * 1024 * 1024
+_MAX_TRAJECTORY_FILES = 128
+_MAX_TELEMETRY_STEPS = 100_000
+_MAX_TELEMETRY_COUNT = 1_000_000_000_000
+_MAX_TELEMETRY_COST = 1_000_000_000.0
+
+
+def _read_pinned_trajectory(path: Path, jobs_dir: str) -> Optional[Dict[str, Any]]:
+    """Read one regular, single-link trajectory through a no-follow fd chain."""
+    descriptors: List[int] = []
+    try:
+        search_root = Path(jobs_dir)
+        root = search_root.resolve(strict=True)
+        relative = path.relative_to(search_root)
+        if not relative.parts or relative.name != "trajectory.json":
+            return None
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        cloexec = getattr(os, "O_CLOEXEC", 0)
+        current_fd = os.open(
+            root, os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec
+        )
+        descriptors.append(current_fd)
+        for component in relative.parts[:-1]:
+            current_fd = os.open(
+                component,
+                os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec,
+                dir_fd=current_fd,
+            )
+            descriptors.append(current_fd)
+        file_fd = os.open(
+            relative.name, os.O_RDONLY | nofollow | cloexec, dir_fd=current_fd
+        )
+        descriptors.append(file_fd)
+        before = os.fstat(file_fd)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
+                or before.st_size < 0 or before.st_size > _MAX_TRAJECTORY_BYTES):
+            return None
+        chunks: List[bytes] = []
+        remaining = before.st_size
+        while remaining:
+            chunk = os.read(file_fd, min(1024 * 1024, remaining))
+            if not chunk:
+                return None
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        if os.read(file_fd, 1):
+            return None
+        after = os.fstat(file_fd)
+        stable = ("st_dev", "st_ino", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if any(getattr(before, field) != getattr(after, field) for field in stable):
+            return None
+        data = json.loads(b"".join(chunks).decode("utf-8"))
+        return data if isinstance(data, dict) else None
+    except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError, RecursionError):
+        return None
+    finally:
+        for descriptor in reversed(descriptors):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+
+
+def _bounded_telemetry_int(value: Any) -> Optional[int]:
+    if type(value) is not int or value < 0 or value > _MAX_TELEMETRY_COUNT:
+        return None
+    return value
+
+
+def _bounded_telemetry_text(value: Any, maximum: int) -> Optional[str]:
+    if (not isinstance(value, str) or not value or len(value) > maximum
+            or any(ord(character) < 0x20 for character in value)):
+        return None
+    return value
+
+
+def _bounded_telemetry_cost(value: Any) -> Optional[float]:
+    if type(value) not in (int, float):
+        return None
+    number = float(value)
+    if not math.isfinite(number) or not 0.0 <= number <= _MAX_TELEMETRY_COST:
+        return None
+    return number
+
+
 def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
-    """Read additive usage metadata from Harbor's ATIF trajectory, if present."""
+    """Read a fixed, bounded telemetry whitelist from untrusted ATIF JSON."""
     try:
         paths = sorted(Path(jobs_dir).rglob("trajectory.json"))
     except OSError:
         return {}
+    if len(paths) > _MAX_TRAJECTORY_FILES:
+        return {}
     for path in paths:
-        try:
-            data = json.loads(path.read_text())
-        except (OSError, json.JSONDecodeError):
+        data = _read_pinned_trajectory(path, jobs_dir)
+        if data is None:
             continue
-        if not isinstance(data, dict) or not isinstance(data.get("steps"), list):
+        steps = data.get("steps")
+        final = data.get("final_metrics")
+        agent = data.get("agent")
+        if (not isinstance(steps, list) or len(steps) > _MAX_TELEMETRY_STEPS
+                or any(not isinstance(step, dict) for step in steps)
+                or not isinstance(final, dict) or not isinstance(agent, dict)):
             continue
-        steps = data["steps"]
-        final = data.get("final_metrics") or {}
-        agent = data.get("agent") or {}
-        if not isinstance(final, dict) or not isinstance(agent, dict):
-            continue
+
         n_llm_calls = 0
         n_tool_calls = 0
+        counts_valid = True
         for step in steps:
-            if not isinstance(step, dict):
-                continue
-            count = step.get("llm_call_count")
-            if isinstance(count, int):
+            if "llm_call_count" in step:
+                count = _bounded_telemetry_int(step.get("llm_call_count"))
+                if count is None:
+                    counts_valid = False
+                    break
                 n_llm_calls += count
-            calls = step.get("tool_calls")
-            if isinstance(calls, list):
+            if "tool_calls" in step:
+                calls = step.get("tool_calls")
+                if not isinstance(calls, list) or len(calls) > _MAX_TELEMETRY_STEPS:
+                    counts_valid = False
+                    break
                 n_tool_calls += len(calls)
-        prompt = final.get("total_prompt_tokens")
-        completion = final.get("total_completion_tokens")
-        extra = final.get("extra") or {}
-        total = extra.get("total_tokens") if isinstance(extra, dict) else None
-        if total is None and isinstance(prompt, int) and isinstance(completion, int):
-            total = prompt + completion
-        return {
-            "version": agent.get("version"),
-            "trajectory_model": agent.get("model_name"),
-            "n_turns": final.get("total_steps", len(steps)),
+            if (n_llm_calls > _MAX_TELEMETRY_COUNT
+                    or n_tool_calls > _MAX_TELEMETRY_COUNT):
+                counts_valid = False
+                break
+        if not counts_valid:
+            continue
+
+        telemetry: Dict[str, Any] = {
+            "n_turns": len(steps),
             "n_llm_calls": n_llm_calls,
             "n_tool_calls": n_tool_calls,
-            "prompt_tokens": prompt,
-            "completion_tokens": completion,
-            "cached_tokens": final.get("total_cached_tokens"),
-            "total_tokens": total,
-            "cost_usd": final.get("total_cost_usd"),
             "trajectory_path": str(path),
         }
+        version = _bounded_telemetry_text(agent.get("version"), 128)
+        model = _bounded_telemetry_text(agent.get("model_name"), 256)
+        turns = _bounded_telemetry_int(final.get("total_steps"))
+        prompt = _bounded_telemetry_int(final.get("total_prompt_tokens"))
+        completion = _bounded_telemetry_int(final.get("total_completion_tokens"))
+        cached = _bounded_telemetry_int(final.get("total_cached_tokens"))
+        cost = _bounded_telemetry_cost(final.get("total_cost_usd"))
+        if version is not None:
+            telemetry["version"] = version
+        if model is not None:
+            telemetry["trajectory_model"] = model
+        if turns is not None:
+            telemetry["n_turns"] = turns
+        if prompt is not None:
+            telemetry["prompt_tokens"] = prompt
+        if completion is not None:
+            telemetry["completion_tokens"] = completion
+        if cached is not None:
+            telemetry["cached_tokens"] = cached
+        if cost is not None:
+            telemetry["cost_usd"] = cost
+
+        extra = final.get("extra")
+        total = (
+            _bounded_telemetry_int(extra.get("total_tokens"))
+            if isinstance(extra, dict) else None
+        )
+        if total is None and prompt is not None and completion is not None:
+            candidate = prompt + completion
+            total = candidate if candidate <= _MAX_TELEMETRY_COUNT else None
+        if total is not None:
+            telemetry["total_tokens"] = total
+        return telemetry
     return {}
 
 
 def run_harbor_oracle(run_task_dir: str, jobs_dir: str, eks: List[str],
-                      timeout_sec: int) -> str:
+                      timeout_sec: int) -> tuple[int, str]:
     cmd = ["harbor", "run", "-p", run_task_dir, "-a", "oracle", "-e", "singularity"]
     for ek in eks:
         cmd += ["--ek", ek]
     cmd += ["--timeout-multiplier", "2.0", "-o", jobs_dir]
     # Task-driven no-network switch (death point #1) via the harness injector.
     cmd = _maybe_inject_offline_eks(cmd)
-    env = _clean_subprocess_env(os.environ)
-    _require_harbor()
-    _log("harbor: " + shlex.join(cmd))
-    _, trace = _run_process_group(cmd, env=env, timeout_sec=timeout_sec)
-    return trace
+    env = _base_harbor_child_env(
+        os.environ, str(Path(jobs_dir).parent), "oracle-runtime"
+    )
+    # The offline Singularity backend uses a Unix-domain socket below TMPDIR.
+    # A private TMPDIR nested under the durable run path can exceed Linux's
+    # sockaddr_un limit before ``.../singularity_staging_*/hbexec.sock`` is
+    # appended.  Keep only this ephemeral transport root short and node-local;
+    # mkdtemp makes it owner-only and the exact directory is removed below.
+    node_tmp = tempfile.mkdtemp(prefix="tdb-oracle-", dir="/tmp")
+    try:
+        os.chmod(node_tmp, 0o700)
+        env.update({name: node_tmp for name in ("TMPDIR", "TMP", "TEMP")})
+        cmd[0] = _require_harbor()
+        _log("harbor: " + shlex.join(cmd))
+        return _run_process_group(cmd, env=env, timeout_sec=timeout_sec)
+    finally:
+        # ``node_tmp`` is the resolved, exact path returned by mkdtemp above.
+        if os.path.lexists(node_tmp):
+            shutil.rmtree(node_tmp)
+        if os.path.lexists(node_tmp):
+            raise RuntimeError("failed to remove private oracle temporary directory")
 
 
 # ---------------------------------------------------------------------------
@@ -668,6 +1040,10 @@ def main(argv=None) -> int:
                     help="validate and emit a secret-free run plan without calling a model/Harbor")
     ap.add_argument("--keep-task-network-policy", action="store_true",
                     help="do not enable network in the per-run copy for an installed vendor agent")
+    ap.add_argument("--task-sif", default=None,
+                    help="absolute prebuilt SIF path applied only to the disposable task copy")
+    ap.add_argument("--task-sif-sha256", default=None,
+                    help="required expected SHA-256 for --task-sif")
     ap.add_argument("--work", default=os.environ.get("TDB_WORK", "./.tdb_work"),
                     help="scratch/work root for run copies + results")
     ap.add_argument("--max-tokens", type=int, default=4096)
@@ -706,6 +1082,7 @@ def main(argv=None) -> int:
             "false_accept": 0,
         },
     }
+    vendor_score_candidate = False
 
     try:
         adapter = None if is_baseline else create_adapter(args.harness)
@@ -746,15 +1123,38 @@ def main(argv=None) -> int:
         shutil.copytree(task_dir, run_task)
         os.makedirs(jobs_dir, exist_ok=True)
 
+        staged_task_sif_facts = None
+        if bool(args.task_sif) != bool(args.task_sif_sha256):
+            raise ValueError("--task-sif and --task-sif-sha256 must be provided together")
+        if args.task_sif:
+            (task_sif, task_sif_source, task_sif_sha256,
+             staged_task_sif_facts) = _stage_pinned_task_sif(
+                args.task_sif, args.task_sif_sha256, run_root
+            )
+            _set_task_docker_image(os.path.join(run_task, "task.toml"), task_sif)
+            result["effective_image"] = task_sif
+            result["task_sif_source"] = task_sif_source
+            result["task_sif_sha256"] = task_sif_sha256
+        else:
+            result["effective_image"] = sif
+
         eks = list(_DEFAULT_EKS)
         if is_baseline:
             if args.dry_run:
                 result["plan"] = {"agent": "oracle", "jobs_dir": jobs_dir}
                 return _finish(result, args.out, t0)
-            trace = run_harbor_oracle(run_task, jobs_dir, eks, args.harbor_timeout)
+            harbor_returncode, trace = run_harbor_oracle(
+                run_task, jobs_dir, eks, args.harbor_timeout
+            )
+            result["harbor_returncode"] = harbor_returncode
             _write_private_text(Path(run_root) / "harbor.log", trace)
-            reward = _read_harbor_reward(jobs_dir)
+            reward = (
+                _read_harbor_reward(jobs_dir)
+                if harbor_returncode == 0 else None
+            )
             result["patch_applied"] = reward is not None
+            if harbor_returncode != 0:
+                result["error"] = f"harbor exited with status {harbor_returncode}"
             if "oracle patch does not apply" in trace:
                 result["patch_applied"] = False
 
@@ -799,11 +1199,19 @@ def main(argv=None) -> int:
             result["harness"]["patch_touched_tests"] = touched_tests
             (Path(run_task) / "solution" / "oracle.patch").write_text(diff)
 
-            trace = run_harbor_oracle(run_task, jobs_dir, eks, args.harbor_timeout)
+            harbor_returncode, trace = run_harbor_oracle(
+                run_task, jobs_dir, eks, args.harbor_timeout
+            )
             trace_path = Path(run_root) / "harbor.log"
             _write_private_text(trace_path, trace)
+            result["harness"]["harbor_returncode"] = harbor_returncode
             result["harness"]["trace_path"] = str(trace_path)
-            reward = _read_harbor_reward(jobs_dir)
+            reward = (
+                _read_harbor_reward(jobs_dir)
+                if harbor_returncode == 0 else None
+            )
+            if harbor_returncode != 0:
+                result["error"] = f"harbor exited with status {harbor_returncode}"
             if "oracle patch does not apply" in trace:
                 result["patch_applied"] = False
             elif reward is not None:
@@ -853,7 +1261,12 @@ def main(argv=None) -> int:
                 result["harness"]["stop_reason"] = "dry_run"
                 return _finish(result, args.out, t0)
 
-            _require_harbor()
+            harbor_executable = _require_harbor()
+            cmd[0] = harbor_executable
+            command_text = shlex.join(cmd)
+            _write_private_text(Path(run_root) / "harbor_cmd.txt", command_text + "\n")
+            result["plan"]["command"] = cmd
+            result["harness"]["harbor_executable"] = harbor_executable
             child_env = _vendor_child_env(os.environ, spec, run_root)
             _log("harbor: " + command_text)
             harness_started = time.time()
@@ -880,35 +1293,97 @@ def main(argv=None) -> int:
                 "trace_path": str(trace_path),
                 "wall_sec": round(time.time() - harness_started, 3),
             })
-            reward = _read_harbor_reward(jobs_dir)
-            result["harness"].update(read_harness_telemetry(jobs_dir))
-            result["harness"]["stop_reason"] = (
-                "completed" if reward is not None else "error"
+            aggregate_status = None
+            result["harness"]["score_accepted"] = False
+            if returncode == 0:
+                snapshot = authoritative_harbor_result_snapshot(jobs_dir)
+                if snapshot is not None:
+                    aggregate_status = harbor_aggregate_status_from_snapshot(snapshot)
+            reward = (
+                aggregate_status.reward
+                if aggregate_status is not None and aggregate_status.clean else None
             )
-            result["agent_completed"] = reward is not None
+            if aggregate_status is not None:
+                result["harness"]["aggregate_status"] = {
+                    "n_total_trials": aggregate_status.n_total_trials,
+                    "n_completed_trials": aggregate_status.n_completed_trials,
+                    "n_errored_trials": aggregate_status.n_errored_trials,
+                    "n_running_trials": aggregate_status.n_running_trials,
+                    "n_pending_trials": aggregate_status.n_pending_trials,
+                    "n_cancelled_trials": aggregate_status.n_cancelled_trials,
+                    "n_retries": aggregate_status.n_retries,
+                    "eval_n_trials": aggregate_status.eval_n_trials,
+                    "eval_n_errors": aggregate_status.eval_n_errors,
+                    "clean": aggregate_status.clean,
+                }
+                if not aggregate_status.clean:
+                    result["harness"]["harbor_diagnostic_reward"] = (
+                        aggregate_status.reward
+                    )
+                    result["error"] = "harbor aggregate reports agent/trial errors"
+            telemetry = _redact_credentials(
+                read_harness_telemetry(jobs_dir), spec
+            )
+            result["harness"].update(telemetry)
+            if (aggregate_status is not None and not aggregate_status.clean
+                    and (aggregate_status.n_errored_trials > 0
+                         or aggregate_status.eval_n_errors > 0)):
+                result["harness"]["stop_reason"] = "scored_agent_error"
+            else:
+                result["harness"]["stop_reason"] = (
+                    "completed" if returncode == 0 and reward is not None else "error"
+                )
+            vendor_score_candidate = (
+                returncode == 0
+                and aggregate_status is not None
+                and aggregate_status.clean
+                and reward is not None
+            )
+            result["agent_completed"] = False
+            if returncode != 0:
+                result["error"] = f"harbor exited with status {returncode}"
+                result["harness"]["harness_error"] = result["error"]
             # Harbor-native agents mutate a workspace; there is no oracle patch.
             result["patch_applied"] = None
             result["false_accept_check"]["model_patch_touched_tests"] = None
+            result = _redact_credentials(result, spec)
         else:
             raise RuntimeError(f"unsupported adapter integration path: {adapter!r}")
+
+        if staged_task_sif_facts is not None:
+            result["task_sif_post_sha256"] = _verify_staged_task_sif(
+                task_sif, task_sif_sha256, staged_task_sif_facts
+            )
+        if vendor_score_candidate:
+            result["harness"]["score_accepted"] = True
+            result["agent_completed"] = True
 
         result["reward"] = float(reward) if reward is not None else 0.0
         result["solved"] = bool(reward is not None and float(reward) >= 0.999)
         result["jobs_dir"] = jobs_dir
         if reward is None:
-            result["error"] = "no reward parsed (agent/patch failed, trial errored, or gate did not run)"
+            if not result.get("error"):
+                result["error"] = (
+                    "no reward parsed (agent/patch failed, trial errored, or gate did not run)"
+                )
             if result.get("harness"):
-                result["harness"]["harness_error"] = result["error"]
-                result["harness"]["stop_reason"] = "error"
+                if not result["harness"].get("harness_error"):
+                    result["harness"]["harness_error"] = result["error"]
+                if result["harness"].get("stop_reason") != "scored_agent_error":
+                    result["harness"]["stop_reason"] = "error"
     except HarborTimeoutError as e:
         result["error"] = str(e)
+        result["agent_completed"] = False
         if result.get("harness"):
             result["harness"]["harness_error"] = str(e)
+            result["harness"]["score_accepted"] = False
     except Exception as e:  # noqa: BLE001 -- BAD-safe: report, never fake a score
         result["error"] = f"{type(e).__name__}: {e}"
+        result["agent_completed"] = False
         if result.get("harness"):
             result["harness"]["harness_error"] = result["error"]
             result["harness"]["stop_reason"] = "error"
+            result["harness"]["score_accepted"] = False
 
     return _finish(result, args.out, t0)
 

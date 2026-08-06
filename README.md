@@ -2,11 +2,14 @@
 
 **Leaderboard: https://daizedong.github.io/terminal-daily-bench/**
 
-A **living** coding-agent benchmark: tasks are mined from real merged GitHub pull
-requests **every day**, and every model is scored by **execution proof only** — a
+A **living** coding-agent benchmark designed to construct daily task sets from real
+merged GitHub pull requests and score models by **execution proof only** — a
 re-laid, protected test suite the model never sees. There is **no LLM judge**, and
-no scored acceptance bypasses protected-test replay. Semantic verifier error is a
-separate empirical quantity; this bundle does not claim it is zero.
+the scoring contract has no acceptance path that bypasses protected-test replay.
+Semantic verifier error is a separate empirical quantity; this bundle does not
+claim it is zero. The current production construction run is blocked before
+submission on operator-managed gateway credentials, so the checked-in examples
+and controlled fixtures must not be read as a fresh production day.
 
 > This is the **public evaluation bundle**. The daily task-construction pipeline
 > and the acceptance gate that mints the task set are **not** part of this repo —
@@ -15,15 +18,19 @@ separate empirical quantity; this bundle does not claim it is zero.
 
 ## Why it's different
 
-- **Contamination-resistant by design.** Tasks are fresh each day from just-merged
-  PRs, so a model can't have trained on the fix. Provenance (repo, PR#, SHAs,
-  license) ships with every task.
+- **Contamination-risk reduction by design.** The construction pipeline targets
+  recently merged PRs and records repo, PR number, SHAs, and license for every
+  task. Recency and provenance reduce exposure risk; they do not prove that a
+  model never encountered the change.
 - **Execution-only scoring.** Your model produces a patch; harbor re-lays the
-  trusted `tests/` from the task package and runs them under a network cut. The
-  reward is the test outcome — never a model's opinion. This proves replay
-  integrity, not perfect semantic coverage of every verifier.
-- **Multi-language.** Tasks span 8 languages (python · rust · go · js · ts · java ·
-  ruby · c++), each with its own execution adapter.
+  trusted `tests/` from the task package and derives reward from their execution —
+  never from a model's opinion. Oracle/single-shot and protected replay paths are
+  designed for an offline verifier phase; installed vendor agents currently need
+  an explicitly recorded online disposable task copy. This proves a replay
+  boundary, not perfect semantic coverage or a completed production deployment.
+- **Multi-language.** The framework targets 8 language adapters (python · rust ·
+  go · js · ts · java · ruby · c++). The current published catalogue is smaller
+  and is not claimed to exercise every adapter.
 - **Multi-angle quality.** Beyond a solve-rate scalar, the leaderboard reports a
   multi-angle quality card (discrimination, difficulty coverage, IRT information,
   KR-20 reliability) so you can see *how* a set separates models.
@@ -46,7 +53,7 @@ and read the reward back out of harbor's `result.json`
 | **Python** | ≥ 3.11 (the scoring core is pure stdlib; no runtime deps) |
 | **harbor** | `harbor` on `PATH` — upstream `harbor-framework/harbor` **0.13.1** **plus our patches to the singularity backend** (see below) |
 | **apptainer/singularity** | required — the singularity backend runs each task's SIF image (we develop on apptainer 1.4.5) |
-| **model endpoint** | `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `single_shot`/Codex; the standard Anthropic environment variables for Claude Code. Values are inherited, never written to argv/results. |
+| **model endpoint** | `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `single_shot`/Codex; the standard Anthropic environment variables for Claude Code. Authentication mode is selected by environment; vendor adapters inject only the selected credential or private node-local auth-file path into a minimal child environment. Values never enter argv/results and are recursively redacted before persistence. |
 
 **Honest status of the harbor dependency.** The harbor build we score against is a
 **private, locally patched fork**, not a released package. Our patches add the
@@ -109,6 +116,12 @@ tdb run claude-sonnet-4-6 tasks/archive/<task-id> --harness claude-code
 # Custom endpoints are explicit and must not contain embedded credentials.
 tdb run gpt-5 tasks/archive/<task-id> --harness codex \
   --harness-base-url http://127.0.0.1:8080/v1
+
+# Singularity workers should pin a prebuilt image. The digest is mandatory
+# whenever --task-sif is present.
+tdb run gpt-5 tasks/archive/<task-id> --harness codex \
+  --task-sif /absolute/path/task.sif \
+  --task-sif-sha256 <64-hex-sha256>
 ```
 
 Credentials cross the Harbor boundary as an environment template such as
@@ -116,6 +129,13 @@ Credentials cross the Harbor boundary as an environment template such as
 absent from process argv, `harbor_cmd.txt`, result JSON, and dry-run output.
 Secret-looking `--agent-kwarg` names are rejected; use environment variables for
 authentication.
+
+For a pinned image run, the source SIF must be an absolute, single-link regular
+file reached without symlinks. The runner copies it into the disposable run as
+a mode-`0400` file, hashes every byte while staging, and reopens and fully hashes
+that same inode after Harbor before accepting a reward. A non-zero Harbor process
+exit invalidates any aggregate it may have left behind; it is reported as an
+execution error, never as a scored zero or success.
 
 The singularity fork used by this bundle does not provide Harbor's newer dynamic
 agent/verifier network switching. An installed CLI needs network access both to
@@ -125,9 +145,11 @@ Pass `--keep-task-network-policy` to opt out (for example, with an already
 installed CLI and a reachable in-sandbox endpoint). The source task is never
 edited, and protected tests are still re-laid after the agent exits.
 
-Publishing a day is one loop: `tdb publish ...` regenerates `docs/leaderboard_data.json`,
-you commit and push it, and GitHub Pages redeploys the leaderboard automatically —
-the page renders straight from that JSON.
+Publishing a day is one coordinated release: `tdb publish ...` regenerates
+`docs/leaderboard_data.json`, while the frozen roster, registry, membership
+ledger, task packages, `site_data.json`, generated pages, and scored snapshot must
+pass their consistency checks together. Only then is the reviewed release
+committed and pushed for GitHub Pages to deploy.
 
 Each run writes one result record:
 
@@ -169,8 +191,11 @@ content-addressed patch; it is not a score. Only a later Ed25519-signed official
 receipt bound to a frozen suite/runner/Harbor/image policy can become
 community-replay-verified, and ranking requires complete frozen-roster coverage.
 Community replay rows remain separate from project-controlled official evaluations.
-The repository ships enforcement and fake boundary tests, not proof that a production
-worker/canary has run. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The repository ships enforcement and fake boundary tests. A standalone staged-SIF
+paired egress canary passed on the operator cluster on 2026-08-06, proving only
+reachable-control/blocked-isolated behavior for that staged image, runtime, node,
+and endpoint. No production protected replay, signed receipt, or authority
+deployment/identity audit has run. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 For an official deployment, ingest/promoter and signer must use distinct UIDs (or
 equivalent identities): the signer alone can read the private key, while the promoter
@@ -203,10 +228,11 @@ enforces inode/device/link-count stability and a 16 MiB limit, and uses the byte
 that one open snapshot for reward validation and the receipt digest.
 
 Fake runner and Fake Harbor tests prove code boundaries only; they are not evidence
-of a production replay, network isolation, or authority separation. Production replay
-remains a blocker until a real Harbor replay plus reachable-control/blocked-isolated
-canary succeeds and an operator audits distinct signer/promoter UIDs, a signer-only
-private-key mount, and read-only manifest/public-key mounts. That production audit
+of a production replay, general network isolation, or authority separation. The
+standalone staged canary above is likewise not a receipt. Production replay remains
+blocked until a real protected Harbor replay and its paired canary execute inside the
+same audited authority path, and an operator confirms distinct signer/promoter UIDs,
+a signer-only private-key mount, and read-only manifest/public-key mounts. That audit
 must also confirm the fail-closed Harbor-tree and single-snapshot result controls with
 the real installed package and replay artifacts.
 

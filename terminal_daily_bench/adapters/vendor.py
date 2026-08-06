@@ -40,7 +40,13 @@ def _safe_base_url(value: str | None) -> str | None:
     if value is None or not value.strip():
         return None
     value = value.strip().rstrip("/")
-    parsed = urlsplit(value)
+    if any(ord(character) < 0x20 for character in value):
+        raise VendorConfigurationError("harness base URL contains a control character")
+    try:
+        parsed = urlsplit(value)
+        _ = parsed.port  # Force validation without persisting urllib's raw error.
+    except ValueError:
+        raise VendorConfigurationError("harness base URL has an invalid port") from None
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise VendorConfigurationError("harness base URL must be an http(s) URL")
     if parsed.username or parsed.password or parsed.query or parsed.fragment:
@@ -132,11 +138,23 @@ class HarborVendorAdapter(HarnessAdapter):
             # process environment to decide custom-endpoint model-name handling.
             process_env[self.spec.base_url_env] = resolved_base
 
+        safe_agent_kwargs = _safe_agent_kwargs(agent_kwargs)
+        if credential_name is not None:
+            credential_value = source_env[credential_name]
+            if resolved_base is not None and credential_value in resolved_base:
+                raise VendorConfigurationError(
+                    "harness base URL must not contain the selected credential"
+                )
+            if any(credential_value in value for value in safe_agent_kwargs.values()):
+                raise VendorConfigurationError(
+                    "agent kwarg value must not contain the selected credential"
+                )
+
         return HarborRunSpec(
             agent=self.spec.harbor_agent,
             model=model,
             agent_env=agent_env,
-            agent_kwargs=_safe_agent_kwargs(agent_kwargs),
+            agent_kwargs=safe_agent_kwargs,
             process_env=process_env,
             credential_env_names=selected_credentials,
             base_url_kind=self.spec.base_url_kind,
@@ -179,7 +197,10 @@ class CodexAdapter(HarborVendorAdapter):
         name="codex",
         harbor_agent="codex",
         base_url_env="OPENAI_BASE_URL",
-        credential_env_options=("OPENAI_API_KEY",),
+        # The patched Harbor Codex agent can upload an existing auth.json from
+        # this host.  Passing its path through the same secret-template boundary
+        # avoids reading or serializing the credential in Terminal Daily.
+        credential_env_options=("OPENAI_API_KEY", "CODEX_AUTH_JSON_PATH"),
         aliases=("codex-cli", "codex_cli"),
         base_url_kind="openai",
     )

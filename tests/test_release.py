@@ -1,7 +1,30 @@
 """Release smoke tests: the public package is self-contained and FA=0 holds."""
-import pathlib, shutil, subprocess, sys
+import json, pathlib, shutil, subprocess, sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+
+def _clean_harbor_aggregate(reward=1.0, trial="task__fixture"):
+    return {
+        "n_total_trials": 1,
+        "stats": {
+            "n_completed_trials": 1,
+            "n_errored_trials": 0,
+            "n_running_trials": 0,
+            "n_pending_trials": 0,
+            "n_cancelled_trials": 0,
+            "n_retries": 0,
+            "evals": {
+                "oracle__adhoc": {
+                    "n_trials": 1,
+                    "n_errors": 0,
+                    "metrics": [{"mean": reward}],
+                    "reward_stats": {"reward": {str(reward): [trial]}},
+                    "exception_stats": {},
+                }
+            },
+        },
+    }
 
 
 def test_package_imports_without_private_stack():
@@ -51,27 +74,151 @@ def test_release_check_script_passes():
 def test_read_harbor_reward_parses_result_json(tmp_path):
     """The extracted reward reader must WORK on a real harbor result.json
     (regression: it once called a helper that wasn't lifted from the private stack)."""
-    import json
     from terminal_daily_bench import harbor_score
     d = tmp_path / "trial1"; d.mkdir()
-    (d / "result.json").write_text(json.dumps(
-        {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 1.0}]}}}}))
+    (d / "result.json").write_text(json.dumps(_clean_harbor_aggregate()))
     assert harbor_score.read_harbor_reward(str(tmp_path)) == 1.0
     assert harbor_score.read_harbor_reward(str(tmp_path / "empty")) is None
 
 
+def test_harbor_reward_strict_aggregate_gate():
+    """Only one complete, internally consistent, error-free cell is scored."""
+    from terminal_daily_bench import harbor_score
+
+    def reward_for(aggregate):
+        snapshot = harbor_score.HarborResultSnapshot(
+            "run/result.json", json.dumps(aggregate).encode()
+        )
+        return harbor_score.reward_from_harbor_result_snapshot(snapshot)
+
+    clean = _clean_harbor_aggregate(1.0)
+    assert reward_for(clean) == 1.0
+
+    errored = _clean_harbor_aggregate(0.0)
+    errored["stats"]["n_errored_trials"] = 1
+    errored_eval = next(iter(errored["stats"]["evals"].values()))
+    errored_eval["n_errors"] = 1
+    errored_eval["exception_stats"] = {
+        "NonZeroAgentExitCodeError": ["task__fixture"]
+    }
+    assert reward_for(errored) is None
+
+    missing_counter = _clean_harbor_aggregate(1.0)
+    del missing_counter["stats"]["n_pending_trials"]
+    assert reward_for(missing_counter) is None
+
+    inconsistent = _clean_harbor_aggregate(1.0)
+    inconsistent_eval = next(iter(inconsistent["stats"]["evals"].values()))
+    inconsistent_eval["reward_stats"] = {
+        "reward": {"0.0": ["task__fixture"]}
+    }
+    assert reward_for(inconsistent) is None
+
+    multi_trial = _clean_harbor_aggregate(1.0)
+    multi_trial["n_total_trials"] = 2
+    multi_trial["stats"]["n_completed_trials"] = 2
+    multi_eval = next(iter(multi_trial["stats"]["evals"].values()))
+    multi_eval["n_trials"] = 2
+    multi_eval["reward_stats"] = {
+        "reward": {"1.0": ["task__fixture", "task__second"]}
+    }
+    assert reward_for(multi_trial) is None
+
+
+def test_harbor_reward_accepts_real_0131_aggregate_plus_bound_trial_result(tmp_path):
+    """Harbor 0.13.1 writes both run/result.json and run/trial/result.json."""
+    from terminal_daily_bench import harbor_score
+
+    run = tmp_path / "2026-08-05__22-48-35"
+    trial = run / "task__fixture"
+    trial.mkdir(parents=True)
+    (run / "result.json").write_text(json.dumps({
+        "id": "job-fixture",
+        "n_total_trials": 1,
+        "stats": {
+            "n_completed_trials": 1,
+            "n_errored_trials": 0,
+            "n_running_trials": 0,
+            "n_pending_trials": 0,
+            "n_cancelled_trials": 0,
+            "n_retries": 0,
+            "evals": {"codex__adhoc": {
+                "n_trials": 1,
+                "n_errors": 0,
+                "metrics": [{"mean": 1.0}],
+                "reward_stats": {"reward": {"1.0": ["task__fixture"]}},
+                "exception_stats": {},
+            }},
+        },
+    }))
+    (trial / "result.json").write_text(json.dumps({
+        "trial_name": "task__fixture",
+        "verifier_result": {"rewards": {"reward": 1.0}},
+    }))
+
+    snapshot = harbor_score.authoritative_harbor_result_snapshot(str(tmp_path))
+    assert snapshot is not None
+    assert snapshot.relative_path == "2026-08-05__22-48-35/result.json"
+    assert harbor_score.reward_from_harbor_result_snapshot(snapshot) == 1.0
+
+
+def test_harbor_reward_rejects_non_mapping_aggregate_with_nested_trial(tmp_path):
+    from terminal_daily_bench import harbor_score
+
+    run = tmp_path / "run"
+    trial = run / "task__fixture"
+    trial.mkdir(parents=True)
+    (run / "result.json").write_text("[]")
+    (trial / "result.json").write_text("{}")
+
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+    assert harbor_score.read_harbor_reward(str(tmp_path)) is None
+
+
+def test_harbor_reward_rejects_cross_run_deep_or_unbound_nested_shadows(tmp_path):
+    from terminal_daily_bench import harbor_score
+
+    run = tmp_path / "run"
+    trial = run / "task__fixture"
+    trial.mkdir(parents=True)
+    aggregate = _clean_harbor_aggregate()
+    aggregate["stats"]["evals"] = {
+        "codex__adhoc": aggregate["stats"]["evals"].pop("oracle__adhoc")
+    }
+    (run / "result.json").write_text(json.dumps(aggregate))
+    (trial / "result.json").write_text("{}")
+
+    deep = trial / "agent" / "result.json"
+    deep.parent.mkdir()
+    deep.write_text("{}")
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+    deep.unlink()
+
+    cross = tmp_path / "other-run" / "task__fixture" / "result.json"
+    cross.parent.mkdir(parents=True)
+    cross.write_text("{}")
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+    cross.unlink()
+
+    aggregate["stats"]["evals"]["codex__adhoc"]["reward_stats"] = {
+        "reward": {"1.0": ["task__different"]}
+    }
+    (run / "result.json").write_text(json.dumps(aggregate))
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+
+
 def test_harbor_reward_fails_closed_on_multiple_or_ambiguous_results(tmp_path):
     from terminal_daily_bench import harbor_score
-    import json
-
-    valid = {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 0.0}]}}}}
+    valid = _clean_harbor_aggregate(0.0)
     first = tmp_path / "a"
     second = tmp_path / "b"
     first.mkdir(); second.mkdir()
     (first / "result.json").write_text(json.dumps(valid))
-    (second / "result.json").write_text(json.dumps(
-        {"stats": {"evals": {"forged": {"metrics": [{"mean": 1.0}]}}}}
-    ))
+    forged = _clean_harbor_aggregate(1.0)
+    forged["stats"]["evals"] = {
+        "forged": forged["stats"]["evals"].pop("oracle__adhoc")
+    }
+    (second / "result.json").write_text(json.dumps(forged))
     assert harbor_score.read_harbor_reward(str(tmp_path)) is None
 
     (second / "result.json").unlink()
@@ -85,16 +232,13 @@ def test_harbor_reward_fails_closed_on_multiple_or_ambiguous_results(tmp_path):
 
 
 def test_harbor_reward_rejects_hardlinked_authority(tmp_path):
-    import json
     import os
     from terminal_daily_bench import harbor_score
 
     trial = tmp_path / "trial"
     trial.mkdir()
     result = trial / "result.json"
-    result.write_text(json.dumps(
-        {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 1.0}]}}}}
-    ))
+    result.write_text(json.dumps(_clean_harbor_aggregate()))
     os.link(result, tmp_path / "attacker-alias")
 
     assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
@@ -102,20 +246,19 @@ def test_harbor_reward_rejects_hardlinked_authority(tmp_path):
 
 
 def test_harbor_result_open_race_fails_closed(tmp_path, monkeypatch):
-    import json
     import os
     from terminal_daily_bench import harbor_score
 
     trial = tmp_path / "trial"
     trial.mkdir()
     result = trial / "result.json"
-    result.write_text(json.dumps(
-        {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 0.0}]}}}}
-    ))
+    result.write_text(json.dumps(_clean_harbor_aggregate(0.0)))
     replacement = trial / "replacement.json"
-    replacement.write_text(json.dumps(
-        {"stats": {"evals": {"forged": {"metrics": [{"mean": 1.0}]}}}}
-    ))
+    forged = _clean_harbor_aggregate(1.0)
+    forged["stats"]["evals"] = {
+        "forged": forged["stats"]["evals"].pop("oracle__adhoc")
+    }
+    replacement.write_text(json.dumps(forged))
     original_open = harbor_score.os.open
     raced = False
 
