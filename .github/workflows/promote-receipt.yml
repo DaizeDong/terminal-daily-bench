@@ -1,0 +1,210 @@
+name: Verify replay receipt promotion candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_commit:
+        description: Full commit SHA containing the untrusted portable receipt bundle
+        required: true
+        type: string
+      bundle_path:
+        description: Directory below promotion-bundles/ at bundle_commit
+        required: true
+        type: string
+      expected_bundle_sha256:
+        description: Operator-pinned terminal-daily bundle digest
+        required: true
+        type: string
+      suite_manifest_path:
+        description: Main-pinned path below .github/replay-suites/
+        required: true
+        type: string
+      trusted_keys_path:
+        description: Main-pinned path below .github/receipt-authorities/
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: receipt-promoter-${{ inputs.expected_bundle_sha256 }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: >-
+      github.repository == 'DaizeDong/terminal-daily-bench' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      BUNDLE_COMMIT: ${{ inputs.bundle_commit }}
+      BUNDLE_PATH: ${{ inputs.bundle_path }}
+      EXPECTED_BUNDLE_SHA256: ${{ inputs.expected_bundle_sha256 }}
+      SUITE_MANIFEST_PATH: ${{ inputs.suite_manifest_path }}
+      TRUSTED_KEYS_PATH: ${{ inputs.trusted_keys_path }}
+    steps:
+      - name: Require a GitHub-hosted runner before handling bundle bytes
+        shell: bash
+        env:
+          TDB_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "${TDB_RUNNER_ENVIRONMENT}" = "github-hosted"
+
+      - name: Checkout main-pinned authority code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: authority
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+
+      - name: Checkout untrusted bundle bytes at an exact commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.bundle_commit }}
+          path: incoming
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+
+      - name: Validate transport paths and pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${BUNDLE_COMMIT}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${EXPECTED_BUNDLE_SHA256}" =~ ^[0-9a-f]{64}$ ]]
+          [[ "${BUNDLE_PATH}" =~ ^promotion-bundles/[A-Za-z0-9_./-]+$ ]]
+          [[ "${BUNDLE_PATH}" != *".."* ]]
+          [[ "${SUITE_MANIFEST_PATH}" =~ ^\.github/replay-suites/[A-Za-z0-9_.-]+\.json$ ]]
+          [[ "${TRUSTED_KEYS_PATH}" =~ ^\.github/receipt-authorities/[A-Za-z0-9_.-]+\.json$ ]]
+          test -d "incoming/${BUNDLE_PATH}"
+          test -f "authority/${SUITE_MANIFEST_PATH}"
+          test -f "authority/${TRUSTED_KEYS_PATH}"
+          test "$(git -C incoming rev-parse HEAD)" = "${BUNDLE_COMMIT}"
+          test "$(git -C authority rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Select pinned Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: authority/.github/receipt-promoter-requirements.txt
+
+      - name: Install hash-locked verifier dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --only-binary=:all: \
+            --require-hashes -r authority/.github/receipt-promoter-requirements.txt
+
+      - name: Verify portable receipt without executing incoming code
+        shell: bash
+        env:
+          TDB_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          TDB_AUTHORITY_WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          python authority/web/receipt_bundle.py verify \
+            --bundle "incoming/${BUNDLE_PATH}" \
+            --expected-manifest "authority/${SUITE_MANIFEST_PATH}" \
+            --trusted-keys "authority/${TRUSTED_KEYS_PATH}" \
+            --expected-bundle-sha256 "${EXPECTED_BUNDLE_SHA256}" \
+            --expected-repository "DaizeDong/terminal-daily-bench" \
+            --out promotion-candidate.json
+
+      - name: Confirm the candidate has no promotion authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          def require(condition, message):
+              if not condition:
+                  raise SystemExit(message)
+
+          def reject_duplicates(pairs):
+              value = {}
+              for key, item in pairs:
+                  require(key not in value, f"duplicate candidate key: {key}")
+                  value[key] = item
+              return value
+
+          def reject_constant(value):
+              raise SystemExit(f"non-standard candidate number: {value}")
+
+          candidate = json.loads(
+              Path("promotion-candidate.json").read_bytes(),
+              object_pairs_hook=reject_duplicates,
+              parse_constant=reject_constant,
+          )
+          candidate_fields = {
+              "schema", "status", "eligible_for_leaderboard", "attestation_required",
+              "bundle_sha256", "submission_id", "attempt_id", "suite_sha256",
+              "receipt_sha256", "receipt_key_id", "reward", "signer_euid",
+              "verified_at", "verifier", "deployment_gate",
+          }
+          require(type(candidate) is dict and set(candidate) == candidate_fields, "unexpected candidate shape")
+          require(candidate.get("schema") == "terminal-daily-replay-promotion-candidate/v1", "wrong candidate schema")
+          require(candidate.get("status") == "receipt_validated_pending_external_attestation", "candidate status is promotable")
+          require(candidate.get("eligible_for_leaderboard") is False, "candidate claims leaderboard eligibility")
+          require(candidate.get("attestation_required") == "github_actions_artifact_attestation", "candidate bypasses attestation")
+          require(candidate.get("bundle_sha256") == os.environ["EXPECTED_BUNDLE_SHA256"], "candidate bundle pin mismatch")
+          verifier = candidate["verifier"]
+          verifier_fields = {
+              "kind", "repository", "ref", "source_commit", "workflow_commit",
+              "workflow_ref", "run_id", "run_attempt", "event_name",
+              "runner_environment", "independent_authority",
+          }
+          require(type(verifier) is dict and set(verifier) == verifier_fields, "unexpected verifier shape")
+          require(verifier.get("kind") == "github_actions_keyless_candidate", "candidate verifier kind mismatch")
+          require(verifier.get("repository") == "DaizeDong/terminal-daily-bench", "candidate repository mismatch")
+          require(verifier.get("ref") == "refs/heads/main", "candidate ref mismatch")
+          require(verifier.get("source_commit") == os.environ["GITHUB_SHA"], "candidate source commit mismatch")
+          require(verifier.get("workflow_commit") == os.environ["GITHUB_SHA"], "candidate workflow commit mismatch")
+          require(verifier.get("run_id") == os.environ["GITHUB_RUN_ID"], "candidate run id mismatch")
+          require(verifier.get("run_attempt") == os.environ["GITHUB_RUN_ATTEMPT"], "candidate run attempt mismatch")
+          require(verifier.get("event_name") == "workflow_dispatch", "candidate event mismatch")
+          require(verifier.get("runner_environment") == "github-hosted", "candidate runner mismatch")
+          require(verifier.get("independent_authority") is True, "candidate lacks hosted authority context")
+          gate = candidate.get("deployment_gate", {})
+          require(type(gate) is dict and set(gate) == {"status", "ready", "controls"}, "unexpected deployment gate shape")
+          require(gate.get("ready") is False, "undeployed candidate claims a ready deployment gate")
+          require(gate.get("status") == "blocked_external_authority_not_deployed", "candidate deployment status is dishonest")
+          controls = gate.get("controls", {})
+          control_fields = {
+              "main_branch_protection_verified", "replay_promoter_environment_verified",
+              "trusted_signer_registry_verified", "trusted_workflow_registry_verified",
+              "artifact_attestation_importer_verified", "publisher_import_boundary_verified",
+          }
+          require(
+              type(controls) is dict
+              and set(controls) == control_fields
+              and all(value is False for value in controls.values()),
+              "candidate claims unverified external controls",
+          )
+          PY
+
+      - name: Attest the still-unranked candidate
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
+        with:
+          subject-path: promotion-candidate.json
+
+      - name: Publish candidate for independent import
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: replay-promotion-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: promotion-candidate.json
+          if-no-files-found: error
+          retention-days: 90

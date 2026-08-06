@@ -1,0 +1,118 @@
+{
+  "schema": "terminal-daily-receipt-authority-deployment/v1",
+  "active": false,
+  "deployment_status": {
+    "state": "blocked",
+    "observed_at": "2026-08-06T10:30:33+00:00",
+    "blockers": [
+      "main_branch_protection_missing",
+      "receipt_importer_environment_missing",
+      "receipt_publisher_environment_missing",
+      "independent_environment_reviewer_missing",
+      "publisher_ledger_branch_missing",
+      "publisher_ledger_protection_missing",
+      "publisher_ledger_ruleset_missing",
+      "publisher_ledger_genesis_pin_missing",
+      "publisher_ledger_trusted_writer_missing",
+      "attestation_verifier_pin_missing",
+      "trusted_workflow_registry_inactive",
+      "required_status_check_app_pin_missing",
+      "environment_reviewer_registry_empty",
+      "trusted_signer_registry_empty",
+      "trusted_suite_registry_empty",
+      "trusted_receipt_key_registry_empty"
+    ]
+  },
+  "repository": "DaizeDong/terminal-daily-bench",
+  "main_ref": "refs/heads/main",
+  "candidate_workflow": ".github/workflows/promote-receipt.yml",
+  "importer_workflow": ".github/workflows/import-receipt.yml",
+  "publisher_workflow": ".github/workflows/publish-receipt.yml",
+  "importer_environment": "receipt-importer",
+  "publisher_environment": "receipt-publisher",
+  "attestation_verifier": {
+    "path": null,
+    "sha256": null,
+    "version": null
+  },
+  "workflow_files": [
+    {
+      "role": "candidate",
+      "path": ".github/workflows/promote-receipt.yml",
+      "sha256": null,
+      "active": false
+    },
+    {
+      "role": "importer",
+      "path": ".github/workflows/import-receipt.yml",
+      "sha256": null,
+      "active": false
+    },
+    {
+      "role": "publisher",
+      "path": ".github/workflows/publish-receipt.yml",
+      "sha256": null,
+      "active": false
+    }
+  ],
+  "branch_protection": {
+    "branch": "main",
+    "strict_status_checks": true,
+    "required_status_checks": [
+      {
+        "context": "REPLACE_WITH_REQUIRED_AUTHORITY_CHECK",
+        "app_id": null
+      }
+    ],
+    "enforce_admins": true,
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": true,
+    "minimum_approvals": 1,
+    "require_linear_history": true,
+    "block_force_pushes": true,
+    "block_deletions": true
+  },
+  "environments": [
+    {
+      "role": "importer",
+      "name": "receipt-importer",
+      "minimum_reviewers": 1,
+      "minimum_approvals": 1,
+      "reviewer_ids": [],
+      "prevent_self_review": true,
+      "protected_branches_only": true
+    },
+    {
+      "role": "publisher",
+      "name": "receipt-publisher",
+      "minimum_reviewers": 1,
+      "minimum_approvals": 1,
+      "reviewer_ids": [],
+      "prevent_self_review": true,
+      "protected_branches_only": true
+    }
+  ],
+  "signers": [],
+  "suites": [],
+  "receipt_keys": [],
+  "publisher_ledger": {
+    "active": false,
+    "branch": "receipt-authority-ledger",
+    "path_prefix": ".github/receipt-authority/ledger",
+    "genesis_commit": null,
+    "trusted_writer_app_id": null,
+    "ruleset_id": null,
+    "enforce_admins": true,
+    "require_linear_history": true,
+    "block_force_pushes": true,
+    "block_deletions": true
+  },
+  "deployment_declarations": {
+    "main_branch_protection_verified": false,
+    "replay_promoter_environment_verified": false,
+    "trusted_signer_registry_verified": false,
+    "trusted_workflow_registry_verified": false,
+    "artifact_attestation_importer_verified": false,
+    "publisher_import_boundary_verified": false
+  }
+}

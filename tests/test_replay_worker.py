@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT / "web"))
 
 import replay_worker as rw
 import receipt_auth
+import receipt_bundle
 import submit_result as sr
 
 
@@ -233,6 +234,52 @@ def _promote_ready(*, store: pathlib.Path, manifest: pathlib.Path,
         )
 
 
+def _portable_ready_bundle(tmp_path: pathlib.Path):
+    trusted, manifest = _manifest(tmp_path)
+    store = tmp_path / "store"
+    entry = sr.record(_submission(), str(store), authenticated_submitter=AUTH_ID)
+    results = _run_queue(
+        tmp_path, store=store, manifest=manifest, trusted=trusted,
+    )
+    assert results[0]["status"] == "receipt_ready"
+    out = tmp_path / "portable-receipt"
+    exported = receipt_bundle.export_bundle(
+        store=store, submission_id=entry["id"], manifest_path=manifest,
+        trusted_keys=tmp_path / "trusted-keys.json", out=out,
+    )
+    return store, entry, manifest, tmp_path / "trusted-keys.json", out, exported
+
+
+def _rewrite_portable_snapshot(
+    bundle_root: pathlib.Path, *, entry_update: dict,
+    bundle_update: dict | None = None,
+) -> str:
+    """Rewrite attacker-controlled bundle bytes while keeping public digests valid."""
+    bundle_root.chmod(0o755)
+    snapshot_path = bundle_root / "submission.json"
+    snapshot_path.chmod(0o644)
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snapshot["entry"].update(entry_update)
+    snapshot_payload = receipt_bundle._canonical_json(snapshot) + b"\n"
+    snapshot_path.write_bytes(snapshot_payload)
+    snapshot_path.chmod(0o444)
+
+    manifest_path = bundle_root / "bundle.json"
+    manifest_path.chmod(0o644)
+    bundle = json.loads(manifest_path.read_text(encoding="utf-8"))
+    bundle["files"]["submission.json"] = receipt_bundle._file_record(
+        snapshot_payload
+    )
+    if bundle_update:
+        bundle.update(bundle_update)
+    body = {key: value for key, value in bundle.items() if key != "bundle_sha256"}
+    bundle["bundle_sha256"] = receipt_bundle._bundle_digest(body)
+    manifest_path.write_bytes(receipt_bundle._canonical_json(bundle) + b"\n")
+    manifest_path.chmod(0o444)
+    bundle_root.chmod(0o555)
+    return bundle["bundle_sha256"]
+
+
 def _write_fake_runtime(path: pathlib.Path, *, version: str,
                         marker: pathlib.Path) -> pathlib.Path:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -389,6 +436,298 @@ def test_forged_claim_becomes_verified_zero_only_after_receipt(tmp_path):
     assert board["community_verified"][0]["solved"] == 0
     assert board["community_verified"][0]["claim_mismatches"] == 1
     assert board["community_pending"] == []
+
+
+def test_portable_bundle_verifies_but_never_promotes_locally(tmp_path):
+    store, entry, manifest, keys, bundle_root, exported = _portable_ready_bundle(
+        tmp_path
+    )
+    candidate = receipt_bundle.verify_bundle(
+        bundle_root=bundle_root,
+        expected_manifest=manifest,
+        trusted_keys=keys,
+        expected_bundle_sha256=exported["bundle_sha256"],
+    )
+    assert candidate["status"] == "receipt_validated_pending_external_attestation"
+    assert candidate["eligible_for_leaderboard"] is False
+    assert candidate["reward"] == 0.0
+    assert candidate["verifier"] == {
+        "kind": "local_diagnostic",
+        "independent_authority": False,
+    }
+    assert candidate["deployment_gate"] == {
+        "status": "blocked_external_authority_not_deployed",
+        "ready": False,
+        "controls": {
+            name: False for name in receipt_bundle.DEPLOYMENT_CONTROLS
+        },
+    }
+    staged = sr.get_entry(str(store), entry["id"])
+    assert staged["verify_status"] == "receipt_ready"
+    assert staged["verified_reward"] is None
+    assert staged["promoter_euid"] is None
+
+
+def test_portable_snapshot_is_minimal_and_diagnostic_text_fails_closed(tmp_path):
+    store, entry, manifest, keys, bundle_root, _ = _portable_ready_bundle(tmp_path)
+    snapshot = json.loads(
+        (bundle_root / "submission.json").read_text(encoding="utf-8")
+    )
+    assert set(snapshot) == {"schema", "entry"}
+    assert set(snapshot["entry"]) == receipt_bundle.SNAPSHOT_ENTRY_FIELDS
+    assert set(snapshot["entry"]).isdisjoint({
+        "last_error", "reward_claimed", "received_at", "lease_expires_at",
+        "replay_started_at", "replay_finished_at",
+    })
+    assert b"provider-runtime-secret" not in (bundle_root / "submission.json").read_bytes()
+
+    queue = next(store.glob("*.jsonl"))
+    row = json.loads(queue.read_text(encoding="utf-8"))
+    row["last_error"] = "provider-runtime-secret"
+    queue.write_text(json.dumps(row, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(
+        receipt_bundle.ReceiptBundleError,
+        match="non-canonical diagnostic/promotion state",
+    ):
+        receipt_bundle.export_bundle(
+            store=store, submission_id=entry["id"], manifest_path=manifest,
+            trusted_keys=keys, out=tmp_path / "must-not-export",
+        )
+    assert not (tmp_path / "must-not-export").exists()
+
+
+def test_portable_export_rejects_staged_signer_metadata_drift(tmp_path):
+    store, entry, manifest, keys, _, _ = _portable_ready_bundle(tmp_path)
+    queue = next(store.glob("*.jsonl"))
+    row = json.loads(queue.read_text(encoding="utf-8"))
+    row["signer_euid"] += 1
+    queue.write_text(json.dumps(row, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="signed receipt authority"):
+        receipt_bundle.export_bundle(
+            store=store, submission_id=entry["id"], manifest_path=manifest,
+            trusted_keys=keys, out=tmp_path / "must-not-export-drift",
+        )
+    assert not (tmp_path / "must-not-export-drift").exists()
+
+
+@pytest.mark.parametrize(
+    ("field", "bundle_field", "suffix"),
+    [
+        ("id", "submission_id", "escaped-id"),
+        ("date", None, "escaped-date"),
+        ("patch_sha256", None, "escaped-patch"),
+        ("receipt_sha256", "receipt_sha256", "escaped-receipt"),
+    ],
+)
+def test_portable_snapshot_rejects_path_fields_before_materialization(
+    tmp_path, field, bundle_field, suffix,
+):
+    _, _, manifest, keys, bundle_root, _ = _portable_ready_bundle(tmp_path)
+    escaped = tmp_path / suffix
+    value = str(escaped)
+    bundle_update = {bundle_field: value} if bundle_field else None
+    digest = _rewrite_portable_snapshot(
+        bundle_root, entry_update={field: value}, bundle_update=bundle_update,
+    )
+
+    with pytest.raises(
+        receipt_bundle.ReceiptBundleError,
+        match="(?:snapshot|receipt bundle).*invalid",
+    ):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=digest,
+        )
+    assert not escaped.exists()
+    assert not escaped.with_suffix(".diff").exists()
+    assert not escaped.with_suffix(".json").exists()
+    assert not pathlib.Path(f"{escaped}.jsonl").exists()
+
+
+@pytest.mark.parametrize(
+    ("bundle_update", "message"),
+    [
+        ({"reward": True}, "reward"),
+        ({"reward": 1}, "reward"),
+        ({"created_at": "2026-08-06T00:00:00Z"}, "creation time"),
+        ({"attempt_id": 1}, "attempt id"),
+        ({"receipt_key_id": True}, "receipt key id"),
+    ],
+)
+def test_portable_bundle_rejects_summary_type_confusion_even_with_valid_digest(
+    tmp_path, bundle_update, message,
+):
+    _, _, manifest, keys, bundle_root, _ = _portable_ready_bundle(tmp_path)
+    digest = _rewrite_portable_snapshot(
+        bundle_root, entry_update={}, bundle_update=bundle_update,
+    )
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match=message):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=digest,
+        )
+
+
+def test_portable_bundle_rejects_float_payload_size_type_confusion(tmp_path):
+    _, _, manifest, keys, bundle_root, _ = _portable_ready_bundle(tmp_path)
+    bundle = json.loads((bundle_root / "bundle.json").read_text(encoding="utf-8"))
+    records = bundle["files"]
+    records["patch.diff"]["size"] = float(records["patch.diff"]["size"])
+    digest = _rewrite_portable_snapshot(
+        bundle_root, entry_update={}, bundle_update={"files": records},
+    )
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="payload digest"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=digest,
+        )
+
+
+@pytest.mark.parametrize("target", ["patch.diff", "receipt.json", "submission.json"])
+def test_portable_bundle_payload_tamper_fails_closed(tmp_path, target):
+    _, _, manifest, keys, bundle_root, exported = _portable_ready_bundle(tmp_path)
+    path = bundle_root / target
+    path.chmod(0o644)
+    path.write_bytes(path.read_bytes() + b"\n")
+    path.chmod(0o444)
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="payload digest mismatch"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+
+
+def test_portable_bundle_rejects_extra_file_and_symlink(tmp_path):
+    _, _, manifest, keys, bundle_root, exported = _portable_ready_bundle(tmp_path)
+    bundle_root.chmod(0o755)
+    (bundle_root / "unreviewed.txt").write_text("not allowed", encoding="utf-8")
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="file set mismatch"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+    (bundle_root / "unreviewed.txt").unlink()
+    receipt = bundle_root / "receipt.json"
+    receipt.chmod(0o644)
+    receipt.unlink()
+    receipt.symlink_to(bundle_root / "submission.json")
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="bundle file"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+
+
+def test_portable_bundle_rejects_intermediate_directory_symlink(tmp_path):
+    _, _, manifest, keys, bundle_root, exported = _portable_ready_bundle(tmp_path)
+    linked_parent = tmp_path / "linked-transport"
+    linked_parent.symlink_to(tmp_path, target_is_directory=True)
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="contains a symlink"):
+        receipt_bundle.verify_bundle(
+            bundle_root=linked_parent / bundle_root.name,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+
+
+def test_portable_bundle_rejects_self_supplied_suite_or_key(tmp_path):
+    _, _, manifest, keys, bundle_root, exported = _portable_ready_bundle(tmp_path)
+    alternate_suite = tmp_path / "alternate-suite.json"
+    alternate_suite.write_bytes(manifest.read_bytes() + b" ")
+    alternate_suite.chmod(0o444)
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="promoter-pinned suite"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=alternate_suite,
+            trusted_keys=keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+
+    alternate_root = tmp_path / "alternate-authority"
+    alternate_root.mkdir()
+    _, alternate_keys, _ = _authority(alternate_root)
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="authority validation"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=alternate_keys,
+            expected_bundle_sha256=exported["bundle_sha256"],
+        )
+
+
+def test_github_candidate_requires_exact_main_workflow_and_hosted_runner(
+    tmp_path, monkeypatch,
+):
+    _, _, manifest, keys, bundle_root, exported = _portable_ready_bundle(tmp_path)
+    repository = "DaizeDong/terminal-daily-bench"
+    context = {
+        "GITHUB_ACTIONS": "true",
+        "GITHUB_REPOSITORY": repository,
+        "GITHUB_REF": "refs/heads/main",
+        "GITHUB_SHA": "a" * 40,
+        "TDB_AUTHORITY_WORKFLOW_SHA": "a" * 40,
+        "GITHUB_WORKFLOW_REF": (
+            f"{repository}/.github/workflows/promote-receipt.yml@refs/heads/main"
+        ),
+        "GITHUB_RUN_ID": "123456",
+        "GITHUB_RUN_ATTEMPT": "1",
+        "GITHUB_EVENT_NAME": "workflow_dispatch",
+        "TDB_RUNNER_ENVIRONMENT": "github-hosted",
+        "RUNNER_ENVIRONMENT": "github-hosted",
+    }
+    for name, value in context.items():
+        monkeypatch.setenv(name, value)
+    candidate = receipt_bundle.verify_bundle(
+        bundle_root=bundle_root,
+        expected_manifest=manifest,
+        trusted_keys=keys,
+        expected_bundle_sha256=exported["bundle_sha256"],
+        expected_repository=repository,
+    )
+    assert candidate["eligible_for_leaderboard"] is False
+    assert candidate["verifier"]["independent_authority"] is True
+    assert candidate["verifier"]["source_commit"] == "a" * 40
+
+    monkeypatch.delenv("TDB_RUNNER_ENVIRONMENT")
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="GitHub-hosted"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_repository=repository,
+        )
+
+    monkeypatch.setenv("TDB_RUNNER_ENVIRONMENT", "self-hosted")
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="GitHub-hosted"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_repository=repository,
+        )
+
+    monkeypatch.setenv("TDB_RUNNER_ENVIRONMENT", "github-hosted")
+    monkeypatch.setenv("TDB_AUTHORITY_WORKFLOW_SHA", "b" * 40)
+    with pytest.raises(receipt_bundle.ReceiptBundleError, match="workflow commit"):
+        receipt_bundle.verify_bundle(
+            bundle_root=bundle_root,
+            expected_manifest=manifest,
+            trusted_keys=keys,
+            expected_repository=repository,
+        )
 
 
 def test_unknown_task_is_rejected_not_ranked(tmp_path):

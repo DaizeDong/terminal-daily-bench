@@ -1,0 +1,8 @@
+# GitHub-hosted ubuntu-x64 / CPython 3.13 promoter lock.
+# A platform/wheel change must update hashes in review; pip otherwise fails closed.
+cryptography==46.0.5 \
+    --hash=sha256:4c3341037c136030cb46e4b1e17b7418ea4cbd9dd207e4a6f3b2b24e0d4ac731
+cffi==2.1.1 \
+    --hash=sha256:a931079504ecc49efed7744c476a5c343a92fabf66dec2db95edb1b2fdc770e2
+pycparser==3.0 \
+    --hash=sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992

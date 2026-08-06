@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts import paired_egress_canary as probe  # noqa: E402
+from scripts import protected_replay_diagnostic as replay_diag  # noqa: E402
 
 
 def _work_root(tmp_path: Path, name: str = "work") -> Path:
@@ -129,3 +130,89 @@ def test_main_invokes_worker_canary_only_on_staged_sif(tmp_path, monkeypatch):
     assert report["image_path"] == str(staged)
     assert report["image_staging"]["source_stat_stable"] is True
     assert report["scope"].startswith("paired canary only")
+
+
+def test_protected_replay_diagnostic_child_env_is_secret_minimal(tmp_path, monkeypatch):
+    for name in (
+        "AWS_ACCESS_KEY_ID", "GOOGLE_APPLICATION_CREDENTIALS", "SSH_AUTH_SOCK",
+        "SLURM_JOB_TOKEN", "OPENAI_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+    ):
+        monkeypatch.setenv(name, f"secret-{name}")
+    tdb = tmp_path / "bin" / "tdb"
+    harbor = tmp_path / "bin" / "harbor"
+    tdb.parent.mkdir()
+    tdb.write_text("#!/bin/sh\n", encoding="utf-8")
+    harbor.write_text("#!/bin/sh\n", encoding="utf-8")
+    case = tmp_path / "case"
+    case.mkdir()
+
+    env = replay_diag._child_env(case_root=case, harbor=harbor, tdb=tdb)
+
+    assert all(value not in env.values() for value in (
+        "secret-AWS_ACCESS_KEY_ID", "secret-GOOGLE_APPLICATION_CREDENTIALS",
+        "secret-SSH_AUTH_SOCK", "secret-SLURM_JOB_TOKEN",
+        "secret-OPENAI_API_KEY", "secret-ANTHROPIC_AUTH_TOKEN",
+    ))
+    assert set(env).isdisjoint({
+        "AWS_ACCESS_KEY_ID", "GOOGLE_APPLICATION_CREDENTIALS", "SSH_AUTH_SOCK",
+        "SLURM_JOB_TOKEN", "OPENAI_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+    })
+
+
+def test_protected_replay_diagnostic_rejects_test_edit_and_accepts_fixed_bad_patch():
+    task = "td-fc90ea8b76d5f6b6"
+    patch_path = ROOT / "scripts" / "diagnostics" / f"{task}-bad.patch"
+    bad_patch, digest = replay_diag._stable_patch_text(patch_path)
+
+    replay_diag._validate_bad_patch(bad_patch, task)
+    test_edit = replay_diag._test_edit_rejected(task)
+
+    assert digest == hashlib.sha256(bad_patch.encode("utf-8")).hexdigest()
+    assert test_edit["rejected"] is True
+    assert "test_path_rejected" in test_edit["error_codes"]
+
+
+def test_protected_replay_diagnostic_task_copy_is_digest_bound(tmp_path):
+    source = tmp_path / "source-task"
+    (source / "solution").mkdir(parents=True)
+    (source / "solution" / "oracle.patch").write_text(
+        "diff --git a/src/a.py b/src/a.py\n", encoding="utf-8",
+    )
+    (source / "task.toml").write_text(
+        "[environment]\nallow_internet = false\n", encoding="utf-8",
+    )
+    expected = replay_diag.replay_worker.hash_tree(source)
+    destination = tmp_path / "copied-task"
+
+    copied = replay_diag._copy_task(
+        source, destination, expected_sha256=expected,
+    )
+
+    assert copied == expected
+    assert replay_diag.replay_worker.hash_tree(destination) == expected
+
+
+def test_protected_replay_diagnostic_rejects_task_mutation_during_copy(
+    tmp_path, monkeypatch,
+):
+    source = tmp_path / "source-task"
+    source.mkdir()
+    payload = source / "task.toml"
+    payload.write_text("[environment]\nallow_internet = false\n", encoding="utf-8")
+    expected = replay_diag.replay_worker.hash_tree(source)
+    original_copytree = replay_diag.shutil.copytree
+
+    def copy_then_mutate(src, dst, *args, **kwargs):
+        result = original_copytree(src, dst, *args, **kwargs)
+        payload.write_text(
+            "[environment]\nallow_internet = true\n", encoding="utf-8",
+        )
+        return result
+
+    monkeypatch.setattr(replay_diag.shutil, "copytree", copy_then_mutate)
+    destination = tmp_path / "must-be-removed"
+    with pytest.raises(ValueError, match="changed while it was copied"):
+        replay_diag._copy_task(
+            source, destination, expected_sha256=expected,
+        )
+    assert not destination.exists()

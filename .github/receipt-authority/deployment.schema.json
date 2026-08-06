@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://daizedong.github.io/terminal-daily-bench/schemas/receipt-authority-deployment-v1.json",
+  "title": "Terminal Daily receipt authority deployment registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "active",
+    "deployment_status",
+    "repository",
+    "main_ref",
+    "candidate_workflow",
+    "importer_workflow",
+    "publisher_workflow",
+    "importer_environment",
+    "publisher_environment",
+    "attestation_verifier",
+    "workflow_files",
+    "branch_protection",
+    "environments",
+    "signers",
+    "suites",
+    "receipt_keys",
+    "publisher_ledger",
+    "deployment_declarations"
+  ],
+  "properties": {
+    "schema": {
+      "const": "terminal-daily-receipt-authority-deployment/v1"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "deployment_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "observed_at", "blockers"],
+      "properties": {
+        "state": {"enum": ["blocked", "active"]},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "blockers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z0-9_]{3,100}$"}
+        }
+      }
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "main_ref": {
+      "const": "refs/heads/main"
+    },
+    "candidate_workflow": {
+      "$ref": "#/$defs/workflowPath"
+    },
+    "importer_workflow": {
+      "$ref": "#/$defs/workflowPath"
+    },
+    "publisher_workflow": {
+      "$ref": "#/$defs/workflowPath"
+    },
+    "importer_environment": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "publisher_environment": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "attestation_verifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "version"],
+      "properties": {
+        "path": {"type": ["string", "null"]},
+        "sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "version": {"type": ["string", "null"]}
+      }
+    },
+    "workflow_files": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "path", "sha256", "active"],
+        "properties": {
+          "role": {"enum": ["candidate", "importer", "publisher"]},
+          "path": {"$ref": "#/$defs/workflowPath"},
+          "sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+          "active": {"type": "boolean"}
+        }
+      }
+    },
+    "branch_protection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch", "strict_status_checks", "required_status_checks",
+        "enforce_admins", "dismiss_stale_reviews", "require_code_owner_reviews",
+        "minimum_approvals", "require_linear_history", "block_force_pushes",
+        "block_deletions"
+      ],
+      "properties": {
+        "branch": {"const": "main"},
+        "strict_status_checks": {"const": true},
+        "required_status_checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["context", "app_id"],
+            "properties": {
+              "context": {"type": "string", "minLength": 1, "maxLength": 200},
+              "app_id": {"type": ["integer", "null"], "minimum": 1}
+            }
+          },
+          "uniqueItems": true
+        },
+        "enforce_admins": {"const": true},
+        "dismiss_stale_reviews": {"const": true},
+        "require_code_owner_reviews": {"const": true},
+        "minimum_approvals": {"type": "integer", "minimum": 1},
+        "require_linear_history": {"const": true},
+        "block_force_pushes": {"const": true},
+        "block_deletions": {"const": true}
+      }
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role", "name", "minimum_reviewers", "prevent_self_review",
+          "protected_branches_only", "minimum_approvals", "reviewer_ids"
+        ],
+        "properties": {
+          "role": {"enum": ["importer", "publisher"]},
+          "name": {"type": "string", "minLength": 3, "maxLength": 80},
+          "minimum_reviewers": {"type": "integer", "minimum": 1},
+          "minimum_approvals": {"type": "integer", "minimum": 1},
+          "reviewer_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "integer", "minimum": 1}
+          },
+          "prevent_self_review": {"const": true},
+          "protected_branches_only": {"const": true}
+        }
+      }
+    },
+    "signers": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/signer"}
+    },
+    "suites": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/suite"}
+    },
+    "receipt_keys": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/receiptKey"}
+    },
+    "publisher_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "active", "branch", "path_prefix", "genesis_commit",
+        "trusted_writer_app_id", "ruleset_id", "enforce_admins", "require_linear_history",
+        "block_force_pushes", "block_deletions"
+      ],
+      "properties": {
+        "active": {"type": "boolean"},
+        "branch": {"type": "string", "minLength": 3, "maxLength": 100},
+        "path_prefix": {
+          "type": "string",
+          "pattern": "^\\.github/receipt-authority/[A-Za-z0-9_./-]+$"
+        },
+        "genesis_commit": {
+          "anyOf": [
+            {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            {"type": "null"}
+          ]
+        },
+        "trusted_writer_app_id": {"type": ["integer", "null"], "minimum": 1},
+        "ruleset_id": {"type": ["integer", "null"], "minimum": 1},
+        "enforce_admins": {"const": true},
+        "require_linear_history": {"const": true},
+        "block_force_pushes": {"const": true},
+        "block_deletions": {"const": true}
+      }
+    },
+    "deployment_declarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "main_branch_protection_verified",
+        "replay_promoter_environment_verified",
+        "trusted_signer_registry_verified",
+        "trusted_workflow_registry_verified",
+        "artifact_attestation_importer_verified",
+        "publisher_import_boundary_verified"
+      ],
+      "properties": {
+        "main_branch_protection_verified": {"type": "boolean"},
+        "replay_promoter_environment_verified": {"type": "boolean"},
+        "trusted_signer_registry_verified": {"type": "boolean"},
+        "trusted_workflow_registry_verified": {"type": "boolean"},
+        "artifact_attestation_importer_verified": {"type": "boolean"},
+        "publisher_import_boundary_verified": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "workflowPath": {
+      "type": "string",
+      "pattern": "^\\.github/workflows/[A-Za-z0-9_.-]+\\.ya?ml$"
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signer_euid", "key_id", "public_key_sha256", "active"],
+      "properties": {
+        "signer_euid": {"type": "integer", "minimum": 1},
+        "key_id": {"type": "string", "minLength": 3, "maxLength": 128},
+        "public_key_sha256": {"$ref": "#/$defs/sha256"},
+        "active": {"type": "boolean"}
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["suite_sha256", "manifest_path", "active"],
+      "properties": {
+        "suite_sha256": {"$ref": "#/$defs/sha256"},
+        "manifest_path": {"type": "string"},
+        "active": {"type": "boolean"}
+      }
+    },
+    "receiptKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "public_key_sha256", "registry_path", "active"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 3, "maxLength": 128},
+        "public_key_sha256": {"$ref": "#/$defs/sha256"},
+        "registry_path": {"type": "string"},
+        "active": {"type": "boolean"}
+      }
+    }
+  }
+}
