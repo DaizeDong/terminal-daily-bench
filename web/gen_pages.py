@@ -248,7 +248,7 @@ def prose_block(html: str) -> str:
 
 def code_figure(caption: str, lines) -> str:
     """Their code-block treatment (figure > caption row > pre.shiki)."""
-    body = "".join(f'<span class="line">{l}</span>' for l in lines)
+    body = "".join(f'<span class="line">{line}</span>' for line in lines)
     return (
         '<figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border '
         'outline-none overflow-hidden text-sm my-0 mb-6 font-mono">'
@@ -572,8 +572,10 @@ def _retrievability_note() -> str:
         "redacted from a live package, but the task must name its source repo and base "
         "commit to be buildable, and the fix is a descendant of that commit. An agent with "
         "network access can therefore retrieve rather than solve. Read any online score on "
-        'a live task as an <span class="text-foreground">upper bound</span>; the figures we '
-        "publish are produced with egress severed.</p>"
+        'a live task as an <span class="text-foreground">upper bound</span>. A staged-SIF '
+        "paired egress canary passed on 2026-08-06, but no production protected replay or "
+        "authority deployment has run; future official figures must bind the same network "
+        "cut in their receipts.</p>"
     )
 
 
@@ -586,7 +588,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
     n_tasks = suite.get("n_tasks")
     if n_tasks is None:
         n_tasks = len(suite_tasks)
-    solved_any = sum(1 for t in suite_tasks if (t.get("solved_by") or 0) > 0)
+    scored_tasks = sum(1 for t in suite_tasks if t.get("n_models"))
     f2p = sum(t.get("n_fail_to_pass") or 0 for t in suite_tasks)
 
     head = [
@@ -600,7 +602,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
             "requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient."
         ),
         tags(status_pill(suite.get("status", "")),
-             *[pill(l, "outline") for l in langs]),
+             *[pill(language, "outline") for language in langs]),
         button_row([
             ("all suites", "../", False),
             ("leaderboard", "../../leaderboard/", False),
@@ -613,7 +615,12 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         ("tasks", n_tasks, "one merged pull request each"),
         ("languages", len(langs) or None, "mined across the ecosystem"),
         ("fail-to-pass tests", f2p or None, "re-laid over the agent's workspace"),
-        ("solved by a model", solved_any, "execution-verified"),
+        (
+            "official score coverage",
+            f"{scored_tasks}/{len(suite_tasks)}" if scored_tasks else None,
+            "awaiting the certified 50-task v3 campaign" if not scored_tasks
+            else "tasks bound to the formal published matrix",
+        ),
         ("semantic exploit FA", None, "unmeasured for this published suite"),
         ("status", suite.get("status") or None, "live withholds gold; archive publishes it"),
     ])
@@ -642,7 +649,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         table = table_block(
             [("Task", "left"), ("What it asks for", "left"), ("Source pull request", "left"),
              ("Language", "left"), ("Difficulty", "left"),
-             ("F2P Tests", "right"), ("Solved By", "right")],
+             ("F2P Tests", "right"), ("Official Solves", "right")],
             rows,
         )
     else:
@@ -656,7 +663,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         )
 
     cmd = (
-        ["tdb submit &lt;RESULTS.jsonl&gt;   # listed as pending; worth zero until replayed"]
+        ["tdb submit &lt;RESULTS.jsonl&gt;   # pending; no score until official replay"]
         if live
         else [
             "tdb run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;",
@@ -681,9 +688,10 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
             )
             + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
               'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
-              "workspace tests are discarded, the protected tests are re-laid from the trusted "
-              "package, and they run with the network cut. The reward is that run's outcome and "
-              "nothing else. That proves replay integrity; it does not establish semantic "
+              "workspace tests are discarded and protected tests are re-laid from the trusted "
+              "package. The receipt contract requires a verified network cut. A paired staged-SIF "
+              "egress canary passed on 2026-08-06, but production replay authority remains "
+              "inactive. An accepted run outcome proves replay integrity; it does not establish semantic "
               "verifier false-accept, which remains unmeasured until labeled exploit trials run. "
               "For archived tasks, these commands require our unpublished "
               "patched Harbor fork; stock Harbor 0.13.1 cannot run them end to end.</p>"
@@ -733,7 +741,8 @@ def task_page_body(task: dict, pkg: dict) -> str:
         _h2(title or tid),
         _lede(
             f'<span class="text-foreground">{esc(tid)}</span> &middot; source pull-request task. '
-            "The instruction, provenance, release state, and execution-verified results follow."
+            "The instruction, provenance, release state, and any formally published score "
+            "coverage follow."
         ),
         tags(status_pill(task.get("status", "")),
              pill(language, "outline") if language else "",
@@ -744,11 +753,11 @@ def task_page_body(task: dict, pkg: dict) -> str:
     solved, n_models = task.get("solved_by"), task.get("n_models")
     stats = strip([
         ("language", language or None, "the upstream repository's language"),
-        ("difficulty", difficulty or None, "derived from who solved it"),
+        ("difficulty", difficulty or None, "derived only from an official 50-task matrix"),
         ("fail-to-pass tests", n_f2p, "must fail before the patch, pass after"),
-        ("solved by",
+        ("official solves",
          f"{solved}/{n_models}" if solved is not None and n_models else None,
-         "execution-verified solves"),
+         "dash means awaiting formal coverage, not zero solves"),
         ("semantic exploit FA", None, "unmeasured for this task"),
         ("suites", len(suites) or None, "versioned task sets containing this task"),
     ])
@@ -832,12 +841,12 @@ def task_page_body(task: dict, pkg: dict) -> str:
         + code_figure("Score a model on this task, then prove it is solvable", cmd)
         + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
           'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
-          "else. A submitted reward is advisory: it is recorded, read by nothing, and "
-          "counts as an attempt worth zero until a replay worker adjudicates the patch. "
-          "That worker is not running yet, so every submission stays pending. "
+          "else. A submitted reward is advisory and never becomes a score by itself. "
+          "The production receipt authority is inactive, so every submission stays pending "
+          "and unranked with no numeric outcome. "
           + ("The local commands above also require the unpublished patched Harbor fork; "
              "stock Harbor 0.13.1 is insufficient. " if not live else "")
-          + f'<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
+          + '<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
           "how to submit &rarr;</a></p>"
     )
 
@@ -910,7 +919,7 @@ def main(argv=None) -> int:
                 description=(
                     f"The {sid} daily suite: "
                     f"{s.get('n_tasks', len(st))} tasks mined from merged pull requests, "
-                    f"scored by re-laid protected tests."
+                    "awaiting formally receipt-bound relative scoring."
                 ),
                 page_key="benchmarks",
                 depth=2,

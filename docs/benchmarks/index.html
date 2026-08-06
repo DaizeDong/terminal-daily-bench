@@ -17,7 +17,7 @@
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Published suites, newest dated release first. Open a suite for its tasks and score coverage.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest dated release first. Suite publication does not imply a formal score.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -mx-4 sm:mx-0" id="suites" data-tdb-primary-data>
         <div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">loading suites&hellip;</div>
@@ -37,7 +37,7 @@
             <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution still requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
           </div>
         </div>
-        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">The deterministic execution gate ignores claimed rewards. This proves replay integrity; semantic verifier false-accept remains unmeasured without labeled exploit trials.</p>
+        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">The certified 50-task v3 campaign is awaiting formal publication. Historical matrices do not mark a suite scored. The deterministic execution gate ignores claimed rewards; semantic verifier false-accept remains unmeasured without labeled exploit trials.</p>
       </section>
 
     </div>
@@ -85,7 +85,7 @@
     return suites;
   }
 
-  function suiteCard(suite, tasks, scoredDate) {
+  function suiteCard(suite, tasks) {
     var live = suite.status === "live";
     var langs = (suite.languages || []).filter(Boolean);
     if (!langs.length) {
@@ -96,7 +96,6 @@
       });
     }
     var pills = badge(suite.status || "unknown", live);
-    if (scoredDate && suite.id === scoredDate) pills += badge("scored snapshot", false);
     var facts = [];
     if (suite.n_tasks != null) facts.push(plural(suite.n_tasks, "task", "tasks"));
     if (langs.length) facts.push(langs.join(", "));
@@ -116,16 +115,12 @@
       "</a></div>";
   }
 
-  Promise.all([
-    T.getJSON("site_data.json").catch(function () { return null; }),
-    T.getJSON("leaderboard_data.json").catch(function () { return null; })
-  ]).then(function (data) {
-    var site = data[0] || {};
-    var board = data[1] || {};
+  T.getJSON("site_data.json").catch(function () { return null; }).then(function (data) {
+    var site = data || {};
     var suites = orderedSuites(site);
     var host = document.getElementById("suites");
     host.innerHTML = suites.length
-      ? suites.map(function (suite) { return suiteCard(suite, site.tasks || [], board.date); }).join("")
+      ? suites.map(function (suite) { return suiteCard(suite, site.tasks || []); }).join("")
       : '<div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">No suites are published.</div>';
   });
 })();

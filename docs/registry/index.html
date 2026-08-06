@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
-<meta name="description" content="Search published terminal-daily-bench tasks by repository, language, suite, release status, and execution-verified result coverage.">
+<meta name="description" content="Search the published terminal-daily-bench task catalogue; formal score coverage appears only with a trusted 50-task v3 report.">
 <link rel="stylesheet" href="../assets/tw.css">
 <link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
@@ -33,7 +33,7 @@
       </nav>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Open a row for provenance, instructions, protected-test metadata, and available results.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Catalogue membership is not a score; official coverage appears only after the certified 50-task v3 campaign publishes.</p>
 
       <!-- catalogue summary, in their card-grid idiom -->
       <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
@@ -43,13 +43,11 @@
       <p class="text-muted-foreground mb-6 font-mono text-sm" data-tdb-integrity>
         <span class="text-foreground">live</span> tasks withhold gold and protected test bodies; submissions await official replay.
         <span class="text-foreground">archive</span> tasks publish those artifacts; end-to-end execution currently requires the unpublished patched Harbor fork.
-        Protected-test replay prevents claim bypass; semantic verifier false-accept is unmeasured until exploit trials run.
+        Receipt-authority code is complete, but production is active=false with one collaborator, so submissions remain unranked. The staged-SIF paired egress canary passed; no production protected replay has run.
       </p>
 
       <!-- ==================== filterable table ==================== -->
       <div class="-mx-4 flex flex-col md:mx-0" data-tdb-primary-data>
-
-        <div id="tdb-note" hidden></div>
 
         <div class="flex flex-col">
           <div class="flex min-h-10 items-center justify-between px-4 py-1 md:px-0">
@@ -92,7 +90,7 @@
         <div id="tdb-none" hidden></div>
       </div>
 
-      <p class="text-muted-foreground mt-6 font-mono text-sm"><span class="text-foreground">F2P tests</span> must flip from failing to passing. <span class="text-foreground">Solved by</span> counts execution-verified solves.</p>
+      <p class="text-muted-foreground mt-6 font-mono text-sm"><span class="text-foreground">F2P tests</span> must flip from failing to passing. A dash under <span class="text-foreground">Official solves</span> means awaiting formal coverage, not zero solves.</p>
 
     </div>
   </div>
@@ -166,7 +164,7 @@
     { key: "suite",    label: "Suite",     align: "left"  },
     { key: "status",   label: "Status",    align: "left"  },
     { key: "f2p",      label: "F2P Tests", align: "right" },
-    { key: "solved",   label: "Solved By", align: "right" }
+    { key: "solved",   label: "Official Solves", align: "right" }
   ];
 
   var rowsEl  = document.getElementById("tdb-rows");
@@ -187,27 +185,13 @@
       'text-muted-foreground md:border-x">' + html + "</div>";
   }
 
-  Promise.all([
-    T.getJSON("site_data.json").catch(function () { return null; }),
-    T.getJSON("leaderboard_data.json").catch(function () { return null; })
-  ]).then(function (res) { start(res[0], res[1]); });
+  T.getJSON("site_data.json").catch(function () { return null; }).then(start);
 
-  function start(site, board) {
-    /* Prefer the catalogue. If it has not been published yet, fall back to the
-       day's leaderboard matrix, which at least knows the ids and who solved
-       them. Degrade, never invent. */
-    var tasks = (site && Array.isArray(site.tasks) && site.tasks.length) ? site.tasks.slice() : null;
-    var derived = false;
-
-    if (!tasks && board && board.matrix && Array.isArray(board.matrix.tasks)) {
-      derived = true;
-      var mrows = board.matrix.rows || [];
-      tasks = board.matrix.tasks.map(function (id, i) {
-        var solved = mrows.reduce(function (a, r) { return a + ((r.g && r.g[i]) ? 1 : 0); }, 0);
-        return { id: id, suite: board.date, status: "live",
-                 solved_by: solved, n_models: mrows.length };
-      });
-    }
+  function start(site) {
+    /* The catalogue is the sole task authority. A result matrix cannot invent
+       task rows or score fields when site_data.json is missing. */
+    var tasks = (site && Array.isArray(site.tasks) && site.tasks.length)
+      ? site.tasks.slice() : null;
 
     if (!tasks || !tasks.length) {
       countEl.textContent = "Showing 0 entries";
@@ -223,13 +207,13 @@
     }
 
     /* ---- summary ---- */
-    var suiteSet = {}, langs = {}, diffs = {}, live = 0, f2p = 0, solvedAny = 0;
+    var suiteSet = {}, langs = {}, diffs = {}, live = 0, f2p = 0, scoredTasks = 0;
     tasks.forEach(function (t) {
       T.taskSuites(t).forEach(function (sid) { suiteSet[sid] = 1; });
       if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
       if (t.difficulty) diffs[t.difficulty] = (diffs[t.difficulty] || 0) + 1;
       if (t.status === "live") live++;
-      if (Number(t.solved_by) > 0) solvedAny++;
+      if (Number(t.n_models) > 0 && typeof t.solved_by === "number") scoredTasks++;
       f2p += Number(t.n_fail_to_pass) || 0;
     });
 
@@ -239,7 +223,8 @@
       ["languages",            Object.keys(langs).length || null,     "mined across the ecosystem"],
       ["live now",             live,                                  "gold withheld, pending official replay"],
       ["protected f2p tests",  f2p || null,                           "re-laid over the agent's workspace"],
-      ["solved by a model",    solvedAny,                             "protected replay; semantic FA unmeasured"]
+      ["official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
+        scoredTasks ? "bound to the formal matrix" : "awaiting certified 50-task results"]
     ];
     statsEl.innerHTML = stats.map(function (s) {
       return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 ' +
@@ -355,7 +340,7 @@
     /* ---- derived per-task fields ---- */
     tasks.forEach(function (t) {
       t._f2p = (t.n_fail_to_pass == null) ? -1 : Number(t.n_fail_to_pass);
-      t._solved = Number(t.solved_by) || 0;
+      t._solved = (typeof t.solved_by === "number") ? t.solved_by : -1;
       t._h = [t.id, t.repo, t.title, t.language, T.taskSuites(t).join(" "),
               t.status, t.difficulty,
               (t.pr_number != null ? "#" + t.pr_number : "")].join(" ").toLowerCase();
@@ -372,10 +357,8 @@
     /* ---- one row ---- */
     function row(t) {
       var href = "./" + encodeURIComponent(t.id) + "/";
-      var idCell = derived
-        ? '<span class="text-muted-foreground" title="no task page published yet">' +
-            esc(t.id) + "</span>"
-        : '<a class="' + LINK + '" href="' + esc(href) + '">' + esc(t.id) + "</a>";
+      var idCell = '<a class="' + LINK + '" href="' + esc(href) + '">' +
+        esc(t.id) + "</a>";
       var title = t.title
         ? '<span class="text-muted-foreground block text-sm sm:text-xs">' + esc(t.title) + "</span>"
         : "";
@@ -411,8 +394,8 @@
         : "";
 
       var n = Number(t.n_models) || 0;
-      var solved = n
-        ? '<span class="tabular-nums' + (t._solved ? "" : " text-muted-foreground") + '">' +
+      var solved = n && t._solved >= 0
+        ? '<span class="tabular-nums">' +
           t._solved + "/" + n + "</span>"
         : DASH;
 
@@ -434,7 +417,6 @@
 
     /* whole-row navigation, the way their leaderboard rows behave */
     rowsEl.addEventListener("click", function (ev) {
-      if (derived) return;
       if (ev.target && ev.target.closest && ev.target.closest("a")) return;
       var tr = ev.target && ev.target.closest ? ev.target.closest("tr[data-href]") : null;
       if (tr) window.location.href = tr.getAttribute("data-href");
@@ -475,17 +457,6 @@
       }
       noneEl.hidden = true;
       rowsEl.innerHTML = out.map(row).join("");
-    }
-
-    if (derived) {
-      var noteEl = document.getElementById("tdb-note");
-      noteEl.hidden = false;
-      noteEl.innerHTML = emptyBlock(
-        "Showing the current day only, reconstructed from " +
-        "<span class=\"text-foreground\">leaderboard_data.json</span>: " +
-        "<span class=\"text-foreground\">site_data.json</span> is not published yet, so repo, " +
-        "language and test counts are missing and rows do not link to a task page.",
-        "border-y mb-6");
     }
 
     render();

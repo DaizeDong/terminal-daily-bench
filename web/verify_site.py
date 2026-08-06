@@ -50,7 +50,6 @@ from __future__ import annotations
 import html.parser
 import json
 import re
-import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -525,7 +524,11 @@ def check_public_frontend() -> list[str]:
     caveats = (
         "deterministic code",
         "claimed reward",
-        "deployment egress canary is still pending",
+        "paired staged-sif egress canary passed",
+        "no production protected replay has run",
+        "active=false",
+        "one collaborator",
+        "certified 50-task",
         "unpublished patched harbor fork",
         "stock harbor 0.13.1 is insufficient",
         "completed gate decisions",
@@ -620,6 +623,9 @@ def check_public_frontend() -> list[str]:
         "re-scored on ingest",
         "node worker replays",
         "worker replays your patch",
+        "deployment egress canary is still pending",
+        "worth zero until replayed",
+        "attempt worth zero",
         "execution-verified, false_accept 0",
         "a property of execution scoring, held by construction",
         "why the score cannot be gamed by the model",
@@ -655,12 +661,44 @@ def check_public_frontend() -> list[str]:
                     "without measured trials"
                 )
     leaderboard_html = source("leaderboard/index.html")
-    if ('hacks: measuredFa ? s.fa : null' not in leaderboard_html or
-            'hacks_n: measuredFa ? s.fa_n : null' not in leaderboard_html or
-            'esc(e.hacks) + "/" + esc(e.hacks_n)' not in leaderboard_html):
-        bad.append("leaderboard/index.html: missing measured numerator/denominator FA mapping")
-    if "protected-test replay alone is not evidence of zero" not in leaderboard_html:
-        bad.append("leaderboard/index.html: semantic FA scope warning missing")
+    leaderboard_requirements = (
+        'schema_version === "td-relative-capability-v3"',
+        "input.frozen_task_roster_n === 50",
+        "input.task_roster_digest_trusted === true",
+        "input.cell_manifest_digest_trusted === true",
+        "scoring.official_ranking === true",
+        'scoring.publication_registry_mode === "code-controlled-allowlist"',
+        "scoring.publication_bundle_approved === true",
+        "scoring.relative_report_digest_matches === true",
+        "scoring.anti_cheat_deployment_active === true",
+        "rating.publishable === true",
+        "ALLOWED_DIMENSIONS[axis.dimension]",
+        "authenticated_counts",
+        "untrusted_declared_counts",
+        "outcome:null",
+        "Task-family: unavailable",
+    )
+    for phrase in leaderboard_requirements:
+        if phrase not in leaderboard_html:
+            bad.append(f"leaderboard/index.html: v3 fail-closed marker missing {phrase!r}")
+    registry_html = source("registry/index.html")
+    if 'T.getJSON("leaderboard_data.json")' in registry_html or "board.matrix" in registry_html:
+        bad.append("registry/index.html: legacy matrix must not invent task rows or scores")
+
+    scoring = site.get("scoring") if isinstance(site, dict) else None
+    if not isinstance(scoring, dict):
+        bad.append("site_data.json: machine-readable scoring publication status missing")
+    elif scoring.get("official_ranking") is not True:
+        leaked = [
+            task.get("id", "<unknown>")
+            for task in site.get("tasks") or []
+            if task.get("solved_by") is not None or task.get("n_models") is not None
+        ]
+        if leaked:
+            bad.append(
+                "site_data.json: unranked catalogue leaked task score fields for "
+                + ", ".join(leaked)
+            )
 
     shell = source("assets/site.js")
     labels = ['["status"', '["leaderboard"', '["tasks"', '["docs"', '["submit"']
@@ -694,11 +732,10 @@ def check_data_consistency() -> list[str]:
     """Cross-check the two published JSON files. WARNINGS, not failures.
 
     The shipped bundle deliberately carries one sample task per split while
-    leaderboard_data.json holds a real scored day, so the two do not have to
-    agree here. On a real publish they must: every id in the board's matrix
-    should have a task page, and the board's date should name a suite. The site
-    degrades correctly either way (an unpublished id renders as plain text
-    rather than a dead link) -- this only tells you what is missing.
+    leaderboard_data.json currently holds a legacy diagnostic snapshot, so the
+    two do not have to agree. The v3 frontend ignores that matrix rather than
+    rendering it as a score. On a future formal publish, every bound matrix id
+    must have a task page and the frozen suite must be present here.
     """
     def load(name):
         try:
@@ -715,13 +752,13 @@ def check_data_consistency() -> list[str]:
     matrix = (board.get("matrix") or {}).get("tasks") or []
     missing = [t for t in matrix if t not in published]
     if missing:
-        out.append(f"{len(missing)}/{len(matrix)} leaderboard matrix task ids have no page in "
-                   f"site_data.json (they render as plain text): {', '.join(missing[:4])}"
+        out.append(f"{len(missing)}/{len(matrix)} legacy matrix task ids have no page in "
+                   f"site_data.json (v3 frontend ignores this matrix): {', '.join(missing[:4])}"
                    + (" …" if len(missing) > 4 else ""))
     if board.get("date") and board["date"] not in suites:
         out.append(f'leaderboard_data.date "{board["date"]}" names no suite in site_data.json '
-                   f'(suites: {", ".join(sorted(map(str, suites)))}) -- catalogue and scored '
-                   "snapshot must be presented as separate artifacts")
+                   f'(suites: {", ".join(sorted(map(str, suites)))}) -- this legacy '
+                   "snapshot remains diagnostic-only until replaced by formal v3 authority")
     return out
 
 

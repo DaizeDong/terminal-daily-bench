@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaderboard — terminal-daily-bench</title>
-<meta name="description" content="Task resolution success-rate for agents and models on the current terminal-daily-bench snapshot, with explicit coverage and integrity evidence.">
+<title>Relative capability — terminal-daily-bench</title>
+<meta name="description" content="Receipt-bound v3 relative capability ratings and complete execution-status coverage audit for terminal-daily-bench.">
 <link rel="stylesheet" href="../assets/tw.css">
 <link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
@@ -13,111 +13,75 @@
 <body>
 
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-
   <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
-    <div class="flex w-full max-w-8xl flex-col" data-tdb-canary-host>
+    <div class="flex w-full max-w-7xl flex-col" data-tdb-canary-host>
 
-      <!-- ================= breadcrumb ================= -->
       <nav aria-label="breadcrumb" data-slot="breadcrumb" class="mb-6 hidden font-mono sm:block">
         <ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5">
           <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><a data-slot="breadcrumb-link" class="hover:text-foreground transition-colors" href="../">Home</a></li>
           <li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" class="[&amp;>svg]:size-3.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></li>
-          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Leaderboards</span></li>
+          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Relative capability</span></li>
         </ol>
       </nav>
 
-      <h1 class="font-mono text-4xl tracking-tighter"><span id="suite-name">terminal-daily-bench</span> leaderboard</h1>
-      <div class="mb-6 mt-4 flex flex-wrap items-center gap-4 font-mono text-sm">
-        <p class="text-muted-foreground">Execution-verified model × scaffold results.</p>
-        <a class="text-foreground underline underline-offset-4" href="../submit/">submit results</a>
+      <h1 class="font-mono text-4xl tracking-tighter">relative capability</h1>
+      <p class="text-muted-foreground mb-6 mt-4 max-w-3xl font-mono text-sm/relaxed">Matched-task, multidimensional comparisons from <code>td-relative-capability-v3</code>. This page is currently unranked while the certified 50-task roster and formal campaign receipts are still awaiting publication.</p>
+
+      <div class="bg-card mb-8 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
+        <p><span class="font-medium">Publication gate.</span> A <code>publishable=true</code> row is necessary but not sufficient: the generator must recompute its report pin and match a code-controlled publication allowlist. Any task matrix also needs its own canonical digest and task-ID roster digest bound to that report.</p>
+        <p class="text-muted-foreground mt-4">The current publication registry mode is <span class="text-foreground">code-controlled-allowlist</span> with no approved production bundle. Receipt-authority enforcement code is complete, but its production deployment registry is <span class="text-foreground">active=false</span>. The repository has one collaborator, so independent review cannot yet be satisfied.</p>
+        <p class="text-muted-foreground mt-4">A paired staged-SIF egress canary passed on 2026-08-06. It proved reachable-control/blocked-isolated behavior only for that staged image, runtime, node, and endpoint; no production protected replay has run.</p>
       </div>
 
-      <!-- ================= the board ================= -->
-      <div class="-mx-4 flex flex-col md:mx-0" data-tdb-primary-data>
-
-        <div class="flex flex-col">
-          <div class="flex min-h-10 items-center justify-between px-4 py-1 md:px-0">
-            <p class="text-muted-foreground hidden font-mono text-sm sm:block" id="count">Showing &mdash; entries</p>
-            <div class="flex min-w-0 flex-wrap-reverse items-center justify-end gap-1">
-              <button id="filter-btn" type="button" aria-label="Filters" aria-expanded="false" data-state="closed" class="inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 border bg-background hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 relative h-8 w-8 rounded-none shadow-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg></button>
-            </div>
+      <section class="flex flex-col py-12" data-tdb-primary-data>
+        <div class="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p class="font-mono text-sm">publishable ratings</p>
+            <p class="text-muted-foreground mt-1 font-mono text-xs">overall, language, and authority-bound canonical capability axes only</p>
           </div>
-
-          <div class="bg-card -mb-px border-y md:border-x">
-            <div class="relative flex h-[57px]">
-              <input id="search" type="text" data-slot="input" class="placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input flex py-1 transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 bg-card dark:bg-card h-full w-full min-w-0 rounded-none border-0 px-4 font-mono text-base shadow-none focus-visible:ring-0 sm:text-sm" placeholder="Search leaderboard" value="">
-              <button id="clear-search" data-slot="button" type="button" aria-label="Clear search" class="shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 hover:bg-accent dark:hover:bg-accent/50 size-9 text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 h-full w-12 rounded-none shadow-none hidden"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-            </div>
-          </div>
-
-          <div id="filter-panel" class="bg-card -mb-px hidden border-y font-mono md:border-x">
-            <div class="flex flex-wrap items-center gap-2 px-4 py-3">
-              <p class="text-muted-foreground text-sm">agent</p>
-              <div id="filter-agents" class="flex flex-wrap items-center gap-1"></div>
-            </div>
-          </div>
+          <p class="text-muted-foreground font-mono text-xs" id="rating-count">checking authority&hellip;</p>
         </div>
-
-        <div class="bg-card border-y font-mono md:border-x">
+        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
           <div data-slot="table-container" class="relative w-full overflow-x-auto">
             <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="lb-head"></thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="lb-body"></tbody>
+              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="rating-head"></thead>
+              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="rating-body"></tbody>
             </table>
           </div>
-          <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center text-sm" data-tdb-integrity>
-            <p>Results in this leaderboard correspond to <span class="text-foreground" id="foot-suite">the day's sealed suite</span>.</p>
-            <div class="mx-auto flex flex-row items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
-              <p>Every row in this table comes from completed deterministic execution-gate runs &mdash; protected tests are re-laid after the patch and runtime egress is disabled. Claimed rewards and pending submissions do not count.</p>
-            </div>
+          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="rating-foot">Historical and plumbing-only runs are not ranking authority.</div>
+        </div>
+      </section>
+
+      <section class="flex flex-col py-12">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">coverage and status audit</p>
+          <p class="text-muted-foreground font-mono text-xs">the frozen manifest is the denominator; failures never become zero scores</p>
+        </div>
+        <div class="-mx-4 mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:mx-0" id="audit-cards"></div>
+        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
+          <div data-slot="table-container" class="relative w-full overflow-x-auto">
+            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
+              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="status-head"></thead>
+              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="status-body"></tbody>
+            </table>
+          </div>
+          <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center font-mono text-sm">
+            <p><code>FAILED</code>, <code>BLOCKED</code>, <code>NOT_RUN</code>, and <code>score_accepted=false</code> use <code>outcome:null</code>. They remain in coverage and status counts, never in Bradley&ndash;Terry outcomes.</p>
+            <p>Untrusted declarations are displayed separately and cannot authenticate a status.</p>
           </div>
         </div>
+      </section>
 
-        <div class="flex flex-col px-4 md:px-0">
-          <p class="text-muted-foreground mt-6 font-mono text-sm" id="displaying">Displaying &mdash; entries</p>
-        </div>
-      </div>
-
-      <!-- ================= our extras, below the table ================= -->
-
-      <div class="flex flex-col py-12 sm:pb-16">
+      <section class="flex flex-col py-12 sm:pb-16">
         <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">per-task matrix</p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          <p class="font-mono text-sm">dimension authority</p>
         </div>
-        <p class="text-muted-foreground mx-auto mb-6 max-w-xl text-center font-mono text-sm/relaxed">The scalar ranking turned into a capability map. Every cell is a gate-verified solve or a miss, and the column footers give each task's solve-rate &mdash; the emphasised columns split the field.</p>
-        <div class="-mx-4 flex flex-col md:mx-0">
-          <div class="bg-card border-y font-mono md:border-x">
-            <div data-slot="table-container" class="relative w-full overflow-x-auto">
-              <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-                <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="mx-head"></thead>
-                <tbody data-slot="table-body" id="mx-body"></tbody>
-                <tfoot id="mx-foot"></tfoot>
-              </table>
-            </div>
-            <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center text-sm">
-              <div class="mx-auto flex flex-row flex-wrap items-center justify-center gap-4">
-                <span class="inline-flex items-center gap-2"><span class="bg-primary text-primary-foreground inline-flex size-5 items-center justify-center text-xs">&#9632;</span> gate-verified solve</span>
-                <span class="inline-flex items-center gap-2"><span class="text-muted-foreground inline-flex size-5 items-center justify-center border text-xs">&middot;</span> miss</span>
-                <span>counts match the Accuracy column for the same agent</span>
-              </div>
-            </div>
-          </div>
+        <div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x">
+          <p><span class="font-medium">Available when published:</span> overall, language, and canonical C1&ndash;C14 capability labels bound by the trusted task catalogue.</p>
+          <p class="text-muted-foreground mt-4"><span class="text-foreground">Task-family: unavailable.</span> Historical data has no authority-bound task-family field; the site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</p>
+          <p class="text-muted-foreground mt-4">Model, harness, and complete configuration effects remain separate estimands. A configuration score is never relabeled as model-only performance.</p>
         </div>
-      </div>
-
-      <div class="flex flex-col py-12 sm:pb-16">
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">benchmark quality</p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <p class="text-muted-foreground mx-auto mb-6 max-w-xl text-center font-mono text-sm/relaxed">A leaderboard ranks models. This card measures the instrument: does today's task set discriminate the field, span difficulties, and measure a coherent skill? Each axis is a pure read over the gate-scored matrix and readiness is advisory only; neither establishes semantic verifier false-accept.</p>
-        <div class="-mx-4 sm:mx-0">
-          <div class="grid grid-cols-1 md:grid-cols-2" id="msq"></div>
-        </div>
-        <p class="text-muted-foreground mx-auto mt-6 max-w-xl text-center font-mono text-xs">D discriminative yield &middot; C difficulty coverage &middot; M monotonicity &middot; IRT info 2PL Fisher test-information &middot; KR-20 internal-consistency reliability.</p>
-      </div>
+      </section>
 
     </div>
   </div>
@@ -130,491 +94,173 @@
 
   var T = window.TDB;
   var $ = function (id) { return document.getElementById(id); };
-
-  function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-    });
+  var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ENT[c]; });
+  }
+  function shown(value) { return value == null || value === "" ? "&mdash;" : esc(value); }
+  function count(value) { return typeof value === "number" ? String(value) : "&mdash;"; }
+  function ratio(numerator, denominator) {
+    return typeof numerator === "number" && typeof denominator === "number" && denominator > 0
+      ? numerator + "/" + denominator : "&mdash;";
   }
 
-  var DASH = '<p class="text-left text-muted-foreground">&mdash;</p>';
-  var DASH_R = '<p class="text-right text-muted-foreground">&mdash;</p>';
-
-  /* ---------- their exact table class strings ---------- */
   var TH = "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
     "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
   var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
     "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
   var TR_HEAD = "data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent";
-  /* their body row, minus `cursor-pointer`: their rows navigate to a Harbor Hub
-     detail page, ours do not, so the pointer cursor would promise a click that
-     never happens. Every other token is verbatim. */
   var TR_BODY = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
-  var SORT_BTN = "inline-flex shrink-0 items-center justify-center font-medium whitespace-nowrap " +
-    "transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] " +
-    "focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 " +
-    "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 " +
-    "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 gap-1.5 " +
-    "rounded-md px-3 has-[>svg]:px-2.5 text-base";
-  var BADGE = "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden font-mono";
 
-  var SVG = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" ' +
-    'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
-    'stroke-linejoin="round" aria-hidden="true"';
-  var I_SORT = "<svg " + SVG + '><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>';
-  var I_UP   = "<svg " + SVG + '><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>';
-  var I_DOWN = "<svg " + SVG + '><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>';
-
-  /* ======================================================================
-     the board
-     ====================================================================== */
-
-  var RESERVED_ROW_KEYS = {
-    model: 1, lead: 1, agent_org: 1, model_org: 1, effort: 1,
-    date: 1, pr: 1, cost: 1, cost_usd: 1
-  };
-  var KNOWN_HARNESSES = {
-    single_shot: { label: "single-shot", org: "terminal-daily" },
-    terminus2: { label: "terminus-2", org: "terminal-daily" }
-  };
-
-  function isHarnessCell(value) {
-    return value && typeof value === "object" && !Array.isArray(value) &&
-      (Object.prototype.hasOwnProperty.call(value, "n") ||
-       Object.prototype.hasOwnProperty.call(value, "solved") ||
-       Object.prototype.hasOwnProperty.call(value, "rate") ||
-       Object.prototype.hasOwnProperty.call(value, "fa_n"));
-  }
-
-  /* Pooled data gives stable column order; per-model cells add newly published
-     harnesses even when the aggregate was generated by an older producer. */
-  function discoverHarnesses(b) {
-    var names = [];
-    var seen = Object.create(null);
-    function add(key, value) {
-      if (!Object.prototype.hasOwnProperty.call(RESERVED_ROW_KEYS, key) &&
-          !seen[key] && isHarnessCell(value)) {
-        seen[key] = true;
-        names.push(key);
+  function relativeReport(documentData) {
+    var candidates = [documentData, documentData && documentData.relative_capability,
+      documentData && documentData.relative_scoring];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i] && candidates[i].schema_version === "td-relative-capability-v3") {
+        return candidates[i];
       }
     }
-    var pooled = (b && b.pooled) || {};
-    Object.keys(pooled).forEach(function (key) { add(key, pooled[key]); });
-    ((b && b.leaderboard) || []).forEach(function (row) {
-      Object.keys(row || {}).forEach(function (key) { add(key, row[key]); });
-    });
-    return names;
+    return null;
   }
 
-  function harnessLabel(key) {
-    return Object.prototype.hasOwnProperty.call(KNOWN_HARNESSES, key)
-      ? KNOWN_HARNESSES[key].label : key;
+  function formalAuthority(report, scoring) {
+    var input = (report && report.input) || {};
+    return !!report && scoring && scoring.official_ranking === true &&
+      scoring.publication_registry_mode === "code-controlled-allowlist" &&
+      scoring.publication_bundle_approved === true &&
+      scoring.relative_report_digest_matches === true &&
+      scoring.anti_cheat_deployment_active === true &&
+      input.frozen_task_roster_n === 50 &&
+      input.task_roster_digest_trusted === true &&
+      input.cell_manifest_digest_trusted === true;
   }
 
-  function harnessOrg(key) {
-    return Object.prototype.hasOwnProperty.call(KNOWN_HARNESSES, key)
-      ? KNOWN_HARNESSES[key].org : null;
-  }
+  var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };
 
-  var COLS = [
-    { key: "rank",      label: "Rank",      right: false, sortable: false },
-    { key: "agent",     label: "Agent",     right: false },
-    { key: "model",     label: "Model",     right: false },
-    { key: "effort",    label: "Effort",    right: false },
-    { key: "acc",       label: "Accuracy",  right: true  },
-    { key: "date",      label: "Date",      right: true  },
-    { key: "agent_org", label: "Agent Org", right: false },
-    { key: "model_org", label: "Model Org", right: false },
-    { key: "pr",        label: "PR",        right: false },
-    { key: "hacks",     label: "Exploit FA", right: true  },
-    { key: "cost",      label: "Cost",      right: true  }
-  ];
-
-  var HACK_TITLE = "Semantic verifier false-accepts observed in labeled exploit trials. " +
-    "A dash means this model/scaffold cell has not been measured against that corpus; " +
-    "protected-test replay alone is not evidence of zero.";
-
-  var ALL = [];          /* every entry, unfiltered */
-  var AGENT_FILTER = Object.create(null); /* agent name -> bool */
-  var SORT = { key: "acc", dir: "desc" };
-  var MEASURED = false;
-
-  /* Task ids that actually have a generated registry page. A task can be scored on
-     the board before its page is published, so we only link the ones we know exist —
-     a dead link is worse than a plain label. */
-  var PUBLISHED = null;
-
-  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  function prettyDate(s) {
-    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ""));
-    if (!m) return s || null;
-    return MONTHS[Number(m[2]) - 1] + " " + Number(m[3]) + ", " + m[1];
-  }
-
-  function build(b) {
-    var out = [];
-    var harnesses = discoverHarnesses(b);
-    (b.leaderboard || []).forEach(function (r) {
-      harnesses.forEach(function (key) {
-        var s = r[key];
-        if (!s || !s.n) return;
-        var solved = (s.solved != null) ? s.solved : Math.round(s.rate * s.n);
-        var measuredFa = typeof s.fa === "number" &&
-          typeof s.fa_n === "number" && s.fa_n > 0;
-        out.push({
-          agent: harnessLabel(key),
-          agent_org: s.agent_org || r.agent_org || harnessOrg(key),
-          model: r.model,
-          model_org: s.model_org || r.model_org || null,
-          effort: s.effort || r.effort || null,
-          stat: { n: s.n, solved: solved },
-          p: solved / s.n,
-          date: prettyDate(s.date || r.date || b.date),
-          pr: s.pr || r.pr || null,
-          hacks: measuredFa ? s.fa : null,
-          hacks_n: measuredFa ? s.fa_n : null,
-          cost: (s.cost_usd != null) ? s.cost_usd
-              : (s.cost != null) ? s.cost
-              : (r.cost_usd != null) ? r.cost_usd
-              : (r.cost != null) ? r.cost : null
+  function collectPublishable(report, scoring) {
+    if (!formalAuthority(report, scoring)) return [];
+    var rows = [];
+    (report.axes || []).forEach(function (axis) {
+      if (!axis || !ALLOWED_DIMENSIONS[axis.dimension]) return;
+      ["model", "harness", "configuration"].forEach(function (kind) {
+        var table = axis.entities && axis.entities[kind];
+        ((table && table.ratings) || []).forEach(function (rating) {
+          var publishable = rating && rating.publishable === true &&
+            typeof rating.relative_score === "number" && Array.isArray(rating.ci);
+          if (!publishable) return;
+          rows.push({ axis: axis.axis, dimension: axis.dimension, kind: kind, rating: rating });
         });
       });
     });
-    return out;
-  }
-
-  function sortVal(e, key) {
-    switch (key) {
-      case "acc":   return e.p;
-      case "hacks": return (e.hacks == null) ? -1 : e.hacks / e.hacks_n;
-      case "cost":  return (e.cost == null) ? -1 : e.cost;
-      case "date":  return Date.parse(e.date || "") || 0;
-      default:      return String(e[key] == null ? "" : e[key]).toLowerCase();
-    }
-  }
-
-  function visible() {
-    var q = ($("search").value || "").trim().toLowerCase();
-    return ALL.filter(function (e) {
-      if (AGENT_FILTER[e.agent] === false) return false;
-      if (!q) return true;
-      return [e.agent, e.model, e.model_org, e.agent_org, e.effort, e.date]
-        .join(" ").toLowerCase().indexOf(q) >= 0;
-    }).sort(function (x, y) {
-      var a = sortVal(x, SORT.key), b2 = sortVal(y, SORT.key);
-      var c = (a < b2) ? -1 : (a > b2) ? 1 : 0;
-      if (!c) return (y.p - x.p) || (y.stat.n - x.stat.n);
-      return SORT.dir === "asc" ? c : -c;
+    return rows.sort(function (a, b) {
+      return String(a.axis).localeCompare(String(b.axis)) ||
+        a.kind.localeCompare(b.kind) ||
+        ((a.rating.rank_within_component || 999999) -
+          (b.rating.rank_within_component || 999999)) ||
+        String(a.rating.name).localeCompare(String(b.rating.name));
     });
   }
 
-  function renderHead() {
-    $("lb-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
-      COLS.map(function (c) {
-        if (c.sortable === false) {
-          return '<th data-slot="table-head" class="' + TH + '">' + c.label + "</th>";
-        }
-        var on = SORT.key === c.key;
-        var aria = on ? (SORT.dir === "asc" ? "ascending" : "descending") : "none";
-        var ico = on ? (SORT.dir === "asc" ? I_UP : I_DOWN) : I_SORT;
-        return '<th data-slot="table-head" class="' + TH + '" aria-sort="' + aria + '">' +
-          '<div class="flex' + (c.right ? " justify-end" : "") + '">' +
-            '<button data-slot="button" type="button" data-sort="' + c.key + '" ' +
-              'aria-label="Sort ' + c.label + '" class="' + SORT_BTN +
-              (c.right ? "" : " -ml-3") + '">' + c.label + ico + "</button>" +
-          "</div></th>";
+  function participant(row) {
+    var rating = row.rating;
+    if (row.kind === "configuration" && rating.model && rating.harness) {
+      return rating.model + " + " + rating.harness;
+    }
+    return rating.name || rating.model || rating.harness || "";
+  }
+
+  function renderRatings(report, rawDocument, scoring) {
+    var rows = collectPublishable(report, scoring);
+    $("rating-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
+      ["Axis", "Estimand", "Participant", "Rank", "Relative score", "95% CI", "Tasks", "Attempt coverage"].map(function (label, index) {
+        return '<th data-slot="table-head" class="' + TH + '"><div class="flex' +
+          (index >= 3 ? " justify-end" : "") + '">' + esc(label) + "</div></th>";
       }).join("") + "</tr>";
-  }
-
-  function textCell(v, right) {
-    if (v == null || v === "") return right ? DASH_R : DASH;
-    return '<p class="text-' + (right ? "right" : "left") + '">' + esc(v) + "</p>";
-  }
-
-  function prCell(v) {
-    if (!v) return DASH;
-    if (/^https?:/.test(String(v))) {
-      return '<p class="text-left"><a href="' + esc(v) + '" target="_blank" rel="noopener noreferrer" ' +
-        'class="hover:underline hover:underline-offset-4">link</a></p>';
-    }
-    return '<p class="text-left">' + esc(v) + "</p>";
-  }
-
-  function costCell(v) {
-    if (!MEASURED || v == null) {
-      return '<p class="text-right text-muted-foreground" title="token/$ accounting is capturable ' +
-        'at the runner but was not metered on this suite">&mdash;</p>';
-    }
-    return '<p class="text-right tabular-nums">$' + Number(v).toFixed(2) + "</p>";
-  }
-
-  function renderBody() {
-    var rows = visible();
-    $("count").textContent = "Showing " + rows.length + " entr" + (rows.length === 1 ? "y" : "ies");
-    $("displaying").textContent = "Displaying " + rows.length + " of " + ALL.length +
-      " available entr" + (ALL.length === 1 ? "y" : "ies");
-
     if (!rows.length) {
-      $("lb-body").innerHTML = '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '" colspan="' + COLS.length + '">' +
-        '<p class="text-muted-foreground text-left">' +
-        (ALL.length ? "No entries match this search." :
-          "No leaderboard published yet — generate leaderboard_data.json at the site root.") +
-        "</p></td></tr>";
+      $("rating-body").innerHTML = '<tr data-slot="table-row" class="' + TR_BODY + '">' +
+        '<td data-slot="table-cell" class="' + TD + '" colspan="8"><div class="py-4 whitespace-normal">' +
+        '<p class="font-medium">Awaiting certified 50-task results.</p>' +
+        '<p class="text-muted-foreground mt-2">No code-approved complete v3 rating is publishable. ' +
+        'Embedded trust booleans, self-signed bundles, and legacy artifacts are diagnostic-only and intentionally hidden.</p>' +
+        "</div></td></tr>";
+      $("rating-count").textContent = "0 publishable rows";
+      $("rating-foot").textContent = rawDocument && (rawDocument.leaderboard || rawDocument.matrix)
+        ? "Legacy result data detected and ignored: it is not td-relative-capability-v3 authority."
+        : "No formal relative-capability document is published.";
       return;
     }
-
-    $("lb-body").innerHTML = rows.map(function (e, i) {
-      var td = function (html) {
-        return '<td data-slot="table-cell" class="' + TD + '">' + html + "</td>";
-      };
+    $("rating-body").innerHTML = rows.map(function (row) {
+      var rating = row.rating;
+      var score = (rating.relative_score > 0 ? "+" : "") + rating.relative_score;
+      var ci = rating.ci.length === 2 ? "[" + rating.ci[0] + ", " + rating.ci[1] + "]" : "\u2014";
       return '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        td('<p class="text-left tabular-nums">' + (i + 1) + "</p>") +
-        td(textCell(e.agent)) +
-        td(textCell(e.model)) +
-        td(e.effort ? textCell(e.effort)
-          : '<p class="text-left text-muted-foreground" title="no reasoning-effort setting was ' +
-            'recorded for this run">&mdash;</p>') +
-        td(T.rateCell(e.stat)) +
-        td(textCell(e.date, true)) +
-        td(textCell(e.agent_org)) +
-        td(textCell(e.model_org)) +
-        td(prCell(e.pr)) +
-        td(e.hacks == null
-          ? '<p class="text-right text-muted-foreground" title="' + esc(HACK_TITLE) + '">&mdash;</p>'
-          : '<p class="text-right tabular-nums" title="' + esc(HACK_TITLE) + '">' +
-            esc(e.hacks) + "/" + esc(e.hacks_n) + "</p>") +
-        td(costCell(e.cost)) +
-      "</tr>";
-    }).join("");
-  }
-
-  function render() { renderHead(); renderBody(); }
-
-  /* ---------- controls ---------- */
-
-  $("lb-head").addEventListener("click", function (ev) {
-    var btn = ev.target && ev.target.closest ? ev.target.closest("button[data-sort]") : null;
-    if (!btn) return;
-    var k = btn.getAttribute("data-sort");
-    if (SORT.key === k) SORT.dir = (SORT.dir === "asc") ? "desc" : "asc";
-    else { SORT.key = k; SORT.dir = (k === "acc" || k === "cost" || k === "date") ? "desc" : "asc"; }
-    render();
-  });
-
-  $("search").addEventListener("input", function () {
-    $("clear-search").classList.toggle("hidden", !this.value);
-    renderBody();
-  });
-  $("clear-search").addEventListener("click", function () {
-    $("search").value = "";
-    this.classList.add("hidden");
-    renderBody();
-  });
-
-  $("filter-btn").addEventListener("click", function () {
-    var open = this.getAttribute("data-state") === "open";
-    this.setAttribute("data-state", open ? "closed" : "open");
-    this.setAttribute("aria-expanded", open ? "false" : "true");
-    $("filter-panel").classList.toggle("hidden", open);
-  });
-
-  function renderFilters() {
-    var names = [];
-    ALL.forEach(function (e) { if (names.indexOf(e.agent) < 0) names.push(e.agent); });
-    $("filter-agents").innerHTML = names.map(function (n) {
-      var on = AGENT_FILTER[n] !== false;
-      return '<button type="button" data-agent="' + esc(n) + '" class="' + BADGE + " " +
-        (on ? "border-transparent bg-primary text-primary-foreground"
-            : "text-muted-foreground") + '">' + esc(n) + "</button>";
-    }).join("");
-  }
-
-  $("filter-agents").addEventListener("click", function (ev) {
-    var btn = ev.target && ev.target.closest ? ev.target.closest("button[data-agent]") : null;
-    if (!btn) return;
-    var n = btn.getAttribute("data-agent");
-    AGENT_FILTER[n] = (AGENT_FILTER[n] === false);
-    renderFilters();
-    renderBody();
-  });
-
-  /* ======================================================================
-     extras
-     ====================================================================== */
-
-  function renderMatrix(b) {
-    var mx = b && b.matrix;
-    if (!mx || !mx.rows || !mx.rows.length) {
-      $("mx-head").innerHTML = "";
-      $("mx-foot").innerHTML = "";
-      $("mx-body").innerHTML = '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '">' +
-        '<p class="text-muted-foreground text-left">No per-task grid published for this suite.</p>' +
-        "</td></tr>";
-      return;
-    }
-    var nT = mx.tasks.length, nM = mx.rows.length;
-
-    $("mx-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
-      '<th data-slot="table-head" class="' + TH + '">model \\ task</th>' +
-      mx.tasks.map(function (t) {
-        var s = String(t);
-        var short = esc(s.length > 13 ? s.slice(0, 12) + "…" : s);
-        var inner = (PUBLISHED && !PUBLISHED[s]) ? short
-          : '<a href="../registry/' + encodeURIComponent(s) +
-            '/" class="hover:underline hover:underline-offset-4">' + short + "</a>";
-        return '<th data-slot="table-head" class="' + TH + '" title="' + esc(s) + '">' +
-          '<div class="flex justify-center">' + inner + "</div></th>";
-      }).join("") +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">solved</div></th>' +
-      "</tr>";
-
-    $("mx-body").innerHTML = mx.rows.map(function (r) {
-      var cells = r.g.map(function (v) {
-        var chip = v
-          ? '<span class="bg-primary text-primary-foreground inline-flex size-5 items-center ' +
-            'justify-center text-xs" title="gate-verified solve">&#9632;</span>'
-          : '<span class="text-muted-foreground inline-flex size-5 items-center justify-center ' +
-            'border text-xs" title="miss">&middot;</span>';
-        return '<td data-slot="table-cell" class="' + TD + '">' +
-          '<div class="flex justify-center">' + chip + "</div></td>";
-      }).join("");
-      var tot = r.g.reduce(function (a, v) { return a + (v ? 1 : 0); }, 0);
-      return '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + esc(r.model) + "</p></td>" +
-        cells +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(row.axis) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(row.kind) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(participant(row)) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + shown(rating.rank_within_component) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(score) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(ci) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + shown(rating.n_tasks) + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
-          tot + "/" + nT + "</p></td></tr>";
+          ratio(rating.attempt_coverage_numerator, rating.attempt_coverage_denominator) + "</p></td></tr>";
+    }).join("");
+    $("rating-count").textContent = rows.length + " publishable row" + (rows.length === 1 ? "" : "s");
+    $("rating-foot").textContent = "Centered Elo-style deltas within connected components; configuration effects are not model effects.";
+  }
+
+  function statCard(label, value, note) {
+    return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col border -mb-px rounded-none border-x-0 py-0 font-mono shadow-none sm:-mr-px sm:border-x">' +
+      '<div class="flex flex-1 flex-col justify-between gap-4 py-6"><div data-slot="card-header" class="px-6">' +
+      '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +
+      '<p data-tdb-stat-value class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' + shown(value) + "</p>" +
+      '</div><div data-slot="card-content" class="px-6"><p class="text-muted-foreground font-mono text-xs">' + esc(note) + "</p></div></div></div>";
+  }
+
+  function renderAudit(report) {
+    var input = (report && report.input) || {};
+    var evidence = input.execution_evidence_audit || {};
+    var audit = input.execution_status_audit || {};
+    var authenticated = audit.authenticated_counts || {};
+    var untrusted = audit.untrusted_declared_counts || {};
+    var cards = [
+      ["frozen roster", input.frozen_task_roster_n != null ? input.frozen_task_roster_n + "/50" : null, "exactly 50 required"],
+      ["manifest cells", input.cell_manifest_n, "fixed coverage denominator"],
+      ["accepted outcomes", input.successful_records_admitted_to_outcomes, "SUCCESS + score_accepted=true"],
+      ["excluded status rows", input.non_success_or_unaccepted_records_excluded, "counted in coverage, not outcomes"],
+      ["trusted receipts", evidence.admitted != null ? evidence.admitted + "/" + evidence.claimed : null, "manifest-bound and allowlisted"],
+      ["task-family", null, "unavailable; not inferred and not zero"]
+    ];
+    $("audit-cards").innerHTML = cards.map(function (card) {
+      return statCard(card[0], card[1], card[2]);
     }).join("");
 
-    $("mx-foot").innerHTML = '<tr data-slot="table-row" class="' + TR_BODY + ' border-t">' +
-      '<td data-slot="table-cell" class="' + TD + '">' +
-        '<p class="text-muted-foreground text-left">solve-rate</p></td>' +
-      mx.tasks.map(function (_, c) {
-        var s = mx.rows.reduce(function (a, r) { return a + (r.g[c] ? 1 : 0); }, 0);
-        var split = s > 0 && s < nM;
-        return '<td data-slot="table-cell" class="' + TD + '"' +
-          (split ? ' title="splits the field — counted by D"' : "") + ">" +
-          '<p class="text-center tabular-nums ' +
-          (split ? "text-foreground font-medium" : "text-muted-foreground") + '">' +
-          s + "/" + nM + "</p></td>";
-      }).join("") +
-      '<td data-slot="table-cell" class="' + TD + '">' +
-        '<p class="text-muted-foreground text-right">' + esc(mx.scaffold || "") + "</p></td></tr>";
+    $("status-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
+      '<th data-slot="table-head" class="' + TH + '">Execution status</th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">Authenticated</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">Untrusted declaration</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '">Outcome treatment</th></tr>';
+    var statuses = ["SUCCESS", "FAILED", "BLOCKED", "NOT_RUN"];
+    $("status-body").innerHTML = statuses.map(function (status) {
+      var treatment = status === "SUCCESS"
+        ? "numeric only when score_accepted=true"
+        : "\u2014 (outcome:null; excluded from ratings)";
+      return '<tr data-slot="table-row" class="' + TR_BODY + '">' +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + status + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + count(authenticated[status]) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + count(untrusted[status]) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + treatment + "</p></td></tr>";
+    }).join("");
   }
-
-  var CARD = "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
-    "transition-all duration-200 sm:-mr-px sm:border-x";
-  var CARD_HEAD = "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start " +
-    "gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
-
-  function axis(name, val, ok, ref) {
-    if (val == null) return "";
-    var w = Math.max(2, Math.min(100, (val / (ref || 1)) * 100));
-    return '<div class="mb-3">' +
-      '<div class="flex items-center justify-between gap-2">' +
-        '<span class="text-muted-foreground text-xs">' + name + "</span>" +
-        '<span class="tabular-nums text-xs' + (ok ? "" : " text-muted-foreground") + '">' +
-          val.toFixed(3) + "</span>" +
-      "</div>" +
-      '<div class="bg-border mt-1 h-1.5 w-full">' +
-        '<div class="bg-foreground h-full' + (ok ? "" : " opacity-50") +
-        '" style="width:' + w.toFixed(1) + '%"></div>' +
-      "</div></div>";
-  }
-
-  function frame(q, key, label) {
-    var f = q[key];
-    if (!f) return "";
-    var th = q.thresholds || { min_D: 0.4, min_kr20: 0.7, max_d_halfwidth: 0.15 };
-    var hw = f.D_ci ? (f.D_ci[1] - f.D_ci[0]) / 2 : null;
-    var badge = f.ready
-      ? '<span data-slot="badge" class="' + BADGE +
-        ' border-transparent bg-primary text-primary-foreground">ready</span>'
-      : '<span data-slot="badge" class="' + BADGE + ' text-muted-foreground" ' +
-        'title="not yet research-grade">not yet' +
-        (f.required_n_D ? " · ~" + f.required_n_D + " tasks" : "") + "</span>";
-    var foot = (hw != null
-        ? "D 95% CI [" + f.D_ci[0].toFixed(3) + ", " + f.D_ci[1].toFixed(3) +
-          "] · half-width ±" + hw.toFixed(2) + " vs target ±" + th.max_d_halfwidth + " · "
-        : "") +
-      ((f.composite != null) ? "composite " + f.composite.toFixed(3) + " · " : "") +
-      f.n_tasks + " tasks × " + f.n_models + " models" +
-      (f.bottleneck ? " · bottleneck: " + esc(f.bottleneck) : "");
-
-    return '<div data-slot="card" class="' + CARD + '">' +
-      '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
-        '<div data-slot="card-header" class="' + CARD_HEAD + '">' +
-          '<div data-slot="card-title" class="leading-none font-semibold">' +
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(label) + "</h2></div>" +
-          '<div class="mt-2 flex gap-2">' + badge + "</div>" +
-        "</div>" +
-        '<div data-slot="card-content" class="px-6">' +
-          axis("D &mdash; discrimination", f.D, f.D >= th.min_D) +
-          axis("C &mdash; difficulty coverage", f.C, true) +
-          axis("M &mdash; monotonicity", f.M, true) +
-          axis("IRT info (2PL)", f.irt_info, f.irt_info >= 1, 2.0) +
-          axis("KR-20 reliability", f.kr20, f.kr20 >= th.min_kr20) +
-        "</div>" +
-        '<div data-slot="card-footer" class="flex items-center px-6 [.border-t]:pt-6">' +
-          '<p class="text-muted-foreground font-mono text-xs">' + foot + "</p>" +
-        "</div>" +
-      "</div></div>";
-  }
-
-  function renderQuality(b) {
-    var q = b && b.quality;
-    var html = q ? discoverHarnesses(b).map(function (key) {
-      return frame(q, key, harnessLabel(key) + " frame");
-    }).join("") : "";
-    $("msq").innerHTML = html ||
-      '<p class="text-muted-foreground px-4 font-mono text-sm">No quality card computed for this suite.</p>';
-  }
-
-  /* ======================================================================
-     load
-     ====================================================================== */
 
   Promise.all([
-    T.getJSON("leaderboard_data.json").catch(function () { return null; }),
-    T.getJSON("site_data.json").catch(function () { return null; })
-  ]).then(function (res) {
-    var b = res[0], site = res[1];
-
-    if (site && Array.isArray(site.tasks)) {
-      PUBLISHED = {};
-      site.tasks.forEach(function (t) { if (t && t.id) PUBLISHED[t.id] = 1; });
-    }
-
-    if (!b) {
-      ALL = [];
-      render();
-      renderMatrix(null);
-      renderQuality(null);
-      return;
-    }
-    MEASURED = !!b.cost_measured;
-
-    if (b.date) {
-      $("suite-name").textContent = "terminal-daily-bench@" + b.date;
-      document.title = "Leaderboard " + b.date + " — terminal-daily-bench";
-      $("foot-suite").textContent = "terminal-daily-bench@" + b.date +
-        (b.n_tasks != null ? " (" + b.n_tasks + " tasks)" : "");
-    }
-    ALL = build(b);
-    renderFilters();
-    render();
-    renderMatrix(b);
-    renderQuality(b);
+    T.getJSON("../site_data.json").catch(function () { return null; }),
+    T.getJSON("../leaderboard_data.json").catch(function () { return null; })
+  ]).then(function (documents) {
+    var site = documents[0];
+    var documentData = documents[1];
+    var report = relativeReport(documentData);
+    renderRatings(report, documentData, (site && site.scoring) || {});
+    renderAudit(report);
   });
 })();
 </script>

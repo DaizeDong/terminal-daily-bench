@@ -145,6 +145,221 @@ def test_archive_live_sample_copy_merges_fallback_memberships(tmp_path):
     assert verify_site.check_suite_membership(release) == []
 
 
+def _formal_relative_report(
+    roster_n: int = 50,
+    *,
+    publishable: bool = True,
+    task_ids: list[str] | None = None,
+) -> dict:
+    task_ids = task_ids or [f"td-formal-{number:02d}" for number in range(roster_n)]
+    return {
+        "schema_version": "td-relative-capability-v3",
+        "input": {
+            "frozen_task_roster_n": roster_n,
+            "frozen_task_roster_sha256": "1" * 64,
+            "frozen_task_id_roster_sha256": (
+                gen_site_data._task_id_roster_sha256(task_ids)
+            ),
+            "task_roster_digest_trusted": True,
+            "cell_manifest_sha256": "2" * 64,
+            "cell_manifest_digest_trusted": True,
+        },
+        "axes": [{
+            "axis": "overall",
+            "entities": {
+                "model": {
+                    "ratings": [{
+                        "name": "model-a",
+                        "relative_score": 12.0,
+                        "ci": [8.0, 16.0],
+                        "publishable": publishable,
+                    }]
+                }
+            },
+        }],
+    }
+
+
+def _bound_publication(report: dict, matrix: dict) -> dict:
+    tasks = matrix["tasks"]
+    return {
+        "relative_capability": report,
+        "matrix": matrix,
+        "publication_authority": {
+            "schema_version": "td-relative-publication-bundle-v1",
+            "relative_report_sha256": gen_site_data.canonical_sha256(report),
+            "matrix_sha256": gen_site_data.canonical_sha256(matrix),
+            "matrix_task_id_roster_sha256": (
+                gen_site_data._task_id_roster_sha256(tasks)
+            ),
+        },
+    }
+
+
+def _approve_publication(monkeypatch, board: dict) -> None:
+    authority_sha256 = gen_site_data.canonical_sha256(
+        board["publication_authority"]
+    )
+    monkeypatch.setattr(
+        gen_site_data,
+        "APPROVED_PUBLICATION_BUNDLE_SHA256S",
+        frozenset({authority_sha256}),
+    )
+    monkeypatch.setattr(gen_site_data, "ANTI_CHEAT_DEPLOYMENT_ACTIVE", True)
+
+
+def test_legacy_matrix_cannot_mint_task_scores_or_difficulty(tmp_path):
+    release = tmp_path / "release"
+    _package(release, "archive", "td-legacy", 9)
+    _write_json(release / "registry.json", {"suites": [{
+        "id": "sample", "status": "archive", "n_tasks": 1,
+        "path": "tasks/archive",
+    }]})
+    board = {
+        "date": "2026-07-23",
+        "n_models": 1,
+        "leaderboard": [{"model": "legacy-model"}],
+        "matrix": {
+            "tasks": ["td-legacy"],
+            "rows": [{"model": "legacy-model", "g": [0]}],
+        },
+    }
+
+    data = gen_site_data.collect(release, board)
+    task = data["tasks"][0]
+
+    assert data["scoring"]["official_ranking"] is False
+    assert data["scoring"]["legacy_snapshot_present"] is True
+    assert data["scoring"]["state"] == "awaiting-certified-50-task-results"
+    assert task["solved_by"] is None
+    assert task["n_models"] is None
+    assert task["difficulty"] == ""
+
+
+def test_code_approved_v3_report_can_bind_exact_matrix(tmp_path, monkeypatch):
+    release = tmp_path / "release"
+    _package(release, "archive", "td-formal-00", 10)
+    _write_json(release / "registry.json", {"suites": [{
+        "id": "formal", "status": "archive", "n_tasks": 1,
+        "path": "tasks/archive",
+    }]})
+    tasks = [f"td-formal-{number:02d}" for number in range(50)]
+    matrix = {
+        "tasks": tasks,
+        "rows": [
+            {"model": "model-a", "g": [1] + [0] * 49},
+            {"model": "model-b", "g": [0] * 50},
+        ],
+    }
+    board = _bound_publication(
+        _formal_relative_report(task_ids=tasks), matrix
+    )
+    _approve_publication(monkeypatch, board)
+
+    data = gen_site_data.collect(release, board)
+    task = data["tasks"][0]
+
+    assert data["scoring"]["official_ranking"] is True
+    assert data["scoring"]["matrix_published"] is True
+    assert data["scoring"]["formal_roster_n"] == 50
+    assert task["solved_by"] == 1
+    assert task["n_models"] == 2
+    assert task["difficulty"] == "medium"
+
+
+@pytest.mark.parametrize("mutation", ["swapped_tasks", "arbitrary_outcomes"])
+def test_bound_report_rejects_swapped_or_arbitrary_unbound_matrix(
+    tmp_path, monkeypatch, mutation
+):
+    release = tmp_path / "release"
+    _package(release, "archive", "td-formal-00", 10)
+    _write_json(release / "registry.json", {"suites": [{
+        "id": "formal", "status": "archive", "n_tasks": 1,
+        "path": "tasks/archive",
+    }]})
+    tasks = [f"td-formal-{number:02d}" for number in range(50)]
+    matrix = {
+        "tasks": tasks,
+        "rows": [
+            {"model": "model-a", "g": [1] + [0] * 49},
+            {"model": "model-b", "g": [0] * 50},
+        ],
+    }
+    board = _bound_publication(
+        _formal_relative_report(task_ids=tasks), matrix
+    )
+    _approve_publication(monkeypatch, board)
+    if mutation == "swapped_tasks":
+        board["matrix"]["tasks"][0], board["matrix"]["tasks"][1] = (
+            board["matrix"]["tasks"][1],
+            board["matrix"]["tasks"][0],
+        )
+    else:
+        board["matrix"]["rows"][0]["g"][0] = 0
+
+    data = gen_site_data.collect(release, board)
+    task = data["tasks"][0]
+
+    # The report artifact remains code-approved, but the changed matrix no
+    # longer matches its canonical pin and therefore cannot mint task scores.
+    assert data["scoring"]["official_ranking"] is True
+    assert data["scoring"]["matrix_published"] is False
+    assert data["scoring"]["matrix_digest_matches"] is False
+    assert task["solved_by"] is None
+    assert task["n_models"] is None
+    assert task["difficulty"] == ""
+
+
+def test_self_signed_report_and_matrix_cannot_approve_themselves(tmp_path):
+    release = tmp_path / "release"
+    _package(release, "archive", "td-formal-00", 10)
+    _write_json(release / "registry.json", {"suites": [{
+        "id": "formal", "status": "archive", "n_tasks": 1,
+        "path": "tasks/archive",
+    }]})
+    tasks = [f"td-formal-{number:02d}" for number in range(50)]
+    matrix = {
+        "tasks": tasks,
+        "rows": [{"model": "model-a", "g": [1] + [0] * 49}],
+    }
+    board = _bound_publication(
+        _formal_relative_report(task_ids=tasks), matrix
+    )
+
+    data = gen_site_data.collect(release, board)
+    task = data["tasks"][0]
+
+    assert data["scoring"]["publication_registry_mode"] == (
+        "code-controlled-allowlist"
+    )
+    assert data["scoring"]["publication_bundle_approved"] is False
+    assert data["scoring"]["anti_cheat_deployment_active"] is False
+    assert data["scoring"]["official_ranking"] is False
+    assert data["scoring"]["matrix_published"] is False
+    assert task["solved_by"] is None
+
+
+@pytest.mark.parametrize(
+    "report",
+    [
+        _formal_relative_report(49),
+        _formal_relative_report(50, publishable=False),
+        {
+            **_formal_relative_report(),
+            "input": {
+                **_formal_relative_report()["input"],
+                "cell_manifest_digest_trusted": False,
+            },
+        },
+    ],
+)
+def test_incomplete_or_untrusted_v3_report_stays_unranked(report):
+    status = gen_site_data.scoring_status({"relative_capability": report})
+
+    assert status["official_ranking"] is False
+    assert status["state"] == "unranked-incomplete-or-untrusted"
+
+
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [

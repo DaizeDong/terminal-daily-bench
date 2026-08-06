@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>terminal-daily-bench — status, tasks, and leaderboard</title>
-<meta name="description" content="Current terminal-daily-bench suite status, execution-verified leaderboard results, and published tasks.">
+<title>terminal-daily-bench — status, tasks, and relative capability</title>
+<meta name="description" content="Current terminal-daily-bench catalogue, formal publication status, and receipt-bound relative capability results when available.">
 <link rel="stylesheet" href="./assets/tw.css">
 <link rel="stylesheet" href="./assets/tw-extra.css">
 <link rel="stylesheet" href="./assets/site.css">
@@ -19,10 +19,10 @@
       <section class="mx-auto flex max-w-4xl flex-col items-center gap-6 py-8 text-center sm:pt-24" data-tdb-section="intro">
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
         <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance sm:text-6xl/tight">terminal-daily-bench</h1>
-        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance sm:text-xl/relaxed">Fresh merged pull requests become executable tasks. Agents submit patches; protected tests decide the score.</p>
+        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance sm:text-xl/relaxed">Fresh merged pull requests become executable tasks. The catalogue is public; the certified 50-task relative ranking is still awaiting formal results.</p>
         <div class="grid grid-cols-1 gap-2 lg:grid-cols-3">
           <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-primary px-8 text-base font-medium text-primary-foreground transition-all hover:bg-primary/90" href="#status">current status</a>
-          <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-secondary px-8 text-base font-medium text-secondary-foreground transition-all hover:bg-secondary/80" href="./leaderboard/">leaderboard</a>
+          <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-secondary px-8 text-base font-medium text-secondary-foreground transition-all hover:bg-secondary/80" href="./leaderboard/">relative scores</a>
           <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-secondary px-8 text-base font-medium text-secondary-foreground transition-all hover:bg-secondary/80" href="./registry/">browse tasks</a>
         </div>
       </section>
@@ -30,7 +30,7 @@
       <section id="status" class="flex w-full flex-col py-8" data-tdb-section="status">
         <div class="mb-4 flex flex-col items-center gap-2">
           <p class="font-mono text-sm">benchmark status</p>
-          <p class="text-muted-foreground font-mono text-xs">suite catalogue and scored snapshot are versioned separately</p>
+          <p class="text-muted-foreground font-mono text-xs">catalogue availability is separate from ranking authority</p>
         </div>
 
         <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
@@ -47,7 +47,8 @@
             <summary class="cursor-pointer font-medium">integrity limits and current blockers</summary>
             <div class="text-muted-foreground mt-4">
               <p>Deterministic code re-lays and executes protected tests. A claimed reward is never accepted as a score.</p>
-              <p class="mt-4">Offline runs request runtime egress isolation, but the deployment egress canary is still pending; installed vendor CLI runs remain online for provider access.</p>
+              <p class="mt-4">A paired staged-SIF egress canary passed on the operator cluster on 2026-08-06: its control was reachable and its isolated run was blocked. This proves only that staged image/runtime/node/endpoint combination; no production protected replay has run.</p>
+              <p class="mt-4">Receipt-authority enforcement code is complete, but the deployment registry remains <span class="text-foreground">active=false</span>. Publication input is a <span class="text-foreground">code-controlled allowlist</span>; embedded trust booleans or self-signed report/matrix pins cannot approve themselves. This repository has one collaborator, so an independent environment reviewer cannot yet exist; every candidate remains unranked.</p>
               <p class="mt-4"><span class="text-foreground">Live tasks</span> withhold gold and protected tests; submissions remain unranked until official replay. <span class="text-foreground">Archives</span> publish those artifacts, but local runs require an unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
             </div>
           </details>
@@ -58,17 +59,17 @@
       <section class="flex w-full flex-col py-8" data-tdb-section="leaderboard">
         <div class="mb-4 flex items-center justify-between gap-4">
           <div>
-            <p class="font-mono text-sm" id="hp-board-title">leaderboard snapshot</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">Wilson 95% intervals are shown below each rate</p>
+            <p class="font-mono text-sm" id="hp-board-title">relative capability · awaiting results</p>
+            <p class="text-muted-foreground mt-1 font-mono text-xs">v3 matched-task Bradley&ndash;Terry deltas with task-cluster confidence intervals</p>
           </div>
           <a class="text-muted-foreground hover:text-foreground font-mono text-sm underline-offset-4 hover:underline" href="./leaderboard/">full leaderboard &rarr;</a>
         </div>
 
         <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
           <div data-slot="table-container" class="relative w-full overflow-x-auto" id="hp-board">
-            <p class="text-muted-foreground px-6 py-8 text-sm">loading leaderboard&hellip;</p>
+            <p class="text-muted-foreground px-6 py-8 text-sm">checking formal publication authority&hellip;</p>
           </div>
-          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="hp-board-foot">Published execution-gate results.</div>
+          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="hp-board-foot">Only publishable v3 rows can appear here.</div>
         </div>
       </section>
 
@@ -103,44 +104,8 @@
   function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
 
-  var RESERVED_ROW_KEYS = {
-    model: 1, lead: 1, agent_org: 1, model_org: 1, effort: 1,
-    date: 1, pr: 1, cost: 1, cost_usd: 1
-  };
-  var HARNESS_LABELS = { single_shot: "single-shot", terminus2: "terminus-2" };
   var BOARD_PREVIEW_LIMIT = 5;
   var TASK_PREVIEW_LIMIT = 3;
-
-  function isHarnessCell(value) {
-    return value && typeof value === "object" && !Array.isArray(value) &&
-      (Object.prototype.hasOwnProperty.call(value, "n") ||
-       Object.prototype.hasOwnProperty.call(value, "solved") ||
-       Object.prototype.hasOwnProperty.call(value, "rate") ||
-       Object.prototype.hasOwnProperty.call(value, "fa_n"));
-  }
-
-  function discoverHarnesses(board) {
-    var names = [];
-    var seen = Object.create(null);
-    function add(key, value) {
-      if (!Object.prototype.hasOwnProperty.call(RESERVED_ROW_KEYS, key) &&
-          !seen[key] && isHarnessCell(value)) {
-        seen[key] = true;
-        names.push(key);
-      }
-    }
-    var pooled = (board && board.pooled) || {};
-    Object.keys(pooled).forEach(function (key) { add(key, pooled[key]); });
-    ((board && board.leaderboard) || []).forEach(function (row) {
-      Object.keys(row || {}).forEach(function (key) { add(key, row[key]); });
-    });
-    return names;
-  }
-
-  function harnessLabel(key) {
-    return Object.prototype.hasOwnProperty.call(HARNESS_LABELS, key)
-      ? HARNESS_LABELS[key] : key;
-  }
 
   var CARD =
     "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
@@ -179,6 +144,50 @@
     return all;
   }
 
+  function relativeReport(board) {
+    var candidates = [board, board && board.relative_capability,
+      board && board.relative_scoring];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i] &&
+          candidates[i].schema_version === "td-relative-capability-v3") {
+        return candidates[i];
+      }
+    }
+    return null;
+  }
+
+  function codeApproved(scoring) {
+    return scoring && scoring.official_ranking === true &&
+      scoring.publication_registry_mode === "code-controlled-allowlist" &&
+      scoring.publication_bundle_approved === true &&
+      scoring.relative_report_digest_matches === true &&
+      scoring.anti_cheat_deployment_active === true;
+  }
+
+  function formalModelRatings(report, scoring) {
+    var input = (report && report.input) || {};
+    var authority = codeApproved(scoring) &&
+      input.frozen_task_roster_n === 50 &&
+      input.task_roster_digest_trusted === true &&
+      input.cell_manifest_digest_trusted === true;
+    if (!authority) return [];
+    var axes = (report && report.axes) || [];
+    for (var i = 0; i < axes.length; i++) {
+      if (axes[i].axis !== "overall" || axes[i].dimension !== "overall") continue;
+      var table = axes[i].entities && axes[i].entities.model;
+      return ((table && table.ratings) || []).filter(function (row) {
+        return row && row.publishable === true &&
+          typeof row.relative_score === "number" && Array.isArray(row.ci);
+      });
+    }
+    return [];
+  }
+
+  function ratio(numerator, denominator) {
+    return typeof numerator === "number" && typeof denominator === "number" && denominator > 0
+      ? String(numerator) + "/" + String(denominator) : "\u2014";
+  }
+
   function statCard(label, value, note) {
     return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col border -mb-px rounded-none border-x-0 py-0 font-mono shadow-none sm:-mr-px sm:border-x">' +
       '<div class="flex flex-1 flex-col justify-between gap-4 py-6">' +
@@ -194,77 +203,77 @@
   function renderStatus(site, board) {
     var suites = datedSuites(site);
     var latest = suites[0] || {};
+    var report = relativeReport(board);
+    var input = (report && report.input) || {};
+    var scoring = (site && site.scoring) || {};
+    var ratings = formalModelRatings(report, scoring);
     var stats = [
       ["latest suite", latest.id, "task catalogue"],
-      ["suite state", latest.status, latest.status === "live" ? "gold withheld" : "released"],
-      ["suite tasks", latest.n_tasks, "published packages"],
-      ["scored snapshot", board && board.date, "leaderboard data"],
-      ["models", board && board.n_models, "in scored snapshot"],
-      ["scored cells", board && board.n_cells, "model × task runs"]
+      ["catalogue tasks", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
+      ["formal roster", input.frozen_task_roster_n != null
+        ? input.frozen_task_roster_n + "/50" : "awaiting", "exactly 50 required"],
+      ["official ranking", ratings.length ? "published" : "unranked",
+        ratings.length ? ratings.length + " publishable models" : "awaiting trusted complete coverage"],
+      ["accepted outcomes", input.successful_records_admitted_to_outcomes,
+        "SUCCESS + score_accepted=true only"],
+      ["receipt authority", "inactive", "active=false · one collaborator"]
     ];
     set("hp-status", stats.map(function (s) { return statCard(s[0], s[1], s[2]); }).join(""));
 
     if (T.dayRail) T.dayRail(byId("tdb-rail"), suites, latest.id);
     var fa = document.querySelector("[data-tdb-fa]");
     if (fa) {
-      fa.textContent = board && typeof board.total_fa === "number" &&
+      fa.textContent = ratings.length && board && typeof board.total_fa === "number" &&
         typeof board.total_fa_n === "number" && board.total_fa_n > 0
         ? String(board.total_fa) + "/" + String(board.total_fa_n) : "\u2014";
     }
 
-    var latestId = latest.id || "not published";
-    var boardDate = board && board.date;
-    if (boardDate && boardDate !== latestId) {
-      set("hp-data-note", "Data note: the latest suite is " + esc(latestId) +
-        ", while the scored snapshot is " + esc(boardDate) + ". They are separate artifacts.");
-    } else if (boardDate) {
-      set("hp-data-note", "Suite catalogue and scored snapshot both point to " + esc(boardDate) + ".");
+    if (ratings.length) {
+      set("hp-data-note", "A trusted td-relative-capability-v3 report is published.");
+    } else if (scoring.legacy_snapshot_present || (board && board.leaderboard)) {
+      set("hp-data-note", "A legacy diagnostic snapshot exists but is not ranking authority and is not displayed.");
     } else {
-      set("hp-data-note", "No scored snapshot is currently published.");
+      set("hp-data-note", "No certified 50-task relative-capability report is published.");
     }
   }
 
-  function rateCell(value) {
-    if (T.rateCell) return T.rateCell(value);
-    if (!value || !value.n) return '<p class="text-right text-muted-foreground">&mdash;</p>';
-    return '<p class="text-right tabular-nums">' + Math.round(value.solved / value.n * 1000) / 10 + "%</p>";
-  }
-
-  function renderBoard(board) {
-    var rows = (board && board.leaderboard) || [];
+  function renderBoard(board, site) {
+    var report = relativeReport(board);
+    var rows = formalModelRatings(report, (site && site.scoring) || {});
     if (!rows.length) {
-      set("hp-board", '<p class="text-muted-foreground px-6 py-8 text-sm">No scored snapshot is published.</p>');
-      set("hp-board-foot", "The table appears when leaderboard_data.json contains verified runs.");
+      set("hp-board", '<div class="px-6 py-8"><p class="font-medium">Official ranking awaiting certified results.</p>' +
+        '<p class="text-muted-foreground mt-2 text-sm">No trusted, complete exactly-50 ' +
+        'td-relative-capability-v3 model table is code-approved. Embedded booleans and ' +
+        'self-signed artifacts remain unranked and are not converted to zero.</p></div>');
+      set("hp-board-foot", "Awaiting frozen roster, manifest-bound receipts, and 100% coverage.");
       return;
     }
 
-    var harnesses = discoverHarnesses(board);
     var head = '<tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">' +
       '<th data-slot="table-head" class="' + TH + '">rank</th>' +
       '<th data-slot="table-head" class="' + TH + '">model</th>' +
-      harnesses.map(function (key) {
-        return '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">' +
-          esc(harnessLabel(key)) + "</div></th>";
-      }).join("") +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">relative score</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">95% CI</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">attempt coverage</div></th>' +
       "</tr>";
-    var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r, i) {
+    var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
+      var score = (r.relative_score > 0 ? "+" : "") + r.relative_score;
+      var ci = Array.isArray(r.ci) && r.ci.length === 2
+        ? "[" + r.ci[0] + ", " + r.ci[1] + "]" : "\u2014";
       return '<tr data-slot="table-row" class="' + TR + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums">' + (i + 1) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(r.model) + "</p></td>" +
-        harnesses.map(function (key) {
-          return '<td data-slot="table-cell" class="' + TD + '">' + rateCell(r[key]) + "</td>";
-        }).join("") +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums">' + esc(r.rank_within_component) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(r.name) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(score) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(ci) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
+          esc(ratio(r.attempt_coverage_numerator, r.attempt_coverage_denominator)) + "</p></td>" +
         "</tr>";
     }).join("");
     set("hp-board", '<table data-slot="table" class="w-full caption-bottom text-sm [&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 [&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6">' +
       '<thead data-slot="table-header" class="[&_tr]:border-b">' + head + "</thead>" +
       '<tbody data-slot="table-body" class="[&_tr:last-child]:border-0">' + body + "</tbody></table>");
-    set("hp-board-title", "leaderboard · " + esc(board.date || "snapshot"));
-    var bits = [];
-    if (board.n_models != null) bits.push(plural(board.n_models, "model", "models"));
-    if (board.n_tasks != null) bits.push(plural(board.n_tasks, "task", "tasks"));
-    if (board.n_cells != null) bits.push(plural(board.n_cells, "scored cell", "scored cells"));
-    set("hp-board-foot", esc(bits.join(" · ")) +
+    set("hp-board-title", "relative capability · v3 overall model effect");
+    set("hp-board-foot", "Centered Elo-style deltas; only publishable rows shown" +
       (rows.length > BOARD_PREVIEW_LIMIT
         ? " · showing " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " models"
         : ""));
@@ -310,7 +319,7 @@
     T.getJSON("leaderboard_data.json").catch(function () { return null; })
   ]).then(function (data) {
     renderStatus(data[0], data[1]);
-    renderBoard(data[1]);
+    renderBoard(data[1], data[0]);
     renderTasks(data[0]);
   });
 })();

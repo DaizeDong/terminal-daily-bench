@@ -1,9 +1,4 @@
-"""Dependency-free structural fixtures for the static leaderboard JavaScript.
-
-The release environment has no JavaScript runtime.  These tests pin the data
-discovery, output escaping, and semantic-FA rendering paths in both inline
-scripts so an unknown harness cannot silently disappear on the next edit.
-"""
+"""Dependency-free structural fixtures for the static v3 capability frontend."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,99 +9,98 @@ HOME = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
 LEADERBOARD = (ROOT / "docs" / "leaderboard" / "index.html").read_text(
     encoding="utf-8"
 )
+REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
+    encoding="utf-8"
+)
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
-GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
+PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
+DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
 
-def _fixture_harnesses(board: dict) -> list[str]:
-    """Reference contract used only to make the structural fixture explicit."""
-    reserved = {
-        "model", "lead", "agent_org", "model_org", "effort",
-        "date", "pr", "cost", "cost_usd",
-    }
-    seen: set[str] = set()
-    out: list[str] = []
-
-    def add(name: str, cell: object) -> None:
-        if name in reserved or name in seen or not isinstance(cell, dict):
-            return
-        if not ({"n", "solved", "rate", "fa_n"} & set(cell)):
-            return
-        seen.add(name)
-        out.append(name)
-
-    for name, cell in (board.get("pooled") or {}).items():
-        add(name, cell)
-    for row in board.get("leaderboard") or []:
-        for name, cell in row.items():
-            add(name, cell)
-    return out
-
-
-def test_unknown_harness_fixture_requires_pooled_and_cell_union():
-    hostile = '<vendor-agent data-x="&">'
-    board = {
-        "pooled": {
-            "single_shot": {"n": 2, "solved": 1},
-            hostile: {"n": 1, "solved": 1},
-        },
-        "leaderboard": [{
-            "model": "fixture-model",
-            "single_shot": {"n": 2, "solved": 1},
-            hostile: {"n": 1, "solved": 1, "fa": 0, "fa_n": 3},
-            "cell-only-harness": {"n": 1, "solved": 0, "fa": None, "fa_n": 0},
-        }],
-    }
-    assert _fixture_harnesses(board) == [
-        "single_shot", hostile, "cell-only-harness"
-    ]
-
+def test_home_and_full_board_require_code_approved_relative_v3_authority():
     for source in (HOME, LEADERBOARD):
-        assert "function discoverHarnesses(" in source
-        assert "Object.keys(pooled).forEach" in source
-        assert "Object.keys(row || {}).forEach" in source
-        assert "Object.create(null)" in source
+        assert 'schema_version === "td-relative-capability-v3"' in source
+        assert "scoring.official_ranking === true" in source
+        assert (
+            'scoring.publication_registry_mode === "code-controlled-allowlist"'
+            in source
+        )
+        assert "scoring.publication_bundle_approved === true" in source
+        assert "scoring.relative_report_digest_matches === true" in source
+        assert "scoring.anti_cheat_deployment_active === true" in source
+        assert "input.frozen_task_roster_n === 50" in source
+        assert "input.task_roster_digest_trusted === true" in source
+        assert "input.cell_manifest_digest_trusted === true" in source
+        assert "publishable === true" in source
+
+    assert "var rows = (board && board.leaderboard) || []" not in HOME
+    assert "discoverHarnesses" not in HOME
+    assert "KNOWN_HARNESSES" not in LEADERBOARD
+    assert "build(b)" not in LEADERBOARD
 
 
-def test_homepage_discovers_columns_and_escapes_unknown_harness_labels():
-    assert "var harnesses = discoverHarnesses(board);" in HOME
-    assert "esc(harnessLabel(key))" in HOME
-    assert "rateCell(r[key])" in HOME
-    assert "r.single_shot" not in HOME
-    assert "r.terminus2" not in HOME
+def test_site_data_generator_rejects_legacy_or_partial_matrix_authority():
+    assert 'RELATIVE_SCHEMA = "td-relative-capability-v3"' in DATA_GENERATOR
+    assert "FORMAL_TASK_TARGET = 50" in DATA_GENERATOR
+    assert 'PUBLICATION_BUNDLE_SCHEMA = "td-relative-publication-bundle-v1"' in DATA_GENERATOR
+    assert 'PUBLICATION_REGISTRY_MODE = "code-controlled-allowlist"' in DATA_GENERATOR
+    assert "APPROVED_PUBLICATION_BUNDLE_SHA256S" in DATA_GENERATOR
+    assert "ANTI_CHEAT_DEPLOYMENT_ACTIVE = False" in DATA_GENERATOR
+    assert "matrix_task_id_roster_sha256" in DATA_GENERATOR
+    assert "relative_report_digest_matches" in DATA_GENERATOR
+    assert "def scoring_status(" in DATA_GENERATOR
+    assert "def _published_matrix(" in DATA_GENERATOR
+    assert 'state = "awaiting-certified-50-task-results"' in DATA_GENERATOR
+    assert '"legacy_snapshot_present": legacy_present' in DATA_GENERATOR
 
 
-def test_full_board_discovers_rows_and_escapes_unknown_harness_labels():
-    assert "var AGENTS =" not in LEADERBOARD
-    assert "var harnesses = discoverHarnesses(b);" in LEADERBOARD
-    assert "harnesses.forEach(function (key)" in LEADERBOARD
-    assert "agent: harnessLabel(key)" in LEADERBOARD
-    assert "td(textCell(e.agent))" in LEADERBOARD
-    assert "' + esc(v) +" in LEADERBOARD
-    assert "esc(label)" in LEADERBOARD  # unknown quality-card harness label
+def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
+    assert (
+        "var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };"
+        in LEADERBOARD
+    )
+    assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
+    assert "Task-family: unavailable." in LEADERBOARD
+    assert "canonical C1&ndash;C14 capability labels" in LEADERBOARD
+    assert "does not infer one from tracks, merged labels" in LEADERBOARD
+    assert '["task-family", null, "unavailable; not inferred and not zero"]' in LEADERBOARD
 
 
-def test_semantic_false_accept_always_renders_as_fraction_or_dash():
-    assert 'typeof board.total_fa === "number"' in HOME
-    assert 'typeof board.total_fa_n === "number"' in HOME
-    assert 'String(board.total_fa) + "/" + String(board.total_fa_n)' in HOME
-    assert ': "\\u2014"' in HOME
+def test_non_success_statuses_are_null_not_zero_and_never_ranked():
+    for status in ("FAILED", "BLOCKED", "NOT_RUN"):
+        assert f'"{status}"' in LEADERBOARD
+    assert "use <code>outcome:null</code>" in LEADERBOARD
+    assert "excluded from ratings" in LEADERBOARD
+    assert "authenticated_counts" in LEADERBOARD
+    assert "untrusted_declared_counts" in LEADERBOARD
+    assert "counted in coverage, not outcomes" in LEADERBOARD
+    assert "worth zero" not in PAGE_GENERATOR.lower()
+    assert "attempt worth zero" not in PAGE_GENERATOR.lower()
 
-    assert 'typeof s.fa === "number"' in LEADERBOARD
-    assert 'typeof s.fa_n === "number" && s.fa_n > 0' in LEADERBOARD
-    assert "hacks: measuredFa ? s.fa : null" in LEADERBOARD
-    assert "hacks_n: measuredFa ? s.fa_n : null" in LEADERBOARD
-    assert 'esc(e.hacks) + "/" + esc(e.hacks_n)' in LEADERBOARD
-    assert "e.hacks == null" in LEADERBOARD
+
+def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
+    assert 'T.getJSON("leaderboard_data.json")' not in REGISTRY
+    assert "board.matrix" not in REGISTRY
+    assert "Official Solves" in REGISTRY
+    assert "means awaiting formal coverage, not zero solves" in REGISTRY
+    assert "official score coverage" in REGISTRY
+
+
+def test_output_values_are_escaped_before_entering_v3_tables():
+    assert "esc(row.axis)" in LEADERBOARD
+    assert "esc(row.kind)" in LEADERBOARD
+    assert "esc(participant(row))" in LEADERBOARD
+    assert "shown(rating.rank_within_component)" in LEADERBOARD
+    assert "ratio(rating.attempt_coverage_numerator" in LEADERBOARD
 
 
 def test_stat_values_are_not_document_headings():
     assert "<p data-tdb-stat-value" in HOME
-    assert "<p data-tdb-stat-value" in GENERATOR
+    assert "<p data-tdb-stat-value" in PAGE_GENERATOR
     assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in HOME
     assert (
         '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
-        not in GENERATOR
+        not in PAGE_GENERATOR
     )
 
     generated = sorted((ROOT / "docs" / "benchmarks").glob("*/index.html"))
@@ -135,14 +129,19 @@ def test_shell_mounts_a_real_footer_landmark():
     assert "document.body.appendChild(footer)" in SHELL
 
 
-def test_homepage_integrity_limits_use_progressive_disclosure():
+def test_homepage_integrity_facts_match_current_operator_evidence():
     assert "data-tdb-integrity-details" in HOME
     assert "integrity limits and current blockers" in HOME
     assert "Protected tests decide published scores" in HOME
-    assert "deployment egress canary is still pending" in HOME
+    assert "paired staged-SIF egress canary passed" in HOME
+    assert "no production protected replay has run" in HOME
+    assert "active=false" in HOME
+    assert "code-controlled allowlist" in HOME
+    assert "self-signed report/matrix pins cannot approve themselves" in HOME
+    assert "one collaborator" in HOME
+    assert "deployment egress canary is still pending" not in HOME
     assert "unpublished patched Harbor fork" in HOME
     assert "stock Harbor 0.13.1 is insufficient" in HOME
-    assert "completed gate decisions only" in HOME
 
 
 def test_homepage_previews_stay_short_and_link_to_full_views():

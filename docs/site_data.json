@@ -1,5 +1,28 @@
 {
- "generated": "2026-08-06T08:26:12Z",
+ "generated": "2026-08-06T13:48:20Z",
+ "scoring": {
+  "schema_version": "td-public-scoring-status-v1",
+  "relative_schema": "td-relative-capability-v3",
+  "formal_task_target": 50,
+  "formal_roster_n": null,
+  "official_ranking": false,
+  "state": "awaiting-certified-50-task-results",
+  "legacy_snapshot_present": true,
+  "task_roster_digest_trusted": false,
+  "cell_manifest_digest_trusted": false,
+  "publishable_overall_models": 0,
+  "publication_registry_mode": "code-controlled-allowlist",
+  "publication_bundle_sha256": null,
+  "publication_bundle_approved": false,
+  "relative_report_sha256": null,
+  "relative_report_digest_matches": false,
+  "matrix_sha256": null,
+  "matrix_digest_matches": false,
+  "matrix_task_id_roster_sha256": null,
+  "matrix_task_roster_digest_matches": false,
+  "anti_cheat_deployment_active": false,
+  "matrix_published": false
+ },
  "suites": [
   {
    "id": "2026-08-01",
@@ -427,9 +450,9 @@
    "language": "python",
    "title": "Validate format string keys in logger.add() for early error feedback",
    "n_fail_to_pass": 4,
-   "solved_by": 0,
-   "n_models": 5,
-   "difficulty": "unsolved",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
    "also_in": [
     "live"
    ]

@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
 """Build docs/site_data.json -- the catalogue the site's suite and task pages render from.
 
-The leaderboard renders from `leaderboard_data.json` (who solved what). This file is the
-other half: WHAT the benchmark contains -- the daily suites and every task's provenance.
-Both are plain JSON at the site root, so publishing a day stays "regenerate, commit, push".
+The leaderboard renders a trusted relative-capability report from
+`leaderboard_data.json`. This file is the other half: WHAT the benchmark
+contains -- the daily suites and every task's provenance. Both are plain JSON
+at the site root, so publishing a day stays "regenerate, commit, push".
 
     gen_site_data.py [--release DIR] [--out DIR/site_data.json]
 
 Reads (all optional, degrades to whatever exists):
     <release>/registry.json          suite declarations
     <release>/tasks/{archive,live}/  the shipped task packages
-    <release>/docs/leaderboard_data.json   per-task solve counts, to show difficulty
+    <release>/docs/leaderboard_data.json   optional formal v3 report + task matrix
 
 Emits:
-    { generated, suites: [{id, status, n_tasks, languages, note}],
+    { generated, scoring, suites: [{id, status, n_tasks, languages, note}],
       tasks:  [{id, suite, status, repo, pr_number, base_sha, merge_sha, license,
                 language, title, difficulty, n_fail_to_pass, solved_by, n_models}] }
 
-Task packages carry no secrets (publish_tasks.py sanitises them), and nothing here reads a
-reward: difficulty is derived from the already-published solve matrix.
+Task packages carry no secrets (publish_tasks.py sanitises them). Per-task
+difficulty is derived only when a trusted, publishable 50-task v3 report binds
+the accompanying matrix. Historical/fixture matrices never mint public scores.
 """
 from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -33,12 +36,51 @@ _LANG_BY_EXT = {".py": "python", ".rs": "rust", ".go": "go", ".js": "javascript"
                 ".ts": "typescript", ".rb": "ruby", ".java": "java",
                 ".cpp": "c++", ".cc": "c++", ".c": "c", ".h": "c++"}
 
+RELATIVE_SCHEMA = "td-relative-capability-v3"
+FORMAL_TASK_TARGET = 50
+PUBLICATION_BUNDLE_SCHEMA = "td-relative-publication-bundle-v1"
+TASK_ID_ROSTER_SCHEMA = "td-frozen-task-roster-v1"
+PUBLICATION_REGISTRY_MODE = "code-controlled-allowlist"
+# There is no independent production publication registry yet. Adding an
+# authority digest here is an explicit reviewed code change; a JSON artifact
+# cannot approve itself by changing its own booleans or embedded hashes.
+APPROVED_PUBLICATION_BUNDLE_SHA256S: frozenset[str] = frozenset()
+ANTI_CHEAT_DEPLOYMENT_ACTIVE = False
+
 
 def _read_json(p: Path):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001 -- a missing/odd file just means fewer fields
         return {}
+
+
+def canonical_sha256(value) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _sha256(value) -> str | None:
+    if (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value)
+    ):
+        return value
+    return None
+
+
+def _task_id_roster_sha256(tasks: list[str]) -> str:
+    return canonical_sha256({
+        "schema_version": TASK_ID_ROSTER_SCHEMA,
+        "tasks": sorted(tasks),
+    })
 
 
 def _title_from_instruction(task_dir: Path) -> str:
@@ -86,6 +128,198 @@ def _difficulty(solved_by, n_models) -> str:
     return "easy"
 
 
+def relative_report(board: dict) -> dict:
+    """Return a v3 report from either the document root or its public wrapper."""
+    if not isinstance(board, dict):
+        return {}
+    candidates = (
+        board,
+        board.get("relative_capability"),
+        board.get("relative_scoring"),
+    )
+    for candidate in candidates:
+        if (
+            isinstance(candidate, dict)
+            and candidate.get("schema_version") == RELATIVE_SCHEMA
+        ):
+            return candidate
+    return {}
+
+
+def _publishable_overall_models(report: dict) -> list[dict]:
+    for axis in report.get("axes") or []:
+        if not isinstance(axis, dict) or axis.get("axis") != "overall":
+            continue
+        entities = axis.get("entities") or {}
+        model_table = entities.get("model") if isinstance(entities, dict) else {}
+        return [
+            row
+            for row in (model_table or {}).get("ratings") or []
+            if isinstance(row, dict)
+            and row.get("publishable") is True
+            and type(row.get("relative_score")) in (int, float)
+            and isinstance(row.get("ci"), list)
+            and len(row["ci"]) == 2
+            and all(type(value) in (int, float) for value in row["ci"])
+        ]
+    return []
+
+
+def _matrix_shape(board: dict) -> dict:
+    """Return a strictly binary exactly-50 matrix, or an empty object."""
+    matrix = board.get("matrix") if isinstance(board, dict) else None
+    if not isinstance(matrix, dict):
+        return {}
+    tasks = matrix.get("tasks")
+    rows = matrix.get("rows")
+    if (
+        not isinstance(tasks, list)
+        or len(tasks) != FORMAL_TASK_TARGET
+        or not all(
+            isinstance(task, str) and task and task == task.strip()
+            for task in tasks
+        )
+        or len(set(tasks)) != FORMAL_TASK_TARGET
+        or not isinstance(rows, list)
+        or not rows
+    ):
+        return {}
+    seen_models: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            return {}
+        model = row.get("model")
+        outcomes = row.get("g")
+        if (
+            not isinstance(model, str)
+            or not model.strip()
+            or model != model.strip()
+            or model in seen_models
+            or not isinstance(outcomes, list)
+            or len(outcomes) != FORMAL_TASK_TARGET
+            or not all(type(value) is int and value in (0, 1) for value in outcomes)
+        ):
+            return {}
+        seen_models.add(model)
+    return matrix
+
+
+def _publication_audit(board: dict, report: dict) -> dict:
+    authority = board.get("publication_authority") if isinstance(board, dict) else None
+    if not isinstance(authority, dict):
+        authority = {}
+    try:
+        authority_sha256 = canonical_sha256(authority) if authority else None
+        report_sha256 = canonical_sha256(report) if report else None
+    except (TypeError, ValueError):
+        authority_sha256 = None
+        report_sha256 = None
+    matrix = _matrix_shape(board)
+    try:
+        matrix_sha256 = canonical_sha256(matrix) if matrix else None
+    except (TypeError, ValueError):
+        matrix_sha256 = None
+    tasks = matrix.get("tasks") if matrix else None
+    matrix_task_roster_sha256 = (
+        _task_id_roster_sha256(tasks) if isinstance(tasks, list) else None
+    )
+    report_input = report.get("input") if isinstance(report.get("input"), dict) else {}
+    schema_valid = authority.get("schema_version") == PUBLICATION_BUNDLE_SCHEMA
+    report_digest_matches = (
+        report_sha256 is not None
+        and _sha256(authority.get("relative_report_sha256")) == report_sha256
+    )
+    matrix_digest_matches = (
+        matrix_sha256 is not None
+        and _sha256(authority.get("matrix_sha256")) == matrix_sha256
+    )
+    matrix_roster_matches = (
+        matrix_task_roster_sha256 is not None
+        and _sha256(authority.get("matrix_task_id_roster_sha256"))
+        == matrix_task_roster_sha256
+        and _sha256(report_input.get("frozen_task_id_roster_sha256"))
+        == matrix_task_roster_sha256
+    )
+    bundle_approved = (
+        schema_valid
+        and authority_sha256 is not None
+        and authority_sha256 in APPROVED_PUBLICATION_BUNDLE_SHA256S
+    )
+    return {
+        "publication_registry_mode": PUBLICATION_REGISTRY_MODE,
+        "publication_bundle_sha256": authority_sha256,
+        "publication_bundle_approved": bundle_approved,
+        "relative_report_sha256": report_sha256,
+        "relative_report_digest_matches": report_digest_matches,
+        "matrix_sha256": matrix_sha256,
+        "matrix_digest_matches": matrix_digest_matches,
+        "matrix_task_id_roster_sha256": matrix_task_roster_sha256,
+        "matrix_task_roster_digest_matches": matrix_roster_matches,
+        "anti_cheat_deployment_active": ANTI_CHEAT_DEPLOYMENT_ACTIVE,
+    }
+
+
+def scoring_status(board: dict) -> dict:
+    """Machine-readable status gated by code-controlled publication authority."""
+    report = relative_report(board)
+    report_input = report.get("input") if isinstance(report.get("input"), dict) else {}
+    roster_n = report_input.get("frozen_task_roster_n")
+    trusted_roster = report_input.get("task_roster_digest_trusted") is True
+    trusted_manifest = report_input.get("cell_manifest_digest_trusted") is True
+    full_roster_digest = _sha256(report_input.get("frozen_task_roster_sha256"))
+    cell_manifest_digest = _sha256(report_input.get("cell_manifest_sha256"))
+    publishable = _publishable_overall_models(report)
+    publication = _publication_audit(board, report)
+    official = (
+        roster_n == FORMAL_TASK_TARGET
+        and trusted_roster
+        and trusted_manifest
+        and full_roster_digest is not None
+        and cell_manifest_digest is not None
+        and bool(publishable)
+        and publication["publication_bundle_approved"]
+        and publication["relative_report_digest_matches"]
+        and publication["anti_cheat_deployment_active"]
+    )
+    legacy_present = bool(
+        isinstance(board, dict)
+        and (board.get("leaderboard") or board.get("matrix"))
+        and not official
+    )
+    if official:
+        state = "published"
+    elif report:
+        state = "unranked-incomplete-or-untrusted"
+    else:
+        state = "awaiting-certified-50-task-results"
+    return {
+        "schema_version": "td-public-scoring-status-v1",
+        "relative_schema": RELATIVE_SCHEMA,
+        "formal_task_target": FORMAL_TASK_TARGET,
+        "formal_roster_n": roster_n,
+        "official_ranking": official,
+        "state": state,
+        "legacy_snapshot_present": legacy_present,
+        "task_roster_digest_trusted": trusted_roster,
+        "cell_manifest_digest_trusted": trusted_manifest,
+        "publishable_overall_models": len(publishable),
+        **publication,
+    }
+
+
+def _published_matrix(board: dict, status: dict) -> dict:
+    """Admit only a code-approved matrix transitively bound to the v3 report."""
+    if status.get("official_ranking") is not True:
+        return {}
+    if (
+        status.get("matrix_digest_matches") is not True
+        or status.get("matrix_task_roster_digest_matches") is not True
+        or status.get("publication_bundle_approved") is not True
+    ):
+        return {}
+    return _matrix_shape(board)
+
+
 _DATED_SUITE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -130,9 +364,12 @@ def _add_membership(
 
 
 def collect(release: Path, board: dict) -> dict:
-    # per-task solve counts from the published matrix (if a board has been published)
-    solved_by, n_models = {}, board.get("n_models") or 0
-    mx = board.get("matrix") or {}
+    # A legacy/fixture matrix remains useful as an input artifact, but never as
+    # public score authority. Only the formal v3 + exactly-50 gate admits it.
+    score_status = scoring_status(board)
+    solved_by, n_models = {}, 0
+    mx = _published_matrix(board, score_status)
+    score_status["matrix_published"] = bool(mx)
     for i, tid in enumerate(mx.get("tasks") or []):
         solved_by[tid] = sum(int(bool(r["g"][i])) for r in mx.get("rows") or [] if i < len(r["g"]))
     if mx.get("rows"):
@@ -323,6 +560,7 @@ def collect(release: Path, board: dict) -> dict:
 
     return {
         "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "scoring": score_status,
         "suites": sorted(suite_rows.values(), key=lambda s: str(s["id"])),
         "tasks": tasks,
     }
