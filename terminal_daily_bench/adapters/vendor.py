@@ -222,6 +222,64 @@ class CodexAdapter(HarborVendorAdapter):
     )
 
 
+class _OpenAIProviderPrefixedAdapter(HarborVendorAdapter):
+    """Common guard for Harbor agents backed by provider-prefixed LiteLLM models."""
+
+    def harbor_run_spec(self, model: str, **kwargs: Any) -> HarborRunSpec:
+        if model != model.strip() or any(ord(char) < 0x20 or ord(char) == 0x7F for char in model):
+            raise VendorConfigurationError(
+                f"{self.spec.name} requires a canonical provider-prefixed model name"
+            )
+        provider, separator, suffix = model.partition("/")
+        if provider != "openai" or separator != "/" or not suffix or suffix != suffix.strip():
+            raise VendorConfigurationError(
+                f"{self.spec.name} requires an openai/provider-prefixed model name"
+            )
+        return super().harbor_run_spec(model, **kwargs)
+
+
+class AiderAdapter(_OpenAIProviderPrefixedAdapter):
+    """Aider through Harbor and LiteLLM's OpenAI-compatible chat transport."""
+
+    spec = VendorHarnessSpec(
+        name="aider",
+        harbor_agent="aider",
+        base_url_env="OPENAI_API_BASE",
+        credential_env_options=("OPENAI_API_KEY",),
+        aliases=("aider-cli", "aider_cli"),
+        base_url_kind="openai",
+        supported_protocols=("openai-chat-completions",),
+    )
+
+
+class OpenCodeAdapter(_OpenAIProviderPrefixedAdapter):
+    """OpenCode through its explicit provider.options.baseURL configuration."""
+
+    spec = VendorHarnessSpec(
+        name="opencode",
+        harbor_agent="opencode",
+        base_url_env="OPENAI_BASE_URL",
+        credential_env_options=("OPENAI_API_KEY",),
+        aliases=("open-code", "open_code"),
+        base_url_kind="openai",
+        supported_protocols=("openai-chat-completions",),
+    )
+
+
+class MiniSweAgentAdapter(_OpenAIProviderPrefixedAdapter):
+    """mini-swe-agent through LiteLLM's OpenAI-compatible chat transport."""
+
+    spec = VendorHarnessSpec(
+        name="mini-swe-agent",
+        harbor_agent="mini-swe-agent",
+        base_url_env="OPENAI_API_BASE",
+        credential_env_options=("OPENAI_API_KEY", "MSWEA_API_KEY"),
+        aliases=("mini_swe_agent", "mswea"),
+        base_url_kind="openai",
+        supported_protocols=("openai-chat-completions",),
+    )
+
+
 class Terminus2Adapter(HarborVendorAdapter):
     """Gateway-capable Harbor ``terminus-2`` agent backed by LiteLLM.
 
@@ -267,8 +325,11 @@ class Terminus2Adapter(HarborVendorAdapter):
 
 
 __all__ = [
+    "AiderAdapter",
     "ClaudeCodeAdapter",
     "CodexAdapter",
+    "MiniSweAgentAdapter",
+    "OpenCodeAdapter",
     "Terminus2Adapter",
     "HarborVendorAdapter",
     "VendorConfigurationError",

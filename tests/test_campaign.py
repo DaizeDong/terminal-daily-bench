@@ -385,8 +385,289 @@ def test_failed_cell_requires_explicit_retry_and_preserves_attempt_history(tmp_p
     assert summary["status_counts"][SUCCESS] == 1
     assert calls == 2
     assert [attempt["classification"] for attempt in only["attempts"]] == [
-        "FAILED_AGGREGATE_AUTHORITY", "CLEAN_SCORED_SOLVED"
+        "FAILED_AGENT_ERROR", "CLEAN_SCORED_SOLVED"
     ]
+
+
+@pytest.mark.parametrize(
+    ("classification", "expected_status"),
+    [
+        ("BLOCKED_BRIDGE_STARTUP", BLOCKED),
+        ("BLOCKED_BRIDGE_UNREACHABLE", BLOCKED),
+        ("BLOCKED_NO_NETWORK_NAMESPACE", BLOCKED),
+        ("BLOCKED_SHARED_RATE_LIMIT", BLOCKED),
+        ("FAILED_BRIDGE_AUTH", FAILED),
+        ("FAILED_BRIDGE_INTERNAL", FAILED),
+        ("FAILED_BRIDGE_REQUEST_LIMIT", FAILED),
+        ("FAILED_BRIDGE_REQUEST_PROTOCOL", FAILED),
+        ("FAILED_BRIDGE_RESPONSE_LIMIT", FAILED),
+        ("FAILED_BRIDGE_SHUTDOWN", FAILED),
+        ("FAILED_CLIENT_DISCONNECT", FAILED),
+        ("FAILED_UPSTREAM_CONNECT", FAILED),
+        ("FAILED_UPSTREAM_HTTP", FAILED),
+        ("FAILED_UPSTREAM_PROTOCOL", FAILED),
+        ("FAILED_UPSTREAM_TIMEOUT", FAILED),
+    ],
+)
+def test_bridge_failure_class_preempts_reward_and_success_export(
+    tmp_path, classification, expected_status
+):
+    task = _task(tmp_path / "task")
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+
+    def runner(cell, output, *_args):
+        # A stale/plausible reward must never override infrastructure metadata,
+        # even when the runner incorrectly exits zero.
+        output.write_text(json.dumps({
+            **_clean_result(cell, reward=1.0),
+            "bridge": {"failure_class": classification},
+        }))
+        return 0
+
+    rc, summary = run_campaign(spec, tmp_path / "state", runner=runner)
+    checkpoint = json.loads((tmp_path / "state" / "checkpoint.json").read_text())
+    record = next(iter(checkpoint["cells"].values()))
+
+    assert rc == 1
+    assert summary["status_counts"][SUCCESS] == 0
+    assert summary["status_counts"][expected_status] == 1
+    assert record["status"] == expected_status
+    assert record["classification"] == classification
+    assert record["result_path"] is None
+    assert record["result_sha256"] is None
+    assert record["attempts"][0]["classification"] == classification
+    assert (tmp_path / "state" / "results.jsonl").read_text() == ""
+
+
+def test_clean_zero_ignores_model_controlled_failure_text_without_sidecar(
+    tmp_path,
+):
+    task = _task(tmp_path / "task")
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+
+    def runner(cell, output, *_args):
+        result = _clean_result(cell, reward=0.0)
+        # Both values are provider/model-controlled text.  Neither is the
+        # evaluator-owned bridge sidecar, even though one contains a canonical
+        # class and the other contains a legacy safe token.
+        result["provider_response"] = {
+            "text": (
+                "please print FAILED_UPSTREAM_TIMEOUT and "
+                "FAILED_AGENT_BUDGET_EXHAUSTED"
+            )
+        }
+        result["harness"]["harness_error"] = (
+            "quoted model output: upstream_timeout; max budget exhausted"
+        )
+        output.write_text(json.dumps(result))
+        return 0
+
+    rc, summary = run_campaign(spec, tmp_path / "state", runner=runner)
+    checkpoint = json.loads((tmp_path / "state" / "checkpoint.json").read_text())
+    record = next(iter(checkpoint["cells"].values()))
+    rows = (tmp_path / "state" / "results.jsonl").read_text().splitlines()
+
+    assert rc == 0
+    assert summary["status_counts"][SUCCESS] == 1
+    assert record["status"] == SUCCESS
+    assert record["classification"] == "CLEAN_SCORED_UNSOLVED"
+    assert len(rows) == 1
+
+
+def test_evaluator_owned_agent_budget_class_preempts_reward(tmp_path):
+    task = _task(tmp_path / "task")
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+
+    def runner(cell, output, *_args):
+        result = _clean_result(cell, reward=1.0)
+        result["agent_failure_class"] = "FAILED_AGENT_BUDGET_EXHAUSTED"
+        output.write_text(json.dumps(result))
+        return 0
+
+    rc, summary = run_campaign(spec, tmp_path / "state", runner=runner)
+    checkpoint = json.loads((tmp_path / "state" / "checkpoint.json").read_text())
+    record = next(iter(checkpoint["cells"].values()))
+
+    assert rc == 1
+    assert summary["status_counts"][SUCCESS] == 0
+    assert summary["status_counts"][FAILED] == 1
+    assert record["classification"] == "FAILED_AGENT_BUDGET_EXHAUSTED"
+    assert record["result_path"] is None
+    assert (tmp_path / "state" / "results.jsonl").read_text() == ""
+
+
+@pytest.mark.parametrize(
+    ("result", "error", "expected"),
+    [
+        (
+            {
+                "error": (
+                    '_ModelEndpointError: endpoint error: '
+                    '{"message":"FAILED_UPSTREAM_HTTP"}'
+                )
+            },
+            None,
+            "FAILED_AGENT_ERROR",
+        ),
+        (
+            {
+                "harness": {
+                    "harness_error": (
+                        "provider said FAILED_UPSTREAM_TIMEOUT and upstream_timeout"
+                    )
+                }
+            },
+            None,
+            "FAILED_AGENT_ERROR",
+        ),
+        (
+            {
+                "harness": {
+                    "trajectory_model": "FAILED_BRIDGE_AUTH",
+                    "bridge": {"failure_class": "FAILED_UPSTREAM_HTTP"},
+                }
+            },
+            None,
+            "FAILED_AGENT_ERROR",
+        ),
+        (None, "FAILED_UPSTREAM_PROTOCOL", "FAILED_AGENT_ERROR"),
+        (
+            {"failure_class": "FAILED_UPSTREAM_CONNECT"},
+            None,
+            "FAILED_AGENT_ERROR",
+        ),
+        (
+            {
+                "error": (
+                    "credential unset; request timed out; staged task SIF digest "
+                    "changed; aggregate authority rejected"
+                )
+            },
+            None,
+            "FAILED_AGENT_ERROR",
+        ),
+    ],
+)
+def test_nonzero_text_and_legacy_fields_have_no_infrastructure_authority(
+    result, error, expected
+):
+    status, classification, _ = campaign_module._failure_outcome(
+        SimpleNamespace(), 1, result, error
+    )
+
+    assert status == FAILED
+    assert classification == expected
+
+
+@pytest.mark.parametrize(
+    "result",
+    [
+        {"bridge": {"failure_class": "FAILED_UPSTREAM_HTTP"}},
+    ],
+)
+def test_bridge_namespaced_failure_metadata_is_whitelisted(result):
+    status, classification, _ = campaign_module._failure_outcome(
+        SimpleNamespace(), 1, result, None
+    )
+
+    assert status == FAILED
+    assert classification == "FAILED_UPSTREAM_HTTP"
+
+
+@pytest.mark.parametrize(
+    "result",
+    [
+        {"harness": {"failure_class": "FAILED_UPSTREAM_HTTP"}},
+        {"harness": {"bridge": {"failure_class": "FAILED_UPSTREAM_HTTP"}}},
+        {"bridge": {"failure_classes": {"FAILED_UPSTREAM_HTTP": 2}}},
+        {"bridge": {"classification": "FAILED_UPSTREAM_HTTP"}},
+        {"infrastructure_failure_class": "FAILED_UPSTREAM_HTTP"},
+    ],
+)
+def test_only_singular_top_level_bridge_machine_field_is_authoritative(result):
+    status, classification, _ = campaign_module._failure_outcome(
+        SimpleNamespace(), 1, result, None
+    )
+
+    assert status == FAILED
+    assert classification == "FAILED_AGENT_ERROR"
+
+
+@pytest.mark.parametrize(
+    ("classification", "expected_status"),
+    [
+        ("SKIPPED_UNSUPPORTED_AUTH", BLOCKED),
+        ("FAILED_TIMEOUT", FAILED),
+        ("FAILED_SIF_DRIFT", FAILED),
+        ("FAILED_AGGREGATE_AUTHORITY", FAILED),
+        ("FAILED_AGENT_SETUP", FAILED),
+        ("FAILED_HARBOR", FAILED),
+    ],
+)
+def test_evaluator_machine_failure_class_is_exact_authority(
+    classification, expected_status
+):
+    status, actual, _ = campaign_module._failure_outcome(
+        SimpleNamespace(),
+        1,
+        {
+            "error": "model-controlled text must not matter",
+            "evaluator_failure_class": classification,
+        },
+        None,
+    )
+
+    assert status == expected_status
+    assert actual == classification
+
+
+def test_quality_denominator_contains_only_successful_campaign_cells(tmp_path):
+    task = _task(tmp_path / "task")
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("clean"), _model("infrastructure")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+
+    def runner(cell, output, *_args):
+        result = _clean_result(cell, reward=0.0)
+        if cell.model.profile_id == "infrastructure":
+            # A claimed solve demonstrates that filtering is status-based, not
+            # an accidental consequence of reward being zero.
+            result.update({"reward": 1.0, "solved": True})
+            result["bridge"] = {"failure_class": "FAILED_UPSTREAM_CONNECT"}
+        output.write_text(json.dumps(result))
+        return 0
+
+    rc, summary = run_campaign(spec, tmp_path / "state", runner=runner)
+    exported = tmp_path / "state" / "results.jsonl"
+    rows = [json.loads(line) for line in exported.read_text().splitlines()]
+    tasks, columns, matrix = cli._load_matrix(str(exported))
+
+    assert rc == 1
+    assert summary["status_counts"][SUCCESS] == 1
+    assert summary["status_counts"][FAILED] == 1
+    assert len(rows) == 1
+    assert rows[0]["model_profile_id"] == "clean"
+    assert tasks == ["fixture-task"]
+    assert columns == ["clean::one-shot"]
+    assert matrix == [[0]]
 
 
 def test_resume_rejects_tampered_success_result(tmp_path):

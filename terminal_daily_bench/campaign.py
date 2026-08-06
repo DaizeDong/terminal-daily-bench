@@ -44,6 +44,42 @@ NOT_RUN = "NOT_RUN"
 BLOCKED = "BLOCKED"
 STATUSES = {SUCCESS, FAILED, NOT_RUN, BLOCKED}
 
+# Stable infrastructure classifications emitted by the private localhost auth
+# bridge boundary.  A cell carrying one of these markers has not produced an
+# authoritative reward, even if a buggy runner returns zero or leaves a
+# superficially valid result object behind.  Keeping the status mapping here
+# makes checkpoint/retry and SUCCESS-only export accounting deterministic.
+_INFRASTRUCTURE_FAILURE_STATUSES = {
+    "BLOCKED_BRIDGE_STARTUP": BLOCKED,
+    "BLOCKED_BRIDGE_UNREACHABLE": BLOCKED,
+    "BLOCKED_NO_NETWORK_NAMESPACE": BLOCKED,
+    "BLOCKED_SHARED_RATE_LIMIT": BLOCKED,
+    "FAILED_BRIDGE_AUTH": FAILED,
+    "FAILED_BRIDGE_INTERNAL": FAILED,
+    "FAILED_BRIDGE_REQUEST_LIMIT": FAILED,
+    "FAILED_BRIDGE_REQUEST_PROTOCOL": FAILED,
+    "FAILED_BRIDGE_RESPONSE_LIMIT": FAILED,
+    "FAILED_BRIDGE_SHUTDOWN": FAILED,
+    "FAILED_CLIENT_DISCONNECT": FAILED,
+    "FAILED_UPSTREAM_CONNECT": FAILED,
+    "FAILED_UPSTREAM_HTTP": FAILED,
+    "FAILED_UPSTREAM_PROTOCOL": FAILED,
+    "FAILED_UPSTREAM_TIMEOUT": FAILED,
+}
+
+_AGENT_FAILURE_STATUSES = {
+    "FAILED_AGENT_BUDGET_EXHAUSTED": FAILED,
+    "FAILED_AGENT_ERROR": FAILED,
+}
+_EVALUATOR_FAILURE_STATUSES = {
+    "SKIPPED_UNSUPPORTED_AUTH": BLOCKED,
+    "FAILED_TIMEOUT": FAILED,
+    "FAILED_SIF_DRIFT": FAILED,
+    "FAILED_AGGREGATE_AUTHORITY": FAILED,
+    "FAILED_AGENT_SETUP": FAILED,
+    "FAILED_HARBOR": FAILED,
+}
+
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _PROTOCOL_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -1300,7 +1336,64 @@ def _default_cell_runner(
     return completed.returncode
 
 
+def _declared_agent_failure(result: Mapping[str, Any] | None) -> str | None:
+    """Read evaluator-owned agent failure metadata without inspecting text."""
+    if not isinstance(result, Mapping):
+        return None
+    candidate = result.get("agent_failure_class")
+    return (
+        candidate
+        if isinstance(candidate, str) and candidate in _AGENT_FAILURE_STATUSES
+        else None
+    )
+
+
+def _declared_infrastructure_failure(
+    result: Mapping[str, Any] | None,
+) -> str | None:
+    """Read only the evaluator-owned ``bridge.failure_class`` machine field."""
+    if not isinstance(result, Mapping):
+        return None
+    bridge = result.get("bridge")
+    candidate = bridge.get("failure_class") if isinstance(bridge, Mapping) else None
+    return (
+        candidate
+        if isinstance(candidate, str)
+        and candidate in _INFRASTRUCTURE_FAILURE_STATUSES
+        else None
+    )
+
+
+def _declared_evaluator_failure(result: Mapping[str, Any] | None) -> str | None:
+    """Read a fixed evaluator-owned class; never infer one from error text."""
+    if not isinstance(result, Mapping):
+        return None
+    candidate = result.get("evaluator_failure_class")
+    return (
+        candidate
+        if isinstance(candidate, str)
+        and candidate in _EVALUATOR_FAILURE_STATUSES
+        else None
+    )
+
+
 def _validate_success_result(cell: RuntimeCell, result: Mapping[str, Any]) -> str:
+    # This path is reached only after the runner returned zero.  Trust the
+    # evaluator-owned bridge namespace, never generic error/provider text.
+    infrastructure_failure = _declared_infrastructure_failure(result)
+    if infrastructure_failure is not None:
+        raise CampaignError(
+            "cell result declares infrastructure failure "
+            f"{infrastructure_failure}"
+        )
+    agent_failure = _declared_agent_failure(result)
+    if agent_failure is not None:
+        raise CampaignError(f"cell result declares agent failure {agent_failure}")
+    evaluator_failure = _declared_evaluator_failure(result)
+    if evaluator_failure is not None:
+        raise CampaignError(
+            f"cell result declares evaluator failure {evaluator_failure}"
+        )
     if result.get("dry_run") is not False:
         raise CampaignError("cell result is not a scored run")
     if result.get("model") != cell.resolved_model:
@@ -1345,23 +1438,27 @@ def _failure_outcome(
     cell: RuntimeCell, returncode: int | None, result: Mapping[str, Any] | None, error: str | None
 ) -> tuple[str, str, str]:
     detail = error or (str(result.get("error")) if result and result.get("error") else "cell runner failed")
-    lower = detail.lower()
-    harness = result.get("harness") if isinstance(result, dict) else None
-    if "requires one of these environment variables" in lower or "credential" in lower and "unset" in lower:
-        return BLOCKED, "SKIPPED_UNSUPPORTED_AUTH", detail
-    if (isinstance(harness, dict) and harness.get("timed_out") is True) or "timed out" in lower:
-        return FAILED, "FAILED_TIMEOUT", detail
-    if "staged task sif" in lower or "sif" in lower and ("digest" in lower or "changed" in lower):
-        return FAILED, "FAILED_SIF_DRIFT", detail
-    if isinstance(harness, dict) and harness.get("stop_reason") == "scored_agent_error":
-        return FAILED, "FAILED_AGENT_ERROR", detail
-    if ("aggregate" in lower or "reward parsed" in lower or "authority" in lower
-            or "protected replay proof" in lower):
-        return FAILED, "FAILED_AGGREGATE_AUTHORITY", detail
-    if "harbor exited" in lower or (returncode is not None and returncode != 0 and result):
-        return FAILED, "FAILED_HARBOR", detail
-    if "requires" in lower or "not on path" in lower or "configuration" in lower:
-        return FAILED, "FAILED_AGENT_SETUP", detail
+    infrastructure_failure = _declared_infrastructure_failure(result)
+    if infrastructure_failure is not None:
+        return (
+            _INFRASTRUCTURE_FAILURE_STATUSES[infrastructure_failure],
+            infrastructure_failure,
+            detail,
+        )
+    agent_failure = _declared_agent_failure(result)
+    if agent_failure is not None:
+        return _AGENT_FAILURE_STATUSES[agent_failure], agent_failure, detail
+    evaluator_failure = _declared_evaluator_failure(result)
+    if evaluator_failure is not None:
+        return (
+            _EVALUATOR_FAILURE_STATUSES[evaluator_failure],
+            evaluator_failure,
+            detail,
+        )
+    # The return code proves only that execution failed. Provider/model text in
+    # ``error`` and ``harness_error`` has no authority to choose a more
+    # favorable BLOCKED or infrastructure classification.
+    del cell, returncode
     return FAILED, "FAILED_AGENT_ERROR", detail
 
 
@@ -1512,14 +1609,13 @@ def run_campaign(
                 if returncode == 0 and result is not None:
                     classification = _validate_success_result(cell, result)
                     status = SUCCESS
-                    detail = None
                 else:
-                    status, classification, detail = _failure_outcome(
+                    status, classification, _detail = _failure_outcome(
                         cell, returncode, result, None
                     )
             except Exception as exc:  # noqa: BLE001 -- checkpoint the failure, never fake success
                 runner_error = f"{type(exc).__name__}: {exc}"
-                status, classification, detail = _failure_outcome(
+                status, classification, _detail = _failure_outcome(
                     cell, returncode, result, runner_error
                 )
             try:
@@ -1527,12 +1623,11 @@ def run_campaign(
                 relative = (
                     output.relative_to(store.root).as_posix() if output.exists() else None
                 )
-            except Exception as exc:  # A malformed result path can never become SUCCESS.
+            except Exception:  # A malformed result path can never become SUCCESS.
                 digest = None
                 relative = None
                 status = FAILED
                 classification = "FAILED_RESULT_INTEGRITY"
-                detail = f"{type(exc).__name__}: {exc}"
             with state_guard:
                 record = state["cells"][cell.cell_id]
                 attempt = record["attempts"][attempt_number - 1]

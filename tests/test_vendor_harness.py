@@ -19,9 +19,64 @@ from terminal_daily_bench.adapters.vendor import VendorConfigurationError
 
 
 def test_registry_exposes_first_party_vendor_harnesses():
-    assert {"single_shot", "claude-code", "codex"} <= set(REGISTRY)
+    assert {
+        "single_shot", "claude-code", "codex", "aider", "opencode",
+        "mini-swe-agent",
+    } <= set(REGISTRY)
     assert create_adapter("claude").name == "claude-code"
     assert create_adapter("codex-cli").name == "codex"
+    assert create_adapter("open-code").name == "opencode"
+    assert create_adapter("mswea").name == "mini-swe-agent"
+
+
+@pytest.mark.parametrize(
+    ("harness", "base_env"),
+    [
+        ("aider", "OPENAI_API_BASE"),
+        ("opencode", "OPENAI_BASE_URL"),
+        ("mini-swe-agent", "OPENAI_API_BASE"),
+    ],
+)
+def test_openai_chat_agents_use_secret_templates_and_explicit_base(
+    harness, base_env
+):
+    credential = "unit-test-private-placeholder"
+    adapter = create_adapter(harness)
+    spec = adapter.harbor_run_spec(
+        "openai/gpt-test",
+        base_url="http://127.0.0.1:18765/v1",
+        environ={"OPENAI_API_KEY": credential},
+        protocol="openai-chat-completions",
+    )
+    command = ev.build_harbor_agent_command("/task", "/jobs", spec, [])
+    persisted = json.dumps({"command": command, "spec": spec.public_summary()})
+
+    assert credential not in persisted
+    assert spec.agent == harness
+    assert spec.agent_env["OPENAI_API_KEY"] == "${OPENAI_API_KEY}"
+    assert spec.agent_env[base_env] == "http://127.0.0.1:18765/v1"
+    assert spec.process_env[base_env] == "http://127.0.0.1:18765/v1"
+    assert spec.protocol == "openai-chat-completions"
+
+    with pytest.raises(VendorConfigurationError, match="provider-prefixed"):
+        adapter.harbor_run_spec(
+            "gpt-test",
+            environ={"OPENAI_API_KEY": credential},
+        )
+
+    for malformed in (
+        "openai/",
+        "openai-ish/gpt-test",
+        " openai/gpt-test",
+        "openai/gpt-test ",
+        "openai/\x00gpt-test",
+        "openai/\ngpt-test",
+    ):
+        with pytest.raises(VendorConfigurationError):
+            adapter.harbor_run_spec(
+                malformed,
+                environ={"OPENAI_API_KEY": credential},
+            )
 
 
 def test_codex_run_spec_keeps_credential_out_of_argv_and_metadata():
@@ -167,6 +222,67 @@ def test_single_shot_reflected_credential_is_redacted(monkeypatch):
     assert "<redacted:OPENAI_API_KEY>" in content
 
 
+def test_single_shot_preserves_bridge_machine_failure_class(monkeypatch):
+    monkeypatch.setattr(
+        ev,
+        "_openai_post",
+        lambda *_args, **_kwargs: {
+            "error": "upstream_timeout",
+            ev._TRUSTED_BRIDGE_FAILURE_KEY: "FAILED_UPSTREAM_TIMEOUT",
+        },
+    )
+
+    with pytest.raises(RuntimeError, match=r"^FAILED_UPSTREAM_TIMEOUT:") as caught:
+        ev._call_model_once("fixture", "prompt", 10, 10)
+
+    assert caught.value.failure_class == "FAILED_UPSTREAM_TIMEOUT"
+
+
+def test_single_shot_provider_body_cannot_spoof_bridge_machine_class(monkeypatch):
+    monkeypatch.setattr(
+        ev,
+        "_openai_post",
+        lambda *_args, **_kwargs: {
+            "error": "model-controlled upstream_timeout",
+            "failure_class": "FAILED_UPSTREAM_TIMEOUT",
+        },
+    )
+
+    with pytest.raises(RuntimeError) as caught:
+        ev._call_model_once("fixture", "prompt", 10, 10)
+
+    assert not str(caught.value).startswith("FAILED_UPSTREAM_TIMEOUT:")
+    assert caught.value.failure_class is None
+
+
+def test_arbitrary_exception_attribute_cannot_spoof_bridge_machine_class():
+    class ForgedFailure(Exception):
+        failure_class = "BLOCKED_SHARED_RATE_LIMIT"
+
+    assert ev._bridge_failure_from_exception(ForgedFailure("forged")) is None
+    trusted = ev._ModelEndpointError(
+        "redacted evaluator endpoint failure",
+        failure_class="BLOCKED_SHARED_RATE_LIMIT",
+    )
+    assert ev._bridge_failure_from_exception(trusted) == (
+        "BLOCKED_SHARED_RATE_LIMIT"
+    )
+
+
+def test_bridge_machine_failure_is_recorded_only_in_owned_namespace():
+    result = {"harness": {}}
+
+    ev._record_bridge_failure(result, "BLOCKED_SHARED_RATE_LIMIT")
+
+    assert result == {
+        "harness": {},
+        "bridge": {
+            "failure_class": "BLOCKED_SHARED_RATE_LIMIT",
+            "source": "evaluator_machine_metadata",
+        },
+    }
+
+
 def test_atif_telemetry_is_additive_and_best_effort(tmp_path):
     trajectory = tmp_path / "trial" / "agent" / "trajectory.json"
     trajectory.parent.mkdir(parents=True)
@@ -194,6 +310,240 @@ def test_atif_telemetry_is_additive_and_best_effort(tmp_path):
     assert telemetry["n_llm_calls"] == 2
     assert telemetry["n_tool_calls"] == 1
     assert telemetry["total_tokens"] == 14
+
+
+def _write_claude_telemetry_fixture(root: Path) -> tuple[Path, Path]:
+    agent_dir = root / "run" / "trial" / "agent"
+    agent_dir.mkdir(parents=True)
+    trajectory = agent_dir / "trajectory.json"
+    trajectory.write_text(json.dumps({
+        "agent": {
+            "name": "claude-code",
+            "version": "2.1.223",
+            "model_name": "claude-test",
+        },
+        "steps": [],
+        "final_metrics": {"total_steps": 0, "total_cost_usd": 0.68},
+    }))
+    return trajectory, agent_dir / "claude-code.txt"
+
+
+def _claude_result(
+    subtype: object = "error_max_budget_usd",
+    reason: object = "budget_exhausted",
+    is_error: object = True,
+    cost: object = 1.02,
+) -> dict:
+    return {
+        "type": "result",
+        "subtype": subtype,
+        "terminal_reason": reason,
+        "is_error": is_error,
+        "total_cost_usd": cost,
+    }
+
+
+def test_claude_terminal_stream_selects_last_valid_top_level_result(tmp_path):
+    jobs = tmp_path / "jobs"
+    _, stream = _write_claude_telemetry_fixture(jobs)
+    model_body_marker = "model-body-must-not-cross-terminal-boundary"
+    first = _claude_result("error_max_turns", "max_turns", True, 0.68)
+    final = _claude_result(cost=1.0207694999999999)
+    stream.write_text("\n".join([
+        json.dumps({
+            "type": "assistant",
+            "message": {"content": model_body_marker, "nested": final},
+        }),
+        json.dumps(first),
+        json.dumps(final),
+    ]) + "\n")
+
+    telemetry = ev.read_harness_telemetry(str(jobs))
+
+    assert telemetry["terminal_subtype"] == "error_max_budget_usd"
+    assert telemetry["terminal_reason"] == "budget_exhausted"
+    assert telemetry["terminal_is_error"] is True
+    assert telemetry["terminal_total_cost_usd"] == 1.0207694999999999
+    assert telemetry["cost_usd"] == 1.0207694999999999
+    assert telemetry["cost_source"] == "claude_code_stream_final_result"
+    assert telemetry["terminal_result_count"] == 2
+    assert telemetry["terminal_result_selected_ordinal"] == 2
+    assert telemetry["terminal_stream_sha256"] == hashlib.sha256(
+        stream.read_bytes()
+    ).hexdigest()
+    assert model_body_marker not in json.dumps(telemetry)
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        _claude_result(is_error=1),
+        _claude_result(cost=True),
+        _claude_result(cost=float("nan")),
+        _claude_result(subtype="x" * 129),
+        _claude_result(reason="free form model body"),
+    ],
+)
+def test_claude_terminal_stream_rejects_invalid_scalar_shapes(tmp_path, invalid):
+    jobs = tmp_path / "jobs"
+    _, stream = _write_claude_telemetry_fixture(jobs)
+    stream.write_text(json.dumps(invalid) + "\n")
+
+    assert ev._parse_claude_terminal_stream(stream, str(jobs)) == {}
+
+
+@pytest.mark.parametrize("suffix", ["{\"type\":", "truncated-non-json"])
+def test_claude_terminal_stream_fails_closed_after_malformed_suffix(
+    tmp_path, suffix
+):
+    jobs = tmp_path / "jobs"
+    _, stream = _write_claude_telemetry_fixture(jobs)
+    stream.write_text(json.dumps(_claude_result()) + "\n" + suffix)
+
+    assert ev._parse_claude_terminal_stream(stream, str(jobs)) == {}
+
+
+def test_claude_terminal_stream_rejects_multiple_files_and_path_escape(tmp_path):
+    jobs = tmp_path / "jobs"
+    _, stream = _write_claude_telemetry_fixture(jobs)
+    stream.write_text(json.dumps(_claude_result()) + "\n")
+    second = jobs / "other" / "agent" / "claude-code.txt"
+    second.parent.mkdir(parents=True)
+    second.write_text(json.dumps(_claude_result(cost=9.0)) + "\n")
+    outside = tmp_path / "outside" / "claude-code.txt"
+    outside.parent.mkdir()
+    outside.write_text(json.dumps(_claude_result()) + "\n")
+
+    telemetry = ev.read_harness_telemetry(str(jobs))
+
+    assert "terminal_subtype" not in telemetry
+    assert telemetry["cost_usd"] == 0.68
+    assert ev._parse_claude_terminal_stream(outside, str(jobs)) == {}
+
+
+def test_claude_terminal_stream_rejects_symlink_and_hardlink(tmp_path):
+    jobs = tmp_path / "jobs"
+    agent_dir = jobs / "run" / "trial" / "agent"
+    agent_dir.mkdir(parents=True)
+    outside = tmp_path / "claude-code.txt"
+    outside.write_text(json.dumps(_claude_result()) + "\n")
+    symlink = agent_dir / "claude-code.txt"
+    symlink.symlink_to(outside)
+
+    assert ev._parse_claude_terminal_stream(symlink, str(jobs)) == {}
+
+    symlink.unlink()
+    os.link(outside, symlink)
+    assert ev._parse_claude_terminal_stream(symlink, str(jobs)) == {}
+
+
+def test_claude_terminal_stream_enforces_byte_line_and_result_bounds(
+    tmp_path, monkeypatch
+):
+    jobs = tmp_path / "jobs"
+    _, stream = _write_claude_telemetry_fixture(jobs)
+    encoded = json.dumps(_claude_result())
+    stream.write_text(encoded + "\n" + encoded + "\n")
+
+    monkeypatch.setattr(ev, "_MAX_CLAUDE_STREAM_BYTES", 1)
+    assert ev._parse_claude_terminal_stream(stream, str(jobs)) == {}
+    monkeypatch.setattr(ev, "_MAX_CLAUDE_STREAM_BYTES", 16 * 1024 * 1024)
+    monkeypatch.setattr(ev, "_MAX_CLAUDE_STREAM_LINES", 1)
+    assert ev._parse_claude_terminal_stream(stream, str(jobs)) == {}
+    monkeypatch.setattr(ev, "_MAX_CLAUDE_STREAM_LINES", 200_000)
+    monkeypatch.setattr(ev, "_MAX_CLAUDE_RESULT_EVENTS", 1)
+    assert ev._parse_claude_terminal_stream(stream, str(jobs)) == {}
+
+
+def test_agent_budget_class_uses_numeric_machine_facts_not_error_text():
+    spec = HarborRunSpec(
+        agent="claude-code",
+        model="claude-test",
+        agent_kwargs={"max_budget_usd": "0.50"},
+    )
+    dirty = SimpleNamespace(
+        clean=False,
+        n_errored_trials=1,
+        eval_n_errors=1,
+    )
+    clean = SimpleNamespace(
+        clean=True,
+        n_errored_trials=0,
+        eval_n_errors=0,
+    )
+
+    assert ev._agent_budget_failure_class(
+        spec, {"cost_usd": 0.50893225}, dirty
+    ) == "FAILED_AGENT_BUDGET_EXHAUSTED"
+    assert ev._agent_budget_failure_class(
+        spec,
+        {
+            "cost_usd": 0.49,
+            "harness_error": (
+                "model-controlled FAILED_AGENT_BUDGET_EXHAUSTED max budget"
+            ),
+        },
+        dirty,
+    ) is None
+    assert ev._agent_budget_failure_class(
+        spec, {"cost_usd": 0.75}, clean
+    ) is None
+
+
+def test_agent_budget_class_uses_exact_claude_terminal_machine_facts():
+    spec = HarborRunSpec(
+        agent="claude-code",
+        model="claude-test",
+        agent_kwargs={"max_budget_usd": "1.00"},
+    )
+    dirty = SimpleNamespace(
+        clean=False,
+        n_errored_trials=1,
+        eval_n_errors=1,
+    )
+    terminal = {
+        "terminal_subtype": "error_max_budget_usd",
+        "terminal_reason": "budget_exhausted",
+        "terminal_is_error": True,
+        "terminal_total_cost_usd": 1.0207694999999999,
+        "cost_usd": 1.0207694999999999,
+    }
+
+    assert ev._agent_budget_failure_class(
+        spec, terminal, dirty
+    ) == "FAILED_AGENT_BUDGET_EXHAUSTED"
+    for key, replacement in (
+        ("terminal_subtype", "error_max_turns"),
+        ("terminal_reason", "max_turns"),
+        ("terminal_is_error", False),
+    ):
+        forged = {**terminal, key: replacement, "cost_usd": 0.5}
+        assert ev._agent_budget_failure_class(spec, forged, dirty) is None
+
+
+def test_atif_telemetry_never_promotes_model_bridge_class_text(tmp_path):
+    trajectory = tmp_path / "trial" / "agent" / "trajectory.json"
+    trajectory.parent.mkdir(parents=True)
+    trajectory.write_text(json.dumps({
+        "agent": {"name": "claude-code", "version": "test"},
+        "steps": [
+            {
+                "observation": {
+                    "error": {
+                        "failure_class": "FAILED_BRIDGE_REQUEST_PROTOCOL",
+                        "error": "invalid_request_target",
+                    }
+                }
+            }
+        ],
+        "final_metrics": {"total_steps": 1},
+    }))
+
+    telemetry = ev.read_harness_telemetry(str(tmp_path))
+
+    assert telemetry["n_turns"] == 1
+    assert "_bridge_failure_class" not in telemetry
+    assert "FAILED_BRIDGE_REQUEST_PROTOCOL" not in json.dumps(telemetry)
 
 
 def test_atif_telemetry_is_strictly_bounded_and_drops_nested_data(tmp_path):
@@ -348,7 +698,8 @@ def test_codex_dry_run_is_unscored_and_needs_no_credential(tmp_path, monkeypatch
 
     assert rc == 0
     assert result["dry_run"] is True
-    assert result["reward"] is None
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
     assert result["false_accept_check"] is None
     assert result["harness"]["stop_reason"] == "dry_run"
     assert "OPENAI_API_KEY=${OPENAI_API_KEY}" in result["plan"]["command"]
@@ -489,8 +840,8 @@ def test_post_harbor_sif_mutation_resets_score_acceptance(tmp_path, monkeypatch)
     result = json.loads(out.read_text())
 
     assert rc == 1
-    assert result["reward"] == 0.0
-    assert result["solved"] is False
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
     assert result["agent_completed"] is False
     assert result["harness"]["score_accepted"] is False
     assert result["harness"]["stop_reason"] == "error"
@@ -703,7 +1054,9 @@ def test_auth_path_from_malicious_trajectory_is_redacted_everywhere(
     assert "total_tokens" not in result["harness"]
 
 
-def test_agent_error_aggregate_is_diagnostic_not_clean_score(tmp_path, monkeypatch):
+def test_agent_error_cannot_be_downgraded_by_trajectory_or_trace_injection(
+    tmp_path, monkeypatch
+):
     task = _write_minimal_task(tmp_path)
     bin_dir = tmp_path / "bin-agent-error"
     bin_dir.mkdir()
@@ -715,6 +1068,16 @@ def test_agent_error_aggregate_is_diagnostic_not_clean_score(tmp_path, monkeypat
         "out = pathlib.Path(args[args.index('-o') + 1])\n"
         "run = out / 'errored-run'\n"
         "run.mkdir(parents=True)\n"
+        "agent = run / 'agent'\n"
+        "agent.mkdir()\n"
+        "(agent / 'trajectory.json').write_text(json.dumps({\n"
+        "  'agent': {'name': 'claude-code', 'version': 'test'},\n"
+        "  'steps': [{'observation': {'error': {\n"
+        "    'failure_class': 'FAILED_BRIDGE_REQUEST_PROTOCOL',\n"
+        "    'error': 'invalid_request_target'\n"
+        "  }}}],\n"
+        "  'final_metrics': {'total_steps': 1}\n"
+        "}))\n"
         "trial = 'task__errored'\n"
         "(run / 'result.json').write_text(json.dumps({\n"
         "  'n_total_trials': 1,\n"
@@ -730,6 +1093,7 @@ def test_agent_error_aggregate_is_diagnostic_not_clean_score(tmp_path, monkeypat
         "    }}\n"
         "  }\n"
         "}))\n"
+        "print('FAILED_BRIDGE_REQUEST_PROTOCOL')\n"
     )
     fake.chmod(0o755)
     monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ.get("PATH", ""))
@@ -748,8 +1112,8 @@ def test_agent_error_aggregate_is_diagnostic_not_clean_score(tmp_path, monkeypat
 
     assert ev._read_harbor_reward(result["jobs_dir"]) is None
     assert rc == 1
-    assert result["reward"] == 0.0
-    assert result["solved"] is False
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
     assert result["agent_completed"] is False
     assert result["error"] == "harbor aggregate reports agent/trial errors"
     assert result["harness"]["stop_reason"] == "scored_agent_error"
@@ -757,6 +1121,87 @@ def test_agent_error_aggregate_is_diagnostic_not_clean_score(tmp_path, monkeypat
     assert result["harness"]["harbor_diagnostic_reward"] == 0.0
     assert result["harness"]["aggregate_status"]["n_errored_trials"] == 1
     assert result["harness"]["aggregate_status"]["eval_n_errors"] == 1
+    assert "failure_class" not in result
+    assert "failure_class" not in result["harness"]
+    assert "bridge" not in result
+    assert "bridge" not in result["harness"]
+    assert "_bridge_failure_class" not in json.dumps(result)
+
+
+def test_claude_terminal_budget_result_survives_full_evaluator_boundary(
+    tmp_path, monkeypatch
+):
+    task = _write_minimal_task(tmp_path)
+    bin_dir = tmp_path / "bin-claude-budget"
+    bin_dir.mkdir()
+    fake = bin_dir / "harbor"
+    fake.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json, pathlib, sys\n"
+        "args = sys.argv[1:]\n"
+        "out = pathlib.Path(args[args.index('-o') + 1])\n"
+        "run = out / 'errored-run'\n"
+        "agent = run / 'trial' / 'agent'\n"
+        "agent.mkdir(parents=True)\n"
+        "first = {'type': 'result', 'subtype': 'error_max_turns', "
+        "'terminal_reason': 'max_turns', 'is_error': True, "
+        "'total_cost_usd': 0.68}\n"
+        "final = {'type': 'result', 'subtype': 'error_max_budget_usd', "
+        "'terminal_reason': 'budget_exhausted', 'is_error': True, "
+        "'total_cost_usd': 1.02}\n"
+        "(agent / 'claude-code.txt').write_text("
+        "json.dumps(first) + '\\n' + json.dumps(final) + '\\n')\n"
+        "(agent / 'trajectory.json').write_text(json.dumps({\n"
+        "  'agent': {'name': 'claude-code', 'version': 'test'},\n"
+        "  'steps': [],\n"
+        "  'final_metrics': {'total_steps': 0, 'total_cost_usd': 0.68}\n"
+        "}))\n"
+        "trial = 'task__errored'\n"
+        "(run / 'result.json').write_text(json.dumps({\n"
+        "  'n_total_trials': 1,\n"
+        "  'stats': {\n"
+        "    'n_completed_trials': 1, 'n_errored_trials': 1,\n"
+        "    'n_running_trials': 0, 'n_pending_trials': 0,\n"
+        "    'n_cancelled_trials': 0, 'n_retries': 0,\n"
+        "    'evals': {'claude-code__fixture': {\n"
+        "      'n_trials': 1, 'n_errors': 1,\n"
+        "      'metrics': [{'mean': 0.0}],\n"
+        "      'reward_stats': {'reward': {'0.0': [trial]}},\n"
+        "      'exception_stats': {'NonZeroAgentExitCodeError': [trial]}\n"
+        "    }}\n"
+        "  }\n"
+        "}))\n"
+    )
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ.get("PATH", ""))
+    monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "unit-test-private-value")
+    out = tmp_path / "claude-budget-result.json"
+
+    rc = ev.main([
+        "--model", "claude-test",
+        "--task", str(task),
+        "--out", str(out),
+        "--work", str(tmp_path / "claude-budget-work"),
+        "--harness", "claude-code",
+        "--agent-kwarg", "max_budget_usd=1.00",
+        "--harbor-timeout", "10",
+    ])
+    result = json.loads(out.read_text())
+
+    assert rc == 1
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
+    assert result["agent_completed"] is False
+    assert result["error"] == "agent budget exhausted before clean completion"
+    assert result["agent_failure_class"] == "FAILED_AGENT_BUDGET_EXHAUSTED"
+    assert result["harness"]["agent_failure_class"] == (
+        "FAILED_AGENT_BUDGET_EXHAUSTED"
+    )
+    assert result["harness"]["stop_reason"] == "budget_exhausted"
+    assert result["harness"]["score_accepted"] is False
+    assert result["harness"]["cost_usd"] == 1.02
+    assert result["harness"]["terminal_result_count"] == 2
+    assert result["harness"]["terminal_result_selected_ordinal"] == 2
 
 
 def _write_nonzero_harbor(path: Path, exit_code: int) -> None:
@@ -810,8 +1255,8 @@ def test_vendor_nonzero_harbor_exit_rejects_fresh_aggregate(tmp_path, monkeypatc
     # is authoritative and must prevent it from becoming an accepted score.
     assert ev._read_harbor_reward(result["jobs_dir"]) == 1.0
     assert rc == 1
-    assert result["reward"] == 0.0
-    assert result["solved"] is False
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
     assert result["error"] == "harbor exited with status 7"
     assert result["agent_completed"] is False
     assert result["harness"]["harbor_returncode"] == 7
@@ -838,8 +1283,8 @@ def test_oracle_nonzero_harbor_exit_rejects_fresh_aggregate(tmp_path, monkeypatc
 
     assert ev._read_harbor_reward(result["jobs_dir"]) == 1.0
     assert rc == 1
-    assert result["reward"] == 0.0
-    assert result["solved"] is False
+    assert result["outcome"] is None
+    assert not ({"reward", "solved", "passed"} & set(result))
     assert result["error"] == "harbor exited with status 9"
     assert result["patch_applied"] is False
     assert result["harbor_returncode"] == 9

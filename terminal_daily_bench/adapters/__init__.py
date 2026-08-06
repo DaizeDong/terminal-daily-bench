@@ -4,9 +4,29 @@ from __future__ import annotations
 from typing import Type
 
 from .base import AdapterResult, HarborRunSpec, HarnessAdapter
+from .gateway_vendors import (
+    ClineCLIAdapter,
+    GooseAdapter,
+    HermesAdapter,
+    KimiCLIAdapter,
+    OpenHandsAdapter,
+    OpenHandsSDKAdapter,
+    OpenClawAdapter,
+    PiAdapter,
+    QwenCodeAdapter,
+    SWEAgentAdapter,
+    TraeAgentAdapter,
+)
 from .single_shot import SingleShotAdapter
 from .terminus import TerminusAdapter
-from .vendor import ClaudeCodeAdapter, CodexAdapter, Terminus2Adapter
+from .vendor import (
+    AiderAdapter,
+    ClaudeCodeAdapter,
+    CodexAdapter,
+    MiniSweAgentAdapter,
+    OpenCodeAdapter,
+    Terminus2Adapter,
+)
 
 
 REGISTRY: dict[str, Type[HarnessAdapter]] = {}
@@ -49,6 +69,20 @@ for _adapter in (
     Terminus2Adapter,
     ClaudeCodeAdapter,
     CodexAdapter,
+    AiderAdapter,
+    OpenCodeAdapter,
+    MiniSweAgentAdapter,
+    ClineCLIAdapter,
+    OpenHandsAdapter,
+    OpenHandsSDKAdapter,
+    PiAdapter,
+    QwenCodeAdapter,
+    SWEAgentAdapter,
+    TraeAgentAdapter,
+    GooseAdapter,
+    HermesAdapter,
+    KimiCLIAdapter,
+    OpenClawAdapter,
 ):
     register_adapter(_adapter)
 
@@ -59,8 +93,22 @@ __all__ = [
     "HarborRunSpec",
     "SingleShotAdapter",
     "TerminusAdapter",
+    "AiderAdapter",
     "ClaudeCodeAdapter",
     "CodexAdapter",
+    "MiniSweAgentAdapter",
+    "OpenCodeAdapter",
+    "OpenHandsAdapter",
+    "OpenHandsSDKAdapter",
+    "PiAdapter",
+    "ClineCLIAdapter",
+    "GooseAdapter",
+    "HermesAdapter",
+    "KimiCLIAdapter",
+    "OpenClawAdapter",
+    "QwenCodeAdapter",
+    "SWEAgentAdapter",
+    "TraeAgentAdapter",
     "Terminus2Adapter",
     "REGISTRY",
     "create_adapter",

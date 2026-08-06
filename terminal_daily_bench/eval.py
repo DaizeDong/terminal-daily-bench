@@ -79,14 +79,14 @@ from urllib.request import Request, urlopen
 from .harbor_score import (
     _clean_subprocess_env,
     _maybe_inject_offline_eks,
-    _read_harbor_reward,
+    _read_harbor_reward,  # noqa: F401 - retained for diagnostic compatibility
     authoritative_harbor_result_snapshot,
     harbor_aggregate_status_from_snapshot,
     reward_from_harbor_result_snapshot,
 )
-from .adapters import REGISTRY, create_adapter
+from .adapters import create_adapter
 from .adapters.base import HarborRunSpec
-from .adapters.vendor import _safe_base_url
+from .adapters.vendor import VendorConfigurationError, _safe_base_url
 
 # Singularity `--ek` backend knobs. Paths are env-driven so nothing host-specific
 # ships: set TDB_SIF_CACHE / TDB_OVERLAY_DIR to override the generic defaults.
@@ -122,6 +122,56 @@ _VENDOR_HOST_ENV_ALLOWLIST = (
 _SENSITIVE_ENV_NAME = re.compile(
     r"(?:key|secret|token|password|credential|auth)", re.IGNORECASE
 )
+
+# Fixed, non-secret machine classes emitted by the localhost auth bridge.  This
+# whitelist is duplicated at the evaluator boundary deliberately: importing the
+# campaign runner here would couple the one-cell evaluator back to its optional
+# orchestration layer.
+_BRIDGE_FAILURE_CLASSES = (
+    "BLOCKED_BRIDGE_STARTUP",
+    "BLOCKED_BRIDGE_UNREACHABLE",
+    "BLOCKED_NO_NETWORK_NAMESPACE",
+    "BLOCKED_SHARED_RATE_LIMIT",
+    "FAILED_BRIDGE_AUTH",
+    "FAILED_BRIDGE_INTERNAL",
+    "FAILED_BRIDGE_REQUEST_LIMIT",
+    "FAILED_BRIDGE_REQUEST_PROTOCOL",
+    "FAILED_BRIDGE_RESPONSE_LIMIT",
+    "FAILED_BRIDGE_SHUTDOWN",
+    "FAILED_CLIENT_DISCONNECT",
+    "FAILED_UPSTREAM_CONNECT",
+    "FAILED_UPSTREAM_HTTP",
+    "FAILED_UPSTREAM_PROTOCOL",
+    "FAILED_UPSTREAM_TIMEOUT",
+)
+_BRIDGE_FAILURE_CLASS_SET = frozenset(_BRIDGE_FAILURE_CLASSES)
+_TRUSTED_BRIDGE_FAILURE_KEY = "_terminal_daily_trusted_bridge_failure_class"
+_AGENT_BUDGET_FAILURE_CLASS = "FAILED_AGENT_BUDGET_EXHAUSTED"
+_AGENT_ERROR_FAILURE_CLASS = "FAILED_AGENT_ERROR"
+_EVALUATOR_FAILURE_CLASS_SET = frozenset(
+    {
+        "SKIPPED_UNSUPPORTED_AUTH",
+        "FAILED_TIMEOUT",
+        "FAILED_SIF_DRIFT",
+        "FAILED_AGGREGATE_AUTHORITY",
+        "FAILED_AGENT_SETUP",
+        "FAILED_HARBOR",
+    }
+)
+
+
+class _ModelEndpointError(RuntimeError):
+    """Endpoint failure with optional bridge-header machine provenance."""
+
+    def __init__(self, message: str, failure_class: Optional[str] = None) -> None:
+        super().__init__(message)
+        self.failure_class = (
+            failure_class if failure_class in _BRIDGE_FAILURE_CLASS_SET else None
+        )
+
+
+class TaskSIFIntegrityError(ValueError):
+    """A task SIF failed a pinned identity or byte-integrity check."""
 
 
 def _log(msg: str) -> None:
@@ -165,9 +215,14 @@ def _openai_post(
     try:
         with urlopen(request, timeout=timeout) as response:
             raw = response.read().decode("utf-8", errors="replace").strip()
+        http_failure_class = None
     except HTTPError as e:
         # Provider error bodies are commonly valid JSON and are interpreted by
         # ``_call_model_once`` (including the max_completion_tokens fallback).
+        candidate = e.headers.get("X-Terminal-Daily-Failure-Class")
+        http_failure_class = (
+            candidate if candidate in _BRIDGE_FAILURE_CLASS_SET else None
+        )
         raw = e.read().decode("utf-8", errors="replace").strip()
     except URLError as e:
         reason = _redact_openai_credential(str(e.reason))
@@ -179,6 +234,12 @@ def _openai_post(
     except json.JSONDecodeError as e:
         safe_raw = _redact_openai_credential(raw)
         raise RuntimeError(f"non-JSON response: {safe_raw[:300]}") from e
+    if isinstance(data, dict):
+        # This private hand-off is always cleared before use.  A provider body
+        # cannot spoof it; only the bridge-added HTTP header can populate it.
+        data.pop(_TRUSTED_BRIDGE_FAILURE_KEY, None)
+        if http_failure_class is not None:
+            data[_TRUSTED_BRIDGE_FAILURE_KEY] = http_failure_class
     return data
 
 
@@ -227,7 +288,15 @@ def _call_model_once(
         data = _chat("max_completion_tokens")  # reasoning models reject max_tokens
     if "error" in data:
         safe_error = _redact_openai_credential(str(data["error"]))
-        raise RuntimeError(f"endpoint error: {safe_error[:300]}")
+        failure_class = data.get(_TRUSTED_BRIDGE_FAILURE_KEY)
+        prefix = (
+            f"{failure_class}: "
+            if failure_class in _BRIDGE_FAILURE_CLASS_SET else ""
+        )
+        raise _ModelEndpointError(
+            f"{prefix}endpoint error: {safe_error[:300]}",
+            failure_class=failure_class,
+        )
     choices = data.get("choices") or []
     if not choices:
         safe_data = _redact_openai_credential(json.dumps(data))
@@ -582,15 +651,19 @@ def _stage_pinned_task_sif(
 ) -> tuple[str, str, str, tuple[int, ...]]:
     """Copy a stable source SIF into the disposable run before Harbor opens it."""
     if not os.path.isabs(path):
-        raise ValueError("--task-sif must be an absolute path")
+        raise TaskSIFIntegrityError("--task-sif must be an absolute path")
     if not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256 or ""):
-        raise ValueError("--task-sif-sha256 must be exactly 64 hexadecimal characters")
+        raise TaskSIFIntegrityError(
+            "--task-sif-sha256 must be exactly 64 hexadecimal characters"
+        )
     supplied = Path(path)
     resolved = supplied.resolve(strict=True)
     if os.path.abspath(path) != str(resolved):
-        raise ValueError("--task-sif must not traverse a symbolic link")
+        raise TaskSIFIntegrityError("--task-sif must not traverse a symbolic link")
     if resolved.suffix.lower() != ".sif":
-        raise ValueError("--task-sif must resolve to a regular .sif file")
+        raise TaskSIFIntegrityError(
+            "--task-sif must resolve to a regular .sif file"
+        )
     nofollow = getattr(os, "O_NOFOLLOW", 0)
     cloexec = getattr(os, "O_CLOEXEC", 0)
     source_fd = destination_fd = None
@@ -603,7 +676,9 @@ def _stage_pinned_task_sif(
         if (not stat.S_ISREG(source_before.st_mode) or source_before.st_nlink != 1
                 or (source_before.st_dev, source_before.st_ino)
                 != (source_lstat.st_dev, source_lstat.st_ino)):
-            raise ValueError("--task-sif must be a single-link regular file")
+            raise TaskSIFIntegrityError(
+                "--task-sif must be a single-link regular file"
+            )
         staged_dir.mkdir(mode=0o700)
         os.chmod(staged_dir, 0o700)
         destination_fd = os.open(
@@ -629,16 +704,20 @@ def _stage_pinned_task_sif(
         os.fsync(destination_fd)
         source_after = os.fstat(source_fd)
         if _stable_sif_facts(source_before) != _stable_sif_facts(source_after):
-            raise ValueError("source task SIF changed while it was staged")
+            raise TaskSIFIntegrityError(
+                "source task SIF changed while it was staged"
+            )
         destination_after = os.fstat(destination_fd)
         if (not stat.S_ISREG(destination_after.st_mode)
                 or destination_after.st_nlink != 1
                 or destination_after.st_size != copied
                 or stat.S_IMODE(destination_after.st_mode) != 0o400):
-            raise ValueError("staged task SIF failed private-file validation")
+            raise TaskSIFIntegrityError(
+                "staged task SIF failed private-file validation"
+            )
         actual = digest.hexdigest()
         if actual != expected_sha256.lower():
-            raise ValueError(
+            raise TaskSIFIntegrityError(
                 f"task SIF digest mismatch: expected {expected_sha256.lower()}, got {actual}"
             )
         # WekaFS may finalize ctime/mtime after close.  Bind the cross-process
@@ -677,23 +756,33 @@ def _verify_staged_task_sif(
                 or stat.S_IMODE(before.st_mode) != 0o400
                 or (before.st_dev, before.st_ino) != (path_stat.st_dev, path_stat.st_ino)
                 or _sif_identity_facts(before) != expected_facts):
-            raise ValueError("staged task SIF identity changed before post-run verification")
+            raise TaskSIFIntegrityError(
+                "staged task SIF identity changed before post-run verification"
+            )
         digest = hashlib.sha256()
         remaining = before.st_size
         while remaining:
             chunk = os.read(fd, min(1024 * 1024, remaining))
             if not chunk:
-                raise ValueError("staged task SIF was truncated during verification")
+                raise TaskSIFIntegrityError(
+                    "staged task SIF was truncated during verification"
+                )
             digest.update(chunk)
             remaining -= len(chunk)
         if os.read(fd, 1):
-            raise ValueError("staged task SIF grew during verification")
+            raise TaskSIFIntegrityError(
+                "staged task SIF grew during verification"
+            )
         after = os.fstat(fd)
         if _stable_sif_facts(before) != _stable_sif_facts(after):
-            raise ValueError("staged task SIF changed during post-run verification")
+            raise TaskSIFIntegrityError(
+                "staged task SIF changed during post-run verification"
+            )
         actual = digest.hexdigest()
         if actual != expected_sha256:
-            raise ValueError("staged task SIF digest changed during Harbor execution")
+            raise TaskSIFIntegrityError(
+                "staged task SIF digest changed during Harbor execution"
+            )
         return actual
     finally:
         if fd is not None:
@@ -860,9 +949,43 @@ def _public_endpoint(url: str) -> Optional[str]:
 
 _MAX_TRAJECTORY_BYTES = 16 * 1024 * 1024
 _MAX_TRAJECTORY_FILES = 128
+_MAX_CLAUDE_STREAM_BYTES = 16 * 1024 * 1024
+_MAX_CLAUDE_STREAM_LINES = 200_000
+_MAX_CLAUDE_RESULT_EVENTS = 10_000
 _MAX_TELEMETRY_STEPS = 100_000
 _MAX_TELEMETRY_COUNT = 1_000_000_000_000
 _MAX_TELEMETRY_COST = 1_000_000_000.0
+_TERMINAL_IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9_.-]{1,128}$")
+
+
+def _record_bridge_failure(
+    result: Dict[str, Any], failure_class: Optional[str]
+) -> None:
+    """Persist evaluator-owned machine metadata in the dedicated namespace."""
+    if failure_class not in _BRIDGE_FAILURE_CLASS_SET:
+        return
+    result["bridge"] = {
+        "failure_class": failure_class,
+        "source": "evaluator_machine_metadata",
+    }
+
+
+def _bridge_failure_from_exception(exc: BaseException) -> Optional[str]:
+    """Accept provenance only from the evaluator's private endpoint error type."""
+    if not isinstance(exc, _ModelEndpointError):
+        return None
+    return exc.failure_class
+
+
+def _record_evaluator_failure(
+    result: Dict[str, Any], failure_class: Optional[str]
+) -> None:
+    """Persist a fixed evaluator-owned class without parsing exception text."""
+    if (
+        failure_class in _EVALUATOR_FAILURE_CLASS_SET
+        and "evaluator_failure_class" not in result
+    ):
+        result["evaluator_failure_class"] = failure_class
 
 
 def _read_pinned_trajectory(path: Path, jobs_dir: str) -> Optional[Dict[str, Any]]:
@@ -921,6 +1044,172 @@ def _read_pinned_trajectory(path: Path, jobs_dir: str) -> Optional[Dict[str, Any
                 pass
 
 
+def _read_pinned_claude_stream(path: Path, jobs_dir: str) -> Optional[bytes]:
+    """Read one bounded ``claude-code.txt`` below the fixed jobs root.
+
+    Every path component is opened relative to an already-open directory with
+    ``O_NOFOLLOW``. The returned bytes therefore cannot come from a symlink,
+    hard link, path escape, or file swapped while it is being read.
+    """
+    descriptors: List[int] = []
+    try:
+        search_root = Path(jobs_dir).absolute()
+        root_path_facts = search_root.lstat()
+        if search_root.is_symlink() or not stat.S_ISDIR(root_path_facts.st_mode):
+            return None
+        candidate = path.absolute()
+        relative = candidate.relative_to(search_root)
+        if not relative.parts or relative.name != "claude-code.txt":
+            return None
+
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        cloexec = getattr(os, "O_CLOEXEC", 0)
+        current_fd = os.open(
+            search_root, os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec
+        )
+        descriptors.append(current_fd)
+        root_fd_facts = os.fstat(current_fd)
+        if (
+            not stat.S_ISDIR(root_fd_facts.st_mode)
+            or (root_fd_facts.st_dev, root_fd_facts.st_ino)
+            != (root_path_facts.st_dev, root_path_facts.st_ino)
+        ):
+            return None
+
+        for component in relative.parts[:-1]:
+            current_fd = os.open(
+                component,
+                os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec,
+                dir_fd=current_fd,
+            )
+            descriptors.append(current_fd)
+        file_fd = os.open(
+            relative.name, os.O_RDONLY | nofollow | cloexec, dir_fd=current_fd
+        )
+        descriptors.append(file_fd)
+        before = os.fstat(file_fd)
+        if (
+            not stat.S_ISREG(before.st_mode)
+            or before.st_nlink != 1
+            or before.st_size < 0
+            or before.st_size > _MAX_CLAUDE_STREAM_BYTES
+        ):
+            return None
+
+        chunks: List[bytes] = []
+        remaining = before.st_size
+        while remaining:
+            chunk = os.read(file_fd, min(1024 * 1024, remaining))
+            if not chunk:
+                return None
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        if os.read(file_fd, 1):
+            return None
+        after = os.fstat(file_fd)
+        stable = (
+            "st_dev", "st_ino", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns",
+        )
+        if any(getattr(before, field) != getattr(after, field) for field in stable):
+            return None
+        current_path_facts = candidate.lstat()
+        if (
+            not stat.S_ISREG(current_path_facts.st_mode)
+            or (current_path_facts.st_dev, current_path_facts.st_ino,
+                current_path_facts.st_nlink, current_path_facts.st_size)
+            != (after.st_dev, after.st_ino, after.st_nlink, after.st_size)
+        ):
+            return None
+        return b"".join(chunks)
+    except (OSError, ValueError):
+        return None
+    finally:
+        for descriptor in reversed(descriptors):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+
+
+def _parse_claude_terminal_stream(path: Path, jobs_dir: str) -> Dict[str, Any]:
+    """Select the final valid top-level Claude result event.
+
+    Only four bounded scalar fields cross this boundary. In particular, nested
+    model text, error arrays, prompts, response bodies, and arbitrary extra
+    fields are never returned or persisted.
+    """
+    raw = _read_pinned_claude_stream(path, jobs_dir)
+    if raw is None:
+        return {}
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return {}
+    lines = text.splitlines()
+    if len(lines) > _MAX_CLAUDE_STREAM_LINES:
+        return {}
+
+    terminal: Optional[Dict[str, Any]] = None
+    count = 0
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if not stripped.startswith("{"):
+            if terminal is not None:
+                return {}
+            continue
+        try:
+            event = json.loads(stripped)
+        except (json.JSONDecodeError, RecursionError):
+            if terminal is not None:
+                return {}
+            continue
+        if not isinstance(event, dict) or event.get("type") != "result":
+            continue
+
+        subtype = event.get("subtype")
+        reason = event.get("terminal_reason")
+        is_error = event.get("is_error")
+        cost = event.get("total_cost_usd")
+        if (
+            not isinstance(subtype, str)
+            or _TERMINAL_IDENTIFIER_RE.fullmatch(subtype) is None
+            or not isinstance(reason, str)
+            or _TERMINAL_IDENTIFIER_RE.fullmatch(reason) is None
+            or type(is_error) is not bool
+        ):
+            if terminal is not None:
+                return {}
+            continue
+        bounded_cost = _bounded_telemetry_cost(cost)
+        if bounded_cost is None:
+            if terminal is not None:
+                return {}
+            continue
+        terminal = {
+            "terminal_subtype": subtype,
+            "terminal_reason": reason,
+            "terminal_is_error": is_error,
+            "terminal_total_cost_usd": bounded_cost,
+        }
+        count += 1
+        if count > _MAX_CLAUDE_RESULT_EVENTS:
+            return {}
+
+    if terminal is None:
+        return {}
+    return {
+        **terminal,
+        "terminal_result_count": count,
+        "terminal_result_selected_ordinal": count,
+        "terminal_result_source": "claude_code_stream_final_result",
+        "terminal_stream_sha256": hashlib.sha256(raw).hexdigest(),
+        "cost_usd": terminal["terminal_total_cost_usd"],
+        "cost_source": "claude_code_stream_final_result",
+    }
+
+
 def _bounded_telemetry_int(value: Any) -> Optional[int]:
     if type(value) is not int or value < 0 or value > _MAX_TELEMETRY_COUNT:
         return None
@@ -943,10 +1232,52 @@ def _bounded_telemetry_cost(value: Any) -> Optional[float]:
     return number
 
 
+def _agent_budget_failure_class(
+    spec: HarborRunSpec,
+    telemetry: Dict[str, Any],
+    aggregate_status: Any,
+) -> Optional[str]:
+    """Derive budget exhaustion only from bounded machine facts, never text."""
+    if (
+        aggregate_status is None
+        or aggregate_status.clean
+        or (
+            aggregate_status.n_errored_trials <= 0
+            and aggregate_status.eval_n_errors <= 0
+        )
+    ):
+        return None
+    if (
+        spec.agent == "claude-code"
+        and telemetry.get("terminal_subtype") == "error_max_budget_usd"
+        and telemetry.get("terminal_reason") == "budget_exhausted"
+        and telemetry.get("terminal_is_error") is True
+        and type(telemetry.get("terminal_total_cost_usd")) in (int, float)
+    ):
+        return _AGENT_BUDGET_FAILURE_CLASS
+    raw_limit = spec.agent_kwargs.get("max_budget_usd")
+    try:
+        limit = float(raw_limit) if raw_limit is not None else None
+    except (TypeError, ValueError):
+        return None
+    cost = telemetry.get("cost_usd")
+    if (
+        limit is None
+        or not math.isfinite(limit)
+        or limit <= 0
+        or type(cost) not in (int, float)
+        or not math.isfinite(float(cost))
+        or float(cost) < limit
+    ):
+        return None
+    return _AGENT_BUDGET_FAILURE_CLASS
+
+
 def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
     """Read a fixed, bounded telemetry whitelist from untrusted ATIF JSON."""
     try:
         paths = sorted(Path(jobs_dir).rglob("trajectory.json"))
+        claude_stream_paths = sorted(Path(jobs_dir).rglob("claude-code.txt"))
     except OSError:
         return {}
     if len(paths) > _MAX_TRAJECTORY_FILES:
@@ -1024,6 +1355,14 @@ def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
             total = candidate if candidate <= _MAX_TELEMETRY_COUNT else None
         if total is not None:
             telemetry["total_tokens"] = total
+        if (
+            agent.get("name") == "claude-code"
+            and len(claude_stream_paths) == 1
+            and claude_stream_paths[0].parent == path.parent
+        ):
+            telemetry.update(
+                _parse_claude_terminal_stream(claude_stream_paths[0], jobs_dir)
+            )
         return telemetry
     return {}
 
@@ -1118,8 +1457,7 @@ def main(argv=None) -> int:
         "task": task_id,
         "task_dir": task_dir,
         "scaffold": "oracle_baseline" if is_baseline else harness_name,
-        "reward": None if args.dry_run else 0.0,
-        "solved": None if args.dry_run else False,
+        "outcome": None,
         "patch_applied": None,
         "error": None,
         "model_endpoint": None,
@@ -1192,7 +1530,9 @@ def main(argv=None) -> int:
 
         staged_task_sif_facts = None
         if bool(args.task_sif) != bool(args.task_sif_sha256):
-            raise ValueError("--task-sif and --task-sif-sha256 must be provided together")
+            raise TaskSIFIntegrityError(
+                "--task-sif and --task-sif-sha256 must be provided together"
+            )
         if args.task_sif:
             (task_sif, task_sif_source, task_sif_sha256,
              staged_task_sif_facts) = _stage_pinned_task_sif(
@@ -1224,6 +1564,7 @@ def main(argv=None) -> int:
             result["patch_applied"] = reward is not None
             if harbor_returncode != 0:
                 result["error"] = f"harbor exited with status {harbor_returncode}"
+                _record_evaluator_failure(result, "FAILED_HARBOR")
             if "oracle patch does not apply" in trace:
                 result["patch_applied"] = False
 
@@ -1290,6 +1631,7 @@ def main(argv=None) -> int:
                 result["harness"]["harbor_result_sha256"] = aggregate_digest
             if harbor_returncode != 0:
                 result["error"] = f"harbor exited with status {harbor_returncode}"
+                _record_evaluator_failure(result, "FAILED_HARBOR")
             if "oracle patch does not apply" in trace:
                 result["patch_applied"] = False
             elif reward is not None:
@@ -1407,9 +1749,23 @@ def main(argv=None) -> int:
                 read_harness_telemetry(jobs_dir), spec
             )
             result["harness"].update(telemetry)
-            if (aggregate_status is not None and not aggregate_status.clean
+            # Harbor stdout/stderr, trajectories, and agent-authored files are
+            # untrusted model channels.  Text found there must never downgrade
+            # an agent failure into an excluded infrastructure failure.  Until
+            # Harbor has a private, digest-bound wrapper result channel, only
+            # the direct evaluator HTTP-header path may assert bridge classes.
+            agent_failure_class = _agent_budget_failure_class(
+                spec, telemetry, aggregate_status
+            )
+            if agent_failure_class is not None:
+                result["agent_failure_class"] = agent_failure_class
+                result["harness"]["agent_failure_class"] = agent_failure_class
+                result["error"] = "agent budget exhausted before clean completion"
+                result["harness"]["stop_reason"] = "budget_exhausted"
+            elif (aggregate_status is not None and not aggregate_status.clean
                     and (aggregate_status.n_errored_trials > 0
                          or aggregate_status.eval_n_errors > 0)):
+                result["agent_failure_class"] = _AGENT_ERROR_FAILURE_CLASS
                 result["harness"]["stop_reason"] = "scored_agent_error"
             else:
                 result["harness"]["stop_reason"] = (
@@ -1425,6 +1781,7 @@ def main(argv=None) -> int:
             if returncode != 0:
                 result["error"] = f"harbor exited with status {returncode}"
                 result["harness"]["harness_error"] = result["error"]
+                _record_evaluator_failure(result, "FAILED_HARBOR")
             # Harbor-native agents mutate a workspace; there is no oracle patch.
             result["patch_applied"] = None
             result["false_accept_check"]["model_patch_touched_tests"] = None
@@ -1440,8 +1797,14 @@ def main(argv=None) -> int:
             result["harness"]["score_accepted"] = True
             result["agent_completed"] = True
 
-        result["reward"] = float(reward) if reward is not None else 0.0
-        result["solved"] = bool(reward is not None and float(reward) >= 0.999)
+        score_accepted = (
+            vendor_score_candidate
+            if adapter is not None and adapter.integration_path == "harbor-agent"
+            else reward is not None and not result.get("error")
+        )
+        result["outcome"] = float(reward) if score_accepted else None
+        if isinstance(result.get("harness"), dict):
+            result["harness"]["score_accepted"] = score_accepted
         result["jobs_dir"] = jobs_dir
         if reward is None:
             if not result.get("error"):
@@ -1451,17 +1814,31 @@ def main(argv=None) -> int:
             if result.get("harness"):
                 if not result["harness"].get("harness_error"):
                     result["harness"]["harness_error"] = result["error"]
-                if result["harness"].get("stop_reason") != "scored_agent_error":
+                if result["harness"].get("stop_reason") not in {
+                    "scored_agent_error", "budget_exhausted",
+                }:
                     result["harness"]["stop_reason"] = "error"
+                    _record_evaluator_failure(
+                        result, "FAILED_AGGREGATE_AUTHORITY"
+                    )
     except HarborTimeoutError as e:
         result["error"] = str(e)
         result["agent_completed"] = False
+        _record_evaluator_failure(result, "FAILED_TIMEOUT")
         if result.get("harness"):
             result["harness"]["harness_error"] = str(e)
             result["harness"]["score_accepted"] = False
     except Exception as e:  # noqa: BLE001 -- BAD-safe: report, never fake a score
         result["error"] = f"{type(e).__name__}: {e}"
         result["agent_completed"] = False
+        _record_bridge_failure(
+            result,
+            _bridge_failure_from_exception(e),
+        )
+        if isinstance(e, TaskSIFIntegrityError):
+            _record_evaluator_failure(result, "FAILED_SIF_DRIFT")
+        elif isinstance(e, VendorConfigurationError):
+            _record_evaluator_failure(result, "FAILED_AGENT_SETUP")
         if result.get("harness"):
             result["harness"]["harness_error"] = result["error"]
             result["harness"]["stop_reason"] = "error"
@@ -1477,6 +1854,33 @@ def _finish(result: Dict[str, Any], out: str, t0: float) -> int:
     a clean zero-reward run: it exits non-zero so a harness/CI notices. A genuine
     unsolved attempt (no error, reward 0.0) still exits 0 -- that is a real result.
     """
+    # Numeric/boolean score aliases are valid only for an accepted outcome.
+    # A failed, blocked, dry-run, or otherwise unaccepted row must be explicit
+    # null and must not be observationally equivalent to a genuine zero.
+    raw_outcome = result.get("outcome")
+    if "outcome" not in result:
+        raw_outcome = result.get("reward")
+    harness = result.get("harness")
+    harness_rejected = (
+        isinstance(harness, dict) and harness.get("score_accepted") is False
+    )
+    outcome_accepted = (
+        type(raw_outcome) in (int, float)
+        and math.isfinite(float(raw_outcome))
+        and 0.0 <= float(raw_outcome) <= 1.0
+        and result.get("error") is None
+        and not harness_rejected
+    )
+    if outcome_accepted:
+        result["outcome"] = float(raw_outcome)
+        result["reward"] = float(raw_outcome)
+        result["solved"] = float(raw_outcome) >= 0.999
+        result.pop("passed", None)
+    else:
+        result["outcome"] = None
+        for alias in ("reward", "solved", "passed"):
+            result.pop(alias, None)
+
     result["runtime_sec"] = round(time.time() - t0, 1)
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w") as fh:
