@@ -3,7 +3,8 @@
 **terminal-daily-bench** is a living, execution-graded coding-agent benchmark.
 A model produces a patch; harbor re-lays a protected test suite the model never
 sees and runs it under a network cut. The reward is the test outcome — never a
-model's opinion — so `false_accept = 0` by construction.
+model's opinion. This makes acceptance without protected-test replay impossible;
+semantic verifier false-accept remains unmeasured, not assumed zero.
 
 This page walks you from install to a scored result and a quality card.
 
@@ -21,7 +22,7 @@ harbor run -p <task-copy> -a oracle -e singularity --ek singularity_...=... -o <
 and read the reward out of harbor's `result.json`
 (`terminal_daily_bench/eval.py::run_harbor_oracle`). Concretely you need:
 
-- **Python ≥ 3.10** — the scoring core is pure stdlib; there are no runtime
+- **Python ≥ 3.11** — the scoring core is pure stdlib; there are no runtime
   dependencies.
 - **`harbor` on `PATH`** — upstream `harbor-framework/harbor` **0.13.1** *plus our
   patches to its singularity backend* (next bullet). This is the only hard
@@ -161,6 +162,34 @@ tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.j
 
 The record is also printed to stdout.
 
+### Use the real Codex or Claude Code harness
+
+The default is the one-shot `single_shot` adapter. To let a first-party coding
+agent explore and edit the repository over multiple turns, select Harbor's real
+installed-agent adapter:
+
+```bash
+tdb run gpt-5 tasks/archive/td-fc90ea8b76d5f6b6 --harness codex
+tdb run claude-sonnet-4-6 tasks/archive/td-fc90ea8b76d5f6b6 \
+  --harness claude-code
+```
+
+Codex reads `OPENAI_API_KEY`/`OPENAI_BASE_URL`; Claude Code reads the standard
+Anthropic environment variables. Credentials are inherited by the Harbor child
+and represented in argv/result metadata only as `${ENV_NAME}`. To validate the
+full command with no credential or model call:
+
+```bash
+tdb run gpt-5 tasks/archive/td-fc90ea8b76d5f6b6 \
+  --harness codex --dry-run
+```
+
+Use `--harness-base-url http://127.0.0.1:8080/v1` for a compatible proxy. URLs
+with embedded credentials, queries, or fragments are rejected. The singularity
+backend lacks phase-specific network switching, so an installed-agent run enables
+network only in its disposable task copy; pass `--keep-task-network-policy` to
+retain the task's original setting.
+
 ## Run the oracle baseline
 
 The `oracle` model id runs the task's real `solution/oracle.patch` — no model is
@@ -201,6 +230,9 @@ Each run writes one JSON record. A solved run looks like:
     "protected_tests_relaid_by_harbor": true,
     "model_is_judge": false,
     "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
     "false_accept": 0
   }
 }
@@ -219,7 +251,8 @@ Field notes:
 
 ### The `false_accept_check` block
 
-This block records *why* the score cannot be gamed by the model:
+This block records which deterministic execution boundary produced the score.
+It does not by itself establish semantic verifier quality:
 
 - `gate: "harbor_protected_tests"` — scoring is the harbor execution gate and
   nothing else.
@@ -232,7 +265,9 @@ This block records *why* the score cannot be gamed by the model:
 - `model_is_judge: false` — the model is the subject under test, never the judge.
 - `model_patch_touched_tests` — flags whether the model's diff touched any
   `test`-named path (informational; it cannot affect the score).
-- `false_accept: 0` — a property of execution scoring, held by construction.
+- `false_accept: 0` — compatibility field scoped by `scope` to replay integrity.
+  It means no acceptance bypassed the protected test run; it does not estimate
+  semantic verifier false-accept, which remains `null` pending an exploit corpus.
 
 ## Aggregate a quality card
 
@@ -264,6 +299,7 @@ monotonicity (`M`), 2PL IRT test-information, KR-20 reliability, a bootstrap CI 
 
 ## Submitting results
 
-Every submission is **re-scored by the same execution gate on ingest** — a claimed
-number is never trusted, only the patch is replayed. See
+Every submission is recorded as **pending** and its claimed reward is ignored. The
+public bundle does not run a replay worker; only a later operator-published gate
+receipt can move a row into the verified ranking. See
 [`../CONTRIBUTING.md`](../CONTRIBUTING.md).

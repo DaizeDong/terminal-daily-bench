@@ -13,10 +13,9 @@ psychometric reliability of the set, honest bootstrap uncertainty on every axis,
 task counts needed to reach research-grade precision, and a daily GO/NO-GO readiness
 verdict. This is the axis TB (Terminal-Bench) does not measure.
 
-Everything below is a **pure function over plain lists** — no reward gate is read, no
-accept is gated, so `false_accept = 0` can never be perturbed by anything in this
-module. All randomized routines are **seeded and deterministic** (a resume reproduces
-the interval).
+Everything below is a **pure function over plain lists**: it never reads or changes a
+reward decision. It therefore cannot alter replay integrity, and it also cannot measure
+semantic verifier false-accept. All randomized routines are seeded and deterministic.
 
 ---
 

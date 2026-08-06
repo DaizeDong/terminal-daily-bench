@@ -1,17 +1,15 @@
-"""adapters/base.py -- the HarnessAdapter contract.
+"""Contracts shared by patch-producing and Harbor-native harness adapters.
 
-Any coding-agent harness plugs in by implementing this contract:
-    input  = (task dir, failing test ids, model id/endpoint)
-    output = (unified diff, telemetry)
-The execution gate stays the SOLE reward authority -- an adapter only produces a
-candidate repo state; it never scores. This is what keeps false_accept = 0 as more
-harnesses are added (single-shot, terminus, Claude Code, Aider, OpenHands, ...).
+An adapter never interprets a verifier result.  A patch adapter returns a unified
+diff; a Harbor-native adapter returns a declarative invocation for an installed
+Harbor agent.  The runner remains the only component allowed to invoke the
+protected-test gate and read its reward.
 """
 from __future__ import annotations
 
 import abc
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 
 @dataclass
@@ -22,12 +20,46 @@ class AdapterResult:
     error: Optional[str] = None
 
 
+@dataclass(frozen=True)
+class HarborRunSpec:
+    """Secret-safe description of one installed-agent Harbor invocation.
+
+    ``agent_env`` values are passed to ``harbor --ae``.  Credential values must
+    be environment templates such as ``${OPENAI_API_KEY}``, never literal
+    credentials.  The corresponding real values live only in ``process_env`` and
+    are inherited by the child process; that mapping is excluded from repr.
+    """
+
+    agent: str
+    model: str
+    agent_env: Mapping[str, str] = field(default_factory=dict)
+    agent_kwargs: Mapping[str, str] = field(default_factory=dict)
+    process_env: Mapping[str, str] = field(default_factory=dict, repr=False)
+    credential_env_names: tuple[str, ...] = ()
+    base_url_kind: str = "native"
+    requires_public_network: bool = True
+
+    def public_summary(self) -> Dict[str, Any]:
+        """Return audit metadata that contains names/templates, never secrets."""
+        return {
+            "agent": self.agent,
+            "model": self.model,
+            "agent_env": dict(self.agent_env),
+            "agent_kwargs": dict(self.agent_kwargs),
+            "credential_env_names": list(self.credential_env_names),
+            "base_url_kind": self.base_url_kind,
+            "requires_public_network": self.requires_public_network,
+        }
+
+
 class HarnessAdapter(abc.ABC):
-    """A pluggable scaffold. Subclasses MUST NOT score -- they only produce a patch."""
+    """A pluggable scaffold which can produce a diff or configure a Harbor agent."""
 
     name: str = "base"
+    integration_path: str = "external-diff"
+    model_agnostic: bool = True
+    base_url_kind: str = "openai"
 
-    @abc.abstractmethod
     def produce_patch(self, task_dir: str, failing_test_ids: List[str],
                       model: str, **kwargs: Any) -> AdapterResult:
         """Drive the harness on ``task_dir`` and return the candidate patch + telemetry.
@@ -35,4 +67,17 @@ class HarnessAdapter(abc.ABC):
         MUST NOT read or write the protected tests / the gold solution, and MUST NOT
         compute a reward. Scoring is done afterward by the execution gate.
         """
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.name} is not a patch-producing adapter")
+
+    def harbor_run_spec(self, model: str, **kwargs: Any) -> HarborRunSpec:
+        """Describe a Harbor-native invocation without starting it or scoring it."""
+        raise NotImplementedError(f"{self.name} is not a Harbor-native adapter")
+
+    def metadata(self) -> Dict[str, Any]:
+        """Stable, additive metadata for result records and harness discovery."""
+        return {
+            "name": self.name,
+            "integration_path": self.integration_path,
+            "model_agnostic": self.model_agnostic,
+            "base_url_kind": self.base_url_kind,
+        }

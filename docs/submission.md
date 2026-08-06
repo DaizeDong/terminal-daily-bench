@@ -4,10 +4,10 @@ This page documents how to run the benchmark, submit results, and extend it with
 new scaffold/agent. Everything here maps to code in this bundle — no external
 services or hidden APIs are required to score a patch.
 
-The one invariant behind all of it: **a scaffold produces a candidate patch; the
-execution gate is the sole reward authority.** A claimed reward is never trusted —
-only the patch is replayed against protected tests. This is what makes
-`false_accept = 0` a structural property rather than a promise.
+The one invariant behind all of it: **a scaffold produces a candidate; the execution
+gate is the sole reward authority.** A claimed reward is never trusted. Protected-test
+replay prevents claim bypass; semantic verifier false-accept is a separate empirical
+quantity and is not inferred to be zero.
 
 ---
 
@@ -61,6 +61,9 @@ Each run writes one JSON record (via `terminal_daily_bench/eval.py`) to `--out`
     "protected_tests_relaid_by_harbor": true,
     "model_is_judge": false,
     "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
     "false_accept": 0
   }
 }
@@ -72,7 +75,7 @@ in `error`. A crash never produces a positive score (BAD-safe by construction).
 
 ---
 
-## 2. How scoring works — re-scored on ingest
+## 2. How scoring works — deterministic execution gate
 
 The reward is read from harbor's structured `result.json` by
 `harbor_score._read_harbor_reward` — the **same** reader the private admission gate
@@ -88,22 +91,21 @@ Why a patch can't cheat the score:
 - The reward is byte-for-byte execution truth from `result.json`, not any string the
   model emitted.
 
-### Submission ingest re-scores, too
+### Recording is not replay
 
-When you submit results to the leaderboard, the same discipline applies at ingest.
-In `web/submit_result.py`:
+When you submit results, `web/submit_result.py` records the patch for later review:
 
 - `reward_claimed` is **advisory only** — it is validated against nothing.
 - On record, the entry is stored as `verify_status="pending"` with
-  `verified_reward=null`. The board trusts **only** `verified_reward`.
-- A node worker replays the submitted `patch` through the execution gate and calls
-  `apply_verified(store, sub_id, verified_reward)`, which flips the entry to
-  `verify_status="verified"`.
-- `rebuild_leaderboard(store, out)` folds only **verified** rows into a solved/attempt
-  rate; a pending submission is listed but contributes `0` to any rate.
+  `verified_reward=null` and no `false_accept` value.
+- The public bundle **does not run a replay worker**. Pending rows remain in a
+  separate audit view and are excluded from the verified ranking.
+- An operator may publish a completed gate receipt after replaying the submitted
+  `patch`. Only receipt-backed rows appear in `community_verified`; unreviewed rows
+  remain in `community_pending`.
 
-A fake `1.0` whose patch verifies `0.0` therefore contributes `0`. The claimed number
-is never trusted; only its patch is replayed.
+A fake `1.0` therefore cannot enter a ranking. If an operator later replays that
+patch, only the execution-gate receipt can determine its verified reward.
 
 ---
 
@@ -112,29 +114,33 @@ is never trusted; only its patch is replayed.
 ### Submission schema (JSONL, one line per `(model, task)` cell)
 
 Required fields are enforced by `submit_result.validate` (the `REQUIRED` tuple):
-`date`, `submitter`, `model`, `scaffold`, `task`, `patch`.
+`date`, `submitter`, `model`, `model_build`, `scaffold`, `harness_version`, `task`,
+`patch`.
 
 ```json
 {
   "date": "2026-07-22",
   "submitter": "your-handle",
   "model": "your-model",
+  "model_build": "your-model@immutable-build-id",
   "scaffold": "your-scaffold",
+  "harness_version": "your-scaffold@immutable-version",
   "task": "td-fc90ea8b76d5f6b6",
   "patch": "diff --git a/... b/...\n--- a/...\n+++ b/...\n@@ ...",
-  "reward_claimed": 1.0,
-  "harness_version": "v2",
-  "signature": "<sha256>"
+  "reward_claimed": 1.0
 }
 ```
 
 Validation rules:
 
-- All six required fields must be present and non-empty.
-- `patch` must be a unified-diff **string**.
-- `task` must start with `td-`.
-- `reward_claimed` (and any extra fields like `harness_version` / `signature`) are
-  accepted but never trusted — they carry through as advisory metadata.
+- All eight required fields must be present, typed and bounded.
+- `patch` must be a non-empty unified-diff string no larger than 2 MiB.
+- Binary patches, test edits, path traversal and Git-metadata edits are rejected.
+- `task` must match the Terminal Daily id grammar and `date` must be ISO format.
+- `reward_claimed` is accepted but never trusted. Receipt signatures are produced
+  by the official replay worker; a submitter must not provide one.
+- The surrounding deployment auth layer supplies `authenticated_submitter`
+  separately. A client-provided value with that name is rejected.
 
 ### CLI
 
@@ -145,18 +151,115 @@ Validation rules:
 python web/submit_result.py validate < submission.json
 
 # 2. Record as pending (appends to <store>/<date>.jsonl)
-python web/submit_result.py record --store community_submissions < submission.json
+python web/submit_result.py record --store community_submissions \
+  --authenticated-submitter github:YOUR_LOGIN < submission.json
 
-# 3. (server-side, after re-scoring) fold verified rows into the board
-python web/submit_result.py rebuild --store community_submissions --out web/leaderboard_data.json
+# 3. After an operator replay receipt exists, rebuild the two public views
+python web/submit_result.py rebuild --store community_submissions \
+  --manifest /read-only/suite-manifest.json \
+  --trusted-keys /read-only/replay-authorities.json \
+  --out web/leaderboard_data.json
 ```
 
-`record` computes a content-addressed `id` (sha256 over the required fields, first 16
-hex chars) for dedup and tamper-evidence, then writes an entry with
-`verify_status="pending"`. The store defaults to `community_submissions/`.
+`record` computes a full SHA-256 content id over the patch, authenticated submitter,
+model build, harness version and task, stores the patch as a private content-addressed
+blob, and atomically writes `verify_status="pending"`. Only one attempt is accepted per
+authenticated `(suite, submitter, model build, harness version, task)` cell. An official
+operator freezes suite/task/verifier, runner, Harbor and image digests with
+`web/replay_worker.py freeze`, runs the queue on a compute node, and persists a signed
+v2 receipt before promotion is possible. The promoter verifies the Ed25519 signature
+with a pinned public key and re-validates the receipt on every leaderboard rebuild.
 
-For **live** (this-week) tasks the gold patch and protected test bodies are withheld
-and scoring happens server-side: submit your patch and it is scored on our side.
+A replay receipt is still insufficient for a community ranking until every task in
+the same frozen roster has one valid receipt. Partial coverage, duplicate cells,
+cross-date rows, invalid/expired leases and self-reported-only identities stay in
+`community_pending`. Community replay-verified rows are explicitly separate from
+project-controlled official evaluations.
+
+### Operator-only replay authority
+
+Install the replay-only receipt dependency on the operator image:
+
+```bash
+pip install -e '.[replay]'
+```
+
+Receipt signing and verification use Python `cryptography`'s in-process Ed25519
+primitives. `web/receipt_auth.py` does not search `PATH` and does not invoke an
+external OpenSSL process. A missing or invalid replay extra fails closed before a
+receipt can be signed or accepted.
+
+The operator must prepare three read-only inputs before `run`:
+
+- a v2 frozen suite manifest created with `freeze --execution-policy ...`;
+- an Ed25519 private key readable only by the worker (`0600`), never by ingest or
+  the Harbor child;
+- a public-key registry (`terminal-daily-receipt-authorities/v1`) pinning the
+  `key_id`, Ed25519 public PEM and its DER SHA-256.
+
+The execution-policy JSON pins the exact replay runner digest, Harbor executable
+digest/version, backend, `network_policy="no-network"`, `canary_required=true`, the
+receipt `key_id` + public-key SHA-256, and one runtime-image SHA-256 per task. It must
+also pin `container_runtime_path` as a canonical absolute path, the runtime binary's
+SHA-256, its exact `--version` output, and its kind (`apptainer` or `singularity`).
+The worker must not own the runtime binary or its parent directory, must be unable to
+write either (including through ACLs or supplementary groups), and rejects group- or
+world-writable modes on both.
+
+Before each Harbor execution, the worker copies the expected SIF into the
+worker-private attempt directory as a read-only file and compares its SHA-256 with
+the frozen task policy. It hashes the copy immediately before Harbor and again at the
+Harbor-to-canary boundary. It validates the pinned runtime before Harbor and again in
+the canary preflight, then requires the canary-preflight snapshot to match the
+pre-Harbor snapshot before returning a receipt. Any image drift or runtime snapshot
+mismatch fails closed.
+
+The Harbor authority binding now fails closed in code. Policy and receipts bind the
+canonical `harbor_binary_path`, launcher SHA-256/version, canonical
+`harbor_package_root`, SHA-256 of the complete installed Harbor package and
+network-patch tree, and immutable runtime-control facts. The worker recomputes and
+compares those facts before and after replay, so an unchanged launcher cannot mask
+changed imported modules or backend patches.
+
+The authoritative Harbor result boundary opens the sole contained `result.json`
+through a root/run/result `O_NOFOLLOW` file-descriptor chain, rejects symlinks and
+hardlinks (`st_nlink != 1`), checks inode/device/link-count stability, and limits the
+snapshot to 16 MiB. Reward schema validation and receipt hashing consume the same
+already-open snapshot bytes; the attacker-influenced pathname is never reopened.
+
+`freeze` validates the authority pin against `--trusted-keys`. `run` additionally
+requires `TDB_EGRESS_CANARY_HOST` and `TDB_EGRESS_CANARY_PORT`: the same pinned image
+must reach that endpoint in the control run and fail from an Apptainer
+`--net --network none` run. Missing runtime image bytes, a missing canary endpoint,
+an unreachable control, or an unproven isolated failure is an infrastructure error,
+never a zero reward or verified receipt.
+
+This repository contains enforcement code, fake-runner tests, and Fake Harbor tests.
+They prove only code and command boundaries; they are **not** evidence of a production
+replay, real network isolation, or a correctly separated receipt authority. The bundle
+does **not** contain a production private key, production policy, or deployment audit.
+
+The signer and public ingest/promoter must also be different OS UIDs (or equivalent
+service identities). The private key is a signer-only read-only secret mount; the
+manifest and public-key registry are read-only mounts for the promoter. File modes
+such as `0600`/`0444` do **not** create isolation when every process has the same
+owner, because that owner can replace or chmod the files. At startup the worker
+rejects signing keys under its submission store, work directory, trusted task tree,
+or source checkout and records UID/mode facts in the signed receipt. Those facts aid
+an external deployment audit; they are not a substitute for distinct identities,
+ACLs/read-only mounts, and an actual canary run. A same-UID deployment remains a
+production blocker.
+
+More generally, production replay remains a blocker until the official compute worker
+completes a real Harbor replay, demonstrates both a reachable control canary and a
+blocked isolated canary, and passes an operator audit of distinct signer/promoter UIDs,
+the signer-only private-key mount, and read-only manifest/public-key mounts. No
+community row should be described as replay-verified before all of those conditions,
+and before the full Harbor package/tree and single-snapshot result controls have been
+exercised and audited with the real installed package and replay artifacts.
+
+For **live** tasks the gold patch and protected bodies are withheld. Submission alone
+does not score them; an official operator replay is required.
 **Archived** tasks (≥ 2 weeks old) ship in full for local reproduction.
 
 ---
@@ -171,8 +274,8 @@ input  = (task dir, failing test ids, model id/endpoint)
 output = (unified diff, telemetry)
 ```
 
-An adapter **only produces a candidate patch — it must not score.** Keeping scoring
-out of the adapter is what preserves `false_accept = 0` as harnesses are added.
+An adapter **only produces a candidate — it must not score.** Keeping scoring out of
+the adapter preserves the protected-replay boundary as harnesses are added.
 
 ### The interface
 
@@ -214,11 +317,11 @@ Rules `produce_patch` must obey (from the base-class docstring):
 5. calls the model (`eval.call_model`) and extracts the diff (`eval.extract_diff`),
 6. returns an `AdapterResult` with `touches_tests` telemetry — no scoring.
 
-`terminal_daily_bench/adapters/terminus.py` (`TerminusAdapter`, `name = "terminus"`)
-is a stub documenting where to wire a multi-turn agent (terminus-2 / Claude Code /
-Aider / OpenHands / SWE-agent). Any harness that accepts a custom OpenAI base URL can
-drive an arbitrary model unchanged; implement its `produce_patch` to run your agent
-CLI and return the resulting diff.
+Harbor-native `claude-code` and `codex` adapters are also registered. They return a
+declarative `HarborRunSpec`; Harbor owns the multi-turn CLI loop and workspace edits,
+while the Terminal Daily runner remains the only reward reader. Their command boundary
+is tested locally, but real provider/container cells still require the runtime described
+in README.
 
 ### Registering it
 

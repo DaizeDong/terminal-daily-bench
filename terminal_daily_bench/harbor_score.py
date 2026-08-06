@@ -3,14 +3,24 @@
 Three self-contained helpers lifted verbatim from the (private) construction
 stack so the PUBLIC eval framework scores a model's patch by execution truth
 WITHOUT importing the task-construction pipeline or the RC-VH accept gate.
-false_accept=0 is a property of execution scoring, preserved here.
+It proves the reward source, not semantic verifier false-accept.
 
 Pure stdlib (json/os/glob/pathlib/subprocess-env); no td_pipeline / rcvh import.
 """
 from __future__ import annotations
-import glob, json, os, re
+import json, math, os, re, stat, tomllib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, NamedTuple, Optional
+
+_MAX_RESULT_BYTES = 16 * 1024 * 1024
+
+
+class HarborResultSnapshot(NamedTuple):
+    """One fd-pinned authoritative result; reward and digest consume these bytes."""
+
+    relative_path: str
+    data: bytes
+
 
 def _read_harbor_reward(jobs_dir: str) -> Optional[float]:
     """Parse the Harbor trial reward out of a ``result.json`` under ``jobs_dir``.
@@ -33,22 +43,124 @@ def _read_harbor_reward(jobs_dir: str) -> Optional[float]:
     is ``stats.evals.<eval_key>.metrics[0].mean``; for a single trial it is also
     recoverable as the (max) float key of ``reward_stats.reward``.
 
-    Strategy: glob ``result.json`` recursively under ``jobs_dir`` and return the
-    reward from the FIRST file that yields a parseable value (preferring the
-    ``metrics[0].mean`` shape, falling back to the max float key of
-    ``reward_stats.reward``). Robust to missing keys / malformed JSON: returns
-    ``None`` (never raises) if nothing is parseable.
+    Exactly one non-symlink ``result.json`` must exist under ``jobs_dir`` and it
+    must have the single-eval aggregate schema.  Multiple files, fallback shapes,
+    booleans, NaN/Inf and out-of-range values all fail closed to ``None``.  This
+    prevents a candidate-created early-sorting result from shadowing the Harbor
+    authority file.
     """
+    snapshot = authoritative_harbor_result_snapshot(jobs_dir)
+    return (
+        reward_from_harbor_result_snapshot(snapshot)
+        if snapshot is not None else None
+    )
+
+
+def authoritative_harbor_result_snapshot(
+    jobs_dir: str,
+) -> Optional[HarborResultSnapshot]:
+    """Open, validate and read the sole result exactly once through pinned fds.
+
+    The result and its run directory are opened with ``O_NOFOLLOW`` relative to an
+    already-open jobs directory.  Device/inode facts must match the enumerated
+    path, hardlinks are rejected, and metadata must remain stable across the
+    bounded read.  Callers parse and hash the returned bytes; they never reopen
+    the attacker-influenced path.
+    """
+    root_fd = run_fd = result_fd = None
     try:
-        paths = sorted(glob.glob(os.path.join(jobs_dir, "**", "result.json"),
-                                 recursive=True))
-    except Exception:  # noqa: BLE001 -- a bad jobs_dir must not raise
+        root = Path(jobs_dir).resolve(strict=True)
+        if not root.is_dir():
+            return None
+        all_named = list(root.rglob("result.json"))
+        candidates = list(root.glob("*/result.json"))
+        if (len(all_named) != 1 or len(candidates) != 1
+                or candidates[0].is_symlink() or candidates[0].parent.is_symlink()):
+            return None
+        candidate = candidates[0]
+        candidate_stat = candidate.lstat()
+        parent_stat = candidate.parent.lstat()
+        root_stat = root.lstat()
+        if (not os.path.isfile(candidate) or candidate_stat.st_nlink != 1
+                or not os.path.isdir(candidate.parent)):
+            return None
+        relative = candidate.relative_to(root)
+        if len(relative.parts) != 2 or relative.name != "result.json":
+            return None
+
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        cloexec = getattr(os, "O_CLOEXEC", 0)
+        root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec)
+        opened_root = os.fstat(root_fd)
+        if (opened_root.st_dev, opened_root.st_ino) != (root_stat.st_dev, root_stat.st_ino):
+            return None
+        run_fd = os.open(
+            relative.parts[0], os.O_RDONLY | os.O_DIRECTORY | nofollow | cloexec,
+            dir_fd=root_fd,
+        )
+        opened_parent = os.fstat(run_fd)
+        if ((opened_parent.st_dev, opened_parent.st_ino)
+                != (parent_stat.st_dev, parent_stat.st_ino)):
+            return None
+        result_fd = os.open(
+            "result.json", os.O_RDONLY | nofollow | cloexec, dir_fd=run_fd,
+        )
+        before = os.fstat(result_fd)
+        if (not stat.S_ISREG(before.st_mode)
+                or before.st_nlink != 1
+                or (before.st_dev, before.st_ino)
+                != (candidate_stat.st_dev, candidate_stat.st_ino)
+                or before.st_size < 0 or before.st_size > _MAX_RESULT_BYTES):
+            return None
+        chunks: List[bytes] = []
+        remaining = before.st_size
+        while remaining:
+            chunk = os.read(result_fd, min(1024 * 1024, remaining))
+            if not chunk:
+                return None
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        if os.read(result_fd, 1):
+            return None
+        after = os.fstat(result_fd)
+        stable_fields = (
+            "st_dev", "st_ino", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns",
+        )
+        if any(getattr(before, field) != getattr(after, field) for field in stable_fields):
+            return None
+        current_root = root.lstat()
+        current_parent = candidate.parent.lstat()
+        current_candidate = candidate.lstat()
+        if ((current_root.st_dev, current_root.st_ino)
+                != (opened_root.st_dev, opened_root.st_ino)
+                or (current_parent.st_dev, current_parent.st_ino)
+                != (opened_parent.st_dev, opened_parent.st_ino)
+                or (current_candidate.st_dev, current_candidate.st_ino)
+                != (before.st_dev, before.st_ino)
+                or current_candidate.st_nlink != 1):
+            return None
+        # Re-enumeration closes insertion/removal races around the single path.
+        if (list(root.rglob("result.json")) != [candidate]
+                or list(root.glob("*/result.json")) != [candidate]):
+            return None
+        return HarborResultSnapshot(relative.as_posix(), b"".join(chunks))
+    except (OSError, RuntimeError, ValueError):
         return None
-    for path in paths:
-        r = _reward_from_result_file(path)
-        if r is not None:
-            return r
-    return None
+    finally:
+        for fd in (result_fd, run_fd, root_fd):
+            if fd is not None:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+
+
+def authoritative_harbor_result_path(jobs_dir: str) -> Optional[str]:
+    """Compatibility path accessor; authority checks still use one fd snapshot."""
+    snapshot = authoritative_harbor_result_snapshot(jobs_dir)
+    if snapshot is None:
+        return None
+    return str(Path(jobs_dir).resolve() / snapshot.relative_path)
 
 
 def _maybe_inject_offline_eks(cmd: list) -> list:
@@ -201,8 +313,13 @@ read_harbor_reward = _read_harbor_reward
 maybe_inject_offline_eks = _maybe_inject_offline_eks
 clean_subprocess_env = _clean_subprocess_env
 
-__all__ = ["read_harbor_reward","maybe_inject_offline_eks","clean_subprocess_env",
-           "_read_harbor_reward","_maybe_inject_offline_eks","_clean_subprocess_env"]
+__all__ = [
+    "HarborResultSnapshot", "read_harbor_reward",
+    "authoritative_harbor_result_path", "authoritative_harbor_result_snapshot",
+    "reward_from_harbor_result_snapshot", "maybe_inject_offline_eks",
+    "clean_subprocess_env", "_read_harbor_reward", "_maybe_inject_offline_eks",
+    "_clean_subprocess_env",
+]
 
 
 
@@ -245,15 +362,17 @@ def _task_declares_run_offline(cmd: list) -> bool:
         return False
     toml_path = os.path.join(p_dir, "task.toml")
     try:
-        with open(toml_path, "r", encoding="utf-8") as fh:
-            text = fh.read()
-    except OSError:
+        with open(toml_path, "rb") as fh:
+            config = tomllib.load(fh)
+    except (OSError, tomllib.TOMLDecodeError):
         return False
-    # Match `allow_internet = false` (TOML bare bool, optional surrounding ws). A
-    # tiny regex is sufficient + dependency-free; the value env_generation writes
-    # is always a bare lower-case bool.
-    m = re.search(r"(?m)^\s*allow_internet\s*=\s*(true|false)\s*$", text)
-    return bool(m and m.group(1) == "false")
+    environment = config.get("environment") if isinstance(config, dict) else None
+    if not isinstance(environment, dict):
+        return False
+    network_mode = environment.get("network_mode")
+    if network_mode is not None:
+        return network_mode == "no-network"
+    return environment.get("allow_internet") is False
 
 
 def _disable_internet_enabled() -> bool:
@@ -267,16 +386,13 @@ def _disable_internet_enabled() -> bool:
     return raw in ("1", "true", "yes", "on")
 
 
-def _reward_from_result_file(path: str) -> Optional[float]:
-    """Extract the reward float from a single ``result.json``; None if not found.
-
-    Tries ``stats.evals.<key>.metrics[0].mean`` first (the TOP-LEVEL aggregate
-    shape), then the max float key of ``stats.evals.<key>.reward_stats.reward``.
-    Any missing key / wrong type / malformed JSON -> None (never raises)."""
+def reward_from_harbor_result_snapshot(
+    snapshot: HarborResultSnapshot,
+) -> Optional[float]:
+    """Extract one strict aggregate reward from the already-pinned bytes."""
     try:
-        with open(path, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
-    except Exception:  # noqa: BLE001 -- malformed/unreadable -> not parseable
+        data = json.loads(snapshot.data.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return None
     try:
         evals = (data.get("stats", {}) or {}).get("evals", {}) or {}
@@ -284,27 +400,30 @@ def _reward_from_result_file(path: str) -> Optional[float]:
         return None
     if not isinstance(evals, dict):
         return None
-    for ev in evals.values():
-        if not isinstance(ev, dict):
-            continue
-        # 1) metrics[0].mean (preferred).
-        metrics = ev.get("metrics")
-        if isinstance(metrics, list) and metrics and isinstance(metrics[0], dict):
-            mean = metrics[0].get("mean")
-            if isinstance(mean, (int, float)):
-                return float(mean)
-        # 2) fallback: max float key of reward_stats.reward (single-trial).
-        rewards = (ev.get("reward_stats", {}) or {}).get("reward", {})
-        if isinstance(rewards, dict) and rewards:
-            floats = []
-            for k in rewards:
-                try:
-                    floats.append(float(k))
-                except (TypeError, ValueError):
-                    continue
-            if floats:
-                return max(floats)
-    return None
+    if len(evals) != 1:
+        return None
+    ev = next(iter(evals.values()))
+    if not isinstance(ev, dict):
+        return None
+    metrics = ev.get("metrics")
+    if not isinstance(metrics, list) or len(metrics) != 1 or not isinstance(metrics[0], dict):
+        return None
+    mean = metrics[0].get("mean")
+    if isinstance(mean, bool) or not isinstance(mean, (int, float)):
+        return None
+    reward = float(mean)
+    if not math.isfinite(reward) or not 0.0 <= reward <= 1.0:
+        return None
+    return reward
+
+
+def _reward_from_result_file(path: str) -> Optional[float]:
+    """Legacy direct-file helper; replay authority uses the fd snapshot API."""
+    try:
+        data = Path(path).read_bytes()
+    except OSError:
+        return None
+    return reward_from_harbor_result_snapshot(HarborResultSnapshot("result.json", data))
 
 
 # ---------------------------------------------------------------------------

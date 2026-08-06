@@ -11,11 +11,25 @@ FAIL=0
 say() { printf "%-52s %s\n" "$1" "$2"; }
 
 echo "=== 1. SECRET SCAN (nothing sensitive may ship) ==="
-# patterns for gateway keys / split-billing creds / private endpoints -- NOT the
-# literal secrets (which must never appear anywhere, including here).
-PATTERNS='Ocp-Apim-Subscription|direct-gw\.aooowuuu|GW_KEY|ANTHROPIC_KEY|ANTHROPIC_API_KEY|8a1ddd59|v2_gw_tunnel|split-billing|/work1/|/home1/[a-z]|v2_eval_work|reports/v2-campaign|forward-plan/|MSQ_METHODS|CERTIFIED_YIELD_PROOF|UNIVERSE_EXPANSION|BEGIN (RSA|OPENSSH|PRIVATE) KEY|xoxb-|sk-[A-Za-z0-9]{20}'
-HITS=$(grep -rInE "$PATTERNS" . --exclude=release_check.sh --exclude=test_release.py 2>/dev/null || true)
-if [ -n "$HITS" ]; then say "secret scan" "FAIL"; echo "$HITS" | head; FAIL=1; else say "secret scan" "OK (no secret patterns)"; fi
+# Patterns describe credential formats and private identifiers, never a literal
+# credential or a credential prefix. Environment-variable names are public API.
+PATTERNS='Ocp-Apim-Subscription|direct-gw\.aooowuuu|GW_KEY|v2_gw_tunnel|split-billing|/work1/|/home1/[a-z]|v2_eval_work|reports/v2-campaign|forward-plan/|MSQ_METHODS|CERTIFIED_YIELD_PROOF|UNIVERSE_EXPANSION|BEGIN (RSA|OPENSSH|PRIVATE) KEY|xoxb-[A-Za-z0-9-]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20}'
+release_files() {
+  git ls-files -z --cached --others --exclude-standard -- . \
+    ':(exclude)scripts/release_check.sh' ':(exclude)tests/test_release.py'
+}
+HITS=$(release_files | xargs -0 -r grep -InE "$PATTERNS" -- 2>/dev/null || true)
+# AMD gateway keys are opaque 32-hex tokens. Bound both sides so ordinary
+# SHA-256 values (64 hex characters) are not mistaken for credentials.
+HEX32_HITS=$(release_files | xargs -0 -r \
+  grep -InE '(^|[^0-9A-Fa-f])[0-9A-Fa-f]{32}([^0-9A-Fa-f]|$)' -- 2>/dev/null || true)
+if [ -n "$HITS$HEX32_HITS" ]; then
+  say "secret scan" "FAIL"
+  { printf "%s\n" "$HITS"; printf "%s\n" "$HEX32_HITS"; } | sed '/^$/d' | head
+  FAIL=1
+else
+  say "secret scan" "OK (no secret patterns)"
+fi
 # no .env files
 # Only TRACKED bytecode ships (a .pyc embeds absolute source paths). Untracked local
 # residue is ignored by .gitignore and never leaves this machine, so it is a warning.
@@ -39,7 +53,7 @@ if command -v lint-imports >/dev/null 2>&1; then
     && say "import-linter moat contract" "OK (kept)" || say "import-linter moat contract" "WARN (linter check skipped/failed)"
 fi
 # harbor_score must import standalone (no construction deps)
-python - <<'PY' 2>/dev/null && say "harbor_score standalone import" "OK" || { say "harbor_score standalone import" "FAIL"; FAIL=1; }
+python3 - <<'PY' 2>/dev/null && say "harbor_score standalone import" "OK" || { say "harbor_score standalone import" "FAIL"; FAIL=1; }
 import sys, importlib.util
 spec=importlib.util.spec_from_file_location("harbor_score","terminal_daily_bench/harbor_score.py")
 m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
@@ -54,14 +68,14 @@ done
 echo; echo "=== 4. TASK-RELEASE POLICY (live tasks withhold gold + protected) ==="
 for d in tasks/live/*/; do
   [ -d "$d" ] || continue
-  if [ -d "${d}solution" ]; then say "live $(basename $d): solution/" "FAIL (leaked)"; FAIL=1
-  elif [ -f "${d}tests/test_outputs.py" ]; then say "live $(basename $d): protected tests" "FAIL (leaked)"; FAIL=1
-  else say "live $(basename $d)" "OK (gold+protected withheld)"; fi
+  if [ -d "$d/solution" ]; then say "live $(basename "$d"): solution/" "FAIL (leaked)"; FAIL=1
+  elif [ -f "$d/tests/test_outputs.py" ]; then say "live $(basename "$d"): protected tests" "FAIL (leaked)"; FAIL=1
+  else say "live $(basename "$d")" "OK (gold+protected withheld)"; fi
 done
 # archived tasks must carry provenance (license attribution)
 for d in tasks/archive/*/; do
   [ -d "$d" ] || continue
-  [ -f "${d}PROVENANCE.json" ] && say "archive $(basename $d): PROVENANCE" "OK" || { say "archive $(basename $d): PROVENANCE" "MISSING"; FAIL=1; }
+  [ -f "$d/PROVENANCE.json" ] && say "archive $(basename "$d"): PROVENANCE" "OK" || { say "archive $(basename "$d"): PROVENANCE" "MISSING"; FAIL=1; }
 done
 
 echo; [ "$FAIL" = "0" ] && echo "RELEASE CHECK: PASS" || echo "RELEASE CHECK: FAIL"

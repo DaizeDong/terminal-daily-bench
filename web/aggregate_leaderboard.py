@@ -11,7 +11,7 @@ file and the site updates; nothing else changes.
 Each result JSON is one scored (model, task) cell as emitted by `tdb run`
 (model / task / solved / reward / false_accept_check). The payload produced:
 
-    date n_tasks n_models n_cells total_fa cost_measured
+    date n_tasks n_models n_cells semantic_fa semantic_fa_n cost_measured
     tasks[]        the day's task ids
     pooled{}       per-scaffold pooled n/solved
     leaderboard[]  one row per model, per-scaffold {n, solved, rate, fa}
@@ -20,8 +20,9 @@ Each result JSON is one scored (model, task) cell as emitted by `tdb run`
                    D 95% CI, readiness) -- via terminal_daily_bench.quality
     community[]    verified community submissions (filled by submit_result.py)
 
-Integrity: this only READS already-minted execution outcomes. It never scores, so
-`false_accept = 0` is untouched; `total_fa` is carried through from the results.
+Integrity: this only reads already-minted execution outcomes. Protected-test replay
+prevents a claimed reward from becoming a score, but it does not establish semantic
+verifier false-accept. Missing cheat-trial evidence stays ``null``, never zero.
 """
 from __future__ import annotations
 
@@ -55,9 +56,13 @@ def load(d, scaffold):
             continue          # the oracle is the gate baseline, not a leaderboard entry
         solved = bool(j.get("solved") or
                       (isinstance(j.get("reward"), (int, float)) and j["reward"] >= 0.999))
+        integrity = j.get("false_accept_check") or {}
+        semantic_fa = integrity.get("semantic_false_accept")
+        if not isinstance(semantic_fa, (bool, int, float)):
+            semantic_fa = None
         out.append({
             "model": model, "task": j.get("task"), "solved": solved,
-            "fa": (j.get("false_accept_check") or {}).get("false_accept", 0),
+            "fa": semantic_fa,
             "scaffold": scaffold, "cost_usd": j.get("cost_usd"),
         })
     return out
@@ -111,13 +116,15 @@ def build_payload(rows, date):
     models = sorted({r["model"] for r in rows})
 
     board = collections.defaultdict(lambda: collections.defaultdict(
-        lambda: {"n": 0, "solved": 0, "fa": 0}))
+        lambda: {"n": 0, "solved": 0, "fa": 0, "fa_n": 0}))
     pooled = collections.defaultdict(lambda: {"n": 0, "solved": 0})
     for r in rows:
         b = board[r["model"]][r["scaffold"]]
         b["n"] += 1
         b["solved"] += int(r["solved"])
-        b["fa"] += int(r["fa"])
+        if r["fa"] is not None:
+            b["fa"] += int(r["fa"])
+            b["fa_n"] += 1
         p = pooled[r["scaffold"]]
         p["n"] += 1
         p["solved"] += int(r["solved"])
@@ -128,7 +135,8 @@ def build_payload(rows, date):
         for s, v in per_scaffold.items():
             row[s] = {"n": v["n"], "solved": v["solved"],
                       "rate": round(v["solved"] / v["n"], 3) if v["n"] else 0.0,
-                      "fa": v["fa"]}
+                      "fa": v["fa"] if v["fa_n"] else None,
+                      "fa_n": v["fa_n"]}
         leaderboard.append(row)
     # rank by the best rate the model reached under any scaffold, then by name
     leaderboard.sort(key=lambda r: (-max((v.get("rate", 0.0) for v in r.values()
@@ -141,7 +149,9 @@ def build_payload(rows, date):
     payload = {
         "date": date,
         "n_tasks": len(tasks), "n_models": len(models), "n_cells": len(rows),
-        "total_fa": sum(int(r["fa"]) for r in rows),
+        "total_fa": (sum(int(r["fa"]) for r in rows if r["fa"] is not None)
+                     if any(r["fa"] is not None for r in rows) else None),
+        "total_fa_n": sum(1 for r in rows if r["fa"] is not None),
         "cost_measured": any(r.get("cost_usd") is not None for r in rows),
         "tasks": tasks,
         "pooled": {s: dict(pooled[s]) for s in scaffolds},
@@ -180,8 +190,10 @@ def main(argv):
     payload = build_payload(rows, date)
     with open(out, "w") as fh:
         json.dump(payload, fh, indent=1)
+    fa_summary = (str(payload["total_fa"]) if payload["total_fa"] is not None
+                  else "unmeasured")
     print(f"published {len(rows)} cells / {payload['n_models']} models / "
-          f"{payload['n_tasks']} tasks, total_FA={payload['total_fa']}"
+          f"{payload['n_tasks']} tasks, semantic_FA={fa_summary}"
           f"{', MSQ card OK' if payload['quality'] else ''} -> {out}")
     return 0
 

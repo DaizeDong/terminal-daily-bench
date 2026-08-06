@@ -4,45 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
-<meta name="description" content="Browse every terminal-daily-bench task: repo, language, suite, status, protected fail-to-pass tests and how many models solved it. One task is one real merged pull request, rebuilt as an executable package and scored by execution proof only.">
+<meta name="description" content="Search published terminal-daily-bench tasks by repository, language, suite, release status, and execution-verified result coverage.">
 <link rel="stylesheet" href="../assets/tw.css">
 <link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
-<!--
-  ============================================================================
-  SPEC — per-task page:  docs/registry/<task-id>/index.html
-  Owned by the 'benchmarks' agent (release/web/gen_pages.py). NOT written here.
-  This page (the registry index) links every row to ./<task-id>/ and expects
-  the generated page to answer, in this order:
-
-  1. HEADER — task id (mono, the <task-id> in the URL), suite, status badge
-     (archive = released in full / live = gold patch withheld), language badge,
-     difficulty badge.
-  2. PROVENANCE — upstream repo (linked), PR number + title (linked to the
-     merged pull request), full 40-char base sha and merge sha (both linked to
-     the upstream commit view), the PR merge timestamp and the mining date —
-     the gap that makes "merged after the model shipped" auditable — and the
-     upstream SPDX license with a note on what the package redistributes.
-  3. INSTRUCTION — the verbatim instruction.md in a <pre>, the exact bytes the
-     harness serves, so a reader can audit that it leaks no fix.
-  4. PROTECTED TESTS — the fail-to-pass ids one per line, fully qualified
-     (path::class::test), the pass-to-pass count, and the statement that these
-     are re-laid over the agent's workspace in a network-cut container with the
-     agent's copy discarded first. For LIVE tasks: ids only, bodies withheld.
-  5. RESULTS — one row per model: model, scaffold (single-shot / terminus-2),
-     solved yes/no, reward; a solved-by count consistent with this table's
-     column; links back to ../../benchmarks/<suite>/ and to the leaderboard.
-  6. RELEASE POLICY — archive ships gold patch + test bodies + environment
-     recipe and runs entirely offline; live withholds gold patch and test
-     bodies and is scored server-side by the same gate; the flip date; and
-       tdb run <MODEL> tasks/<suite>/<task-id>
-       tdb oracle tasks/<suite>/<task-id>   -> reward 1.0
-
-  Data source: the same site_data.json task record, plus a per-task task.json
-  emitted next to the page.
-  ============================================================================
--->
 </head>
 <body>
 
@@ -66,37 +32,22 @@
         </ol>
       </nav>
 
-      <h2 class="mb-6 font-mono text-4xl tracking-tighter">Task Registry</h2>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Browse terminal-daily-bench tasks and their provenance. One task is one real merged pull request, rebuilt into a package an agent can be dropped into &mdash; nothing here is authored by a model, and every solve is minted by re-executing protected tests.</p>
-
-      <!-- run command, in their code-block treatment -->
-      <figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border outline-none overflow-hidden text-sm my-0 mb-6 font-mono">
-        <div class="flex text-fd-muted-foreground items-center gap-2 ps-3 h-9.5">
-          <figcaption class="flex-1 truncate">Run one task, then prove it is solvable with the oracle patch</figcaption>
-          <div>
-            <button type="button" id="tdb-copy" class="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none hover:bg-fd-accent hover:text-fd-accent-foreground [&amp;_svg]:size-3.5" aria-label="Copy Text">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
-            </button>
-          </div>
-        </div>
-        <div class="bg-fd-secondary rounded-lg border text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container">
-          <pre id="tdb-cmd" class="min-w-full w-max *:flex *:flex-col shiki" tabindex="0"><code><span class="line">tdb run &lt;MODEL&gt; tasks/&lt;suite&gt;/&lt;task-id&gt;</span><span class="line">tdb oracle tasks/&lt;suite&gt;/&lt;task-id&gt;   # -&gt; reward 1.0</span></code></pre>
-        </div>
-      </figure>
+      <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Open a row for provenance, instructions, protected-test metadata, and available results.</p>
 
       <!-- catalogue summary, in their card-grid idiom -->
       <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="tdb-stats"></div>
       </div>
 
-      <p class="text-muted-foreground mb-6 font-mono text-sm">
-        <span class="text-foreground">archive</span> tasks ship the gold patch, the protected test bodies and the environment recipe, and run entirely offline.
-        <span class="text-foreground">live</span> tasks withhold the gold patch and the test bodies; those submissions are re-scored server-side by the same gate.
-        Across every suite published so far, <span class="text-foreground">false_accept = 0</span>.
+      <p class="text-muted-foreground mb-6 font-mono text-sm" data-tdb-integrity>
+        <span class="text-foreground">live</span> tasks withhold gold and protected test bodies; submissions await official replay.
+        <span class="text-foreground">archive</span> tasks publish those artifacts; end-to-end execution currently requires the unpublished patched Harbor fork.
+        Protected-test replay prevents claim bypass; semantic verifier false-accept is unmeasured until exploit trials run.
       </p>
 
       <!-- ==================== filterable table ==================== -->
-      <div class="-mx-4 flex flex-col md:mx-0">
+      <div class="-mx-4 flex flex-col md:mx-0" data-tdb-primary-data>
 
         <div id="tdb-note" hidden></div>
 
@@ -141,11 +92,7 @@
         <div id="tdb-none" hidden></div>
       </div>
 
-      <p class="text-muted-foreground mt-6 font-mono text-sm">
-        <span class="text-foreground">F2P tests</span> is the count of protected fail-to-pass tests that must go from failing to passing for the task to be scored solved.
-        <span class="text-foreground">Solved by</span> counts the models with an execution-verified solve, out of the models run against that suite.
-        A task nobody solved is kept, not dropped &mdash; the oracle patch proves it is solvable.
-      </p>
+      <p class="text-muted-foreground mt-6 font-mono text-sm"><span class="text-foreground">F2P tests</span> must flip from failing to passing. <span class="text-foreground">Solved by</span> counts execution-verified solves.</p>
 
     </div>
   </div>
@@ -208,28 +155,6 @@
   var I_UP     = SVG_OPEN + '<path d="m18 15-6-6-6 6"></path></svg>';
   var I_DOWN   = SVG_OPEN + '<path d="m6 9 6 6 6-6"></path></svg>';
   var DASH = '<span class="text-muted-foreground">&mdash;</span>';
-
-  /* ---------------------------------------------------------------------
-     copy the run command
-     --------------------------------------------------------------------- */
-  var copyBtn = document.getElementById("tdb-copy");
-  copyBtn.addEventListener("click", function () {
-    var text = document.getElementById("tdb-cmd").textContent;
-    var done = function () {
-      copyBtn.setAttribute("aria-label", "Copied");
-      setTimeout(function () { copyBtn.setAttribute("aria-label", "Copy Text"); }, 1400);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () {});
-    } else {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) {}
-      document.body.removeChild(ta);
-    }
-  });
 
   /* ---------------------------------------------------------------------
      columns
@@ -300,7 +225,7 @@
     /* ---- summary ---- */
     var suiteSet = {}, langs = {}, diffs = {}, live = 0, f2p = 0, solvedAny = 0;
     tasks.forEach(function (t) {
-      if (t.suite) suiteSet[t.suite] = 1;
+      T.taskSuites(t).forEach(function (sid) { suiteSet[sid] = 1; });
       if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
       if (t.difficulty) diffs[t.difficulty] = (diffs[t.difficulty] || 0) + 1;
       if (t.status === "live") live++;
@@ -312,9 +237,9 @@
       ["tasks",                tasks.length,                          "one merged pull request each"],
       ["suites",               Object.keys(suiteSet).length || 1,     "every day is its own sealed suite"],
       ["languages",            Object.keys(langs).length || null,     "mined across the ecosystem"],
-      ["live now",             live,                                  "gold patch withheld, scored server-side"],
+      ["live now",             live,                                  "gold withheld, pending official replay"],
       ["protected f2p tests",  f2p || null,                           "re-laid over the agent's workspace"],
-      ["solved by a model",    solvedAny,                             "execution-verified, false_accept 0"]
+      ["solved by a model",    solvedAny,                             "protected replay; semantic FA unmeasured"]
     ];
     statsEl.innerHTML = stats.map(function (s) {
       return '<div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 ' +
@@ -431,7 +356,8 @@
     tasks.forEach(function (t) {
       t._f2p = (t.n_fail_to_pass == null) ? -1 : Number(t.n_fail_to_pass);
       t._solved = Number(t.solved_by) || 0;
-      t._h = [t.id, t.repo, t.title, t.language, t.suite, t.status, t.difficulty,
+      t._h = [t.id, t.repo, t.title, t.language, T.taskSuites(t).join(" "),
+              t.status, t.difficulty,
               (t.pr_number != null ? "#" + t.pr_number : "")].join(" ").toLowerCase();
     });
 
@@ -439,6 +365,7 @@
       if (k === "f2p") return t._f2p;
       if (k === "solved") return t._solved;
       if (k === "id") return String(t.id || "");
+      if (k === "suite") return T.taskSuites(t).join(" ");
       return String(t[k] || "");
     }
 
@@ -470,10 +397,11 @@
         ? '<span data-slot="badge" class="' + BADGE_OUTLINE + '">' + esc(t.language) + "</span>"
         : DASH;
 
-      var suite = t.suite
-        ? '<a class="' + LINK + '" href="../benchmarks/' + encodeURIComponent(t.suite) +
-          '/">' + esc(t.suite) + "</a>"
-        : DASH;
+      var suiteIds = T.taskSuites(t);
+      var suite = suiteIds.length ? suiteIds.map(function (sid) {
+        return '<a class="' + LINK + '" href="../benchmarks/' + encodeURIComponent(sid) +
+          '/">' + esc(sid) + "</a>";
+      }).join(", ") : DASH;
 
       var status = (t.status === "live")
         ? '<span data-slot="badge" class="' + BADGE_PRIMARY + '">live</span>'

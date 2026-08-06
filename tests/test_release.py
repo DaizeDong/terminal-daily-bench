@@ -60,6 +60,77 @@ def test_read_harbor_reward_parses_result_json(tmp_path):
     assert harbor_score.read_harbor_reward(str(tmp_path / "empty")) is None
 
 
+def test_harbor_reward_fails_closed_on_multiple_or_ambiguous_results(tmp_path):
+    from terminal_daily_bench import harbor_score
+    import json
+
+    valid = {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 0.0}]}}}}
+    first = tmp_path / "a"
+    second = tmp_path / "b"
+    first.mkdir(); second.mkdir()
+    (first / "result.json").write_text(json.dumps(valid))
+    (second / "result.json").write_text(json.dumps(
+        {"stats": {"evals": {"forged": {"metrics": [{"mean": 1.0}]}}}}
+    ))
+    assert harbor_score.read_harbor_reward(str(tmp_path)) is None
+
+    (second / "result.json").unlink()
+    (first / "result.json").write_text(json.dumps({
+        "stats": {"evals": {
+            "one": {"metrics": [{"mean": 0.0}]},
+            "two": {"metrics": [{"mean": 1.0}]},
+        }}
+    }))
+    assert harbor_score.read_harbor_reward(str(tmp_path)) is None
+
+
+def test_harbor_reward_rejects_hardlinked_authority(tmp_path):
+    import json
+    import os
+    from terminal_daily_bench import harbor_score
+
+    trial = tmp_path / "trial"
+    trial.mkdir()
+    result = trial / "result.json"
+    result.write_text(json.dumps(
+        {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 1.0}]}}}}
+    ))
+    os.link(result, tmp_path / "attacker-alias")
+
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+    assert harbor_score.read_harbor_reward(str(tmp_path)) is None
+
+
+def test_harbor_result_open_race_fails_closed(tmp_path, monkeypatch):
+    import json
+    import os
+    from terminal_daily_bench import harbor_score
+
+    trial = tmp_path / "trial"
+    trial.mkdir()
+    result = trial / "result.json"
+    result.write_text(json.dumps(
+        {"stats": {"evals": {"oracle__adhoc": {"metrics": [{"mean": 0.0}]}}}}
+    ))
+    replacement = trial / "replacement.json"
+    replacement.write_text(json.dumps(
+        {"stats": {"evals": {"forged": {"metrics": [{"mean": 1.0}]}}}}
+    ))
+    original_open = harbor_score.os.open
+    raced = False
+
+    def replace_between_lstat_and_open(path, flags, mode=0o777, *, dir_fd=None):
+        nonlocal raced
+        if path == "result.json" and dir_fd is not None and not raced:
+            raced = True
+            os.replace(replacement, result)
+        return original_open(path, flags, mode, dir_fd=dir_fd)
+
+    monkeypatch.setattr(harbor_score.os, "open", replace_between_lstat_and_open)
+    assert harbor_score.authoritative_harbor_result_snapshot(str(tmp_path)) is None
+    assert raced is True
+
+
 def test_harbor_score_parses_task_toml_without_nameerror(tmp_path):
     """P0-1 regression: harbor_score used re.search without importing re, so any
     real task.toml parse raised NameError and third-party scoring never worked."""
@@ -69,6 +140,19 @@ def test_harbor_score_parses_task_toml_without_nameerror(tmp_path):
     assert harbor_score._task_declares_run_offline(cmd) is True
     (tmp_path / "task.toml").write_text("[environment]\nallow_internet = true\n")
     assert harbor_score._task_declares_run_offline(cmd) is False
+
+
+def test_harbor_network_policy_reads_environment_table_not_first_matching_key(tmp_path):
+    from terminal_daily_bench import harbor_score
+    cmd = ["harbor", "run", "-p", str(tmp_path), "-e", "singularity"]
+    (tmp_path / "task.toml").write_text(
+        "[agent]\nallow_internet = true\n"
+        "[environment]\nallow_internet = false\n"
+        "[verifier]\nallow_internet = true\n"
+    )
+    assert harbor_score._task_declares_run_offline(cmd) is True
+    injected = harbor_score.maybe_inject_offline_eks(cmd)
+    assert "singularity_disable_internet=true" in injected
 
 
 def test_eval_finish_exits_nonzero_on_error(tmp_path):
@@ -161,8 +245,8 @@ def test_pending_submission_never_reports_a_false_accept_number():
     decision made about it, so writing 0 there would let the community board print
     "0 false accepts" about rows nothing ever adjudicated -- an unearned safety claim.
 
-    Also pins the fail-closed posture: a pending row counts as an attempt and zero
-    solved, so submitting claims can only lower a submitter's rate, never raise it.
+    Also pins the fail-closed posture: pending rows live in an unranked review view
+    and can never enter the verified denominator.
     """
     import json as _json, tempfile, os
     sys.path.insert(0, str(ROOT / "web"))
@@ -170,19 +254,45 @@ def test_pending_submission_never_reports_a_false_accept_number():
 
     d = tempfile.mkdtemp()
     out = os.path.join(d, "lb.json")
-    sub = {"date": "2026-07-30", "submitter": "x", "model": "m", "scaffold": "s",
+    sub = {"date": "2026-07-30", "submitter": "x", "model": "m",
+           "model_build": "m@build-1", "scaffold": "s",
+           "harness_version": "s@1",
            "task": "td-fc90ea8b76d5f6b6", "patch": "diff --git a/a b/a\n",
            "reward_claimed": 1.0}
-    entry = sr.record(sub, d)
+    entry = sr.record(sub, d, authenticated_submitter="github:x")
     assert entry["false_accept"] is None, "a pending row must not claim a measured FA"
     assert entry["verified_reward"] is None
 
-    row = sr.rebuild_leaderboard(d, out)["community"][0]
-    assert row["false_accept"] is None, "FA must stay unmeasured until something verifies"
-    assert (row["n"], row["solved"], row["rate"]) == (1, 0, 0.0), \
-        "an unverified claim must count as an attempt worth zero"
+    board = sr.rebuild_leaderboard(d, out)
+    assert board["community_verified"] == []
+    assert board["community_pending"][0]["pending"] == 1
 
-    # Only after a real adjudication does the number exist.
-    sr.apply_verified(d, entry["id"], 1.0)
-    row = sr.rebuild_leaderboard(d, out)["community"][0]
-    assert row["false_accept"] == 0 and row["solved"] == 1 and row["verified"] == 1
+    # A legacy self-hashed v1 receipt is forgeable and must never promote a row.
+    # v2 additionally requires an authority signature and pinned manifest/key paths.
+    claimed = sr.claim_for_replay(d, entry["id"])
+    digest = "a" * 64
+    receipt = {
+        "schema": "terminal-daily-replay-receipt/v1",
+        "submission_id": entry["id"], "date": entry["date"],
+        "patch_sha256": entry["patch_sha256"],
+        "task": entry["task"], "suite_sha256": digest,
+        "task_sha256": digest, "verifier_sha256": digest,
+        "runner_sha256": digest, "result_sha256": digest, "reward": 1.0,
+        "network_isolation": {"requested": True},
+    }
+    receipt_sha = __import__("hashlib").sha256(sr._canonical_json(receipt)).hexdigest()
+    receipt["receipt_sha256"] = receipt_sha
+    receipt_dir = pathlib.Path(d) / "receipts" / entry["id"]
+    receipt_dir.mkdir(parents=True)
+    (receipt_dir / f"{receipt_sha}.json").write_text(_json.dumps(receipt))
+    with __import__("pytest").raises(ValueError):
+        sr.apply_verification(
+            d, entry["id"], receipt, attempt_id=claimed["attempt_id"],
+            trusted_keys=pathlib.Path(d) / "untrusted-keys.json",
+            manifest_path=pathlib.Path(d) / "untrusted-manifest.json",
+        )
+    assert sr.get_entry(d, entry["id"])["verified_reward"] is None
+    assert sr.rebuild_leaderboard(d, out)["community_verified"] == []
+
+    with __import__("pytest").raises(RuntimeError):
+        sr.apply_verified(d, entry["id"], 1.0)

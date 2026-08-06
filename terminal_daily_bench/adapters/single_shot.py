@@ -9,7 +9,6 @@ from __future__ import annotations
 from typing import Any, List
 
 from .base import AdapterResult, HarnessAdapter
-from .. import eval as _eval
 
 
 class SingleShotAdapter(HarnessAdapter):
@@ -19,6 +18,10 @@ class SingleShotAdapter(HarnessAdapter):
                       model: str, *, max_tokens: int = 4096, timeout: int = 180,
                       **kwargs: Any) -> AdapterResult:
         try:
+            # Local import keeps the registry importable while eval owns adapter
+            # selection (and avoids a package-initialization cycle).
+            from .. import eval as _eval
+
             cfg = _eval.load_task(task_dir)
             sif = (cfg.get("environment", {}) or {}).get("docker_image", "")
             targets = _eval.solution_target_files(task_dir)

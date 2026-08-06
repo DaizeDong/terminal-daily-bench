@@ -43,17 +43,17 @@
     </div>
   </div>
 
-  <!-- ===================== install and first run ===================== -->
+  <!-- ===================== install and command surface ===================== -->
   <div class="flex w-full flex-col items-center py-12 sm:pb-16">
     <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">install and first run</p>
+      <p class="font-mono text-sm">install and command surface</p>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">python &ge; 3.10 &middot; apptainer/singularity for the gate</p>
+      <p class="text-muted-foreground font-mono text-xs">python &ge; 3.11 &middot; apptainer/singularity for the gate</p>
     </div>
 
     <div data-slot="card" class="bg-card text-card-foreground -mx-4 flex w-full flex-col gap-6 self-stretch border rounded-none border-x-0 py-6 font-mono shadow-none sm:mx-0 sm:border-x">
       <div data-slot="card-header" class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between">
-        <p class="font-mono text-sm">first commands</p>
+        <p class="font-mono text-sm">bundle commands</p>
         <a class="text-muted-foreground hover:text-foreground inline-flex shrink-0 items-center justify-center gap-2 font-mono text-sm font-normal whitespace-nowrap underline-offset-4 transition-all hover:underline" href="quickstart/">full quickstart &rarr;</a>
       </div>
       <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border h-px w-full shrink-0"></div>
@@ -80,6 +80,12 @@ tdb quality results.jsonl</pre>
         <p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono text-sm/relaxed">If <code>tdb oracle</code> does not yield
           <code>reward = 1.0</code>, the environment &mdash; not the model &mdash; is the problem.</p>
       </div>
+    </div>
+
+    <div class="bg-fd-secondary/50 mt-6 w-full border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
+      <strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
+      currently require our unpublished patched Harbor fork; stock Harbor 0.13.1 is
+      insufficient. The catalogue, quality card, publisher, and doctor remain usable.
     </div>
 
     <div id="live-task" class="mt-8 w-full"></div>
@@ -218,7 +224,7 @@ tdb quality results.jsonl</pre>
 
     <p class="text-muted-foreground mx-auto mt-8 max-w-3xl text-center font-mono text-sm/relaxed">Archived tasks (&ge; 2 weeks old) ship in full, including
       the reference solution, so you can reproduce a number locally. Live tasks withhold the gold
-      patch and the protected test bodies and are scored server-side on submission.</p>
+      patch and protected test bodies; submissions remain unranked until official replay.</p>
 
     <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard &rarr;</a>
   </div>
@@ -272,7 +278,7 @@ tdb quality results.jsonl</pre>
                 The protected tests are re-laid from the trusted package after the patch is applied, so a
                 patch that edits tests only changes a workspace that is discarded before scoring.</p>
               <div class="space-y-6">
-                <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono"><span class="text-muted-foreground">false_accept</span> 0</span>
+                <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono"><span class="text-muted-foreground">semantic FA</span> unmeasured</span>
               </div>
             </div>
           </div>

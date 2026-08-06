@@ -1,10 +1,10 @@
-"""scoring.py -- the false_accept=0 scoring contract (gate-free, releasable).
+"""Execution-replay scoring contract (gate-free, releasable).
 
 A model/scaffold produces a candidate repo state (a patch, or an agent run); the
 REWARD is always the outcome of harbor RE-LAYING the trusted, protected tests on a
 face the candidate never touched, read by ``harbor_score.read_harbor_reward``. No
-model ever scores itself -> false_accept = 0 by construction. This module is the
-thin, public contract; the actual harbor invocation lives in ``eval`` / an adapter.
+submitted claim becomes a score without replay. Semantic verifier false-accept is
+not implied by that fact and remains unmeasured without labeled exploit trials.
 """
 from __future__ import annotations
 
@@ -23,14 +23,19 @@ def score_from_jobs(jobs_dir: str) -> Optional[float]:
 
 
 def false_accept_check(*, model_patch_touched_tests: bool = False) -> Dict[str, Any]:
-    """The stamped integrity block: the reward came from re-laid protected tests,
-    the model was never the judge, and it did not (effectively) edit the tests.
-    ``false_accept`` is 0 by construction of execution scoring."""
+    """Compatibility integrity block, explicitly scoped to replay bypass.
+
+    ``false_accept`` remains for old consumers and means only that a reward claim
+    did not bypass protected-test replay. Semantic verifier error is ``None``.
+    """
     return {
         "gate": "harbor_protected_tests",
         "reward_source": "result.json via harbor_score.read_harbor_reward",
         "protected_tests_relaid_by_harbor": True,
         "model_is_judge": False,
         "model_patch_touched_tests": bool(model_patch_touched_tests),
+        "scope": "protected_test_replay_integrity",
+        "claim_acceptance_without_replay": False,
+        "semantic_false_accept": None,
         "false_accept": 0,
     }

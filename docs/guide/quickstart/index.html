@@ -33,8 +33,8 @@
         <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">quickstart</h1>
         <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>terminal-daily-bench</strong> is a living, execution-graded coding-agent
           benchmark. A model produces a patch; harbor re-lays a protected test suite the model never
-          sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
-          opinion &mdash; so <code>false_accept = 0</code> by construction.</p>
+          sees and runs it under a network cut. The reward is the test outcome, never a model's
+          opinion. This prevents claim bypass; semantic verifier false-accept remains unmeasured.</p>
         <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">This page walks you from install to a scored result and a quality card.</p>
       </header>
 
@@ -42,7 +42,7 @@
 
         <h2 id="requirements" class="scroll-m-28 font-mono">Requirements</h2>
         <ul>
-          <li>Python <strong>&ge; 3.10</strong> (the scoring core is pure stdlib; there are no runtime
+          <li>Python <strong>&ge; 3.11</strong> (the scoring core is pure stdlib; there are no runtime
             dependencies).</li>
           <li>An <strong>apptainer/singularity</strong> host for the execution gate. <code>tdb run</code>
             and <code>tdb oracle</code> invoke <code>harbor run ... -e singularity</code>, which executes
@@ -50,6 +50,14 @@
           <li>Network access to an <strong>OpenAI-compatible endpoint</strong> (only for
             <code>tdb run</code> with a real model; <code>tdb oracle</code> needs no model).</li>
         </ul>
+
+        <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
+          <strong>Current availability:</strong> our scored runs use a private, locally patched Harbor
+          0.13.1 fork. Stock upstream Harbor rejects the singularity backend options passed by this
+          bundle, so a third party cannot currently run <code>tdb run</code> or <code>tdb oracle</code>
+          end to end. The task packages, <code>tdb doctor</code>, <code>tdb quality</code>, and
+          <code>tdb publish</code> remain usable without that fork. No publication date is promised.
+        </div>
 
         <h2 id="install" class="scroll-m-28 font-mono">Install</h2>
         <p>From a checkout of the release bundle:</p>
@@ -96,7 +104,7 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
           not the model, is the problem.</p>
         <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed">Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship with
           <code>solution/</code>. <strong>Live</strong> tasks withhold the gold patch and the protected
-          test bodies and are scored server-side. See
+          test bodies; submitted patches remain unranked until official replay. See
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</div>
 
         <h2 id="record" class="scroll-m-28 font-mono">The result record</h2>
@@ -118,6 +126,9 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
     "protected_tests_relaid_by_harbor": true,
     "model_is_judge": false,
     "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
     "false_accept": 0
   }
 }</pre></div>
@@ -136,7 +147,8 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
         </ul>
 
         <h3 id="fa-block" class="scroll-m-28 font-mono">The <code>false_accept_check</code> block</h3>
-        <p>This block records <em>why</em> the score cannot be gamed by the model:</p>
+        <p>This block records which deterministic execution boundary produced the score.
+          It does not by itself establish semantic verifier quality:</p>
         <ul>
           <li><code>gate: "harbor_protected_tests"</code> &mdash; scoring is the harbor execution gate
             and nothing else.</li>
@@ -150,8 +162,10 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
             judge.</li>
           <li><code>model_patch_touched_tests</code> &mdash; flags whether the model's diff touched any
             <code>test</code>-named path (informational; it cannot affect the score).</li>
-          <li><code>false_accept: 0</code> &mdash; a property of execution scoring, held by
-            construction.</li>
+          <li><code>false_accept: 0</code> &mdash; a compatibility field scoped by
+            <code>scope</code> to replay integrity. It means no acceptance bypassed the protected
+            test run; it does not estimate semantic verifier false-accept, which remains
+            <code>null</code> pending an exploit corpus.</li>
         </ul>
 
         <h2 id="quality" class="scroll-m-28 font-mono">Aggregate a quality card</h2>
@@ -175,8 +189,9 @@ tdb quality results.jsonl</pre></div>
           with the bottleneck axis and a recommended task count.</p>
 
         <h2 id="submitting" class="scroll-m-28 font-mono">Submitting results</h2>
-        <p>Every submission is <strong>re-scored by the same execution gate on ingest</strong> &mdash; a
-          claimed number is never trusted, only the patch is replayed. See
+        <p>Every submission is recorded as <strong>pending</strong> and its claimed reward is ignored.
+          The public bundle does not run a replay worker; only a later operator-published gate
+          receipt can move a row into the verified ranking. See
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>../CONTRIBUTING.md</code></a>.</p>
 
       </article>

@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-31T08:50:45Z",
+ "generated": "2026-08-06T01:37:36Z",
  "suites": [
   {
    "id": "2026-08-01",
@@ -8,7 +8,26 @@
    "note": "13 certified task(s); gold withheld while live",
    "languages": [
     "python"
-   ]
+   ],
+   "task_ids": [
+    "td-0980962a477fa0f5",
+    "td-353d3a1ca1556d1b",
+    "td-3e581ba3eb25fbfd",
+    "td-428e3784c727ef72",
+    "td-48f89934de58e0e3",
+    "td-5cf14361c19fc401",
+    "td-6c1b1fcb31cdc49f",
+    "td-6fedde17c75ca4cb",
+    "td-7b63d1d1e6234ec4",
+    "td-b3cf1cd66d5c95bd",
+    "td-d7e4208726a4b85b",
+    "td-e48d3444c4c946d6",
+    "td-ea49f2bb7b9d832c"
+   ],
+   "catalogued_tasks": 13,
+   "fresh_tasks": 0,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 13
   },
   {
    "id": "sample",
@@ -17,14 +36,30 @@
    "note": "one sample task; full dated suites are served from the site",
    "languages": [
     "python"
-   ]
+   ],
+   "task_ids": [
+    "td-fc90ea8b76d5f6b6"
+   ],
+   "catalogued_tasks": 1,
+   "fresh_tasks": 0,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 1
   },
   {
    "id": "sample-live",
    "status": "live",
    "n_tasks": 1,
-   "note": "one sample live task (gold+protected withheld, scored server-side)",
-   "languages": []
+   "note": "one sample live task (gold+protected withheld, pending official replay)",
+   "languages": [
+    "python"
+   ],
+   "task_ids": [
+    "td-fc90ea8b76d5f6b6"
+   ],
+   "catalogued_tasks": 1,
+   "fresh_tasks": 0,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 1
   }
  ],
  "tasks": [
@@ -32,6 +67,15 @@
    "id": "td-0980962a477fa0f5",
    "suite": "2026-08-01",
    "status": "live",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "live"
+    }
+   ],
    "repo": "maziyarpanahi/openmed",
    "pr_number": null,
    "base_sha": "",
@@ -49,6 +93,15 @@
    "id": "td-353d3a1ca1556d1b",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "mahmoud/boltons",
    "pr_number": 429,
    "base_sha": "57cb026b7f47cd2765a0d5acdc83849ed5f1f6a3",
@@ -66,6 +119,15 @@
    "id": "td-3e581ba3eb25fbfd",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "python-validators/validators",
    "pr_number": 420,
    "base_sha": "7c97eca2990f6d42e27f0f211475eb0d4809de59",
@@ -83,6 +145,15 @@
    "id": "td-428e3784c727ef72",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "skorokithakis/shortuuid",
    "pr_number": 115,
    "base_sha": "b8898871c5b977549b4ecbecbb638d8e06d7359e",
@@ -100,6 +171,15 @@
    "id": "td-48f89934de58e0e3",
    "suite": "2026-08-01",
    "status": "live",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "live"
+    }
+   ],
    "repo": "kislyuk/argcomplete",
    "pr_number": null,
    "base_sha": "",
@@ -117,6 +197,15 @@
    "id": "td-5cf14361c19fc401",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "sdispater/pendulum",
    "pr_number": 977,
    "base_sha": "1d9e31a678caf4b4881fe93709c7eaa166116a2a",
@@ -134,6 +223,15 @@
    "id": "td-6c1b1fcb31cdc49f",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "hukkin/tomli",
    "pr_number": 286,
    "base_sha": "c20c49113890c226ffb27a67befe20d14fcf0c73",
@@ -151,6 +249,15 @@
    "id": "td-6fedde17c75ca4cb",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "jazzband/docopt-ng",
    "pr_number": 71,
    "base_sha": "fab01f5f19c9c7ca30f05e79a06d79bd066b475a",
@@ -168,6 +275,15 @@
    "id": "td-7b63d1d1e6234ec4",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "cpburnz/python-pathspec",
    "pr_number": 110,
    "base_sha": "3199cd43f74c22bafcff9848458dd04613fbe64e",
@@ -185,6 +301,15 @@
    "id": "td-b3cf1cd66d5c95bd",
    "suite": "2026-08-01",
    "status": "live",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "live"
+    }
+   ],
    "repo": "567-labs/instructor",
    "pr_number": null,
    "base_sha": "",
@@ -202,6 +327,15 @@
    "id": "td-d7e4208726a4b85b",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "keleshev/schema",
    "pr_number": 348,
    "base_sha": "27e268d4fc36a169b9a3296fe03d3b897fc0bf2f",
@@ -219,6 +353,15 @@
    "id": "td-e48d3444c4c946d6",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "agittins/bermuda",
    "pr_number": 783,
    "base_sha": "0de65b9e97c2d9aa9754aa470b9825b8d4ccdafc",
@@ -236,6 +379,15 @@
    "id": "td-ea49f2bb7b9d832c",
    "suite": "2026-08-01",
    "status": "archive",
+   "suites": [
+    "2026-08-01"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    }
+   ],
    "repo": "kislyuk/argcomplete",
    "pr_number": 526,
    "base_sha": "bb8d688f74edd8290a63c0d8f892fa18157e1847",
@@ -251,8 +403,22 @@
   },
   {
    "id": "td-fc90ea8b76d5f6b6",
-   "suite": "sample",
+   "suite": "sample-live",
    "status": "archive",
+   "suites": [
+    "sample",
+    "sample-live"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "sample",
+     "mode": "archive"
+    },
+    {
+     "suite": "sample-live",
+     "mode": "live"
+    }
+   ],
    "repo": "Delgan/loguru",
    "pr_number": 1451,
    "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",

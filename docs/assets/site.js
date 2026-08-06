@@ -9,7 +9,8 @@
    utilities are already present in the vendored tw.css / tw-extra.css, so no
    hand-written CSS is needed to make it look right.
 
-   window.TDB = { ROOT, getJSON, wilson, pct, rateCell, dayRail, CANARY }
+   window.TDB = { ROOT, getJSON, taskSuites, taskInSuite, wilson, pct,
+                  rateCell, dayRail, CANARY }
    ------------------------------------------------------------------------- */
 (function () {
   "use strict";
@@ -150,13 +151,13 @@
 
   /* label, href relative to ROOT, page keys that light it up */
   var NAV = [
-    ["run it",      "guide/quickstart/", ["run", "quickstart", "docs", "guide",
-                                          "task-format", "submission", "quality-methods"]],
-    ["leaderboard", "leaderboard/",      ["leaderboard"]],
-    ["benchmarks",  "benchmarks/",       ["benchmarks", "benchmark", "suite"]],
-    ["tasks",       "registry/",         ["tasks", "registry", "task"]],
-    ["quality",     "quality/",          ["quality"]],
-    ["submit",      "submit/",           ["submit"]]
+    ["status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
+    ["leaderboard", "leaderboard/", ["leaderboard"]],
+    ["tasks",       "registry/",    ["tasks", "registry", "task"]],
+    ["docs",        "guide/",       ["run", "quickstart", "docs", "guide",
+                                      "task-format", "submission", "quality-methods",
+                                      "quality"]],
+    ["submit",      "submit/",      ["submit"]]
   ];
 
   var LINK_CLS =
@@ -309,6 +310,27 @@
     });
   }
 
+  /* Suite membership is many-to-many: a certified task can be carried into a
+     later window, and one legacy sample package can exist in both splits. */
+  function taskSuites(task) {
+    var values = task && Array.isArray(task.suites)
+      ? task.suites : [task && task.suite];
+    var seen = Object.create(null), out = [];
+    values.forEach(function (value) {
+      if (value == null || value === "") return;
+      var sid = String(value);
+      if (seen[sid]) return;
+      seen[sid] = true;
+      out.push(sid);
+    });
+    return out.sort();
+  }
+
+  function taskInSuite(task, suiteId) {
+    var target = String(suiteId == null ? "" : suiteId);
+    return taskSuites(task).some(function (sid) { return sid === target; });
+  }
+
   /* Wilson 95% interval: the honest way to show a rate at small N */
   function wilson(solved, n, z) {
     z = z || 1.959964;
@@ -354,9 +376,9 @@
     el.innerHTML =
       '<div class="bg-card text-card-foreground flex flex-col border font-mono">' +
         '<div class="flex items-center gap-3 border-b px-4 py-2">' +
-          '<p class="text-muted-foreground text-xs">daily suites &mdash; every day is its own sealed benchmark</p>' +
+          '<p class="text-muted-foreground text-xs">published suites</p>' +
           '<span data-slot="badge" class="ml-auto ' + BADGE_SECONDARY + '">' +
-            '<span class="text-muted-foreground">false_accept</span> 0</span>' +
+            suites.length + (suites.length === 1 ? " suite" : " suites") + "</span>" +
         "</div>" +
         '<div class="tdb-rail flex overflow-x-auto">' + cells + "</div>" +
       "</div>";
@@ -365,6 +387,8 @@
   window.TDB = {
     ROOT: ROOT,
     getJSON: getJSON,
+    taskSuites: taskSuites,
+    taskInSuite: taskInSuite,
     wilson: wilson,
     pct: pct,
     rateCell: rateCell,

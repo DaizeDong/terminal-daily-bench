@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "terminal-daily-bench"
 version = "0.1.0"
-description = "A living, execution-graded coding-agent benchmark (false_accept = 0)."
+description = "A living coding-agent benchmark graded by protected-test execution replay."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"  # tomllib (stdlib) since 3.11
@@ -20,6 +20,7 @@ dependencies = []            # scoring core is pure stdlib; harbor/apptainer are
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+replay = ["cryptography>=41"]
 
 [project.scripts]
 tdb = "terminal_daily_bench.cli:main"
@@ -30,3 +31,9 @@ Repository = "https://github.com/OWNER/terminal-daily-bench"
 
 [tool.hatch.build.targets.wheel]
 packages = ["terminal_daily_bench"]
+
+[tool.pytest.ini_options]
+# Archived benchmark packages intentionally contain many verifier files with
+# the same basename.  They are executed in isolated Harbor tasks, not imported
+# together as this package's unit-test suite.
+testpaths = ["tests"]

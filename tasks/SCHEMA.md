@@ -19,5 +19,6 @@ server-side. **Archived tasks** (≥ 2 weeks old) ship in full for reproducibili
 ## Scoring contract
 A model's patch is written to a run copy, applied via `solution/solve.sh` (git apply),
 then harbor RE-LAYS `tests/` from the trusted package and runs them under a network
-cut. Reward = the protected-test outcome (read by `eval/harbor_score.read_harbor_reward`).
-`false_accept = 0`: the model is the subject, never the judge.
+cut. Reward = the protected-test outcome (read by
+`terminal_daily_bench.harbor_score.read_harbor_reward`). The model is the subject,
+never the judge; this prevents claim bypass but does not prove semantic verifier FA=0.

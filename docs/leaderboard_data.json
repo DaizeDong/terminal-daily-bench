@@ -3,7 +3,8 @@
  "n_tasks": 6,
  "n_models": 16,
  "n_cells": 124,
- "total_fa": 0,
+ "total_fa": null,
+ "total_fa_n": 0,
  "cost_measured": false,
  "tasks": [
   "td-965d562cfcb587f7",
@@ -30,13 +31,15 @@
     "n": 6,
     "solved": 2,
     "rate": 0.333,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "terminus2": {
     "n": 6,
     "solved": 3,
     "rate": 0.5,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "lead": true
   },
@@ -46,13 +49,15 @@
     "n": 6,
     "solved": 1,
     "rate": 0.167,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "terminus2": {
     "n": 4,
     "solved": 2,
     "rate": 0.5,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -61,13 +66,15 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "terminus2": {
     "n": 6,
     "solved": 1,
     "rate": 0.167,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -76,7 +83,8 @@
     "n": 6,
     "solved": 1,
     "rate": 0.167,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -85,13 +93,15 @@
     "n": 6,
     "solved": 1,
     "rate": 0.167,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "terminus2": {
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -100,7 +110,8 @@
     "n": 6,
     "solved": 1,
     "rate": 0.167,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -109,7 +120,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -118,7 +130,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -127,7 +140,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -136,7 +150,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -145,7 +160,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -154,7 +170,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -163,7 +180,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -172,13 +190,15 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    },
    "terminus2": {
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -187,7 +207,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   },
   {
@@ -196,7 +217,8 @@
     "n": 6,
     "solved": 0,
     "rate": 0.0,
-    "fa": 0
+    "fa": null,
+    "fa_n": 0
    }
   }
  ],

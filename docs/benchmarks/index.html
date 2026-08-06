@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Benchmarks — terminal-daily-bench</title>
-<meta name="description" content="Browse terminal-daily-bench suites and their tasks. One suite per day: mined from real merged pull requests, built and proven, sealed on ship, released in full after two weeks.">
+<title>Benchmark status — terminal-daily-bench</title>
+<meta name="description" content="Published terminal-daily-bench suites, task counts, languages, and live/archive release status.">
 <link rel="stylesheet" href="../assets/tw.css">
 <link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
@@ -14,102 +14,31 @@
 
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
   <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
-    <div class="flex w-full max-w-7xl flex-1 flex-col">
+    <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
-      <h2 class="mb-6 font-mono text-4xl tracking-tighter">Benchmarks</h2>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Browse terminal-daily-bench suites and their tasks.</p>
+      <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Published suites, newest dated release first. Open a suite for its tasks and score coverage.</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -mx-4 sm:mx-0" id="suites">
-        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
-          <div class="flex flex-1 flex-col gap-6 py-6">
-            <div data-slot="card-content" class="px-6">
-              <p class="text-muted-foreground font-mono text-sm">loading suites…</p>
-            </div>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -mx-4 sm:mx-0" id="suites" data-tdb-primary-data>
+        <div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">loading suites&hellip;</div>
       </div>
 
-      <!-- ================= how a daily suite lives ================= -->
-      <div class="flex flex-col py-12 sm:pb-16">
+      <section class="flex flex-col py-12 sm:pb-16" data-tdb-integrity>
         <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">how a daily suite lives</p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down animate-float size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+          <p class="font-mono text-sm">release and scoring policy</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 -mx-4 sm:mx-0 lg:grid-cols-4">
-
-          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
-            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
-              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
-                <div data-slot="card-title" class="leading-none font-semibold">
-                  <h2 class="line-clamp-1 font-mono text-xl font-medium">mined</h2>
-                </div>
-                <div class="mt-2 flex gap-2">
-                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">step 1</span>
-                </div>
-              </div>
-              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
-                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Every morning the miner walks a curated universe of public repositories and takes pull requests that merged upstream today and touch a test file.</p>
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">the fix is younger than the model</p>
-              </div>
-            </div>
+        <div class="bg-card -mx-4 grid grid-cols-1 border-y font-mono md:mx-0 md:grid-cols-2 md:border-x">
+          <div class="border-b px-6 py-6">
+            <p class="font-medium">live</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected test bodies are withheld. Submissions remain unranked until an official replay receipt exists.</p>
           </div>
-
-          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
-            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
-              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
-                <div data-slot="card-title" class="leading-none font-semibold">
-                  <h2 class="line-clamp-1 font-mono text-xl font-medium">built</h2>
-                </div>
-                <div class="mt-2 flex gap-2">
-                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">step 2</span>
-                </div>
-              </div>
-              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
-                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Each candidate is rebuilt into a container at the parent commit. It survives only if its fail-to-pass tests really fail before the patch and reach reward 1.0 after it.</p>
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">solvability is executed, never assumed</p>
-              </div>
-            </div>
+          <div class="px-6 py-6">
+            <p class="font-medium">archive</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution still requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
           </div>
-
-          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
-            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
-              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
-                <div data-slot="card-title" class="leading-none font-semibold">
-                  <h2 class="line-clamp-1 font-mono text-xl font-medium">sealed</h2>
-                </div>
-                <div class="mt-2 flex gap-2">
-                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">live</span>
-                </div>
-              </div>
-              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
-                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">The day's survivors are frozen into one dated suite. The reference patch and the protected test bodies stay withheld; only the failing-test identifiers ship.</p>
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">scored server-side by re-laying the tests</p>
-              </div>
-            </div>
-          </div>
-
-          <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
-            <div class="flex flex-1 flex-col justify-between gap-6 py-6">
-              <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
-                <div data-slot="card-title" class="leading-none font-semibold">
-                  <h2 class="line-clamp-1 font-mono text-xl font-medium">released</h2>
-                </div>
-                <div class="mt-2 flex gap-2">
-                  <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">archive</span>
-                </div>
-              </div>
-              <div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">
-                <p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">Two weeks later the same suite is released in full — environment, protected tests and reference solution — so every number published on it can be re-derived locally.</p>
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">tdb run · tdb oracle</p>
-              </div>
-            </div>
-          </div>
-
         </div>
-
-        <p class="text-muted-foreground mx-auto mt-6 max-w-3xl text-center font-mono text-sm/relaxed">mined → built → sealed → released. The live/archive split is mechanical, not editorial: a suite becomes archive once its pull requests are two weeks old. The gate never differs between the two — the same protected tests are re-laid either way, so an archived re-run and our live score are the same measurement.</p>
-      </div>
+        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">The deterministic execution gate ignores claimed rewards. This proves replay integrity; semantic verifier false-accept remains unmeasured without labeled exploit trials.</p>
+      </section>
 
     </div>
   </div>
@@ -120,127 +49,87 @@
 (function () {
   "use strict";
   var T = window.TDB;
-
-  function esc(s) {
-    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-    });
+  var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"]/g, function (c) { return ENT[c]; });
   }
-
-  /* their badge, verbatim; only the colour pair varies */
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden border-transparent ";
-  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
-  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
 
   var CARD =
     "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
     "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
     "transition-all duration-200 sm:-mr-px sm:border-x";
   var HEADER =
-    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start " +
-    "gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
+    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 " +
+    "px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
+  var BADGE =
+    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "font-medium w-fit whitespace-nowrap shrink-0 gap-1 transition-[color,box-shadow] " +
+    "overflow-hidden border-transparent font-mono ";
+  var PRIMARY = BADGE + "bg-primary text-primary-foreground";
+  var SECONDARY = BADGE + "bg-secondary text-secondary-foreground";
 
-  function badge(text, variant) {
-    return '<span data-slot="badge" class="' + BADGE + variant + '">' + esc(text) + "</span>";
+  function badge(text, primary) {
+    return '<span data-slot="badge" class="' + (primary ? PRIMARY : SECONDARY) + '">' +
+      esc(text) + "</span>";
   }
 
-  function emptyCard(html) {
-    return '<div data-slot="card" class="' + CARD + '">' +
-      '<div class="flex flex-1 flex-col gap-6 py-6">' +
-        '<div data-slot="card-content" class="px-6">' +
-          '<p class="text-muted-foreground font-mono text-sm">' + html + "</p>" +
-        "</div></div></div>";
+  function orderedSuites(site) {
+    var suites = ((site && site.suites) || []).slice();
+    suites.sort(function (a, b) {
+      var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(a.id));
+      var bd = /^\d{4}-\d{2}-\d{2}$/.test(String(b.id));
+      if (ad !== bd) return ad ? -1 : 1;
+      return String(b.id).localeCompare(String(a.id));
+    });
+    return suites;
   }
 
-  /* languages: prefer what the suite declares, else derive from its tasks */
-  function langsOf(suite, tasks) {
-    var ls = (suite.languages || []).slice();
-    if (!ls.length) {
-      var seen = {};
-      tasks.forEach(function (t) {
-        if (t.suite === suite.id && t.language && !seen[t.language]) {
-          seen[t.language] = 1;
-          ls.push(t.language);
+  function suiteCard(suite, tasks, scoredDate) {
+    var live = suite.status === "live";
+    var langs = (suite.languages || []).filter(Boolean);
+    if (!langs.length) {
+      tasks.forEach(function (task) {
+        if (T.taskInSuite(task, suite.id) && task.language && langs.indexOf(task.language) < 0) {
+          langs.push(task.language);
         }
       });
     }
-    return ls;
-  }
-
-  function describe(suite) {
-    if (suite.note) return suite.note;
-    return suite.status === "live"
-      ? "Sealed and running. The reference patch and the protected tests are withheld; a submission is scored server-side by re-laying the same tests."
-      : "Released in full — environment, protected tests and reference solution — so every number published on this suite can be re-derived locally.";
-  }
-
-  function suiteCard(suite, tasks, today) {
-    var live = suite.status === "live";
-    var ls = langsOf(suite, tasks);
-
-    var pills = badge(suite.status || "unknown", live ? PRIMARY : SECONDARY);
-    if (today && suite.id === today) pills += badge("today", SECONDARY);
-
+    var pills = badge(suite.status || "unknown", live);
+    if (scoredDate && suite.id === scoredDate) pills += badge("scored snapshot", false);
     var facts = [];
-    if (suite.n_tasks != null) {
-      facts.push(suite.n_tasks + (suite.n_tasks === 1 ? " task" : " tasks"));
-    }
-    if (ls.length) {
-      facts.push(ls.length + (ls.length === 1 ? " language" : " languages") +
-                 " · " + ls.slice(0, 6).join(", ") + (ls.length > 6 ? ", …" : ""));
-    }
+    if (suite.n_tasks != null) facts.push(plural(suite.n_tasks, "task", "tasks"));
+    if (langs.length) facts.push(langs.join(", "));
 
     return '<div data-slot="card" class="' + CARD + '">' +
       '<a class="flex flex-1" href="./' + encodeURIComponent(suite.id) + '/">' +
         '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
           '<div data-slot="card-header" class="' + HEADER + '">' +
-            '<div data-slot="card-title" class="leading-none font-semibold">' +
-              '<h2 class="line-clamp-1 font-mono text-xl font-medium">suite ' + esc(suite.id) + "</h2>" +
-            "</div>" +
-            '<div class="mt-2 flex gap-2">' + pills + "</div>" +
+            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(suite.id) + "</h2>" +
+            '<div class="mt-2 flex flex-wrap gap-2">' + pills + "</div>" +
           "</div>" +
-          '<div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between space-y-6">' +
-            '<p class="line-clamp-[10] font-mono wrap-anywhere whitespace-pre-wrap sm:text-sm">' +
-              esc(describe(suite)) + "</p>" +
-            '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' +
-              (facts.length ? esc(facts.join(" · ")) : "&mdash;") + "</p>" +
+          '<div data-slot="card-content" class="flex flex-1 flex-col justify-between gap-6 px-6">' +
+            '<p class="font-mono wrap-anywhere sm:text-sm">' + esc(suite.note || "No release note published.") + "</p>" +
+            '<p class="text-muted-foreground font-mono text-xs">' + (facts.length ? esc(facts.join(" · ")) : "&mdash;") + "</p>" +
           "</div>" +
         "</div>" +
       "</a></div>";
   }
 
-  function render(site, board) {
-    var box = document.getElementById("suites");
-    if (!box) return;
-
-    var suites = (site && site.suites) || [];
-    var tasks = (site && site.tasks) || [];
-    var today = board && board.date;
-
-    if (!suites.length) {
-      box.innerHTML = emptyCard(
-        "No suites published yet. The publisher writes <code>site_data.json</code> at the " +
-        "site root; this page renders whatever it finds there.");
-      return;
-    }
-
-    box.innerHTML = suites.map(function (s) {
-      return suiteCard(s, tasks, today);
-    }).join("");
-  }
-
   Promise.all([
     T.getJSON("site_data.json").catch(function () { return null; }),
     T.getJSON("leaderboard_data.json").catch(function () { return null; })
-  ]).then(function (r) { render(r[0], r[1]); })
-    .catch(function () { render(null, null); });
+  ]).then(function (data) {
+    var site = data[0] || {};
+    var board = data[1] || {};
+    var suites = orderedSuites(site);
+    var host = document.getElementById("suites");
+    host.innerHTML = suites.length
+      ? suites.map(function (suite) { return suiteCard(suite, site.tasks || [], board.date); }).join("")
+      : '<div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">No suites are published.</div>';
+  });
 })();
 </script>
+
 </body>
 </html>

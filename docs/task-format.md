@@ -237,7 +237,7 @@ via `publish_tasks.py::_failing_test_ids`):
 ```json
 {
   "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
-  "note": "protected assertions + gold solution withheld; submit a patch, scored server-side"
+  "note": "protected assertions + gold withheld; pending until operator replay"
 }
 ```
 
@@ -247,8 +247,8 @@ reproducibility.
 
 ## How scoring re-lays the protected tests
 
-Scoring is **execution-only** — there is no LLM judge, so `false_accept = 0` holds by
-construction. The flow (`terminal_daily_bench/eval.py`,
+Scoring is **execution-only**: no LLM judge can turn a submitted claim into a score.
+This proves replay integrity, not semantic verifier completeness. The flow (`terminal_daily_bench/eval.py`,
 `terminal_daily_bench/harbor_score.py`):
 
 1. The task package is copied to a **run copy** (`.tdb_work/runs/...`); the model
@@ -282,7 +282,10 @@ Each run writes one result record:
   "false_accept_check": { "gate": "harbor_protected_tests",
     "reward_source": "result.json via harbor_score.read_harbor_reward",
     "protected_tests_relaid_by_harbor": true, "model_is_judge": false,
-    "model_patch_touched_tests": false, "false_accept": 0 } }
+    "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null, "false_accept": 0 } }
 ```
 
 Scoring is BAD-safe: no patch, a patch that fails to apply, a hung trial, or an
@@ -335,18 +338,24 @@ python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./
 # -> {"task": "td-...", "mode": "archive", "shipped_solution": true, "dest": "tasks/archive/td-..."}
 ```
 
-Submit a result for a live task (re-scored on ingest — the claimed reward is
-advisory, only the patch is replayed; see [CONTRIBUTING.md](../CONTRIBUTING.md)):
+Submit a result for a live task (recorded as pending; the claimed reward is
+advisory and the public bundle does not run a replay worker; see
+[CONTRIBUTING.md](../CONTRIBUTING.md)):
 
 ```bash
 # validate the submission JSON, then record it as pending re-verification
 python web/submit_result.py validate < submission.json
-python web/submit_result.py record   < submission.json --store community_submissions
+python web/submit_result.py record   < submission.json \
+  --store community_submissions --authenticated-submitter github:YOUR_LOGIN
 ```
 
 A submission is one JSON object per `(model, task)` cell; required fields are
-`date`, `submitter`, `model`, `scaffold`, `task` (must start with `td-`), and `patch`
-(the unified diff). `reward_claimed` is advisory only.
+`date`, `submitter`, `model`, `model_build`, `scaffold`, `harness_version`, `task`
+(must start with `td-`), and `patch` (the unified diff). The authenticated submitter
+comes from the surrounding auth layer, never the JSON body. `reward_claimed` is
+advisory only. Duplicate attempts for the same authenticated suite/build/harness/task
+cell are rejected, and a community row is ranked only after signed replay receipts
+cover the complete frozen suite roster.
 
 ## Plugging in your own scaffold
 
@@ -361,5 +370,5 @@ output = AdapterResult(patch: str, telemetry: dict, error: str | None)
 
 An adapter's `produce_patch(...)` must **not** read or write the protected tests or
 the gold solution, and must **not** compute a reward. The execution gate stays the
-sole reward authority — which is what keeps `false_accept = 0` as more harnesses are
-added.
+sole reward authority as more harnesses are added; semantic false-accept still needs
+an exploit-corpus measurement.

@@ -1,7 +1,7 @@
 # Execution backend (harbor / apptainer)
 
-Tasks run under **harbor** on an apptainer/singularity host. Two properties are
-enforced here and are what make `false_accept = 0` real:
+Tasks run under **harbor** on an apptainer/singularity host. Two properties enforce
+the protected-test replay boundary (not semantic verifier completeness):
 
 1. **Protected-test re-lay.** After a candidate patch is applied, harbor RE-LAYS the
    trusted `tests/` from the task package and runs them — the model's workspace edits

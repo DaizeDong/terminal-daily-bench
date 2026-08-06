@@ -86,6 +86,49 @@ def _difficulty(solved_by, n_models) -> str:
     return "easy"
 
 
+_DATED_SUITE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def primary_suite(suite_ids) -> str:
+    """Return the compatibility ``suite`` without losing many-to-many membership.
+
+    ISO-dated suites are ordered by date and take precedence over named fixture
+    suites.  A carried task therefore points at the newest dated snapshot while
+    its complete history remains in ``suites``.  Consumers must use ``suites``
+    for membership tests; this scalar exists for older clients and sorting only.
+    """
+    ids = sorted({str(value) for value in suite_ids if value})
+    dated = [sid for sid in ids if _DATED_SUITE.fullmatch(sid)]
+    return (dated or ids)[-1] if ids else ""
+
+
+def _add_membership(
+    memberships_by_task: dict,
+    task_ids_by_suite: dict,
+    task_id: str,
+    membership: dict,
+) -> None:
+    """Record one task/suite edge in both directions.
+
+    The same package may be materialised in archive/ and live/ and may be
+    carried through several dated suites.  Membership is therefore an edge,
+    not a property that can be overwritten while scanning files.
+    """
+    sid = str(membership.get("suite") or "")
+    if not task_id or not sid:
+        return
+    current = memberships_by_task.setdefault(task_id, {}).get(sid)
+    if current is None:
+        memberships_by_task[task_id][sid] = dict(membership, suite=sid)
+    else:
+        # A release gate reports duplicate/conflicting ledger rows.  Keeping the
+        # first non-empty value here makes catalogue generation deterministic.
+        for key, value in membership.items():
+            if key not in current or current[key] in (None, ""):
+                current[key] = value
+    task_ids_by_suite.setdefault(sid, set()).add(task_id)
+
+
 def collect(release: Path, board: dict) -> dict:
     # per-task solve counts from the published matrix (if a board has been published)
     solved_by, n_models = {}, board.get("n_models") or 0
@@ -104,12 +147,29 @@ def collect(release: Path, board: dict) -> dict:
     # gave whichever suite was declared first every task in that split: with 13
     # dated tasks published, registry.json said 13 and this catalogue said 4,
     # because `sample` (status=archive) had claimed all eleven archive packages.
-    suite_of_task = {}
+    memberships_by_task: dict[str, dict[str, dict]] = {}
+    task_ids_by_suite: dict[str, set[str]] = {}
+    explicit_member_tasks: set[str] = set()
     for member_file in sorted((release / "tasks").glob(".suite-*.json")):
         sid = member_file.name[len(".suite-"):-len(".json")]
-        for m in (_read_json(member_file) or []):
+        members = _read_json(member_file)
+        if not isinstance(members, list):
+            continue
+        for m in members:
             if isinstance(m, dict) and m.get("task"):
-                suite_of_task[str(m["task"])] = sid
+                tid = str(m["task"])
+                window = m.get("suite_window") if isinstance(m.get("suite_window"), dict) else {}
+                membership = {"suite": sid}
+                if m.get("mode"):
+                    membership["mode"] = str(m["mode"])
+                for key in ("origin", "certified_date", "age_days",
+                            "source_ledger", "selected_ledger_date"):
+                    if key in window:
+                        membership[key] = window[key]
+                _add_membership(
+                    memberships_by_task, task_ids_by_suite, tid, membership
+                )
+                explicit_member_tasks.add(tid)
 
     # Fallback for packages that predate membership files: only a suite that
     # DECLARES a path owns that split wholesale. The shipped samples do
@@ -121,7 +181,11 @@ def collect(release: Path, board: dict) -> dict:
         if path:
             suite_of.setdefault(path.rstrip("/").rsplit("/", 1)[-1], str(s_.get("id")))
 
-    tasks, suites_langs = [], {}
+    # Read package copies first, then add fallback edges.  This two-pass shape is
+    # load-bearing: a legacy sample task can exist in BOTH archive/ and live/.
+    # Adding archive's fallback and immediately treating it as an explicit edge
+    # would otherwise prevent the live fallback from ever being recorded.
+    package_rows = []
     for status in ("archive", "live"):
         root = release / "tasks" / status
         if not root.is_dir():
@@ -132,44 +196,103 @@ def collect(release: Path, board: dict) -> dict:
             failing = _read_json(d / "FAILING_TESTS.json")
             f2p = rec.get("fail_to_pass") or failing.get("failing_test_ids") or []
             lang = _language(rec, d)
-            suite = (suite_of_task.get(d.name)
-                     or suite_of.get(status)
-                     or str(rec.get("date") or board.get("date") or status))
-            sb = solved_by.get(d.name)
-            tasks.append({
-                "id": d.name, "suite": suite, "status": status,
-                "repo": rec.get("repo") or prov.get("source_repo") or "",
-                "pr_number": rec.get("pr_number"),
-                "base_sha": rec.get("base_sha") or prov.get("source_ref") or "",
-                "merge_sha": rec.get("merge_sha") or "",
-                "license": rec.get("source_license_spdx") or prov.get("source_license_spdx") or "",
-                "language": lang,
-                "title": _title_from_instruction(d),
-                "n_fail_to_pass": len(f2p) if isinstance(f2p, list) else None,
-                "solved_by": sb, "n_models": n_models if sb is not None else None,
-                "difficulty": _difficulty(sb, n_models),
+            package_rows.append({
+                "status": status, "dir": d, "record": rec, "provenance": prov,
+                "f2p": f2p, "language": lang,
             })
-            if lang:
-                suites_langs.setdefault(suite, set()).add(lang)
+
+    for package in package_rows:
+        d, status, rec = package["dir"], package["status"], package["record"]
+        if d.name in explicit_member_tasks:
+            continue
+        fallback = (suite_of.get(status)
+                    or str(rec.get("date") or board.get("date") or status))
+        _add_membership(
+            memberships_by_task,
+            task_ids_by_suite,
+            d.name,
+            {"suite": fallback, "mode": status},
+        )
+
+    tasks, suites_langs = [], {}
+    for package in package_rows:
+        status = package["status"]
+        d = package["dir"]
+        rec = package["record"]
+        prov = package["provenance"]
+        f2p = package["f2p"]
+        lang = package["language"]
+        memberships = sorted(
+            memberships_by_task.get(d.name, {}).values(),
+            key=lambda item: str(item["suite"]),
+        )
+        suite_ids = [str(item["suite"]) for item in memberships]
+        # Backward-compatible primary suite for old consumers. Membership is
+        # many-to-many; pages and release gates consume ``suites`` below.
+        suite = primary_suite(suite_ids)
+        sb = solved_by.get(d.name)
+        tasks.append({
+            "id": d.name, "suite": suite, "status": status,
+            "suites": suite_ids,
+            "suite_memberships": memberships,
+            "repo": rec.get("repo") or prov.get("source_repo") or "",
+            "pr_number": rec.get("pr_number"),
+            "base_sha": rec.get("base_sha") or prov.get("source_ref") or "",
+            "merge_sha": rec.get("merge_sha") or "",
+            "license": rec.get("source_license_spdx") or prov.get("source_license_spdx") or "",
+            "language": lang,
+            "title": _title_from_instruction(d),
+            "n_fail_to_pass": len(f2p) if isinstance(f2p, list) else None,
+            "solved_by": sb, "n_models": n_models if sb is not None else None,
+            "difficulty": _difficulty(sb, n_models),
+        })
+        if lang:
+            for sid in suite_ids:
+                suites_langs.setdefault(sid, set()).add(lang)
 
     # suites: registry declarations, enriched with what actually shipped
     reg = _read_json(release / "registry.json")
     suite_rows = {}
     for s in reg.get("suites") or []:
-        suite_rows[str(s.get("id"))] = {
+        sid = str(s.get("id"))
+        suite_rows[sid] = {
             "id": str(s.get("id")), "status": s.get("status") or "archive",
             "n_tasks": s.get("n_tasks"), "note": s.get("note") or "",
-            "languages": sorted(suites_langs.get(str(s.get("id")), [])),
+            "languages": sorted(suites_langs.get(sid, [])),
+            "task_ids": sorted(task_ids_by_suite.get(sid, set())),
         }
-    for t in tasks:  # a suite present on disk but absent from registry.json still shows up
-        sid = t["suite"]
+        for key in ("target_tasks", "complete", "publish_shortfall"):
+            if key in s:
+                suite_rows[sid][key] = s[key]
+    for sid in sorted(task_ids_by_suite):  # membership present but registry absent
         if sid not in suite_rows:
-            suite_rows[sid] = {"id": sid, "status": t["status"], "n_tasks": 0, "note": "",
-                               "languages": sorted(suites_langs.get(sid, []))}
+            modes = {
+                membership.get("mode")
+                for per_suite in memberships_by_task.values()
+                for membership in per_suite.values()
+                if membership.get("suite") == sid
+            }
+            suite_rows[sid] = {
+                "id": sid, "status": "live" if "live" in modes else "archive",
+                "n_tasks": len(task_ids_by_suite[sid]), "note": "",
+                "languages": sorted(suites_langs.get(sid, [])),
+                "task_ids": sorted(task_ids_by_suite[sid]),
+            }
     for sid, s in suite_rows.items():
-        on_disk = sum(1 for t in tasks if t["suite"] == sid)
-        if on_disk:
-            s["n_tasks"] = on_disk
+        task_ids = sorted(task_ids_by_suite.get(sid, set()))
+        s["task_ids"] = task_ids
+        s["catalogued_tasks"] = len(task_ids)
+        if s.get("n_tasks") is None:
+            s["n_tasks"] = len(task_ids)
+        origins = [
+            membership.get("origin")
+            for per_suite in memberships_by_task.values()
+            for membership in per_suite.values()
+            if membership.get("suite") == sid
+        ]
+        s["fresh_tasks"] = origins.count("fresh")
+        s["carried_tasks"] = origins.count("carried")
+        s["unknown_origin_tasks"] = len(task_ids) - s["fresh_tasks"] - s["carried_tasks"]
 
     # one page per task id: prefer the archive record (it carries the full metadata) and
     # record the other splits the same task also ships in.
@@ -181,7 +304,20 @@ def collect(release: Path, board: dict) -> dict:
             task_by_id[t["id"]] = t
         else:
             keep, other = (prev, t) if prev["status"] == "archive" else (t, prev)
-            keep["also_in"] = sorted(set(keep.get("also_in", []) + other.get("also_in", []) + [other["status"]]))
+            keep["also_in"] = sorted(set(
+                keep.get("also_in", []) + other.get("also_in", []) + [other["status"]]
+            ) - {keep["status"]})
+            merged_memberships = {
+                str(item["suite"]): item
+                for item in (keep.get("suite_memberships", [])
+                             + other.get("suite_memberships", []))
+                if item.get("suite")
+            }
+            keep["suite_memberships"] = [
+                merged_memberships[sid] for sid in sorted(merged_memberships)
+            ]
+            keep["suites"] = sorted(merged_memberships)
+            keep["suite"] = primary_suite(keep["suites"])
             task_by_id[t["id"]] = keep
     tasks = sorted(task_by_id.values(), key=lambda t: (t["suite"], t["id"]))
 

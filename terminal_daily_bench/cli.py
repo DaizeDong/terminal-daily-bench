@@ -1,13 +1,13 @@
 """cli.py -- the `tdb` command-line interface.
 
   tdb doctor [TASK_DIR]                    preflight: is this host able to score?
-  tdb run <MODEL> <TASK_DIR> [--out OUT]   score a model on a task (execution gate)
+  tdb run <MODEL> <TASK_DIR> [--harness H] score a model on a task (execution gate)
   tdb oracle <TASK_DIR>                    the gate baseline (task's own solution -> 1.0)
   tdb quality <RESULTS.jsonl|json>         multi-angle quality card + readiness verdict
   tdb version
 
-The model call uses a generic OpenAI-compatible endpoint (OPENAI_BASE_URL /
-OPENAI_API_KEY). Scoring shells out to `harbor` and needs an apptainer/singularity
+The default model call uses a generic OpenAI-compatible endpoint; vendor adapters
+use their standard environment variables. Scoring shells out to `harbor` and needs an apptainer/singularity
 host. `oracle` needs no model. Run `tdb doctor` first -- it reports exactly which of
 those pieces are present on this host, and the harbor build we score against is not
 yet public (see README "Requirements").
@@ -20,20 +20,43 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 from typing import List
 
 from . import __version__, eval as _eval, quality as _q
 
 
 def _cmd_run(a) -> int:
+    harness = getattr(a, "harness", "single_shot")
+    suffix = "" if harness in {"single_shot", "single-shot"} else f"__{_slug(harness)}"
     out = a.out or os.path.join(os.environ.get("TDB_WORK", "./.tdb_work"), "results",
-                                f"{os.path.basename(a.task.rstrip('/'))}__{a.model}.json")
+                                f"{os.path.basename(a.task.rstrip('/'))}__{_slug(a.model)}{suffix}.json")
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    return _eval.main(["--model", a.model, "--task", a.task, "--out", out])
+    argv = ["--model", a.model, "--task", a.task, "--out", out,
+            "--harness", harness]
+    if getattr(a, "harness_base_url", None):
+        argv += ["--harness-base-url", a.harness_base_url]
+    for value in getattr(a, "agent_kwarg", []) or []:
+        argv += ["--agent-kwarg", value]
+    if getattr(a, "dry_run", False):
+        argv.append("--dry-run")
+    if getattr(a, "keep_task_network_policy", False):
+        argv.append("--keep-task-network-policy")
+    if getattr(a, "harbor_timeout", None) is not None:
+        argv += ["--harbor-timeout", str(a.harbor_timeout)]
+    return _eval.main(argv)
 
 
 def _cmd_oracle(a) -> int:
-    return _cmd_run(argparse.Namespace(model="oracle", task=a.task, out=a.out))
+    return _cmd_run(argparse.Namespace(
+        model="oracle", task=a.task, out=a.out, harness="single_shot",
+        harness_base_url=None, agent_kwarg=[], dry_run=getattr(a, "dry_run", False),
+        keep_task_network_policy=False, harbor_timeout=getattr(a, "harbor_timeout", None),
+    ))
+
+
+def _slug(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", value)
 
 
 def _load_matrix(path: str):
@@ -138,7 +161,7 @@ def _check_task_dir(task: str):
         return False, f"{task}: missing {', '.join(missing)}"
     split = ("archive-style (solution/ present)"
              if os.path.isdir(os.path.join(task, "solution"))
-             else "live-style (no solution/ -- `tdb oracle` will not work; scored server-side)")
+             else "live-style (no solution/ -- `tdb oracle` will not work; official replay required)")
     note = f"{os.path.basename(task.rstrip('/'))}: task.toml + instruction.md + tests/ + environment/, {split}"
     # What the gate would execute. `environment.docker_image` is either a build
     # recipe relative to the task dir (harbor builds the SIF) or an absolute
@@ -187,14 +210,26 @@ def _cmd_doctor(a) -> int:
                    f"{apptainer} -- {_probe_version(apptainer)}" if apptainer else
                    "not on PATH; the harbor singularity backend executes each task's SIF"))
 
-    base = os.environ.get("OPENAI_BASE_URL")
-    checks.append((True, _OPTIONAL, "OPENAI_BASE_URL",
-                   base if base else "unset -> defaults to https://api.openai.com/v1"))
+    harness = getattr(a, "harness", "single_shot")
+    is_claude = harness in {"claude", "claude-code", "claude_code"}
+    base_name = "ANTHROPIC_BASE_URL" if is_claude else "OPENAI_BASE_URL"
+    base = os.environ.get(base_name)
+    default_note = (
+        "unset -> vendor CLI default"
+        if is_claude else "unset -> defaults to https://api.openai.com/v1"
+    )
+    checks.append((True, _OPTIONAL, base_name, base if base else default_note))
 
-    key = os.environ.get("OPENAI_API_KEY")
+    key_names = (
+        ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN")
+        if is_claude else ("OPENAI_API_KEY",)
+    )
+    selected_key = next((name for name in key_names if os.environ.get(name)), None)
+    key = os.environ.get(selected_key, "") if selected_key else ""
     key_level = _OPTIONAL if a.oracle_only else _RUN_ONLY
-    checks.append((bool(key), key_level, "OPENAI_API_KEY",
-                   f"set (len={len(key)}, ...{key[-4:]})" if key else
+    credential_label = " / ".join(key_names)
+    checks.append((bool(key), key_level, credential_label,
+                   f"{selected_key} is set (value not displayed)" if key else
                    "unset -- needed by `tdb run` only (`tdb oracle` / `tdb quality` do "
                    "not call a model; pass --oracle-only to stop treating this as a failure)"))
 
@@ -239,10 +274,32 @@ def main(argv: List[str] = None) -> int:
     d = sub.add_parser("doctor", help="preflight this host (run me first)")
     d.add_argument("task", nargs="?", default=None, help="optional task dir to sanity-check")
     d.add_argument("--oracle-only", action="store_true",
-                   help="do not fail on a missing OPENAI_API_KEY (oracle/quality need no model)")
+                   help="do not fail on a missing model credential (oracle/quality need none)")
+    d.add_argument("--harness", default="single_shot",
+                   help="check credentials for single_shot/codex/claude-code")
     d.set_defaults(fn=_cmd_doctor)
-    r = sub.add_parser("run", help="score a model on a task"); r.add_argument("model"); r.add_argument("task"); r.add_argument("--out", default=None); r.set_defaults(fn=_cmd_run)
-    o = sub.add_parser("oracle", help="gate baseline"); o.add_argument("task"); o.add_argument("--out", default=None); o.set_defaults(fn=_cmd_oracle)
+    r = sub.add_parser("run", help="score a model on a task")
+    r.add_argument("model")
+    r.add_argument("task")
+    r.add_argument("--out", default=None)
+    r.add_argument("--harness", default="single_shot",
+                   help="single_shot (default), claude-code, or codex")
+    r.add_argument("--harness-base-url", default=None,
+                   help="optional vendor-compatible API/proxy base URL")
+    r.add_argument("--agent-kwarg", action="append", default=[], metavar="KEY=VALUE",
+                   help="safe non-secret Harbor agent option; repeatable")
+    r.add_argument("--dry-run", action="store_true",
+                   help="write a secret-free plan without calling the model or Harbor")
+    r.add_argument("--keep-task-network-policy", action="store_true",
+                   help="do not enable network in the installed-agent run copy")
+    r.add_argument("--harbor-timeout", type=int, default=None)
+    r.set_defaults(fn=_cmd_run)
+    o = sub.add_parser("oracle", help="gate baseline")
+    o.add_argument("task")
+    o.add_argument("--out", default=None)
+    o.add_argument("--dry-run", action="store_true")
+    o.add_argument("--harbor-timeout", type=int, default=None)
+    o.set_defaults(fn=_cmd_oracle)
     q = sub.add_parser("quality", help="multi-angle quality card"); q.add_argument("results"); q.set_defaults(fn=_cmd_quality)
     pb = sub.add_parser("publish", help="results -> website data file (leaderboard_data.json)")
     pb.add_argument("results", help="DIR[:scaffold][,DIR[:scaffold] ...] of result JSONs")

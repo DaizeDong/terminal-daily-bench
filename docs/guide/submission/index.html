@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submission — terminal-daily-bench docs</title>
-<meta name="description" content="How to run the benchmark, submit results that are re-scored on ingest, and extend it with a new scaffold through the HarnessAdapter contract.">
+<meta name="description" content="How to run the benchmark, record pending submissions, publish verified replay receipts, and extend it with a new scaffold.">
 <link rel="stylesheet" href="../../assets/tw.css">
 <link rel="stylesheet" href="../../assets/tw-extra.css">
 <link rel="stylesheet" href="../../assets/site.css">
@@ -36,8 +36,8 @@
           hidden APIs are required to score a patch.</p>
         <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">The one invariant behind all of it: <strong>a scaffold produces a candidate patch;
           the execution gate is the sole reward authority.</strong> A claimed reward is never trusted
-          &mdash; only the patch is replayed against protected tests. This is what makes
-          <code>false_accept = 0</code> a structural property rather than a promise.</p>
+          &mdash; only an official protected-test replay receipt can enter the verified ranking.
+          Semantic verifier false-accept remains a separate empirical quantity.</p>
       </header>
 
       <article class="prose prose-no-margin">
@@ -85,6 +85,9 @@ tdb quality results.jsonl</pre></div>
     "protected_tests_relaid_by_harbor": true,
     "model_is_judge": false,
     "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
     "false_accept": 0
   }
 }</pre></div>
@@ -95,7 +98,7 @@ tdb quality results.jsonl</pre></div>
 
         <hr>
 
-        <h2 id="scoring" class="scroll-m-28 font-mono">2. How scoring works &mdash; re-scored on ingest</h2>
+        <h2 id="scoring" class="scroll-m-28 font-mono">2. How scoring works &mdash; deterministic execution gate</h2>
         <p>The reward is read from harbor's structured <code>result.json</code> by
           <code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong> reader the
           private admission gate uses. The model is the <em>subject</em> under test; it is never the
@@ -112,24 +115,21 @@ tdb quality results.jsonl</pre></div>
             the model emitted.</li>
         </ul>
 
-        <h3 id="ingest" class="scroll-m-28 font-mono">Submission ingest re-scores, too</h3>
-        <p>When you submit results to the leaderboard, the same discipline applies at ingest. In
-          <code>web/submit_result.py</code>:</p>
+        <h3 id="ingest" class="scroll-m-28 font-mono">Recording is not replay</h3>
+        <p><code>web/submit_result.py</code> records the patch for later review:</p>
         <ul>
           <li><code>reward_claimed</code> is <strong>advisory only</strong> &mdash; it is validated
             against nothing.</li>
           <li>On record, the entry is stored as <code>verify_status="pending"</code> with
-            <code>verified_reward=null</code>. The board trusts <strong>only</strong>
-            <code>verified_reward</code>.</li>
-          <li>A node worker replays the submitted <code>patch</code> through the execution gate and calls
-            <code>apply_verified(store, sub_id, verified_reward)</code>, which flips the entry to
-            <code>verify_status="verified"</code>.</li>
-          <li><code>rebuild_leaderboard(store, out)</code> folds only <strong>verified</strong> rows into
-            a solved/attempt rate; a pending submission is listed but contributes <code>0</code> to any
-            rate.</li>
+            <code>verified_reward=null</code> and no <code>false_accept</code> value.</li>
+          <li>The public bundle <strong>does not run a replay worker</strong>. Pending rows remain in
+            <code>community_pending</code>, a separate audit view excluded from ranking.</li>
+          <li>Only an Ed25519-signed v2 receipt bound to the frozen suite, runner, Harbor,
+            runtime image, enforced offline canary and pinned authority key may enter
+            <code>community_verified</code>. Ranking also requires the complete frozen roster.</li>
         </ul>
-        <p>A fake <code>1.0</code> whose patch verifies <code>0.0</code> therefore contributes
-          <code>0</code>. The claimed number is never trusted; only its patch is replayed.</p>
+        <p>A fake <code>1.0</code> therefore cannot enter a ranking. If an operator later replays that
+          patch, only the execution-gate receipt can determine its verified reward.</p>
 
         <hr>
 
@@ -137,27 +137,28 @@ tdb quality results.jsonl</pre></div>
 
         <h3 id="schema" class="scroll-m-28 font-mono">Submission schema (JSONL, one line per <code>(model, task)</code> cell)</h3>
         <p>Required fields are enforced by <code>submit_result.validate</code> (the <code>REQUIRED</code>
-          tuple): <code>date</code>, <code>submitter</code>, <code>model</code>, <code>scaffold</code>,
+          tuple): <code>date</code>, <code>submitter</code>, <code>model</code>,
+          <code>model_build</code>, <code>scaffold</code>, <code>harness_version</code>,
           <code>task</code>, <code>patch</code>.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
   "date": "2026-07-22",
   "submitter": "your-handle",
   "model": "your-model",
+  "model_build": "your-model@immutable-build-id",
   "scaffold": "your-scaffold",
+  "harness_version": "your-scaffold@immutable-version",
   "task": "td-fc90ea8b76d5f6b6",
   "patch": "diff --git a/... b/...\n--- a/...\n+++ b/...\n@@ ...",
-  "reward_claimed": 1.0,
-  "harness_version": "v2",
-  "signature": "&lt;sha256&gt;"
+  "reward_claimed": 1.0
 }</pre></div>
         <p>Validation rules:</p>
         <ul>
-          <li>All six required fields must be present and non-empty.</li>
+          <li>All eight required fields must be present and non-empty.</li>
           <li><code>patch</code> must be a unified-diff <strong>string</strong>.</li>
           <li><code>task</code> must start with <code>td-</code>.</li>
-          <li><code>reward_claimed</code> (and any extra fields like <code>harness_version</code> /
-            <code>signature</code>) are accepted but never trusted &mdash; they carry through as advisory
-            metadata.</li>
+          <li><code>reward_claimed</code> is advisory. Receipt signatures come only from the
+            official signer; the authenticated submitter comes from the deployment auth layer,
+            never the JSON body.</li>
         </ul>
 
         <h3 id="cli" class="scroll-m-28 font-mono">CLI</h3>
@@ -166,16 +167,67 @@ tdb quality results.jsonl</pre></div>
 python web/submit_result.py validate &lt; submission.json
 
 <span class="text-muted-foreground"># 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)</span>
-python web/submit_result.py record --store community_submissions &lt; submission.json
+python web/submit_result.py record --store community_submissions \
+  --authenticated-submitter github:YOUR_LOGIN &lt; submission.json
 
-<span class="text-muted-foreground"># 3. (server-side, after re-scoring) fold verified rows into the board</span>
-python web/submit_result.py rebuild --store community_submissions --out web/leaderboard_data.json</pre></div>
-        <p><code>record</code> computes a content-addressed <code>id</code> (sha256 over the required
-          fields, first 16 hex chars) for dedup and tamper-evidence, then writes an entry with
-          <code>verify_status="pending"</code>. The store defaults to
-          <code>community_submissions/</code>.</p>
+<span class="text-muted-foreground"># 3. After an operator replay receipt exists, rebuild the two public views</span>
+python web/submit_result.py rebuild --store community_submissions \
+  --manifest /read-only/suite-manifest.json \
+  --trusted-keys /read-only/replay-authorities.json \
+  --out web/leaderboard_data.json</pre></div>
+        <p><code>record</code> computes a full SHA-256 content id over the patch, authenticated
+          submitter, model build, harness version and task. One immutable authenticated cell is
+          allowed per suite/build/harness/task; partial, duplicate and cross-date sets remain
+          unranked. Every board rebuild re-verifies the receipt signature and content binding.</p>
+
+        <h3 id="operator-replay" class="scroll-m-28 font-mono">Operator-only replay authority</h3>
+        <p>Install the replay-only receipt dependency on the operator image:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e '.[replay]'</pre></div>
+        <p>Receipt signing and verification use Python <code>cryptography</code>'s in-process
+          Ed25519 primitives. <code>web/receipt_auth.py</code> does not search <code>PATH</code>
+          and does not invoke an external OpenSSL process. A missing or invalid replay extra
+          fails closed before a receipt can be signed or accepted.</p>
+        <p>The frozen execution policy must pin the replay runner and Harbor digests, backend,
+          offline policy, authority key, per-task SIF digest, and the container runtime's
+          canonical absolute path, binary SHA-256, exact version, and kind. The worker must not
+          own or be able to write the runtime binary or its parent directory; neither may be
+          group- or world-writable.</p>
+        <p>Before every Harbor execution, the worker copies the expected SIF into a
+          worker-private attempt directory as a read-only file. It verifies the frozen digest
+          before Harbor and again at the Harbor-to-canary boundary. Runtime facts are validated
+          before Harbor and again in the canary preflight; those snapshots must match before a
+          receipt is returned. Any image drift or runtime snapshot mismatch fails closed.</p>
+        <p><strong>Implemented Harbor binding:</strong> policy and receipts bind the canonical
+          <code>harbor_binary_path</code>, launcher digest/version, canonical
+          <code>harbor_package_root</code>, SHA-256 of the complete Harbor package and
+          network-patch tree, and immutable runtime-control facts. The worker recomputes and
+          compares those facts before and after replay, so changed imported modules or backend
+          patches fail closed.</p>
+        <p><strong>Implemented result binding:</strong> the authoritative <code>result.json</code>
+          reader opens root/run/result through <code>O_NOFOLLOW</code> file descriptors, rejects
+          symlinks and hardlinks (<code>st_nlink != 1</code>), checks inode/device/link-count
+          stability, and limits the snapshot to 16 MiB. Reward validation and receipt hashing use
+          the same already-open snapshot bytes; the selected pathname is never reopened.</p>
+        <p><code>run</code> requires a canary endpoint. The same pinned image must reach it in the
+          control run and fail in the isolated <code>--net --network none</code> run. Missing
+          image bytes, an unreachable control, or an unproven isolation failure is an
+          infrastructure error, never a zero reward or verified receipt.</p>
+        <p><strong>Deployment boundary:</strong> signer and ingest/promoter must use distinct UIDs
+          or service identities. A signer-only private-key mount and promoter read-only
+          manifest/public-key mounts are required; shared ownership plus mode bits is not
+          isolation.</p>
+        <p><strong>Evidence boundary:</strong> fake-runner tests and Fake Harbor tests prove code
+          and command boundaries only. Fake-runner tests are not evidence of a production replay,
+          real network isolation, or a correctly separated receipt authority.</p>
+        <p><strong>Production blocker:</strong> production replay remains blocked until the official
+          compute worker completes a real Harbor replay, demonstrates both a reachable control
+          canary and a blocked isolated canary, and passes an operator audit of distinct
+          signer/promoter UIDs, the signer-only private-key mount, and read-only
+          manifest/public-key mounts. The audit must also exercise the Harbor package/tree and
+          single-snapshot result controls above with the real installed package and replay
+          artifacts.</p>
         <p>For <strong>live</strong> (this-week) tasks the gold patch and protected test bodies are
-          withheld and scoring happens server-side: submit your patch and it is scored on our side.
+          withheld: submit your patch and it remains pending until an official replay is deployed.
           <strong>Archived</strong> tasks (&ge; 2 weeks old) ship in full for local reproduction.</p>
 
         <hr>
@@ -185,9 +237,8 @@ python web/submit_result.py rebuild --store community_submissions --out web/lead
           <code>terminal_daily_bench/adapters/base.py</code>. The contract is deliberately narrow:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">input  = (task dir, failing test ids, model id/endpoint)
 output = (unified diff, telemetry)</pre></div>
-        <p>An adapter <strong>only produces a candidate patch &mdash; it must not score.</strong> Keeping
-          scoring out of the adapter is what preserves <code>false_accept = 0</code> as harnesses are
-          added.</p>
+        <p>An adapter <strong>only produces a candidate &mdash; it must not score.</strong> Keeping
+          scoring out of the adapter preserves the protected-replay boundary as harnesses are added.</p>
 
         <h3 id="interface" class="scroll-m-28 font-mono">The interface</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">from dataclasses import dataclass, field

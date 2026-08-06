@@ -43,9 +43,9 @@
           honest bootstrap uncertainty on every axis, the task counts needed to reach research-grade
           precision, and a daily GO/NO-GO readiness verdict. This is the axis TB (Terminal-Bench) does
           not measure.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything below is a <strong>pure function over plain lists</strong> &mdash; no
-          reward gate is read, no accept is gated, so <code>false_accept = 0</code> can never be
-          perturbed by anything in this module. All randomized routines are <strong>seeded and
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything below is a <strong>pure function over plain lists</strong>: it neither
+          reads nor changes reward decisions, and it cannot measure semantic verifier false-accept.
+          All randomized routines are <strong>seeded and
           deterministic</strong> (a resume reproduces the interval).</p>
       </header>
 

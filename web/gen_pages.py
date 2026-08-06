@@ -469,6 +469,34 @@ def load_task_package(task_id: str) -> dict:
     return {}
 
 
+def task_suites(task: dict) -> list[str]:
+    """Normalise the many-to-many suite edge list for page consumers.
+
+    ``suite`` remains in site_data.json for old clients, but filtering and links
+    must use ``suites`` or a carried task silently disappears from every suite
+    except whichever one happened to become its scalar compatibility value.
+    """
+    values = task.get("suites")
+    if not isinstance(values, list):
+        values = [task.get("suite")]
+    return sorted({str(value) for value in values if value})
+
+
+def index_tasks_by_suite(tasks: list[dict]) -> dict[str, list[dict]]:
+    """Build a many-to-many suite index without duplicating a task in one suite."""
+    out: dict[str, list[dict]] = {}
+    seen: dict[str, set[str]] = {}
+    for task in tasks:
+        identity = str(task.get("id") or "")
+        for sid in task_suites(task):
+            if identity and identity in seen.setdefault(sid, set()):
+                continue
+            if identity:
+                seen[sid].add(identity)
+            out.setdefault(sid, []).append(task)
+    return out
+
+
 def instruction_title(text: str) -> str:
     for line in (text or "").splitlines():
         if line.startswith("# "):
@@ -565,10 +593,10 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         _h2(f"suite {sid}"),
         _lede(
             "Gold patch and protected tests are withheld while this suite is live; "
-            "submissions are scored server-side by re-laying the protected tests."
+            "submissions remain unranked until an official replay receipt exists."
             if live
-            else "Archived and released in full &mdash; environment, protected tests and the "
-            "reference solution &mdash; so every number here can be reproduced locally."
+            else "Archived task artifacts are released in full. End-to-end scoring currently "
+            "requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient."
         ),
         tags(status_pill(suite.get("status", "")),
              *[pill(l, "outline") for l in langs]),
@@ -585,8 +613,8 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         ("languages", len(langs) or None, "mined across the ecosystem"),
         ("fail-to-pass tests", f2p or None, "re-laid over the agent's workspace"),
         ("solved by a model", solved_any, "execution-verified"),
-        ("false-accepts", 0, "the gate cannot be talked into a pass"),
-        ("status", suite.get("status") or None, "live is sealed; archive is released in full"),
+        ("semantic exploit FA", None, "unmeasured for this published suite"),
+        ("status", suite.get("status") or None, "live withholds gold; archive publishes it"),
     ])
 
     if suite_tasks:
@@ -646,7 +674,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         _section(
             sec_head("how this suite is scored", "execution proof only")
             + code_figure(
-                "Run one task, then prove it is solvable with the oracle patch"
+                "Local commands (the unpublished patched Harbor fork is required)"
                 if not live else "Run your model, then submit the patch",
                 cmd,
             )
@@ -654,10 +682,10 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
               'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
               "workspace tests are discarded, the protected tests are re-laid from the trusted "
               "package, and they run with the network cut. The reward is that run's outcome and "
-              'nothing else. <span class="text-foreground">false_accept = 0</span> is certified '
-              "for task admission, where the gate faces an oracle patch and a no-op; it is not "
-              "yet certified against an adversarial agent holding a shell in the same container "
-              "as the verifier.</p>"
+              "nothing else. That proves replay integrity; it does not establish semantic "
+              "verifier false-accept, which remains unmeasured until labeled exploit trials run. "
+              "For archived tasks, these commands require our unpublished "
+              "patched Harbor fork; stock Harbor 0.13.1 cannot run them end to end.</p>"
             + (_retrievability_note() if live else "")
         ),
     ])
@@ -675,7 +703,8 @@ SUITE_SCRIPT = """(async function () {
 def task_page_body(task: dict, pkg: dict) -> str:
     """SHARED task-page body. The registry generator renders this inside render_page(depth=2)."""
     tid = task.get("id", "")
-    suite = task.get("suite", "")
+    suites = task_suites(task)
+    suite = task.get("suite", "") or (suites[-1] if suites else "")
     live = task.get("status") == "live"
     rec = (pkg or {}).get("record") or {}
     tom = (pkg or {}).get("toml") or {}
@@ -690,8 +719,9 @@ def task_page_body(task: dict, pkg: dict) -> str:
     difficulty = task.get("difficulty") or tom.get("difficulty")
 
     buttons = []
-    if safe_id(suite):
-        buttons.append((f"suite {suite}", f"../../benchmarks/{suite}/", False))
+    for sid in suites:
+        if safe_id(sid):
+            buttons.append((f"suite {sid}", f"../../benchmarks/{sid}/", False))
     buttons.append(("all tasks", "../", False))
     if repo and pr:
         buttons.append(("source pull request", f"https://github.com/{repo}/pull/{pr}", False))
@@ -701,9 +731,8 @@ def task_page_body(task: dict, pkg: dict) -> str:
         breadcrumb([("Home", "../../"), ("Tasks", "../"), (tid, None)]),
         _h2(title or tid),
         _lede(
-            f'<span class="text-foreground">{esc(tid)}</span> &middot; mined from a real merged '
-            "pull request, rebuilt into a package an agent can be dropped into. Nothing here is "
-            "authored by a model, and the solve is minted by re-executing protected tests."
+            f'<span class="text-foreground">{esc(tid)}</span> &middot; source pull-request task. '
+            "The instruction, provenance, release state, and execution-verified results follow."
         ),
         tags(status_pill(task.get("status", "")),
              pill(language, "outline") if language else "",
@@ -719,14 +748,15 @@ def task_page_body(task: dict, pkg: dict) -> str:
         ("solved by",
          f"{solved}/{n_models}" if solved is not None and n_models else None,
          "execution-verified solves"),
-        ("false-accepts", 0, "the gate cannot be talked into a pass"),
-        ("suite", suite or None, "every day is its own sealed suite"),
+        ("semantic exploit FA", None, "unmeasured for this task"),
+        ("suites", len(suites) or None, "versioned task sets containing this task"),
     ])
 
-    suite_cell = (
-        f'<a class="{cls(LINK)}" href="../../benchmarks/{esc(suite)}/">{esc(suite)}</a>'
-        if safe_id(suite) else (esc(suite) or DASH)
-    )
+    suite_links = [
+        f'<a class="{cls(LINK)}" href="../../benchmarks/{esc(sid)}/">{esc(sid)}</a>'
+        for sid in suites if safe_id(sid)
+    ]
+    suite_cell = ", ".join(suite_links) or (esc(suite) or DASH)
     facts = [
         ("Task id", f'<span class="text-foreground">{esc(tid)}</span>'),
         ("Suite", suite_cell),
@@ -794,14 +824,19 @@ def task_page_body(task: dict, pkg: dict) -> str:
         ]
     )
     run = _section(
-        sec_head("reproduce it", "archived tasks ship complete" if not live else "live task")
+        sec_head(
+            "reproduce it",
+            "requires the unpublished patched Harbor fork" if not live else "live task",
+        )
         + code_figure("Score a model on this task, then prove it is solvable", cmd)
         + '<p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono '
           'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
           "else. A submitted reward is advisory: it is recorded, read by nothing, and "
           "counts as an attempt worth zero until a replay worker adjudicates the patch. "
           "That worker is not running yet, so every submission stays pending. "
-          f'<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
+          + ("The local commands above also require the unpublished patched Harbor fork; "
+             "stock Harbor 0.13.1 is insufficient. " if not live else "")
+          + f'<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
           "how to submit &rarr;</a></p>"
     )
 
@@ -855,9 +890,7 @@ def main(argv=None) -> int:
         site = {}
 
     suites, tasks = collect(site, registry)
-    by_suite = {}
-    for t in tasks:
-        by_suite.setdefault(t.get("suite"), []).append(t)
+    by_suite = index_tasks_by_suite(tasks)
 
     counts = {"write": 0, "update": 0, "unchanged": 0}
 

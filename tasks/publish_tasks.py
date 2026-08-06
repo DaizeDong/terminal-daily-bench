@@ -171,7 +171,7 @@ def publish(src: Path, merge_date: str, today: str, out_root: Path) -> dict:
         (dest / "FAILING_TESTS.json").write_text(
             json.dumps({"failing_test_ids": _failing_test_ids(src),
                         "note": "protected assertions + gold solution withheld; "
-                                "submit a patch, scored server-side",
+                                "submit a patch, pending official replay",
                         "retrievability": RETRIEVABILITY_NOTE}, indent=2))
 
     return {"task": src.name, "mode": "archive" if archive else "live",

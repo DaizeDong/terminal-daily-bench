@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard — terminal-daily-bench</title>
-<meta name="description" content="Task resolution success-rate for agents and models on the day's sealed terminal-daily-bench suite. Accuracy with Wilson 95% intervals, and a measured reward-hack count of zero.">
+<meta name="description" content="Task resolution success-rate for agents and models on the current terminal-daily-bench snapshot, with explicit coverage and integrity evidence.">
 <link rel="stylesheet" href="../assets/tw.css">
 <link rel="stylesheet" href="../assets/tw-extra.css">
 <link rel="stylesheet" href="../assets/site.css">
@@ -26,33 +26,14 @@
         </ol>
       </nav>
 
-      <!-- ================= title ================= -->
-      <h2 class="font-mono text-4xl tracking-tighter"><span id="suite-name">terminal-daily-bench</span> Leaderboard</h2>
-
-      <!-- ================= button row + run command ================= -->
-      <div dir="ltr" data-orientation="horizontal" class="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-6 font-mono">
-        <div role="tablist" aria-orientation="horizontal" class="flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4">
-          <a role="tab" aria-selected="true" data-state="active" href="./" class="inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&amp;_svg]:size-4 hover:text-fd-accent-foreground data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary">Leaderboard</a>
-          <a role="tab" aria-selected="false" data-state="inactive" href="../submit/" class="inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&amp;_svg]:size-4 hover:text-fd-accent-foreground data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary">Submit a model</a>
-          <a role="tab" aria-selected="false" data-state="inactive" href="../submit/#adapter" class="inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&amp;_svg]:size-4 hover:text-fd-accent-foreground data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary">Custom harness</a>
-        </div>
-        <div data-state="active" data-orientation="horizontal" role="tabpanel" class="p-4 text-[15px] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&amp;>figure:only-child]:-m-4 [&amp;>figure:only-child]:border-none">
-          <figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border outline-none overflow-hidden text-sm my-0">
-            <div class="flex text-fd-muted-foreground items-center gap-2 ps-3 h-9.5">
-              <figcaption class="flex-1 truncate">Note: submissions are re-scored by the execution gate on ingest; a claimed reward is never trusted</figcaption>
-              <div class="empty:hidden">
-                <button type="button" id="copy-cmd" class="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none hover:bg-fd-accent hover:text-fd-accent-foreground [&amp;_svg]:size-3.5" aria-label="Copy Text"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
-              </div>
-            </div>
-            <div class="bg-fd-secondary rounded-lg border text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container">
-              <pre class="min-w-full w-max *:flex *:flex-col shiki" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e" tabindex="0"><code id="run-code"><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">tdb</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> &lt;MODEL&gt;</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF"> tasks/archive/</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF" id="run-task">&lt;task-id&gt;</span></span></code></pre>
-            </div>
-          </figure>
-        </div>
+      <h1 class="font-mono text-4xl tracking-tighter"><span id="suite-name">terminal-daily-bench</span> leaderboard</h1>
+      <div class="mb-6 mt-4 flex flex-wrap items-center gap-4 font-mono text-sm">
+        <p class="text-muted-foreground">Execution-verified model × scaffold results.</p>
+        <a class="text-foreground underline underline-offset-4" href="../submit/">submit results</a>
       </div>
 
       <!-- ================= the board ================= -->
-      <div class="-mx-4 flex flex-col md:mx-0">
+      <div class="-mx-4 flex flex-col md:mx-0" data-tdb-primary-data>
 
         <div class="flex flex-col">
           <div class="flex min-h-10 items-center justify-between px-4 py-1 md:px-0">
@@ -84,12 +65,11 @@
               <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="lb-body"></tbody>
             </table>
           </div>
-          <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center text-sm">
+          <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center text-sm" data-tdb-integrity>
             <p>Results in this leaderboard correspond to <span class="text-foreground" id="foot-suite">the day's sealed suite</span>.</p>
-            <p>Submit via the <a href="../submit/" class="text-foreground underline underline-offset-4">submission guide</a>.</p>
             <div class="mx-auto flex flex-row items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
-              <p>Every entry is re-executed by the gate on ingest &mdash; protected tests re-laid after the patch, in a network-cut container.</p>
+              <p>Every row in this table comes from completed deterministic execution-gate runs &mdash; protected tests are re-laid after the patch and runtime egress is disabled. Claimed rewards and pending submissions do not count.</p>
             </div>
           </div>
         </div>
@@ -132,7 +112,7 @@
           <p class="font-mono text-sm">benchmark quality</p>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
         </div>
-        <p class="text-muted-foreground mx-auto mb-6 max-w-xl text-center font-mono text-sm/relaxed">A leaderboard ranks models. This card measures the instrument: does today's task set discriminate the field, span difficulties, and measure a coherent skill? Each axis is a pure read over the gate-scored matrix &mdash; never a reward gate, so false_accept stays 0 &mdash; and readiness is advisory only.</p>
+        <p class="text-muted-foreground mx-auto mb-6 max-w-xl text-center font-mono text-sm/relaxed">A leaderboard ranks models. This card measures the instrument: does today's task set discriminate the field, span difficulties, and measure a coherent skill? Each axis is a pure read over the gate-scored matrix and readiness is advisory only; neither establishes semantic verifier false-accept.</p>
         <div class="-mx-4 sm:mx-0">
           <div class="grid grid-cols-1 md:grid-cols-2" id="msq"></div>
         </div>
@@ -190,38 +170,56 @@
   var I_UP   = "<svg " + SVG + '><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>';
   var I_DOWN = "<svg " + SVG + '><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>';
 
-  /* ---------- copy button ---------- */
-  var I_COPY = $("copy-cmd").innerHTML;
-  var I_CHECK = "<svg " + SVG + '><path d="M20 6 9 17l-5-5"></path></svg>';
-  $("copy-cmd").addEventListener("click", function () {
-    var btn = this, txt = $("run-code").textContent;
-    var done = function () {
-      btn.innerHTML = I_CHECK;
-      setTimeout(function () { btn.innerHTML = I_COPY; }, 1400);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(done, done);
-    } else {
-      var ta = document.createElement("textarea");
-      ta.value = txt;
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand("copy"); } catch (e) {}
-      document.body.removeChild(ta);
-      done();
-    }
-  });
-
   /* ======================================================================
      the board
      ====================================================================== */
 
-  /* one row per (model x agent): "Agent" is our scaffold — the one-shot patch,
-     or the multi-turn agent. Both are ours, hence a known Agent Org. */
-  var AGENTS = [
-    ["single_shot", "single-shot", "terminal-daily"],
-    ["terminus2",   "terminus-2",  "terminal-daily"]
-  ];
+  var RESERVED_ROW_KEYS = {
+    model: 1, lead: 1, agent_org: 1, model_org: 1, effort: 1,
+    date: 1, pr: 1, cost: 1, cost_usd: 1
+  };
+  var KNOWN_HARNESSES = {
+    single_shot: { label: "single-shot", org: "terminal-daily" },
+    terminus2: { label: "terminus-2", org: "terminal-daily" }
+  };
+
+  function isHarnessCell(value) {
+    return value && typeof value === "object" && !Array.isArray(value) &&
+      (Object.prototype.hasOwnProperty.call(value, "n") ||
+       Object.prototype.hasOwnProperty.call(value, "solved") ||
+       Object.prototype.hasOwnProperty.call(value, "rate") ||
+       Object.prototype.hasOwnProperty.call(value, "fa_n"));
+  }
+
+  /* Pooled data gives stable column order; per-model cells add newly published
+     harnesses even when the aggregate was generated by an older producer. */
+  function discoverHarnesses(b) {
+    var names = [];
+    var seen = Object.create(null);
+    function add(key, value) {
+      if (!Object.prototype.hasOwnProperty.call(RESERVED_ROW_KEYS, key) &&
+          !seen[key] && isHarnessCell(value)) {
+        seen[key] = true;
+        names.push(key);
+      }
+    }
+    var pooled = (b && b.pooled) || {};
+    Object.keys(pooled).forEach(function (key) { add(key, pooled[key]); });
+    ((b && b.leaderboard) || []).forEach(function (row) {
+      Object.keys(row || {}).forEach(function (key) { add(key, row[key]); });
+    });
+    return names;
+  }
+
+  function harnessLabel(key) {
+    return Object.prototype.hasOwnProperty.call(KNOWN_HARNESSES, key)
+      ? KNOWN_HARNESSES[key].label : key;
+  }
+
+  function harnessOrg(key) {
+    return Object.prototype.hasOwnProperty.call(KNOWN_HARNESSES, key)
+      ? KNOWN_HARNESSES[key].org : null;
+  }
 
   var COLS = [
     { key: "rank",      label: "Rank",      right: false, sortable: false },
@@ -233,16 +231,16 @@
     { key: "agent_org", label: "Agent Org", right: false },
     { key: "model_org", label: "Model Org", right: false },
     { key: "pr",        label: "PR",        right: false },
-    { key: "hacks",     label: "Hacks",     right: true  },
+    { key: "hacks",     label: "Exploit FA", right: true  },
     { key: "cost",      label: "Cost",      right: true  }
   ];
 
-  var HACK_TITLE = "Reward hacks admitted onto the board. Zero by construction: no model " +
-    "and no LLM signal can mint an accept — a solve exists only if protected tests, re-laid " +
-    "after the patch, pass in a network-cut container.";
+  var HACK_TITLE = "Semantic verifier false-accepts observed in labeled exploit trials. " +
+    "A dash means this model/scaffold cell has not been measured against that corpus; " +
+    "protected-test replay alone is not evidence of zero.";
 
   var ALL = [];          /* every entry, unfiltered */
-  var AGENT_FILTER = {}; /* agent name -> bool */
+  var AGENT_FILTER = Object.create(null); /* agent name -> bool */
   var SORT = { key: "acc", dir: "desc" };
   var MEASURED = false;
 
@@ -262,14 +260,17 @@
 
   function build(b) {
     var out = [];
+    var harnesses = discoverHarnesses(b);
     (b.leaderboard || []).forEach(function (r) {
-      AGENTS.forEach(function (a) {
-        var s = r[a[0]];
+      harnesses.forEach(function (key) {
+        var s = r[key];
         if (!s || !s.n) return;
         var solved = (s.solved != null) ? s.solved : Math.round(s.rate * s.n);
+        var measuredFa = typeof s.fa === "number" &&
+          typeof s.fa_n === "number" && s.fa_n > 0;
         out.push({
-          agent: a[1],
-          agent_org: s.agent_org || r.agent_org || a[2],
+          agent: harnessLabel(key),
+          agent_org: s.agent_org || r.agent_org || harnessOrg(key),
           model: r.model,
           model_org: s.model_org || r.model_org || null,
           effort: s.effort || r.effort || null,
@@ -277,7 +278,8 @@
           p: solved / s.n,
           date: prettyDate(s.date || r.date || b.date),
           pr: s.pr || r.pr || null,
-          hacks: (s.fa != null) ? s.fa : 0,
+          hacks: measuredFa ? s.fa : null,
+          hacks_n: measuredFa ? s.fa_n : null,
           cost: (s.cost_usd != null) ? s.cost_usd
               : (s.cost != null) ? s.cost
               : (r.cost_usd != null) ? r.cost_usd
@@ -291,7 +293,7 @@
   function sortVal(e, key) {
     switch (key) {
       case "acc":   return e.p;
-      case "hacks": return e.hacks;
+      case "hacks": return (e.hacks == null) ? -1 : e.hacks / e.hacks_n;
       case "cost":  return (e.cost == null) ? -1 : e.cost;
       case "date":  return Date.parse(e.date || "") || 0;
       default:      return String(e[key] == null ? "" : e[key]).toLowerCase();
@@ -385,7 +387,10 @@
         td(textCell(e.agent_org)) +
         td(textCell(e.model_org)) +
         td(prCell(e.pr)) +
-        td('<p class="text-right tabular-nums" title="' + esc(HACK_TITLE) + '">' + e.hacks + "</p>") +
+        td(e.hacks == null
+          ? '<p class="text-right text-muted-foreground" title="' + esc(HACK_TITLE) + '">&mdash;</p>'
+          : '<p class="text-right tabular-nums" title="' + esc(HACK_TITLE) + '">' +
+            esc(e.hacks) + "/" + esc(e.hacks_n) + "</p>") +
         td(costCell(e.cost)) +
       "</tr>";
     }).join("");
@@ -550,7 +555,7 @@
       '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
         '<div data-slot="card-header" class="' + CARD_HEAD + '">' +
           '<div data-slot="card-title" class="leading-none font-semibold">' +
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + label + "</h2></div>" +
+            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(label) + "</h2></div>" +
           '<div class="mt-2 flex gap-2">' + badge + "</div>" +
         "</div>" +
         '<div data-slot="card-content" class="px-6">' +
@@ -568,9 +573,9 @@
 
   function renderQuality(b) {
     var q = b && b.quality;
-    var html = q
-      ? (frame(q, "single_shot", "single-shot frame") + frame(q, "terminus2", "agent (terminus-2) frame"))
-      : "";
+    var html = q ? discoverHarnesses(b).map(function (key) {
+      return frame(q, key, harnessLabel(key) + " frame");
+    }).join("") : "";
     $("msq").innerHTML = html ||
       '<p class="text-muted-foreground px-4 font-mono text-sm">No quality card computed for this suite.</p>';
   }
@@ -605,8 +610,6 @@
       $("foot-suite").textContent = "terminal-daily-bench@" + b.date +
         (b.n_tasks != null ? " (" + b.n_tasks + " tasks)" : "");
     }
-    if (b.tasks && b.tasks.length) $("run-task").textContent = b.tasks[0];
-
     ALL = build(b);
     renderFilters();
     render();
