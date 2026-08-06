@@ -18,12 +18,16 @@ Flow:
   2. ``record(sub)``    — store the patch by SHA-256 and append a pending queue row.
   3. ``replay_worker``  — pin suite/task/verifier bytes, replay offline on a compute
                           node, and emit an append-only receipt.
-  4. ``apply_verification`` — promote only the receipt-bound execution result.
-  5. ``rebuild_leaderboard`` — emit verified ranking + pending review separately.
+  4. ``stage_signed_receipt`` — leave the signed result unranked for a separate
+                                promoter identity.
+  5. ``promote_ready_receipt`` — re-verify and promote under a non-signer UID.
+  6. ``rebuild_leaderboard`` — emit verified ranking + pending review separately.
 
 CLI:
   python submit_result.py validate  < submission.json
   python submit_result.py record    < submission.json   [--store DIR]
+  python submit_result.py promote    --store DIR --id ID --manifest FILE \
+                                     --trusted-keys FILE
   python submit_result.py rebuild    --store DIR --out leaderboard_data.json
 """
 from __future__ import annotations
@@ -52,7 +56,9 @@ REQUIRED = (
 STORE_DEFAULT = "community_submissions"
 MAX_PATCH_BYTES = 2 * 1024 * 1024
 MAX_LABEL_CHARS = 200
-VERIFY_STATES = frozenset({"pending", "running", "verified", "rejected", "error"})
+VERIFY_STATES = frozenset({
+    "pending", "running", "receipt_ready", "verified", "rejected", "error",
+})
 _TASK_RE = re.compile(r"^td-[a-z0-9]{8,64}$")
 _AUTH_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.:@/-]{1,199}$")
 RECEIPT_SCHEMA = "terminal-daily-replay-receipt/v2"
@@ -610,19 +616,79 @@ def _validate_receipt_evidence(store: str, sub_id: str, entry: Dict[str, Any],
     return reward, receipt_sha256, str(signature["key_id"])
 
 
-def apply_verification(store: str, sub_id: str, receipt: Dict[str, Any], *,
-                       attempt_id: str, trusted_keys: Path,
-                       manifest_path: Path) -> Dict[str, Any]:
-    """Promote only a signed receipt bound to pinned code, image and suite bytes."""
+def stage_signed_receipt(store: str, sub_id: str, receipt: Dict[str, Any], *,
+                         attempt_id: str, trusted_keys: Path,
+                         manifest_path: Path) -> Dict[str, Any]:
+    """Persist a verified signature without granting leaderboard authority.
+
+    This transition is deliberately callable by the signer.  It records only
+    that a cryptographically valid receipt is ready for review; it never copies
+    the receipt reward into the queue row.  A second process running under a
+    different UID must call :func:`promote_ready_receipt`.
+    """
     entry = get_entry(store, sub_id)
     if entry is None:
         raise KeyError(sub_id)
     if entry.get("verify_status") != "running" or entry.get("attempt_id") != attempt_id:
-        raise ValueError("verification can only complete a claimed running row")
+        raise ValueError("a signed receipt can only complete a claimed running row")
+    _, receipt_sha256, key_id = _validate_receipt_evidence(
+        store, sub_id, entry, receipt, attempt_id=attempt_id,
+        trusted_keys=trusted_keys, manifest_path=manifest_path,
+    )
+    signer_euid = receipt.get("authority_runtime", {}).get("worker_euid")
+    if not isinstance(signer_euid, int) or signer_euid < 0:
+        raise ValueError("receipt lacks a valid signer UID")
+    return _rewrite_entry(store, sub_id, {
+        "verify_status": "receipt_ready",
+        "verified_reward": None,
+        "receipt_sha256": receipt_sha256,
+        "receipt_key_id": key_id,
+        "suite_sha256": receipt["suite_sha256"],
+        "replay_provenance": "community_replay_signed_pending_promotion",
+        "signer_euid": signer_euid,
+        "promoter_euid": None,
+        "replay_finished_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "last_error": None,
+        "lease_expires_at": None,
+    }, expected_status={"running"}, expected_attempt_id=attempt_id)
+
+
+def _require_separate_promoter(receipt: Dict[str, Any]) -> tuple[int, int]:
+    authority = receipt.get("authority_runtime")
+    signer_euid = authority.get("worker_euid") if isinstance(authority, dict) else None
+    promoter_euid = os.geteuid()
+    if not isinstance(signer_euid, int) or signer_euid < 0:
+        raise ValueError("receipt lacks a valid signer UID")
+    if promoter_euid == 0:
+        raise ValueError("receipt promoter must be an unprivileged service identity")
+    if promoter_euid == signer_euid:
+        raise ValueError("receipt signer and promoter must use distinct UIDs")
+    return signer_euid, promoter_euid
+
+
+def apply_verification(store: str, sub_id: str, receipt: Dict[str, Any], *,
+                       attempt_id: str, trusted_keys: Path,
+                       manifest_path: Path) -> Dict[str, Any]:
+    """Promote a staged receipt under an identity distinct from its signer."""
+    entry = get_entry(store, sub_id)
+    if entry is None:
+        raise KeyError(sub_id)
+    if (entry.get("verify_status") != "receipt_ready"
+            or entry.get("attempt_id") != attempt_id):
+        raise ValueError("promotion requires a staged signed receipt")
     reward, receipt_sha256, key_id = _validate_receipt_evidence(
         store, sub_id, entry, receipt, attempt_id=attempt_id,
         trusted_keys=trusted_keys, manifest_path=manifest_path,
     )
+    if (entry.get("receipt_sha256") != receipt_sha256
+            or entry.get("receipt_key_id") != key_id
+            or entry.get("suite_sha256") != receipt.get("suite_sha256")
+            or entry.get("replay_provenance")
+            != "community_replay_signed_pending_promotion"):
+        raise ValueError("staged receipt metadata does not match authority evidence")
+    signer_euid, promoter_euid = _require_separate_promoter(receipt)
+    if entry.get("signer_euid") != signer_euid:
+        raise ValueError("staged signer UID does not match authority evidence")
     claimed = entry.get("reward_claimed")
     mismatch = None
     if isinstance(claimed, (int, float)):
@@ -635,11 +701,37 @@ def apply_verification(store: str, sub_id: str, receipt: Dict[str, Any], *,
         "receipt_key_id": key_id,
         "suite_sha256": receipt["suite_sha256"],
         "replay_provenance": "community_replay_verified",
+        "signer_euid": signer_euid,
+        "promoter_euid": promoter_euid,
         "claim_mismatch": mismatch,
         "last_error": None,
         "false_accept": None,
         "lease_expires_at": None,
-    }, expected_status={"running"}, expected_attempt_id=attempt_id)
+    }, expected_status={"receipt_ready"}, expected_attempt_id=attempt_id)
+
+
+def promote_ready_receipt(store: str, sub_id: str, *, trusted_keys: Path,
+                          manifest_path: Path) -> Dict[str, Any]:
+    """Load and promote one staged receipt; intended for the promoter service."""
+    entry = get_entry(store, sub_id)
+    if entry is None:
+        raise KeyError(sub_id)
+    if entry.get("verify_status") != "receipt_ready":
+        raise ValueError("submission has no signed receipt awaiting promotion")
+    digest = str(entry.get("receipt_sha256", ""))
+    attempt_id = str(entry.get("attempt_id", ""))
+    if (not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or not re.fullmatch(r"[0-9a-f]{32}", attempt_id)):
+        raise ValueError("staged receipt reference is invalid")
+    receipt_path = Path(store) / "receipts" / sub_id / f"{digest}.json"
+    try:
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("staged verification receipt is unreadable") from exc
+    return apply_verification(
+        store, sub_id, receipt, attempt_id=attempt_id,
+        trusted_keys=trusted_keys, manifest_path=manifest_path,
+    )
 
 
 def mark_replay_failure(store: str, sub_id: str, *, rejected: bool,
@@ -659,7 +751,7 @@ def mark_replay_failure(store: str, sub_id: str, *, rejected: bool,
 
 def apply_verified(store: str, sub_id: str, verified_reward: float) -> None:
     """Removed unsafe promotion seam; callers must provide a full replay receipt."""
-    raise RuntimeError("direct score promotion is disabled; use apply_verification(receipt)")
+    raise RuntimeError("direct score promotion is disabled; use promote_ready_receipt()")
 
 
 def rebuild_leaderboard(store: str, out: str, *,
@@ -743,6 +835,16 @@ def rebuild_leaderboard(store: str, out: str, *,
                     continue
                 if key_id != cell.get("receipt_key_id"):
                     continue
+                authority = receipt.get("authority_runtime")
+                signer_euid = (
+                    authority.get("worker_euid") if isinstance(authority, dict) else None
+                )
+                promoter_euid = cell.get("promoter_euid")
+                if (not isinstance(signer_euid, int)
+                        or not isinstance(promoter_euid, int)
+                        or signer_euid == promoter_euid
+                        or cell.get("signer_euid") != signer_euid):
+                    continue
                 verified_rewards[str(cell["task"])] = reward
         all_verified = (
             exact_roster and labels_consistent and trusted_keys is not None
@@ -788,6 +890,8 @@ def rebuild_leaderboard(store: str, out: str, *,
                 "duplicate_cells" if duplicate_tasks else
                 "inconsistent_self_reported_identity" if not labels_consistent else
                 "incomplete_roster" if missing or extra else
+                "signed_receipt_awaiting_separate_promoter"
+                if any(cell.get("verify_status") == "receipt_ready" for cell in cells) else
                 "replay_incomplete_or_authority_mismatch"
             ),
             "n": len(entries),
@@ -865,6 +969,24 @@ def _main(argv: List[str]) -> int:
             store, out, manifest_path=manifest, trusted_keys=keys,
         )
         print(f"community rows: {len(b.get('community', []))} -> {out}")
+        return 0
+    if cmd == "promote":
+        if "--id" not in argv:
+            raise SystemExit("promote requires --id")
+        if "--manifest" not in argv:
+            raise SystemExit("promote requires --manifest")
+        if "--trusted-keys" not in argv:
+            raise SystemExit("promote requires --trusted-keys")
+        promoted = promote_ready_receipt(
+            store, argv[argv.index("--id") + 1],
+            manifest_path=Path(argv[argv.index("--manifest") + 1]),
+            trusted_keys=Path(argv[argv.index("--trusted-keys") + 1]),
+        )
+        print(json.dumps({
+            "id": promoted["id"],
+            "status": promoted["verify_status"],
+            "receipt_sha256": promoted["receipt_sha256"],
+        }, indent=1))
         return 0
     print(f"unknown command {cmd!r}"); return 2
 

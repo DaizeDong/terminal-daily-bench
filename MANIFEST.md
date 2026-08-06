@@ -35,6 +35,12 @@ under one shared owner is not isolation. The code rejects obvious key co-locatio
 records UID/mode facts, but this bundle is not evidence that those deployment
 boundaries or the real Harbor/egress canary have been exercised.
 
+The signer process cannot directly publish a score: it can only transition a row to
+`receipt_ready`, where the receipt digest is visible but `verified_reward` stays null.
+Promotion is a separate command that re-verifies the receipt and fails closed when
+its effective UID is root or equals the signed worker UID. This is code-boundary
+evidence, not a substitute for an operator proving the two real service identities.
+
 The frozen policy also pins the container runtime by canonical absolute path, binary
 SHA-256, exact version, and kind. The worker must not own or be able to write the
 runtime or its parent, and neither may be group- or world-writable. Each replay copies

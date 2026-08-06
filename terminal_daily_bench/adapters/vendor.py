@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping
 from urllib.parse import urlsplit
 
@@ -33,6 +33,7 @@ class VendorHarnessSpec:
     credential_env_options: tuple[str, ...]
     aliases: tuple[str, ...] = ()
     base_url_kind: str = "native"
+    supported_protocols: tuple[str, ...] = ()
 
 
 def _safe_base_url(value: str | None) -> str | None:
@@ -90,6 +91,9 @@ class HarborVendorAdapter(HarnessAdapter):
             raise TypeError("HarborVendorAdapter requires a VendorHarnessSpec")
         self.name = self.spec.name
         self.base_url_kind = self.spec.base_url_kind
+        self.supported_protocols = self.spec.supported_protocols
+        self.base_url_env = self.spec.base_url_env
+        self.credential_env_options = self.spec.credential_env_options
 
     def harbor_run_spec(
         self,
@@ -98,6 +102,7 @@ class HarborVendorAdapter(HarnessAdapter):
         base_url: str | None = None,
         environ: Mapping[str, str] | None = None,
         agent_kwargs: Mapping[str, Any] | None = None,
+        protocol: str | None = None,
         require_credentials: bool = True,
         **_: Any,
     ) -> HarborRunSpec:
@@ -105,6 +110,12 @@ class HarborVendorAdapter(HarnessAdapter):
         model = model.strip()
         if not model:
             raise VendorConfigurationError("model must not be empty")
+        if protocol is not None and protocol not in self.supported_protocols:
+            supported = ", ".join(self.supported_protocols) or "none"
+            raise VendorConfigurationError(
+                f"{self.name} does not support protocol {protocol!r}; "
+                f"supported: {supported}"
+            )
 
         source_env = dict(os.environ if environ is None else environ)
         resolved_base = _safe_base_url(base_url or source_env.get(self.spec.base_url_env))
@@ -157,6 +168,9 @@ class HarborVendorAdapter(HarnessAdapter):
             agent_kwargs=safe_agent_kwargs,
             process_env=process_env,
             credential_env_names=selected_credentials,
+            protocol=protocol or (
+                self.supported_protocols[0] if len(self.supported_protocols) == 1 else None
+            ),
             base_url_kind=self.spec.base_url_kind,
             requires_public_network=True,
         )
@@ -187,6 +201,7 @@ class ClaudeCodeAdapter(HarborVendorAdapter):
         ),
         aliases=("claude", "claude_code"),
         base_url_kind="anthropic",
+        supported_protocols=("anthropic-messages",),
     )
 
 
@@ -203,12 +218,58 @@ class CodexAdapter(HarborVendorAdapter):
         credential_env_options=("OPENAI_API_KEY", "CODEX_AUTH_JSON_PATH"),
         aliases=("codex-cli", "codex_cli"),
         base_url_kind="openai",
+        supported_protocols=("openai-responses",),
     )
+
+
+class Terminus2Adapter(HarborVendorAdapter):
+    """Gateway-capable Harbor ``terminus-2`` agent backed by LiteLLM.
+
+    The legacy public ``terminus`` adapter is intentionally left as a stub.  This
+    adapter selects Harbor's real installed agent and maps the negotiated model
+    protocol onto Terminus' explicit ``use_responses_api`` option.
+    """
+
+    spec = VendorHarnessSpec(
+        name="terminus-2",
+        harbor_agent="terminus-2",
+        base_url_env="OPENAI_BASE_URL",
+        credential_env_options=("OPENAI_API_KEY",),
+        aliases=("terminus2", "terminus_2"),
+        base_url_kind="openai",
+        supported_protocols=("openai-responses", "openai-chat-completions"),
+    )
+
+    def harbor_run_spec(self, model: str, **kwargs: Any) -> HarborRunSpec:
+        spec = super().harbor_run_spec(model, **kwargs)
+        if "/" not in model:
+            raise VendorConfigurationError(
+                "terminus-2 requires a LiteLLM provider-prefixed model name"
+            )
+        agent_kwargs = dict(spec.agent_kwargs)
+        resolved_base = spec.agent_env.get(self.spec.base_url_env)
+        configured_base = agent_kwargs.get("api_base")
+        if configured_base is not None:
+            configured_base = _safe_base_url(configured_base)
+            if configured_base is None:
+                raise VendorConfigurationError("terminus-2 api_base must not be empty")
+            agent_kwargs["api_base"] = configured_base
+        if resolved_base is not None:
+            if configured_base is not None and configured_base.rstrip("/") != resolved_base:
+                raise VendorConfigurationError(
+                    "terminus-2 api_base must match the selected harness base URL"
+                )
+            agent_kwargs["api_base"] = resolved_base
+        agent_kwargs["use_responses_api"] = str(
+            spec.protocol == "openai-responses"
+        ).lower()
+        return replace(spec, agent_kwargs=agent_kwargs)
 
 
 __all__ = [
     "ClaudeCodeAdapter",
     "CodexAdapter",
+    "Terminus2Adapter",
     "HarborVendorAdapter",
     "VendorConfigurationError",
     "VendorHarnessSpec",

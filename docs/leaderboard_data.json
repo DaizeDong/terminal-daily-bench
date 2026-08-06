@@ -331,5 +331,15 @@
    "max_d_halfwidth": 0.15
   }
  },
+ "community_verified": [],
+ "community_replay_verified": [],
+ "community_pending": [],
+ "community_suite": {
+  "date": null,
+  "suite_sha256": null,
+  "roster_n": null,
+  "ranking_requires_complete_roster": true,
+  "official_results_included": false
+ },
  "community": []
 }

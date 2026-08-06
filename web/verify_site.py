@@ -632,6 +632,16 @@ def check_public_frontend() -> list[str]:
     except Exception as exc:
         bad.append(f"leaderboard_data.json: cannot verify semantic FA denominators ({exc})")
         board = {}
+    for key in ("community_verified", "community_replay_verified", "community_pending"):
+        if not isinstance(board.get(key), list):
+            bad.append(f"leaderboard_data.json: missing separate {key} collection")
+    if board.get("community") != board.get("community_verified"):
+        bad.append("leaderboard_data.json: legacy community alias must be verified-only")
+    community_suite = board.get("community_suite")
+    if (not isinstance(community_suite, dict)
+            or community_suite.get("ranking_requires_complete_roster") is not True
+            or community_suite.get("official_results_included") is not False):
+        bad.append("leaderboard_data.json: community suite authority policy is missing")
     if not board.get("total_fa_n") and board.get("total_fa") is not None:
         bad.append("leaderboard_data.json: total_fa must be null when total_fa_n is zero")
     for row in board.get("leaderboard") or []:

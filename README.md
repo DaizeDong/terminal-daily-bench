@@ -89,6 +89,8 @@ tdb doctor tasks/archive/<task-id>          # preflight: python/harbor/apptainer
 tdb run <MODEL> tasks/archive/<task-id>     # score a model on a task (execution gate)
 tdb run <MODEL> tasks/archive/<task-id> --harness codex       # real Codex CLI
 tdb run <MODEL> tasks/archive/<task-id> --harness claude-code # real Claude Code
+tdb campaign campaign.json --state .tdb_campaign/run-001 --dry-run   # freeze sparse plan
+tdb campaign campaign.json --state .tdb_campaign/run-001 --resume   # execute/resume
 tdb oracle tasks/archive/<task-id>          # baseline: the gold solution -> reward 1.0
 tdb quality results.jsonl                   # multi-angle quality card + readiness verdict
 tdb publish <results-dir>[:scaffold],...    # results -> docs/leaderboard_data.json (the site's data)
@@ -129,6 +131,13 @@ Credentials cross the Harbor boundary as an environment template such as
 absent from process argv, `harbor_cmd.txt`, result JSON, and dry-run output.
 Secret-looking `--agent-kwarg` names are rejected; use environment variables for
 authentication.
+
+For a full gateway model catalogue, use the digest-pinned, protocol-aware
+[`tdb campaign` format](docs/campaigns.md). It joins only compatible model and
+agent profiles, checkpoints every cell atomically, enforces provider concurrency
+and estimated-cost limits, and exports only clean authoritative scores. Each cell
+still produces a separate one-trial Harbor aggregate; campaigns do not weaken or
+batch the execution-proof boundary.
 
 For a pinned image run, the source SIF must be an absolute, single-link regular
 file reached without symlinks. The runner copies it into the disposable run as
@@ -203,6 +212,13 @@ gets read-only manifest and pinned-public-key mounts. Shared ownership plus `060
 `0444` is not isolation. The worker records ownership/mode facts and rejects private
 keys co-located with mutable store/work/source trees, but deployment ACLs and service
 identity separation still require an operator audit.
+
+The code path enforces the hand-off: the replay worker stops at the unranked
+`receipt_ready` state with `verified_reward = null`. A separate invocation of
+`submit_result.py promote` re-verifies the persisted receipt and refuses to run as
+root or under the signer UID. Only that second transition can populate
+`community_verified`; this enforcement is still not proof that production service
+identities or ACLs have been provisioned.
 
 Replay operators must install `pip install -e '.[replay]'`. Receipt signing and
 verification use Python `cryptography`'s in-process Ed25519 implementation; neither

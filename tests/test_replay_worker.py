@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import tomllib
+from unittest import mock
 
 import pytest
 from cryptography.hazmat.primitives import serialization
@@ -215,6 +216,23 @@ def _run_queue(tmp_path: pathlib.Path, *, store: pathlib.Path,
     )
 
 
+def _promote_ready(*, store: pathlib.Path, manifest: pathlib.Path,
+                   sub_id: str, trusted_keys: pathlib.Path):
+    """Exercise the promoter phase under a fixture UID distinct from the signer."""
+    staged = sr.get_entry(str(store), sub_id)
+    assert staged is not None
+    receipt_path = (
+        store / "receipts" / sub_id / f"{staged['receipt_sha256']}.json"
+    )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    signer_uid = receipt["authority_runtime"]["worker_euid"]
+    with mock.patch.object(sr.os, "geteuid", return_value=signer_uid + 10_000):
+        return sr.promote_ready_receipt(
+            str(store), sub_id, manifest_path=manifest,
+            trusted_keys=trusted_keys,
+        )
+
+
 def _write_fake_runtime(path: pathlib.Path, *, version: str,
                         marker: pathlib.Path) -> pathlib.Path:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -332,11 +350,36 @@ def test_forged_claim_becomes_verified_zero_only_after_receipt(tmp_path):
     results = _run_queue(
         tmp_path, store=store, manifest=manifest, trusted=trusted,
     )
-    assert results[0]["status"] == "verified"
-    promoted = sr.get_entry(str(store), entry["id"])
+    assert results[0]["status"] == "receipt_ready"
+    staged = sr.get_entry(str(store), entry["id"])
+    assert staged["verified_reward"] is None
+    assert staged["receipt_sha256"]
+
+    waiting = sr.rebuild_leaderboard(
+        str(store), str(tmp_path / "waiting.json"), manifest_path=manifest,
+        trusted_keys=tmp_path / "trusted-keys.json",
+    )
+    assert waiting["community_verified"] == []
+    assert waiting["community_pending"][0]["receipt_ready"] == 1
+    assert waiting["community_pending"][0]["reason"] == (
+        "signed_receipt_awaiting_separate_promoter"
+    )
+
+    # The signer process cannot silently publish its own receipt.
+    with pytest.raises(ValueError, match="distinct UIDs"):
+        sr.promote_ready_receipt(
+            str(store), entry["id"], manifest_path=manifest,
+            trusted_keys=tmp_path / "trusted-keys.json",
+        )
+
+    promoted = _promote_ready(
+        store=store, manifest=manifest, sub_id=entry["id"],
+        trusted_keys=tmp_path / "trusted-keys.json",
+    )
     assert promoted["verified_reward"] == 0.0
     assert promoted["claim_mismatch"] is True
     assert promoted["receipt_sha256"]
+    assert promoted["promoter_euid"] != promoted["signer_euid"]
 
     board_path = tmp_path / "leaderboard.json"
     board = sr.rebuild_leaderboard(
@@ -499,21 +542,17 @@ def test_patch_blob_tampering_fails_closed(tmp_path):
     assert sr.get_entry(str(store), entry["id"])["verified_reward"] is None
 
 
-def test_legacy_self_hashed_receipt_and_signed_body_tamper_both_fail(tmp_path, monkeypatch):
+def test_legacy_self_hashed_receipt_and_signed_body_tamper_both_fail(tmp_path):
     trusted, manifest = _manifest(tmp_path)
     store = tmp_path / "store"
     entry = sr.record(_submission(), str(store), authenticated_submitter=AUTH_ID)
-    original_apply = sr.apply_verification
-    captured = {}
-
-    def capture_apply(store_arg, sub_id, receipt, **kwargs):
-        captured.update({"store": store_arg, "id": sub_id, "receipt": receipt, **kwargs})
-        return {"verify_status": "verified", "verified_reward": receipt["reward"]}
-
-    monkeypatch.setattr(sr, "apply_verification", capture_apply)
     results = _run_queue(tmp_path, store=store, manifest=manifest, trusted=trusted)
-    assert results[0]["status"] == "verified"
-    signed = dict(captured["receipt"])
+    assert results[0]["status"] == "receipt_ready"
+    staged = sr.get_entry(str(store), entry["id"])
+    signed_path = (
+        store / "receipts" / entry["id"] / f"{staged['receipt_sha256']}.json"
+    )
+    signed = json.loads(signed_path.read_text(encoding="utf-8"))
 
     # Recomputing the public self-hash cannot repair a changed signed field.
     tampered = dict(signed)
@@ -522,13 +561,15 @@ def test_legacy_self_hashed_receipt_and_signed_body_tamper_both_fail(tmp_path, m
     tampered["receipt_sha256"] = receipt_auth.receipt_sha256(tampered)
     receipt_dir = store / "receipts" / entry["id"]
     (receipt_dir / f"{tampered['receipt_sha256']}.json").write_text(json.dumps(tampered))
-    with pytest.raises(receipt_auth.ReceiptAuthorityError):
-        original_apply(
-            str(store), entry["id"], tampered,
-            attempt_id=captured["attempt_id"],
-            trusted_keys=captured["trusted_keys"],
-            manifest_path=captured["manifest_path"],
-        )
+    signer_uid = signed["authority_runtime"]["worker_euid"]
+    with mock.patch.object(sr.os, "geteuid", return_value=signer_uid + 10_000):
+        with pytest.raises(receipt_auth.ReceiptAuthorityError):
+            sr.apply_verification(
+                str(store), entry["id"], tampered,
+                attempt_id=staged["attempt_id"],
+                trusted_keys=tmp_path / "trusted-keys.json",
+                manifest_path=manifest,
+            )
     assert sr.get_entry(str(store), entry["id"])["verified_reward"] is None
 
 
@@ -854,7 +895,12 @@ def test_verified_queue_metadata_tamper_is_not_ranked(tmp_path):
     sr.record(_submission(), str(store), authenticated_submitter=AUTH_ID)
     assert _run_queue(
         tmp_path, store=store, manifest=manifest, trusted=trusted,
-    )[0]["status"] == "verified"
+    )[0]["status"] == "receipt_ready"
+    staged = next(sr.iter_entries(str(store)))
+    _promote_ready(
+        store=store, manifest=manifest, sub_id=staged["id"],
+        trusted_keys=tmp_path / "trusted-keys.json",
+    )
     queue = store / "2026-08-05.jsonl"
     entry = json.loads(queue.read_text())
     entry["model"] = "attacker-renamed-model"
@@ -890,7 +936,12 @@ def test_partial_frozen_roster_cannot_get_perfect_one_of_one_score(tmp_path):
     sr.record(_submission(), str(store), authenticated_submitter=AUTH_ID)
     assert _run_queue(
         tmp_path, store=store, manifest=manifest, trusted=trusted,
-    )[0]["status"] == "verified"
+    )[0]["status"] == "receipt_ready"
+    staged = next(sr.iter_entries(str(store)))
+    _promote_ready(
+        store=store, manifest=manifest, sub_id=staged["id"],
+        trusted_keys=keys,
+    )
     board = sr.rebuild_leaderboard(
         str(store), str(tmp_path / "partial-board.json"),
         manifest_path=manifest, trusted_keys=keys,

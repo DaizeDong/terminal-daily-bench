@@ -18,7 +18,8 @@ Each result JSON is one scored (model, task) cell as emitted by `tdb run`
     matrix{}       per-task drill-down: {tasks[], rows[{model, g[]}], scaffold}
     quality{}      the multi-angle MSQ card per scaffold (D/C/M, IRT info, KR-20,
                    D 95% CI, readiness) -- via terminal_daily_bench.quality
-    community[]    verified community submissions (filled by submit_result.py)
+    community_verified[]  receipt-backed community submissions
+    community_pending[]   unranked submissions/replay/promotion state
 
 Integrity: this only reads already-minted execution outcomes. Protected-test replay
 prevents a claimed reward from becoming a score, but it does not establish semantic
@@ -158,6 +159,17 @@ def build_payload(rows, date):
         "leaderboard": leaderboard,
         "matrix": _matrix(rows, primary),
         "quality": None,
+        "community_verified": [],
+        "community_replay_verified": [],
+        "community_pending": [],
+        "community_suite": {
+            "date": None,
+            "suite_sha256": None,
+            "roster_n": None,
+            "ranking_requires_complete_roster": True,
+            "official_results_included": False,
+        },
+        # Backward-compatible alias.  It is intentionally verified-only.
         "community": [],
     }
     q = {s: v for s, v in ((s, _quality(rows, s)) for s in scaffolds) if v}

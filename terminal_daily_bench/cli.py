@@ -41,6 +41,10 @@ def _cmd_run(a) -> int:
             "--harness", harness]
     if getattr(a, "harness_base_url", None):
         argv += ["--harness-base-url", a.harness_base_url]
+    if getattr(a, "model_protocol", None):
+        argv += ["--model-protocol", a.model_protocol]
+    if getattr(a, "seed", None) is not None:
+        argv += ["--seed", str(a.seed)]
     for value in getattr(a, "agent_kwarg", []) or []:
         argv += ["--agent-kwarg", value]
     if getattr(a, "dry_run", False):
@@ -60,6 +64,7 @@ def _cmd_oracle(a) -> int:
     return _cmd_run(argparse.Namespace(
         model="oracle", task=a.task, out=a.out, harness="single_shot",
         harness_base_url=None, agent_kwarg=[], dry_run=getattr(a, "dry_run", False),
+        model_protocol=None, seed=None,
         keep_task_network_policy=False, harbor_timeout=getattr(a, "harbor_timeout", None),
         task_sif=getattr(a, "task_sif", None),
         task_sif_sha256=getattr(a, "task_sif_sha256", None),
@@ -71,8 +76,12 @@ def _slug(value: str) -> str:
 
 
 def _load_matrix(path: str):
-    """Build a (task x model) solved matrix from a results file (jsonl or json list).
-    Each record needs task + model + (solved | reward>=1)."""
+    """Build a task x execution-profile solved matrix from result records.
+
+    Campaign exports provide ``matrix_column_id`` (model profile + agent profile)
+    and an optional seed.  Falling back to the legacy model field preserves the
+    single-run file format without collapsing distinct campaign harnesses.
+    """
     rows = []
     text = open(path).read().strip()
     recs = ([json.loads(l) for l in text.splitlines() if l.strip()]
@@ -80,7 +89,10 @@ def _load_matrix(path: str):
     tasks, models = [], []
     cell = {}
     for r in recs:
-        t, m = r.get("task"), r.get("model")
+        t = r.get("task_profile_id", r.get("task"))
+        m = r.get("matrix_column_id", r.get("model"))
+        if r.get("campaign_cell_id") and r.get("seed") is not None:
+            m = f"{m}::seed={r['seed']}"
         if t is None or m is None:
             continue
         solved = bool(r.get("solved") if "solved" in r else (r.get("reward", 0) >= 0.999))
@@ -113,6 +125,31 @@ def _cmd_quality(a) -> int:
           + ("" if rd["ready"] else f" (bottleneck={rd['bottleneck']}, need ~{rd['recommended_n']} tasks)"))
     print(json.dumps({"msq": m, "irt": irt, "reliability": rel, "readiness": rd}, default=str))
     return 0
+
+
+def _cmd_campaign(a) -> int:
+    """Plan or execute a protocol-compatible sparse campaign."""
+    from .campaign import CampaignError, run_campaign
+
+    try:
+        rc, summary = run_campaign(
+            a.spec,
+            a.state,
+            resume=a.resume,
+            retry_failed=a.retry_failed,
+            retry_blocked=a.retry_blocked,
+            dry_run=a.dry_run,
+            max_workers=a.max_workers,
+            max_cells=a.max_cells,
+            budget_usd=a.budget_usd,
+        )
+    except CampaignError as exc:
+        print(f"campaign error: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    if a.dry_run:
+        print(f"plan frozen at {os.path.abspath(a.state)}; no cells were executed")
+    return rc
 
 
 def _cmd_publish(a) -> int:
@@ -306,6 +343,10 @@ def main(argv: List[str] = None) -> int:
                    help="single_shot (default), claude-code, or codex")
     r.add_argument("--harness-base-url", default=None,
                    help="optional vendor-compatible API/proxy base URL")
+    r.add_argument("--model-protocol", default=None,
+                   help="explicit API protocol (normally selected by `tdb campaign`)")
+    r.add_argument("--seed", type=int, default=None,
+                   help="optional model sampling seed")
     r.add_argument("--agent-kwarg", action="append", default=[], metavar="KEY=VALUE",
                    help="safe non-secret Harbor agent option; repeatable")
     r.add_argument("--dry-run", action="store_true",
@@ -318,6 +359,28 @@ def main(argv: List[str] = None) -> int:
     r.add_argument("--task-sif-sha256", default=None,
                    help="required expected SHA-256 for --task-sif")
     r.set_defaults(fn=_cmd_run)
+    c = sub.add_parser(
+        "campaign",
+        help="run a resumable protocol-aware sparse model x agent matrix",
+    )
+    c.add_argument("spec", help="tdb-campaign/v1 JSON definition")
+    c.add_argument("--state", required=True,
+                   help="private manifest/checkpoint/result directory")
+    c.add_argument("--resume", action="store_true",
+                   help="resume an existing state directory after manifest verification")
+    c.add_argument("--retry-failed", action="store_true",
+                   help="retry FAILED cells (SUCCESS cells are always immutable/skipped)")
+    c.add_argument("--retry-blocked", action="store_true",
+                   help="retry eligible BLOCKED cells after their external blocker is fixed")
+    c.add_argument("--dry-run", action="store_true",
+                   help="freeze/verify the sparse plan without executing a cell")
+    c.add_argument("--max-workers", type=int, default=None,
+                   help="tighten the spec's global concurrency limit")
+    c.add_argument("--max-cells", type=int, default=None,
+                   help="execute at most this many cells in this invocation")
+    c.add_argument("--budget-usd", type=float, default=None,
+                   help="tighten the campaign's cumulative estimated-cost budget")
+    c.set_defaults(fn=_cmd_campaign)
     o = sub.add_parser("oracle", help="gate baseline")
     o.add_argument("task")
     o.add_argument("--out", default=None)

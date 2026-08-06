@@ -6,7 +6,7 @@ from typing import Type
 from .base import AdapterResult, HarborRunSpec, HarnessAdapter
 from .single_shot import SingleShotAdapter
 from .terminus import TerminusAdapter
-from .vendor import ClaudeCodeAdapter, CodexAdapter
+from .vendor import ClaudeCodeAdapter, CodexAdapter, Terminus2Adapter
 
 
 REGISTRY: dict[str, Type[HarnessAdapter]] = {}
@@ -43,7 +43,13 @@ def create_adapter(name: str) -> HarnessAdapter:
     return adapter()
 
 
-for _adapter in (SingleShotAdapter, TerminusAdapter, ClaudeCodeAdapter, CodexAdapter):
+for _adapter in (
+    SingleShotAdapter,
+    TerminusAdapter,
+    Terminus2Adapter,
+    ClaudeCodeAdapter,
+    CodexAdapter,
+):
     register_adapter(_adapter)
 
 
@@ -55,6 +61,7 @@ __all__ = [
     "TerminusAdapter",
     "ClaudeCodeAdapter",
     "CodexAdapter",
+    "Terminus2Adapter",
     "REGISTRY",
     "create_adapter",
     "register_adapter",

@@ -150,6 +150,23 @@ def test_selected_credential_cannot_enter_base_url_path():
         )
 
 
+def test_single_shot_reflected_credential_is_redacted(monkeypatch):
+    credential = "unit-test-reflected-private-value"
+    monkeypatch.setenv("OPENAI_API_KEY", credential)
+    monkeypatch.setattr(
+        ev,
+        "_openai_post",
+        lambda *_args, **_kwargs: {
+            "choices": [{"message": {"content": f"prefix-{credential}-suffix"}}]
+        },
+    )
+
+    content = ev._call_model_once("fixture", "prompt", 10, 10)
+
+    assert credential not in content
+    assert "<redacted:OPENAI_API_KEY>" in content
+
+
 def test_atif_telemetry_is_additive_and_best_effort(tmp_path):
     trajectory = tmp_path / "trial" / "agent" / "trajectory.json"
     trajectory.parent.mkdir(parents=True)

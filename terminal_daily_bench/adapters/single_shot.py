@@ -13,9 +13,13 @@ from .base import AdapterResult, HarnessAdapter
 
 class SingleShotAdapter(HarnessAdapter):
     name = "single_shot"
+    supported_protocols = ("openai-chat-completions",)
+    base_url_env = "OPENAI_BASE_URL"
+    credential_env_options = ("OPENAI_API_KEY",)
 
     def produce_patch(self, task_dir: str, failing_test_ids: List[str],
                       model: str, *, max_tokens: int = 4096, timeout: int = 180,
+                      base_url: str | None = None, seed: int | None = None,
                       **kwargs: Any) -> AdapterResult:
         try:
             # Local import keeps the registry importable while eval owns adapter
@@ -29,7 +33,14 @@ class SingleShotAdapter(HarnessAdapter):
             ctx = _eval.extract_repo_files(sif, targets) if sif and os.path.exists(sif) else {}
             instruction = _eval._read(os.path.join(task_dir, "instruction.md"))
             prompt = _eval.build_prompt(instruction, ctx, targets)
-            raw = _eval.call_model(model, prompt, max_tokens=max_tokens, timeout=timeout)
+            raw = _eval.call_model(
+                model,
+                prompt,
+                max_tokens=max_tokens,
+                timeout=timeout,
+                base_url=base_url,
+                seed=seed,
+            )
             diff = _eval.extract_diff(raw)
             return AdapterResult(patch=diff, telemetry={"model_raw_len": len(raw),
                                                         "touches_tests": _eval.diff_touches_tests(diff)})

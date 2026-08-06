@@ -4,7 +4,8 @@
 The worker is deliberately separate from the HTTP-facing recorder.  It consumes
 content-addressed patches from a private store, checks them against a frozen suite
 manifest, runs a fresh Harbor oracle replay with egress disabled, and emits an
-append-only receipt.  Only that receipt can promote a row to ``verified``.
+append-only receipt.  The signer stops at ``receipt_ready``; a separate promoter
+UID must re-verify that receipt before a row can become ``verified``.
 
 The receipt proves which bytes and execution result were used.  It does *not* claim
 that a task verifier is semantically complete; that separate false-accept question
@@ -1246,14 +1247,14 @@ def process_submission(*, store: Path, manifest_data: Dict[str, Any],
         receipt: Dict[str, Any] = {**signed_body, "signature": signature}
         receipt["receipt_sha256"] = receipt_auth.receipt_sha256(receipt)
         receipt_path = _write_receipt(store, receipt)
-        promoted = submissions.apply_verification(
+        staged = submissions.stage_signed_receipt(
             str(store), sub_id, receipt, attempt_id=attempt_id,
             trusted_keys=trusted_keys, manifest_path=manifest_path,
         )
         return {
             "id": sub_id,
-            "status": promoted["verify_status"],
-            "reward": promoted["verified_reward"],
+            "status": staged["verify_status"],
+            "reward": None,
             "receipt": str(receipt_path),
         }
     except PermanentReplayError as exc:

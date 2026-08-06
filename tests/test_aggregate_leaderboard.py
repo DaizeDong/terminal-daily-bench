@@ -32,6 +32,10 @@ def test_missing_or_legacy_integrity_never_defaults_semantic_fa_to_zero(tmp_path
     assert payload["total_fa"] is None
     assert payload["total_fa_n"] == 0
     assert all(row["codex"]["fa"] is None for row in payload["leaderboard"])
+    assert payload["community"] == payload["community_verified"] == []
+    assert payload["community_pending"] == []
+    assert payload["community_suite"]["ranking_requires_complete_roster"] is True
+    assert payload["community_suite"]["official_results_included"] is False
 
 
 def test_explicit_semantic_exploit_measurement_is_aggregated_with_denominator(tmp_path):

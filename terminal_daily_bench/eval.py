@@ -82,9 +82,11 @@ from .harbor_score import (
     _read_harbor_reward,
     authoritative_harbor_result_snapshot,
     harbor_aggregate_status_from_snapshot,
+    reward_from_harbor_result_snapshot,
 )
 from .adapters import REGISTRY, create_adapter
 from .adapters.base import HarborRunSpec
+from .adapters.vendor import _safe_base_url
 
 # Singularity `--ek` backend knobs. Paths are env-driven so nothing host-specific
 # ships: set TDB_SIF_CACHE / TDB_OVERLAY_DIR to override the generic defaults.
@@ -126,6 +128,11 @@ def _log(msg: str) -> None:
     print(f"[model_eval] {msg}", file=sys.stderr, flush=True)
 
 
+def _redact_openai_credential(value: str) -> str:
+    key = os.environ.get("OPENAI_API_KEY", "")
+    return value.replace(key, "<redacted:OPENAI_API_KEY>") if key else value
+
+
 # ---------------------------------------------------------------------------
 # model call -- GENERIC OpenAI-compatible endpoint (point it at ANY provider)
 # ---------------------------------------------------------------------------
@@ -133,9 +140,18 @@ def _log(msg: str) -> None:
 #   OPENAI_BASE_URL  (default https://api.openai.com/v1)  -- any OpenAI-compatible
 #                    endpoint: OpenAI, OpenRouter, vLLM, LiteLLM, a local server, ...
 #   OPENAI_API_KEY   -- the bearer key for that endpoint (read from env, never stored).
-def _openai_post(payload: Dict[str, Any], timeout: int = 120) -> Dict[str, Any]:
+def _openai_post(
+    payload: Dict[str, Any],
+    timeout: int = 120,
+    base_url: str | None = None,
+) -> Dict[str, Any]:
     """POST an OpenAI-format chat/completions payload to ``$OPENAI_BASE_URL``."""
-    base = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+    base = _safe_base_url(
+        base_url
+        or os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+    )
+    if base is None:  # The default above is non-empty; retain a fail-closed guard.
+        raise RuntimeError("model endpoint base URL is empty")
     key = os.environ.get("OPENAI_API_KEY", "")
     request = Request(
         f"{base}/chat/completions",
@@ -154,17 +170,21 @@ def _openai_post(payload: Dict[str, Any], timeout: int = 120) -> Dict[str, Any]:
         # ``_call_model_once`` (including the max_completion_tokens fallback).
         raw = e.read().decode("utf-8", errors="replace").strip()
     except URLError as e:
-        raise RuntimeError(f"model endpoint request failed: {e.reason}") from e
+        reason = _redact_openai_credential(str(e.reason))
+        raise RuntimeError(f"model endpoint request failed: {reason}") from e
     if not raw:
         raise RuntimeError("empty response from model endpoint")
     try:
-        return json.loads(raw)
+        data = json.loads(raw)
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"non-JSON response: {raw[:300]}") from e
+        safe_raw = _redact_openai_credential(raw)
+        raise RuntimeError(f"non-JSON response: {safe_raw[:300]}") from e
+    return data
 
 
 def call_model(model: str, prompt: str, max_tokens: int = 4096,
-               timeout: int = 180, retries: int = 1) -> str:
+               timeout: int = 180, retries: int = 1,
+               base_url: str | None = None, seed: int | None = None) -> str:
     """Call ``model`` on the configured OpenAI-compatible endpoint; return its text.
 
     Retries once on an empty/timeout response (cold models can 504 on first hit).
@@ -174,7 +194,9 @@ def call_model(model: str, prompt: str, max_tokens: int = 4096,
     last_err: Optional[Exception] = None
     for attempt in range(retries + 1):
         try:
-            return _call_model_once(model, prompt, max_tokens, timeout)
+            return _call_model_once(
+                model, prompt, max_tokens, timeout, base_url=base_url, seed=seed
+            )
         except RuntimeError as e:
             last_err = e
             _log(f"model call attempt {attempt + 1} failed: {e}")
@@ -182,20 +204,36 @@ def call_model(model: str, prompt: str, max_tokens: int = 4096,
     raise last_err  # type: ignore[misc]
 
 
-def _call_model_once(model: str, prompt: str, max_tokens: int, timeout: int) -> str:
+def _call_model_once(
+    model: str,
+    prompt: str,
+    max_tokens: int,
+    timeout: int,
+    *,
+    base_url: str | None = None,
+    seed: int | None = None,
+) -> str:
     def _chat(tok_field: str) -> Dict[str, Any]:
-        return _openai_post({"model": model, tok_field: max_tokens,
-                             "messages": [{"role": "user", "content": prompt}]},
-                            timeout=timeout)
+        payload: Dict[str, Any] = {
+            "model": model,
+            tok_field: max_tokens,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if seed is not None:
+            payload["seed"] = seed
+        return _openai_post(payload, timeout=timeout, base_url=base_url)
     data = _chat("max_tokens")
     if "error" in data and "max_completion_tokens" in json.dumps(data.get("error", "")):
         data = _chat("max_completion_tokens")  # reasoning models reject max_tokens
     if "error" in data:
-        raise RuntimeError(f"endpoint error: {str(data['error'])[:300]}")
+        safe_error = _redact_openai_credential(str(data["error"]))
+        raise RuntimeError(f"endpoint error: {safe_error[:300]}")
     choices = data.get("choices") or []
     if not choices:
-        raise RuntimeError(f"no choices in response: {json.dumps(data)[:300]}")
-    return (choices[0].get("message", {}) or {}).get("content") or ""
+        safe_data = _redact_openai_credential(json.dumps(data))
+        raise RuntimeError(f"no choices in response: {safe_data[:300]}")
+    content = (choices[0].get("message", {}) or {}).get("content") or ""
+    return _redact_openai_credential(content)
 
 
 # ---------------------------------------------------------------------------
@@ -1021,6 +1059,17 @@ def run_harbor_oracle(run_task_dir: str, jobs_dir: str, eks: List[str],
             raise RuntimeError("failed to remove private oracle temporary directory")
 
 
+def _authoritative_reward_and_digest(
+    jobs_dir: str,
+) -> tuple[float | None, str | None]:
+    """Read the authoritative aggregate once and bind the accepted bytes."""
+    snapshot = authoritative_harbor_result_snapshot(jobs_dir)
+    if snapshot is None:
+        return None, None
+    reward = reward_from_harbor_result_snapshot(snapshot)
+    return reward, hashlib.sha256(snapshot.data).hexdigest()
+
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
@@ -1034,6 +1083,10 @@ def main(argv=None) -> int:
                     help="harness adapter (single_shot, claude-code, codex)")
     ap.add_argument("--harness-base-url", default=None,
                     help="optional vendor API/proxy base URL (never put credentials in it)")
+    ap.add_argument("--model-protocol", default=None,
+                    help="explicit negotiated API protocol (campaigns always set this)")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="optional model sampling seed; vendor agents require a mapped kwarg")
     ap.add_argument("--agent-kwarg", action="append", default=[], metavar="KEY=VALUE",
                     help="safe non-secret Harbor agent kwarg; repeatable")
     ap.add_argument("--dry-run", action="store_true",
@@ -1060,6 +1113,8 @@ def main(argv=None) -> int:
 
     result: Dict[str, Any] = {
         "model": args.model,
+        "model_protocol": args.model_protocol,
+        "seed": args.seed,
         "task": task_id,
         "task_dir": task_dir,
         "scaffold": "oracle_baseline" if is_baseline else harness_name,
@@ -1087,6 +1142,18 @@ def main(argv=None) -> int:
     try:
         adapter = None if is_baseline else create_adapter(args.harness)
         if adapter is not None:
+            if (args.model_protocol is not None
+                    and args.model_protocol not in adapter.supported_protocols):
+                supported = ", ".join(adapter.supported_protocols) or "none"
+                raise ValueError(
+                    f"harness {adapter.name!r} does not support protocol "
+                    f"{args.model_protocol!r}; supported: {supported}"
+                )
+            effective_protocol = args.model_protocol or (
+                adapter.supported_protocols[0]
+                if len(adapter.supported_protocols) == 1 else None
+            )
+            result["model_protocol"] = effective_protocol
             result["scaffold"] = (
                 "single_shot_patch" if adapter.name == "single_shot" else adapter.name
             )
@@ -1148,10 +1215,12 @@ def main(argv=None) -> int:
             )
             result["harbor_returncode"] = harbor_returncode
             _write_private_text(Path(run_root) / "harbor.log", trace)
-            reward = (
-                _read_harbor_reward(jobs_dir)
-                if harbor_returncode == 0 else None
+            reward, aggregate_digest = (
+                _authoritative_reward_and_digest(jobs_dir)
+                if harbor_returncode == 0 else (None, None)
             )
+            if aggregate_digest is not None:
+                result["harbor_result_sha256"] = aggregate_digest
             result["patch_applied"] = reward is not None
             if harbor_returncode != 0:
                 result["error"] = f"harbor exited with status {harbor_returncode}"
@@ -1167,7 +1236,12 @@ def main(argv=None) -> int:
                 }
                 return _finish(result, args.out, t0)
 
-            base = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+            base = _safe_base_url(
+                args.harness_base_url
+                or os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+            )
+            if base is None:
+                raise ValueError("model endpoint base URL is empty")
             result["model_endpoint"] = _public_endpoint(
                 base.rstrip("/") + "/chat/completions"
             )
@@ -1177,6 +1251,8 @@ def main(argv=None) -> int:
                 args.model,
                 max_tokens=args.max_tokens,
                 timeout=args.call_timeout,
+                base_url=base,
+                seed=args.seed,
             )
             result["harness"].update(attempt.telemetry)
             if attempt.error:
@@ -1206,10 +1282,12 @@ def main(argv=None) -> int:
             _write_private_text(trace_path, trace)
             result["harness"]["harbor_returncode"] = harbor_returncode
             result["harness"]["trace_path"] = str(trace_path)
-            reward = (
-                _read_harbor_reward(jobs_dir)
-                if harbor_returncode == 0 else None
+            reward, aggregate_digest = (
+                _authoritative_reward_and_digest(jobs_dir)
+                if harbor_returncode == 0 else (None, None)
             )
+            if aggregate_digest is not None:
+                result["harness"]["harbor_result_sha256"] = aggregate_digest
             if harbor_returncode != 0:
                 result["error"] = f"harbor exited with status {harbor_returncode}"
             if "oracle patch does not apply" in trace:
@@ -1224,6 +1302,7 @@ def main(argv=None) -> int:
                 base_url=args.harness_base_url,
                 environ=os.environ,
                 agent_kwargs=agent_kwargs,
+                protocol=result.get("model_protocol"),
                 require_credentials=not args.dry_run,
             )
             result["harness"]["run_spec"] = spec.public_summary()
@@ -1299,6 +1378,9 @@ def main(argv=None) -> int:
                 snapshot = authoritative_harbor_result_snapshot(jobs_dir)
                 if snapshot is not None:
                     aggregate_status = harbor_aggregate_status_from_snapshot(snapshot)
+                    result["harness"]["harbor_result_sha256"] = hashlib.sha256(
+                        snapshot.data
+                    ).hexdigest()
             reward = (
                 aggregate_status.reward
                 if aggregate_status is not None and aggregate_status.clean else None

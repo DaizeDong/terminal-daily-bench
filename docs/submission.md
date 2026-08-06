@@ -250,6 +250,12 @@ an external deployment audit; they are not a substitute for distinct identities,
 ACLs/read-only mounts, and an actual canary run. A same-UID deployment remains a
 production blocker.
 
+Accordingly, `replay_worker.py run` stops at `receipt_ready`; that state remains in
+the unranked pending view and keeps `verified_reward = null`. The separate promoter
+identity runs `submit_result.py promote --store ... --id ... --manifest ...
+--trusted-keys ...`. Promotion re-verifies every receipt binding and rejects root or
+the signer UID before changing the row to `verified`.
+
 More generally, production replay remains a blocker until the official compute worker
 completes a real Harbor replay, demonstrates both a reachable control canary and a
 blocked isolated canary, and passes an operator audit of distinct signer/promoter UIDs,
