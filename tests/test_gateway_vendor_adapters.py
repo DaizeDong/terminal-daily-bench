@@ -1,6 +1,7 @@
 """Adversarial, credential-free tests for pending gateway vendor adapters."""
 from __future__ import annotations
 
+import base64
 import json
 from urllib.parse import quote
 
@@ -9,6 +10,7 @@ import pytest
 from terminal_daily_bench.adapters import REGISTRY, create_adapter
 from terminal_daily_bench.adapters.gateway_vendors import (
     ClineCLIAdapter,
+    GeminiCLIAdapter,
     GooseAdapter,
     HermesAdapter,
     KimiCLIAdapter,
@@ -25,6 +27,7 @@ from terminal_daily_bench.adapters.vendor import VendorConfigurationError
 
 _BRIDGE = "http://127.0.0.1:18765/v1"
 _DUMMY = "unit-test-ephemeral-bridge-token"
+_GEMINI_BRIDGE = "http://127.0.0.1:18765"
 
 
 @pytest.mark.parametrize(
@@ -300,6 +303,91 @@ def test_qwen_code_requires_raw_canonical_gateway_catalog_id(model):
             base_url=_BRIDGE,
             environ={"OPENAI_API_KEY": _DUMMY},
         )
+
+
+def test_gemini_cli_binds_exact_slash_model_to_nonsecret_agent_header():
+    exact = "catalog/google/gemini-2.5-pro"
+    spec = GeminiCLIAdapter().harbor_run_spec(
+        "google/" + exact,
+        base_url=_GEMINI_BRIDGE,
+        environ={"GEMINI_API_KEY": _DUMMY},
+        protocol="openai-chat-completions",
+        agent_kwargs={"version": "0.55.1"},
+    )
+    header_name, encoded = spec.agent_env["GEMINI_CLI_CUSTOM_HEADERS"].split(
+        ": ", 1
+    )
+    decoded = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)).decode()
+
+    assert spec.agent == "gemini-cli"
+    assert spec.model == "google/" + exact
+    assert spec.agent_env["GEMINI_API_KEY"] == "${GEMINI_API_KEY}"
+    assert spec.agent_env["GOOGLE_GEMINI_BASE_URL"] == _GEMINI_BRIDGE
+    assert header_name == "X-Terminal-Daily-Gateway-Model"
+    assert decoded == exact
+    assert spec.agent_env["GOOGLE_GENAI_API_VERSION"] == "v1beta"
+    assert spec.agent_env["GEMINI_API_KEY_AUTH_MECHANISM"] == "x-goog-api-key"
+    assert spec.process_env == {
+        "GOOGLE_GEMINI_BASE_URL": _GEMINI_BRIDGE,
+        "GEMINI_API_KEY": _DUMMY,
+    }
+    assert "GEMINI_CLI_CUSTOM_HEADERS" not in spec.process_env
+    assert spec.agent_kwargs == {"version": "0.55.1"}
+
+
+@pytest.mark.parametrize(
+    "base_url",
+    [
+        "http://127.0.0.1:18765/",
+        "http://127.0.0.1:18765/v1",
+        "http://localhost:18765",
+        "http://127.0.0.2:18765",
+        "https://127.0.0.1:18765",
+        "http://user@127.0.0.1:18765",
+        "http://127.0.0.1:18765?route=x",
+        "https://gateway.example",
+    ],
+)
+def test_gemini_cli_rejects_anything_but_exact_loopback_origin(base_url):
+    with pytest.raises(VendorConfigurationError, match="exact loopback origin"):
+        GeminiCLIAdapter().harbor_run_spec(
+            "google/gemini-test",
+            base_url=base_url,
+            environ={"GEMINI_API_KEY": _DUMMY},
+        )
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "gemini-test",
+        "openai/gemini-test",
+        "google/",
+        "google//gemini-test",
+        "google/../gemini-test",
+        "google/gemini test",
+        " google/gemini-test",
+        "google/gemini-test\n",
+    ],
+)
+def test_gemini_cli_rejects_unbound_or_noncanonical_models(model):
+    with pytest.raises(VendorConfigurationError):
+        GeminiCLIAdapter().harbor_run_spec(
+            model,
+            base_url=_GEMINI_BRIDGE,
+            environ={"GEMINI_API_KEY": _DUMMY},
+        )
+
+
+def test_gemini_cli_metadata_discloses_both_wires_and_translation():
+    metadata = GeminiCLIAdapter().metadata()
+    assert metadata["harbor_agent"] == "gemini-cli"
+    assert metadata["executable"] == "gemini"
+    assert metadata["requires_root_install"] is True
+    assert metadata["model_format"] == "google/<exact-gateway-catalog-id>"
+    assert metadata["agent_wire"] == "gemini-native"
+    assert metadata["upstream_wire"] == "openai-chat-completions"
+    assert metadata["translation"] == "localhost-bounded"
 
 
 @pytest.mark.parametrize(
@@ -839,6 +927,7 @@ def test_kimi_cli_metadata_discloses_temporary_json_token_persistence():
 def test_pending_gateway_adapters_are_registered_without_runtime_claims():
     assert {
         "goose",
+        "gemini-cli",
         "cline-cli",
         "hermes",
         "kimi-cli",
@@ -852,6 +941,7 @@ def test_pending_gateway_adapters_are_registered_without_runtime_claims():
     } <= set(REGISTRY)
     assert create_adapter("open-hands").name == "openhands"
     assert create_adapter("block-goose").name == "goose"
+    assert create_adapter("gemini").name == "gemini-cli"
     assert create_adapter("cline").name == "cline-cli"
     assert create_adapter("hermes-agent").name == "hermes"
     assert create_adapter("kimi").name == "kimi-cli"
@@ -863,6 +953,7 @@ def test_pending_gateway_adapters_are_registered_without_runtime_claims():
     assert create_adapter("trae").name == "trae-agent"
     for name in (
         "goose",
+        "gemini-cli",
         "cline-cli",
         "hermes",
         "kimi-cli",

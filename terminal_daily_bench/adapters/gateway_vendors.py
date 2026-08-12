@@ -12,6 +12,7 @@ registry does so centrally without implying runtime compatibility.
 """
 from __future__ import annotations
 
+import base64
 import ipaddress
 import re
 from dataclasses import replace
@@ -463,6 +464,107 @@ class QwenCodeAdapter(GatewayBridgeVendorAdapter):
         return _raw_gateway_model(model, self.name)
 
 
+class GeminiCLIAdapter(GatewayBridgeVendorAdapter):
+    """Official Gemini CLI through the bridge's bounded native translation."""
+
+    spec = VendorHarnessSpec(
+        name="gemini-cli",
+        harbor_agent="gemini-cli",
+        base_url_env="GOOGLE_GEMINI_BASE_URL",
+        credential_env_options=("GEMINI_API_KEY",),
+        aliases=("gemini", "gemini_cli", "google-gemini-cli"),
+        base_url_kind="gemini-native",
+        supported_protocols=(_OPENAI_CHAT,),
+    )
+    executable = "gemini"
+    model_format = "google/<exact-gateway-catalog-id>"
+    requires_root_install = True
+
+    @staticmethod
+    def _exact_origin(value: str | None) -> str:
+        if not isinstance(value, str) or not value:
+            raise VendorConfigurationError(
+                "gemini-cli requires an explicit localhost bridge origin"
+            )
+        try:
+            parsed = urlsplit(value)
+            port = parsed.port
+        except ValueError:
+            raise VendorConfigurationError(
+                "gemini-cli localhost bridge origin has an invalid port"
+            ) from None
+        if (
+            parsed.scheme != "http"
+            or parsed.hostname != "127.0.0.1"
+            or port is None
+            or not 1 <= port <= 65535
+            or parsed.netloc != f"127.0.0.1:{port}"
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.path != ""
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise VendorConfigurationError(
+                "gemini-cli bridge URL must be an exact loopback origin"
+            )
+        return f"http://127.0.0.1:{port}"
+
+    def _validate_model(self, model: str, protocol: str) -> str:
+        del protocol
+        canonical = _canonical_model(model, self.name)
+        provider, separator, exact_model = canonical.partition("/")
+        if provider != "google" or separator != "/" or not exact_model:
+            raise VendorConfigurationError(
+                "gemini-cli requires google/<exact-gateway-catalog-id>"
+            )
+        _canonical_model(exact_model, self.name)
+        return canonical
+
+    def harbor_run_spec(
+        self,
+        model: str,
+        *,
+        base_url: str | None = None,
+        environ: Mapping[str, str] | None = None,
+        **kwargs: Any,
+    ) -> HarborRunSpec:
+        source_env = {} if environ is None else environ
+        selected_base = base_url or source_env.get("GOOGLE_GEMINI_BASE_URL")
+        canonical_base = self._exact_origin(selected_base)
+        spec = super().harbor_run_spec(
+            model,
+            base_url=canonical_base,
+            environ=source_env,
+            **kwargs,
+        )
+        exact_model = spec.model.partition("/")[2]
+        encoded_model = base64.urlsafe_b64encode(exact_model.encode("utf-8")).decode(
+            "ascii"
+        ).rstrip("=")
+        agent_env = dict(spec.agent_env)
+        # This is a non-secret route binding and intentionally lives only in
+        # Harbor's per-agent environment.  The public process environment
+        # continues to contain only the ephemeral local token and origin.
+        agent_env["GEMINI_CLI_CUSTOM_HEADERS"] = (
+            "X-Terminal-Daily-Gateway-Model: " + encoded_model
+        )
+        agent_env["GOOGLE_GENAI_API_VERSION"] = "v1beta"
+        agent_env["GEMINI_API_KEY_AUTH_MECHANISM"] = "x-goog-api-key"
+        return replace(spec, agent_env=agent_env)
+
+    def metadata(self) -> dict[str, Any]:
+        data = super().metadata()
+        data.update(
+            {
+                "agent_wire": "gemini-native",
+                "upstream_wire": "openai-chat-completions",
+                "translation": "localhost-bounded",
+            }
+        )
+        return data
+
+
 class ClineCLIAdapter(GatewayBridgeVendorAdapter):
     """Cline CLI's explicit OpenAI custom-base route.
 
@@ -696,6 +798,7 @@ KimiCliAdapter = KimiCLIAdapter
 
 __all__ = [
     "ClineCLIAdapter",
+    "GeminiCLIAdapter",
     "GatewayBridgeVendorAdapter",
     "GooseAdapter",
     "HermesAdapter",

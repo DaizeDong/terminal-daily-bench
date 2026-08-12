@@ -6,6 +6,7 @@ from typing import Type
 from .base import AdapterResult, HarborRunSpec, HarnessAdapter
 from .gateway_vendors import (
     ClineCLIAdapter,
+    GeminiCLIAdapter,
     GooseAdapter,
     HermesAdapter,
     KimiCLIAdapter,
@@ -73,6 +74,7 @@ for _adapter in (
     OpenCodeAdapter,
     MiniSweAgentAdapter,
     ClineCLIAdapter,
+    GeminiCLIAdapter,
     OpenHandsAdapter,
     OpenHandsSDKAdapter,
     PiAdapter,
@@ -96,6 +98,7 @@ __all__ = [
     "AiderAdapter",
     "ClaudeCodeAdapter",
     "CodexAdapter",
+    "GeminiCLIAdapter",
     "MiniSweAgentAdapter",
     "OpenCodeAdapter",
     "OpenHandsAdapter",
