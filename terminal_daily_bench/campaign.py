@@ -1109,7 +1109,9 @@ class CampaignStore:
         os.chmod(self.root, 0o700)
         self.manifest_path = self.root / "manifest.json"
         self.checkpoint_path = self.root / "checkpoint.json"
-        self.results_root = self.root / "attempts"
+        # Evaluator results are distinct from the per-attempt mutable work tree.
+        # The formal receipt authority binds this exact stable namespace.
+        self.results_root = self.root / "results"
         self.export_path = self.root / "results.jsonl"
         self.lock_path = self.root / ".campaign.lock"
         self._lock_file = None
@@ -1495,6 +1497,8 @@ def run_campaign(
     max_cells: int | None = None,
     budget_usd: float | None = None,
     runner: CellRunner | None = None,
+    retry_cell_ids: frozenset[str] | None = None,
+    max_attempts_per_cell: int | None = None,
 ) -> tuple[int, dict[str, Any]]:
     plan = plan_campaign(spec_path)
     limits = plan.definition.limits
@@ -1507,6 +1511,20 @@ def run_campaign(
         raise CampaignError("max_cells override must be positive")
     if effective_budget is not None:
         effective_budget = _nonnegative_money(effective_budget, "budget override")
+    if retry_cell_ids is not None:
+        if (
+            not isinstance(retry_cell_ids, frozenset)
+            or not retry_cell_ids
+            or not all(isinstance(cell_id, str) for cell_id in retry_cell_ids)
+            or not retry_cell_ids <= set(plan.runtime_cells)
+        ):
+            raise CampaignError("retry_cell_ids must select eligible frozen cells")
+    if max_attempts_per_cell is not None and (
+        isinstance(max_attempts_per_cell, bool)
+        or not isinstance(max_attempts_per_cell, int)
+        or max_attempts_per_cell < 1
+    ):
+        raise CampaignError("max_attempts_per_cell must be a positive integer")
     cell_runner = runner or _default_cell_runner
     store = CampaignStore(state_dir)
 
@@ -1529,11 +1547,21 @@ def run_campaign(
         candidates: list[RuntimeCell] = []
         for cell_id in sorted(plan.runtime_cells):
             record = state["cells"][cell_id]
-            if record["status"] == SUCCESS:
-                continue
-            if record["status"] == FAILED and not retry_failed:
-                continue
-            if record["status"] == BLOCKED and not retry_blocked:
+            selective_retry = retry_cell_ids is not None
+            if selective_retry:
+                if cell_id not in retry_cell_ids:
+                    continue
+            else:
+                if record["status"] == SUCCESS:
+                    continue
+                if record["status"] == FAILED and not retry_failed:
+                    continue
+                if record["status"] == BLOCKED and not retry_blocked:
+                    continue
+            if (
+                max_attempts_per_cell is not None
+                and len(record["attempts"]) >= max_attempts_per_cell
+            ):
                 continue
             candidates.append(plan.runtime_cells[cell_id])
 

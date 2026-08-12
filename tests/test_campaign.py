@@ -389,6 +389,60 @@ def test_failed_cell_requires_explicit_retry_and_preserves_attempt_history(tmp_p
     ]
 
 
+def test_selective_bounded_retry_appends_attempts_and_never_exceeds_cap(tmp_path):
+    task = _task(tmp_path)
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+    calls = 0
+
+    def runner(cell, output, *_args):
+        nonlocal calls
+        calls += 1
+        output.write_text(json.dumps(_clean_result(cell, reward=1.0)))
+        return 0
+
+    assert run_campaign(spec, tmp_path / "state", runner=runner)[0] == 0
+    manifest = json.loads((tmp_path / "state/manifest.json").read_text())
+    cell_id = manifest["cells"][0]["cell_id"]
+    retry_ids = frozenset({cell_id})
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    # A fourth invocation is a no-op: all three immutable attempt slots exist.
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    checkpoint = json.loads((tmp_path / "state/checkpoint.json").read_text())
+    attempts = checkpoint["cells"][cell_id]["attempts"]
+    assert calls == 3
+    assert [attempt["attempt"] for attempt in attempts] == [1, 2, 3]
+    assert len(
+        list((tmp_path / "state/results" / cell_id).glob("attempt-*.json"))
+    ) == 3
+
+
 @pytest.mark.parametrize(
     ("classification", "expected_status"),
     [
