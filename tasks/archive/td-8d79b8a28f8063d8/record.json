@@ -1,0 +1,44 @@
+{
+  "task_id": "td-8d79b8a28f8063d8",
+  "repo": "petl-developers/petl",
+  "pr_number": 705,
+  "base_sha": "f5e6e128b5143b8b6f51f6b006b37ca6818c7ab4",
+  "merge_sha": "aa03e269637d6b5abf21d71180cb37f687a2c7cb",
+  "merged_at": "2026-08-05T00:18:36Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "e0399a8930c93b4498ed425f684249ba4ba5e1cc19d05853a3bf0ee764b87b81",
+  "test_files": [
+    "petl/test/test_method_shadow.py"
+  ],
+  "fail_to_pass": [
+    "petl/test/test_method_shadow.py::test_hashjoin_cache",
+    "petl/test/test_method_shadow.py::test_hashleftjoin_cache",
+    "petl/test/test_method_shadow.py::test_hashrightjoin_cache",
+    "petl/test/test_method_shadow.py::test_sort_cache",
+    "petl/test/test_method_shadow.py::test_cache_cache",
+    "petl/test/test_method_shadow.py::test_search_complement",
+    "petl/test/test_method_shadow.py::test_rowselect_complement",
+    "petl/test/test_method_shadow.py::test_fieldselect_complement",
+    "petl/test/test_method_shadow.py::test_addfield_index",
+    "petl/test/test_method_shadow.py::test_movefield_index",
+    "petl/test/test_method_shadow.py::test_fromavro_skip",
+    "petl/test/test_method_shadow.py::test_frombcolz_skip",
+    "petl/test/test_method_shadow.py::test_hashjoin_cache_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_sort_cache_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_cacheview_clearcache_still_works",
+    "petl/test/test_method_shadow.py::test_search_complement_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_select_complement_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_addfield_index_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_movefield_index_option_still_honoured",
+    "petl/test/test_method_shadow.py::test_no_shadowed_api_names"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

@@ -1,0 +1,85 @@
+diff --git a/tests/async/test_async_tspd.py b/tests/async/test_async_tspd.py
+new file mode 100644
+index 0000000..9c15a4a
+--- /dev/null
++++ b/tests/async/test_async_tspd.py
+@@ -0,0 +1,36 @@
++#!/usr/bin/env python3
++
++import unittest
++
++try:
++    from .abstract_async import AsyncAbstractTest
++except ImportError:
++    from abstract_async import AsyncAbstractTest
++
++
++class AsyncTspd(AsyncAbstractTest):
++    def test_all_params(self):
++        params = {
++                'pageurl': 'https://example.com/login',
++                'tspd_cookie': 'TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++                'html_page_base64': 'PCFET0NUWVBFIGh0bWw+...',
++                'proxy': {'type': 'HTTP',
++                          'uri': 'login:password@IP_address:PORT'},
++                'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        }
++
++        sends = {
++                'method': 'tspd',
++                'pageurl': 'https://example.com/login',
++                'tspd_cookie': 'TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++                'html_page_base64': 'PCFET0NUWVBFIGh0bWw+...',
++                'proxytype': 'HTTP',
++                'proxy': 'login:password@IP_address:PORT',
++                'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        }
++
++        self.send_return(sends, self.solver.tspd, **params)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tests/sync/test_tspd.py b/tests/sync/test_tspd.py
+new file mode 100644
+index 0000000..2cb10d8
+--- /dev/null
++++ b/tests/sync/test_tspd.py
+@@ -0,0 +1,37 @@
++#!/usr/bin/env python3
++
++import unittest
++
++try:
++    from .abstract import AbstractTest
++except ImportError:
++    from abstract import AbstractTest
++
++
++class CaptchaTspd(AbstractTest):
++
++    def test_all_params(self):
++        params = {
++            'pageurl': 'https://example.com/login',
++            'tspd_cookie': 'TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++            'html_page_base64': 'PCFET0NUWVBFIGh0bWw+...',
++            'proxy': {'type': 'HTTP',
++                      'uri': 'login:password@IP_address:PORT'},
++            'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        }
++
++        sends = {
++            'method': 'tspd',
++            'pageurl': 'https://example.com/login',
++            'tspd_cookie': 'TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++            'html_page_base64': 'PCFET0NUWVBFIGh0bWw+...',
++            'proxytype': 'HTTP',
++            'proxy': 'login:password@IP_address:PORT',
++            'useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        }
++
++        return self.send_return(sends, self.solver.tspd, **params)
++
++
++if __name__ == '__main__':
++    unittest.main()

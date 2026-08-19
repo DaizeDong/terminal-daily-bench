@@ -4,6 +4,7 @@
   "pr_number": 71,
   "base_sha": "fab01f5f19c9c7ca30f05e79a06d79bd066b475a",
   "merge_sha": "ca3bb1f2c44d5e8b022537c48f88443d5f676dd5",
+  "merged_at": "2026-07-18T17:17:15Z",
   "track": "merged",
   "source_license_spdx": "",
   "oracle_patch_sha256": "8a39a5a9aa11ee62bdd2ffea6625c72bdee3d83bc9f7e15cf5196d10962685d2",

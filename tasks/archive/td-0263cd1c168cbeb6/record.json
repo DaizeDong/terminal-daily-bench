@@ -1,0 +1,30 @@
+{
+  "task_id": "td-0263cd1c168cbeb6",
+  "repo": "pdfminer/pdfminer.six",
+  "pr_number": 1242,
+  "base_sha": "9e1243c4ad000bf9bbe60e81fc8dde2fccc0ed3b",
+  "merge_sha": "b14d19be024b263ef7d1ef0eba8bf18a40d6eeaf",
+  "merged_at": "2026-02-05T23:30:12Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "3338d07f875ac424098c5448e93cfaa525b7f1e84a402c8dbe1d0824da8692e9",
+  "test_files": [
+    "tests/test_tools_conv_cmap_reproducibility.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvCmapReproducibility::test_conv_cmap_gzip_mtime_is_zero",
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvCmapReproducibility::test_conv_cmap_produces_identical_files",
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvCmapReproducibility::test_conv_cmap_output_is_valid_json",
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvertCmapsToJsonReproducibility::test_convert_pickle_gzip_mtime_is_zero",
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvertCmapsToJsonReproducibility::test_convert_pickle_produces_identical_files",
+    "tests/test_tools_conv_cmap_reproducibility.py::TestConvertCmapsToJsonReproducibility::test_convert_pickle_output_is_valid_json"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

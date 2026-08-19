@@ -1,0 +1,633 @@
+diff --git a/tests/test_legacy_generation_options.py b/tests/test_legacy_generation_options.py
+new file mode 100644
+index 00000000..692c355a
+--- /dev/null
++++ b/tests/test_legacy_generation_options.py
+@@ -0,0 +1,130 @@
++import unittest
++
++from utils.legacy_generation_options import (
++    generation_additional_info,
++    image_size_for_figure_size,
++    is_plot_task,
++    normalize_legacy_input_content,
++)
++
++
++class LegacyGenerationOptionsTests(unittest.TestCase):
++    def test_plot_task_detection_accepts_display_labels(self) -> None:
++        self.assertTrue(is_plot_task("plot"))
++        self.assertTrue(is_plot_task("statistical plot"))
++        self.assertTrue(is_plot_task("PaperBanana Plot Mode"))
++        self.assertFalse(is_plot_task("diagram"))
++        self.assertFalse(is_plot_task(None))
++
++    def test_figure_size_maps_to_provider_image_size(self) -> None:
++        self.assertEqual(image_size_for_figure_size("1-3cm"), "1k")
++        self.assertEqual(image_size_for_figure_size("4-6cm"), "1k")
++        self.assertEqual(image_size_for_figure_size("7-9cm"), "2k")
++        self.assertEqual(image_size_for_figure_size("10-13cm"), "2k")
++        self.assertEqual(image_size_for_figure_size("14-17cm"), "4k")
++
++    def test_generation_additional_info_preserves_figure_size_and_image_size(self) -> None:
++        self.assertEqual(
++            generation_additional_info("21:9", "14-17cm"),
++            {"rounded_ratio": "21:9", "figure_size": "14-17cm", "image_size": "4k"},
++        )
++
++    def test_plot_text_input_parses_record_array_json(self) -> None:
++        content = """
++        [
++          {"Category": "Integration", "Current": 0, "Target": 4},
++          {"Category": "Security", "Current": 2, "Target": 4}
++        ]
++        """
++
++        parsed = normalize_legacy_input_content(content, "plot")
++
++        self.assertIsInstance(parsed, list)
++        self.assertEqual(parsed[0]["Category"], "Integration")
++        self.assertEqual(parsed[1]["Target"], 4)
++
++    def test_plot_text_input_parses_multiseries_dict_json(self) -> None:
++        content = """
++        {
++          "labels": ["Integration", "Governance"],
++          "current": [0, 1],
++          "target": [4, 3]
++        }
++        """
++
++        parsed = normalize_legacy_input_content(content, "statistical plot")
++
++        self.assertIsInstance(parsed, dict)
++        self.assertEqual(parsed["labels"], ["Integration", "Governance"])
++        self.assertEqual(parsed["target"], [4, 3])
++
++    def test_issue_67_record_array_schema_parses(self) -> None:
++        content = """
++        [
++          {"Category": "Capability 11: X", "Current": 0, "Target": 4},
++          {"Category": "Capability 8: X", "Current": 1, "Target": 3},
++          {"Category": "Capability 2: X", "Current": 1, "Target": 3},
++          {"Category": "Capability 10: X", "Current": 1, "Target": 3},
++          {"Category": "Capability 3: X", "Current": 1, "Target": 3},
++          {"Category": "Capability 13: X", "Current": 1, "Target": 3},
++          {"Category": "Capability 4: X", "Current": 2, "Target": 4},
++          {"Category": "Capability 12: X", "Current": 2, "Target": 4}
++        ]
++        """
++
++        parsed = normalize_legacy_input_content(content, "PaperBanana Plot Mode")
++
++        self.assertIsInstance(parsed, list)
++        self.assertEqual(len(parsed), 8)
++        self.assertEqual(parsed[0]["Category"], "Capability 11: X")
++        self.assertEqual(parsed[-1]["Target"], 4)
++
++    def test_issue_67_labels_multiseries_schema_parses(self) -> None:
++        content = """
++        {
++          "labels": [
++            "Capability 11: X",
++            "Capability 8: X",
++            "Capability 2: X",
++            "Capability 10: X",
++            "Capability 3: X",
++            "Capability 13: X",
++            "Capability 4: X",
++            "Capability 12: X"
++          ],
++          "Current Level": [0, 1, 1, 1, 1, 1, 2, 2],
++          "Target Level": [4, 3, 3, 3, 3, 3, 4, 4]
++        }
++        """
++
++        parsed = normalize_legacy_input_content(content, "plot")
++
++        self.assertIsInstance(parsed, dict)
++        self.assertEqual(parsed["labels"][0], "Capability 11: X")
++        self.assertEqual(parsed["Current Level"], [0, 1, 1, 1, 1, 1, 2, 2])
++        self.assertEqual(parsed["Target Level"][-1], 4)
++
++    def test_issue_67_minimal_labels_multiseries_schema_parses(self) -> None:
++        content = """
++        {
++          "labels": ["Integration", "Governance", "Culture", "Infra", "Availability", "Processes", "Quality", "Security"],
++          "current": [0, 1, 1, 1, 1, 1, 2, 2],
++          "target": [4, 3, 3, 3, 3, 3, 4, 4]
++        }
++        """
++
++        parsed = normalize_legacy_input_content(content, "statistical plot")
++
++        self.assertIsInstance(parsed, dict)
++        self.assertEqual(parsed["labels"][0], "Integration")
++        self.assertEqual(parsed["current"][0], 0)
++        self.assertEqual(parsed["target"][-1], 4)
++
++    def test_diagram_text_input_is_left_unchanged(self) -> None:
++        content = '{"not": "parsed for diagrams"}'
++
++        self.assertEqual(normalize_legacy_input_content(content, "diagram"), content)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_legacy_plot_agents.py b/tests/test_legacy_plot_agents.py
+new file mode 100644
+index 00000000..061d22ed
+--- /dev/null
++++ b/tests/test_legacy_plot_agents.py
+@@ -0,0 +1,183 @@
++import asyncio
++import base64
++import io
++import unittest
++from concurrent.futures import ThreadPoolExecutor
++from pathlib import Path
++from tempfile import TemporaryDirectory
++from unittest import mock
++
++from PIL import Image
++
++from agents.vanilla_agent import VanillaAgent
++from agents.visualizer_agent import VisualizerAgent
++from utils.config import ExpConfig
++
++
++PLOT_CODE = """```python
++import matplotlib.pyplot as plt
++
++labels = ["Baseline", "PaperBanana"]
++values = [0.61, 0.78]
++plt.figure(figsize=(3.2, 2.2))
++plt.bar(labels, values, color=["#6E6E73", "#2E7D32"])
++plt.ylim(0, 1)
++plt.ylabel("Accuracy")
++plt.tight_layout()
++```"""
++
++
++class LegacyPlotAgentTests(unittest.TestCase):
++    def test_visualizer_plot_mode_preserves_code_and_renders_jpeg(self) -> None:
++        async def run_agent() -> dict:
++            with TemporaryDirectory() as tmp:
++                agent = VisualizerAgent(exp_config=self._plot_config(Path(tmp)))
++                self._replace_executor(agent)
++                try:
++                    with mock.patch(
++                        "utils.generation_utils.call_model_with_retry_async",
++                        mock.AsyncMock(return_value=[PLOT_CODE]),
++                    ):
++                        return await agent.process(
++                            {
++                                "candidate_id": "plot-test-visualizer",
++                                "target_plot_desc0": (
++                                    "Compare baseline accuracy against PaperBanana."
++                                ),
++                                "additional_info": {"rounded_ratio": "1:1"},
++                            }
++                        )
++                finally:
++                    self._shutdown_executor(agent)
++
++        output = asyncio.run(run_agent())
++
++        self.assertEqual(output["target_plot_desc0_code"], PLOT_CODE)
++        self._assert_base64_jpeg(output["target_plot_desc0_base64_jpg"])
++
++    def test_vanilla_plot_mode_preserves_code_and_renders_jpeg(self) -> None:
++        async def run_agent() -> dict:
++            with TemporaryDirectory() as tmp:
++                agent = VanillaAgent(exp_config=self._plot_config(Path(tmp)))
++                self._replace_executor(agent)
++                try:
++                    with mock.patch(
++                        "utils.generation_utils.call_model_with_retry_async",
++                        mock.AsyncMock(return_value=[PLOT_CODE]),
++                    ):
++                        return await agent.process(
++                            {
++                                "content": {"Baseline": 0.61, "PaperBanana": 0.78},
++                                "visual_intent": "Compare accuracy for two methods.",
++                                "additional_info": {"rounded_ratio": "1:1"},
++                            }
++                        )
++                finally:
++                    self._shutdown_executor(agent)
++
++        output = asyncio.run(run_agent())
++
++        self.assertEqual(output["vanilla_plot_code"], PLOT_CODE)
++        self._assert_base64_jpeg(output["vanilla_plot_base64_jpg"])
++
++    def test_visualizer_diagram_uses_requested_image_size(self) -> None:
++        async def run_agent():
++            with TemporaryDirectory() as tmp:
++                agent = VisualizerAgent(exp_config=self._diagram_config(Path(tmp)))
++                with mock.patch(
++                    "utils.generation_utils.call_gemini_with_retry_async",
++                    mock.AsyncMock(return_value=["png"]),
++                ) as call, mock.patch(
++                    "agents.visualizer_agent.image_utils.convert_png_b64_to_jpg_b64",
++                    mock.Mock(return_value="jpeg"),
++                ):
++                    output = await agent.process(
++                        {
++                            "candidate_id": "diagram-size-test",
++                            "target_diagram_desc0": "Render a clean diagram.",
++                            "additional_info": {
++                                "rounded_ratio": "16:9",
++                                "figure_size": "14-17cm",
++                                "image_size": "4k",
++                            },
++                        }
++                    )
++                return output, call
++
++        output, call = asyncio.run(run_agent())
++
++        self.assertEqual(output["target_diagram_desc0_base64_jpg"], "jpeg")
++        image_config = call.call_args.kwargs["config"].image_config
++        self.assertEqual(image_config.image_size, "4k")
++
++    def test_vanilla_diagram_uses_requested_image_size(self) -> None:
++        async def run_agent():
++            with TemporaryDirectory() as tmp:
++                agent = VanillaAgent(exp_config=self._diagram_config(Path(tmp)))
++                with mock.patch(
++                    "utils.generation_utils.call_gemini_with_retry_async",
++                    mock.AsyncMock(return_value=["png"]),
++                ) as call, mock.patch(
++                    "agents.vanilla_agent.image_utils.convert_png_b64_to_jpg_b64",
++                    mock.Mock(return_value="jpeg"),
++                ):
++                    output = await agent.process(
++                        {
++                            "content": "Method content.",
++                            "visual_intent": "A diagram caption.",
++                            "additional_info": {
++                                "rounded_ratio": "16:9",
++                                "figure_size": "14-17cm",
++                                "image_size": "4k",
++                            },
++                        }
++                    )
++                return output, call
++
++        output, call = asyncio.run(run_agent())
++
++        self.assertEqual(output["vanilla_diagram_base64_jpg"], "jpeg")
++        image_config = call.call_args.kwargs["config"].image_config
++        self.assertEqual(image_config.image_size, "4k")
++
++    def _plot_config(self, work_dir: Path) -> ExpConfig:
++        return ExpConfig(
++            dataset_name="PaperBananaBench",
++            task_name="plot",
++            exp_mode="vanilla",
++            retrieval_setting="none",
++            main_model_name="mock-main-model",
++            image_gen_model_name="mock-image-model",
++            work_dir=work_dir,
++        )
++
++    def _diagram_config(self, work_dir: Path) -> ExpConfig:
++        return ExpConfig(
++            dataset_name="PaperBananaBench",
++            task_name="diagram",
++            exp_mode="vanilla",
++            retrieval_setting="none",
++            main_model_name="mock-main-model",
++            image_gen_model_name="mock-image-model",
++            work_dir=work_dir,
++        )
++
++    def _replace_executor(self, agent) -> None:
++        agent.process_executor.shutdown(wait=True)
++        agent.process_executor = ThreadPoolExecutor(max_workers=1)
++
++    def _shutdown_executor(self, agent) -> None:
++        if agent.process_executor is not None:
++            agent.process_executor.shutdown(wait=True)
++            agent.process_executor = None
++
++    def _assert_base64_jpeg(self, encoded: str) -> None:
++        image_bytes = base64.b64decode(encoded)
++        with Image.open(io.BytesIO(image_bytes)) as image:
++            self.assertEqual(image.format, "JPEG")
++            self.assertGreater(image.width, 100)
++            self.assertGreater(image.height, 80)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_legacy_ui_result_keys.py b/tests/test_legacy_ui_result_keys.py
+new file mode 100644
+index 00000000..d55fd6b0
+--- /dev/null
++++ b/tests/test_legacy_ui_result_keys.py
+@@ -0,0 +1,235 @@
++import asyncio
++from pathlib import Path
++from tempfile import TemporaryDirectory
++from unittest import TestCase, mock
++
++from utils.legacy_ui_results import (
++    build_evolution_stages,
++    infer_task_name,
++    resolve_display_mode_output,
++    resolve_final_output,
++    resolve_gt_image_path,
++    stage_name_from_image_key,
++    text_key_for_image_key,
++)
++
++
++class LegacyUiResultKeyTests(TestCase):
++    def test_plot_final_output_prefers_eval_image_field(self) -> None:
++        result = {
++            "content": {"x": [1, 2]},
++            "eval_image_field": "target_plot_stylist_desc0_base64_jpg",
++            "target_plot_critic_desc1_base64_jpg": "critic",
++            "target_plot_stylist_desc0_base64_jpg": "stylist",
++            "target_plot_stylist_desc0": "Styled plot description",
++        }
++
++        selection = resolve_final_output(result, task_name="plot")
++
++        self.assertEqual(selection.image_key, "target_plot_stylist_desc0_base64_jpg")
++        self.assertEqual(selection.text_key, "target_plot_stylist_desc0")
++
++    def test_plot_final_output_falls_back_to_highest_critic_round(self) -> None:
++        result = {
++            "target_plot_critic_desc0_base64_jpg": "round0",
++            "target_plot_critic_desc2_base64_jpg": "round2",
++            "target_plot_critic_desc2_code": "plt.plot([1, 2])",
++        }
++
++        selection = resolve_final_output(result, task_name="plot")
++
++        self.assertEqual(selection.image_key, "target_plot_critic_desc2_base64_jpg")
++        self.assertEqual(selection.text_key, "target_plot_critic_desc2_code")
++
++    def test_plot_final_output_ignores_stale_diagram_eval_image_field(self) -> None:
++        result = {
++            "eval_image_field": "target_diagram_critic_desc2_base64_jpg",
++            "target_diagram_critic_desc2_base64_jpg": "wrong task",
++            "target_plot_critic_desc1_base64_jpg": "right task",
++            "target_plot_critic_desc1_code": "plt.plot([1])",
++        }
++
++        selection = resolve_final_output(result, task_name="plot")
++
++        self.assertEqual(selection.image_key, "target_plot_critic_desc1_base64_jpg")
++        self.assertEqual(selection.text_key, "target_plot_critic_desc1_code")
++
++    def test_critic_display_mode_uses_latest_round(self) -> None:
++        result = {
++            "target_plot_critic_desc0_base64_jpg": "round0",
++            "target_plot_critic_desc3_base64_jpg": "round3",
++            "target_plot_critic_desc3_code": "plt.plot([3])",
++        }
++
++        selection = resolve_display_mode_output(result, "Critic", task_name="plot")
++
++        self.assertEqual(selection.image_key, "target_plot_critic_desc3_base64_jpg")
++        self.assertEqual(selection.text_key, "target_plot_critic_desc3_code")
++
++    def test_auto_prefers_polished_plot_when_present(self) -> None:
++        result = {
++            "target_plot_critic_desc2_base64_jpg": "critic",
++            "target_plot_critic_desc2_code": "plt.plot([2])",
++            "polished_plot_base64_jpg": "polished",
++            "suggestions_plot": "Tighten axis labeling.",
++        }
++
++        selection = resolve_final_output(result, task_name="plot")
++
++        self.assertEqual(selection.image_key, "polished_plot_base64_jpg")
++        self.assertEqual(selection.text_key, "suggestions_plot")
++
++    def test_vanilla_plot_output_uses_plot_code_as_text(self) -> None:
++        result = {
++            "vanilla_plot_base64_jpg": "image",
++            "polished_plot_base64_jpg": "polished",
++            "vanilla_plot_code": "plt.bar(['A'], [1])",
++        }
++
++        selection = resolve_final_output(result, exp_mode="vanilla", task_name="plot")
++
++        self.assertEqual(selection.image_key, "vanilla_plot_base64_jpg")
++        self.assertEqual(selection.text_key, "vanilla_plot_code")
++        self.assertEqual(
++            text_key_for_image_key("vanilla_plot_base64_jpg", result),
++            "vanilla_plot_code",
++        )
++
++    def test_evolution_stages_include_vanilla_planner_critic_and_polished_plot(self) -> None:
++        result = {
++            "content": {"Series": [1, 2, 3]},
++            "vanilla_plot_base64_jpg": "vanilla",
++            "target_plot_desc0_base64_jpg": "planner",
++            "target_plot_critic_desc0_base64_jpg": "critic",
++            "polished_plot_base64_jpg": "polished",
++        }
++
++        stages = build_evolution_stages(result, task_name="plot")
++
++        self.assertEqual(
++            [stage["image_key"] for stage in stages],
++            [
++                "vanilla_plot_base64_jpg",
++                "target_plot_desc0_base64_jpg",
++                "target_plot_critic_desc0_base64_jpg",
++                "polished_plot_base64_jpg",
++            ],
++        )
++
++    def test_relative_plot_ground_truth_path_resolves_under_benchmark_root(self) -> None:
++        with TemporaryDirectory() as tmp:
++            root = Path(tmp)
++            image_path = root / "data" / "PaperBananaBench" / "plot" / "images" / "plot.jpg"
++            image_path.parent.mkdir(parents=True)
++            image_path.write_bytes(b"not-a-real-image")
++
++            resolved = resolve_gt_image_path(
++                {"path_to_gt_image": "images/plot.jpg", "content": {"x": [1]}},
++                task_name="plot",
++                repo_root=root,
++            )
++
++        self.assertEqual(resolved, image_path)
++
++    def test_task_name_inference_handles_vanilla_plot_records(self) -> None:
++        self.assertEqual(infer_task_name({"vanilla_plot_base64_jpg": "image"}), "plot")
++        self.assertEqual(infer_task_name({"task_name": "statistical plot"}), "plot")
++
++    def test_stage_names_are_stable_for_vanilla_and_polished_outputs(self) -> None:
++        self.assertEqual(stage_name_from_image_key("vanilla_plot_base64_jpg"), "vanilla")
++        self.assertEqual(stage_name_from_image_key("polished_diagram_base64_jpg"), "polished")
++        self.assertEqual(
++            stage_name_from_image_key("target_plot_critic_desc2_base64_jpg"),
++            "critic_desc2",
++        )
++
++
++class LegacyUiTaskPropagationTests(TestCase):
++    def test_gradio_candidate_pipeline_passes_plot_task_to_exp_config(self) -> None:
++        import app
++
++        captured = {}
++
++        class FakeProcessor:
++            def __init__(self, exp_config, **_agents):
++                captured["task_name"] = exp_config.task_name
++                captured["dataset_name"] = exp_config.dataset_name
++
++            async def process_queries_batch(self, *_args, **_kwargs):
++                yield {"vanilla_plot_base64_jpg": "image", "eval_image_field": "vanilla_plot_base64_jpg"}
++
++        with self._patched_legacy_pipeline(app, FakeProcessor):
++            results = asyncio.run(app.process_parallel_candidates([{}], exp_mode="vanilla", task_name="plot"))
++
++        self.assertEqual(captured, {"task_name": "plot", "dataset_name": "PaperBananaBench"})
++        self.assertEqual(results[0]["eval_image_field"], "vanilla_plot_base64_jpg")
++        self.assertEqual(results[0]["task_name"], "plot")
++
++    def test_streamlit_candidate_pipeline_passes_plot_task_to_exp_config(self) -> None:
++        import demo
++
++        captured = {}
++
++        class FakeProcessor:
++            def __init__(self, exp_config, **_agents):
++                captured["task_name"] = exp_config.task_name
++                captured["dataset_name"] = exp_config.dataset_name
++
++            async def process_queries_batch(self, *_args, **_kwargs):
++                yield {"vanilla_plot_base64_jpg": "image", "eval_image_field": "vanilla_plot_base64_jpg"}
++
++        with self._patched_legacy_pipeline(demo, FakeProcessor):
++            results = asyncio.run(demo.process_parallel_candidates([{}], exp_mode="vanilla", task_name="plot"))
++
++        self.assertEqual(captured, {"task_name": "plot", "dataset_name": "PaperBananaBench"})
++        self.assertEqual(results[0]["eval_image_field"], "vanilla_plot_base64_jpg")
++        self.assertEqual(results[0]["task_name"], "plot")
++
++    def test_gradio_failed_plot_record_keeps_task_name_for_inference(self) -> None:
++        import app
++
++        class FakeProcessor:
++            def __init__(self, *_args, **_kwargs):
++                pass
++
++            async def process_queries_batch(self, *_args, **_kwargs):
++                yield {"content": "CSV data that failed before image generation"}
++
++        with self._patched_legacy_pipeline(app, FakeProcessor):
++            results = asyncio.run(app.process_parallel_candidates([{}], task_name="plot"))
++
++        self.assertEqual(results[0]["task_name"], "plot")
++        self.assertEqual(infer_task_name(results[0]), "plot")
++
++    def test_streamlit_failed_plot_record_keeps_task_name_for_inference(self) -> None:
++        import demo
++
++        class FakeProcessor:
++            def __init__(self, *_args, **_kwargs):
++                pass
++
++            async def process_queries_batch(self, *_args, **_kwargs):
++                yield {"content": "CSV data that failed before image generation"}
++
++        with self._patched_legacy_pipeline(demo, FakeProcessor):
++            results = asyncio.run(demo.process_parallel_candidates([{}], task_name="plot"))
++
++        self.assertEqual(results[0]["task_name"], "plot")
++        self.assertEqual(infer_task_name(results[0]), "plot")
++
++    def _patched_legacy_pipeline(self, module, fake_processor):
++        class DummyAgent:
++            def __init__(self, **_kwargs):
++                pass
++
++        return mock.patch.multiple(
++            module,
++            PaperVizProcessor=fake_processor,
++            VanillaAgent=DummyAgent,
++            PlannerAgent=DummyAgent,
++            VisualizerAgent=DummyAgent,
++            StylistAgent=DummyAgent,
++            CriticAgent=DummyAgent,
++            RetrieverAgent=DummyAgent,
++            PolishAgent=DummyAgent,
++        )
+diff --git a/tests/test_plot_execution.py b/tests/test_plot_execution.py
+new file mode 100644
+index 00000000..1aab0dc8
+--- /dev/null
++++ b/tests/test_plot_execution.py
+@@ -0,0 +1,61 @@
++import base64
++import io
++import unittest
++
++from PIL import Image
++
++from utils.plot_execution import execute_plot_code_worker, extract_plot_code
++
++
++PLOT_CODE = """```python
++import matplotlib.pyplot as plt
++
++plt.figure(figsize=(3, 2))
++plt.plot([1, 2, 3], [1, 4, 9], marker="o")
++plt.xlabel("Input")
++plt.ylabel("Score")
++plt.tight_layout()
++```"""
++
++
++class PlotExecutionTests(unittest.TestCase):
++    def test_extract_plot_code_from_python_fence(self) -> None:
++        self.assertEqual(
++            extract_plot_code("```python\nprint('plot')\n```"),
++            "print('plot')",
++        )
++
++    def test_execute_plot_code_worker_renders_base64_jpeg(self) -> None:
++        rendered = execute_plot_code_worker(PLOT_CODE, dpi=80)
++
++        self.assertIsNotNone(rendered)
++        image_bytes = base64.b64decode(rendered)
++        with Image.open(io.BytesIO(image_bytes)) as image:
++            self.assertEqual(image.format, "JPEG")
++            self.assertGreater(image.width, 100)
++            self.assertGreater(image.height, 80)
++
++    def test_execute_plot_code_worker_returns_none_without_figure(self) -> None:
++        self.assertIsNone(execute_plot_code_worker("value = 42", dpi=80))
++
++    def test_execute_plot_code_worker_closes_figures_after_failure(self) -> None:
++        import matplotlib
++
++        matplotlib.use("Agg", force=True)
++        import matplotlib.pyplot as plt
++
++        self.assertIsNone(
++            execute_plot_code_worker(
++                (
++                    "import matplotlib.pyplot as plt\n"
++                    "plt.figure()\n"
++                    "raise RuntimeError('boom')"
++                ),
++                dpi=80,
++            )
++        )
++        self.assertEqual(plt.get_fignums(), [])
++
++
++if __name__ == "__main__":
++    unittest.main()

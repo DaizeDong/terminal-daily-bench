@@ -1,0 +1,139 @@
+diff --git a/CITATION.bib b/CITATION.bib
+index 1f24b40..0b60adb 100644
+--- a/CITATION.bib
++++ b/CITATION.bib
+@@ -6,5 +6,5 @@ @article{stable-baselines3
+   volume  = {22},
+   number  = {268},
+   pages   = {1-8},
+-  url     = {http://jmlr.org/papers/v22/20-1364.html}
++  url     = {https://jmlr.org/papers/v22/20-1364.html}
+ }
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index 45c958b..2000ec0 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -15,7 +15,7 @@ https://github.com/DLR-RM/stable-baselines3
+ 
+ 
+ If you are not familiar with creating a Pull Request, here are some guides:
+-- http://stackoverflow.com/questions/14680711/how-to-do-a-github-pull-request
++- https://stackoverflow.com/questions/14680711/how-to-do-a-github-pull-request
+ - https://help.github.com/articles/creating-a-pull-request/
+ 
+ 
+diff --git a/NOTICE b/NOTICE
+index 6dbbda6..5b480ad 100644
+--- a/NOTICE
++++ b/NOTICE
+@@ -2,7 +2,7 @@ Large portion of the code of Stable-Baselines3 (in `common/`) were ported from S
+ both licensed under the MIT License:
+ 
+ before the fork (June 2018):
+-Copyright (c) 2017 OpenAI (http://openai.com)
++Copyright (c) 2017 OpenAI (https://openai.com)
+ 
+ after the fork (June 2018):
+ Copyright (c) 2018-2019 Stable-Baselines Team
+diff --git a/README.md b/README.md
+index a837d77..29b257b 100644
+--- a/README.md
++++ b/README.md
+@@ -194,7 +194,7 @@ To cite this repository in publications, please cite the SB3 paper:
+   volume  = {22},
+   number  = {268},
+   pages   = {1-8},
+-  url     = {http://jmlr.org/papers/v22/20-1364.html}
++  url     = {https://jmlr.org/papers/v22/20-1364.html}
+ }
+ ```
+ 
+diff --git a/sbx/common/on_policy_algorithm.py b/sbx/common/on_policy_algorithm.py
+index aa54b95..7aae62f 100644
+--- a/sbx/common/on_policy_algorithm.py
++++ b/sbx/common/on_policy_algorithm.py
+@@ -36,6 +36,8 @@ def __init__(
+         max_grad_norm: float,
+         use_sde: bool,
+         sde_sample_freq: int,
++        rollout_buffer_class: type[RolloutBuffer] | None = None,
++        rollout_buffer_kwargs: dict[str, Any] | None = None,
+         tensorboard_log: str | None = None,
+         monitor_wrapper: bool = True,
+         policy_kwargs: dict[str, Any] | None = None,
+@@ -57,6 +59,8 @@ def __init__(
+             max_grad_norm=max_grad_norm,
+             use_sde=use_sde,
+             sde_sample_freq=sde_sample_freq,
++            rollout_buffer_class=rollout_buffer_class,
++            rollout_buffer_kwargs=rollout_buffer_kwargs,
+             monitor_wrapper=monitor_wrapper,
+             policy_kwargs=policy_kwargs,
+             tensorboard_log=tensorboard_log,
+@@ -108,7 +112,11 @@ def _setup_model(self) -> None:
+         self._setup_lr_schedule()
+         self.set_random_seed(self.seed)
+ 
+-        self.rollout_buffer = RolloutBuffer(
++        if self.rollout_buffer_class is None:
++            assert not isinstance(self.observation_space, spaces.Dict), "Dict observation space is not supported yet."
++            self.rollout_buffer_class = RolloutBuffer
++
++        self.rollout_buffer = self.rollout_buffer_class(
+             self.n_steps,
+             self.observation_space,
+             self.action_space,
+@@ -116,6 +124,7 @@ def _setup_model(self) -> None:
+             gae_lambda=self.gae_lambda,
+             n_envs=self.n_envs,
+             device="cpu",  # force cpu device to easy torch -> numpy conversion
++            **self.rollout_buffer_kwargs,
+         )
+ 
+     def collect_rollouts(
+diff --git a/sbx/ppo/ppo.py b/sbx/ppo/ppo.py
+index 0a27fc4..1a76e3d 100644
+--- a/sbx/ppo/ppo.py
++++ b/sbx/ppo/ppo.py
+@@ -7,6 +7,7 @@
+ import numpy as np
+ from flax.training.train_state import TrainState
+ from gymnasium import spaces
++from stable_baselines3.common.buffers import RolloutBuffer
+ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
+ from stable_baselines3.common.utils import FloatSchedule, explained_variance
+ 
+@@ -55,6 +56,8 @@ class PPO(OnPolicyAlgorithmJax):
+         instead of action noise exploration (default: False)
+     :param sde_sample_freq: Sample a new noise matrix every n steps when using gSDE
+         Default: -1 (only sample at the beginning of the rollout)
++    :param rollout_buffer_class: Rollout buffer class to use. If ``None``, it will be automatically selected.
++    :param rollout_buffer_kwargs: Keyword arguments to pass to the rollout buffer on creation.
+     :param target_kl: Update the learning rate based on a desired KL divergence (see https://arxiv.org/abs/1707.02286).
+         Note: this will overwrite any lr schedule.
+         By default, there is no limit on the kl div.
+@@ -94,6 +97,8 @@ def __init__(
+         max_grad_norm: float = 0.5,
+         use_sde: bool = False,
+         sde_sample_freq: int = -1,
++        rollout_buffer_class: type[RolloutBuffer] | None = None,
++        rollout_buffer_kwargs: dict[str, Any] | None = None,
+         target_kl: float | None = None,
+         tensorboard_log: str | None = None,
+         policy_kwargs: dict[str, Any] | None = None,
+@@ -115,6 +120,8 @@ def __init__(
+             # Note: gSDE is not properly implemented,
+             use_sde=use_sde,
+             sde_sample_freq=sde_sample_freq,
++            rollout_buffer_class=rollout_buffer_class,
++            rollout_buffer_kwargs=rollout_buffer_kwargs,
+             tensorboard_log=tensorboard_log,
+             policy_kwargs=policy_kwargs,
+             verbose=verbose,
+diff --git a/sbx/version.txt b/sbx/version.txt
+index d21d277..4e8f395 100644
+--- a/sbx/version.txt
++++ b/sbx/version.txt
+@@ -1 +1 @@
+-0.25.0
++0.26.0

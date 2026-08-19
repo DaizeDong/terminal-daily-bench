@@ -1,0 +1,27 @@
+{
+  "task_id": "td-d1fece63f49d45a5",
+  "repo": "anyoptimization/pymoo",
+  "pr_number": 788,
+  "base_sha": "2aa012be7e6049f436453eaba95ae054fe6b5b65",
+  "merge_sha": "cb9341e454c5f411a0dc51979dc7719facc34fcb",
+  "merged_at": "2026-06-21T18:21:31Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "256b5f69cf02de494f04c06af9ef9eec3c855ac9f3f480fecc727bddba9002f7",
+  "test_files": [
+    "tests/algorithms/test_spea2.py"
+  ],
+  "fail_to_pass": [
+    "tests/algorithms/test_spea2.py::test_spea2_truncation_keeps_extreme_solutions",
+    "tests/algorithms/test_spea2.py::test_spea2_truncation_preserves_extremes_after_multiple_removals"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4",
+    "C6"
+  ]
+}

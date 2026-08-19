@@ -1,0 +1,27 @@
+{
+  "task_id": "td-3f82c2e5c91b7c6e",
+  "repo": "aligfellow/xyzrender",
+  "pr_number": 172,
+  "base_sha": "5fe916c647cd3f5dee544c42d378a194e7546e4d",
+  "merge_sha": "5cb4a5feb5d5baae4e8ef3f5d7861f712856e2fd",
+  "merged_at": "2026-07-31T12:32:05Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "17890c5e6c08043eb32f64acc2ca661219e29044e547f3877ec4bf12fff06eef",
+  "test_files": [
+    "tests/test_api.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_api.py::test_stereocenter_hydrogens",
+    "tests/test_api.py::test_render_wires_stereocenter_hydrogens"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C2",
+    "C4"
+  ]
+}

@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/jazzband/docopt-ng.git
+ARG REPO_URL=git://127.0.0.1:29405/jazzband/docopt-ng.git
 ARG REPO_BASE_SHA=fab01f5f19c9c7ca30f05e79a06d79bd066b475a
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \

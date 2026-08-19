@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-40063b5d3aa6ab4b"
+description = "RC-4712-add-alibaba-captcha"
+keywords = ["C5", "C2", "C4"]
+
+[metadata]
+source_repo = "2captcha/2captcha-python"
+pr_number = 143
+base_sha = "d981352f4f17b75b7211657162189d1efddf19b1"
+merge_sha = "f596f77d3d697d0e0f9182dfc943aba95e625819"
+created_at = "2026-06-22T12:52:21Z"
+oracle_patch_sha256 = "b0fb79e33589eaafe1440dd379cadbee845bc30761154c039e2adb6a34d47402"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

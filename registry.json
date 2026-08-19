@@ -21,6 +21,15 @@
       "note": "13 certified task(s); gold withheld while live"
     },
     {
+      "id": "2026-08-19",
+      "status": "live",
+      "n_tasks": 50,
+      "fresh_tasks": 0,
+      "carried_tasks": 0,
+      "unknown_origin_tasks": 50,
+      "note": "50 certified task(s): 0 fresh + 0 carried + 50 unknown-origin; gold withheld while live"
+    },
+    {
       "id": "sample",
       "status": "archive",
       "n_tasks": 1,

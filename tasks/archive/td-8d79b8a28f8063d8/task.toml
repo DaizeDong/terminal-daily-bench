@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-8d79b8a28f8063d8"
+description = "Fix cache/complement/index/skip attributes shadowing Table methods"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "petl-developers/petl"
+pr_number = 705
+base_sha = "f5e6e128b5143b8b6f51f6b006b37ca6818c7ab4"
+merge_sha = "aa03e269637d6b5abf21d71180cb37f687a2c7cb"
+created_at = "2026-08-04T08:39:45Z"
+oracle_patch_sha256 = "e0399a8930c93b4498ed425f684249ba4ba5e1cc19d05853a3bf0ee764b87b81"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

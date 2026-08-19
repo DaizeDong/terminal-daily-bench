@@ -1,0 +1,149 @@
+diff --git a/docs/source/cli_reference.md b/docs/source/cli_reference.md
+index 325c936..818100c 100644
+--- a/docs/source/cli_reference.md
++++ b/docs/source/cli_reference.md
+@@ -58,7 +58,7 @@ Full flag reference for `xyzrender`. See also `xyzrender --help`.
+ | Flag | Description |
+ |------|-------------|
+ | `--hy [ATOMS]` | Show H atoms (no args = all, or indices like `"1-5,8"`) |
+-| `--no-hy` | Hide all H atoms |
++| `--no-hy` | Hide C-bound H except those on R/S stereocenters or explicit TS/NCI bonds |
+ | `--only ATOMS` | Render only selected atoms before orientation/canvas fitting. Repeatable; same selector grammar as `--hl`, e.g. `"1-24"`, `"C,N,O"`, `"M"`. Cube/surface fields are not cropped |
+ | `--exclude ATOMS` | Remove selected atoms before orientation/canvas fitting. Repeatable; same selector grammar as `--hl`, e.g. `"25-40"`, `"Na,Cl"`. Cube/surface fields are not cropped |
+ | `-k`, `--kekule` | Use Kekulé bond orders (no aromatic 1.5) |
+diff --git a/docs/source/python_api.md b/docs/source/python_api.md
+index 08c8f6c..5e92df9 100644
+--- a/docs/source/python_api.md
++++ b/docs/source/python_api.md
+@@ -126,10 +126,13 @@ Atom indices are **1-indexed**.
+ ```python
+ ethanol = load("ethanol.xyz")
+ render(ethanol, hy=True)            # show all H
+-render(ethanol, no_hy=True)         # hide all H
++render(ethanol, no_hy=True)         # hide non-essential H
+ render(ethanol, hy=[7, 8, 9])       # show specific H atoms
+ ```
+ 
++Hydrogens bonded to R/S point stereocenters remain visible automatically, as
++do hydrogens referenced by explicit TS or NCI bonds.
++
+ ### Atom filtering
+ 
+ Use `only=` or `exclude=` to remove atoms from the render-time graph before
+diff --git a/pyproject.toml b/pyproject.toml
+index 4024385..f2926fa 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "xyzrender"
+-version = "0.3.8"
++version = "0.3.9"
+ description = "Publication-quality molecular graphics."
+ authors = [{name = "Alister S. Goodfellow"}]
+ readme = "README.md"
+diff --git a/src/xyzrender/cli.py b/src/xyzrender/cli.py
+index a2dcc4d..8911738 100644
+--- a/src/xyzrender/cli.py
++++ b/src/xyzrender/cli.py
+@@ -272,7 +272,12 @@ def main() -> None:
+         metavar="ATOMS",
+         help='Show H atoms (no args=all, or indices like "1-5,8")',
+     )
+-    disp_g.add_argument("--no-hy", action="store_true", default=False, help="Hide all H atoms")
++    disp_g.add_argument(
++        "--no-hy",
++        action="store_true",
++        default=False,
++        help="Hide C-bound H except those on R/S stereocenters or explicit TS/NCI bonds",
++    )
+     disp_g.add_argument(
+         "--only",
+         action="append",
+diff --git a/src/xyzrender/config.py b/src/xyzrender/config.py
+index e0ef7a1..e269cbe 100644
+--- a/src/xyzrender/config.py
++++ b/src/xyzrender/config.py
+@@ -248,6 +248,7 @@ def apply_hydrogen_flags(cfg: RenderConfig, *, hy: bool | list[int] | None, no_h
+     """Single source of truth for --hy / --no-hy logic. Called by CLI and Python API.
+ 
+     hy=None → hide C-H (default), hy=True → show all, hy=[1,3] → show specific (1-indexed).
++    Hydrogens attached to R/S stereocenters remain visible in every mode.
+     """
+     if no_hy:
+         cfg.hide_h = True
+diff --git a/src/xyzrender/renderer.py b/src/xyzrender/renderer.py
+index 166e778..dbabe83 100644
+--- a/src/xyzrender/renderer.py
++++ b/src/xyzrender/renderer.py
+@@ -49,6 +49,46 @@
+ _CENTROID_VDW = 0.5  # VdW radius (Å) for NCI pi-system centroid dummy nodes
+ 
+ 
++def _stereocenter_hydrogens(graph: nx.Graph) -> set[int]:
++    """Return H atoms bonded to point stereocenters detected by xyzgraph.
++
++    Only covalent atoms and bonds participate, matching xyzgraph's unified
++    stereo annotator while avoiding unrelated E/Z, axial, and planar work.
++    """
++    from xyzgraph.stereo import assign_rs
++
++    def is_specified_atom(node: int) -> bool:
++        """Exclude nodes (atoms) with unspecified/wildcard symbols."""
++        symbol = graph.nodes[node].get("symbol")
++        return symbol != "*"
++
++    def is_not_ts_or_nci(left: int, right: int) -> bool:
++        """Exclude edges pertaining to NCIs or TSs."""
++        bond = graph.edges[left, right]
++        is_nci = bond.get("NCI", False)
++        is_ts = bond.get("TS", False)
++        return not is_nci and not is_ts
++
++    # return filtered graph without unspecified atoms and NCIs or TSs.
++    covalent_graph = nx.subgraph_view(
++        graph,
++        filter_node=is_specified_atom,
++        filter_edge=is_not_ts_or_nci,
++    )
++
++    centers = set(assign_rs(covalent_graph))  # Assign and return the set of r/s stereocenters.
++
++    # Returns hydrogen atoms covalently bonded to stereocenters.
++    hydrogen_indices: set[int] = set()
++
++    for center in centers:
++        for neighbor in covalent_graph.neighbors(center):
++            symbol = covalent_graph.nodes[neighbor].get("symbol")
++            if symbol == "H":
++                hydrogen_indices.add(neighbor)
++    return hydrogen_indices
++
++
+ def _sphere_gradient_def(gid: str, xi: float, yi: float, r_px: float, stops: list[tuple[str, str]]) -> str:
+     """User-space radial gradient centred on the projected sphere, focal upper-left."""
+     stops_xml = "".join(f'<stop offset="{off}" stop-color="{col}"/>' for off, col in stops)
+@@ -460,6 +500,9 @@ def render_svg(graph, config: RenderConfig | None = None, *, _log: bool = True,
+     hidden = set()
+     if cfg.hide_h:
+         show = set(cfg.show_h_indices)
++        # A hydrogen can define the stereochemistry of an R/S stereocenter.
++        # Keep steric hydrogen explicit so an R/S center remains unambiguous.
++        show.update(_stereocenter_hydrogens(graph))
+         # Auto-show H atoms involved in manual NCI/TS pairs — these aren't in
+         # graph.edges (cfg.{nci,ts}_bonds is renderer-only), so the C-only
+         # neighbour check below would otherwise hide them and orphan the bond.
+diff --git a/uv.lock b/uv.lock
+index e0f1ba3..309493a 100644
+--- a/uv.lock
++++ b/uv.lock
+@@ -2208,7 +2208,7 @@ wheels = [
+ 
+ [[package]]
+ name = "xyzrender"
+-version = "0.3.5"
++version = "0.3.8"
+ source = { editable = "." }
+ dependencies = [
+     { name = "cairosvg" },

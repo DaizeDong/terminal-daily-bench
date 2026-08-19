@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_inline_vault_targeting_docs.py::<class>::test_central_protocol_documents_inline_override_before_fallbacks",
+    "tests/test_write_config_preserves_user_keys.py::test_rerunning_setup_keeps_user_added_keys",
+    "tests/test_write_config_preserves_user_keys.py::test_setup_on_legacy_config_preserves_keys",
+    "tests/test_write_config_preserves_user_keys.py::test_setup_writes_managed_keys_on_a_fresh_config",
+    "tests/test_write_config_preserves_user_keys.py::test_setup_collapses_duplicate_managed_keys",
+    "tests/test_xdg_config_location.py::test_fresh_install_uses_xdg_default",
+    "tests/test_xdg_config_location.py::test_xdg_config_home_is_honored",
+    "tests/test_xdg_config_location.py::test_existing_legacy_dir_keeps_working",
+    "tests/test_xdg_config_location.py::test_xdg_dir_wins_once_it_exists",
+    "tests/test_xdg_config_location.py::test_empty_xdg_config_home_falls_back_to_default",
+    "tests/test_xdg_config_location.py::test_legacy_config_is_still_read_end_to_end"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

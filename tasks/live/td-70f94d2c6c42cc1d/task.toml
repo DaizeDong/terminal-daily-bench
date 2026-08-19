@@ -1,0 +1,35 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-70f94d2c6c42cc1d"
+description = "fix: support 3D activations in gradient CAM weights"
+keywords = ["C5", "C4", "C6", "C13"]
+
+[metadata]
+source_repo = "jacobgil/pytorch-grad-cam"
+created_at = "2026-08-12T04:42:27Z"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

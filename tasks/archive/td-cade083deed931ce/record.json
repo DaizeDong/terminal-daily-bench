@@ -1,0 +1,30 @@
+{
+  "task_id": "td-cade083deed931ce",
+  "repo": "dwzhu-pku/PaperBanana",
+  "pr_number": 71,
+  "base_sha": "ddeb2a9a8cf6c8119dd29a97c1f1a7312d27dc7b",
+  "merge_sha": "836455537e863b5a2f40dace487a782c0bc5ef94",
+  "merged_at": "2026-06-25T12:48:17Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "e7f17eafcd1c5a6c5a3d0fb278d0494966e4b45a3deda8bb4278815bcffd4545",
+  "test_files": [
+    "tests/test_planner_metaphor.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_planner_metaphor.py::test_exp_config_planner_metaphor_defaults_false",
+    "tests/test_planner_metaphor.py::test_default_diagram_planner_prompt_is_unchanged",
+    "tests/test_planner_metaphor.py::test_metaphor_supplement_only_when_enabled_for_diagrams",
+    "tests/test_planner_metaphor.py::test_planner_metaphor_is_diagram_only_and_keeps_description_output",
+    "tests/test_planner_metaphor.py::test_planner_agent_uses_exp_config_metaphor_flag_for_diagrams",
+    "tests/test_planner_metaphor.py::test_planner_agent_ignores_metaphor_flag_for_plots"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

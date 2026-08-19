@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-a59538ed3ac418d3"
+description = "fix(skills): remove broken default skills hub"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "cft0808/edict"
+pr_number = 306
+base_sha = "96abcd12ec59bc017bb8a505ee4cc83cfa3e9515"
+merge_sha = "5f4da4e184227508e1b7b465111994190c0fd0d5"
+created_at = "2026-04-25T07:41:13Z"
+oracle_patch_sha256 = "065aec5f6c8f56dff5b4639a83cdceb8c5188f8e657152ea17e812a4754cfa09"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

@@ -1,0 +1,15 @@
+diff --git a/docopt/__init__.py b/docopt/__init__.py
+index b13ff73..182e043 100644
+--- a/docopt/__init__.py
++++ b/docopt/__init__.py
+@@ -919,5 +919,9 @@ def docopt(
+     if matched and left == []:
+         return ParsedOptions((a.name, a.value) for a in (pattern.flat() + collected))
+     if left:
+-        raise DocoptExit(f"Warning: found unmatched (duplicate?) arguments {left}")
++        raise DocoptExit(
++            f"Warning: found unmatched (duplicate?) arguments {left}",
++            collected=collected,
++            left=left,
++        )
+     raise DocoptExit(collected=collected, left=left)

@@ -1,0 +1,28 @@
+{
+  "task_id": "td-40063b5d3aa6ab4b",
+  "repo": "2captcha/2captcha-python",
+  "pr_number": 143,
+  "base_sha": "d981352f4f17b75b7211657162189d1efddf19b1",
+  "merge_sha": "f596f77d3d697d0e0f9182dfc943aba95e625819",
+  "merged_at": "2026-06-22T12:52:32Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "b0fb79e33589eaafe1440dd379cadbee845bc30761154c039e2adb6a34d47402",
+  "test_files": [
+    "tests/async/test_async_alibaba.py",
+    "tests/sync/test_alibaba.py"
+  ],
+  "fail_to_pass": [
+    "tests/async/test_async_alibaba.py::AsyncAlibaba::test_all_params",
+    "tests/sync/test_alibaba.py::CaptchaAlibaba::test_all_params"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C2",
+    "C4"
+  ]
+}

@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-bca62cbd0a787fef"
+description = "fix(torch): apply quantile flip to autoregressive outputs in force_flip_invariance"
+keywords = ["C5", "C4", "C6", "C13"]
+
+[metadata]
+source_repo = "google-research/timesfm"
+pr_number = 463
+base_sha = "4a6c5cdae7ac73a450843e035fbfc3ffa08e9caf"
+merge_sha = "3dae50b20d7a724981e8ea36cda75578f80dd2dc"
+created_at = "2026-07-09T15:22:09Z"
+oracle_patch_sha256 = "6ee363b5eaacd8846e71b0179cb35d50769d212aa31c019f3a5aeb1fb323ff5a"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

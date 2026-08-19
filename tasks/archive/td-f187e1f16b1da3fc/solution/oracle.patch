@@ -1,0 +1,282 @@
+diff --git a/README.md b/README.md
+index 0784946..cf6bb68 100644
+--- a/README.md
++++ b/README.md
+@@ -54,6 +54,7 @@ Examples of API requests for different captcha types are available on the [Pytho
+     - [Hunt](#hunt)
+     - [Alibaba](#alibaba)
+     - [TSPD](#tspd)
++    - [Basilisk](#basilisk)
+   - [Other methods](#other-methods)
+     - [send / get\_result](#send--get_result)
+     - [balance](#balance)
+@@ -599,6 +600,17 @@ result = solver.tspd(pageurl='https://example.com/login',
+                      )
+ ```
+ 
++### Basilisk
++
++<sup>[API method description.](https://2captcha.com/2captcha-api#basilisk)</sup>
++
++Use this method to solve Basilisk captcha. Returns a token.
++```python
++result = solver.basilisk(pageurl='https://example.com/login',
++                         sitekey='b7890h...19fb2600897',
++                         )
++```
++
+ ## Other methods
+ 
+ ### send / get_result
+diff --git a/examples/async/async_basilisk.py b/examples/async/async_basilisk.py
+new file mode 100644
+index 0000000..99efac9
+--- /dev/null
++++ b/examples/async/async_basilisk.py
+@@ -0,0 +1,31 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = AsyncTwoCaptcha(api_key)
++
++async def solve_captcha():
++    try:
++        return await solver.basilisk(
++            pageurl='https://example.com/login',
++            sitekey='b7890h...19fb2600897',
++        )
++
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/async/async_basilisk_options.py b/examples/async/async_basilisk_options.py
+new file mode 100644
+index 0000000..6e19c27
+--- /dev/null
++++ b/examples/async/async_basilisk_options.py
+@@ -0,0 +1,42 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = AsyncTwoCaptcha(**config)
++
++async def solve_captcha():
++    try:
++        return await solver.basilisk(
++            pageurl='https://example.com/login',
++            sitekey='b7890h...19fb2600897',
++            useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++            # proxy={'type': 'HTTP',
++            #        'uri': 'login:password@IP_address:PORT'}
++        )
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/basilisk.py b/examples/sync/basilisk.py
+new file mode 100644
+index 0000000..29cf3f1
+--- /dev/null
++++ b/examples/sync/basilisk.py
+@@ -0,0 +1,28 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = TwoCaptcha(api_key)
++
++try:
++    result = solver.basilisk(
++        pageurl='https://example.com/login',
++        sitekey='b7890h...19fb2600897',
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/basilisk_options.py b/examples/sync/basilisk_options.py
+new file mode 100644
+index 0000000..a250e40
+--- /dev/null
++++ b/examples/sync/basilisk_options.py
+@@ -0,0 +1,40 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = TwoCaptcha(**config)
++
++try:
++    result = solver.basilisk(
++        pageurl='https://example.com/login',
++        sitekey='b7890h...19fb2600897',
++        useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        # proxy={'type': 'HTTP',
++        #        'uri': 'login:password@IP_address:PORT'}
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/setup.py b/setup.py
+index c521705..661127c 100644
+--- a/setup.py
++++ b/setup.py
+@@ -36,6 +36,6 @@ def get_version():
+           '2captcha', 'captcha', 'api', 'captcha solver', 'reCAPTCHA',
+           'FunCaptcha', 'Geetest', 'image captcha', 'Coordinates', 'Click Captcha',
+           'Geetest V4', 'Lemin captcha', 'Amazon WAF', 'Cloudflare Turnstile',
+-          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt', 'Alibaba', 'TSPD'],
++          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt', 'Alibaba', 'TSPD', 'Basilisk'],
+       python_requires='>=3.8',
+       test_suite='tests')
+diff --git a/twocaptcha/async_solver.py b/twocaptcha/async_solver.py
+index fb86e99..e0d3142 100644
+--- a/twocaptcha/async_solver.py
++++ b/twocaptcha/async_solver.py
+@@ -1165,6 +1165,28 @@ async def tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs):
+ 
+         return await result
+ 
++    async def basilisk(self, pageurl, sitekey, **kwargs):
++        '''Wrapper for solving Basilisk captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        sitekey : str
++            The value of the data-site-key parameter found on the page.
++        useragent : str, optional
++            Browser User-Agent used to open the page.
++        proxy : dict, optional
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        '''
++        result = self.solve(
++            method="basilisk",
++            pageurl=pageurl,
++            sitekey=sitekey,
++            **kwargs)
++
++        return await result
++
+     async def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.
+ 
+diff --git a/twocaptcha/solver.py b/twocaptcha/solver.py
+index edd961c..191abb5 100755
+--- a/twocaptcha/solver.py
++++ b/twocaptcha/solver.py
+@@ -119,6 +119,8 @@ class TwoCaptcha():
+         Wrapper for solving Alibaba captcha.
+     tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs)
+         Wrapper for solving TSPD captcha.
++    basilisk(self, pageurl, sitekey, **kwargs)
++        Wrapper for solving Basilisk captcha.
+     solve(timeout=0, polling_interval=0, **kwargs)
+         Sends CAPTCHA data and retrieves the result.
+     balance()
+@@ -1313,6 +1315,28 @@ def tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs):
+ 
+         return result
+ 
++    def basilisk(self, pageurl, sitekey, **kwargs):
++        '''Wrapper for solving Basilisk captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        sitekey : str
++            The value of the data-site-key parameter found on the page.
++        useragent : str, optional
++            Browser User-Agent used to open the page.
++        proxy : dict, optional
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        '''
++        result = self.solve(
++            method="basilisk",
++            pageurl=pageurl,
++            sitekey=sitekey,
++            **kwargs)
++
++        return result
++
+ 
+     def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.

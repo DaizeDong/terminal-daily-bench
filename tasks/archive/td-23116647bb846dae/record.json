@@ -1,0 +1,29 @@
+{
+  "task_id": "td-23116647bb846dae",
+  "repo": "2captcha/2captcha-python",
+  "pr_number": 144,
+  "base_sha": "f596f77d3d697d0e0f9182dfc943aba95e625819",
+  "merge_sha": "d41a12a9cf55b244aa03ddee5d9dfcf084e8f085",
+  "merged_at": "2026-06-22T14:13:07Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "90cb8f3f37bd4f895d0df5a36c3b8bee2696c9b0ac06b16c17216b0c01b94200",
+  "test_files": [
+    "tests/async/test_async_tspd.py",
+    "tests/sync/test_tspd.py"
+  ],
+  "fail_to_pass": [
+    "tests/async/test_async_tspd.py::AsyncTspd::test_all_params",
+    "tests/sync/test_tspd.py::CaptchaTspd::test_all_params"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C2",
+    "C4",
+    "C8"
+  ]
+}

@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-f187e1f16b1da3fc"
+description = "RC-4714-add-basilisk-captcha"
+keywords = ["C5", "C2", "C4"]
+
+[metadata]
+source_repo = "2captcha/2captcha-python"
+pr_number = 145
+base_sha = "d41a12a9cf55b244aa03ddee5d9dfcf084e8f085"
+merge_sha = "4889a70721254c301804caa7196c025da0f0fd61"
+created_at = "2026-06-22T14:52:31Z"
+oracle_patch_sha256 = "c9fd26a5bdde07fb0d209742191b68e78eb2f0a6258a3854ff06081523f8c075"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

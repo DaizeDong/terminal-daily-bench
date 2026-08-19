@@ -1,0 +1,25 @@
+{
+  "task_id": "td-819f2ac85eeead88",
+  "repo": "petl-developers/petl",
+  "pr_number": 698,
+  "base_sha": "97fbbfdc61f18e75e670129400d87a407bee240e",
+  "merge_sha": "841973d903d996d9df2a8cbba65c1fc3137d78ac",
+  "merged_at": "2026-07-21T04:01:57Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "da9d4b4f2dcfbd239f2cb3b38fc6efb7bae1201d43133681873e9b5255d954cc",
+  "test_files": [
+    "petl/test/transform/test_fills.py"
+  ],
+  "fail_to_pass": [
+    "petl/test/transform/test_fills.py::test_filldown_header_only"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "task_id": "td-4165a4fb9c0acddb",
+  "repo": "yaml/pyyaml",
+  "pr_number": 937,
+  "base_sha": "d51d8a138f7230834fc6e95635ff09ebd329185f",
+  "merge_sha": "34a9bf82357f4952d8f194a5a31f1c39743652d0",
+  "merged_at": "2026-06-17T22:15:29Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "5d2c7907d0f6d7c1f87ed7c7a7098a9387a5cb26d695a996a663a496fc7fb81a",
+  "test_files": [
+    "tests/legacy_tests/data/construct-merge.code",
+    "tests/legacy_tests/data/construct-merge.data",
+    "tests/legacy_tests/test_constructor.py",
+    "tests/test_merge.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_merge.py::test_flatten_mapping_skips_duplicate_sequence_merge_nodes",
+    "tests/test_merge.py::test_flatten_mapping_skips_duplicate_direct_merge_nodes",
+    "tests/test_merge.py::test_flatten_mapping_skips_nested_duplicate_merge_nodes",
+    "tests/test_merge.py::test_flatten_mapping_deduplicates_fanout_merge_keys"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C2",
+    "C4",
+    "C10"
+  ]
+}

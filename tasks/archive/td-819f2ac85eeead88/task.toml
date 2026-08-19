@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-819f2ac85eeead88"
+description = "Fix filldown RuntimeError on header-only tables"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "petl-developers/petl"
+pr_number = 698
+base_sha = "97fbbfdc61f18e75e670129400d87a407bee240e"
+merge_sha = "841973d903d996d9df2a8cbba65c1fc3137d78ac"
+created_at = "2026-06-29T07:56:56Z"
+oracle_patch_sha256 = "da9d4b4f2dcfbd239f2cb3b38fc6efb7bae1201d43133681873e9b5255d954cc"
+source_license_spdx = ""
+difficulty = "medium"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

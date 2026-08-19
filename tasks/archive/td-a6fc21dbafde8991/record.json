@@ -1,0 +1,29 @@
+{
+  "task_id": "td-a6fc21dbafde8991",
+  "repo": "apeworx/ape",
+  "pr_number": 2798,
+  "base_sha": "e7f87563a7beb244f5d6baa3d4ff0a5808f9eef2",
+  "merge_sha": "bf80da2cffa20a8e940bc43834ec6f5493713f88",
+  "merged_at": "2026-07-11T19:23:27Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "bd40ee862b41afb11fdd7b12254ba08be750ae29478f6f7bdfe261eedc46342a",
+  "test_files": [
+    "tests/functional/test_accounts.py",
+    "tests/functional/test_contract_container.py"
+  ],
+  "fail_to_pass": [
+    "tests/functional/test_accounts.py::test_deploy_and_publish_live_network_no_explorer",
+    "tests/functional/test_accounts.py::test_deploy_and_publish_explorer_failure",
+    "tests/functional/test_contract_container.py::test_deploy_and_publish_live_network_no_explorer",
+    "tests/functional/test_contract_container.py::test_deploy_and_publish_explorer_failure"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

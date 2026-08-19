@@ -1,0 +1,296 @@
+diff --git a/README.md b/README.md
+index 100b75a..0784946 100644
+--- a/README.md
++++ b/README.md
+@@ -53,6 +53,7 @@ Examples of API requests for different captcha types are available on the [Pytho
+     - [Yidun](#yidun)
+     - [Hunt](#hunt)
+     - [Alibaba](#alibaba)
++    - [TSPD](#tspd)
+   - [Other methods](#other-methods)
+     - [send / get\_result](#send--get_result)
+     - [balance](#balance)
+@@ -585,6 +586,19 @@ result = solver.alibaba(pageurl='https://www.example.com',
+                         )
+ ```
+ 
++### TSPD
++
++<sup>[API method description.](https://2captcha.com/2captcha-api#tspd)</sup>
++
++Use this method to solve TSPD captcha. Returns a JSON string with cookies.
++```python
++result = solver.tspd(pageurl='https://example.com/login',
++                     tspd_cookie='TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++                     html_page_base64='PCFET0NUWVBFIGh0bWw+...',
++                     proxy={'type': 'HTTP', 'uri': 'login:password@IP_address:PORT'},
++                     )
++```
++
+ ## Other methods
+ 
+ ### send / get_result
+diff --git a/examples/async/async_tspd.py b/examples/async/async_tspd.py
+new file mode 100644
+index 0000000..abc0808
+--- /dev/null
++++ b/examples/async/async_tspd.py
+@@ -0,0 +1,33 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = AsyncTwoCaptcha(api_key)
++
++async def solve_captcha():
++    try:
++        return await solver.tspd(
++            pageurl='https://example.com/login',
++            tspd_cookie='TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++            html_page_base64='PCFET0NUWVBFIGh0bWw+...',
++            proxy={'type': 'HTTP', 'uri': 'login:password@IP_address:PORT'},
++        )
++
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/async/async_tspd_options.py b/examples/async/async_tspd_options.py
+new file mode 100644
+index 0000000..e5a2433
+--- /dev/null
++++ b/examples/async/async_tspd_options.py
+@@ -0,0 +1,42 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = AsyncTwoCaptcha(**config)
++
++async def solve_captcha():
++    try:
++        return await solver.tspd(
++            pageurl='https://example.com/login',
++            tspd_cookie='TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++            html_page_base64='PCFET0NUWVBFIGh0bWw+...',
++            proxy={'type': 'HTTP', 'uri': 'login:password@IP_address:PORT'},
++            useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        )
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/tspd.py b/examples/sync/tspd.py
+new file mode 100644
+index 0000000..d986ba6
+--- /dev/null
++++ b/examples/sync/tspd.py
+@@ -0,0 +1,30 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = TwoCaptcha(api_key)
++
++try:
++    result = solver.tspd(
++        pageurl='https://example.com/login',
++        tspd_cookie='TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++        html_page_base64='PCFET0NUWVBFIGh0bWw+...',
++        proxy={'type': 'HTTP', 'uri': 'login:password@IP_address:PORT'},
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/tspd_options.py b/examples/sync/tspd_options.py
+new file mode 100644
+index 0000000..fd841c4
+--- /dev/null
++++ b/examples/sync/tspd_options.py
+@@ -0,0 +1,40 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = TwoCaptcha(**config)
++
++try:
++    result = solver.tspd(
++        pageurl='https://example.com/login',
++        tspd_cookie='TS386a400d029=082670...010245; TS386a400d078=082670...dbb3b0c',
++        html_page_base64='PCFET0NUWVBFIGh0bWw+...',
++        proxy={'type': 'HTTP', 'uri': 'login:password@IP_address:PORT'},
++        useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/setup.py b/setup.py
+index 6a397a0..c521705 100644
+--- a/setup.py
++++ b/setup.py
+@@ -36,6 +36,6 @@ def get_version():
+           '2captcha', 'captcha', 'api', 'captcha solver', 'reCAPTCHA',
+           'FunCaptcha', 'Geetest', 'image captcha', 'Coordinates', 'Click Captcha',
+           'Geetest V4', 'Lemin captcha', 'Amazon WAF', 'Cloudflare Turnstile',
+-          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt', 'Alibaba'],
++          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt', 'Alibaba', 'TSPD'],
+       python_requires='>=3.8',
+       test_suite='tests')
+diff --git a/twocaptcha/async_solver.py b/twocaptcha/async_solver.py
+index b4e1b4e..fb86e99 100644
+--- a/twocaptcha/async_solver.py
++++ b/twocaptcha/async_solver.py
+@@ -1139,6 +1139,32 @@ async def alibaba(self, pageurl, scene_id, prefix, **kwargs):
+ 
+         return await result
+ 
++    async def tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs):
++        '''Wrapper for solving TSPD captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        tspd_cookie : str
++            Cookies received on the TSPD challenge page.
++        html_page_base64 : str
++            Full HTML of the challenge page, Base64 encoded.
++        proxy : dict
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        useragent : str, optional
++            Browser User-Agent. We recommend sending a valid Windows browser string.
++        '''
++        result = self.solve(
++            method="tspd",
++            pageurl=pageurl,
++            tspd_cookie=tspd_cookie,
++            html_page_base64=html_page_base64,
++            proxy=proxy,
++            **kwargs)
++
++        return await result
++
+     async def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.
+ 
+diff --git a/twocaptcha/solver.py b/twocaptcha/solver.py
+index 3ba1b22..edd961c 100755
+--- a/twocaptcha/solver.py
++++ b/twocaptcha/solver.py
+@@ -117,6 +117,8 @@ class TwoCaptcha():
+         Wrapper for solving Hunt captcha.
+     alibaba(self, pageurl, scene_id, prefix, **kwargs)
+         Wrapper for solving Alibaba captcha.
++    tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs)
++        Wrapper for solving TSPD captcha.
+     solve(timeout=0, polling_interval=0, **kwargs)
+         Sends CAPTCHA data and retrieves the result.
+     balance()
+@@ -1285,6 +1287,32 @@ def alibaba(self, pageurl, scene_id, prefix, **kwargs):
+ 
+         return result
+ 
++    def tspd(self, pageurl, tspd_cookie, html_page_base64, proxy, **kwargs):
++        '''Wrapper for solving TSPD captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        tspd_cookie : str
++            Cookies received on the TSPD challenge page.
++        html_page_base64 : str
++            Full HTML of the challenge page, Base64 encoded.
++        proxy : dict
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        useragent : str, optional
++            Browser User-Agent. We recommend sending a valid Windows browser string.
++        '''
++        result = self.solve(
++            method="tspd",
++            pageurl=pageurl,
++            tspd_cookie=tspd_cookie,
++            html_page_base64=html_page_base64,
++            proxy=proxy,
++            **kwargs)
++
++        return result
++
+ 
+     def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.

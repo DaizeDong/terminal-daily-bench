@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_multimodal_chunks_list_merge.py::test_merge_appends_new_chunk_ids_and_updates_count",
+    "tests/test_multimodal_chunks_list_merge.py::test_reprocessing_same_ids_does_not_duplicate",
+    "tests/test_multimodal_chunks_list_merge.py::test_partial_overlap_appends_only_missing_ids",
+    "tests/test_multimodal_chunks_list_merge.py::test_missing_record_warns_instead_of_silently_skipping"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

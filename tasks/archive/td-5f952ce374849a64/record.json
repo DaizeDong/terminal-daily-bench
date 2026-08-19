@@ -1,0 +1,28 @@
+{
+  "task_id": "td-5f952ce374849a64",
+  "repo": "getzep/graphiti",
+  "pr_number": 1695,
+  "base_sha": "b0ec6d9303d80c8724606cc88c73dbcab654076a",
+  "merge_sha": "d9a2db9dd220dff562cc75711c4ee6c11be3027f",
+  "merged_at": "2026-07-27T19:16:33Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "a40211a8e9b58f729d6815d812b8cb2863d78418d25af09f372c552c8c4cc5be",
+  "test_files": [
+    "tests/utils/maintenance/test_remove_communities.py",
+    "tests/utils/search/test_edge_bfs_query_shape.py"
+  ],
+  "fail_to_pass": [
+    "tests/utils/maintenance/test_remove_communities.py::test_remove_communities_scoped_via_graph_ops",
+    "tests/utils/search/test_edge_bfs_query_shape.py::test_neptune_generic_edge_searches_return_reference_time",
+    "tests/utils/search/test_edge_bfs_query_shape.py::test_neptune_operations_bfs_search_returns_reference_time"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

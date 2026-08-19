@@ -1,0 +1,22 @@
+diff --git a/argcomplete/completers.py b/argcomplete/completers.py
+index 48715811..33b0baa2 100644
+--- a/argcomplete/completers.py
++++ b/argcomplete/completers.py
+@@ -104,12 +104,15 @@ def __call__(self, prefix, **kwargs):
+         """
+         Provide completions on prefix
+         """
+-        target_dir = os.path.dirname(prefix)
++        # Expand a leading "~" so that filesystem operations below work on a
++        # real path (os.listdir("~") would otherwise raise FileNotFoundError).
++        expanded_prefix = os.path.expanduser(prefix)
++        target_dir = os.path.dirname(expanded_prefix)
+         try:
+             names = os.listdir(target_dir or ".")
+         except Exception:
+             return  # empty iterator
+-        incomplete_part = os.path.basename(prefix)
++        incomplete_part = os.path.basename(expanded_prefix)
+         # Iterate on target_dir entries and filter on given predicate
+         for name in names:
+             if not name.startswith(incomplete_part):

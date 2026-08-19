@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-6750abf1ab84864c"
+description = "Update OnPolicyAlgorithmJax & PPO to support custom rollout_buffer_class"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "araffin/sbx"
+pr_number = 90
+base_sha = "30e370c4e2bc4192a15c7b73723790ad1034f393"
+merge_sha = "cd77f4201df80c9f2bbd369b71260693b4136702"
+created_at = "2026-05-08T10:43:20Z"
+oracle_patch_sha256 = "7d72960293ef8d4120e017d0b884f4813e83d2c2ae3a0114d4128a9f7bdbe874"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

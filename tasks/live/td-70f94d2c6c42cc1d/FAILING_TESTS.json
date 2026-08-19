@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_3d_cam_weights.py::test_grad_cam_plusplus_accepts_3d_activations",
+    "tests/test_3d_cam_weights.py::test_xgrad_cam_accepts_3d_activations",
+    "tests/test_3d_cam_weights.py::test_gradient_cam_methods_support_3d_conv_layers"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

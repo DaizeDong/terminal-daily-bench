@@ -1,0 +1,26 @@
+{
+  "task_id": "td-123b3c8d9c22a9a3",
+  "repo": "psf/cachecontrol",
+  "pr_number": 449,
+  "base_sha": "23c7cb048fafc46c6a290050eb17d7dc3f8f8b65",
+  "merge_sha": "e46a97fedcdd4ab4dcb41b40837768f58e71f602",
+  "merged_at": "2026-07-25T13:41:05Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "f4850ebfb96c64532e8f0fc2fcc9bf55f89e7b79acdb0ffee20f1bf1e3a0584e",
+  "test_files": [
+    "tests/test_cache_control.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_cache_control.py::test_no_cache_with_malformed_date",
+    "tests/test_cache_control.py::test_cached_request_with_malformed_date_not_returned"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

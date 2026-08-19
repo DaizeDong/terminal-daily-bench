@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-0263cd1c168cbeb6"
+description = "Fix: reproducibility when generating cmap .json.gz"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "pdfminer/pdfminer.six"
+pr_number = 1242
+base_sha = "9e1243c4ad000bf9bbe60e81fc8dde2fccc0ed3b"
+merge_sha = "b14d19be024b263ef7d1ef0eba8bf18a40d6eeaf"
+created_at = "2026-01-18T15:30:47Z"
+oracle_patch_sha256 = "3338d07f875ac424098c5448e93cfaa525b7f1e84a402c8dbe1d0824da8692e9"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]
