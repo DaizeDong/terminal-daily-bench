@@ -1,10 +1,10 @@
 {
   "certified_object_set_audit_sha256": "fc24fd6ade825990723f431a69cd389665ffb77da35f02e3bbb4e7f3306b6f91",
-  "completed_at": "2026-08-20T06:02:50+00:00",
+  "completed_at": "2026-08-20T06:20:27+00:00",
   "image_count": 49,
   "manifest_path": "docs/registry/w1-fixed50-images.json",
-  "manifest_sha256": "f645332ef1ea797b7740d84ac4a155985525d257ebd9f83ff3ba1b5becce11b0",
-  "public_pull_verified": false,
+  "manifest_sha256": "ffde4a161c38710dbbd83302784a4d30ca38804e80a6157ba5ffb7b2a3971d6a",
+  "public_pull_verified": true,
   "publication_plan_sha256": "68e89c45105fd2466505e6a847202424206e84e244e9d238ac7312cb8b6e23a9",
   "repository": "ghcr.io/daizedong/terminal-daily-task-envs",
   "roster_sha256": "44b722079e4b47901b21f4086f77001fe8578b7279be62773ca347222bfaf6f1",
