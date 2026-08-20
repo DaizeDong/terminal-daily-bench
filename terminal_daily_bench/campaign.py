@@ -31,6 +31,10 @@ from typing import Any, Callable, Mapping
 from .adapters import create_adapter
 from .adapters.vendor import _safe_agent_kwargs, _safe_base_url
 from . import __version__
+from .task_sif_cache import (
+    TaskSIFCacheError,
+    validate_task_sif_cache_proof,
+)
 
 
 SPEC_SCHEMA = "tdb-campaign/v1"
@@ -332,12 +336,14 @@ class TaskProfile:
     task_tree_sha256: str
     task_sif: Path | None
     task_sif_sha256: str | None
+    task_sif_size: int | None
 
     def public_summary(self) -> dict[str, Any]:
         return {
             "id": self.profile_id,
             "task_tree_sha256": self.task_tree_sha256,
             "task_sif_sha256": self.task_sif_sha256,
+            "task_sif_size": self.task_sif_size,
         }
 
 
@@ -841,7 +847,10 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
     value = _mapping(raw, f"tasks[{index}]")
     _only_keys(
         value,
-        {"id", "path", "task_tree_sha256", "task_sif", "task_sif_sha256"},
+        {
+            "id", "path", "task_tree_sha256", "task_sif", "task_sif_sha256",
+            "task_sif_size",
+        },
         f"tasks[{index}]",
     )
     raw_path = value.get("path")
@@ -864,12 +873,14 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
 
     raw_sif = value.get("task_sif")
     raw_sif_digest = value.get("task_sif_sha256")
+    raw_sif_size = value.get("task_sif_size")
     if (raw_sif is None) != (raw_sif_digest is None):
         raise CampaignError(
             f"tasks[{index}].task_sif and task_sif_sha256 must be provided together"
         )
     task_sif: Path | None = None
     sif_digest: str | None = None
+    sif_size: int | None = None
     if raw_sif is not None:
         if not isinstance(raw_sif, str) or not raw_sif:
             raise CampaignError(f"tasks[{index}].task_sif must be a path string")
@@ -878,7 +889,23 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
             task_sif = base_dir / task_sif
         task_sif = task_sif.absolute()
         sif_digest = _sha256(raw_sif_digest, f"tasks[{index}].task_sif_sha256")
-    return TaskProfile(profile_id, path, actual_tree, task_sif, sif_digest)
+        try:
+            actual_sif_size = task_sif.stat().st_size
+        except OSError as exc:
+            raise CampaignError(f"tasks[{index}].task_sif cannot be stat'ed") from exc
+        if actual_sif_size <= 0:
+            raise CampaignError(f"tasks[{index}].task_sif must not be empty")
+        if raw_sif_size is not None:
+            if type(raw_sif_size) is not int or raw_sif_size <= 0:
+                raise CampaignError(f"tasks[{index}].task_sif_size must be positive")
+            if raw_sif_size != actual_sif_size:
+                raise CampaignError(f"tasks[{index}].task_sif_size does not match the file")
+        sif_size = actual_sif_size
+    elif raw_sif_size is not None:
+        raise CampaignError(
+            f"tasks[{index}].task_sif_size requires task_sif and task_sif_sha256"
+        )
+    return TaskProfile(profile_id, path, actual_tree, task_sif, sif_digest, sif_size)
 
 
 def _parse_limits(raw: Any) -> ExecutionLimits:
@@ -1412,8 +1439,27 @@ def _validate_success_result(cell: RuntimeCell, result: Mapping[str, Any]) -> st
     if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(float(reward)):
         raise CampaignError("cell result does not contain a finite reward")
     if cell.task.task_sif_sha256 is not None:
+        if result.get("task_sif_sha256") != cell.task.task_sif_sha256:
+            raise CampaignError("cell result task SIF digest does not match the frozen cell")
         if result.get("task_sif_post_sha256") != cell.task.task_sif_sha256:
             raise CampaignError("cell result lacks the post-Harbor SIF proof")
+        proof = result.get("task_sif_cache_proof")
+        if not isinstance(proof, Mapping):
+            raise CampaignError("cell result lacks a complete task SIF cache proof")
+        assert cell.task.task_sif is not None
+        assert cell.task.task_sif_size is not None
+        try:
+            validate_task_sif_cache_proof(
+                proof,
+                expected_sha256=cell.task.task_sif_sha256,
+                expected_size=cell.task.task_sif_size,
+                task_id=cell.task.path.name,
+                harness=cell.agent.harness,
+                model=cell.resolved_model,
+                source_path=str(cell.task.task_sif.resolve(strict=True)),
+            )
+        except (OSError, TaskSIFCacheError) as exc:
+            raise CampaignError(f"cell result task SIF cache proof is invalid: {exc}") from exc
     harness_result = result.get("harness")
     aggregate_digest = (
         harness_result.get("harbor_result_sha256")

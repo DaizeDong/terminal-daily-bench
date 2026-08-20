@@ -1,6 +1,7 @@
 """Credential-free command-boundary tests for vendor harness adapters."""
 from __future__ import annotations
 
+import concurrent.futures
 import hashlib
 import json
 import os
@@ -16,6 +17,10 @@ from terminal_daily_bench import eval as ev
 from terminal_daily_bench.adapters import REGISTRY, create_adapter
 from terminal_daily_bench.adapters.base import HarborRunSpec
 from terminal_daily_bench.adapters.vendor import VendorConfigurationError
+from terminal_daily_bench.task_sif_cache import (
+    persist_cell_binding,
+    validate_task_sif_cache_proof,
+)
 
 
 def test_registry_exposes_first_party_vendor_harnesses():
@@ -715,7 +720,9 @@ def test_dry_run_pins_prebuilt_sif_only_on_disposable_copy(tmp_path, monkeypatch
     sif.write_bytes(b"test-only-sif-bytes")
     digest = hashlib.sha256(sif.read_bytes()).hexdigest()
     out = tmp_path / "dry-sif.json"
+    cache_root = tmp_path / "node-cache"
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("TD_TASK_SIF_CACHE_ROOT", str(cache_root))
 
     rc = ev.main([
         "--model", "gpt-test",
@@ -734,11 +741,21 @@ def test_dry_run_pins_prebuilt_sif_only_on_disposable_copy(tmp_path, monkeypatch
     assert rc == 0
     effective = Path(result["effective_image"])
     assert effective != sif.resolve()
-    assert effective.is_relative_to(tmp_path / "work-sif")
+    assert effective.is_relative_to(cache_root)
     assert effective.read_bytes() == sif.read_bytes()
     assert stat.S_IMODE(effective.stat().st_mode) == 0o400
+    assert not list((tmp_path / "work-sif").rglob("*.sif"))
     assert result["task_sif_source"] == str(sif.resolve())
     assert result["task_sif_sha256"] == digest
+    assert result["task_sif_cache_proof"]["content_sha256"] == digest
+    assert result["task_sif_cache_proof"]["cache_hit"] is False
+    assert result["task_sif_cache_proof"]["portable_content_identity"] is True
+    assert result["task_sif_cache_proof"]["credential_values_persisted"] is False
+    run_root = Path(result["plan"]["run_task"]).parent
+    receipt = run_root / result["task_sif_cache_proof"]["cache_receipt_relative_path"]
+    binding = run_root / result["task_sif_cache_proof"]["binding_relative_path"]
+    assert receipt.stat().st_size < 64 * 1024
+    assert binding.stat().st_size < 64 * 1024
     assert run_config["environment"]["docker_image"] == str(effective)
     assert (task / "task.toml").read_text() == source_toml
 
@@ -756,12 +773,11 @@ def test_task_sif_staging_rejects_symlink_and_digest_mismatch(tmp_path):
             digest,
             str(tmp_path / "symlink-run"),
         )
-    (tmp_path / "mismatch-run").mkdir()
     with pytest.raises(ValueError, match="digest mismatch"):
         ev._stage_pinned_task_sif(
             str(source.resolve()), "0" * 64, str(tmp_path / "mismatch-run")
         )
-    assert not (tmp_path / "mismatch-run" / "pinned-image" / "task.sif").exists()
+    assert not list((tmp_path / "mismatch-run").rglob("*.sif"))
 
 
 def test_task_sif_staging_rejects_source_mutation(tmp_path, monkeypatch):
@@ -769,7 +785,6 @@ def test_task_sif_staging_rejects_source_mutation(tmp_path, monkeypatch):
     source.write_bytes(b"a" * (1024 * 1024 + 32))
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     run_root = tmp_path / "mutation-run"
-    run_root.mkdir()
     original_read = ev.os.read
     mutated = False
 
@@ -788,11 +803,147 @@ def test_task_sif_staging_rejects_source_mutation(tmp_path, monkeypatch):
     assert mutated is True
 
 
+def test_task_sif_cache_reuses_one_object_without_rereading_source(
+    tmp_path, monkeypatch
+):
+    source = tmp_path / "source.sif"
+    source.write_bytes(b"one-frozen-sif")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    cache_root = tmp_path / "node-cache"
+
+    first = ev._stage_pinned_task_sif(
+        str(source.resolve()), digest, str(cache_root)
+    )
+    first_path = first.path
+    first_inode = first.path.stat().st_ino
+    assert first.cache_hit is False
+    first.close()
+
+    original_read = ev.os.read
+    source_inode = source.stat().st_ino
+    source_reads = 0
+
+    def count_source_reads(fd, size):
+        nonlocal source_reads
+        if os.fstat(fd).st_ino == source_inode:
+            source_reads += 1
+        return original_read(fd, size)
+
+    monkeypatch.setattr(ev.os, "read", count_source_reads)
+    second = ev._stage_pinned_task_sif(
+        str(source.resolve()), digest, str(cache_root)
+    )
+    try:
+        assert second.cache_hit is True
+        assert second.path == first_path
+        assert second.path.stat().st_ino == first_inode
+        assert source_reads == 0
+    finally:
+        second.close()
+
+
+def test_task_sif_cache_concurrent_cold_acquire_publishes_once(tmp_path):
+    source = tmp_path / "source.sif"
+    source.write_bytes(b"concurrent-frozen-sif" * 1024)
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    cache_root = tmp_path / "node-cache"
+
+    def acquire():
+        lease = ev._stage_pinned_task_sif(
+            str(source.resolve()), digest, str(cache_root)
+        )
+        try:
+            return lease.cache_hit, lease.path, lease.path.stat().st_ino
+        finally:
+            lease.close()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        acquired = list(pool.map(lambda _index: acquire(), range(4)))
+
+    assert sum(not cache_hit for cache_hit, _path, _inode in acquired) == 1
+    assert len({path for _cache_hit, path, _inode in acquired}) == 1
+    assert len({inode for _cache_hit, _path, inode in acquired}) == 1
+    assert len(list(cache_root.rglob("*.sif"))) == 1
+
+
+def test_task_sif_cache_public_proof_validator_recomputes_binding(tmp_path):
+    source = tmp_path / "source.sif"
+    source.write_bytes(b"proof-validator-sif")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+    lease = ev._stage_pinned_task_sif(
+        str(source.resolve()), digest, str(tmp_path / "node-cache")
+    )
+    try:
+        proof = persist_cell_binding(
+            lease,
+            run_root,
+            task_id="td-proof",
+            harness="codex",
+            model="gpt-test",
+        )
+        proof["post_identity_sha256"] = lease.verify_after_run()
+        validate_task_sif_cache_proof(
+            proof,
+            expected_sha256=digest,
+            expected_size=source.stat().st_size,
+            task_id="td-proof",
+            harness="codex",
+            model="gpt-test",
+            source_path=str(source.resolve()),
+        )
+        with pytest.raises(ValueError, match="binding is inconsistent"):
+            validate_task_sif_cache_proof(
+                proof,
+                expected_sha256=digest,
+                expected_size=source.stat().st_size,
+                task_id="td-proof",
+                harness="codex",
+                model="different-model",
+                source_path=str(source.resolve()),
+            )
+    finally:
+        lease.close()
+
+
+def test_task_sif_cache_cold_path_cleans_killed_unpublished_temp(tmp_path):
+    cache_root = tmp_path / "node-cache"
+    first_source = tmp_path / "first.sif"
+    first_source.write_bytes(b"first")
+    first_digest = hashlib.sha256(first_source.read_bytes()).hexdigest()
+    first = ev._stage_pinned_task_sif(
+        str(first_source.resolve()), first_digest, str(cache_root)
+    )
+    first.close()
+
+    stale = (
+        cache_root / "v1" / "tmp"
+        / f".populate-{'f' * 64}-999-deadbeef"
+    )
+    stale.mkdir(mode=0o700)
+    (stale / "task.sif").write_bytes(b"incomplete")
+
+    second_source = tmp_path / "second.sif"
+    second_source.write_bytes(b"second")
+    second_digest = hashlib.sha256(second_source.read_bytes()).hexdigest()
+    second = ev._stage_pinned_task_sif(
+        str(second_source.resolve()), second_digest, str(cache_root)
+    )
+    try:
+        assert not stale.exists()
+        assert second.cache_hit is False
+    finally:
+        second.close()
+
+
 def test_post_harbor_sif_mutation_resets_score_acceptance(tmp_path, monkeypatch):
     task = _write_minimal_task(tmp_path)
     source_sif = tmp_path / "source-task.sif"
     source_sif.write_bytes(b"pinned-source-sif")
     digest = hashlib.sha256(source_sif.read_bytes()).hexdigest()
+    cache_root = tmp_path / "node-cache"
+    cached_sif = cache_root / "v1" / "objects" / "sha256" / digest / "task.sif"
     bin_dir = tmp_path / "bin-sif-mutation"
     bin_dir.mkdir()
     fake = bin_dir / "harbor"
@@ -818,13 +969,14 @@ def test_post_harbor_sif_mutation_resets_score_acceptance(tmp_path, monkeypatch)
         "    }}\n"
         "  }\n"
         "}))\n"
-        "sif = out.parent / 'pinned-image' / 'task.sif'\n"
+        f"sif = pathlib.Path({str(cached_sif)!r})\n"
         "os.chmod(sif, 0o600)\n"
         "sif.write_bytes(b'mutated-by-fake-harbor')\n"
     )
     fake.chmod(0o755)
     monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ.get("PATH", ""))
     monkeypatch.setenv("OPENAI_API_KEY", "unit-test-private-value")
+    monkeypatch.setenv("TD_TASK_SIF_CACHE_ROOT", str(cache_root))
     out = tmp_path / "sif-mutation-result.json"
 
     rc = ev.main([
@@ -845,7 +997,7 @@ def test_post_harbor_sif_mutation_resets_score_acceptance(tmp_path, monkeypatch)
     assert result["agent_completed"] is False
     assert result["harness"]["score_accepted"] is False
     assert result["harness"]["stop_reason"] == "error"
-    assert "staged task SIF" in result["error"]
+    assert "cached task SIF" in result["error"]
     assert "task_sif_post_sha256" not in result
 
 

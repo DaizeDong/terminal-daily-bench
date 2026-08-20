@@ -87,6 +87,12 @@ from .harbor_score import (
 from .adapters import create_adapter
 from .adapters.base import HarborRunSpec
 from .adapters.vendor import VendorConfigurationError, _safe_base_url
+from .task_sif_cache import (
+    TaskSIFCacheError,
+    TaskSIFCacheLease,
+    acquire_task_sif,
+    persist_cell_binding,
+)
 
 # Singularity `--ek` backend knobs. Paths are env-driven so nothing host-specific
 # ships: set TDB_SIF_CACHE / TDB_OVERLAY_DIR to override the generic defaults.
@@ -170,8 +176,7 @@ class _ModelEndpointError(RuntimeError):
         )
 
 
-class TaskSIFIntegrityError(ValueError):
-    """A task SIF failed a pinned identity or byte-integrity check."""
+TaskSIFIntegrityError = TaskSIFCacheError
 
 
 def _log(msg: str) -> None:
@@ -632,161 +637,18 @@ def _set_task_allow_internet(task_toml: str, allow: bool) -> bool:
     return True
 
 
-_SIF_STABLE_FIELDS = (
-    "st_dev", "st_ino", "st_nlink", "st_size", "st_mtime_ns", "st_ctime_ns",
-)
-_SIF_IDENTITY_FIELDS = ("st_dev", "st_ino", "st_nlink", "st_size")
-
-
-def _stable_sif_facts(value: os.stat_result) -> tuple[int, ...]:
-    return tuple(getattr(value, field) for field in _SIF_STABLE_FIELDS)
-
-
-def _sif_identity_facts(value: os.stat_result) -> tuple[int, ...]:
-    return tuple(getattr(value, field) for field in _SIF_IDENTITY_FIELDS)
-
-
 def _stage_pinned_task_sif(
-    path: str, expected_sha256: str, run_root: str,
-) -> tuple[str, str, str, tuple[int, ...]]:
-    """Copy a stable source SIF into the disposable run before Harbor opens it."""
-    if not os.path.isabs(path):
-        raise TaskSIFIntegrityError("--task-sif must be an absolute path")
-    if not re.fullmatch(r"[0-9a-fA-F]{64}", expected_sha256 or ""):
-        raise TaskSIFIntegrityError(
-            "--task-sif-sha256 must be exactly 64 hexadecimal characters"
-        )
-    supplied = Path(path)
-    resolved = supplied.resolve(strict=True)
-    if os.path.abspath(path) != str(resolved):
-        raise TaskSIFIntegrityError("--task-sif must not traverse a symbolic link")
-    if resolved.suffix.lower() != ".sif":
-        raise TaskSIFIntegrityError(
-            "--task-sif must resolve to a regular .sif file"
-        )
-    nofollow = getattr(os, "O_NOFOLLOW", 0)
-    cloexec = getattr(os, "O_CLOEXEC", 0)
-    source_fd = destination_fd = None
-    staged_dir = Path(run_root) / "pinned-image"
-    staged_path = staged_dir / "task.sif"
-    try:
-        source_lstat = resolved.lstat()
-        source_fd = os.open(resolved, os.O_RDONLY | nofollow | cloexec)
-        source_before = os.fstat(source_fd)
-        if (not stat.S_ISREG(source_before.st_mode) or source_before.st_nlink != 1
-                or (source_before.st_dev, source_before.st_ino)
-                != (source_lstat.st_dev, source_lstat.st_ino)):
-            raise TaskSIFIntegrityError(
-                "--task-sif must be a single-link regular file"
-            )
-        staged_dir.mkdir(mode=0o700)
-        os.chmod(staged_dir, 0o700)
-        destination_fd = os.open(
-            staged_path,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | nofollow | cloexec,
-            0o400,
-        )
-        digest = hashlib.sha256()
-        copied = 0
-        while True:
-            chunk = os.read(source_fd, 1024 * 1024)
-            if not chunk:
-                break
-            digest.update(chunk)
-            copied += len(chunk)
-            view = memoryview(chunk)
-            while view:
-                written = os.write(destination_fd, view)
-                if written <= 0:
-                    raise OSError("short write while staging task SIF")
-                view = view[written:]
-        os.fchmod(destination_fd, 0o400)
-        os.fsync(destination_fd)
-        source_after = os.fstat(source_fd)
-        if _stable_sif_facts(source_before) != _stable_sif_facts(source_after):
-            raise TaskSIFIntegrityError(
-                "source task SIF changed while it was staged"
-            )
-        destination_after = os.fstat(destination_fd)
-        if (not stat.S_ISREG(destination_after.st_mode)
-                or destination_after.st_nlink != 1
-                or destination_after.st_size != copied
-                or stat.S_IMODE(destination_after.st_mode) != 0o400):
-            raise TaskSIFIntegrityError(
-                "staged task SIF failed private-file validation"
-            )
-        actual = digest.hexdigest()
-        if actual != expected_sha256.lower():
-            raise TaskSIFIntegrityError(
-                f"task SIF digest mismatch: expected {expected_sha256.lower()}, got {actual}"
-            )
-        # WekaFS may finalize ctime/mtime after close.  Bind the cross-process
-        # identity to the inode and size; each hashing window independently
-        # requires ctime/mtime stability and the full digest binds the bytes.
-        facts = _sif_identity_facts(destination_after)
-        return str(staged_path), str(resolved), actual, facts
-    except Exception:
-        if destination_fd is not None:
-            os.close(destination_fd)
-            destination_fd = None
-        try:
-            staged_path.unlink()
-        except FileNotFoundError:
-            pass
-        raise
-    finally:
-        for fd in (destination_fd, source_fd):
-            if fd is not None:
-                os.close(fd)
+    path: str, expected_sha256: str, cache_root: str | None = None,
+) -> TaskSIFCacheLease:
+    """Acquire one content-addressed node-local object for a frozen SIF."""
+    return acquire_task_sif(path, expected_sha256, cache_root)
 
 
 def _verify_staged_task_sif(
-    path: str, expected_sha256: str, expected_facts: tuple[int, ...],
+    lease: TaskSIFCacheLease,
 ) -> str:
-    """Recheck the exact staged SIF after Harbor exits, before accepting reward."""
-    nofollow = getattr(os, "O_NOFOLLOW", 0)
-    cloexec = getattr(os, "O_CLOEXEC", 0)
-    fd = None
-    try:
-        candidate = Path(path)
-        path_stat = candidate.lstat()
-        fd = os.open(candidate, os.O_RDONLY | nofollow | cloexec)
-        before = os.fstat(fd)
-        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 1
-                or stat.S_IMODE(before.st_mode) != 0o400
-                or (before.st_dev, before.st_ino) != (path_stat.st_dev, path_stat.st_ino)
-                or _sif_identity_facts(before) != expected_facts):
-            raise TaskSIFIntegrityError(
-                "staged task SIF identity changed before post-run verification"
-            )
-        digest = hashlib.sha256()
-        remaining = before.st_size
-        while remaining:
-            chunk = os.read(fd, min(1024 * 1024, remaining))
-            if not chunk:
-                raise TaskSIFIntegrityError(
-                    "staged task SIF was truncated during verification"
-                )
-            digest.update(chunk)
-            remaining -= len(chunk)
-        if os.read(fd, 1):
-            raise TaskSIFIntegrityError(
-                "staged task SIF grew during verification"
-            )
-        after = os.fstat(fd)
-        if _stable_sif_facts(before) != _stable_sif_facts(after):
-            raise TaskSIFIntegrityError(
-                "staged task SIF changed during post-run verification"
-            )
-        actual = digest.hexdigest()
-        if actual != expected_sha256:
-            raise TaskSIFIntegrityError(
-                "staged task SIF digest changed during Harbor execution"
-            )
-        return actual
-    finally:
-        if fd is not None:
-            os.close(fd)
+    """Recheck the exact cache object identity after Harbor exits."""
+    return lease.verify_after_run()
 
 
 def _set_task_docker_image(task_toml: str, image: str) -> None:
@@ -1476,6 +1338,16 @@ def main(argv=None) -> int:
         },
     }
     vendor_score_candidate = False
+    task_sif_lease: TaskSIFCacheLease | None = None
+
+    def finish() -> int:
+        nonlocal task_sif_lease
+        try:
+            return _finish(result, args.out, t0)
+        finally:
+            if task_sif_lease is not None:
+                task_sif_lease.close()
+                task_sif_lease = None
 
     try:
         adapter = None if is_baseline else create_adapter(args.harness)
@@ -1528,20 +1400,27 @@ def main(argv=None) -> int:
         shutil.copytree(task_dir, run_task)
         os.makedirs(jobs_dir, exist_ok=True)
 
-        staged_task_sif_facts = None
         if bool(args.task_sif) != bool(args.task_sif_sha256):
             raise TaskSIFIntegrityError(
                 "--task-sif and --task-sif-sha256 must be provided together"
             )
         if args.task_sif:
-            (task_sif, task_sif_source, task_sif_sha256,
-             staged_task_sif_facts) = _stage_pinned_task_sif(
-                args.task_sif, args.task_sif_sha256, run_root
+            task_sif_lease = _stage_pinned_task_sif(
+                args.task_sif, args.task_sif_sha256
             )
+            task_sif = str(task_sif_lease.path)
             _set_task_docker_image(os.path.join(run_task, "task.toml"), task_sif)
             result["effective_image"] = task_sif
-            result["task_sif_source"] = task_sif_source
-            result["task_sif_sha256"] = task_sif_sha256
+            result["task_sif_source"] = str(task_sif_lease.source)
+            result["task_sif_sha256"] = task_sif_lease.content_sha256
+            result["task_sif_cache_path"] = task_sif
+            result["task_sif_cache_proof"] = persist_cell_binding(
+                task_sif_lease,
+                run_root,
+                task_id=task_id,
+                harness=harness_name,
+                model=args.model,
+            )
         else:
             result["effective_image"] = sif
 
@@ -1549,7 +1428,7 @@ def main(argv=None) -> int:
         if is_baseline:
             if args.dry_run:
                 result["plan"] = {"agent": "oracle", "jobs_dir": jobs_dir}
-                return _finish(result, args.out, t0)
+                return finish()
             harbor_returncode, trace = run_harbor_oracle(
                 run_task, jobs_dir, eks, args.harbor_timeout
             )
@@ -1575,7 +1454,7 @@ def main(argv=None) -> int:
                     "model_call": "skipped",
                     "gate": "harbor oracle after adapter diff",
                 }
-                return _finish(result, args.out, t0)
+                return finish()
 
             base = _safe_base_url(
                 args.harness_base_url
@@ -1601,7 +1480,7 @@ def main(argv=None) -> int:
                 result["patch_applied"] = False
                 result["harness"]["harness_error"] = attempt.error
                 result["harness"]["stop_reason"] = "error"
-                return _finish(result, args.out, t0)
+                return finish()
             diff = attempt.patch
             result["patch_len"] = len(diff)
             result["harness"]["patch_len"] = len(diff)
@@ -1610,7 +1489,7 @@ def main(argv=None) -> int:
                 result["error"] = "model produced no diff"
                 result["patch_applied"] = False
                 result["harness"]["stop_reason"] = "no_diff"
-                return _finish(result, args.out, t0)
+                return finish()
             touched_tests = diff_touches_tests(diff)
             result["false_accept_check"]["model_patch_touched_tests"] = touched_tests
             result["harness"]["patch_touched_tests"] = touched_tests
@@ -1680,7 +1559,7 @@ def main(argv=None) -> int:
             }
             if args.dry_run:
                 result["harness"]["stop_reason"] = "dry_run"
-                return _finish(result, args.out, t0)
+                return finish()
 
             harbor_executable = _require_harbor()
             cmd[0] = harbor_executable
@@ -1789,10 +1668,10 @@ def main(argv=None) -> int:
         else:
             raise RuntimeError(f"unsupported adapter integration path: {adapter!r}")
 
-        if staged_task_sif_facts is not None:
-            result["task_sif_post_sha256"] = _verify_staged_task_sif(
-                task_sif, task_sif_sha256, staged_task_sif_facts
-            )
+        if task_sif_lease is not None:
+            post_identity = _verify_staged_task_sif(task_sif_lease)
+            result["task_sif_post_sha256"] = task_sif_lease.content_sha256
+            result["task_sif_cache_proof"]["post_identity_sha256"] = post_identity
         if vendor_score_candidate:
             result["harness"]["score_accepted"] = True
             result["agent_completed"] = True
@@ -1844,7 +1723,7 @@ def main(argv=None) -> int:
             result["harness"]["stop_reason"] = "error"
             result["harness"]["score_accepted"] = False
 
-    return _finish(result, args.out, t0)
+    return finish()
 
 
 def _finish(result: Dict[str, Any], out: str, t0: float) -> int:
