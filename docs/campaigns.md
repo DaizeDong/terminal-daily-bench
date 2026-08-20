@@ -100,6 +100,24 @@ Supported built-in protocol contracts are:
 The legacy `terminus` adapter remains an unwired stub and has no eligible
 protocol.
 
+### Frozen SIF cache
+
+Pinned task SIFs are copied once per content SHA-256 into an owner-private,
+node-local cache instead of into every durable cell work tree. Set
+`TD_TASK_SIF_CACHE_ROOT` to an absolute node-global path such as
+`/tmp/td-e2e-task-sif-cache-$UID`; the default is a per-UID directory under
+`/tmp`. A scheduler wrapper should verify that this path is local to the compute
+node and has enough room for the digest-deduplicated frozen roster before any API
+request starts.
+
+Population is protected by cross-process locks and atomically publishes the SIF
+with a canonical receipt. Each cell keeps a shared lease through Harbor, then
+checks the same path, inode, mode, size, timestamps, owner, and receipt identity.
+The durable cell work tree contains only small `cache-receipt.json` and
+`binding.json` files; their canonical contents and hashes are also embedded in
+the evaluator result. Campaign acceptance independently recomputes and binds
+those records to the frozen task digest, task, model, and harness.
+
 ## Plan, run, and resume
 
 Freeze and inspect a credential-free plan first:

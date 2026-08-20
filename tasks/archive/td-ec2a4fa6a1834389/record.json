@@ -1,0 +1,29 @@
+{
+  "task_id": "td-ec2a4fa6a1834389",
+  "repo": "petl-developers/petl",
+  "pr_number": 697,
+  "base_sha": "841973d903d996d9df2a8cbba65c1fc3137d78ac",
+  "merge_sha": "9c50905031e62faa2dafb692ce483556067d905a",
+  "merged_at": "2026-07-28T04:54:29Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "63aa9e74a1f7e4aa14cda28dcd3b25fe3745990d28fdff102de5e2d37fca5577",
+  "test_files": [
+    "petl/test/io/test_json.py"
+  ],
+  "fail_to_pass": [
+    "petl/test/io/test_json.py::test_fromdicts_dicts_method",
+    "petl/test/io/test_json.py::test_fromdicts_dicts_attribute_reads_as_data",
+    "petl/test/io/test_json.py::test_fromdicts_dicts_attribute_assignment",
+    "petl/test/io/test_json.py::test_fromdicts_generator_dicts_method",
+    "petl/test/io/test_json.py::test_fromdicts_generator_dicts_attribute_is_consumable"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4"
+  ]
+}

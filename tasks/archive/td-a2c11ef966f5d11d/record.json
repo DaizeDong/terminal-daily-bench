@@ -1,0 +1,26 @@
+{
+  "task_id": "td-a2c11ef966f5d11d",
+  "repo": "liuzhao1225/YouDub-webui",
+  "pr_number": 105,
+  "base_sha": "beadce60787e5b00071f5195e5f1ea7d6941d833",
+  "merge_sha": "ef1d4bb8474afa65834c108d4050a5778a8092ed",
+  "merged_at": "2026-07-14T07:12:32Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "fdb26f3ce200e3f7454b700c7d532b8213257ad33a55333150c58b2bae265a6a",
+  "test_files": [
+    "apps/web/src/app/page.test.tsx",
+    "backend/tests/test_settings_and_api.py"
+  ],
+  "fail_to_pass": [
+    "backend/tests/test_settings_and_api.py::test_frontend_video_accept_contract_matches_backend_allowlist",
+    "backend/tests/test_settings_and_api.py::test_upload_local_video_can_save_translated_srt"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5"
+  ]
+}

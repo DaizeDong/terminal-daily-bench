@@ -1,0 +1,421 @@
+diff --git a/docs/examples/medical_observational_demo.md b/docs/examples/medical_observational_demo.md
+new file mode 100644
+index 00000000..07cedb32
+--- /dev/null
++++ b/docs/examples/medical_observational_demo.md
+@@ -0,0 +1,50 @@
++# Medical Observational Domain Demo
++
++This demo topic exercises the `medical_observational` domain profile without
++using real patient data:
++
++```text
++Retrospective cohort study of risk factors for mortality in trauma registry patients
++```
++
++The detector routes this topic to `medical_observational` because it contains
++domain-specific phrases such as `retrospective cohort` and `trauma registry`.
++
++## Intended Behavior
++
++The profile and adapter add safeguards for observational clinical research:
++
++- require an ethics/IRB or waiver status before analysis;
++- require de-identification and privacy confirmation before handling real data;
++- document data access, eligibility criteria, exposure, outcome, confounders,
++  effect modifiers, and follow-up window before modelling;
++- plan missing-data handling before model fitting;
++- produce STROBE-aligned outputs such as participant flow counts, Table 1,
++  effect estimates with confidence intervals, limitations, and sensitivity
++  analyses.
++
++## Synthetic Schema Only
++
++Use synthetic fields for examples and tests:
++
++| Field | Type | Example values |
++| --- | --- | --- |
++| `age_years` | numeric | 18-95 |
++| `sex` | categorical | `female`, `male`, `unknown` |
++| `injury_severity_score` | numeric | 1-75 |
++| `shock_index` | numeric | 0.4-2.5 |
++| `mechanism` | categorical | `fall`, `traffic`, `penetrating`, `other` |
++| `massive_transfusion` | binary | 0, 1 |
++| `mortality_30d` | binary outcome | 0, 1 |
++
++Do not include real patient records, identifiable dates, hospital names,
++medical-record numbers, free-text notes, IRB identifiers, or institution-specific
++workflows in demos.
++
++## Reference Implementation Boundary
++
++This domain profile was informed by the public
++`TUANZIDING/medical-paper-pipeline` project, but it intentionally contributes
++only a lightweight AutoResearchClaw domain pack: profile metadata, prompt
++adapter safeguards, detector keywords, and this demo note. It does not import
++the external pipeline or replace AutoResearchClaw's 23-stage runner.
+diff --git a/researchclaw/domains/adapters/__init__.py b/researchclaw/domains/adapters/__init__.py
+index c3694ee6..2ca9f43f 100644
+--- a/researchclaw/domains/adapters/__init__.py
++++ b/researchclaw/domains/adapters/__init__.py
+@@ -13,6 +13,9 @@
+ from researchclaw.domains.adapters.neuroscience import NeurosciencePromptAdapter
+ from researchclaw.domains.adapters.robotics import RoboticsPromptAdapter
+ from researchclaw.domains.adapters.hep_ph import HEPPhPromptAdapter
++from researchclaw.domains.adapters.medical_observational import (
++    MedicalObservationalPromptAdapter,
++)
+ 
+ __all__ = [
+     "MLPromptAdapter",
+@@ -24,4 +27,5 @@
+     "NeurosciencePromptAdapter",
+     "RoboticsPromptAdapter",
+     "HEPPhPromptAdapter",
++    "MedicalObservationalPromptAdapter",
+ ]
+diff --git a/researchclaw/domains/adapters/medical_observational.py b/researchclaw/domains/adapters/medical_observational.py
+new file mode 100644
+index 00000000..8e45b238
+--- /dev/null
++++ b/researchclaw/domains/adapters/medical_observational.py
+@@ -0,0 +1,131 @@
++"""Medical observational research prompt adapter.
++
++This adapter adds safeguards for retrospective clinical and epidemiology
++studies without changing the generic 23-stage pipeline.
++"""
++
++from __future__ import annotations
++
++from typing import Any
++
++from researchclaw.domains.prompt_adapter import PromptAdapter, PromptBlocks
++
++
++class MedicalObservationalPromptAdapter(PromptAdapter):
++    """Adapter for de-identified medical observational research."""
++
++    def get_code_generation_blocks(self, context: dict[str, Any]) -> PromptBlocks:
++        domain = self.domain
++
++        return PromptBlocks(
++            compute_budget=domain.compute_budget_guidance or (
++                "Medical observational analyses are usually CPU-bound. Keep "
++                "demo datasets small, transparent, and reproducible."
++            ),
++            dataset_guidance=domain.dataset_guidance or (
++                "Use synthetic data or a de-identified schema for examples. "
++                "Do not use real patient data in generated demos or tests. "
++                "Require explicit de-identification and secondary-use approval "
++                "before handling user-provided clinical data."
++            ),
++            hp_reporting=domain.hp_reporting_guidance or (
++                "Report study-design parameters: study design, sample counts, "
++                "exposure, outcome, confounders, missing-data strategy, and "
++                "ethics status."
++            ),
++            code_generation_hints=domain.code_generation_hints or self._default_code_hints(),
++            output_format_guidance=self._output_format(),
++        )
++
++    def get_experiment_design_blocks(self, context: dict[str, Any]) -> PromptBlocks:
++        design_context = (
++            f"This is a **{self.domain.display_name}** study.\n\n"
++            "Required planning gates before data analysis:\n"
++            "1. Ethics/IRB status: approved, exempt/waived, pending, or not yet "
++            "available. Never fabricate an IRB number or approval date.\n"
++            "2. Privacy gate: confirm de-identification, remove direct identifiers, "
++            "and avoid institution-sensitive or patient-identifiable details.\n"
++            "3. Data access plan: document source type (EHR/HIS export, trauma "
++            "registry, CSV/Excel, SPSS output), date range, linkage keys, and "
++            "whether data are synthetic or real.\n"
++            "4. Variable definition plan: define exposure, outcome, confounders, "
++            "effect modifiers, follow-up window, and clinical coding rules before "
++            "modelling.\n"
++            "5. Missingness plan: quantify missingness, discuss likely mechanism, "
++            "choose complete-case analysis by default, and add imputation only "
++            "when assumptions are justified.\n"
++            "6. STROBE alignment: preserve participant flow counts, eligibility "
++            "criteria, statistical methods, limitations, and bias discussion.\n"
++        )
++
++        return PromptBlocks(
++            experiment_design_context=design_context,
++            statistical_test_guidance=(
++                "Use STROBE-aligned observational statistics: Table 1 with "
++                "standardized mean differences, chi-square or Fisher exact tests "
++                "for categorical variables, t-test or Mann-Whitney U for continuous "
++                "variables, adjusted logistic or linear regression for primary "
++                "associations, Cox regression only for time-to-event outcomes, "
++                "and sensitivity analyses for missing data and residual confounding."
++            ),
++        )
++
++    def get_result_analysis_blocks(self, context: dict[str, Any]) -> PromptBlocks:
++        return PromptBlocks(
++            result_analysis_hints=self.domain.result_analysis_hints or (
++                "Medical observational result analysis:\n"
++                "- Interpret associations cautiously; do not imply causation from "
++                "retrospective observational data alone.\n"
++                "- Report exclusions, missingness, model covariates, effect estimates, "
++                "95% confidence intervals, and sensitivity analyses.\n"
++                "- Tie every claim to a table, coefficient, confidence interval, or "
++                "STROBE flow count.\n"
++                "- Explicitly discuss residual confounding, selection bias, and data "
++                "quality limitations."
++            ),
++            statistical_test_guidance=(
++                "Report effect estimates with 95% confidence intervals, p values "
++                "where appropriate, standardized mean differences for baseline "
++                "balance, and model diagnostics or proportional hazards checks "
++                "when applicable."
++            ),
++        )
++
++    def get_export_publish_blocks(self, context: dict[str, Any]) -> PromptBlocks:
++        return PromptBlocks(
++            export_publish_guidance=(
++                "Export as a generic medical manuscript. Include an ethics "
++                "statement, de-identification statement, STROBE checklist note, "
++                "participant-flow summary, Table 1, primary effect estimates, "
++                "limitations, and a clear statement that the generated content is "
++                "research-methodology assistance, not clinical advice."
++            ),
++            preferred_template="generic",
++        )
++
++    def _default_code_hints(self) -> str:
++        return (
++            "Medical observational code requirements:\n"
++            "1. Create an ethics/privacy gate before analysis.\n"
++            "2. Define eligibility, exposure, outcome, confounders, and follow-up "
++            "before modelling.\n"
++            "3. Implement cleaning and exclusion logs.\n"
++            "4. Generate Table 1 and adjusted primary models.\n"
++            "5. Output results.json with ethics, data_plan, table_1, strobe_flow, "
++            "primary_model, sensitivity_analyses, and limitations.\n"
++            "6. Do not use real patient data in examples or tests.\n"
++        )
++
++    def _output_format(self) -> str:
++        return (
++            "Output results to results.json:\n"
++            '{"ethics": {"irb_status": "approved|exempt|pending|unknown", '
++            '"de_identified": true},\n'
++            ' "data_plan": {"source_type": "synthetic|ehr|his|registry|csv", '
++            '"exposure": "...", "outcome": "...", "confounders": [...]},\n'
++            ' "table_1": {"groups": {...}, "smd": {...}},\n'
++            ' "strobe_flow": {"initial": 1000, "excluded": [], "analyzed": 1000},\n'
++            ' "primary_model": {"effect": "...", "estimate": 1.23, '
++            '"ci95": [1.01, 1.49]},\n'
++            ' "sensitivity_analyses": [], "limitations": []}'
++        )
+diff --git a/researchclaw/domains/detector.py b/researchclaw/domains/detector.py
+index 0c616ba0..58972ee1 100644
+--- a/researchclaw/domains/detector.py
++++ b/researchclaw/domains/detector.py
+@@ -335,6 +335,18 @@ def get_generic_profile() -> DomainProfile:
+       "esm"], "biology_protein"),
+     (["biology", "bioinformatics", "omics"], "biology_general"),
+ 
++    # Medical observational research (before economics so "logistic regression"
++    # in a retrospective cohort does not route to economics_empirical).
++    (["retrospective cohort", "case-control", "case control",
++      "cross-sectional", "cross sectional", "strobe",
++      "clinical registry", "trauma registry", "patient registry",
++      "ehr", "electronic health record", "his database", "his export",
++      "hospital information system", "observational clinical",
++      "observational study", "clinical observational",
++      "medical observational", "de-identified clinical",
++      "deidentified clinical", "table 1", "irb", "ethics waiver"],
++     "medical_observational"),
++
+     # Economics
+     (["econometrics", "regression", "instrumental variable",
+       "fixed effect", "panel data", "difference-in-difference",
+@@ -407,6 +419,7 @@ def _keyword_detect(text: str) -> str | None:
+ - biology_singlecell: Single-cell analysis (scRNA-seq, scanpy)
+ - biology_genomics: Genomics (sequencing, variant calling)
+ - biology_protein: Protein science (folding, property prediction)
++- medical_observational: Medical observational studies (retrospective cohort, case-control, cross-sectional, STROBE, EHR/HIS/registry)
+ - economics_empirical: Empirical economics (regression, causal inference)
+ - mathematics_numerical: Numerical methods (ODE/PDE solvers, convergence)
+ - mathematics_optimization: Optimization (convex, evolutionary)
+diff --git a/researchclaw/domains/profiles/medical_observational.yaml b/researchclaw/domains/profiles/medical_observational.yaml
+new file mode 100644
+index 00000000..1468b728
+--- /dev/null
++++ b/researchclaw/domains/profiles/medical_observational.yaml
+@@ -0,0 +1,153 @@
++domain_id: medical_observational
++display_name: Medical Observational Research
++parent_domain: medicine
++
++# Deployment defaults. This profile is a methodology-safety overlay for
++# retrospective clinical/epidemiology manuscripts, not a conference ML track.
++preferred_experiment_mode: sandbox
++preferred_project_mode: co-pilot
++preferred_target_conference: generic
++default_time_budget_sec: 1800
++default_max_iterations: 3
++default_metric_key: primary_effect_estimate
++default_metric_direction: maximize
++
++experiment_paradigm: progressive_spec
++condition_terminology:
++  baseline: unadjusted clinical comparison
++  proposed: adjusted analysis plan
++  variant: sensitivity or subgroup analysis
++  input: de-identified clinical dataset or synthetic schema
++  metric: effect estimate with confidence interval
++
++typical_file_structure:
++  config.py: "Study design, eligibility criteria, variable definitions, and ethics status"
++  data_plan.py: "Data access plan, de-identification checks, and missingness assessment"
++  cleaning.py: "Range checks, unit harmonization, exclusion log, and audit trail"
++  analysis.py: "Table 1, primary model, sensitivity analysis, and missing-data strategy"
++  reporting.py: "STROBE checklist, patient flow counts, and methods/results text"
++  main.py: "Entry point: validate plan -> clean -> analyze -> report"
++
++entry_point: main.py
++
++core_libraries:
++  - pandas
++  - numpy
++  - scipy
++  - statsmodels
++  - matplotlib
++
++docker_image: researchclaw/sandbox-generic:latest
++gpu_required: false
++
++pip_packages:
++  - pandas
++  - numpy
++  - scipy
++  - statsmodels
++  - matplotlib
++
++metric_types:
++  - table
++  - structured
++  - scalar
++
++standard_baselines:
++  - Unadjusted group comparison
++  - Complete-case primary analysis
++  - Multivariable adjusted regression
++  - Missing-data sensitivity analysis
++
++evaluation_protocol: >
++  Plan the study as a de-identified observational clinical analysis. Before
++  modelling, document ethics/IRB status, data access, eligibility criteria,
++  exposure/outcome definitions, confounder candidates, missingness, and every
++  cleaning decision. Report Table 1, effect estimates with 95% confidence
++  intervals, sensitivity analyses, and STROBE-aligned participant flow.
++
++statistical_tests:
++  - chi_square_or_fisher_exact
++  - t_test_or_mann_whitney_u
++  - standardized_mean_difference
++  - multivariable_logistic_regression
++  - cox_regression_if_time_to_event
++  - multiple_imputation_sensitivity_if_justified
++
++output_formats:
++  - table_1
++  - strobe_flow_counts
++  - effect_estimate_table
++  - methods_paragraph
++
++figure_types:
++  - strobe_flow_diagram
++  - forest_plot
++  - missingness_bar_chart
++  - kaplan_meier_curve_if_applicable
++
++github_search_terms:
++  - STROBE observational study python
++  - clinical table 1 statsmodels
++  - retrospective cohort missing data analysis
++  - patient flow diagram observational study
++
++paper_keywords:
++  - retrospective cohort
++  - case-control study
++  - cross-sectional study
++  - STROBE
++  - clinical registry
++  - EHR
++  - de-identified data
++
++compute_budget_guidance: |
++  Medical observational analyses are usually CPU-bound:
++  - Keep synthetic demo datasets small enough for quick tests.
++  - Prefer transparent statistical models over opaque black-box predictors.
++  - Reserve expensive bootstrap or imputation loops for sensitivity analyses.
++
++dataset_guidance: |
++  Medical observational data handling:
++  - Use synthetic data or a de-identified schema for examples and tests.
++  - Do not use real patient data in generated demos.
++  - If the user provides real data, require explicit confirmation that it is
++    de-identified and approved for secondary analysis before producing code.
++  - Never invent patient records, IRB identifiers, hospital names, or outcomes.
++
++hp_reporting_guidance: |
++  Report study-design parameters:
++  HYPERPARAMETERS: {'study_design': ..., 'n_initial': ..., 'n_excluded': ...,
++  'exposure': ..., 'outcome': ..., 'confounders': [...],
++  'missing_data_strategy': ..., 'ethics_status': ...}
++
++code_generation_hints: |
++  Medical observational code requirements:
++
++  1. Start with a data-access and ethics gate. Record IRB/ethics status,
++     waiver status, de-identification status, and whether real data may be used.
++  2. Define eligibility criteria, exposure, outcome, confounders, effect
++     modifiers, and follow-up window before analysis.
++  3. Implement range checks, impossible-value checks, unit harmonization,
++     duplicate detection, and an exclusion/cleaning log.
++  4. Produce Table 1 with group summaries, p values where appropriate, and
++     standardized mean differences.
++  5. Use complete-case analysis as the default primary analysis. Add multiple
++     imputation only when missingness assumptions are documented and justified.
++  6. Output results.json with keys: ethics, data_plan, cleaning_log_summary,
++     table_1, strobe_flow, primary_model, sensitivity_analyses, and limitations.
++
++  ANTI-PATTERNS (DO NOT do these):
++  - Do not use real patient data in examples or tests.
++  - Do not fabricate IRB approval numbers, patient counts, hospital names, or
++    clinical outcomes.
++  - Do not claim clinical effectiveness from observational associations alone.
++  - Do not skip de-identification and privacy checks.
++
++result_analysis_hints: |
++  Medical observational result analysis:
++  - Tie every claim to a specific table, model coefficient, confidence interval,
++    or sensitivity result.
++  - Separate association from causation unless the design supports causal claims.
++  - Report missingness and exclusions before interpreting effect estimates.
++  - State STROBE limitations, residual confounding, selection bias, and data
++    quality limits explicitly.
+diff --git a/researchclaw/domains/prompt_adapter.py b/researchclaw/domains/prompt_adapter.py
+index 0b18bf83..c4080759 100644
+--- a/researchclaw/domains/prompt_adapter.py
++++ b/researchclaw/domains/prompt_adapter.py
+@@ -333,6 +333,13 @@ def _build_adapter_registry() -> dict[str, type[PromptAdapter]]:
+         registry["hep_ph_"] = HEPPhPromptAdapter
+     except ImportError:
+         pass
++    try:
++        from researchclaw.domains.adapters.medical_observational import (
++            MedicalObservationalPromptAdapter,
++        )
++        registry["medical_observational"] = MedicalObservationalPromptAdapter
++    except ImportError:
++        pass
+     return registry
+ 
+ 

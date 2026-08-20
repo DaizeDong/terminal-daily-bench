@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-23116647bb846dae"
+description = "RC-4713-add-tspd-captcha"
+keywords = ["C5", "C2", "C4", "C8"]
+
+[metadata]
+source_repo = "2captcha/2captcha-python"
+pr_number = 144
+base_sha = "f596f77d3d697d0e0f9182dfc943aba95e625819"
+merge_sha = "d41a12a9cf55b244aa03ddee5d9dfcf084e8f085"
+created_at = "2026-06-22T14:12:57Z"
+oracle_patch_sha256 = "90cb8f3f37bd4f895d0df5a36c3b8bee2696c9b0ac06b16c17216b0c01b94200"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

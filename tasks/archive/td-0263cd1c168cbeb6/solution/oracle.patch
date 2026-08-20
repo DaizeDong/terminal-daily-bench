@@ -1,0 +1,79 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index baa144b5..65f18af9 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -3,6 +3,12 @@ All notable changes in pdfminer.six will be documented in this file.
+ 
+ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+ 
++## [Unreleased]
++
++### Fixed
++
++- Reproducibility issue when generating cmap `.json.gz` files ([#1242](https://github.com/pdfminer/pdfminer.six/pull/1242))
++
+ ## [20260107]
+ 
+ ### Added
+diff --git a/tools/conv_cmap.py b/tools/conv_cmap.py
+index 180bd609..adda5069 100755
+--- a/tools/conv_cmap.py
++++ b/tools/conv_cmap.py
+@@ -148,6 +148,7 @@ def dump_unicodemap(self, fp):
+ def main(argv):
+     import getopt
+     import gzip
++    import io
+     import os.path
+ 
+     def usage():
+@@ -183,14 +184,22 @@ def usage():
+         fname = f"{enc}.json.gz"
+         path = os.path.join(outdir, fname)
+         print(f"writing: {path!r}...")
+-        with gzip.open(path, "wt", encoding="utf-8") as fp:
++        with (
++            open(path, "wb") as bfp,
++            gzip.GzipFile(fileobj=bfp, mode="wb", compresslevel=9, mtime=0) as gz,
++            io.TextIOWrapper(gz, encoding="utf-8") as fp,
++        ):
+             converter.dump_cmap(fp, enc)
+ 
+     # Write JSON format
+     fname = f"to-unicode-{regname}.json.gz"
+     path = os.path.join(outdir, fname)
+     print(f"writing: {path!r}...")
+-    with gzip.open(path, "wt", encoding="utf-8") as fp:
++    with (
++        open(path, "wb") as bfp,
++        gzip.GzipFile(fileobj=bfp, mode="wb", compresslevel=9, mtime=0) as gz,
++        io.TextIOWrapper(gz, encoding="utf-8") as fp,
++    ):
+         converter.dump_unicodemap(fp)
+ 
+ 
+diff --git a/tools/convert_cmaps_to_json.py b/tools/convert_cmaps_to_json.py
+index 93e66823..94b60be9 100644
+--- a/tools/convert_cmaps_to_json.py
++++ b/tools/convert_cmaps_to_json.py
+@@ -12,6 +12,7 @@
+ """
+ 
+ import gzip
++import io
+ import json
+ import pickle
+ import sys
+@@ -53,7 +54,11 @@ def convert_pickle_to_json(pickle_path: str, json_path: str) -> None:
+         raise ValueError(f"Expected dict from pickle, got {type(data)}")
+ 
+     # Write JSON data
+-    with gzip.open(json_path, "wt", encoding="utf-8") as gzfile:
++    with (
++        open(json_path, "wb") as fp,
++        gzip.GzipFile(fileobj=fp, mode="wb", compresslevel=9, mtime=0) as gz,
++        io.TextIOWrapper(gz, encoding="utf-8") as gzfile,
++    ):
+         json.dump(data, gzfile, ensure_ascii=False, indent=None, separators=(",", ":"))
+ 
+     print(f"✓ Converted {pickle_path} -> {json_path}")

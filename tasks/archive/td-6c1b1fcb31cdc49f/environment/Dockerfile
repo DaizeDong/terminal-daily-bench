@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/hukkin/tomli.git
+ARG REPO_URL=git://127.0.0.1:29405/hukkin/tomli.git
 ARG REPO_BASE_SHA=c20c49113890c226ffb27a67befe20d14fcf0c73
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \

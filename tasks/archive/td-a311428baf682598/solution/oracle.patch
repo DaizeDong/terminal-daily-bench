@@ -1,0 +1,1229 @@
+diff --git a/README.md b/README.md
+index f578deef..f6a98049 100644
+--- a/README.md
++++ b/README.md
+@@ -95,6 +95,8 @@ You can also run the Gradio app locally:
+ python app.py
+ ```
+ 
++The Gradio **Figure Size** setting maps `1-3cm` and `4-6cm` to `1k`, `7-9cm` and `10-13cm` to `2k`, and `14-17cm` to `4k` for Gemini and OpenRouter image-generation calls. OpenAI `gpt-image` requests continue to use their existing fixed-size API path.
++
+ #### Option 2: Interactive Demo (Streamlit)
+ The easiest way to launch PaperBanana is via the interactive Streamlit demo:
+ ```bash
+@@ -128,6 +130,14 @@ python main.py \
+   --split_name "test" \
+   --exp_mode "dev_full" \
+   --retrieval_setting "auto"
++
++# Legacy matplotlib plot-code generation with no few-shot retrieval
++python main.py \
++  --dataset_name "PaperBananaBench" \
++  --task_name "plot" \
++  --split_name "test" \
++  --exp_mode "vanilla" \
++  --retrieval_setting "none"
+ ```
+ 
+ **Available Options:**
+@@ -310,5 +320,3 @@ If you find this repo helpful, please cite our paper as follows:
+ This is not an officially supported Google product. This project is not eligible for the [Google Open Source Software Vulnerability Rewards Program](https://bughunters.google.com/open-source-security).
+ 
+ Our goal is simply to benefit the community, so currently we have no plans to use it for commercial purposes. The core methodology was developed during my internship at Google, and patents have been filed for these specific workflows by Google. While this doesn't impact open-source research efforts, it restricts third-party commercial applications using similar logic.
+-
+-
+diff --git a/agents/polish_agent.py b/agents/polish_agent.py
+index 2ddfd131..3042b7ec 100644
+--- a/agents/polish_agent.py
++++ b/agents/polish_agent.py
+@@ -24,6 +24,7 @@
+ from PIL import Image
+ 
+ from utils import generation_utils, image_utils
++from utils.legacy_generation_options import image_size_from_data
+ from .base_agent import BaseAgent
+ 
+ 
+@@ -163,13 +164,14 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+         
+         # Generate polished image
+         aspect_ratio = data.get("additional_info", {}).get("rounded_ratio", "16:9")
++        image_size = image_size_from_data(data)
+         try:
+             if generation_utils.openrouter_client is not None:
+                 image_config = {
+                     "system_prompt": self.system_prompt,
+                     "temperature": self.exp_config.temperature,
+                     "aspect_ratio": aspect_ratio,
+-                    "image_size": "1k",
++                    "image_size": image_size,
+                 }
+                 response_list = await generation_utils.call_openrouter_image_generation_with_retry_async(
+                     model_name=self.image_gen_model_name,
+@@ -190,7 +192,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                         response_modalities=["IMAGE"],
+                         image_config=types.ImageConfig(
+                             aspect_ratio=aspect_ratio,
+-                            image_size="1k",
++                            image_size=image_size,
+                         ),
+                     ),
+                     max_attempts=5,
+diff --git a/agents/vanilla_agent.py b/agents/vanilla_agent.py
+index e0d5d8f8..6ee704bd 100644
+--- a/agents/vanilla_agent.py
++++ b/agents/vanilla_agent.py
+@@ -20,53 +20,15 @@
+ from concurrent.futures import ProcessPoolExecutor
+ from typing import Dict, Any
+ from google.genai import types
+-import base64, io, asyncio
+-from PIL import Image
++import asyncio
+ import json
+ 
+ from utils import generation_utils, image_utils
++from utils.legacy_generation_options import image_size_from_data
++from utils.plot_execution import execute_plot_code_worker
+ from .base_agent import BaseAgent
+ 
+ 
+-def _execute_plot_code_worker(code_text: str) -> str:
+-    """
+-    Independent plot code execution worker:
+-    1. Extract code
+-    2. Execute plotting
+-    3. Return JPEG as Base64 string
+-    """
+-    import matplotlib.pyplot as plt
+-    import io
+-    import base64
+-    import re
+-
+-    match = re.search(r"```python(.*?)```", code_text, re.DOTALL)
+-    code_clean = match.group(1).strip() if match else code_text.strip()
+-
+-    plt.switch_backend("Agg")
+-    plt.close("all")
+-    plt.rcdefaults()
+-
+-    try:
+-        exec_globals = {}
+-        exec(code_clean, exec_globals)
+-
+-        if plt.get_fignums():
+-            buf = io.BytesIO()
+-            plt.savefig(buf, format="jpeg", bbox_inches="tight", dpi=100)
+-            plt.close("all")
+-
+-            buf.seek(0)
+-            img_bytes = buf.read()
+-            return base64.b64encode(img_bytes).decode("utf-8")
+-        else:
+-            return None
+-
+-    except Exception as e:
+-        print(f"Error executing plot code: {e}")
+-        return None
+-
+-
+ class VanillaAgent(BaseAgent):
+     """Vanilla Agent to generate images based on user queries"""
+ 
+@@ -128,6 +90,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+         }
+         
+         aspect_ratio = data["additional_info"]["rounded_ratio"]
++        image_size = image_size_from_data(data)
+ 
+         if cfg["use_image_generation"]:
+             if "gpt-image" in self.model_name:
+@@ -149,7 +112,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                     "system_prompt": self.system_prompt,
+                     "temperature": self.exp_config.temperature,
+                     "aspect_ratio": aspect_ratio,
+-                    "image_size": "1k",
++                    "image_size": image_size,
+                 }
+                 response_list = await generation_utils.call_openrouter_image_generation_with_retry_async(
+                     model_name=self.model_name,
+@@ -162,7 +125,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                 gen_config_args["response_modalities"] = ["IMAGE"]
+                 gen_config_args["image_config"] = types.ImageConfig(
+                     aspect_ratio=aspect_ratio,
+-                    image_size="1k",
++                    image_size=image_size,
+                 )
+                 response_list = await generation_utils.call_gemini_with_retry_async(
+                     model_name=self.model_name,
+@@ -187,9 +150,10 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+         else:
+             if response_list and response_list[0]:
+                 raw_code = response_list[0]
++                data[f"vanilla_{cfg['task_name']}_code"] = raw_code
+                 loop = asyncio.get_running_loop()
+                 base64_jpg = await loop.run_in_executor(
+-                    self.process_executor, _execute_plot_code_worker, raw_code
++                    self.process_executor, execute_plot_code_worker, raw_code, 100
+                 )
+                 if base64_jpg:
+                     data[output_key] = base64_jpg
+@@ -227,4 +191,4 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+ 
+ ## OUTPUT
+ Write Python matplotlib code to generate the plot. Only provide the code without any explanations.
+-"""
+\ No newline at end of file
++"""
+diff --git a/agents/visualizer_agent.py b/agents/visualizer_agent.py
+index a45ee0e6..54ed3e89 100644
+--- a/agents/visualizer_agent.py
++++ b/agents/visualizer_agent.py
+@@ -19,47 +19,14 @@
+ from concurrent.futures import ProcessPoolExecutor
+ from typing import Dict, Any
+ from google.genai import types
+-import base64, io, asyncio, re
+-import matplotlib.pyplot as plt
+-from PIL import Image
++import asyncio
+ 
+ from utils import generation_utils, image_utils
++from utils.legacy_generation_options import image_size_from_data
++from utils.plot_execution import execute_plot_code_worker
+ from .base_agent import BaseAgent
+ 
+ 
+-def _execute_plot_code_worker(code_text: str) -> str:
+-    """
+-    Independent plot code execution worker:
+-    1. Extract code
+-    2. Execute plotting
+-    3. Return JPEG as Base64 string
+-    """
+-    match = re.search(r"```python(.*?)```", code_text, re.DOTALL)
+-    code_clean = match.group(1).strip() if match else code_text.strip()
+-
+-    plt.switch_backend("Agg")
+-    plt.close("all")
+-    plt.rcdefaults()
+-
+-    try:
+-        exec_globals = {}
+-        exec(code_clean, exec_globals)
+-        if plt.get_fignums():
+-            buf = io.BytesIO()
+-            plt.savefig(buf, format="jpeg", bbox_inches="tight", dpi=300)
+-            plt.close("all")
+-
+-            buf.seek(0)
+-            img_bytes = buf.read()
+-            return base64.b64encode(img_bytes).decode("utf-8")
+-        else:
+-            return None
+-
+-    except Exception as e:
+-        print(f"Error executing plot code: {e}")
+-        return None
+-
+-
+ class VisualizerAgent(BaseAgent):
+     """Visualizer Agent to generate images based on user queries"""
+ 
+@@ -153,6 +120,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+             aspect_ratio = "1:1"
+             if "additional_info" in data and "rounded_ratio" in data["additional_info"]:
+                 aspect_ratio = data["additional_info"]["rounded_ratio"]
++            image_size = image_size_from_data(data)
+ 
+             if cfg["use_image_generation"]:
+                 if "gpt-image" in self.model_name:
+@@ -175,7 +143,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                         "system_prompt": self.system_prompt,
+                         "temperature": self.exp_config.temperature,
+                         "aspect_ratio": aspect_ratio,
+-                        "image_size": "1k",
++                        "image_size": image_size,
+                     }
+                     response_list = await generation_utils.call_openrouter_image_generation_with_retry_async(
+                         model_name=self.model_name,
+@@ -189,7 +157,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                     gen_config_args["response_modalities"] = ["IMAGE"]
+                     gen_config_args["image_config"] = types.ImageConfig(
+                         aspect_ratio=aspect_ratio,
+-                        image_size="1k",
++                        image_size=image_size,
+                     )
+                     response_list = await generation_utils.call_gemini_with_retry_async(
+                         model_name=self.model_name,
+@@ -230,7 +198,7 @@ async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+                     self.process_executor = ProcessPoolExecutor(max_workers=4)
+                 
+                 base64_jpg = await loop.run_in_executor(
+-                    self.process_executor, _execute_plot_code_worker, raw_code
++                    self.process_executor, execute_plot_code_worker, raw_code, 300
+                 )
+                 data[f"{desc_key}_code"] = raw_code
+                 
+diff --git a/app.py b/app.py
+index 8a83b013..0953f7c5 100644
+--- a/app.py
++++ b/app.py
+@@ -61,6 +61,11 @@
+ from agents.vanilla_agent import VanillaAgent
+ from agents.polish_agent import PolishAgent
+ from utils import config
++from utils.legacy_generation_options import (
++    generation_additional_info,
++    normalize_legacy_input_content,
++)
++from utils.legacy_ui_results import build_evolution_stages, resolve_final_output
+ from utils.paperviz_processor import PaperVizProcessor
+ 
+ model_config_data = {}
+@@ -99,14 +104,24 @@ def base64_to_image(b64_str):
+         return None
+ 
+ 
+-def create_sample_inputs(method_content, caption, aspect_ratio="16:9", num_copies=10, max_critic_rounds=3):
++def create_sample_inputs(
++    method_content,
++    caption,
++    aspect_ratio="16:9",
++    figure_size=None,
++    num_copies=10,
++    max_critic_rounds=3,
++    task_name="diagram",
++):
++    task_name = "plot" if "plot" in (task_name or "").lower() else "diagram"
+     base_input = {
+         "filename": "demo_input",
+         "caption": caption,
+-        "content": method_content,
++        "content": normalize_legacy_input_content(method_content, task_name),
+         "visual_intent": caption,
+-        "additional_info": {"rounded_ratio": aspect_ratio},
++        "additional_info": generation_additional_info(aspect_ratio, figure_size),
+         "max_critic_rounds": max_critic_rounds,
++        "task_name": task_name,
+     }
+     inputs = []
+     for i in range(num_copies):
+@@ -119,10 +134,12 @@ def create_sample_inputs(method_content, caption, aspect_ratio="16:9", num_copie
+ 
+ async def process_parallel_candidates(
+     data_list, exp_mode="dev_planner_critic", retrieval_setting="auto",
+-    main_model_name="", image_gen_model_name="",
++    main_model_name="", image_gen_model_name="", task_name="diagram",
+ ):
++    task_name = "plot" if "plot" in (task_name or "").lower() else "diagram"
+     exp_config = config.ExpConfig(
+-        dataset_name="Demo",
++        dataset_name="PaperBananaBench",
++        task_name=task_name,
+         split_name="demo",
+         exp_mode=exp_mode,
+         retrieval_setting=retrieval_setting,
+@@ -142,6 +159,7 @@ async def process_parallel_candidates(
+     )
+     results = []
+     async for result_data in processor.process_queries_batch(data_list, max_concurrent=10, do_eval=False):
++        result_data["task_name"] = task_name
+         results.append(result_data)
+     return results
+ 
+@@ -218,51 +236,14 @@ async def refine_image_with_nanoviz(image_bytes, edit_prompt, aspect_ratio="21:9
+ 
+ 
+ def get_evolution_stages(result, exp_mode):
+-    task_name = "diagram"
+-    stages = []
+-    # Planner
+-    k = f"target_{task_name}_desc0_base64_jpg"
+-    if k in result and result[k]:
+-        stages.append({"name": "Planner", "image_key": k, "desc_key": f"target_{task_name}_desc0", "description": "Initial diagram plan"})
+-    # Stylist (demo_full only)
+-    if exp_mode == "demo_full":
+-        k = f"target_{task_name}_stylist_desc0_base64_jpg"
+-        if k in result and result[k]:
+-            stages.append({"name": "Stylist", "image_key": k, "desc_key": f"target_{task_name}_stylist_desc0", "description": "Stylistically refined"})
+-    # Critic rounds
+-    for r in range(4):
+-        k = f"target_{task_name}_critic_desc{r}_base64_jpg"
+-        if k in result and result[k]:
+-            stages.append({
+-                "name": f"Critic Round {r}",
+-                "image_key": k,
+-                "desc_key": f"target_{task_name}_critic_desc{r}",
+-                "suggestions_key": f"target_{task_name}_critic_suggestions{r}",
+-                "description": f"Refined after critic iteration {r}",
+-            })
+-    return stages
++    return build_evolution_stages(result, exp_mode=exp_mode)
+ 
+ 
+ def get_final_image(result, exp_mode):
+     """Return (PIL.Image, desc_text) for the best available stage."""
+-    task_name = "diagram"
+-    final_key = None
+-    final_desc_key = None
+-    for r in range(3, -1, -1):
+-        k = f"target_{task_name}_critic_desc{r}_base64_jpg"
+-        if k in result and result[k]:
+-            final_key = k
+-            final_desc_key = f"target_{task_name}_critic_desc{r}"
+-            break
+-    if not final_key:
+-        if exp_mode == "demo_full":
+-            final_key = f"target_{task_name}_stylist_desc0_base64_jpg"
+-            final_desc_key = f"target_{task_name}_stylist_desc0"
+-        else:
+-            final_key = f"target_{task_name}_desc0_base64_jpg"
+-            final_desc_key = f"target_{task_name}_desc0"
+-    img = base64_to_image(result.get(final_key)) if final_key else None
+-    desc = clean_text(result.get(final_desc_key, "")) if final_desc_key else ""
++    selection = resolve_final_output(result, exp_mode=exp_mode)
++    img = base64_to_image(result.get(selection.image_key)) if selection.image_key else None
++    desc = clean_text(result.get(selection.text_key, "")) if selection.text_key else ""
+     return img, desc
+ 
+ 
+@@ -542,6 +523,12 @@ def apply_keys(or_key, g_key):
+                             label="Pipeline Mode",
+                             info="Select which agent pipeline to use",
+                         )
++                        task_name = gr.Dropdown(
++                            choices=["diagram", "plot"],
++                            value="diagram",
++                            label="Output Type",
++                            info="Generate a scientific diagram or a statistical plot",
++                        )
+                         pipeline_desc = gr.Textbox(
+                             label="Pipeline Description",
+                             value=PIPELINE_DESCRIPTIONS["demo_full"],
+@@ -557,7 +544,7 @@ def apply_keys(or_key, g_key):
+                             choices=["auto", "manual", "random", "none"],
+                             value="auto",
+                             label="Retrieval Setting",
+-                            info="How to retrieve reference diagrams",
++                            info="How to retrieve reference examples",
+                         )
+                         num_candidates = gr.Number(
+                             value=10, minimum=1, maximum=20, step=1,
+@@ -611,12 +598,12 @@ def apply_keys(or_key, g_key):
+ 
+                         with gr.Row():
+                             method_content = gr.Textbox(
+-                                label="Method Content",
++                                label="Method Content / Plot Data",
+                                 value=EXAMPLE_METHOD,
+                                 lines=12, max_lines=30,
+                             )
+                             caption_input = gr.Textbox(
+-                                label="Figure Caption",
++                                label="Figure Caption / Visual Intent",
+                                 value=EXAMPLE_CAPTION,
+                                 lines=12, max_lines=30,
+                             )
+@@ -651,7 +638,7 @@ def load_caption_example(choice):
+ 
+                 # ---- Generate handler ----
+                 def run_generate(
+-                    method_text, caption_text, pipe_mode, ret_setting,
++                    method_text, caption_text, pipe_mode, task_name, ret_setting,
+                     n_cands, ar, max_rounds, m_model, img_model,
+                     figure_size, save_results,
+                     progress=gr.Progress(track_tqdm=True),
+@@ -666,9 +653,10 @@ def run_generate(
+                     progress(0, desc="Preparing inputs...")
+                     input_data = create_sample_inputs(
+                         method_content=method_text, caption=caption_text,
+-                        aspect_ratio=ar, num_copies=n_cands, max_critic_rounds=max_rounds,
++                        aspect_ratio=ar, figure_size=figure_size,
++                        num_copies=n_cands, max_critic_rounds=max_rounds,
++                        task_name=task_name,
+                     )
+-                    params = {"figure_size": figure_size}
+ 
+                     progress(0.1, desc=f"Generating {n_cands} candidates in parallel...")
+                     try:
+@@ -677,6 +665,7 @@ def run_generate(
+                             process_parallel_candidates(
+                                 input_data, exp_mode=pipe_mode, retrieval_setting=ret_setting,
+                                 main_model_name=m_model, image_gen_model_name=img_model,
++                                task_name=task_name,
+                             )
+                         )
+                         loop.close()
+@@ -752,7 +741,7 @@ def run_generate(
+                 generate_btn.click(
+                     fn=run_generate,
+                     inputs=[
+-                        method_content, caption_input, pipeline_mode, retrieval_setting,
++                        method_content, caption_input, pipeline_mode, task_name, retrieval_setting,
+                         num_candidates, aspect_ratio, max_critic_rounds,
+                         main_model_name, image_model_name,
+                         figure_size, save_results,
+diff --git a/demo.py b/demo.py
+index de45a17c..7f434ae7 100644
+--- a/demo.py
++++ b/demo.py
+@@ -53,6 +53,11 @@
+     from agents.polish_agent import PolishAgent
+     print("DEBUG: Imported all agents")
+     from utils import config
++    from utils.legacy_generation_options import (
++        generation_additional_info,
++        normalize_legacy_input_content,
++    )
++    from utils.legacy_ui_results import build_evolution_stages, resolve_final_output
+     from utils.paperviz_processor import PaperVizProcessor
+     print("DEBUG: Imported utils")
+ 
+@@ -105,17 +110,26 @@ def base64_to_image(b64_str):
+     except Exception:
+         return None
+ 
+-def create_sample_inputs(method_content, caption, diagram_type="Pipeline", aspect_ratio="16:9", num_copies=10, max_critic_rounds=3):
++def create_sample_inputs(
++    method_content,
++    caption,
++    diagram_type="Pipeline",
++    aspect_ratio="16:9",
++    figure_size=None,
++    num_copies=10,
++    max_critic_rounds=3,
++    task_name="diagram",
++):
+     """Create multiple copies of the input data for parallel processing."""
++    task_name = "plot" if "plot" in (task_name or "").lower() else "diagram"
+     base_input = {
+         "filename": "demo_input",
+         "caption": caption,
+-        "content": method_content,
++        "content": normalize_legacy_input_content(method_content, task_name),
+         "visual_intent": caption,
+-        "additional_info": {
+-            "rounded_ratio": aspect_ratio
+-        },
+-        "max_critic_rounds": max_critic_rounds  # Add critic rounds control
++        "additional_info": generation_additional_info(aspect_ratio, figure_size),
++        "max_critic_rounds": max_critic_rounds,  # Add critic rounds control
++        "task_name": task_name,
+     }
+     
+     # Create num_copies identical inputs, each with a unique identifier
+@@ -128,11 +142,20 @@ def create_sample_inputs(method_content, caption, diagram_type="Pipeline", aspec
+     
+     return inputs
+ 
+-async def process_parallel_candidates(data_list, exp_mode="dev_planner_critic", retrieval_setting="auto", main_model_name="", image_gen_model_name=""):
++async def process_parallel_candidates(
++    data_list,
++    exp_mode="dev_planner_critic",
++    retrieval_setting="auto",
++    main_model_name="",
++    image_gen_model_name="",
++    task_name="diagram",
++):
+     """Process multiple candidates in parallel using PaperVizProcessor."""
++    task_name = "plot" if "plot" in (task_name or "").lower() else "diagram"
+     # Create experiment config
+     exp_config = config.ExpConfig(
+-        dataset_name="Demo",
++        dataset_name="PaperBananaBench",
++        task_name=task_name,
+         split_name="demo",
+         exp_mode=exp_mode,
+         retrieval_setting=retrieval_setting,
+@@ -160,6 +183,7 @@ async def process_parallel_candidates(data_list, exp_mode="dev_planner_critic",
+     async for result_data in processor.process_queries_batch(
+         data_list, max_concurrent=concurrent_num, do_eval=False
+     ):
++        result_data["task_name"] = task_name
+         results.append(result_data)
+     
+     return results
+@@ -271,76 +295,13 @@ async def refine_image_with_nanoviz(image_bytes, edit_prompt, aspect_ratio="21:9
+ 
+ def get_evolution_stages(result, exp_mode):
+     """Extract all evolution stages (images and descriptions) from the result."""
+-    task_name = "diagram"
+-    stages = []
+-    
+-    # Stage 1: Planner output
+-    planner_img_key = f"target_{task_name}_desc0_base64_jpg"
+-    planner_desc_key = f"target_{task_name}_desc0"
+-    if planner_img_key in result and result[planner_img_key]:
+-        stages.append({
+-            "name": "📋 Planner",
+-            "image_key": planner_img_key,
+-            "desc_key": planner_desc_key,
+-            "description": "Initial diagram plan based on method content"
+-        })
+-    
+-    # Stage 2: Stylist output (only for demo_full)
+-    if exp_mode == "demo_full":
+-        stylist_img_key = f"target_{task_name}_stylist_desc0_base64_jpg"
+-        stylist_desc_key = f"target_{task_name}_stylist_desc0"
+-        if stylist_img_key in result and result[stylist_img_key]:
+-            stages.append({
+-                "name": "✨ Stylist",
+-                "image_key": stylist_img_key,
+-                "desc_key": stylist_desc_key,
+-                "description": "Stylistically refined description"
+-            })
+-    
+-    # Stage 3+: Critic iterations
+-    for round_idx in range(4):  # Check up to 4 rounds
+-        critic_img_key = f"target_{task_name}_critic_desc{round_idx}_base64_jpg"
+-        critic_desc_key = f"target_{task_name}_critic_desc{round_idx}"
+-        critic_sugg_key = f"target_{task_name}_critic_suggestions{round_idx}"
+-        
+-        if critic_img_key in result and result[critic_img_key]:
+-            stages.append({
+-                "name": f"🔍 Critic Round {round_idx}",
+-                "image_key": critic_img_key,
+-                "desc_key": critic_desc_key,
+-                "suggestions_key": critic_sugg_key,
+-                "description": f"Refined after critic feedback (iteration {round_idx})"
+-            })
+-    
+-    return stages
++    return build_evolution_stages(result, exp_mode=exp_mode)
+ 
+ def display_candidate_result(result, candidate_id, exp_mode):
+     """Display a single candidate result."""
+-    task_name = "diagram"
+-    
+-    # Determine which image to show based on exp_mode
+-    # For demo modes, always try to find the last critic round
+-    final_image_key = None
+-    final_desc_key = None
+-    
+-    # Try to find the last critic round
+-    for round_idx in range(3, -1, -1):  # Check rounds 3, 2, 1, 0
+-        image_key = f"target_{task_name}_critic_desc{round_idx}_base64_jpg"
+-        if image_key in result and result[image_key]:
+-            final_image_key = image_key
+-            final_desc_key = f"target_{task_name}_critic_desc{round_idx}"
+-            break
+-    
+-    # Fallback if no critic rounds completed
+-    if not final_image_key:
+-        if exp_mode == "demo_full":
+-            # demo_full uses stylist before visualizer
+-            final_image_key = f"target_{task_name}_stylist_desc0_base64_jpg"
+-            final_desc_key = f"target_{task_name}_stylist_desc0"
+-        else:
+-            # demo_planner_critic uses planner output
+-            final_image_key = f"target_{task_name}_desc0_base64_jpg"
+-            final_desc_key = f"target_{task_name}_desc0"
++    selection = resolve_final_output(result, exp_mode=exp_mode)
++    final_image_key = selection.image_key
++    final_desc_key = selection.text_key
+     
+     # Display the final image
+     if final_image_key and final_image_key in result:
+@@ -442,7 +403,15 @@ def main():
+                 ["auto", "manual", "random", "none"],
+                 index=0,
+                 key="tab1_retrieval_setting",
+-                help="How to retrieve reference diagrams: auto (automatic selection), manual (use specified references), random (random selection), none (no retrieval)"
++                help="How to retrieve reference examples: auto (automatic selection), manual (use specified references), random (random selection), none (no retrieval)"
++            )
++
++            task_name = st.selectbox(
++                "Output Type",
++                ["diagram", "plot"],
++                index=0,
++                key="tab1_task_name",
++                help="Generate a scientific diagram or a statistical plot",
+             )
+             
+             num_candidates = st.number_input(
+@@ -460,6 +429,14 @@ def main():
+                 key="tab1_aspect_ratio",
+                 help="Aspect ratio for the generated diagrams"
+             )
++
++            figure_size = st.selectbox(
++                "Figure Size",
++                ["1-3cm", "4-6cm", "7-9cm", "10-13cm", "14-17cm"],
++                index=2,
++                key="tab1_figure_size",
++                help="Target figure size; providers that support image_size map this to 1k, 2k, or 4k",
++            )
+             
+             max_critic_rounds = st.number_input(
+                 "Max Critic Rounds",
+@@ -593,11 +570,11 @@ def main():
+                 method_value = st.session_state.get("method_content", "")
+             
+             method_content = st.text_area(
+-                "Method Section Content (Markdown recommended)",
++                "Method Section Content / Plot Data (Markdown or JSON recommended)",
+                 value=method_value,
+                 height=250,
+                 placeholder="Paste the method section content here...",
+-                help="The method section from the paper that describes the approach. Markdown format is recommended."
++                help="The method section or plot data that describes the figure. Markdown and JSON are supported."
+             )
+         
+         with col_input2:
+@@ -615,7 +592,7 @@ def main():
+                 caption_value = st.session_state.get("caption", "")
+             
+             caption = st.text_area(
+-                "Figure Caption (Markdown recommended)",
++                "Figure Caption / Visual Intent (Markdown recommended)",
+                 value=caption_value,
+                 height=250,
+                 placeholder="Enter the figure caption...",
+@@ -637,8 +614,10 @@ def main():
+                         method_content=method_content,
+                         caption=caption,
+                         aspect_ratio=aspect_ratio,
++                        figure_size=figure_size,
+                         num_copies=num_candidates,
+-                        max_critic_rounds=max_critic_rounds
++                        max_critic_rounds=max_critic_rounds,
++                        task_name=task_name,
+                     )
+                     
+                     # Process in parallel
+@@ -648,7 +627,8 @@ def main():
+                             exp_mode=exp_mode,
+                             retrieval_setting=retrieval_setting,
+                             main_model_name=main_model_name,
+-                            image_gen_model_name=image_gen_model_name
++                            image_gen_model_name=image_gen_model_name,
++                            task_name=task_name,
+                         ))
+                         st.session_state["results"] = results
+                         st.session_state["exp_mode"] = exp_mode
+@@ -730,26 +710,11 @@ def main():
+                 
+                 zip_buffer = BytesIO()
+                 with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+-                    task_name = "diagram"
+-                    
+                     for candidate_id, result in enumerate(results):
+-                        
+-                        # Find the final image key (same logic as display)
+-                        final_image_key = None
+-                        
+-                        # Try to find the last critic round
+-                        for round_idx in range(3, -1, -1):
+-                            image_key = f"target_{task_name}_critic_desc{round_idx}_base64_jpg"
+-                            if image_key in result and result[image_key]:
+-                                final_image_key = image_key
+-                                break
+-                        
+-                        # Fallback if no critic rounds completed
+-                        if not final_image_key:
+-                            if current_mode == "demo_full":
+-                                final_image_key = f"target_{task_name}_stylist_desc0_base64_jpg"
+-                            else:
+-                                final_image_key = f"target_{task_name}_desc0_base64_jpg"
++                        final_image_key = resolve_final_output(
++                            result,
++                            exp_mode=current_mode,
++                        ).image_key
+                         
+                         if final_image_key and final_image_key in result:
+                             img = base64_to_image(result[final_image_key])
+diff --git a/utils/config.py b/utils/config.py
+index f9069d63..35c5c5a6 100644
+--- a/utils/config.py
++++ b/utils/config.py
+@@ -22,6 +22,8 @@
+ from pathlib import Path
+ from typing import Literal
+ 
++from utils.legacy_generation_options import is_plot_task
++
+ 
+ @dataclass
+ class ExpConfig:
+@@ -41,6 +43,7 @@ class ExpConfig:
+     timestamp: str | None = None
+ 
+     def __post_init__(self):
++        self.task_name = "plot" if is_plot_task(self.task_name) else "diagram"
+         os.environ["TZ"] = "America/Los_Angeles"  # set the timezone as you like
+         if hasattr(time, "tzset"):
+             time.tzset()  # Only available on Unix; no-op guard for Windows
+diff --git a/utils/legacy_generation_options.py b/utils/legacy_generation_options.py
+new file mode 100644
+index 00000000..96cd7f15
+--- /dev/null
++++ b/utils/legacy_generation_options.py
+@@ -0,0 +1,93 @@
++# Copyright 2026 Google LLC
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Shared legacy UI generation option helpers."""
++
++from __future__ import annotations
++
++import ast
++import json
++from typing import Any
++
++
++FIGURE_SIZE_TO_IMAGE_SIZE = {
++    "1-3cm": "1k",
++    "4-6cm": "1k",
++    "7-9cm": "2k",
++    "10-13cm": "2k",
++    "14-17cm": "4k",
++}
++
++
++def is_plot_task(task_name: str | None) -> bool:
++    return "plot" in (task_name or "").lower()
++
++
++def image_size_for_figure_size(figure_size: str | None, default: str = "1k") -> str:
++    value = (figure_size or "").strip()
++    if not value:
++        return default
++    if value.lower() in {"1k", "2k", "4k"}:
++        return value.lower()
++    return FIGURE_SIZE_TO_IMAGE_SIZE.get(value, default)
++
++
++def image_size_from_data(data: dict[str, Any], default: str = "1k") -> str:
++    additional_info = data.get("additional_info")
++    if not isinstance(additional_info, dict):
++        return default
++    return image_size_for_figure_size(
++        str(additional_info.get("image_size") or additional_info.get("figure_size") or ""),
++        default=default,
++    )
++
++
++def normalize_plot_content(content: Any) -> Any:
++    if not isinstance(content, str):
++        return content
++
++    stripped = content.strip()
++    if not stripped:
++        return content
++
++    for parser in (json.loads, ast.literal_eval):
++        try:
++            parsed = parser(stripped)
++        except Exception:
++            continue
++        if isinstance(parsed, (dict, list)):
++            return parsed
++
++    try:
++        import json_repair
++
++        parsed = json_repair.loads(stripped)
++        if isinstance(parsed, (dict, list)):
++            return parsed
++    except Exception:
++        pass
++
++    return content
++
++
++def normalize_legacy_input_content(content: Any, task_name: str | None) -> Any:
++    return normalize_plot_content(content) if is_plot_task(task_name) else content
++
++
++def generation_additional_info(aspect_ratio: str, figure_size: str | None = None) -> dict[str, str]:
++    info = {"rounded_ratio": aspect_ratio}
++    if figure_size:
++        info["figure_size"] = figure_size
++        info["image_size"] = image_size_for_figure_size(figure_size)
++    return info
+diff --git a/utils/legacy_ui_results.py b/utils/legacy_ui_results.py
+new file mode 100644
+index 00000000..41c001c1
+--- /dev/null
++++ b/utils/legacy_ui_results.py
+@@ -0,0 +1,298 @@
++# Copyright 2026 Google LLC
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Shared result-key helpers for the legacy Gradio and Streamlit surfaces."""
++
++from __future__ import annotations
++
++from dataclasses import dataclass
++from pathlib import Path
++import re
++from typing import Any
++
++
++TASK_NAMES = {"diagram", "plot"}
++BASE64_SUFFIX = "_base64_jpg"
++
++
++@dataclass(frozen=True)
++class OutputSelection:
++    image_key: str | None
++    text_key: str | None
++
++
++def normalize_task_name(task_name: str | None, default: str = "diagram") -> str:
++    value = (task_name or default or "diagram").strip().lower()
++    return "plot" if "plot" in value else "diagram"
++
++
++def infer_task_name(result: dict[str, Any], default: str = "diagram") -> str:
++    if isinstance(result.get("task_name"), str) and result["task_name"].strip():
++        return normalize_task_name(result["task_name"], default=default)
++
++    for key in result:
++        if key.startswith(("target_plot", "vanilla_plot", "polished_plot")):
++            return "plot"
++    content = result.get("content")
++    if isinstance(content, (dict, list)):
++        return "plot"
++    return normalize_task_name(default)
++
++
++def image_key_task_name(image_key: str | None) -> str | None:
++    if not image_key:
++        return None
++    if image_key.startswith(("target_plot_", "vanilla_plot", "polished_plot")):
++        return "plot"
++    if image_key.startswith(("target_diagram_", "vanilla_diagram", "polished_diagram")):
++        return "diagram"
++    return None
++
++
++def image_key_is_compatible(image_key: str | None, task_name: str) -> bool:
++    inferred_task = image_key_task_name(image_key)
++    return inferred_task is None or inferred_task == normalize_task_name(task_name)
++
++
++def text_key_for_image_key(image_key: str | None, result: dict[str, Any] | None = None) -> str | None:
++    if not image_key:
++        return None
++    base_key = image_key[: -len(BASE64_SUFFIX)] if image_key.endswith(BASE64_SUFFIX) else image_key
++
++    candidates: list[str]
++    if base_key == "vanilla_plot":
++        candidates = ["vanilla_plot_code", "visual_intent"]
++    elif base_key == "vanilla_diagram":
++        candidates = ["visual_intent", "caption"]
++    elif base_key.startswith("target_plot"):
++        candidates = [f"{base_key}_code", base_key]
++    elif base_key.startswith("polished_plot"):
++        candidates = ["suggestions_plot", "visual_intent"]
++    elif base_key.startswith("polished_diagram"):
++        candidates = ["suggestions_diagram", "visual_intent"]
++    else:
++        candidates = [base_key]
++
++    if result is not None:
++        for candidate in candidates:
++            if result.get(candidate):
++                return candidate
++    return candidates[0] if candidates else None
++
++
++def _present(result: dict[str, Any], key: str) -> bool:
++    return bool(result.get(key))
++
++
++def critic_image_keys(result: dict[str, Any], task_name: str) -> list[str]:
++    task_name = normalize_task_name(task_name)
++    pattern = re.compile(rf"^target_{task_name}_critic_desc(\d+){BASE64_SUFFIX}$")
++    keyed_rounds: list[tuple[int, str]] = []
++    for key, value in result.items():
++        match = pattern.match(key)
++        if match and value:
++            keyed_rounds.append((int(match.group(1)), key))
++    return [key for _, key in sorted(keyed_rounds, reverse=True)]
++
++
++def output_key_candidates(
++    result: dict[str, Any],
++    exp_mode: str = "",
++    task_name: str | None = None,
++    include_eval_field: bool = True,
++) -> list[str]:
++    task_name = normalize_task_name(task_name) if task_name else infer_task_name(result)
++    exp_mode = exp_mode or ""
++
++    candidates: list[str] = []
++    if include_eval_field:
++        eval_field = result.get("eval_image_field")
++        if isinstance(eval_field, str) and image_key_is_compatible(eval_field, task_name):
++            candidates.append(eval_field)
++
++    if exp_mode == "vanilla":
++        candidates.append(f"vanilla_{task_name}{BASE64_SUFFIX}")
++    if exp_mode == "dev_polish":
++        candidates.append(f"polished_{task_name}{BASE64_SUFFIX}")
++    if exp_mode != "vanilla":
++        candidates.append(f"polished_{task_name}{BASE64_SUFFIX}")
++
++    candidates.extend(critic_image_keys(result, task_name))
++    candidates.extend(
++        [
++            f"target_{task_name}_stylist_desc0{BASE64_SUFFIX}",
++            f"target_{task_name}_desc0{BASE64_SUFFIX}",
++            f"vanilla_{task_name}{BASE64_SUFFIX}",
++        ]
++    )
++
++    seen: set[str] = set()
++    ordered = []
++    for key in candidates:
++        if key not in seen:
++            seen.add(key)
++            ordered.append(key)
++    return ordered
++
++
++def resolve_final_output(
++    result: dict[str, Any],
++    exp_mode: str = "",
++    task_name: str | None = None,
++) -> OutputSelection:
++    for image_key in output_key_candidates(result, exp_mode=exp_mode, task_name=task_name):
++        if _present(result, image_key):
++            return OutputSelection(
++                image_key=image_key,
++                text_key=text_key_for_image_key(image_key, result=result),
++            )
++    return OutputSelection(image_key=None, text_key=None)
++
++
++def resolve_display_mode_output(
++    result: dict[str, Any],
++    display_mode: str,
++    task_name: str | None = None,
++) -> OutputSelection:
++    task_name = normalize_task_name(task_name) if task_name else infer_task_name(result)
++    mode = (display_mode or "Auto").strip().lower()
++
++    if mode == "auto":
++        return resolve_final_output(result, task_name=task_name)
++    if mode == "critic":
++        image_keys = critic_image_keys(result, task_name)
++        image_key = image_keys[0] if image_keys else f"target_{task_name}_critic_desc0{BASE64_SUFFIX}"
++    elif mode == "vanilla":
++        image_key = f"vanilla_{task_name}{BASE64_SUFFIX}"
++    elif mode == "planner":
++        image_key = f"target_{task_name}_desc0{BASE64_SUFFIX}"
++    elif mode == "stylist":
++        image_key = f"target_{task_name}_stylist_desc0{BASE64_SUFFIX}"
++    elif mode == "polished":
++        image_key = f"polished_{task_name}{BASE64_SUFFIX}"
++    else:
++        return resolve_final_output(result, task_name=task_name)
++
++    return OutputSelection(
++        image_key=image_key,
++        text_key=text_key_for_image_key(image_key, result=result),
++    )
++
++
++def build_evolution_stages(
++    result: dict[str, Any],
++    exp_mode: str = "",
++    task_name: str | None = None,
++) -> list[dict[str, str]]:
++    task_name = normalize_task_name(task_name) if task_name else infer_task_name(result)
++    noun = "plot" if task_name == "plot" else "diagram"
++
++    stage_specs: list[tuple[str, str, str]] = [
++        ("Vanilla", f"vanilla_{task_name}{BASE64_SUFFIX}", f"Direct {noun} generation"),
++        ("Planner", f"target_{task_name}_desc0{BASE64_SUFFIX}", f"Initial {noun} plan"),
++    ]
++    if exp_mode in {"demo_full", "dev_full", "dev_planner_stylist"} or _present(
++        result, f"target_{task_name}_stylist_desc0{BASE64_SUFFIX}"
++    ):
++        stage_specs.append(
++            (
++                "Stylist",
++                f"target_{task_name}_stylist_desc0{BASE64_SUFFIX}",
++                "Stylistically refined",
++            )
++        )
++
++    stages: list[dict[str, str]] = []
++    for name, image_key, description in stage_specs:
++        if _present(result, image_key):
++            stages.append(
++                {
++                    "name": name,
++                    "image_key": image_key,
++                    "desc_key": text_key_for_image_key(image_key, result=result) or "",
++                    "description": description,
++                }
++            )
++
++    for image_key in reversed(critic_image_keys(result, task_name)):
++        match = re.search(r"critic_desc(\d+)", image_key)
++        round_idx = int(match.group(1)) if match else 0
++        stages.append(
++            {
++                "name": f"Critic Round {round_idx}",
++                "image_key": image_key,
++                "desc_key": text_key_for_image_key(image_key, result=result) or "",
++                "suggestions_key": f"target_{task_name}_critic_suggestions{round_idx}",
++                "description": f"Refined after critic iteration {round_idx}",
++            }
++        )
++
++    polished_key = f"polished_{task_name}{BASE64_SUFFIX}"
++    if _present(result, polished_key):
++        stages.append(
++            {
++                "name": "Polished",
++                "image_key": polished_key,
++                "desc_key": text_key_for_image_key(polished_key, result=result) or "",
++                "description": "Style-guideline polish output",
++            }
++        )
++
++    return stages
++
++
++def stage_name_from_image_key(key: str) -> str:
++    stage = key[: -len(BASE64_SUFFIX)] if key.endswith(BASE64_SUFFIX) else key
++    if stage in {"vanilla_diagram", "vanilla_plot"}:
++        return "vanilla"
++    if stage in {"polished_diagram", "polished_plot"}:
++        return "polished"
++    for prefix in (
++        "target_diagram_",
++        "target_plot_",
++    ):
++        stage = stage.replace(prefix, "")
++    return re.sub(r"[^A-Za-z0-9_.-]+", "_", stage)
++
++
++def resolve_gt_image_path(
++    item: dict[str, Any],
++    task_name: str | None = None,
++    results_file_path: str | Path | None = None,
++    repo_root: str | Path | None = None,
++) -> Path | None:
++    raw_path = item.get("path_to_gt_image")
++    if not raw_path:
++        return None
++
++    raw = Path(str(raw_path)).expanduser()
++    if raw.is_absolute() and raw.exists():
++        return raw
++
++    task_name = normalize_task_name(task_name) if task_name else infer_task_name(item)
++    root = Path(repo_root).expanduser() if repo_root else Path(__file__).resolve().parents[1]
++    candidates: list[Path] = []
++    if results_file_path:
++        candidates.append(Path(results_file_path).expanduser().resolve().parent / raw)
++    candidates.extend(
++        [
++            Path.cwd() / raw,
++            root / "data" / "PaperBananaBench" / task_name / raw,
++        ]
++    )
++
++    for candidate in candidates:
++        if candidate.exists():
++            return candidate
++    return None
+diff --git a/utils/plot_execution.py b/utils/plot_execution.py
+new file mode 100644
+index 00000000..b9e9e603
+--- /dev/null
++++ b/utils/plot_execution.py
+@@ -0,0 +1,64 @@
++# Copyright 2026 Google LLC
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""Helpers for executing model-generated matplotlib plot code."""
++
++import base64
++import io
++import re
++from typing import Optional
++
++
++def extract_plot_code(code_text: str) -> str:
++    """Return Python code from a fenced model response or raw code string."""
++    match = re.search(r"```python(.*?)```", code_text, re.DOTALL)
++    return match.group(1).strip() if match else code_text.strip()
++
++
++def execute_plot_code_worker(code_text: str, dpi: int = 300) -> Optional[str]:
++    """
++    Execute matplotlib code and return the rendered figure as a base64 JPEG.
++
++    This helper intentionally mirrors the legacy plot-agent behavior: model
++    output is executed in the caller's isolated worker and must create at least
++    one matplotlib figure to produce an image.
++    """
++    import matplotlib
++
++    matplotlib.use("Agg", force=True)
++    import matplotlib.pyplot as plt
++
++    code_clean = extract_plot_code(code_text)
++
++    plt.close("all")
++    plt.rcdefaults()
++
++    try:
++        exec_globals = {}
++        exec(code_clean, exec_globals)
++
++        if not plt.get_fignums():
++            return None
++
++        buf = io.BytesIO()
++        plt.savefig(buf, format="jpeg", bbox_inches="tight", dpi=dpi)
++        buf.seek(0)
++        return base64.b64encode(buf.read()).decode("utf-8")
++
++    except Exception as exc:
++        print(f"Error executing plot code: {exc}")
++        return None
++
++    finally:
++        plt.close("all")

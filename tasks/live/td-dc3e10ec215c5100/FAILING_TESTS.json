@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "tests/model/test_compiled_templates.py::test_template_inventory_is_derived_from_all_builtin_sources",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_new_features_with_path_line_and_compiler_guidance",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_unknown_filter_with_actionable_diagnostic",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_unsafe_supported_shapes",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_include_capture_of_parent_macro",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_template_source_symlink_outside_root",
+    "tests/model/test_compiled_templates.py::test_inventory_accepts_template_source_symlink_within_root",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_broken_template_source_symlink",
+    "tests/model/test_compiled_templates.py::test_inventory_normalizes_template_source_resolution_errors",
+    "tests/model/test_compiled_templates.py::test_inventory_rejects_template_source_directory",
+    "tests/model/test_compiled_templates.py::test_template_source_read_keeps_the_verified_descriptor_after_symlink_swap",
+    "tests/model/test_compiled_templates.py::test_template_source_read_rejects_symlink_swapped_after_validation",
+    "tests/model/test_compiled_templates.py::test_compile_template_rejects_static_include_outside_template_root"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

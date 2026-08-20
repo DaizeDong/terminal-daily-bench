@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/unit_tests/cli/test_start.py::<class>::test_calls_start_api_without_env_override_for_old_api",
+    "tests/unit_tests/cli/test_start.py::<class>::test_calls_start_api_with_env_override_for_new_api",
+    "tests/unit_tests/cli/test_start.py::<class>::test_passes_env_override_true_to_new_api",
+    "tests/unit_tests/cli/test_start.py::<class>::test_warns_and_ignores_env_override_for_old_api",
+    "tests/unit_tests/cli/test_start.py::<class>::test_no_warning_when_env_override_false_with_old_api",
+    "tests/unit_tests/cli/test_start.py::<class>::test_passes_custom_env_file",
+    "tests/unit_tests/cli/test_start.py::<class>::test_passes_custom_config",
+    "tests/unit_tests/cli/test_start.py::<class>::test_passes_custom_port",
+    "tests/unit_tests/cli/test_start.py::<class>::test_version_check_major_non_zero_uses_new_signature"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

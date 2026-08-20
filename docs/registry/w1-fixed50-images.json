@@ -1,0 +1,1154 @@
+{
+  "certified_object_set_audit_sha256": "fc24fd6ade825990723f431a69cd389665ffb77da35f02e3bbb4e7f3306b6f91",
+  "generated_at": "2026-08-20T06:20:27+00:00",
+  "image_count": 49,
+  "images": [
+    {
+      "archive_sha256": "04e95de17fd0e4f6bb143865616c4d9b8686c823ce23c5c3a49ba0686f3ef87b",
+      "archive_size": 176887504,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c6fb5da5b2fd3b493fa9debf0bdc65f32864117fc2018a8e3f2b764b52c51dd1",
+      "linux_amd64_manifest_digest": "sha256:f540522c94bdbe5778e3e5066a08052ff7454f3bca6c38e3db8d5aafbd4f9282",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__Ar9av__obsidian-wiki__faf0624ca8b7ca7dcc488bcfa02aa40a618f2aba__10d2b4ed5900.sif",
+      "tags": [
+        "img-04e95de17fd0e4f6",
+        "task-td-eae154905e07a86b"
+      ],
+      "task_ids": [
+        "td-eae154905e07a86b"
+      ],
+      "top_oci_digest": "sha256:c6fb5da5b2fd3b493fa9debf0bdc65f32864117fc2018a8e3f2b764b52c51dd1"
+    },
+    {
+      "archive_sha256": "093cd083994b03c4bee974aa19b374083be14b779f30b5db268898378f631faa",
+      "archive_size": 389737854,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c23b8d21a8daeaa3d695258985ab53979fcaff6dded18008988a20e655fe9741",
+      "linux_amd64_manifest_digest": "sha256:e6767a37a9104b612a1bda8b8570afb34abded3437e83099cea8d4d648f65ccc",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__apeworx__ape__e7f87563a7beb244f5d6baa3d4ff0a5808f9eef2__e0a0f4c6690e.sif",
+      "tags": [
+        "img-093cd083994b03c4",
+        "task-td-a6fc21dbafde8991"
+      ],
+      "task_ids": [
+        "td-a6fc21dbafde8991"
+      ],
+      "top_oci_digest": "sha256:c23b8d21a8daeaa3d695258985ab53979fcaff6dded18008988a20e655fe9741"
+    },
+    {
+      "archive_sha256": "13a617a309192fee5a822a62cd1c205c94db8ada3e3df400dc626d0912f445c4",
+      "archive_size": 3327062051,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:b3181fa0641c534fd9572f0db7459f691cfa16fc4b32177a95cd19f300c54073",
+      "linux_amd64_manifest_digest": "sha256:17e9220ce6a41c1564e320a5865392da936ed37cd74663c28b30d18c30c3b385",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__eleutherai__lm-evaluation-harness__f4d4b3de3ee6741a7151a9fe74945ee515262f4c__ff20cdd49a60.sif",
+      "tags": [
+        "img-13a617a309192fee",
+        "task-td-1976e0af7536d92d"
+      ],
+      "task_ids": [
+        "td-1976e0af7536d92d"
+      ],
+      "top_oci_digest": "sha256:b3181fa0641c534fd9572f0db7459f691cfa16fc4b32177a95cd19f300c54073"
+    },
+    {
+      "archive_sha256": "193289a2742c5c69530d9c8c6cd778e320cd93124d637e97a0091874e7e1fe5f",
+      "archive_size": 172383177,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:deb07848198e4f6fc484ab613a456aeb590bc0c7755f232f2ca111d5dd72fddd",
+      "linux_amd64_manifest_digest": "sha256:2c74f430599a5b2ac5fdd73111d1496feb81bb6ec2007d33b4a03eaa6d02d88a",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__mahmoud__boltons__e66cade323f5c11cebb4bd0f099e634b245adccd__438afa669be6.sif",
+      "tags": [
+        "img-193289a2742c5c69",
+        "task-td-1429f4968efb8658"
+      ],
+      "task_ids": [
+        "td-1429f4968efb8658"
+      ],
+      "top_oci_digest": "sha256:deb07848198e4f6fc484ab613a456aeb590bc0c7755f232f2ca111d5dd72fddd"
+    },
+    {
+      "archive_sha256": "1a452cb043d858f20aea5e5536e2ca5b3cec5c0b84e0dbf331154df1f946be75",
+      "archive_size": 171947554,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:18b9829469f95d3ff24058cc22794403a0e895b9abeb2a24289f841f60cc66b5",
+      "linux_amd64_manifest_digest": "sha256:9349bf810b306bd48339103a67fbd293b9f811da406072ae6c6d42c51def74ef",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__jazzband__docopt-ng__897226e71c766e99334aa61fad20505bc8f3b2eb__75929a140ff5.sif",
+      "tags": [
+        "img-1a452cb043d858f2",
+        "task-td-626b33ab47f3a6eb"
+      ],
+      "task_ids": [
+        "td-626b33ab47f3a6eb"
+      ],
+      "top_oci_digest": "sha256:18b9829469f95d3ff24058cc22794403a0e895b9abeb2a24289f841f60cc66b5"
+    },
+    {
+      "archive_sha256": "1ac5630ae5290a4d4baaba5f699c48910d0c9a7ab0883d4181f4421dd26ce5ab",
+      "archive_size": 549320476,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:17e51d79978edb13788200accd593168ef2e94d7355d201b00e9ae6d46f7ec8f",
+      "linux_amd64_manifest_digest": "sha256:752cc3d1d0d13f9bc303a6feb1f2f24ff22e47e1f359240345a4529adfe1aa5b",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__networkx__networkx__f884a12db34c39f2e6d81c5b3607caa4cbe8ea7d__ec542d42b2e7.sif",
+      "tags": [
+        "img-1ac5630ae5290a4d",
+        "task-td-5842c10237b17bb4"
+      ],
+      "task_ids": [
+        "td-5842c10237b17bb4"
+      ],
+      "top_oci_digest": "sha256:17e51d79978edb13788200accd593168ef2e94d7355d201b00e9ae6d46f7ec8f"
+    },
+    {
+      "archive_sha256": "1b8736601a45945d51a2d083a7f980487a6dc581aa9263d55a876b059956b5ea",
+      "archive_size": 172338901,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:b6d250a5af93a91e05271b85af54eb5016308bfa2ba3250c195ccc8bea9f3143",
+      "linux_amd64_manifest_digest": "sha256:84520f7e7fd50c45f4ff160c635f09f042f045ed4ab9eed299b0c079432c9dff",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__scrapy__w3lib__67046530caec94d303fe5f805c292ccadd9322e0__a3d301e6d681.sif",
+      "tags": [
+        "img-1b8736601a45945d",
+        "task-td-e85ca08bd7aceb52"
+      ],
+      "task_ids": [
+        "td-e85ca08bd7aceb52"
+      ],
+      "top_oci_digest": "sha256:b6d250a5af93a91e05271b85af54eb5016308bfa2ba3250c195ccc8bea9f3143"
+    },
+    {
+      "archive_sha256": "1c4bdb6f76e0bebf3e1a82306b93ec3c4b7aeb6e001043c18148069529de97e3",
+      "archive_size": 218176467,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c393c861f4f7b28635d99852443f2195301f57b941ae57e0bcf0890d5b5ea1ac",
+      "linux_amd64_manifest_digest": "sha256:7f160a9d40f47989acd5cf5dbe29620e081cc530a178e2cbc6ae7e343f25b6e4",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__python-attrs__cattrs__a6c0900533af780155510343c1472a46fcb984f5__e523a161dae8.sif",
+      "tags": [
+        "img-1c4bdb6f76e0bebf",
+        "task-td-06b850f0ba89c481"
+      ],
+      "task_ids": [
+        "td-06b850f0ba89c481"
+      ],
+      "top_oci_digest": "sha256:c393c861f4f7b28635d99852443f2195301f57b941ae57e0bcf0890d5b5ea1ac"
+    },
+    {
+      "archive_sha256": "1e9b9439cf17e6b55adbecaa46d948010fe1afac7a563eeb837e16c5757ec170",
+      "archive_size": 194269502,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c4e6024db207b0bd77ee0ca033815b4701989f4e64c5906df08ec27fb8f5953b",
+      "linux_amd64_manifest_digest": "sha256:500fdefc5b4056dc45de9432e7d457511daa072250eee1e9e6bf259923164da1",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__adamchainz__django-upgrade__1be054a840b68c260aa9d84d16056de01d3b571c__5783a4b36e45.sif",
+      "tags": [
+        "img-1e9b9439cf17e6b5",
+        "task-td-b6bf2798b6b9bed5"
+      ],
+      "task_ids": [
+        "td-b6bf2798b6b9bed5"
+      ],
+      "top_oci_digest": "sha256:c4e6024db207b0bd77ee0ca033815b4701989f4e64c5906df08ec27fb8f5953b"
+    },
+    {
+      "archive_sha256": "26cad2376b24706a61252d1a33ed3d30e127522a07f1b3062f0abec6ae8697bd",
+      "archive_size": 5844136120,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:454e4da335e8c2cdce676f584d60ad363660742ef255133ea8d3443f56d8603d",
+      "linux_amd64_manifest_digest": "sha256:e9110a089cabd106044f3ae96577ab386afa29c6f07eadc7b779d3a8504f3db3",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__google-research__timesfm__4a6c5cdae7ac73a450843e035fbfc3ffa08e9caf__7e7b3b2ac1dc.sif",
+      "tags": [
+        "img-26cad2376b24706a",
+        "task-td-bca62cbd0a787fef"
+      ],
+      "task_ids": [
+        "td-bca62cbd0a787fef"
+      ],
+      "top_oci_digest": "sha256:454e4da335e8c2cdce676f584d60ad363660742ef255133ea8d3443f56d8603d"
+    },
+    {
+      "archive_sha256": "29f55cd854003ff2d6791e5f15fc25ecf0395dbbb1024940cc7387caaf6d3026",
+      "archive_size": 241959189,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:50619a6cd6774b6904686973a94f97618c361a5a8d06258fe0ec77291900ff62",
+      "linux_amd64_manifest_digest": "sha256:c12e2b0f75a08bc5f390c7abc349e1a12dbdeb563843b0ae92a9c90fe9db1c56",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__apiflask__apiflask__209c640898276a89cc4d55d52f92a3d7b1ce5a4a__6810b0a28db2.sif",
+      "tags": [
+        "img-29f55cd854003ff2",
+        "task-td-9eda34d10676231e"
+      ],
+      "task_ids": [
+        "td-9eda34d10676231e"
+      ],
+      "top_oci_digest": "sha256:50619a6cd6774b6904686973a94f97618c361a5a8d06258fe0ec77291900ff62"
+    },
+    {
+      "archive_sha256": "313b3df68df8758b7dfc94d50de93aa7240163000d2d8189a381c46c732df63d",
+      "archive_size": 172388381,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:f96761731b8a283644e86098cb11d04a5d17b87c15257e82a2a1f827217185a5",
+      "linux_amd64_manifest_digest": "sha256:1c355fcd1e3816ad6f6b52517d3a66fc9a5aec09de43bc6a7ddce1d8927ee2ba",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__mahmoud__boltons__814a5a7c6e27fcb52c524ca4fe2b05108903058c__5401b5e40a9d.sif",
+      "tags": [
+        "img-313b3df68df8758b",
+        "task-td-2fbc804f19e8dad7"
+      ],
+      "task_ids": [
+        "td-2fbc804f19e8dad7"
+      ],
+      "top_oci_digest": "sha256:f96761731b8a283644e86098cb11d04a5d17b87c15257e82a2a1f827217185a5"
+    },
+    {
+      "archive_sha256": "31af71dde359913195108335bcdc7fa425d01dbf29489aa861e720f3845a0607",
+      "archive_size": 240831089,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:0bff5dddd2626602ac4949065534bd821d5425c8ea87c4997ed47accc189816d",
+      "linux_amd64_manifest_digest": "sha256:f25df2620ee6e7a6579f6f7c4b9bd6915fb269999999a6589facc37f6f490136",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__encode__starlette__78ae82cad482fe66a73fb1217f0a6609b3f998f6__a7d0f8b41dea.sif",
+      "tags": [
+        "img-31af71dde3599131",
+        "task-td-e39d5a4a11cfc645"
+      ],
+      "task_ids": [
+        "td-e39d5a4a11cfc645"
+      ],
+      "top_oci_digest": "sha256:0bff5dddd2626602ac4949065534bd821d5425c8ea87c4997ed47accc189816d"
+    },
+    {
+      "archive_sha256": "339dccc6663f4f5c41652d000c79bec180422d8472ea2c05c7c6d02fa17c5337",
+      "archive_size": 313454488,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:24996f8639f6bc461082db32c94c124cf73c8dce000c72e52530822cbd3781c9",
+      "linux_amd64_manifest_digest": "sha256:696e000a6d7918622e9d15336e7668de7c517d91dc71973524501d45f6cc317c",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__pdfminer__pdfminer.six__9e1243c4ad000bf9bbe60e81fc8dde2fccc0ed3b__89a6bca1edb7.sif",
+      "tags": [
+        "img-339dccc6663f4f5c",
+        "task-td-0263cd1c168cbeb6"
+      ],
+      "task_ids": [
+        "td-0263cd1c168cbeb6"
+      ],
+      "top_oci_digest": "sha256:24996f8639f6bc461082db32c94c124cf73c8dce000c72e52530822cbd3781c9"
+    },
+    {
+      "archive_sha256": "35501f393de065fc53ae6eeebbe761b72c8103229a588dc9c44b14c5cfce4278",
+      "archive_size": 5833601013,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:4fb98b8ff1f588c3682ee5cd899a549d01dcd7e019ac9380feba84f98aa9433b",
+      "linux_amd64_manifest_digest": "sha256:32f82fa589fa301b51115e2931baecbed725bc46e4b7ac9bc5872fbb0f0cc74c",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__cornellius-gp__gpytorch__93222a0f5e22b79fbfbf5c923572baefa5bfc325__ea09889108f2.sif",
+      "tags": [
+        "img-35501f393de065fc",
+        "task-td-1112e680c9d5f642"
+      ],
+      "task_ids": [
+        "td-1112e680c9d5f642"
+      ],
+      "top_oci_digest": "sha256:4fb98b8ff1f588c3682ee5cd899a549d01dcd7e019ac9380feba84f98aa9433b"
+    },
+    {
+      "archive_sha256": "3c965b6b02b1c54d1fb0423525ba3c07ea246d182470b8efeed8766158d9dabb",
+      "archive_size": 172122798,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:f62fca03691734f84d0886022bed4f96ce31b2e32aeec633befbb34fd677e2bf",
+      "linux_amd64_manifest_digest": "sha256:1696c50e9bdcd03a841054cba230eff0c6af6721873a0de8b8e8946f709b6afd",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__hukkin__tomli__c20c49113890c226ffb27a67befe20d14fcf0c73__3c201347d39c.sif",
+      "tags": [
+        "img-3c965b6b02b1c54d",
+        "task-td-6c1b1fcb31cdc49f"
+      ],
+      "task_ids": [
+        "td-6c1b1fcb31cdc49f"
+      ],
+      "top_oci_digest": "sha256:f62fca03691734f84d0886022bed4f96ce31b2e32aeec633befbb34fd677e2bf"
+    },
+    {
+      "archive_sha256": "459fd59c17c44529f4ec9399143f08ff6a643f32aef5d982eb536b2e33120f44",
+      "archive_size": 301337580,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:922ed42247ddb848f6defd946ba7cba7c0c2a83b7948f1a7a25de413f9e4f632",
+      "linux_amd64_manifest_digest": "sha256:7b161ebf3f3a2a72e7bea59f55eefdac59f99b33ddc7e1a5a659ec6c81b0ee8b",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__cft0808__edict__96abcd12ec59bc017bb8a505ee4cc83cfa3e9515__4532a0b140c9.sif",
+      "tags": [
+        "img-459fd59c17c44529",
+        "task-td-a59538ed3ac418d3"
+      ],
+      "task_ids": [
+        "td-a59538ed3ac418d3"
+      ],
+      "top_oci_digest": "sha256:922ed42247ddb848f6defd946ba7cba7c0c2a83b7948f1a7a25de413f9e4f632"
+    },
+    {
+      "archive_sha256": "542816761656ba39978736de81ff2d42a1718d37da57dc10fea0ddf93eb46f74",
+      "archive_size": 177704460,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:14049cb47bd9f65fbc7e3f90f163f6b6d6456ff1fe946e1c977d2b004152eb08",
+      "linux_amd64_manifest_digest": "sha256:f48ab5c975a1cff5a1f3d67b5da8090802a9429d28745fdb896ae5c158f32e4d",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__2captcha__2captcha-python__d981352f4f17b75b7211657162189d1efddf19b1__53ee49d801b2.sif",
+      "tags": [
+        "img-542816761656ba39",
+        "task-td-40063b5d3aa6ab4b"
+      ],
+      "task_ids": [
+        "td-40063b5d3aa6ab4b"
+      ],
+      "top_oci_digest": "sha256:14049cb47bd9f65fbc7e3f90f163f6b6d6456ff1fe946e1c977d2b004152eb08"
+    },
+    {
+      "archive_sha256": "58241bc117e980a0967a7a7402855934351e395a699897c4335b78ec99bf077a",
+      "archive_size": 172020566,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:7b9e9bc0b50b6e3027d5a41e8fa429b845ce6995731910261b577eb1187b0e00",
+      "linux_amd64_manifest_digest": "sha256:6d61801170c7e8ebde33b3cfa6f6ac25ab7b1a337f4ae10bb447259e0f03ef1b",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__jazzband__docopt-ng__fab01f5f19c9c7ca30f05e79a06d79bd066b475a__14bf8df1ca73.sif",
+      "tags": [
+        "img-58241bc117e980a0",
+        "task-td-6fedde17c75ca4cb"
+      ],
+      "task_ids": [
+        "td-6fedde17c75ca4cb"
+      ],
+      "top_oci_digest": "sha256:7b9e9bc0b50b6e3027d5a41e8fa429b845ce6995731910261b577eb1187b0e00"
+    },
+    {
+      "archive_sha256": "5b4377b22bd9588cd6f40eaed722b479835eab65a95d60d2cc75e91469ac2b4a",
+      "archive_size": 6054112055,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:f441813c7bcf31b7c411dab7ec3af9340f439de4b46ee0fc852c5c5b9e779693",
+      "linux_amd64_manifest_digest": "sha256:2f5750a5c8f10af63e60aa144204e7834883db6859afe7ca2d06feaa0b5052dd",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__araffin__sbx__30e370c4e2bc4192a15c7b73723790ad1034f393__16aaa0f2fca0.sif",
+      "tags": [
+        "img-5b4377b22bd9588c",
+        "task-td-6750abf1ab84864c"
+      ],
+      "task_ids": [
+        "td-6750abf1ab84864c"
+      ],
+      "top_oci_digest": "sha256:f441813c7bcf31b7c411dab7ec3af9340f439de4b46ee0fc852c5c5b9e779693"
+    },
+    {
+      "archive_sha256": "5cde8f3395ecb183336824c266257186e215ad7b4cc900d0e87469722a8e6b82",
+      "archive_size": 174081865,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c5a678d346fc66cf391af79feef06fb9242fe00141122ff4df6c873d6d9510dd",
+      "linux_amd64_manifest_digest": "sha256:9bbebc855df02349f938ef01690f177c51dfde165d64c122632740e15bb9e62d",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__petl-developers__petl__97fbbfdc61f18e75e670129400d87a407bee240e__d02216fa684b.sif",
+      "tags": [
+        "img-5cde8f3395ecb183",
+        "task-td-819f2ac85eeead88"
+      ],
+      "task_ids": [
+        "td-819f2ac85eeead88"
+      ],
+      "top_oci_digest": "sha256:c5a678d346fc66cf391af79feef06fb9242fe00141122ff4df6c873d6d9510dd"
+    },
+    {
+      "archive_sha256": "69b7f9d40ca30948b5001ed7e2cc0eb13ff8c60baa66dcfff9963a4e979769fe",
+      "archive_size": 3458247063,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:cf2b8791689bf9d97550fdccc2f7c55e3fe597714638df6ad336270eafb6a623",
+      "linux_amd64_manifest_digest": "sha256:d943fef6712c54cad5c6b30b13846db78d4d84ffaf9a4832dd76cd71f04cfd0b",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__guardrails-ai__guardrails__798d2c4574474593114dbd79f9c031982a3289a8__6741f104071a.sif",
+      "tags": [
+        "img-69b7f9d40ca30948",
+        "task-td-8e256eb038e80765"
+      ],
+      "task_ids": [
+        "td-8e256eb038e80765"
+      ],
+      "top_oci_digest": "sha256:cf2b8791689bf9d97550fdccc2f7c55e3fe597714638df6ad336270eafb6a623"
+    },
+    {
+      "archive_sha256": "6af5f2653310e01a3616d43b7955cd1e11db3b9675a63a11f48a60f54b340ba8",
+      "archive_size": 629583019,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:73634ec420c048c27f5488ad1bfe7b44a79e19dde4542e09f0a28466ed7e2606",
+      "linux_amd64_manifest_digest": "sha256:328285767df2ae8d37b790f09ac9f7c20035b3cbc3505b4985446105a2c56c72",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__aiming-lab__AutoResearchClaw__e040e1dd9afcbda017f72181788a861e2e64d70c__0c0e46c2a218.sif",
+      "tags": [
+        "img-6af5f2653310e01a",
+        "task-td-ff79081914cd3936"
+      ],
+      "task_ids": [
+        "td-ff79081914cd3936"
+      ],
+      "top_oci_digest": "sha256:73634ec420c048c27f5488ad1bfe7b44a79e19dde4542e09f0a28466ed7e2606"
+    },
+    {
+      "archive_sha256": "7174ca8be11fdb8999b4ee4aa153693e530b15da2b377cb46039880fdfc7a6e6",
+      "archive_size": 177044646,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:e20242d2090883301a4e0aacf79ef2c1b8af2c579732f7b88c2e826aed3c77e5",
+      "linux_amd64_manifest_digest": "sha256:b736f70a54878f64a3aea5c597cb7117da7a86aedd2307dd955345cd93a43d77",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__yaml__pyyaml__d51d8a138f7230834fc6e95635ff09ebd329185f__6be2181f5cbe.sif",
+      "tags": [
+        "img-7174ca8be11fdb89",
+        "task-td-4165a4fb9c0acddb"
+      ],
+      "task_ids": [
+        "td-4165a4fb9c0acddb"
+      ],
+      "top_oci_digest": "sha256:e20242d2090883301a4e0aacf79ef2c1b8af2c579732f7b88c2e826aed3c77e5"
+    },
+    {
+      "archive_sha256": "7218d1e17faf9ee0a3ab525fc138b4ab8323acd8f8af3e3589e56e6972c502b5",
+      "archive_size": 759732266,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:da0a88418384c6faac8ca49138996b13bf8d9f922bd60fb11dadd301a3783900",
+      "linux_amd64_manifest_digest": "sha256:6b5d2aeb8ec0fe11f3ff3127da7a89fedceda8eaa014ca2f3d024973f8762927",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__aligfellow__xyzrender__5fe916c647cd3f5dee544c42d378a194e7546e4d__9174934fe417.sif",
+      "tags": [
+        "img-7218d1e17faf9ee0",
+        "task-td-3f82c2e5c91b7c6e"
+      ],
+      "task_ids": [
+        "td-3f82c2e5c91b7c6e"
+      ],
+      "top_oci_digest": "sha256:da0a88418384c6faac8ca49138996b13bf8d9f922bd60fb11dadd301a3783900"
+    },
+    {
+      "archive_sha256": "733b43e969ae250b82d3893c5f8493ce0c4f80dae566fbe7b7e1c98d4911b337",
+      "archive_size": 177690387,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:3942a3e06ed71c3719eab39f09bb170d7c666b6441e8822c8c23644bedeb653b",
+      "linux_amd64_manifest_digest": "sha256:db674b45e9241d69a318ed07a79382249b7575fcd0d7d92bd0147455c33d5f46",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__2captcha__2captcha-python__d41a12a9cf55b244aa03ddee5d9dfcf084e8f085__ea74691ca3b8.sif",
+      "tags": [
+        "img-733b43e969ae250b",
+        "task-td-f187e1f16b1da3fc"
+      ],
+      "task_ids": [
+        "td-f187e1f16b1da3fc"
+      ],
+      "top_oci_digest": "sha256:3942a3e06ed71c3719eab39f09bb170d7c666b6441e8822c8c23644bedeb653b"
+    },
+    {
+      "archive_sha256": "738e04a9b2839e844c0659230e68b338f1493ef0cb4fb384b4d0132ad3557b18",
+      "archive_size": 174096553,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:9289a8b9fb3f5ce71427a70f91f7e0f016626866f5b8adaf1057f4472b329d97",
+      "linux_amd64_manifest_digest": "sha256:f3233b64335653359cdeb7e9285f389d7a2ebf6c06e7748c1e17f48f9e27872d",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__petl-developers__petl__f5e6e128b5143b8b6f51f6b006b37ca6818c7ab4__75dcb48ed034.sif",
+      "tags": [
+        "img-738e04a9b2839e84",
+        "task-td-8d79b8a28f8063d8"
+      ],
+      "task_ids": [
+        "td-8d79b8a28f8063d8"
+      ],
+      "top_oci_digest": "sha256:9289a8b9fb3f5ce71427a70f91f7e0f016626866f5b8adaf1057f4472b329d97"
+    },
+    {
+      "archive_sha256": "74a05a002d8edd3d084c6b10f2175e791cadf6f9489fec37cf2cb4b0482443f5",
+      "archive_size": 6604737959,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:d6246c559bf412e529b6044ddb300ac831ceff231b4661bcd9df54b82c6e6279",
+      "linux_amd64_manifest_digest": "sha256:542219bb7ebe093a3fa6e7a170eac141e87a87d0a218f9534134019ab4e7ba42",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__liuzhao1225__YouDub-webui__beadce60787e5b00071f5195e5f1ea7d6941d833__c6327f41ca08.sif",
+      "tags": [
+        "img-74a05a002d8edd3d",
+        "task-td-a2c11ef966f5d11d"
+      ],
+      "task_ids": [
+        "td-a2c11ef966f5d11d"
+      ],
+      "top_oci_digest": "sha256:d6246c559bf412e529b6044ddb300ac831ceff231b4661bcd9df54b82c6e6279"
+    },
+    {
+      "archive_sha256": "80e88a4706ed55b915e4f559a95823f95852a549f73e2d352c3404ce3eaa066c",
+      "archive_size": 699150425,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:7134cf3b0b6625eeac5d7240b40e6be47ec82048eae1f67478363bf5a095c748",
+      "linux_amd64_manifest_digest": "sha256:a686131bd5fb2feda103d514a98a737233d5a9cf7298e7a7215dc7566e021529",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__has2k1__plotnine__6b5494bb93d7ca52acc3372579ddf94c2e5bd96a__99d0921c66f2.sif",
+      "tags": [
+        "img-80e88a4706ed55b9",
+        "task-td-8e9ce87e4fecd3ab"
+      ],
+      "task_ids": [
+        "td-8e9ce87e4fecd3ab"
+      ],
+      "top_oci_digest": "sha256:7134cf3b0b6625eeac5d7240b40e6be47ec82048eae1f67478363bf5a095c748"
+    },
+    {
+      "archive_sha256": "830f3541b3dbb121fe811badac39fe4488299a06aaac7fed92425f46ef79b5fe",
+      "archive_size": 194271899,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:8900d1be44c3ade5e3cf6e1e2333c2c031f91410e58adbe4509c26ac83d9d424",
+      "linux_amd64_manifest_digest": "sha256:7333bc1c0a6427b75f81ef744711c9e44b5921495a6dd5014bb5a6e0107d84c1",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__adamchainz__django-upgrade__2429c47be245d56c8570bbe1c8f22e02d11fb37d__570b17fdd24e.sif",
+      "tags": [
+        "img-830f3541b3dbb121",
+        "task-td-f7231dfff7039690"
+      ],
+      "task_ids": [
+        "td-f7231dfff7039690"
+      ],
+      "top_oci_digest": "sha256:8900d1be44c3ade5e3cf6e1e2333c2c031f91410e58adbe4509c26ac83d9d424"
+    },
+    {
+      "archive_sha256": "89b713f059d1ff089ef7243771d4a66e25026837905d44b530d51d66ade02c1b",
+      "archive_size": 590512346,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:500b734fdd74a1e1ff76cbfdacff0ab6bea7f1fd4354d5a4a89f06148da400dc",
+      "linux_amd64_manifest_digest": "sha256:33362f0423ddbe79b7f9ce49a76ee330c82968a5b57b63d33b2dcb913585f9de",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__HKUDS__DeepTutor__0e17712888a22c193fbbf8e37d38cba6d2d73300__34c3733fbd3d.sif",
+      "tags": [
+        "img-89b713f059d1ff08",
+        "task-td-43934e7a811c9e83"
+      ],
+      "task_ids": [
+        "td-43934e7a811c9e83"
+      ],
+      "top_oci_digest": "sha256:500b734fdd74a1e1ff76cbfdacff0ab6bea7f1fd4354d5a4a89f06148da400dc"
+    },
+    {
+      "archive_sha256": "8b10def519ea937a3435b8bba91d8062ba86f9a339f2cefe5230ee7047a0c8b0",
+      "archive_size": 5844152901,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:2be9e0dbc6fc381663207ec5a859220596aae83e6fdaf5709db3e07f817f1024",
+      "linux_amd64_manifest_digest": "sha256:4affbfef51e7a335a9b61ba4e8b5d3de9e47fa6b186c57113e88484e9379fd99",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__google-research__timesfm__8a22ca28a0239d34c095b1eba7fea92d22198e0c__c9b4b34262b2.sif",
+      "tags": [
+        "img-8b10def519ea937a",
+        "task-td-8563a99b0ed0fb3d"
+      ],
+      "task_ids": [
+        "td-8563a99b0ed0fb3d"
+      ],
+      "top_oci_digest": "sha256:2be9e0dbc6fc381663207ec5a859220596aae83e6fdaf5709db3e07f817f1024"
+    },
+    {
+      "archive_sha256": "940291bfcb191076cefead5f37c9e34f3a5cb336dc6702fe0bcce707f23a6c2d",
+      "archive_size": 759732313,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:a6ed4074b4316399fee49adf68a20c8e6911c27fa072a03de2532f340c16785b",
+      "linux_amd64_manifest_digest": "sha256:dcec4520589c120b55ad3ef6c9d666714a2e8231ecaef0c869861384bf1a4468",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__aligfellow__xyzrender__5cb4a5feb5d5baae4e8ef3f5d7861f712856e2fd__ac691d59d44b.sif",
+      "tags": [
+        "img-940291bfcb191076",
+        "task-td-646a8a15f64a3c90"
+      ],
+      "task_ids": [
+        "td-646a8a15f64a3c90"
+      ],
+      "top_oci_digest": "sha256:a6ed4074b4316399fee49adf68a20c8e6911c27fa072a03de2532f340c16785b"
+    },
+    {
+      "archive_sha256": "98b41d9bc64a2e38f58a219dbcdb250d98225ee037ebe0558a86ea2652d7c342",
+      "archive_size": 329117556,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:67c56dbbbfec0920f96a7a0491d1d23935301ddb2756e126abb16e6a137d2890",
+      "linux_amd64_manifest_digest": "sha256:63757209d526e4033f07dc93d59e76754b0166ddeffbdd7f26205c921b8fc802",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__ets-labs__python-dependency-injector__f193f39cbd8cdcd616a2517f3a65c010f5cf51f4__f29728735984.sif",
+      "tags": [
+        "img-98b41d9bc64a2e38",
+        "task-td-85e626bf1f08c74f"
+      ],
+      "task_ids": [
+        "td-85e626bf1f08c74f"
+      ],
+      "top_oci_digest": "sha256:67c56dbbbfec0920f96a7a0491d1d23935301ddb2756e126abb16e6a137d2890"
+    },
+    {
+      "archive_sha256": "9a70083a5459e66da227518c843c05ebe2e6c40f01d50cd13b231b62373ed2a6",
+      "archive_size": 218175774,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:783738e19d1073e6d82b7be5bd2c94a32a7c36d035cef717c8b0f01ccf7627cb",
+      "linux_amd64_manifest_digest": "sha256:cde3d4dff57694123dad6480a2a8e9c3e4ef0789db41cdca136524efe2e60e13",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__python-attrs__cattrs__82b02c07ca535a1ba656b935767d819eac9d383b__68747ce67e5a.sif",
+      "tags": [
+        "img-9a70083a5459e66d",
+        "task-td-d0fe8274878b8840"
+      ],
+      "task_ids": [
+        "td-d0fe8274878b8840"
+      ],
+      "top_oci_digest": "sha256:783738e19d1073e6d82b7be5bd2c94a32a7c36d035cef717c8b0f01ccf7627cb"
+    },
+    {
+      "archive_sha256": "9bb652e07456bc7cd0a95912aa3fe171bd104226c4e2b1e49f760d88dd2e9682",
+      "archive_size": 3286223124,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:9978b61966156ece6d99ce4b28ae8d1f435ffa54bebb3f62b81f73c5f8d6b003",
+      "linux_amd64_manifest_digest": "sha256:02e22bfc73df749814521e51f5b3f3a5c68559f919947ddf6d1838f09e62b73c",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__getzep__graphiti__b0ec6d9303d80c8724606cc88c73dbcab654076a__867403b23c00.sif",
+      "tags": [
+        "img-9bb652e07456bc7c",
+        "task-td-5f952ce374849a64"
+      ],
+      "task_ids": [
+        "td-5f952ce374849a64"
+      ],
+      "top_oci_digest": "sha256:9978b61966156ece6d99ce4b28ae8d1f435ffa54bebb3f62b81f73c5f8d6b003"
+    },
+    {
+      "archive_sha256": "9dd120a79e6ad2bdc05cc419c35206abe467bf85969b4f81d1232f3dca41ae33",
+      "archive_size": 5844324723,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:02cd65aacdd7b5fcb43a90d14852c90df0b5a91e420db686556a717277da1c5d",
+      "linux_amd64_manifest_digest": "sha256:5a92ed295872ea8facbc4fd8788589f5c1f8422e929eabd7d81c09c222e178f9",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__google-research__timesfm__b3d0dec6ec3a5a86f87526284fbe9f16c101ce04__2ba70fab7d81.sif",
+      "tags": [
+        "img-9dd120a79e6ad2bd",
+        "task-td-73f42b67c97eae89"
+      ],
+      "task_ids": [
+        "td-73f42b67c97eae89"
+      ],
+      "top_oci_digest": "sha256:02cd65aacdd7b5fcb43a90d14852c90df0b5a91e420db686556a717277da1c5d"
+    },
+    {
+      "archive_sha256": "a25b7ed1295ba7f43e7f4a2a64da38586080f4344d58af758b65effbac3707ea",
+      "archive_size": 228270810,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:dc409cecf21764b05a27118d4c4c3b95a836d31246f3575cdb6bfb64b2895868",
+      "linux_amd64_manifest_digest": "sha256:72d9ea007d38f28d2a740457011fb6db8174f2d4c0ed303e1685c0db319c0889",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__sympy__sympy__a5c37d05c2ac3a3ad4b962f8ea7611586d4cdac5__2d94799ff445.sif",
+      "tags": [
+        "img-a25b7ed1295ba7f4",
+        "task-td-6a824a1ab9be8b9c"
+      ],
+      "task_ids": [
+        "td-6a824a1ab9be8b9c"
+      ],
+      "top_oci_digest": "sha256:dc409cecf21764b05a27118d4c4c3b95a836d31246f3575cdb6bfb64b2895868"
+    },
+    {
+      "archive_sha256": "a2802ee2537b7785d4a1a514b5a32889b5b767cebd689ac2052c5367e50efa77",
+      "archive_size": 239376107,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:d029024dff279cff703026d415ef5fb81dff9307207f04023fa2e098166b1e8b",
+      "linux_amd64_manifest_digest": "sha256:58bd79d1ea81291d755e29f2267e8a56dc490d9620fca0475ae75982b5e4b764",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__psf__cachecontrol__23c7cb048fafc46c6a290050eb17d7dc3f8f8b65__5db6db382ad8.sif",
+      "tags": [
+        "img-a2802ee2537b7785",
+        "task-td-123b3c8d9c22a9a3"
+      ],
+      "task_ids": [
+        "td-123b3c8d9c22a9a3"
+      ],
+      "top_oci_digest": "sha256:d029024dff279cff703026d415ef5fb81dff9307207f04023fa2e098166b1e8b"
+    },
+    {
+      "archive_sha256": "b5a2d7e1363f6437274278f9e8b51763641187c3cb00b736dcc23aeba17759d6",
+      "archive_size": 204481289,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:e3bb01055376058e6ac6b21b78bdd88a8d7b99b8e74190280150d1926de508dc",
+      "linux_amd64_manifest_digest": "sha256:7e14e31e082707321165ab42c200618acb308a6c8b318fe045a12f1ddf80acb3",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__kislyuk__argcomplete__6b4528d801bc38e4be7f374ffda416fd82785529__812de3c38334.sif",
+      "tags": [
+        "img-b5a2d7e1363f6437",
+        "task-td-48f89934de58e0e3"
+      ],
+      "task_ids": [
+        "td-48f89934de58e0e3"
+      ],
+      "top_oci_digest": "sha256:e3bb01055376058e6ac6b21b78bdd88a8d7b99b8e74190280150d1926de508dc"
+    },
+    {
+      "archive_sha256": "ceb4f23ad9b98248119d91c627297bbd813b64f0cd3f524c224ca86324ec1a1f",
+      "archive_size": 177706845,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:86aa5a1607b0ad7385499504792f1e35032ad5a3b884b9d7177a9283f298f8f0",
+      "linux_amd64_manifest_digest": "sha256:cf2b7289ab50ccf59cec5db32fa8463ba230eb6f2073b4827e296d9ad77883ab",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__2captcha__2captcha-python__f596f77d3d697d0e0f9182dfc943aba95e625819__2adb34e93ef6.sif",
+      "tags": [
+        "img-ceb4f23ad9b98248",
+        "task-td-23116647bb846dae"
+      ],
+      "task_ids": [
+        "td-23116647bb846dae"
+      ],
+      "top_oci_digest": "sha256:86aa5a1607b0ad7385499504792f1e35032ad5a3b884b9d7177a9283f298f8f0"
+    },
+    {
+      "archive_sha256": "d077f3af01761a15a04ab0da403c1b45e5c1383267de1acc9caa81bbd3900d6e",
+      "archive_size": 6087638003,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:910871af12c01c61e229f84d2fa5d12526a7f20155eb133641853e2dca85b46a",
+      "linux_amd64_manifest_digest": "sha256:efe2456c5e206d4efcc0dd6faea33ef57a7dd817777ca0a5183c3da5960e1fdc",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__jacobgil__pytorch-grad-cam__dfca63679d157d576563c15eb0e373d5c97b50b0__5463d72ffe53.sif",
+      "tags": [
+        "img-d077f3af01761a15",
+        "task-td-70f94d2c6c42cc1d"
+      ],
+      "task_ids": [
+        "td-70f94d2c6c42cc1d"
+      ],
+      "top_oci_digest": "sha256:910871af12c01c61e229f84d2fa5d12526a7f20155eb133641853e2dca85b46a"
+    },
+    {
+      "archive_sha256": "d66ce406c89bc63e6182bc9501bf84afdae3c927ae54286931938d0c312b1b7e",
+      "archive_size": 172337099,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:bff533fac2db4a8fb2a431b275da8f889e3556afba9f1d302ac76eddb0c2cb92",
+      "linux_amd64_manifest_digest": "sha256:2744b67019097a7ee5a9b576f4c36af6450e830a6597b74b1c296e09bc425a54",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__scrapy__w3lib__22d04b7ef3cc7bd5e5b8eacd1558b990a03834b3__21173ad7b25a.sif",
+      "tags": [
+        "img-d66ce406c89bc63e",
+        "task-td-707da56342332cbc"
+      ],
+      "task_ids": [
+        "td-707da56342332cbc"
+      ],
+      "top_oci_digest": "sha256:bff533fac2db4a8fb2a431b275da8f889e3556afba9f1d302ac76eddb0c2cb92"
+    },
+    {
+      "archive_sha256": "d8feea7bd2f77bcd3258a8f6b820430a12d160e7663748ba02cfac3b4f830842",
+      "archive_size": 6310308329,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:304903fe1c49a6d41705d0d351d20833b3539b47efbc23956552ba60b3336e7a",
+      "linux_amd64_manifest_digest": "sha256:83e55d8f8c17252f823f4c6a0258f9fd752ec7bcd716e85cc7c30e1cb553b37c",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__HKUDS__RAG-Anything__65b7ffdeb801309d4c87b6accf81bfe5cd9b175d__fac47f3a3956.sif",
+      "tags": [
+        "img-d8feea7bd2f77bcd",
+        "task-td-cc0e5465a3dbd9e4"
+      ],
+      "task_ids": [
+        "td-cc0e5465a3dbd9e4"
+      ],
+      "top_oci_digest": "sha256:304903fe1c49a6d41705d0d351d20833b3539b47efbc23956552ba60b3336e7a"
+    },
+    {
+      "archive_sha256": "e377a78839273a1d74db92f6277c2acd478b7a38c51f0bf5a0d2d5e3895d80c9",
+      "archive_size": 600698647,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:4c7de01afe3f7d6ec3593883113608cd69ce33762aa9b7b9258b197309e1dc6b",
+      "linux_amd64_manifest_digest": "sha256:0ff7808296e5dfd50c59f9c6b3fa78b1944fab879ecb2826c92540955336ec54",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__dwzhu-pku__PaperBanana__ddeb2a9a8cf6c8119dd29a97c1f1a7312d27dc7b__823e9c316a63.sif",
+      "tags": [
+        "img-e377a78839273a1d",
+        "task-td-a311428baf682598",
+        "task-td-cade083deed931ce"
+      ],
+      "task_ids": [
+        "td-a311428baf682598",
+        "td-cade083deed931ce"
+      ],
+      "top_oci_digest": "sha256:4c7de01afe3f7d6ec3593883113608cd69ce33762aa9b7b9258b197309e1dc6b"
+    },
+    {
+      "archive_sha256": "e3f9b1b02c3233ab900964b75f0c826847d8f3d7a2f3f1346ab9b231ad915ad8",
+      "archive_size": 241948139,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:c78da49957324a69c2b19ec3be82ee8c2ca0d363126a84934b64bb34d71b41b1",
+      "linux_amd64_manifest_digest": "sha256:f2844e0cfa03b158045ade17621d0c44be1f01681a19c72dbf47fcf82bb2a224",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__apiflask__apiflask__ec68d99d2e8e30f7ccbe876d5b45860d08f12b7d__3efc1f83695f.sif",
+      "tags": [
+        "img-e3f9b1b02c3233ab",
+        "task-td-5ffd97c260c02dfb"
+      ],
+      "task_ids": [
+        "td-5ffd97c260c02dfb"
+      ],
+      "top_oci_digest": "sha256:c78da49957324a69c2b19ec3be82ee8c2ca0d363126a84934b64bb34d71b41b1"
+    },
+    {
+      "archive_sha256": "ef6b2c82e16ac41163c50c14c035398416d985c89e4baf3cd10507934868eb67",
+      "archive_size": 174088769,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:b5e72c80228565602cd3d86ea7eb85450efd83c4d1046642107fe2a77d7dfd5b",
+      "linux_amd64_manifest_digest": "sha256:3945eaf9d6a16b7d98b6c8ec82087dedaccc809fdc24896f07b2b835223d31a3",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__petl-developers__petl__841973d903d996d9df2a8cbba65c1fc3137d78ac__84c02cfbb43d.sif",
+      "tags": [
+        "img-ef6b2c82e16ac411",
+        "task-td-ec2a4fa6a1834389"
+      ],
+      "task_ids": [
+        "td-ec2a4fa6a1834389"
+      ],
+      "top_oci_digest": "sha256:b5e72c80228565602cd3d86ea7eb85450efd83c4d1046642107fe2a77d7dfd5b"
+    },
+    {
+      "archive_sha256": "f22f317c8951ae9319ea002de0450c26b979103802b4c0101a191a0f3a917f14",
+      "archive_size": 295718315,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:e037be2ffc537e9acc743f47753e508a604699c2f5c3e687e6dbfbda0aad5b61",
+      "linux_amd64_manifest_digest": "sha256:4970b7859182c541e32a4a6b4123df6c800e4f619933d2b31324d2a840ae62aa",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__koxudaxi__datamodel-code-generator__eaacba0e12888b500f511eea6b507c93b53c01fd__3c6cf1200b4f.sif",
+      "tags": [
+        "img-f22f317c8951ae93",
+        "task-td-dc3e10ec215c5100"
+      ],
+      "task_ids": [
+        "td-dc3e10ec215c5100"
+      ],
+      "top_oci_digest": "sha256:e037be2ffc537e9acc743f47753e508a604699c2f5c3e687e6dbfbda0aad5b61"
+    },
+    {
+      "archive_sha256": "fc485b0e7bc2771928ede38c7708e883d683f34eabb557e6349a7fe7acc44c6a",
+      "archive_size": 744509008,
+      "canonical_ref": "ghcr.io/daizedong/terminal-daily-task-envs@sha256:4e81cf9092f19a11925a30f6c15945033183dff4a84358a136ddbb91295b95ef",
+      "linux_amd64_manifest_digest": "sha256:32d77cb15d99d3930b579e999e66f57ff8c40f4ad1eed05a3479c7db0b33d88b",
+      "source_archive": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/cache/packed/shared/images/full5__anyoptimization__pymoo__2aa012be7e6049f436453eaba95ae054fe6b5b65__1b845b3d3251.sif",
+      "tags": [
+        "img-fc485b0e7bc27719",
+        "task-td-d1fece63f49d45a5"
+      ],
+      "task_ids": [
+        "td-d1fece63f49d45a5"
+      ],
+      "top_oci_digest": "sha256:4e81cf9092f19a11925a30f6c15945033183dff4a84358a136ddbb91295b95ef"
+    }
+  ],
+  "publication_plan_digest_definition": "sha256(canonical-json(sorted archive_sha256 objects containing archive_sha256, archive_size, sorted task_ids))",
+  "publication_plan_sha256": "68e89c45105fd2466505e6a847202424206e84e244e9d238ac7312cb8b6e23a9",
+  "repository": "ghcr.io/daizedong/terminal-daily-task-envs",
+  "roster_path": "/shared_nfs/daidong/terminal-daily-benchmark-baselines/w1-scratch-replay-2026-08-17-v1/runtime/new-run/generate-repro-raw-r007-primus/W1_FIXED50_FROZEN_TASK_ROSTER.json",
+  "roster_payload_sha256": "6e652c45af36cb52b7b471af0f64038879e5cb1d4db1184e60c01a9cf462497d",
+  "roster_sha256": "44b722079e4b47901b21f4086f77001fe8578b7279be62773ca347222bfaf6f1",
+  "schema": "terminal-daily-w1-fixed50-image-manifest-v1",
+  "task_count": 50,
+  "tasks": [
+    {
+      "archive_sha256": "339dccc6663f4f5c41652d000c79bec180422d8472ea2c05c7c6d02fa17c5337",
+      "archive_size": 313454488,
+      "linux_amd64_manifest_digest": "sha256:696e000a6d7918622e9d15336e7668de7c517d91dc71973524501d45f6cc317c",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-0263cd1c168cbeb6",
+      "task_id": "td-0263cd1c168cbeb6",
+      "top_oci_digest": "sha256:24996f8639f6bc461082db32c94c124cf73c8dce000c72e52530822cbd3781c9"
+    },
+    {
+      "archive_sha256": "1c4bdb6f76e0bebf3e1a82306b93ec3c4b7aeb6e001043c18148069529de97e3",
+      "archive_size": 218176467,
+      "linux_amd64_manifest_digest": "sha256:7f160a9d40f47989acd5cf5dbe29620e081cc530a178e2cbc6ae7e343f25b6e4",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-06b850f0ba89c481",
+      "task_id": "td-06b850f0ba89c481",
+      "top_oci_digest": "sha256:c393c861f4f7b28635d99852443f2195301f57b941ae57e0bcf0890d5b5ea1ac"
+    },
+    {
+      "archive_sha256": "35501f393de065fc53ae6eeebbe761b72c8103229a588dc9c44b14c5cfce4278",
+      "archive_size": 5833601013,
+      "linux_amd64_manifest_digest": "sha256:32f82fa589fa301b51115e2931baecbed725bc46e4b7ac9bc5872fbb0f0cc74c",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-1112e680c9d5f642",
+      "task_id": "td-1112e680c9d5f642",
+      "top_oci_digest": "sha256:4fb98b8ff1f588c3682ee5cd899a549d01dcd7e019ac9380feba84f98aa9433b"
+    },
+    {
+      "archive_sha256": "a2802ee2537b7785d4a1a514b5a32889b5b767cebd689ac2052c5367e50efa77",
+      "archive_size": 239376107,
+      "linux_amd64_manifest_digest": "sha256:58bd79d1ea81291d755e29f2267e8a56dc490d9620fca0475ae75982b5e4b764",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-123b3c8d9c22a9a3",
+      "task_id": "td-123b3c8d9c22a9a3",
+      "top_oci_digest": "sha256:d029024dff279cff703026d415ef5fb81dff9307207f04023fa2e098166b1e8b"
+    },
+    {
+      "archive_sha256": "193289a2742c5c69530d9c8c6cd778e320cd93124d637e97a0091874e7e1fe5f",
+      "archive_size": 172383177,
+      "linux_amd64_manifest_digest": "sha256:2c74f430599a5b2ac5fdd73111d1496feb81bb6ec2007d33b4a03eaa6d02d88a",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-1429f4968efb8658",
+      "task_id": "td-1429f4968efb8658",
+      "top_oci_digest": "sha256:deb07848198e4f6fc484ab613a456aeb590bc0c7755f232f2ca111d5dd72fddd"
+    },
+    {
+      "archive_sha256": "13a617a309192fee5a822a62cd1c205c94db8ada3e3df400dc626d0912f445c4",
+      "archive_size": 3327062051,
+      "linux_amd64_manifest_digest": "sha256:17e9220ce6a41c1564e320a5865392da936ed37cd74663c28b30d18c30c3b385",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-1976e0af7536d92d",
+      "task_id": "td-1976e0af7536d92d",
+      "top_oci_digest": "sha256:b3181fa0641c534fd9572f0db7459f691cfa16fc4b32177a95cd19f300c54073"
+    },
+    {
+      "archive_sha256": "ceb4f23ad9b98248119d91c627297bbd813b64f0cd3f524c224ca86324ec1a1f",
+      "archive_size": 177706845,
+      "linux_amd64_manifest_digest": "sha256:cf2b7289ab50ccf59cec5db32fa8463ba230eb6f2073b4827e296d9ad77883ab",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-23116647bb846dae",
+      "task_id": "td-23116647bb846dae",
+      "top_oci_digest": "sha256:86aa5a1607b0ad7385499504792f1e35032ad5a3b884b9d7177a9283f298f8f0"
+    },
+    {
+      "archive_sha256": "313b3df68df8758b7dfc94d50de93aa7240163000d2d8189a381c46c732df63d",
+      "archive_size": 172388381,
+      "linux_amd64_manifest_digest": "sha256:1c355fcd1e3816ad6f6b52517d3a66fc9a5aec09de43bc6a7ddce1d8927ee2ba",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-2fbc804f19e8dad7",
+      "task_id": "td-2fbc804f19e8dad7",
+      "top_oci_digest": "sha256:f96761731b8a283644e86098cb11d04a5d17b87c15257e82a2a1f827217185a5"
+    },
+    {
+      "archive_sha256": "7218d1e17faf9ee0a3ab525fc138b4ab8323acd8f8af3e3589e56e6972c502b5",
+      "archive_size": 759732266,
+      "linux_amd64_manifest_digest": "sha256:6b5d2aeb8ec0fe11f3ff3127da7a89fedceda8eaa014ca2f3d024973f8762927",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-3f82c2e5c91b7c6e",
+      "task_id": "td-3f82c2e5c91b7c6e",
+      "top_oci_digest": "sha256:da0a88418384c6faac8ca49138996b13bf8d9f922bd60fb11dadd301a3783900"
+    },
+    {
+      "archive_sha256": "542816761656ba39978736de81ff2d42a1718d37da57dc10fea0ddf93eb46f74",
+      "archive_size": 177704460,
+      "linux_amd64_manifest_digest": "sha256:f48ab5c975a1cff5a1f3d67b5da8090802a9429d28745fdb896ae5c158f32e4d",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-40063b5d3aa6ab4b",
+      "task_id": "td-40063b5d3aa6ab4b",
+      "top_oci_digest": "sha256:14049cb47bd9f65fbc7e3f90f163f6b6d6456ff1fe946e1c977d2b004152eb08"
+    },
+    {
+      "archive_sha256": "7174ca8be11fdb8999b4ee4aa153693e530b15da2b377cb46039880fdfc7a6e6",
+      "archive_size": 177044646,
+      "linux_amd64_manifest_digest": "sha256:b736f70a54878f64a3aea5c597cb7117da7a86aedd2307dd955345cd93a43d77",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-4165a4fb9c0acddb",
+      "task_id": "td-4165a4fb9c0acddb",
+      "top_oci_digest": "sha256:e20242d2090883301a4e0aacf79ef2c1b8af2c579732f7b88c2e826aed3c77e5"
+    },
+    {
+      "archive_sha256": "89b713f059d1ff089ef7243771d4a66e25026837905d44b530d51d66ade02c1b",
+      "archive_size": 590512346,
+      "linux_amd64_manifest_digest": "sha256:33362f0423ddbe79b7f9ce49a76ee330c82968a5b57b63d33b2dcb913585f9de",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-43934e7a811c9e83",
+      "task_id": "td-43934e7a811c9e83",
+      "top_oci_digest": "sha256:500b734fdd74a1e1ff76cbfdacff0ab6bea7f1fd4354d5a4a89f06148da400dc"
+    },
+    {
+      "archive_sha256": "b5a2d7e1363f6437274278f9e8b51763641187c3cb00b736dcc23aeba17759d6",
+      "archive_size": 204481289,
+      "linux_amd64_manifest_digest": "sha256:7e14e31e082707321165ab42c200618acb308a6c8b318fe045a12f1ddf80acb3",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-48f89934de58e0e3",
+      "task_id": "td-48f89934de58e0e3",
+      "top_oci_digest": "sha256:e3bb01055376058e6ac6b21b78bdd88a8d7b99b8e74190280150d1926de508dc"
+    },
+    {
+      "archive_sha256": "1ac5630ae5290a4d4baaba5f699c48910d0c9a7ab0883d4181f4421dd26ce5ab",
+      "archive_size": 549320476,
+      "linux_amd64_manifest_digest": "sha256:752cc3d1d0d13f9bc303a6feb1f2f24ff22e47e1f359240345a4529adfe1aa5b",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-5842c10237b17bb4",
+      "task_id": "td-5842c10237b17bb4",
+      "top_oci_digest": "sha256:17e51d79978edb13788200accd593168ef2e94d7355d201b00e9ae6d46f7ec8f"
+    },
+    {
+      "archive_sha256": "9bb652e07456bc7cd0a95912aa3fe171bd104226c4e2b1e49f760d88dd2e9682",
+      "archive_size": 3286223124,
+      "linux_amd64_manifest_digest": "sha256:02e22bfc73df749814521e51f5b3f3a5c68559f919947ddf6d1838f09e62b73c",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-5f952ce374849a64",
+      "task_id": "td-5f952ce374849a64",
+      "top_oci_digest": "sha256:9978b61966156ece6d99ce4b28ae8d1f435ffa54bebb3f62b81f73c5f8d6b003"
+    },
+    {
+      "archive_sha256": "e3f9b1b02c3233ab900964b75f0c826847d8f3d7a2f3f1346ab9b231ad915ad8",
+      "archive_size": 241948139,
+      "linux_amd64_manifest_digest": "sha256:f2844e0cfa03b158045ade17621d0c44be1f01681a19c72dbf47fcf82bb2a224",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-5ffd97c260c02dfb",
+      "task_id": "td-5ffd97c260c02dfb",
+      "top_oci_digest": "sha256:c78da49957324a69c2b19ec3be82ee8c2ca0d363126a84934b64bb34d71b41b1"
+    },
+    {
+      "archive_sha256": "1a452cb043d858f20aea5e5536e2ca5b3cec5c0b84e0dbf331154df1f946be75",
+      "archive_size": 171947554,
+      "linux_amd64_manifest_digest": "sha256:9349bf810b306bd48339103a67fbd293b9f811da406072ae6c6d42c51def74ef",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-626b33ab47f3a6eb",
+      "task_id": "td-626b33ab47f3a6eb",
+      "top_oci_digest": "sha256:18b9829469f95d3ff24058cc22794403a0e895b9abeb2a24289f841f60cc66b5"
+    },
+    {
+      "archive_sha256": "940291bfcb191076cefead5f37c9e34f3a5cb336dc6702fe0bcce707f23a6c2d",
+      "archive_size": 759732313,
+      "linux_amd64_manifest_digest": "sha256:dcec4520589c120b55ad3ef6c9d666714a2e8231ecaef0c869861384bf1a4468",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-646a8a15f64a3c90",
+      "task_id": "td-646a8a15f64a3c90",
+      "top_oci_digest": "sha256:a6ed4074b4316399fee49adf68a20c8e6911c27fa072a03de2532f340c16785b"
+    },
+    {
+      "archive_sha256": "5b4377b22bd9588cd6f40eaed722b479835eab65a95d60d2cc75e91469ac2b4a",
+      "archive_size": 6054112055,
+      "linux_amd64_manifest_digest": "sha256:2f5750a5c8f10af63e60aa144204e7834883db6859afe7ca2d06feaa0b5052dd",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-6750abf1ab84864c",
+      "task_id": "td-6750abf1ab84864c",
+      "top_oci_digest": "sha256:f441813c7bcf31b7c411dab7ec3af9340f439de4b46ee0fc852c5c5b9e779693"
+    },
+    {
+      "archive_sha256": "a25b7ed1295ba7f43e7f4a2a64da38586080f4344d58af758b65effbac3707ea",
+      "archive_size": 228270810,
+      "linux_amd64_manifest_digest": "sha256:72d9ea007d38f28d2a740457011fb6db8174f2d4c0ed303e1685c0db319c0889",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-6a824a1ab9be8b9c",
+      "task_id": "td-6a824a1ab9be8b9c",
+      "top_oci_digest": "sha256:dc409cecf21764b05a27118d4c4c3b95a836d31246f3575cdb6bfb64b2895868"
+    },
+    {
+      "archive_sha256": "3c965b6b02b1c54d1fb0423525ba3c07ea246d182470b8efeed8766158d9dabb",
+      "archive_size": 172122798,
+      "linux_amd64_manifest_digest": "sha256:1696c50e9bdcd03a841054cba230eff0c6af6721873a0de8b8e8946f709b6afd",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-6c1b1fcb31cdc49f",
+      "task_id": "td-6c1b1fcb31cdc49f",
+      "top_oci_digest": "sha256:f62fca03691734f84d0886022bed4f96ce31b2e32aeec633befbb34fd677e2bf"
+    },
+    {
+      "archive_sha256": "58241bc117e980a0967a7a7402855934351e395a699897c4335b78ec99bf077a",
+      "archive_size": 172020566,
+      "linux_amd64_manifest_digest": "sha256:6d61801170c7e8ebde33b3cfa6f6ac25ab7b1a337f4ae10bb447259e0f03ef1b",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-6fedde17c75ca4cb",
+      "task_id": "td-6fedde17c75ca4cb",
+      "top_oci_digest": "sha256:7b9e9bc0b50b6e3027d5a41e8fa429b845ce6995731910261b577eb1187b0e00"
+    },
+    {
+      "archive_sha256": "d66ce406c89bc63e6182bc9501bf84afdae3c927ae54286931938d0c312b1b7e",
+      "archive_size": 172337099,
+      "linux_amd64_manifest_digest": "sha256:2744b67019097a7ee5a9b576f4c36af6450e830a6597b74b1c296e09bc425a54",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-707da56342332cbc",
+      "task_id": "td-707da56342332cbc",
+      "top_oci_digest": "sha256:bff533fac2db4a8fb2a431b275da8f889e3556afba9f1d302ac76eddb0c2cb92"
+    },
+    {
+      "archive_sha256": "d077f3af01761a15a04ab0da403c1b45e5c1383267de1acc9caa81bbd3900d6e",
+      "archive_size": 6087638003,
+      "linux_amd64_manifest_digest": "sha256:efe2456c5e206d4efcc0dd6faea33ef57a7dd817777ca0a5183c3da5960e1fdc",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-70f94d2c6c42cc1d",
+      "task_id": "td-70f94d2c6c42cc1d",
+      "top_oci_digest": "sha256:910871af12c01c61e229f84d2fa5d12526a7f20155eb133641853e2dca85b46a"
+    },
+    {
+      "archive_sha256": "9dd120a79e6ad2bdc05cc419c35206abe467bf85969b4f81d1232f3dca41ae33",
+      "archive_size": 5844324723,
+      "linux_amd64_manifest_digest": "sha256:5a92ed295872ea8facbc4fd8788589f5c1f8422e929eabd7d81c09c222e178f9",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-73f42b67c97eae89",
+      "task_id": "td-73f42b67c97eae89",
+      "top_oci_digest": "sha256:02cd65aacdd7b5fcb43a90d14852c90df0b5a91e420db686556a717277da1c5d"
+    },
+    {
+      "archive_sha256": "5cde8f3395ecb183336824c266257186e215ad7b4cc900d0e87469722a8e6b82",
+      "archive_size": 174081865,
+      "linux_amd64_manifest_digest": "sha256:9bbebc855df02349f938ef01690f177c51dfde165d64c122632740e15bb9e62d",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-819f2ac85eeead88",
+      "task_id": "td-819f2ac85eeead88",
+      "top_oci_digest": "sha256:c5a678d346fc66cf391af79feef06fb9242fe00141122ff4df6c873d6d9510dd"
+    },
+    {
+      "archive_sha256": "8b10def519ea937a3435b8bba91d8062ba86f9a339f2cefe5230ee7047a0c8b0",
+      "archive_size": 5844152901,
+      "linux_amd64_manifest_digest": "sha256:4affbfef51e7a335a9b61ba4e8b5d3de9e47fa6b186c57113e88484e9379fd99",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-8563a99b0ed0fb3d",
+      "task_id": "td-8563a99b0ed0fb3d",
+      "top_oci_digest": "sha256:2be9e0dbc6fc381663207ec5a859220596aae83e6fdaf5709db3e07f817f1024"
+    },
+    {
+      "archive_sha256": "98b41d9bc64a2e38f58a219dbcdb250d98225ee037ebe0558a86ea2652d7c342",
+      "archive_size": 329117556,
+      "linux_amd64_manifest_digest": "sha256:63757209d526e4033f07dc93d59e76754b0166ddeffbdd7f26205c921b8fc802",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-85e626bf1f08c74f",
+      "task_id": "td-85e626bf1f08c74f",
+      "top_oci_digest": "sha256:67c56dbbbfec0920f96a7a0491d1d23935301ddb2756e126abb16e6a137d2890"
+    },
+    {
+      "archive_sha256": "738e04a9b2839e844c0659230e68b338f1493ef0cb4fb384b4d0132ad3557b18",
+      "archive_size": 174096553,
+      "linux_amd64_manifest_digest": "sha256:f3233b64335653359cdeb7e9285f389d7a2ebf6c06e7748c1e17f48f9e27872d",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-8d79b8a28f8063d8",
+      "task_id": "td-8d79b8a28f8063d8",
+      "top_oci_digest": "sha256:9289a8b9fb3f5ce71427a70f91f7e0f016626866f5b8adaf1057f4472b329d97"
+    },
+    {
+      "archive_sha256": "69b7f9d40ca30948b5001ed7e2cc0eb13ff8c60baa66dcfff9963a4e979769fe",
+      "archive_size": 3458247063,
+      "linux_amd64_manifest_digest": "sha256:d943fef6712c54cad5c6b30b13846db78d4d84ffaf9a4832dd76cd71f04cfd0b",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-8e256eb038e80765",
+      "task_id": "td-8e256eb038e80765",
+      "top_oci_digest": "sha256:cf2b8791689bf9d97550fdccc2f7c55e3fe597714638df6ad336270eafb6a623"
+    },
+    {
+      "archive_sha256": "80e88a4706ed55b915e4f559a95823f95852a549f73e2d352c3404ce3eaa066c",
+      "archive_size": 699150425,
+      "linux_amd64_manifest_digest": "sha256:a686131bd5fb2feda103d514a98a737233d5a9cf7298e7a7215dc7566e021529",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-8e9ce87e4fecd3ab",
+      "task_id": "td-8e9ce87e4fecd3ab",
+      "top_oci_digest": "sha256:7134cf3b0b6625eeac5d7240b40e6be47ec82048eae1f67478363bf5a095c748"
+    },
+    {
+      "archive_sha256": "29f55cd854003ff2d6791e5f15fc25ecf0395dbbb1024940cc7387caaf6d3026",
+      "archive_size": 241959189,
+      "linux_amd64_manifest_digest": "sha256:c12e2b0f75a08bc5f390c7abc349e1a12dbdeb563843b0ae92a9c90fe9db1c56",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-9eda34d10676231e",
+      "task_id": "td-9eda34d10676231e",
+      "top_oci_digest": "sha256:50619a6cd6774b6904686973a94f97618c361a5a8d06258fe0ec77291900ff62"
+    },
+    {
+      "archive_sha256": "74a05a002d8edd3d084c6b10f2175e791cadf6f9489fec37cf2cb4b0482443f5",
+      "archive_size": 6604737959,
+      "linux_amd64_manifest_digest": "sha256:542219bb7ebe093a3fa6e7a170eac141e87a87d0a218f9534134019ab4e7ba42",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-a2c11ef966f5d11d",
+      "task_id": "td-a2c11ef966f5d11d",
+      "top_oci_digest": "sha256:d6246c559bf412e529b6044ddb300ac831ceff231b4661bcd9df54b82c6e6279"
+    },
+    {
+      "archive_sha256": "e377a78839273a1d74db92f6277c2acd478b7a38c51f0bf5a0d2d5e3895d80c9",
+      "archive_size": 600698647,
+      "linux_amd64_manifest_digest": "sha256:0ff7808296e5dfd50c59f9c6b3fa78b1944fab879ecb2826c92540955336ec54",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-a311428baf682598",
+      "task_id": "td-a311428baf682598",
+      "top_oci_digest": "sha256:4c7de01afe3f7d6ec3593883113608cd69ce33762aa9b7b9258b197309e1dc6b"
+    },
+    {
+      "archive_sha256": "459fd59c17c44529f4ec9399143f08ff6a643f32aef5d982eb536b2e33120f44",
+      "archive_size": 301337580,
+      "linux_amd64_manifest_digest": "sha256:7b161ebf3f3a2a72e7bea59f55eefdac59f99b33ddc7e1a5a659ec6c81b0ee8b",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-a59538ed3ac418d3",
+      "task_id": "td-a59538ed3ac418d3",
+      "top_oci_digest": "sha256:922ed42247ddb848f6defd946ba7cba7c0c2a83b7948f1a7a25de413f9e4f632"
+    },
+    {
+      "archive_sha256": "093cd083994b03c4bee974aa19b374083be14b779f30b5db268898378f631faa",
+      "archive_size": 389737854,
+      "linux_amd64_manifest_digest": "sha256:e6767a37a9104b612a1bda8b8570afb34abded3437e83099cea8d4d648f65ccc",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-a6fc21dbafde8991",
+      "task_id": "td-a6fc21dbafde8991",
+      "top_oci_digest": "sha256:c23b8d21a8daeaa3d695258985ab53979fcaff6dded18008988a20e655fe9741"
+    },
+    {
+      "archive_sha256": "1e9b9439cf17e6b55adbecaa46d948010fe1afac7a563eeb837e16c5757ec170",
+      "archive_size": 194269502,
+      "linux_amd64_manifest_digest": "sha256:500fdefc5b4056dc45de9432e7d457511daa072250eee1e9e6bf259923164da1",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-b6bf2798b6b9bed5",
+      "task_id": "td-b6bf2798b6b9bed5",
+      "top_oci_digest": "sha256:c4e6024db207b0bd77ee0ca033815b4701989f4e64c5906df08ec27fb8f5953b"
+    },
+    {
+      "archive_sha256": "26cad2376b24706a61252d1a33ed3d30e127522a07f1b3062f0abec6ae8697bd",
+      "archive_size": 5844136120,
+      "linux_amd64_manifest_digest": "sha256:e9110a089cabd106044f3ae96577ab386afa29c6f07eadc7b779d3a8504f3db3",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-bca62cbd0a787fef",
+      "task_id": "td-bca62cbd0a787fef",
+      "top_oci_digest": "sha256:454e4da335e8c2cdce676f584d60ad363660742ef255133ea8d3443f56d8603d"
+    },
+    {
+      "archive_sha256": "e377a78839273a1d74db92f6277c2acd478b7a38c51f0bf5a0d2d5e3895d80c9",
+      "archive_size": 600698647,
+      "linux_amd64_manifest_digest": "sha256:0ff7808296e5dfd50c59f9c6b3fa78b1944fab879ecb2826c92540955336ec54",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-cade083deed931ce",
+      "task_id": "td-cade083deed931ce",
+      "top_oci_digest": "sha256:4c7de01afe3f7d6ec3593883113608cd69ce33762aa9b7b9258b197309e1dc6b"
+    },
+    {
+      "archive_sha256": "d8feea7bd2f77bcd3258a8f6b820430a12d160e7663748ba02cfac3b4f830842",
+      "archive_size": 6310308329,
+      "linux_amd64_manifest_digest": "sha256:83e55d8f8c17252f823f4c6a0258f9fd752ec7bcd716e85cc7c30e1cb553b37c",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-cc0e5465a3dbd9e4",
+      "task_id": "td-cc0e5465a3dbd9e4",
+      "top_oci_digest": "sha256:304903fe1c49a6d41705d0d351d20833b3539b47efbc23956552ba60b3336e7a"
+    },
+    {
+      "archive_sha256": "9a70083a5459e66da227518c843c05ebe2e6c40f01d50cd13b231b62373ed2a6",
+      "archive_size": 218175774,
+      "linux_amd64_manifest_digest": "sha256:cde3d4dff57694123dad6480a2a8e9c3e4ef0789db41cdca136524efe2e60e13",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-d0fe8274878b8840",
+      "task_id": "td-d0fe8274878b8840",
+      "top_oci_digest": "sha256:783738e19d1073e6d82b7be5bd2c94a32a7c36d035cef717c8b0f01ccf7627cb"
+    },
+    {
+      "archive_sha256": "fc485b0e7bc2771928ede38c7708e883d683f34eabb557e6349a7fe7acc44c6a",
+      "archive_size": 744509008,
+      "linux_amd64_manifest_digest": "sha256:32d77cb15d99d3930b579e999e66f57ff8c40f4ad1eed05a3479c7db0b33d88b",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-d1fece63f49d45a5",
+      "task_id": "td-d1fece63f49d45a5",
+      "top_oci_digest": "sha256:4e81cf9092f19a11925a30f6c15945033183dff4a84358a136ddbb91295b95ef"
+    },
+    {
+      "archive_sha256": "f22f317c8951ae9319ea002de0450c26b979103802b4c0101a191a0f3a917f14",
+      "archive_size": 295718315,
+      "linux_amd64_manifest_digest": "sha256:4970b7859182c541e32a4a6b4123df6c800e4f619933d2b31324d2a840ae62aa",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-dc3e10ec215c5100",
+      "task_id": "td-dc3e10ec215c5100",
+      "top_oci_digest": "sha256:e037be2ffc537e9acc743f47753e508a604699c2f5c3e687e6dbfbda0aad5b61"
+    },
+    {
+      "archive_sha256": "31af71dde359913195108335bcdc7fa425d01dbf29489aa861e720f3845a0607",
+      "archive_size": 240831089,
+      "linux_amd64_manifest_digest": "sha256:f25df2620ee6e7a6579f6f7c4b9bd6915fb269999999a6589facc37f6f490136",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-e39d5a4a11cfc645",
+      "task_id": "td-e39d5a4a11cfc645",
+      "top_oci_digest": "sha256:0bff5dddd2626602ac4949065534bd821d5425c8ea87c4997ed47accc189816d"
+    },
+    {
+      "archive_sha256": "1b8736601a45945d51a2d083a7f980487a6dc581aa9263d55a876b059956b5ea",
+      "archive_size": 172338901,
+      "linux_amd64_manifest_digest": "sha256:84520f7e7fd50c45f4ff160c635f09f042f045ed4ab9eed299b0c079432c9dff",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-e85ca08bd7aceb52",
+      "task_id": "td-e85ca08bd7aceb52",
+      "top_oci_digest": "sha256:b6d250a5af93a91e05271b85af54eb5016308bfa2ba3250c195ccc8bea9f3143"
+    },
+    {
+      "archive_sha256": "04e95de17fd0e4f6bb143865616c4d9b8686c823ce23c5c3a49ba0686f3ef87b",
+      "archive_size": 176887504,
+      "linux_amd64_manifest_digest": "sha256:f540522c94bdbe5778e3e5066a08052ff7454f3bca6c38e3db8d5aafbd4f9282",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-eae154905e07a86b",
+      "task_id": "td-eae154905e07a86b",
+      "top_oci_digest": "sha256:c6fb5da5b2fd3b493fa9debf0bdc65f32864117fc2018a8e3f2b764b52c51dd1"
+    },
+    {
+      "archive_sha256": "ef6b2c82e16ac41163c50c14c035398416d985c89e4baf3cd10507934868eb67",
+      "archive_size": 174088769,
+      "linux_amd64_manifest_digest": "sha256:3945eaf9d6a16b7d98b6c8ec82087dedaccc809fdc24896f07b2b835223d31a3",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-ec2a4fa6a1834389",
+      "task_id": "td-ec2a4fa6a1834389",
+      "top_oci_digest": "sha256:b5e72c80228565602cd3d86ea7eb85450efd83c4d1046642107fe2a77d7dfd5b"
+    },
+    {
+      "archive_sha256": "733b43e969ae250b82d3893c5f8493ce0c4f80dae566fbe7b7e1c98d4911b337",
+      "archive_size": 177690387,
+      "linux_amd64_manifest_digest": "sha256:db674b45e9241d69a318ed07a79382249b7575fcd0d7d92bd0147455c33d5f46",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-f187e1f16b1da3fc",
+      "task_id": "td-f187e1f16b1da3fc",
+      "top_oci_digest": "sha256:3942a3e06ed71c3719eab39f09bb170d7c666b6441e8822c8c23644bedeb653b"
+    },
+    {
+      "archive_sha256": "830f3541b3dbb121fe811badac39fe4488299a06aaac7fed92425f46ef79b5fe",
+      "archive_size": 194271899,
+      "linux_amd64_manifest_digest": "sha256:7333bc1c0a6427b75f81ef744711c9e44b5921495a6dd5014bb5a6e0107d84c1",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-f7231dfff7039690",
+      "task_id": "td-f7231dfff7039690",
+      "top_oci_digest": "sha256:8900d1be44c3ade5e3cf6e1e2333c2c031f91410e58adbe4509c26ac83d9d424"
+    },
+    {
+      "archive_sha256": "6af5f2653310e01a3616d43b7955cd1e11db3b9675a63a11f48a60f54b340ba8",
+      "archive_size": 629583019,
+      "linux_amd64_manifest_digest": "sha256:328285767df2ae8d37b790f09ac9f7c20035b3cbc3505b4985446105a2c56c72",
+      "registry_ref": "ghcr.io/daizedong/terminal-daily-task-envs:task-td-ff79081914cd3936",
+      "task_id": "td-ff79081914cd3936",
+      "top_oci_digest": "sha256:73634ec420c048c27f5488ad1bfe7b44a79e19dde4542e09f0a28466ed7e2606"
+    }
+  ]
+}

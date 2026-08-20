@@ -1,0 +1,35 @@
+diff --git a/cachecontrol/controller.py b/cachecontrol/controller.py
+index 733684ff..03b22185 100644
+--- a/cachecontrol/controller.py
++++ b/cachecontrol/controller.py
+@@ -219,7 +219,9 @@ def cached_request(self, request: PreparedRequest) -> HTTPResponse | Literal[Fal
+ 
+         now = time.time()
+         time_tuple = parsedate_tz(headers["date"])
+-        assert time_tuple is not None
++        if time_tuple is None:
++            logger.debug("Ignoring cached response: invalid date")
++            return False
+         date = calendar.timegm(time_tuple[:6])
+         current_age = max(0, now - date)
+         logger.debug("Current age based on date: %i", current_age)
+@@ -358,8 +360,7 @@ def cache_response(
+ 
+         if "date" in response_headers:
+             time_tuple = parsedate_tz(response_headers["date"])
+-            assert time_tuple is not None
+-            date = calendar.timegm(time_tuple[:6])
++            date = calendar.timegm(time_tuple[:6]) if time_tuple is not None else 0
+         else:
+             date = 0
+ 
+@@ -430,7 +431,8 @@ def cache_response(
+         # the cache.
+         elif "date" in response_headers:
+             time_tuple = parsedate_tz(response_headers["date"])
+-            assert time_tuple is not None
++            if time_tuple is None:
++                return
+             date = calendar.timegm(time_tuple[:6])
+             # cache when there is a max-age > 0
+             max_age = cc.get("max-age")

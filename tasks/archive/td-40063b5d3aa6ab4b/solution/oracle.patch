@@ -1,0 +1,329 @@
+diff --git a/README.md b/README.md
+index 7d48566..100b75a 100644
+--- a/README.md
++++ b/README.md
+@@ -52,6 +52,7 @@ Examples of API requests for different captcha types are available on the [Pytho
+     - [Binance](#binance)
+     - [Yidun](#yidun)
+     - [Hunt](#hunt)
++    - [Alibaba](#alibaba)
+   - [Other methods](#other-methods)
+     - [send / get\_result](#send--get_result)
+     - [balance](#balance)
+@@ -572,6 +573,18 @@ result = solver.hunt(pageurl='https://example.com/page-with-hunt',
+                      )
+ ```
+ 
++### Alibaba
++
++<sup>[API method description.](https://2captcha.com/2captcha-api#alibaba)</sup>
++
++Use this method to solve Alibaba captcha. Returns a token.
++```python
++result = solver.alibaba(pageurl='https://www.example.com',
++                        scene_id='abc123xyz4',
++                        prefix='dlw3kug',
++                        )
++```
++
+ ## Other methods
+ 
+ ### send / get_result
+diff --git a/examples/async/async_alibaba.py b/examples/async/async_alibaba.py
+new file mode 100644
+index 0000000..9d817bb
+--- /dev/null
++++ b/examples/async/async_alibaba.py
+@@ -0,0 +1,32 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = AsyncTwoCaptcha(api_key)
++
++async def solve_captcha():
++    try:
++        return await solver.alibaba(
++            pageurl='https://www.example.com',
++            scene_id='abc123xyz4',
++            prefix='dlw3kug',
++        )
++
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/async/async_alibaba_options.py b/examples/async/async_alibaba_options.py
+new file mode 100644
+index 0000000..d4c09fe
+--- /dev/null
++++ b/examples/async/async_alibaba_options.py
+@@ -0,0 +1,49 @@
++import asyncio
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import AsyncTwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = AsyncTwoCaptcha(**config)
++
++async def solve_captcha():
++    try:
++        return await solver.alibaba(
++            pageurl='https://www.example.com',
++            scene_id='abc123xyz4',
++            prefix='dlw3kug',
++            user_id='Abc123Def456Ghi789Jkl012Mno345Pqr678Stu901=',
++            user_user_id='Xyz987Abc654Def321Ghi098Jkl765Mno432Pqr109=',
++            verify_type='1.0',
++            region='sgp',
++            user_certify_id='abc123def456ghi789jkl012mno345pq',
++            api_get_lib='https://o.example.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js?t=2041',
++            useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++            # proxy={'type': 'HTTP',
++            #        'uri': 'login:password@IP_address:PORT'}
++        )
++    except Exception as e:
++        sys.exit(e)
++
++if __name__ == '__main__':
++    result = asyncio.run(solve_captcha())
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/alibaba.py b/examples/sync/alibaba.py
+new file mode 100644
+index 0000000..5a76563
+--- /dev/null
++++ b/examples/sync/alibaba.py
+@@ -0,0 +1,29 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++solver = TwoCaptcha(api_key)
++
++try:
++    result = solver.alibaba(
++        pageurl='https://www.example.com',
++        scene_id='abc123xyz4',
++        prefix='dlw3kug',
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/examples/sync/alibaba_options.py b/examples/sync/alibaba_options.py
+new file mode 100644
+index 0000000..9d776c4
+--- /dev/null
++++ b/examples/sync/alibaba_options.py
+@@ -0,0 +1,47 @@
++import sys
++import os
++
++sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
++
++from twocaptcha import TwoCaptcha
++
++# in this example we store the API key inside environment variables that can be set like:
++# export APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Linux or macOS
++# set APIKEY_2CAPTCHA=1abc234de56fab7c89012d34e56fa7b8 on Windows
++# you can just set the API key directly to it's value like:
++# api_key="1abc234de56fab7c89012d34e56fa7b8"
++
++api_key = os.getenv('APIKEY_2CAPTCHA', 'YOUR_API_KEY')
++
++config = {
++            'server':           '2captcha.com', # can be also set to 'rucaptcha.com'
++    		'apiKey':           api_key,
++    		'softId':            123,
++    		'defaultTimeout':    120,
++    		'recaptchaTimeout':  600,
++    		'pollingInterval':   10,
++	    }
++
++solver = TwoCaptcha(**config)
++
++try:
++    result = solver.alibaba(
++        pageurl='https://www.example.com',
++        scene_id='abc123xyz4',
++        prefix='dlw3kug',
++        user_id='Abc123Def456Ghi789Jkl012Mno345Pqr678Stu901=',
++        user_user_id='Xyz987Abc654Def321Ghi098Jkl765Mno432Pqr109=',
++        verify_type='1.0',
++        region='sgp',
++        user_certify_id='abc123def456ghi789jkl012mno345pq',
++        api_get_lib='https://o.example.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js?t=2041',
++        useragent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
++        # proxy={'type': 'HTTP',
++        #        'uri': 'login:password@IP_address:PORT'}
++    )
++
++except Exception as e:
++    sys.exit(e)
++
++else:
++    sys.exit('result: ' + str(result))
+diff --git a/setup.py b/setup.py
+index 1e6172e..6a397a0 100644
+--- a/setup.py
++++ b/setup.py
+@@ -36,6 +36,6 @@ def get_version():
+           '2captcha', 'captcha', 'api', 'captcha solver', 'reCAPTCHA',
+           'FunCaptcha', 'Geetest', 'image captcha', 'Coordinates', 'Click Captcha',
+           'Geetest V4', 'Lemin captcha', 'Amazon WAF', 'Cloudflare Turnstile',
+-          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt'],
++          'Capy Puzzle', 'MTCaptcha', 'Friendly Captcha', 'Tencent', 'Cutcaptcha', 'DataDome', 'VK Captcha', 'CaptchaFox', 'Prosopo', 'cybersiara', 'Hunt', 'Alibaba'],
+       python_requires='>=3.8',
+       test_suite='tests')
+diff --git a/twocaptcha/async_solver.py b/twocaptcha/async_solver.py
+index 56d7ed0..b4e1b4e 100644
+--- a/twocaptcha/async_solver.py
++++ b/twocaptcha/async_solver.py
+@@ -1102,6 +1102,43 @@ async def hunt(self, pageurl, api_get_lib, **kwargs):
+ 
+         return await result
+ 
++    async def alibaba(self, pageurl, scene_id, prefix, **kwargs):
++        '''Wrapper for solving Alibaba captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        scene_id : str
++            Captcha scenario identifier.
++        prefix : str
++            Prefix from the captcha loading request subdomain.
++        user_id : str, optional
++            User or session identifier on the website.
++        user_user_id : str, optional
++            Additional user identifier.
++        verify_type : str, optional
++            Verification mechanism version or type.
++        region : str, optional
++            Captcha processing region.
++        user_certify_id : str, optional
++            Verification ID for the current captcha session.
++        api_get_lib : str, optional
++            URL of the Alibaba Captcha JS library.
++        useragent : str, optional
++            Browser User-Agent used to open the page.
++        proxy : dict, optional
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        '''
++        result = self.solve(
++            method="alibaba",
++            pageurl=pageurl,
++            scene_id=scene_id,
++            prefix=prefix,
++            **kwargs)
++
++        return await result
++
+     async def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.
+ 
+diff --git a/twocaptcha/solver.py b/twocaptcha/solver.py
+index 2dfa5fe..3ba1b22 100755
+--- a/twocaptcha/solver.py
++++ b/twocaptcha/solver.py
+@@ -115,6 +115,8 @@ class TwoCaptcha():
+         Wrapper for solving Yidun captcha.
+     hunt(self, pageurl, api_get_lib, **kwargs)
+         Wrapper for solving Hunt captcha.
++    alibaba(self, pageurl, scene_id, prefix, **kwargs)
++        Wrapper for solving Alibaba captcha.
+     solve(timeout=0, polling_interval=0, **kwargs)
+         Sends CAPTCHA data and retrieves the result.
+     balance()
+@@ -1246,6 +1248,43 @@ def hunt(self, pageurl, api_get_lib, **kwargs):
+ 
+         return result
+ 
++    def alibaba(self, pageurl, scene_id, prefix, **kwargs):
++        '''Wrapper for solving Alibaba captcha.
++
++        Parameters
++        __________
++        pageurl : str
++            Full URL of the page with the captcha.
++        scene_id : str
++            Captcha scenario identifier.
++        prefix : str
++            Prefix from the captcha loading request subdomain.
++        user_id : str, optional
++            User or session identifier on the website.
++        user_user_id : str, optional
++            Additional user identifier.
++        verify_type : str, optional
++            Verification mechanism version or type.
++        region : str, optional
++            Captcha processing region.
++        user_certify_id : str, optional
++            Verification ID for the current captcha session.
++        api_get_lib : str, optional
++            URL of the Alibaba Captcha JS library.
++        useragent : str, optional
++            Browser User-Agent used to open the page.
++        proxy : dict, optional
++            {'type': 'HTTPS', 'uri': 'login:password@IP_address:PORT'}.
++        '''
++        result = self.solve(
++            method="alibaba",
++            pageurl=pageurl,
++            scene_id=scene_id,
++            prefix=prefix,
++            **kwargs)
++
++        return result
++
+ 
+     def solve(self, timeout=0, polling_interval=0, **kwargs):
+         '''Sends captcha, receives result.

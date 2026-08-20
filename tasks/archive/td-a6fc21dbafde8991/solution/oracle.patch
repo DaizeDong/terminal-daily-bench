@@ -1,0 +1,32 @@
+diff --git a/src/ape/api/accounts.py b/src/ape/api/accounts.py
+index 115a1767fe..d7df62f45b 100644
+--- a/src/ape/api/accounts.py
++++ b/src/ape/api/accounts.py
+@@ -379,7 +379,10 @@ def deploy(
+ 
+         if publish:
+             self.local_project.deployments.track(instance)
+-            self.provider.network.publish_contract(address)
++            try:
++                self.provider.network.publish_contract(address)
++            except Exception as err:
++                logger.error(f"Contract was deployed but explorer verification failed: {err}")
+ 
+         instance.base_path = contract.base_path or self.local_project.path
+         return instance
+diff --git a/src/ape/contracts/base.py b/src/ape/contracts/base.py
+index af3023ab6e..f28f3ec9af 100644
+--- a/src/ape/contracts/base.py
++++ b/src/ape/contracts/base.py
+@@ -1701,7 +1701,10 @@ def deploy(self, *args, publish: bool = False, **kwargs) -> ContractInstance:
+ 
+         if publish:
+             self.local_project.deployments.track(instance)
+-            self.provider.network.publish_contract(address)
++            try:
++                self.provider.network.publish_contract(address)
++            except Exception as err:
++                logger.error(f"Contract was deployed but explorer verification failed: {err}")
+ 
+         instance.base_path = self.base_path or self.local_project.contracts_folder
+         return instance

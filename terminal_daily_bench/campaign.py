@@ -31,6 +31,10 @@ from typing import Any, Callable, Mapping
 from .adapters import create_adapter
 from .adapters.vendor import _safe_agent_kwargs, _safe_base_url
 from . import __version__
+from .task_sif_cache import (
+    TaskSIFCacheError,
+    validate_task_sif_cache_proof,
+)
 
 
 SPEC_SCHEMA = "tdb-campaign/v1"
@@ -332,12 +336,14 @@ class TaskProfile:
     task_tree_sha256: str
     task_sif: Path | None
     task_sif_sha256: str | None
+    task_sif_size: int | None
 
     def public_summary(self) -> dict[str, Any]:
         return {
             "id": self.profile_id,
             "task_tree_sha256": self.task_tree_sha256,
             "task_sif_sha256": self.task_sif_sha256,
+            "task_sif_size": self.task_sif_size,
         }
 
 
@@ -841,7 +847,10 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
     value = _mapping(raw, f"tasks[{index}]")
     _only_keys(
         value,
-        {"id", "path", "task_tree_sha256", "task_sif", "task_sif_sha256"},
+        {
+            "id", "path", "task_tree_sha256", "task_sif", "task_sif_sha256",
+            "task_sif_size",
+        },
         f"tasks[{index}]",
     )
     raw_path = value.get("path")
@@ -864,12 +873,14 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
 
     raw_sif = value.get("task_sif")
     raw_sif_digest = value.get("task_sif_sha256")
+    raw_sif_size = value.get("task_sif_size")
     if (raw_sif is None) != (raw_sif_digest is None):
         raise CampaignError(
             f"tasks[{index}].task_sif and task_sif_sha256 must be provided together"
         )
     task_sif: Path | None = None
     sif_digest: str | None = None
+    sif_size: int | None = None
     if raw_sif is not None:
         if not isinstance(raw_sif, str) or not raw_sif:
             raise CampaignError(f"tasks[{index}].task_sif must be a path string")
@@ -878,7 +889,23 @@ def _parse_task(raw: Any, index: int, base_dir: Path) -> TaskProfile:
             task_sif = base_dir / task_sif
         task_sif = task_sif.absolute()
         sif_digest = _sha256(raw_sif_digest, f"tasks[{index}].task_sif_sha256")
-    return TaskProfile(profile_id, path, actual_tree, task_sif, sif_digest)
+        try:
+            actual_sif_size = task_sif.stat().st_size
+        except OSError as exc:
+            raise CampaignError(f"tasks[{index}].task_sif cannot be stat'ed") from exc
+        if actual_sif_size <= 0:
+            raise CampaignError(f"tasks[{index}].task_sif must not be empty")
+        if raw_sif_size is not None:
+            if type(raw_sif_size) is not int or raw_sif_size <= 0:
+                raise CampaignError(f"tasks[{index}].task_sif_size must be positive")
+            if raw_sif_size != actual_sif_size:
+                raise CampaignError(f"tasks[{index}].task_sif_size does not match the file")
+        sif_size = actual_sif_size
+    elif raw_sif_size is not None:
+        raise CampaignError(
+            f"tasks[{index}].task_sif_size requires task_sif and task_sif_sha256"
+        )
+    return TaskProfile(profile_id, path, actual_tree, task_sif, sif_digest, sif_size)
 
 
 def _parse_limits(raw: Any) -> ExecutionLimits:
@@ -1109,7 +1136,9 @@ class CampaignStore:
         os.chmod(self.root, 0o700)
         self.manifest_path = self.root / "manifest.json"
         self.checkpoint_path = self.root / "checkpoint.json"
-        self.results_root = self.root / "attempts"
+        # Evaluator results are distinct from the per-attempt mutable work tree.
+        # The formal receipt authority binds this exact stable namespace.
+        self.results_root = self.root / "results"
         self.export_path = self.root / "results.jsonl"
         self.lock_path = self.root / ".campaign.lock"
         self._lock_file = None
@@ -1410,8 +1439,27 @@ def _validate_success_result(cell: RuntimeCell, result: Mapping[str, Any]) -> st
     if isinstance(reward, bool) or not isinstance(reward, (int, float)) or not math.isfinite(float(reward)):
         raise CampaignError("cell result does not contain a finite reward")
     if cell.task.task_sif_sha256 is not None:
+        if result.get("task_sif_sha256") != cell.task.task_sif_sha256:
+            raise CampaignError("cell result task SIF digest does not match the frozen cell")
         if result.get("task_sif_post_sha256") != cell.task.task_sif_sha256:
             raise CampaignError("cell result lacks the post-Harbor SIF proof")
+        proof = result.get("task_sif_cache_proof")
+        if not isinstance(proof, Mapping):
+            raise CampaignError("cell result lacks a complete task SIF cache proof")
+        assert cell.task.task_sif is not None
+        assert cell.task.task_sif_size is not None
+        try:
+            validate_task_sif_cache_proof(
+                proof,
+                expected_sha256=cell.task.task_sif_sha256,
+                expected_size=cell.task.task_sif_size,
+                task_id=cell.task.path.name,
+                harness=cell.agent.harness,
+                model=cell.resolved_model,
+                source_path=str(cell.task.task_sif.resolve(strict=True)),
+            )
+        except (OSError, TaskSIFCacheError) as exc:
+            raise CampaignError(f"cell result task SIF cache proof is invalid: {exc}") from exc
     harness_result = result.get("harness")
     aggregate_digest = (
         harness_result.get("harbor_result_sha256")
@@ -1495,6 +1543,8 @@ def run_campaign(
     max_cells: int | None = None,
     budget_usd: float | None = None,
     runner: CellRunner | None = None,
+    retry_cell_ids: frozenset[str] | None = None,
+    max_attempts_per_cell: int | None = None,
 ) -> tuple[int, dict[str, Any]]:
     plan = plan_campaign(spec_path)
     limits = plan.definition.limits
@@ -1507,6 +1557,20 @@ def run_campaign(
         raise CampaignError("max_cells override must be positive")
     if effective_budget is not None:
         effective_budget = _nonnegative_money(effective_budget, "budget override")
+    if retry_cell_ids is not None:
+        if (
+            not isinstance(retry_cell_ids, frozenset)
+            or not retry_cell_ids
+            or not all(isinstance(cell_id, str) for cell_id in retry_cell_ids)
+            or not retry_cell_ids <= set(plan.runtime_cells)
+        ):
+            raise CampaignError("retry_cell_ids must select eligible frozen cells")
+    if max_attempts_per_cell is not None and (
+        isinstance(max_attempts_per_cell, bool)
+        or not isinstance(max_attempts_per_cell, int)
+        or max_attempts_per_cell < 1
+    ):
+        raise CampaignError("max_attempts_per_cell must be a positive integer")
     cell_runner = runner or _default_cell_runner
     store = CampaignStore(state_dir)
 
@@ -1529,11 +1593,21 @@ def run_campaign(
         candidates: list[RuntimeCell] = []
         for cell_id in sorted(plan.runtime_cells):
             record = state["cells"][cell_id]
-            if record["status"] == SUCCESS:
-                continue
-            if record["status"] == FAILED and not retry_failed:
-                continue
-            if record["status"] == BLOCKED and not retry_blocked:
+            selective_retry = retry_cell_ids is not None
+            if selective_retry:
+                if cell_id not in retry_cell_ids:
+                    continue
+            else:
+                if record["status"] == SUCCESS:
+                    continue
+                if record["status"] == FAILED and not retry_failed:
+                    continue
+                if record["status"] == BLOCKED and not retry_blocked:
+                    continue
+            if (
+                max_attempts_per_cell is not None
+                and len(record["attempts"]) >= max_attempts_per_cell
+            ):
                 continue
             candidates.append(plan.runtime_cells[cell_id])
 

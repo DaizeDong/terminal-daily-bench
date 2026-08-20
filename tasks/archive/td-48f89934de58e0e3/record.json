@@ -1,0 +1,25 @@
+{
+  "task_id": "td-48f89934de58e0e3",
+  "repo": "kislyuk/argcomplete",
+  "pr_number": 553,
+  "base_sha": "6b4528d801bc38e4be7f374ffda416fd82785529",
+  "merge_sha": "fa5c56c6164f6f3d88e3c04695f2328dcd97ae4e",
+  "merged_at": "2026-07-20T01:33:42Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "3ca4ab43fed30842319ef349d2ebe77c60e0cc7e64f5ce6934ff979225f85ace",
+  "test_files": [
+    "test/test.py"
+  ],
+  "fail_to_pass": [
+    "test/test.py::test_directory_completion_with_tilde"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C4",
+    "C5"
+  ]
+}

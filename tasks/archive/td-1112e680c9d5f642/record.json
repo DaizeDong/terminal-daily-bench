@@ -1,0 +1,26 @@
+{
+  "task_id": "td-1112e680c9d5f642",
+  "repo": "cornellius-gp/gpytorch",
+  "pr_number": 2756,
+  "base_sha": "93222a0f5e22b79fbfbf5c923572baefa5bfc325",
+  "merge_sha": "e99e33dbcb7c8b2c7b9db60c637f9286092e32e8",
+  "merged_at": "2026-07-10T17:46:51Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "a73d083a340527bb43f37d1e717f9fcf626764e5615cbaf3bb4e912ccbb5928a",
+  "test_files": [
+    "test/kernels/test_piecewise_polynomial_kernel.py"
+  ],
+  "fail_to_pass": [
+    "test/kernels/test_piecewise_polynomial_kernel.py::test_computes_piecewise_polynomial_kernel_q2"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C4",
+    "C13"
+  ]
+}

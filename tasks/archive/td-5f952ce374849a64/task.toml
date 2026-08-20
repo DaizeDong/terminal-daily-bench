@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-5f952ce374849a64"
+description = "Consolidate overlapping backend fixes"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "getzep/graphiti"
+pr_number = 1695
+base_sha = "b0ec6d9303d80c8724606cc88c73dbcab654076a"
+merge_sha = "d9a2db9dd220dff562cc75711c4ee6c11be3027f"
+created_at = "2026-07-27T18:02:21Z"
+oracle_patch_sha256 = "a40211a8e9b58f729d6815d812b8cb2863d78418d25af09f372c552c8c4cc5be"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

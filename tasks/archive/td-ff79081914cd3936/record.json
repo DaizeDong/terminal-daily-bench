@@ -1,0 +1,31 @@
+{
+  "task_id": "td-ff79081914cd3936",
+  "repo": "aiming-lab/AutoResearchClaw",
+  "pr_number": 286,
+  "base_sha": "e040e1dd9afcbda017f72181788a861e2e64d70c",
+  "merge_sha": "f61392de2b3f0104952284747b68d937fae8b023",
+  "merged_at": "2026-07-13T08:01:17Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "a9b3550a73b9961d1ce671cdf248d29a3d65770a5d646b515281c5beb009ed62",
+  "test_files": [
+    "tests/test_domain_detector.py",
+    "tests/test_prompt_adapter.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_domain_detector.py::<class>::test_other_domain_profiles_exist",
+    "tests/test_domain_detector.py::test_medical_observational_keywords",
+    "tests/test_prompt_adapter.py::TestMedicalObservationalAdapter::test_medical_observational_adapter_loaded",
+    "tests/test_prompt_adapter.py::TestMedicalObservationalAdapter::test_medical_design_blocks_include_ethics_privacy_and_strobe",
+    "tests/test_prompt_adapter.py::TestMedicalObservationalAdapter::test_medical_code_blocks_prevent_real_patient_data"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C6",
+    "C4"
+  ]
+}

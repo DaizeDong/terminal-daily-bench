@@ -1,0 +1,24 @@
+{
+  "failing_test_ids": [
+    "tests/test_iterutils.py::test_xfrange_descending",
+    "tests/test_iterutils.py::test_xfrange_wrong_direction",
+    "tests/test_iterutils.py::test_frange_inexact_boundary_counts",
+    "tests/test_iterutils.py::test_xfrange_matches_frange",
+    "tests/test_iterutils.py::test_frange_xfrange_zero_step",
+    "tests/test_jsonutils.py::test_jsonl_iterator_mid_last_line_seek_terminates",
+    "tests/test_jsonutils.py::test_jsonl_iterator_rel_seek_negative",
+    "tests/test_strutils.py::test_multi_replace_empty_mapping",
+    "tests/test_tableutils.py::test_to_text_empty_table",
+    "tests/test_tableutils.py::test_to_text_none_headers",
+    "tests/test_tableutils.py::test_to_text_no_headers",
+    "tests/test_tableutils.py::test_to_text_short_headers_padded",
+    "tests/test_timeutils.py::test_isoparse_basic",
+    "tests/test_timeutils.py::test_isoparse_fractional_seconds",
+    "tests/test_timeutils.py::test_isoparse_fraction_overprecise",
+    "tests/test_timeutils.py::test_daterange_step_does_not_advance",
+    "tests/test_timeutils.py::test_daterange_wrong_direction",
+    "tests/test_timeutils.py::test_daterange_datetime_hourly"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

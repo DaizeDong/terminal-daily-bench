@@ -1,0 +1,29 @@
+{
+  "task_id": "td-73f42b67c97eae89",
+  "repo": "google-research/timesfm",
+  "pr_number": 435,
+  "base_sha": "b3d0dec6ec3a5a86f87526284fbe9f16c101ce04",
+  "merge_sha": "e56854bc9e16427c65656ee735ab4ddaa18bea67",
+  "merged_at": "2026-06-08T17:18:59Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "e880e66bdf126aab833a6e3ac624b91f2eb25f36ebda5a935f5059745b8b58e7",
+  "test_files": [
+    "tests/test_model_loading.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_model_loading.py::TestModelLoading::test_torch_load_checkpoint_and_from_pretrained_local",
+    "tests/test_model_loading.py::TestModelLoading::test_flax_model_init_kwargs"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C5",
+    "C2",
+    "C4",
+    "C6",
+    "C13"
+  ]
+}

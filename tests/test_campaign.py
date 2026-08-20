@@ -23,6 +23,11 @@ from terminal_daily_bench.campaign import (
     plan_campaign,
     run_campaign,
 )
+from terminal_daily_bench.task_sif_cache import (
+    CACHE_BINDING_SCHEMA,
+    CACHE_PROOF_SCHEMA,
+    CACHE_RECEIPT_SCHEMA,
+)
 
 
 def _task(root: Path, name: str = "td-campaign-fixture") -> Path:
@@ -117,6 +122,78 @@ def _clean_result(cell, reward: float = 0.0) -> dict:
     }
 
 
+def _pinned_sif_result(cell) -> dict:
+    digest = cell.task.task_sif_sha256
+    size = cell.task.task_sif_size
+    identity = {
+        "st_dev": 7,
+        "st_ino": 11,
+        "st_nlink": 1,
+        "st_size": size,
+        "st_mtime_ns": 13,
+        "st_ctime_ns": 17,
+        "st_uid": os.geteuid(),
+        "mode": 0o400,
+    }
+    identity_sha = _canonical_digest(identity)
+    source_path = str(cell.task.task_sif)
+    receipt = {
+        "schema": CACHE_RECEIPT_SCHEMA,
+        "content_sha256": digest,
+        "size": size,
+        "source": {
+            "path": source_path,
+            "path_sha256": hashlib.sha256(source_path.encode()).hexdigest(),
+            "identity": {**identity, "mode": 0o600},
+        },
+        "cached_identity": identity,
+        "created_unix_ns": 19,
+        "credential_values_persisted": False,
+    }
+    receipt_sha = hashlib.sha256(
+        json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+    ).hexdigest()
+    binding = {
+        "schema": CACHE_BINDING_SCHEMA,
+        "content_sha256": digest,
+        "size": size,
+        "task_id": cell.task.path.name,
+        "harness": cell.agent.harness,
+        "model": cell.resolved_model,
+        "evaluator_pid": 23,
+        "cache_hit": False,
+        "cache_path_observation": f"/tmp/cache/{digest}/task.sif",
+        "source_path_sha256": hashlib.sha256(source_path.encode()).hexdigest(),
+        "cache_receipt_file_sha256": receipt_sha,
+        "pre_identity_sha256": identity_sha,
+        "credential_values_persisted": False,
+    }
+    binding_sha = hashlib.sha256(
+        json.dumps(binding, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+    ).hexdigest()
+    return {
+        **_clean_result(cell),
+        "task_sif_sha256": digest,
+        "task_sif_post_sha256": digest,
+        "task_sif_cache_proof": {
+            "schema": CACHE_PROOF_SCHEMA,
+            "content_sha256": digest,
+            "size": size,
+            "cache_receipt_relative_path": "pinned-image/cache-receipt.json",
+            "cache_receipt_file_sha256": receipt_sha,
+            "binding_relative_path": "pinned-image/binding.json",
+            "binding_file_sha256": binding_sha,
+            "cache_receipt": receipt,
+            "binding": binding,
+            "pre_identity_sha256": identity_sha,
+            "post_identity_sha256": identity_sha,
+            "cache_hit": False,
+            "portable_content_identity": True,
+            "credential_values_persisted": False,
+        },
+    }
+
+
 def test_sparse_plan_is_protocol_aware_stable_and_base_url_secret_safe(tmp_path):
     task = _task(tmp_path / "source")
     models = [
@@ -151,6 +228,54 @@ def test_sparse_plan_is_protocol_aware_stable_and_base_url_secret_safe(tmp_path)
     persisted = json.dumps(first.manifest)
     assert "gateway.example" not in persisted
     assert "base_url_sha256" in persisted
+
+
+def test_pinned_sif_success_requires_embedded_cache_receipt_and_binding(tmp_path):
+    task = _task(tmp_path / "source")
+    sif = tmp_path / "frozen.sif"
+    sif.write_bytes(b"frozen-sif")
+    digest = hashlib.sha256(sif.read_bytes()).hexdigest()
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+    value = json.loads(spec.read_text())
+    value["tasks"][0].update({
+        "task_sif": str(sif.resolve()),
+        "task_sif_sha256": digest,
+    })
+    spec.write_text(json.dumps(value))
+    cell = next(iter(plan_campaign(spec).runtime_cells.values()))
+    assert cell.task.task_sif_size == sif.stat().st_size
+    clean = _pinned_sif_result(cell)
+
+    assert campaign_module._validate_success_result(cell, clean) == "CLEAN_SCORED_UNSOLVED"
+
+    missing = json.loads(json.dumps(clean))
+    missing["task_sif_cache_proof"].pop("cache_receipt")
+    with pytest.raises(CampaignError, match="complete task SIF cache proof"):
+        campaign_module._validate_success_result(cell, missing)
+
+    forged = json.loads(json.dumps(clean))
+    binding = forged["task_sif_cache_proof"]["binding"]
+    binding["model"] = "openai/forged"
+    forged["task_sif_cache_proof"]["binding_file_sha256"] = hashlib.sha256(
+        json.dumps(binding, sort_keys=True, separators=(",", ":")).encode() + b"\n"
+    ).hexdigest()
+    with pytest.raises(CampaignError, match="binding is inconsistent"):
+        campaign_module._validate_success_result(cell, forged)
+
+    drifted = json.loads(json.dumps(clean))
+    drifted["task_sif_cache_proof"]["post_identity_sha256"] = "f" * 64
+    with pytest.raises(CampaignError, match="identity drifted"):
+        campaign_module._validate_success_result(cell, drifted)
+
+    value["tasks"][0]["task_sif_size"] = sif.stat().st_size + 1
+    spec.write_text(json.dumps(value))
+    with pytest.raises(CampaignError, match="task_sif_size does not match"):
+        plan_campaign(spec)
 
 
 def test_gateway_catalog_imports_capabilities_with_explicit_anthropic_allowlist(tmp_path):
@@ -387,6 +512,60 @@ def test_failed_cell_requires_explicit_retry_and_preserves_attempt_history(tmp_p
     assert [attempt["classification"] for attempt in only["attempts"]] == [
         "FAILED_AGENT_ERROR", "CLEAN_SCORED_SOLVED"
     ]
+
+
+def test_selective_bounded_retry_appends_attempts_and_never_exceeds_cap(tmp_path):
+    task = _task(tmp_path)
+    spec = _write_spec(
+        tmp_path / "campaign.json",
+        task,
+        models=[_model("chat")],
+        agents=[{"id": "one-shot", "harness": "single_shot"}],
+    )
+    calls = 0
+
+    def runner(cell, output, *_args):
+        nonlocal calls
+        calls += 1
+        output.write_text(json.dumps(_clean_result(cell, reward=1.0)))
+        return 0
+
+    assert run_campaign(spec, tmp_path / "state", runner=runner)[0] == 0
+    manifest = json.loads((tmp_path / "state/manifest.json").read_text())
+    cell_id = manifest["cells"][0]["cell_id"]
+    retry_ids = frozenset({cell_id})
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    # A fourth invocation is a no-op: all three immutable attempt slots exist.
+    assert run_campaign(
+        spec,
+        tmp_path / "state",
+        resume=True,
+        retry_cell_ids=retry_ids,
+        max_attempts_per_cell=3,
+        runner=runner,
+    )[0] == 0
+    checkpoint = json.loads((tmp_path / "state/checkpoint.json").read_text())
+    attempts = checkpoint["cells"][cell_id]["attempts"]
+    assert calls == 3
+    assert [attempt["attempt"] for attempt in attempts] == [1, 2, 3]
+    assert len(
+        list((tmp_path / "state/results" / cell_id).glob("attempt-*.json"))
+    ) == 3
 
 
 @pytest.mark.parametrize(

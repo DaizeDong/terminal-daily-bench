@@ -1,5 +1,8 @@
 # terminal-daily-bench
 
+> Running the frozen W1 fixed-50 set on another cluster? Start with
+> [W1_OTHER_CLUSTER_RUNBOOK.md](W1_OTHER_CLUSTER_RUNBOOK.md).
+
 **Leaderboard: https://daizedong.github.io/terminal-daily-bench/**
 
 A **living** coding-agent benchmark designed to construct daily task sets from real

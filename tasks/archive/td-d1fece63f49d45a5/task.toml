@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-d1fece63f49d45a5"
+description = "Fix SPEA2 truncation selection"
+keywords = ["C5", "C4", "C6"]
+
+[metadata]
+source_repo = "anyoptimization/pymoo"
+pr_number = 788
+base_sha = "2aa012be7e6049f436453eaba95ae054fe6b5b65"
+merge_sha = "cb9341e454c5f411a0dc51979dc7719facc34fcb"
+created_at = "2026-06-04T07:50:35Z"
+oracle_patch_sha256 = "256b5f69cf02de494f04c06af9ef9eec3c855ac9f3f480fecc727bddba9002f7"
+source_license_spdx = ""
+difficulty = "medium"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

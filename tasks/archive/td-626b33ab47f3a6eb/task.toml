@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-626b33ab47f3a6eb"
+description = "Include collected/left in DocoptExit exception all the time."
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "jazzband/docopt-ng"
+pr_number = 63
+base_sha = "897226e71c766e99334aa61fad20505bc8f3b2eb"
+merge_sha = "c53ced76295ffb4a9995fa1f11f275b98da537fe"
+created_at = "2024-03-31T16:27:13Z"
+oracle_patch_sha256 = "5f66be3d247e96c38ab94ca7467bcf4fb8cfbe5fef5bba24c9c290d932e7305d"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

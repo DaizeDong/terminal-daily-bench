@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-a6fc21dbafde8991"
+description = "fix: keep deployments successful when verification fails"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "apeworx/ape"
+pr_number = 2798
+base_sha = "e7f87563a7beb244f5d6baa3d4ff0a5808f9eef2"
+merge_sha = "bf80da2cffa20a8e940bc43834ec6f5493713f88"
+created_at = "2026-07-11T16:47:30Z"
+oracle_patch_sha256 = "bd40ee862b41afb11fdd7b12254ba08be750ae29478f6f7bdfe261eedc46342a"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

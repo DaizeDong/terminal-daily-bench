@@ -1,0 +1,270 @@
+diff --git a/petl/io/avro.py b/petl/io/avro.py
+index a48cb123..95332b75 100644
+--- a/petl/io/avro.py
++++ b/petl/io/avro.py
+@@ -245,7 +245,7 @@ class AvroView(Table):
+     def __init__(self, source, limit, skips, **avro_args):
+         self.source = source
+         self.limit = limit
+-        self.skip = skips
++        self._skip = skips
+         self.avro_args = avro_args
+         self.avro_schema = None
+ 
+@@ -281,7 +281,7 @@ def _read_rows_from(self, avro_reader, header):
+         count = 0
+         maximum = self.limit if self.limit is not None else sys.maxsize
+         for i, record in enumerate(avro_reader):
+-            if i < self.skip:
++            if i < self._skip:
+                 continue
+             if count >= maximum:
+                 break
+diff --git a/petl/io/bcolz.py b/petl/io/bcolz.py
+index 34fbd403..4eaaf53e 100644
+--- a/petl/io/bcolz.py
++++ b/petl/io/bcolz.py
+@@ -64,7 +64,7 @@ def __init__(self, source, expression=None, outcols=None, limit=None,
+         self.expression = expression
+         self.outcols = outcols
+         self.limit = limit
+-        self.skip = skip
++        self._skip = skip
+ 
+     def __iter__(self):
+ 
+@@ -86,10 +86,10 @@ def __iter__(self):
+ 
+         # obtain iterator
+         if self.expression is None:
+-            it = ctbl.iter(outcols=self.outcols, skip=self.skip,
++            it = ctbl.iter(outcols=self.outcols, skip=self._skip,
+                            limit=self.limit)
+         else:
+-            it = ctbl.where(self.expression, outcols=self.outcols, skip=self.skip,
++            it = ctbl.where(self.expression, outcols=self.outcols, skip=self._skip,
+                            limit=self.limit)
+ 
+         for row in it:
+diff --git a/petl/transform/basics.py b/petl/transform/basics.py
+index ef08e244..0605fa9d 100644
+--- a/petl/transform/basics.py
++++ b/petl/transform/basics.py
+@@ -534,10 +534,10 @@ def __init__(self, source, field, value=None, index=None, missing=None):
+         self.source = stack(source, missing=missing)
+         self.field = field
+         self.value = value
+-        self.index = index
++        self._index = index
+ 
+     def __iter__(self):
+-        return iteraddfield(self.source, self.field, self.value, self.index)
++        return iteraddfield(self.source, self.field, self.value, self._index)
+ 
+ 
+ def iteraddfield(source, field, value, index):
+@@ -928,7 +928,7 @@ class MoveFieldView(Table):
+     def __init__(self, table, field, index, missing=None):
+         self.table = table
+         self.field = field
+-        self.index = index
++        self._index = index
+         self.missing = missing
+ 
+     def __iter__(self):
+@@ -940,7 +940,7 @@ def __iter__(self):
+         except StopIteration:
+             hdr = []
+         outhdr = [f for f in hdr if f != self.field]
+-        outhdr.insert(self.index, self.field)
++        outhdr.insert(self._index, self.field)
+         yield tuple(outhdr)
+ 
+         # define a function to transform each row in the source data
+diff --git a/petl/transform/hashjoins.py b/petl/transform/hashjoins.py
+index 938c7035..f1d8bc43 100644
+--- a/petl/transform/hashjoins.py
++++ b/petl/transform/hashjoins.py
+@@ -47,13 +47,13 @@ def __init__(self, left, right, lkey, rkey, cache=True, lprefix=None,
+         self.right = stack(right, missing=missing)
+         self.lkey = lkey
+         self.rkey = rkey
+-        self.cache = cache
++        self._cache = cache
+         self.rlookup = None
+         self.lprefix = lprefix
+         self.rprefix = rprefix
+         
+     def __iter__(self):
+-        if not self.cache or self.rlookup is None:
++        if not self._cache or self.rlookup is None:
+             self.rlookup = lookup(self.right, self.rkey)
+         return iterhashjoin(self.left, self.right, self.lkey, self.rkey,
+                             self.rlookup, self.lprefix, self.rprefix)
+@@ -146,13 +146,13 @@ def __init__(self, left, right, lkey, rkey, missing=None, cache=True,
+         self.lkey = lkey
+         self.rkey = rkey
+         self.missing = missing
+-        self.cache = cache
++        self._cache = cache
+         self.rlookup = None
+         self.lprefix = lprefix
+         self.rprefix = rprefix
+ 
+     def __iter__(self):
+-        if not self.cache or self.rlookup is None:
++        if not self._cache or self.rlookup is None:
+             self.rlookup = lookup(self.right, self.rkey)
+         return iterhashleftjoin(self.left, self.right, self.lkey, self.rkey,
+                                 self.missing, self.rlookup, self.lprefix,
+@@ -252,13 +252,13 @@ def __init__(self, left, right, lkey, rkey, missing=None, cache=True,
+         self.lkey = lkey
+         self.rkey = rkey
+         self.missing = missing
+-        self.cache = cache
++        self._cache = cache
+         self.llookup = None
+         self.lprefix = lprefix
+         self.rprefix = rprefix
+ 
+     def __iter__(self):
+-        if not self.cache or self.llookup is None:
++        if not self._cache or self.llookup is None:
+             self.llookup = lookup(self.left, self.lkey)
+         return iterhashrightjoin(self.left, self.right, self.lkey, self.rkey,
+                                  self.missing, self.llookup, self.lprefix,
+diff --git a/petl/transform/regex.py b/petl/transform/regex.py
+index cd74a68c..261a7423 100644
+--- a/petl/transform/regex.py
++++ b/petl/transform/regex.py
+@@ -309,11 +309,11 @@ def __init__(self, table, pattern, field=None, flags=0, complement=False):
+         self.pattern = pattern
+         self.field = field
+         self.flags = flags
+-        self.complement = complement
++        self._complement = complement
+ 
+     def __iter__(self):
+         return itersearch(self.table, self.pattern, self.field, self.flags,
+-                          self.complement)
++                          self._complement)
+ 
+ 
+ def itersearch(table, pattern, field, flags, complement):
+diff --git a/petl/transform/selects.py b/petl/transform/selects.py
+index 712360f4..dc85bde7 100644
+--- a/petl/transform/selects.py
++++ b/petl/transform/selects.py
+@@ -93,11 +93,11 @@ def __init__(self, source, where, missing=None, complement=False):
+         self.source = source
+         self.where = where
+         self.missing = missing
+-        self.complement = complement
++        self._complement = complement
+ 
+     def __iter__(self):
+         return iterrowselect(self.source, self.where, self.missing,
+-                             self.complement)
++                             self._complement)
+ 
+ 
+ class FieldSelectView(Table):
+@@ -106,12 +106,12 @@ def __init__(self, source, field, where, complement=False, missing=None):
+         self.source = source
+         self.field = field
+         self.where = where
+-        self.complement = complement
++        self._complement = complement
+         self.missing = missing
+ 
+     def __iter__(self):
+         return iterfieldselect(self.source, self.field, self.where,
+-                               self.complement, self.missing)
++                               self._complement, self.missing)
+ 
+ 
+ def iterfieldselect(source, field, where, complement, missing):
+diff --git a/petl/transform/sorts.py b/petl/transform/sorts.py
+index c90998ac..3a8fc41b 100755
+--- a/petl/transform/sorts.py
++++ b/petl/transform/sorts.py
+@@ -229,7 +229,7 @@ def __init__(self, source, key=None, reverse=False, buffersize=None,
+         else:
+             self.buffersize = buffersize
+         self.tempdir = tempdir
+-        self.cache = cache
++        self._cache = cache
+         self._hdrcache = None
+         self._memcache = None
+         self._filecache = None
+@@ -246,9 +246,9 @@ def __iter__(self):
+         source = self.source
+         key = self.key
+         reverse = self.reverse
+-        if self.cache and self._memcache is not None:
++        if self._cache and self._memcache is not None:
+             return self._iterfrommemcache()
+-        elif self.cache and self._filecache is not None:
++        elif self._cache and self._filecache is not None:
+             return self._iterfromfilecache()
+         else:
+             return self._iternocache(source, key, reverse)
+@@ -312,7 +312,7 @@ def _iternocache(self, source, key, reverse):
+         if self.buffersize is None or len(rows) < self.buffersize:
+             # yes, table fits within sort buffer
+ 
+-            if self.cache:
++            if self._cache:
+                 debug('caching mem')
+                 self._hdrcache = hdr
+                 self._memcache = rows
+@@ -348,7 +348,7 @@ def _iternocache(self, source, key, reverse):
+                 rows = list(itertools.islice(it, 0, self.buffersize))
+                 rows.sort(key=getkey, reverse=reverse)
+ 
+-            if self.cache:
++            if self._cache:
+                 debug('caching files')
+                 self._hdrcache = hdr
+                 self._filecache = chunkfiles
+diff --git a/petl/util/materialise.py b/petl/util/materialise.py
+index 074dfb37..a64ab6fc 100644
+--- a/petl/util/materialise.py
++++ b/petl/util/materialise.py
+@@ -143,29 +143,29 @@ class CacheView(Table):
+     def __init__(self, inner, n=None):
+         self.inner = inner
+         self.n = n
+-        self.cache = list()
++        self._cache = list()
+         self.cachecomplete = False
+ 
+     def clearcache(self):
+-        self.cache = list()
++        self._cache = list()
+         self.cachecomplete = False
+ 
+     def __iter__(self):
+ 
+         # serve whatever is in the cache first
+-        for row in self.cache:
++        for row in self._cache:
+             yield row
+ 
+         if not self.cachecomplete:
+ 
+             # serve the remainder from the inner iterator
+             it = iter(self.inner)
+-            for row in islice(it, len(self.cache), None):
++            for row in islice(it, len(self._cache), None):
+                 # maybe there's more room in the cache?
+-                if not self.n or len(self.cache) < self.n:
+-                    self.cache.append(row)
++                if not self.n or len(self._cache) < self.n:
++                    self._cache.append(row)
+                 yield row
+ 
+             # does the cache contain a complete copy of the inner table?
+-            if not self.n or len(self.cache) < self.n:
++            if not self.n or len(self._cache) < self.n:
+                 self.cachecomplete = True

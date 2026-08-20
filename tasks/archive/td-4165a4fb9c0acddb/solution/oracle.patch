@@ -1,0 +1,283 @@
+diff --git a/.github/workflows/ci.yaml b/.github/workflows/ci.yaml
+index 06c033e63..1b3fc107d 100644
+--- a/.github/workflows/ci.yaml
++++ b/.github/workflows/ci.yaml
+@@ -145,7 +145,7 @@ jobs:
+       with:
+         matrix_yaml: |
+           include:
+-          - { platform: manylinux1, arch: x86_64, spec: cp38 }
++          - { platform: manylinux1, arch: x86_64, spec: cp38, cibw_version: 'cibuildwheel<4' }
+           - { platform: manylinux1, arch: x86_64, spec: cp39, omit: ${{ env.skip_ci_redundant_jobs }} }
+           - { platform: manylinux2014, arch: x86_64, spec: cp310, omit: ${{ env.skip_ci_redundant_jobs }} }
+           - { platform: manylinux2014, arch: x86_64, spec: cp311, omit: ${{ env.skip_ci_redundant_jobs }} }
+@@ -237,7 +237,7 @@ jobs:
+         set -eux
+ 
+         python3 -V
+-        python3 -m pip install -U --user ${{ matrix.cibw_version || 'cibuildwheel' }}
++        python3 -m pip install -U --user "${{ matrix.cibw_version || 'cibuildwheel' }}"
+ 
+         mkdir pyyaml
+ 
+@@ -423,7 +423,7 @@ jobs:
+       run: |
+         set -eux
+         python3 -V
+-        python3 -m pip install -U --user ${{ matrix.cibw_version || 'cibuildwheel' }}
++        python3 -m pip install -U --user "${{ matrix.cibw_version || 'cibuildwheel' }}"
+         mkdir pyyaml
+ 
+         tar zxf pyyaml*.tar.gz/pyyaml*.tar.gz --strip-components=1 -C pyyaml
+@@ -450,6 +450,7 @@ jobs:
+     name: libyaml windows ${{ matrix.arch }}
+     runs-on: ${{ (matrix.arch == 'arm64') && 'windows-11-arm' || 'windows-2022' }}
+     strategy:
++      fail-fast: false
+       matrix:
+         include:
+         - arch: x64
+@@ -481,7 +482,7 @@ jobs:
+         mkdir libyaml/build
+ 
+         pushd libyaml/build
+-        cmake.exe -G "Visual Studio 17 2022" -A ${{ matrix.arch }} -DYAML_STATIC_LIB_NAME=yaml ..
++        cmake.exe -G "Visual Studio 17 2022" -A ${{ matrix.arch }} -DYAML_STATIC_LIB_NAME=yaml -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
+         cmake.exe --build . --config Release
+         popd
+ 
+@@ -500,6 +501,7 @@ jobs:
+           ### x86_64 jobs
+           - spec: cp38-win_amd64
+             arch: x64
++            cibw_version: cibuildwheel<4
+ 
+           - spec: cp39-win_amd64
+             arch: x64
+@@ -620,7 +622,7 @@ jobs:
+       run: |
+         set -eux
+         python -V
+-        python -m pip install -U --user ${{ matrix.cibw_version || 'cibuildwheel' }}
++        python -m pip install -U --user "${{ matrix.cibw_version || 'cibuildwheel' }}"
+         mkdir pyyaml
+ 
+         tar zxf pyyaml*.tar.gz/pyyaml*.tar.gz --strip-components=1 -C pyyaml
+diff --git a/.gitignore b/.gitignore
+index 194fb3214..41222859c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,6 +1,7 @@
+ # build outputs
+-/dist/*
+-/build/*
++/.cache/
++/dist/
++/build/
+ /lib/PyYAML.egg-info/*
+ /wheelhouse/*
+ /yaml/_yaml.c
+diff --git a/Makefile b/Makefile
+index fc66e0a2d..32829d0a4 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,48 +1,96 @@
++R := https://github.com/makeplus/makes
++C := b0edc13d2045c1a06a92752ea4bfb48cbb59cc4b
++M := $(or $(MAKES_REPO_DIR),.cache/makes)
++$(shell [ -d '$M' ] || git clone -q $R '$M')
++$(shell cd '$M' && [ "$$(git rev-parse HEAD)" = '$C' ] || \
++  { git fetch -q origin && git checkout -q '$C'; })
+ 
+-.PHONY: build dist
++include $M/init.mk
++
++export UV_CACHE_DIR = $(LOCAL-CACHE)/uv
++PYTHON-VENV-SETUP = uv pip install Cython pytest setuptools wheel
++include $M/python.mk
++include $M/clean.mk
++include $M/shell.mk
++
++PYTHON-DEPS = $(PYTHON) $(PYTHON-VENV)
++PYTEST-PYTHON = \
++import sys; \
++sys.path.insert(0, 'build/lib'); \
++import pytest; \
++raise SystemExit(pytest.main())
++
++PYTEST-LIBYAML = \
++import pathlib, sys; \
++sys.path.insert(0, next(str(p) for p in pathlib.Path('build').glob('lib.*'))); \
++import pytest; \
++raise SystemExit(pytest.main())
+ 
+-PYTHON=/usr/bin/python3
+ TEST=
+ PARAMETERS=
+ 
+-build:
+-	${PYTHON} setup.py build ${PARAMETERS}
++LIBYAML-REPO ?= https://github.com/yaml/libyaml
++LIBYAML-REF ?= 0.2.5
++LIBYAML-DIR := $(LOCAL-CACHE)/libyaml-$(LIBYAML-REF)
++LIBYAML-BUILD := $(LIBYAML-DIR)/src/.libs/libyaml.$(SO)
++LIBYAML-INCLUDE := $(LIBYAML-DIR)/include
++LIBYAML-LIB := $(LIBYAML-DIR)/src/.libs
++LIBYAML-ENV := \
++  CFLAGS="-I$(LIBYAML-INCLUDE) $${CFLAGS:-}" \
++  LDFLAGS="-L$(LIBYAML-LIB) $${LDFLAGS:-}" \
++  LD_LIBRARY_PATH="$(LIBYAML-LIB):$${LD_LIBRARY_PATH:-}"
++
++MAKES-CLEAN := \
++  lib/PyYAML.egg-info/ \
++  lib/yaml/__pycache__/ \
++  tests/__pycache__/ \
++  tests/legacy_tests/__pycache__/ \
++  .pytest_cache/ \
++  yaml/_yaml.c \
++  build/ \
++  dist \
++
+ 
+-buildext:
+-	${PYTHON} setup.py --with-libyaml build ${PARAMETERS}
++build: $(PYTHON-DEPS)
++	python setup.py build $(PARAMETERS)
+ 
+-force:
+-	${PYTHON} setup.py build -f ${PARAMETERS}
++build-python: $(PYTHON-DEPS)
++	PYYAML_FORCE_LIBYAML=0 python setup.py --without-libyaml build $(PARAMETERS)
+ 
+-forceext:
+-	${PYTHON} setup.py --with-libyaml build -f ${PARAMETERS}
++buildext: $(PYTHON-DEPS) $(LIBYAML-BUILD)
++	$(LIBYAML-ENV) python setup.py --with-libyaml build $(PARAMETERS)
+ 
+-install:
+-	${PYTHON} setup.py install ${PARAMETERS}
++force: $(PYTHON-DEPS)
++	python setup.py build -f $(PARAMETERS)
+ 
+-installext:
+-	${PYTHON} setup.py --with-libyaml install ${PARAMETERS}
++forceext: $(PYTHON-DEPS) $(LIBYAML-BUILD)
++	$(LIBYAML-ENV) python setup.py --with-libyaml build -f $(PARAMETERS)
+ 
+-test: build
+-	PYYAML_FORCE_LIBYAML=0 ${PYTHON} -I -m pytest
++install: $(PYTHON-DEPS)
++	python setup.py install $(PARAMETERS)
+ 
+-testext: buildext
+-	PYYAML_FORCE_LIBYAML=1 ${PYTHON} -I -m pytest
++installext: $(PYTHON-DEPS) $(LIBYAML-BUILD)
++	$(LIBYAML-ENV) python setup.py --with-libyaml install $(PARAMETERS)
+ 
+-testall:
+-	${PYTHON} -m pytest
++test: test-python test-libyaml
+ 
+-dist:
++test-python: build-python
++	PYYAML_FORCE_LIBYAML=0 python -I -c "$(PYTEST-PYTHON)"
++
++test-libyaml: buildext
++	$(LIBYAML-ENV) PYYAML_FORCE_LIBYAML=1 python -I -c "$(PYTEST-LIBYAML)"
++
++$(LIBYAML-BUILD):
++	rm -fr $(LIBYAML-DIR)
++	git clone --branch $(LIBYAML-REF) $(LIBYAML-REPO) $(LIBYAML-DIR)
++	cd $(LIBYAML-DIR) && git reset --hard $(LIBYAML-REF)
++	cd $(LIBYAML-DIR) && ./bootstrap
++	cd $(LIBYAML-DIR) && ./configure --disable-dependency-tracking --with-pic --enable-shared=yes
++	$(MAKE) -C $(LIBYAML-DIR)
++
++dist: $(PYTHON-DEPS)
+ 	@# No longer uploading a zip file to pypi
+-	@# ${PYTHON} setup.py --with-libyaml sdist --formats=zip,gztar
+-	${PYTHON} setup.py --with-libyaml sdist --formats=gztar
+-
+-clean:
+-	${PYTHON} setup.py --with-libyaml clean -a
+-	rm -fr \
+-	    dist/ \
+-	    lib/PyYAML.egg-info/ \
+-	    lib/yaml/__pycache__/ \
+-	    tests/__pycache__/ \
+-	    tests/legacy_tests/__pycache__/ \
+-	    yaml/_yaml.c
++	@# python setup.py --with-libyaml sdist --formats=zip,gztar
++	python setup.py --with-libyaml sdist --formats=gztar
++
++.PHONY: build dist
+diff --git a/README.md b/README.md
+index 7d01da248..7e7a71e3b 100644
+--- a/README.md
++++ b/README.md
+@@ -27,7 +27,23 @@ If you don't trust the input YAML stream, you should use:
+ ## Testing
+ 
+ PyYAML includes a comprehensive test suite.
+-To run the tests, type `python setup.py test`.
++
++To run the complete local test suite, type:
++
++    make test
++
++This creates a local Python environment, runs the pure Python tests, builds a
++local copy of LibYAML, and then runs the LibYAML extension tests. The local
++LibYAML build is pinned by `LIBYAML-REF`, which defaults to `0.2.5`.
++
++To run only one test mode:
++
++    make test-python
++    make test-libyaml
++
++To test with a specific Python version:
++
++    make test PYTHON-VERSION=3.13.5
+ 
+ ## Further Information
+ 
+diff --git a/lib/yaml/constructor.py b/lib/yaml/constructor.py
+index 619acd307..97aa7b551 100644
+--- a/lib/yaml/constructor.py
++++ b/lib/yaml/constructor.py
+@@ -179,6 +179,7 @@ def construct_scalar(self, node):
+ 
+     def flatten_mapping(self, node):
+         merge = []
++        merge_key_ids = set()  # anchor referent node objects should have reference equality here
+         index = 0
+         while index < len(node.value):
+             key_node, value_node = node.value[index]
+@@ -186,9 +187,11 @@ def flatten_mapping(self, node):
+                 del node.value[index]
+                 if isinstance(value_node, MappingNode):
+                     self.flatten_mapping(value_node)
+-                    merge.extend(value_node.value)
++                    for pair in value_node.value:
++                        if (key_id := id(pair[0].value)) not in merge_key_ids:
++                            merge_key_ids.add(key_id)
++                            merge.append(pair)
+                 elif isinstance(value_node, SequenceNode):
+-                    submerge = []
+                     for subnode in value_node.value:
+                         if not isinstance(subnode, MappingNode):
+                             raise ConstructorError("while constructing a mapping",
+@@ -196,10 +199,10 @@ def flatten_mapping(self, node):
+                                     "expected a mapping for merging, but found %s"
+                                     % subnode.id, subnode.start_mark)
+                         self.flatten_mapping(subnode)
+-                        submerge.append(subnode.value)
+-                    submerge.reverse()
+-                    for value in submerge:
+-                        merge.extend(value)
++                        for pair in subnode.value:
++                            if (key_id := id(pair[0].value)) not in merge_key_ids:
++                                merge_key_ids.add(key_id)
++                                merge.append(pair)
+                 else:
+                     raise ConstructorError("while constructing a mapping", node.start_mark,
+                             "expected a mapping or list of mappings for merging, but found %s"

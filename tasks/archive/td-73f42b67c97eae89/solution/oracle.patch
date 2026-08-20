@@ -1,0 +1,99 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index ddcc9eba..3077b6e4 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,6 +1,6 @@
+ [project]
+ name = "timesfm"
+-version = "2.0.0"
++version = "2.0.1"
+ description = "A time series foundation model."
+ authors = [
+     {name = "Rajat Sen", email = "senrajat@google.com"},
+diff --git a/src/timesfm/timesfm_2p5/timesfm_2p5_flax.py b/src/timesfm/timesfm_2p5/timesfm_2p5_flax.py
+index 0f3b1509..b823af31 100644
+--- a/src/timesfm/timesfm_2p5/timesfm_2p5_flax.py
++++ b/src/timesfm/timesfm_2p5/timesfm_2p5_flax.py
+@@ -447,6 +447,21 @@ class TimesFM_2p5_200M_flax(timesfm_2p5_base.TimesFM_2p5):
+ 
+   model: nnx.Module = TimesFM_2p5_200M_flax_module()
+ 
++  def __init__(self, **kwargs):
++    self.model = TimesFM_2p5_200M_flax_module()
++
++  def load_checkpoint(self, path: str):
++    """Loads a TimesFM model from a checkpoint."""
++    if os.path.isdir(path):
++      model_file_path = path
++    else:
++      model_file_path = os.path.dirname(path)
++
++    checkpointer = ocp.StandardCheckpointer()
++    graph, state = nnx.split(self.model)
++    state = checkpointer.restore(model_file_path, state)
++    self.model = nnx.merge(graph, state)
++
+   @classmethod
+   def from_pretrained(
+     cls,
+@@ -485,10 +500,7 @@ def from_pretrained(
+       )
+       logging.info("Loading checkpoint from: %s", model_file_path)
+ 
+-    checkpointer = ocp.StandardCheckpointer()
+-    graph, state = nnx.split(instance.model)
+-    state = checkpointer.restore(model_file_path, state)
+-    instance.model = nnx.merge(graph, state)
++    instance.load_checkpoint(model_file_path)
+     return instance
+ 
+   def compile(
+diff --git a/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py b/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py
+index 3e7c9f14..e41ad5ad 100644
+--- a/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py
++++ b/src/timesfm/timesfm_2p5/timesfm_2p5_torch.py
+@@ -257,7 +257,7 @@ def forecast_naive(
+       to_concat = [t_pf[:, -1, ...]]
+       if t_ar is not None:
+         to_concat.append(t_ar.reshape(1, -1, self.q))
+-      torch_forecast = torch.cat(to_concat, dim=1)[..., :horizon]
++      torch_forecast = torch.cat(to_concat, dim=1)[:, :horizon, :]
+       torch_forecast = torch_forecast.squeeze(0)
+       outputs.append(torch_forecast.detach().cpu().numpy())
+     return outputs
+@@ -283,12 +283,26 @@ def __init__(
+     self,
+     torch_compile: bool = True,
+     config: Optional[dict] = None,
++    **kwargs,
+   ):
+     self.model = TimesFM_2p5_200M_torch_module()
+     self.torch_compile = torch_compile
+     if config is not None:
+       self._hub_mixin_config = config
+ 
++  def load_checkpoint(self, path: str, **kwargs):
++    """Loads a TimesFM model from a checkpoint directory or file."""
++    if os.path.isdir(path):
++      model_file_path = os.path.join(path, self.WEIGHTS_FILENAME)
++      if not os.path.exists(model_file_path):
++        raise FileNotFoundError(
++          f"{self.WEIGHTS_FILENAME} not found in directory {path}"
++        )
++    else:
++      model_file_path = path
++
++    self.model.load_checkpoint(model_file_path, **kwargs)
++
+   @classmethod
+   def _from_pretrained(
+     cls,
+@@ -333,7 +347,7 @@ def _from_pretrained(
+ 
+     logging.info("Loading checkpoint from: %s", model_file_path)
+     # Load the weights into the model.
+-    instance.model.load_checkpoint(
++    instance.load_checkpoint(
+       model_file_path, torch_compile=instance.torch_compile
+     )
+     return instance

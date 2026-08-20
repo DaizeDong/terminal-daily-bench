@@ -1,0 +1,39 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-8563a99b0ed0fb3d"
+description = "Fix: `torch.compile` was a no-op in `load_checkpoint`"
+keywords = ["C5", "C4", "C13"]
+
+[metadata]
+source_repo = "google-research/timesfm"
+pr_number = 459
+base_sha = "8a22ca28a0239d34c095b1eba7fea92d22198e0c"
+merge_sha = "26d3e89261b152076b38e7aa57e93880493081da"
+created_at = "2026-06-24T11:01:14Z"
+oracle_patch_sha256 = "5fe2f9c710bff8894f3bf11f5bb6086caac9c57ea1dd5f95365f716f4a4e7bef"
+source_license_spdx = ""
+difficulty = "medium"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

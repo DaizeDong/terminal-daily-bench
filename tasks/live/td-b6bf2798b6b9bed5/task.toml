@@ -1,0 +1,35 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-b6bf2798b6b9bed5"
+description = "Fix erasing statements joined by semicolons"
+keywords = ["C5", "C4"]
+
+[metadata]
+source_repo = "adamchainz/django-upgrade"
+created_at = "2026-08-16T23:41:16Z"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]
