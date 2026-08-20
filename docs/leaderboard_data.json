@@ -1,61 +1,151 @@
 {
- "date": "2026-07-23",
- "n_tasks": 6,
- "n_models": 16,
- "n_cells": 124,
+ "date": "2026-08-19",
+ "n_tasks": 50,
+ "n_models": 152,
+ "n_cells": 8032,
  "total_fa": null,
  "total_fa_n": 0,
  "cost_measured": false,
  "tasks": [
-  "td-965d562cfcb587f7",
-  "td-a42635c7e8ecf577",
-  "td-c02f3fb045d717f4",
-  "td-da0a145bd7cb2bee",
-  "td-f6a1098ed7f3b990",
-  "td-fc90ea8b76d5f6b6"
+  "td-0263cd1c168cbeb6",
+  "td-06b850f0ba89c481",
+  "td-1112e680c9d5f642",
+  "td-123b3c8d9c22a9a3",
+  "td-1429f4968efb8658",
+  "td-1976e0af7536d92d",
+  "td-23116647bb846dae",
+  "td-2fbc804f19e8dad7",
+  "td-3f82c2e5c91b7c6e",
+  "td-40063b5d3aa6ab4b",
+  "td-4165a4fb9c0acddb",
+  "td-43934e7a811c9e83",
+  "td-48f89934de58e0e3",
+  "td-5842c10237b17bb4",
+  "td-5f952ce374849a64",
+  "td-5ffd97c260c02dfb",
+  "td-626b33ab47f3a6eb",
+  "td-646a8a15f64a3c90",
+  "td-6750abf1ab84864c",
+  "td-6a824a1ab9be8b9c",
+  "td-6c1b1fcb31cdc49f",
+  "td-6fedde17c75ca4cb",
+  "td-707da56342332cbc",
+  "td-70f94d2c6c42cc1d",
+  "td-73f42b67c97eae89",
+  "td-819f2ac85eeead88",
+  "td-8563a99b0ed0fb3d",
+  "td-85e626bf1f08c74f",
+  "td-8d79b8a28f8063d8",
+  "td-8e256eb038e80765",
+  "td-8e9ce87e4fecd3ab",
+  "td-9eda34d10676231e",
+  "td-a2c11ef966f5d11d",
+  "td-a311428baf682598",
+  "td-a59538ed3ac418d3",
+  "td-a6fc21dbafde8991",
+  "td-b6bf2798b6b9bed5",
+  "td-bca62cbd0a787fef",
+  "td-cade083deed931ce",
+  "td-cc0e5465a3dbd9e4",
+  "td-d0fe8274878b8840",
+  "td-d1fece63f49d45a5",
+  "td-dc3e10ec215c5100",
+  "td-e39d5a4a11cfc645",
+  "td-e85ca08bd7aceb52",
+  "td-eae154905e07a86b",
+  "td-ec2a4fa6a1834389",
+  "td-f187e1f16b1da3fc",
+  "td-f7231dfff7039690",
+  "td-ff79081914cd3936"
  ],
  "pooled": {
-  "single_shot": {
-   "n": 96,
-   "solved": 6
+  "claude-code": {
+   "n": 539,
+   "solved": 42
   },
-  "terminus2": {
-   "n": 28,
-   "solved": 6
+  "codex": {
+   "n": 1533,
+   "solved": 74
+  },
+  "single_shot": {
+   "n": 3156,
+   "solved": 0
+  },
+  "terminus-2": {
+   "n": 2804,
+   "solved": 310
   }
  },
  "leaderboard": [
   {
-   "model": "Claude-Opus-4.8",
+   "model": "Claude-Haiku-4.5",
    "single_shot": {
-    "n": 6,
-    "solved": 2,
-    "rate": 0.333,
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
     "fa": null,
     "fa_n": 0
    },
-   "terminus2": {
-    "n": 6,
-    "solved": 3,
-    "rate": 0.5,
+   "codex": {
+    "n": 1,
+    "solved": 1,
+    "rate": 1.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
     "fa": null,
     "fa_n": 0
    },
    "lead": true
   },
   {
-   "model": "DeepSeek-V4-Flash",
+   "model": "Claude-Opus-4.8",
    "single_shot": {
-    "n": 6,
-    "solved": 1,
-    "rate": 0.167,
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
     "fa": null,
     "fa_n": 0
    },
-   "terminus2": {
-    "n": 4,
+   "codex": {
+    "n": 3,
     "solved": 2,
-    "rate": 0.5,
+    "rate": 0.667,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 45,
+    "solved": 7,
+    "rate": 0.156,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-5",
+   "single_shot": {
+    "n": 34,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 3,
+    "solved": 2,
+    "rate": 0.667,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 46,
+    "solved": 4,
+    "rate": 0.087,
     "fa": null,
     "fa_n": 0
    }
@@ -63,41 +153,1066 @@
   {
    "model": "Claude-Sonnet-4.6",
    "single_shot": {
-    "n": 6,
+    "n": 46,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
     "fa_n": 0
    },
-   "terminus2": {
-    "n": 6,
+   "codex": {
+    "n": 2,
     "solved": 1,
-    "rate": 0.167,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "MiniMax-M2.7",
-   "single_shot": {
-    "n": 6,
-    "solved": 1,
-    "rate": 0.167,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "gemini-2.5-flash",
-   "single_shot": {
-    "n": 6,
-    "solved": 1,
-    "rate": 0.167,
+    "rate": 0.5,
     "fa": null,
     "fa_n": 0
    },
-   "terminus2": {
-    "n": 6,
+   "claude-code": {
+    "n": 45,
+    "solved": 4,
+    "rate": 0.089,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.5",
+   "terminus-2": {
+    "n": 40,
+    "solved": 13,
+    "rate": 0.325,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.5-flash",
+   "terminus-2": {
+    "n": 33,
+    "solved": 9,
+    "rate": 0.273,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.6-sol",
+   "terminus-2": {
+    "n": 44,
+    "solved": 12,
+    "rate": 0.273,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.1-pro-preview",
+   "terminus-2": {
+    "n": 37,
+    "solved": 10,
+    "rate": 0.27,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.2-codex",
+   "terminus-2": {
+    "n": 41,
+    "solved": 11,
+    "rate": 0.268,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.4",
+   "terminus-2": {
+    "n": 45,
+    "solved": 12,
+    "rate": 0.267,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.2-chat",
+   "terminus-2": {
+    "n": 42,
+    "solved": 11,
+    "rate": 0.262,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.6-terra",
+   "terminus-2": {
+    "n": 39,
+    "solved": 10,
+    "rate": 0.256,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.4",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 9,
+    "rate": 0.243,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5-codex",
+   "terminus-2": {
+    "n": 37,
+    "solved": 9,
+    "rate": 0.243,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.1-codex-max",
+   "terminus-2": {
+    "n": 33,
+    "solved": 8,
+    "rate": 0.242,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.6-luna",
+   "terminus-2": {
+    "n": 34,
+    "solved": 8,
+    "rate": 0.235,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.3-chat",
+   "terminus-2": {
+    "n": 43,
+    "solved": 10,
+    "rate": 0.233,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.2-codex",
+   "single_shot": {
+    "n": 31,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 45,
+    "solved": 10,
+    "rate": 0.222,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-terra",
+   "single_shot": {
+    "n": 39,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 8,
+    "rate": 0.211,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.5-flash-lite",
+   "terminus-2": {
+    "n": 38,
+    "solved": 8,
+    "rate": 0.211,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-V4-Flash",
+   "terminus-2": {
+    "n": 30,
+    "solved": 6,
+    "rate": 0.2,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.2",
+   "terminus-2": {
+    "n": 36,
+    "solved": 7,
+    "rate": 0.194,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.6-flash",
+   "terminus-2": {
+    "n": 32,
+    "solved": 6,
+    "rate": 0.188,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-5",
+   "terminus-2": {
+    "n": 27,
+    "solved": 5,
+    "rate": 0.185,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.7-flash",
+   "terminus-2": {
+    "n": 33,
+    "solved": 6,
+    "rate": 0.182,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.1-codex",
+   "terminus-2": {
+    "n": 33,
+    "solved": 6,
+    "rate": 0.182,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5-chat",
+   "terminus-2": {
+    "n": 45,
+    "solved": 8,
+    "rate": 0.178,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.4-mini",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 41,
+    "solved": 7,
+    "rate": 0.171,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-luna",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 41,
+    "solved": 7,
+    "rate": 0.171,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.1-flash-lite-preview",
+   "terminus-2": {
+    "n": 35,
+    "solved": 6,
+    "rate": 0.171,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Kimi-K2.7-Code",
+   "terminus-2": {
+    "n": 36,
+    "solved": 6,
+    "rate": 0.167,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.3-codex",
+   "terminus-2": {
+    "n": 36,
+    "solved": 6,
+    "rate": 0.167,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-sol",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 6,
+    "rate": 0.162,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-flash",
+   "terminus-2": {
+    "n": 37,
+    "solved": 6,
+    "rate": 0.162,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-V4-Pro",
+   "terminus-2": {
+    "n": 38,
+    "solved": 6,
+    "rate": 0.158,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4.6",
+   "terminus-2": {
+    "n": 32,
+    "solved": 5,
+    "rate": 0.156,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/GLM-5.2-FP8",
+   "terminus-2": {
+    "n": 39,
+    "solved": 6,
+    "rate": 0.154,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.4-nano",
+   "terminus-2": {
+    "n": 39,
+    "solved": 6,
+    "rate": 0.154,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.7",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 46,
+    "solved": 7,
+    "rate": 0.152,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Sonnet-5",
+   "single_shot": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 46,
+    "solved": 7,
+    "rate": 0.152,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Kimi-K2.6",
+   "terminus-2": {
+    "n": 34,
+    "solved": 5,
+    "rate": 0.147,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4.1",
+   "terminus-2": {
+    "n": 36,
+    "solved": 5,
+    "rate": 0.139,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-pro",
+   "terminus-2": {
+    "n": 36,
+    "solved": 5,
+    "rate": 0.139,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Sonnet-4",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 41,
+    "solved": 5,
+    "rate": 0.122,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Gemma-4-31B",
+   "terminus-2": {
+    "n": 33,
+    "solved": 4,
+    "rate": 0.121,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4.1",
+   "terminus-2": {
+    "n": 42,
+    "solved": 5,
+    "rate": 0.119,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4.7",
+   "terminus-2": {
+    "n": 34,
+    "solved": 4,
+    "rate": 0.118,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.1",
+   "terminus-2": {
+    "n": 48,
+    "solved": 5,
+    "rate": 0.104,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4.1-mini",
+   "terminus-2": {
+    "n": 39,
+    "solved": 4,
+    "rate": 0.103,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4-turbo",
+   "terminus-2": {
+    "n": 40,
+    "solved": 4,
+    "rate": 0.1,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.1-flash-lite",
+   "terminus-2": {
+    "n": 41,
+    "solved": 4,
+    "rate": 0.098,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.4-mini",
+   "terminus-2": {
+    "n": 41,
+    "solved": 4,
+    "rate": 0.098,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-5",
+   "terminus-2": {
+    "n": 33,
+    "solved": 3,
+    "rate": 0.091,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.6",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 48,
+    "solved": 4,
+    "rate": 0.083,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Qwen3.6-35B-A3B",
+   "terminus-2": {
+    "n": 36,
+    "solved": 3,
+    "rate": 0.083,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5-mini",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 3,
+    "rate": 0.081,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.5",
+   "single_shot": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 3,
+    "rate": 0.081,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.2",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 40,
+    "solved": 3,
+    "rate": 0.075,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4",
+   "terminus-2": {
+    "n": 42,
+    "solved": 3,
+    "rate": 0.071,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-4",
+   "terminus-2": {
+    "n": 30,
+    "solved": 2,
+    "rate": 0.067,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/GPT-oss-120B",
+   "terminus-2": {
+    "n": 31,
+    "solved": 2,
+    "rate": 0.065,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o3-pro",
+   "terminus-2": {
+    "n": 31,
+    "solved": 2,
+    "rate": 0.065,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Haiku-4.5",
+   "terminus-2": {
+    "n": 36,
+    "solved": 2,
+    "rate": 0.056,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-4.6",
+   "terminus-2": {
+    "n": 36,
+    "solved": 2,
+    "rate": 0.056,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "GPT-oss-120B",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 2,
+    "rate": 0.054,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.1",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
+    "solved": 2,
+    "rate": 0.054,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4o-mini",
+   "terminus-2": {
+    "n": 37,
+    "solved": 2,
+    "rate": 0.054,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 2,
+    "rate": 0.053,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.1-codex",
+   "single_shot": {
+    "n": 29,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 39,
+    "solved": 2,
+    "rate": 0.051,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4o",
+   "terminus-2": {
+    "n": 40,
+    "solved": 2,
+    "rate": 0.05,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5-mini",
+   "terminus-2": {
+    "n": 40,
+    "solved": 2,
+    "rate": 0.05,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5",
+   "terminus-2": {
+    "n": 43,
+    "solved": 2,
+    "rate": 0.047,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 44,
+    "solved": 2,
+    "rate": 0.045,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.5",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 44,
+    "solved": 2,
+    "rate": 0.045,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4.5",
+   "terminus-2": {
+    "n": 32,
+    "solved": 1,
+    "rate": 0.031,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Llama-4-Maverick-17B",
+   "terminus-2": {
+    "n": 34,
+    "solved": 1,
+    "rate": 0.029,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o3",
+   "terminus-2": {
+    "n": 34,
+    "solved": 1,
+    "rate": 0.029,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5-nano",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 36,
+    "solved": 1,
+    "rate": 0.028,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/codex-mini",
+   "terminus-2": {
+    "n": 36,
+    "solved": 1,
+    "rate": 0.028,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4-32k",
+   "terminus-2": {
+    "n": 37,
+    "solved": 1,
+    "rate": 0.027,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o1-mini",
+   "terminus-2": {
+    "n": 37,
+    "solved": 1,
+    "rate": 0.027,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o4-mini",
+   "terminus-2": {
+    "n": 37,
+    "solved": 1,
+    "rate": 0.027,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.1-codex-max",
+   "single_shot": {
+    "n": 31,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 1,
+    "rate": 0.026,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o1-preview",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 39,
+    "solved": 1,
+    "rate": 0.026,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Opus-4.8",
+   "terminus-2": {
+    "n": 39,
+    "solved": 1,
+    "rate": 0.026,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-flash-lite",
+   "terminus-2": {
+    "n": 38,
+    "solved": 1,
+    "rate": 0.026,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5-nano",
+   "terminus-2": {
+    "n": 38,
+    "solved": 1,
+    "rate": 0.026,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o3-mini",
+   "terminus-2": {
+    "n": 41,
+    "solved": 1,
+    "rate": 0.024,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o3-pro",
+   "single_shot": {
+    "n": 24,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 44,
+    "solved": 1,
+    "rate": 0.023,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o1-preview",
+   "terminus-2": {
+    "n": 44,
+    "solved": 1,
+    "rate": 0.023,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.1",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 45,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -105,19 +1220,50 @@
    }
   },
   {
-   "model": "gemini-3.1-pro-preview",
+   "model": "Claude-Sonnet-4.5",
    "single_shot": {
-    "n": 6,
-    "solved": 1,
-    "rate": 0.167,
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 47,
+    "solved": 0,
+    "rate": 0.0,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "Claude-Haiku-4.5",
+   "model": "DeepSeek-Coder-6.7B",
    "single_shot": {
-    "n": 6,
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "DeepSeek-R1-Distill-Llama-8B",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -127,7 +1273,7 @@
   {
    "model": "DeepSeek-R1-Distill-Qwen-14B",
    "single_shot": {
-    "n": 6,
+    "n": 39,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -135,9 +1281,60 @@
    }
   },
   {
-   "model": "GPT-oss-120B",
+   "model": "DeepSeek-V4-Flash",
    "single_shot": {
-    "n": 6,
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "DeepSeek-V4-Pro",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "GLM-5.2-FP8",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 2,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "GPT-oss-20B",
+   "single_shot": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -147,7 +1344,14 @@
   {
    "model": "Gemma-4-31B",
    "single_shot": {
-    "n": 6,
+    "n": 47,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -157,7 +1361,17 @@
   {
    "model": "Kimi-K2.6",
    "single_shot": {
-    "n": 6,
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Kimi-K2.7-Code",
+   "single_shot": {
+    "n": 45,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -167,7 +1381,328 @@
   {
    "model": "Llama-4-Maverick-17B",
    "single_shot": {
-    "n": 6,
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 5,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Llama-4-Scout-17B",
+   "single_shot": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 2,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Llama-Guard-4-12B",
+   "single_shot": {
+    "n": 41,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Phi-4",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Phi-4-reasoning",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Qwen3.6-35B-A3B",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "codex-mini",
+   "single_shot": {
+    "n": 29,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "computer-use-preview",
+   "single_shot": {
+    "n": 34,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-2.5-flash",
+   "single_shot": {
+    "n": 41,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 2,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-2.5-flash-lite",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-2.5-pro",
+   "single_shot": {
+    "n": 41,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.1-flash-lite",
+   "single_shot": {
+    "n": 48,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.1-flash-lite-preview",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.1-pro-preview",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.5-flash-lite",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.6-flash",
+   "single_shot": {
+    "n": 47,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 1,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.7-flash",
+   "single_shot": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4",
+   "single_shot": {
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4-32k",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 35,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4-turbo",
+   "single_shot": {
+    "n": 39,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 35,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4.1",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4.1-mini",
+   "single_shot": {
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 41,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-4.1-nano",
+   "single_shot": {
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 37,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -177,24 +1712,14 @@
   {
    "model": "gpt-4o",
    "single_shot": {
-    "n": 6,
-    "solved": 0,
-    "rate": 0.0,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "gpt-5",
-   "single_shot": {
-    "n": 6,
+    "n": 36,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
     "fa_n": 0
    },
-   "terminus2": {
-    "n": 6,
+   "codex": {
+    "n": 35,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -202,9 +1727,152 @@
    }
   },
   {
-   "model": "gpt-5.2",
+   "model": "gpt-4o-mini",
    "single_shot": {
-    "n": 6,
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5-chat",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5-codex",
+   "single_shot": {
+    "n": 33,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.2-chat",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.3-chat",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 36,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.3-codex",
+   "single_shot": {
+    "n": 33,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.4-nano",
+   "single_shot": {
+    "n": 41,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o1",
+   "single_shot": {
+    "n": 45,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o1-mini",
+   "single_shot": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 40,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -214,7 +1882,178 @@
   {
    "model": "o3",
    "single_shot": {
-    "n": 6,
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o3-mini",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "o4-mini",
+   "single_shot": {
+    "n": 39,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "codex": {
+    "n": 40,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-4.5",
+   "terminus-2": {
+    "n": 34,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-Coder-6.7B",
+   "terminus-2": {
+    "n": 39,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-R1-Distill-Llama-8B",
+   "terminus-2": {
+    "n": 32,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-R1-Distill-Qwen-14B",
+   "terminus-2": {
+    "n": 42,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/GPT-oss-20B",
+   "terminus-2": {
+    "n": 38,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Llama-4-Scout-17B",
+   "terminus-2": {
+    "n": 34,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Llama-Guard-4-12B",
+   "terminus-2": {
+    "n": 33,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Phi-4",
+   "terminus-2": {
+    "n": 32,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Phi-4-reasoning",
+   "terminus-2": {
+    "n": 44,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/computer-use-preview",
+   "terminus-2": {
+    "n": 26,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4",
+   "terminus-2": {
+    "n": 35,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4.1-nano",
+   "terminus-2": {
+    "n": 39,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o1",
+   "terminus-2": {
+    "n": 36,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -224,23 +2063,606 @@
  ],
  "matrix": {
   "tasks": [
-   "td-965d562cfcb587f7",
-   "td-a42635c7e8ecf577",
-   "td-c02f3fb045d717f4",
-   "td-da0a145bd7cb2bee",
-   "td-f6a1098ed7f3b990",
-   "td-fc90ea8b76d5f6b6"
+   "td-0263cd1c168cbeb6",
+   "td-06b850f0ba89c481",
+   "td-1112e680c9d5f642",
+   "td-123b3c8d9c22a9a3",
+   "td-1429f4968efb8658",
+   "td-1976e0af7536d92d",
+   "td-23116647bb846dae",
+   "td-2fbc804f19e8dad7",
+   "td-3f82c2e5c91b7c6e",
+   "td-40063b5d3aa6ab4b",
+   "td-4165a4fb9c0acddb",
+   "td-43934e7a811c9e83",
+   "td-48f89934de58e0e3",
+   "td-5842c10237b17bb4",
+   "td-5f952ce374849a64",
+   "td-5ffd97c260c02dfb",
+   "td-626b33ab47f3a6eb",
+   "td-646a8a15f64a3c90",
+   "td-6750abf1ab84864c",
+   "td-6a824a1ab9be8b9c",
+   "td-6c1b1fcb31cdc49f",
+   "td-6fedde17c75ca4cb",
+   "td-707da56342332cbc",
+   "td-70f94d2c6c42cc1d",
+   "td-73f42b67c97eae89",
+   "td-819f2ac85eeead88",
+   "td-8563a99b0ed0fb3d",
+   "td-85e626bf1f08c74f",
+   "td-8d79b8a28f8063d8",
+   "td-8e256eb038e80765",
+   "td-8e9ce87e4fecd3ab",
+   "td-9eda34d10676231e",
+   "td-a2c11ef966f5d11d",
+   "td-a311428baf682598",
+   "td-a59538ed3ac418d3",
+   "td-a6fc21dbafde8991",
+   "td-b6bf2798b6b9bed5",
+   "td-bca62cbd0a787fef",
+   "td-cade083deed931ce",
+   "td-cc0e5465a3dbd9e4",
+   "td-d0fe8274878b8840",
+   "td-d1fece63f49d45a5",
+   "td-dc3e10ec215c5100",
+   "td-e39d5a4a11cfc645",
+   "td-e85ca08bd7aceb52",
+   "td-eae154905e07a86b",
+   "td-ec2a4fa6a1834389",
+   "td-f187e1f16b1da3fc",
+   "td-f7231dfff7039690",
+   "td-ff79081914cd3936"
   ],
-  "scaffold": "terminus2",
+  "scaffold": "claude-code",
   "rows": [
+   {
+    "model": "Claude-Haiku-4.5",
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-4",
+    "g": [
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-4.1",
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-4.5",
+    "g": [
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-4.6",
+    "g": [
+     0,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-4.7",
+    "g": [
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
    {
     "model": "Claude-Opus-4.8",
     "g": [
      0,
      1,
      1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
      0,
      1,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Opus-5",
+    "g": [
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Sonnet-4",
+    "g": [
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "model": "Claude-Sonnet-4.5",
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
      0
     ]
    },
@@ -249,26 +2671,48 @@
     "g": [
      0,
      1,
-     0,
-     0,
-     0,
-     0
-    ]
-   },
-   {
-    "model": "DeepSeek-V4-Flash",
-    "g": [
-     0,
-     1,
      1,
      0,
      0,
-     0
-    ]
-   },
-   {
-    "model": "gemini-2.5-flash",
-    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
      0,
      0,
      0,
@@ -278,8 +2722,52 @@
     ]
    },
    {
-    "model": "gpt-5",
+    "model": "Claude-Sonnet-5",
     "g": [
+     1,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
      0,
      0,
      0,
@@ -291,39 +2779,73 @@
   ]
  },
  "quality": {
-  "single_shot": {
-   "D": 0.3333333333333333,
-   "C": 0.32501121082417705,
-   "M": 1.0,
-   "composite": 0.4979194693727109,
-   "irt_info": 0.6241573468257081,
-   "kr20": 0.2869565217391304,
+  "claude-code": {
+   "D": 0.24,
+   "C": 0.40205702727701365,
+   "M": 0.9,
+   "composite": 0.4455142568192534,
+   "irt_info": 2.957400444838479,
+   "kr20": 0.7243638196019149,
    "D_ci": [
-    0.0,
-    0.6666666666666666
+    0.12,
+    0.34
    ],
-   "n_tasks": 6,
-   "n_models": 16,
+   "n_tasks": 50,
+   "n_models": 12,
    "ready": false,
    "bottleneck": "discrimination",
-   "required_n_D": 35
+   "required_n_D": 45
   },
-  "terminus2": {
-   "D": 0.5,
-   "C": 0.6258145836939114,
-   "M": 1.0,
-   "composite": 0.6564536459234779,
-   "irt_info": 1.8689315528032109,
-   "kr20": 0.6352941176470587,
+  "codex": {
+   "D": 0.32,
+   "C": 0.0,
+   "M": 0.8,
+   "composite": 0.36,
+   "irt_info": 1.2984003145223606,
+   "kr20": 0.8251141944490882,
    "D_ci": [
-    0.16666666666666666,
-    0.8333333333333334
+    0.2,
+    0.44
    ],
-   "n_tasks": 6,
-   "n_models": 5,
+   "n_tasks": 50,
+   "n_models": 54,
    "ready": false,
-   "bottleneck": "precision",
-   "required_n_D": 42
+   "bottleneck": "discrimination",
+   "required_n_D": 37
+  },
+  "single_shot": {
+   "D": 0.0,
+   "C": 0.0,
+   "M": 1.0,
+   "composite": 0.25,
+   "irt_info": 0.11165683699232504,
+   "kr20": 0.0,
+   "D_ci": [
+    0.0,
+    0.0
+   ],
+   "n_tasks": 50,
+   "n_models": 76,
+   "ready": false,
+   "bottleneck": "discrimination",
+   "required_n_D": 0
+  },
+  "terminus-2": {
+   "D": 0.38,
+   "C": 0.36063993277625084,
+   "M": 0.64,
+   "composite": 0.4401599831940627,
+   "irt_info": 4.6324839450006055,
+   "kr20": 0.8009808486344279,
+   "D_ci": [
+    0.26,
+    0.52
+   ],
+   "n_tasks": 50,
+   "n_models": 76,
+   "ready": false,
+   "bottleneck": "discrimination",
+   "required_n_D": 40
   },
   "thresholds": {
    "min_D": 0.4,
