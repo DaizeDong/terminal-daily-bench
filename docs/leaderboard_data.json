@@ -2,7 +2,7 @@
  "date": "2026-08-19",
  "n_tasks": 50,
  "n_models": 152,
- "n_cells": 8032,
+ "n_cells": 8515,
  "total_fa": null,
  "total_fa_n": 0,
  "cost_measured": false,
@@ -60,8 +60,8 @@
  ],
  "pooled": {
   "claude-code": {
-   "n": 539,
-   "solved": 42
+   "n": 585,
+   "solved": 48
   },
   "codex": {
    "n": 1533,
@@ -72,8 +72,8 @@
    "solved": 0
   },
   "terminus-2": {
-   "n": 2804,
-   "solved": 310
+   "n": 3241,
+   "solved": 345
   }
  },
  "leaderboard": [
@@ -94,7 +94,7 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 42,
+    "n": 48,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -119,9 +119,9 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 45,
-    "solved": 7,
-    "rate": 0.156,
+    "n": 48,
+    "solved": 8,
+    "rate": 0.167,
     "fa": null,
     "fa_n": 0
    }
@@ -143,9 +143,9 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 46,
-    "solved": 4,
-    "rate": 0.087,
+    "n": 50,
+    "solved": 5,
+    "rate": 0.1,
     "fa": null,
     "fa_n": 0
    }
@@ -167,9 +167,9 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 45,
+    "n": 48,
     "solved": 4,
-    "rate": 0.089,
+    "rate": 0.083,
     "fa": null,
     "fa_n": 0
    }
@@ -177,19 +177,9 @@
   {
    "model": "openai/gpt-5.5",
    "terminus-2": {
-    "n": 40,
+    "n": 44,
     "solved": 13,
-    "rate": 0.325,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gemini-3.5-flash",
-   "terminus-2": {
-    "n": 33,
-    "solved": 9,
-    "rate": 0.273,
+    "rate": 0.295,
     "fa": null,
     "fa_n": 0
    }
@@ -197,35 +187,15 @@
   {
    "model": "openai/gpt-5.6-sol",
    "terminus-2": {
-    "n": 44,
-    "solved": 12,
-    "rate": 0.273,
+    "n": 47,
+    "solved": 13,
+    "rate": 0.277,
     "fa": null,
     "fa_n": 0
    }
   },
   {
    "model": "openai/gemini-3.1-pro-preview",
-   "terminus-2": {
-    "n": 37,
-    "solved": 10,
-    "rate": 0.27,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.2-codex",
-   "terminus-2": {
-    "n": 41,
-    "solved": 11,
-    "rate": 0.268,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.4",
    "terminus-2": {
     "n": 45,
     "solved": 12,
@@ -235,21 +205,31 @@
    }
   },
   {
-   "model": "openai/gpt-5.2-chat",
+   "model": "openai/gemini-3.5-flash",
    "terminus-2": {
-    "n": 42,
-    "solved": 11,
-    "rate": 0.262,
+    "n": 39,
+    "solved": 10,
+    "rate": 0.256,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/gpt-5.6-terra",
+   "model": "openai/gpt-5.2-codex",
    "terminus-2": {
-    "n": 39,
-    "solved": 10,
-    "rate": 0.256,
+    "n": 48,
+    "solved": 12,
+    "rate": 0.25,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.2-chat",
+   "terminus-2": {
+    "n": 49,
+    "solved": 12,
+    "rate": 0.245,
     "fa": null,
     "fa_n": 0
    }
@@ -272,7 +252,7 @@
    }
   },
   {
-   "model": "openai/gpt-5-codex",
+   "model": "openai/gemini-3.6-flash",
    "terminus-2": {
     "n": 37,
     "solved": 9,
@@ -282,21 +262,11 @@
    }
   },
   {
-   "model": "openai/gpt-5.1-codex-max",
+   "model": "openai/gpt-5.4",
    "terminus-2": {
-    "n": 33,
-    "solved": 8,
-    "rate": 0.242,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.6-luna",
-   "terminus-2": {
-    "n": 34,
-    "solved": 8,
-    "rate": 0.235,
+    "n": 50,
+    "solved": 12,
+    "rate": 0.24,
     "fa": null,
     "fa_n": 0
    }
@@ -304,9 +274,29 @@
   {
    "model": "openai/gpt-5.3-chat",
    "terminus-2": {
-    "n": 43,
+    "n": 47,
+    "solved": 11,
+    "rate": 0.234,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.6-terra",
+   "terminus-2": {
+    "n": 47,
+    "solved": 11,
+    "rate": 0.234,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.6-luna",
+   "terminus-2": {
+    "n": 44,
     "solved": 10,
-    "rate": 0.233,
+    "rate": 0.227,
     "fa": null,
     "fa_n": 0
    }
@@ -329,6 +319,26 @@
    }
   },
   {
+   "model": "openai/gpt-5.1-codex-max",
+   "terminus-2": {
+    "n": 37,
+    "solved": 8,
+    "rate": 0.216,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5-codex",
+   "terminus-2": {
+    "n": 42,
+    "solved": 9,
+    "rate": 0.214,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
    "model": "gpt-5.6-terra",
    "single_shot": {
     "n": 39,
@@ -346,27 +356,17 @@
    }
   },
   {
-   "model": "openai/gemini-3.5-flash-lite",
+   "model": "openai/gpt-5.2",
    "terminus-2": {
-    "n": 38,
-    "solved": 8,
-    "rate": 0.211,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/DeepSeek-V4-Flash",
-   "terminus-2": {
-    "n": 30,
-    "solved": 6,
+    "n": 45,
+    "solved": 9,
     "rate": 0.2,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/gpt-5.2",
+   "model": "openai/DeepSeek-V4-Flash",
    "terminus-2": {
     "n": 36,
     "solved": 7,
@@ -376,41 +376,11 @@
    }
   },
   {
-   "model": "openai/gemini-3.6-flash",
+   "model": "openai/Kimi-K2.7-Code",
    "terminus-2": {
-    "n": 32,
-    "solved": 6,
-    "rate": 0.188,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/Claude-Opus-5",
-   "terminus-2": {
-    "n": 27,
-    "solved": 5,
-    "rate": 0.185,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gemini-3.7-flash",
-   "terminus-2": {
-    "n": 33,
-    "solved": 6,
-    "rate": 0.182,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.1-codex",
-   "terminus-2": {
-    "n": 33,
-    "solved": 6,
-    "rate": 0.182,
+    "n": 42,
+    "solved": 8,
+    "rate": 0.19,
     "fa": null,
     "fa_n": 0
    }
@@ -418,9 +388,29 @@
   {
    "model": "openai/gpt-5-chat",
    "terminus-2": {
-    "n": 45,
+    "n": 48,
+    "solved": 9,
+    "rate": 0.188,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.7-flash",
+   "terminus-2": {
+    "n": 38,
+    "solved": 7,
+    "rate": 0.184,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-3.5-flash-lite",
+   "terminus-2": {
+    "n": 44,
     "solved": 8,
-    "rate": 0.178,
+    "rate": 0.182,
     "fa": null,
     "fa_n": 0
    }
@@ -460,31 +450,31 @@
    }
   },
   {
-   "model": "openai/gemini-3.1-flash-lite-preview",
-   "terminus-2": {
-    "n": 35,
-    "solved": 6,
-    "rate": 0.171,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/Kimi-K2.7-Code",
-   "terminus-2": {
-    "n": 36,
-    "solved": 6,
-    "rate": 0.167,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
    "model": "openai/gpt-5.3-codex",
    "terminus-2": {
-    "n": 36,
-    "solved": 6,
+    "n": 47,
+    "solved": 8,
+    "rate": 0.17,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.4-nano",
+   "terminus-2": {
+    "n": 48,
+    "solved": 8,
     "rate": 0.167,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/DeepSeek-V4-Pro",
+   "terminus-2": {
+    "n": 43,
+    "solved": 7,
+    "rate": 0.163,
     "fa": null,
     "fa_n": 0
    }
@@ -507,51 +497,31 @@
    }
   },
   {
-   "model": "openai/gemini-2.5-flash",
+   "model": "openai/gemini-3.1-flash-lite-preview",
    "terminus-2": {
-    "n": 37,
-    "solved": 6,
-    "rate": 0.162,
+    "n": 44,
+    "solved": 7,
+    "rate": 0.159,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/DeepSeek-V4-Pro",
+   "model": "openai/Claude-Opus-4.1",
    "terminus-2": {
-    "n": 38,
+    "n": 40,
     "solved": 6,
-    "rate": 0.158,
+    "rate": 0.15,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Claude-Opus-4.6",
+   "model": "openai/gpt-5.1-codex",
    "terminus-2": {
-    "n": 32,
-    "solved": 5,
-    "rate": 0.156,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/GLM-5.2-FP8",
-   "terminus-2": {
-    "n": 39,
+    "n": 41,
     "solved": 6,
-    "rate": 0.154,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.4-nano",
-   "terminus-2": {
-    "n": 39,
-    "solved": 6,
-    "rate": 0.154,
+    "rate": 0.146,
     "fa": null,
     "fa_n": 0
    }
@@ -566,9 +536,9 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 46,
+    "n": 49,
     "solved": 7,
-    "rate": 0.152,
+    "rate": 0.143,
     "fa": null,
     "fa_n": 0
    }
@@ -590,39 +560,59 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 46,
+    "n": 50,
     "solved": 7,
-    "rate": 0.152,
+    "rate": 0.14,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Kimi-K2.6",
+   "model": "openai/GLM-5.2-FP8",
    "terminus-2": {
-    "n": 34,
-    "solved": 5,
-    "rate": 0.147,
+    "n": 43,
+    "solved": 6,
+    "rate": 0.14,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Claude-Opus-4.1",
+   "model": "openai/Claude-Opus-4.6",
    "terminus-2": {
-    "n": 36,
+    "n": 37,
     "solved": 5,
-    "rate": 0.139,
+    "rate": 0.135,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/gemini-2.5-pro",
+   "model": "openai/Claude-Opus-5",
    "terminus-2": {
-    "n": 36,
+    "n": 37,
     "solved": 5,
-    "rate": 0.139,
+    "rate": 0.135,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-flash",
+   "terminus-2": {
+    "n": 45,
+    "solved": 6,
+    "rate": 0.133,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-5.4-mini",
+   "terminus-2": {
+    "n": 47,
+    "solved": 6,
+    "rate": 0.128,
     "fa": null,
     "fa_n": 0
    }
@@ -637,6 +627,16 @@
     "fa_n": 0
    },
    "claude-code": {
+    "n": 48,
+    "solved": 6,
+    "rate": 0.125,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-pro",
+   "terminus-2": {
     "n": 41,
     "solved": 5,
     "rate": 0.122,
@@ -645,11 +645,31 @@
    }
   },
   {
-   "model": "openai/Gemma-4-31B",
+   "model": "openai/Kimi-K2.6",
    "terminus-2": {
-    "n": 33,
-    "solved": 4,
-    "rate": 0.121,
+    "n": 44,
+    "solved": 5,
+    "rate": 0.114,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Qwen3.6-35B-A3B",
+   "terminus-2": {
+    "n": 45,
+    "solved": 5,
+    "rate": 0.111,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4-turbo",
+   "terminus-2": {
+    "n": 46,
+    "solved": 5,
+    "rate": 0.109,
     "fa": null,
     "fa_n": 0
    }
@@ -657,35 +677,25 @@
   {
    "model": "openai/gpt-4.1",
    "terminus-2": {
-    "n": 42,
+    "n": 46,
     "solved": 5,
-    "rate": 0.119,
+    "rate": 0.109,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Gemma-4-31B",
+   "terminus-2": {
+    "n": 37,
+    "solved": 4,
+    "rate": 0.108,
     "fa": null,
     "fa_n": 0
    }
   },
   {
    "model": "openai/Claude-Opus-4.7",
-   "terminus-2": {
-    "n": 34,
-    "solved": 4,
-    "rate": 0.118,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.1",
-   "terminus-2": {
-    "n": 48,
-    "solved": 5,
-    "rate": 0.104,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-4.1-mini",
    "terminus-2": {
     "n": 39,
     "solved": 4,
@@ -695,31 +705,21 @@
    }
   },
   {
-   "model": "openai/gpt-4-turbo",
+   "model": "openai/gpt-5.1",
    "terminus-2": {
-    "n": 40,
-    "solved": 4,
+    "n": 50,
+    "solved": 5,
     "rate": 0.1,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/gemini-3.1-flash-lite",
+   "model": "openai/gpt-4.1-mini",
    "terminus-2": {
-    "n": 41,
+    "n": 45,
     "solved": 4,
-    "rate": 0.098,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/gpt-5.4-mini",
-   "terminus-2": {
-    "n": 41,
-    "solved": 4,
-    "rate": 0.098,
+    "rate": 0.089,
     "fa": null,
     "fa_n": 0
    }
@@ -727,9 +727,9 @@
   {
    "model": "openai/Claude-Sonnet-5",
    "terminus-2": {
-    "n": 33,
+    "n": 35,
     "solved": 3,
-    "rate": 0.091,
+    "rate": 0.086,
     "fa": null,
     "fa_n": 0
    }
@@ -744,19 +744,19 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 48,
+    "n": 49,
     "solved": 4,
-    "rate": 0.083,
+    "rate": 0.082,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Qwen3.6-35B-A3B",
+   "model": "openai/gemini-3.1-flash-lite",
    "terminus-2": {
-    "n": 36,
-    "solved": 3,
-    "rate": 0.083,
+    "n": 49,
+    "solved": 4,
+    "rate": 0.082,
     "fa": null,
     "fa_n": 0
    }
@@ -815,59 +815,63 @@
   {
    "model": "openai/Claude-Opus-4",
    "terminus-2": {
-    "n": 42,
+    "n": 43,
     "solved": 3,
-    "rate": 0.071,
+    "rate": 0.07,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Claude-Sonnet-4",
+   "model": "openai/gpt-4o-mini",
    "terminus-2": {
-    "n": 30,
-    "solved": 2,
-    "rate": 0.067,
+    "n": 44,
+    "solved": 3,
+    "rate": 0.068,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/GPT-oss-120B",
+   "model": "openai/gpt-5-mini",
    "terminus-2": {
-    "n": 31,
-    "solved": 2,
+    "n": 46,
+    "solved": 3,
     "rate": 0.065,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/o3-pro",
-   "terminus-2": {
-    "n": 31,
-    "solved": 2,
-    "rate": 0.065,
+   "model": "Claude-Opus-4",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 48,
+    "solved": 3,
+    "rate": 0.062,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/Claude-Haiku-4.5",
-   "terminus-2": {
-    "n": 36,
-    "solved": 2,
-    "rate": 0.056,
+   "model": "Claude-Opus-4.5",
+   "single_shot": {
+    "n": 43,
+    "solved": 0,
+    "rate": 0.0,
     "fa": null,
     "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/Claude-Sonnet-4.6",
-   "terminus-2": {
-    "n": 36,
-    "solved": 2,
-    "rate": 0.056,
+   },
+   "claude-code": {
+    "n": 49,
+    "solved": 3,
+    "rate": 0.061,
     "fa": null,
     "fa_n": 0
    }
@@ -907,16 +911,6 @@
    }
   },
   {
-   "model": "openai/gpt-4o-mini",
-   "terminus-2": {
-    "n": 37,
-    "solved": 2,
-    "rate": 0.054,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
    "model": "gpt-5",
    "single_shot": {
     "n": 43,
@@ -926,6 +920,16 @@
     "fa_n": 0
    },
    "codex": {
+    "n": 38,
+    "solved": 2,
+    "rate": 0.053,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-4",
+   "terminus-2": {
     "n": 38,
     "solved": 2,
     "rate": 0.053,
@@ -951,7 +955,17 @@
    }
   },
   {
-   "model": "openai/gpt-4o",
+   "model": "openai/o3-pro",
+   "terminus-2": {
+    "n": 39,
+    "solved": 2,
+    "rate": 0.051,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/Claude-Sonnet-4.6",
    "terminus-2": {
     "n": 40,
     "solved": 2,
@@ -961,11 +975,31 @@
    }
   },
   {
-   "model": "openai/gpt-5-mini",
+   "model": "openai/Claude-Haiku-4.5",
    "terminus-2": {
-    "n": 40,
+    "n": 41,
     "solved": 2,
-    "rate": 0.05,
+    "rate": 0.049,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/GPT-oss-120B",
+   "terminus-2": {
+    "n": 41,
+    "solved": 2,
+    "rate": 0.049,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gpt-4o",
+   "terminus-2": {
+    "n": 47,
+    "solved": 2,
+    "rate": 0.043,
     "fa": null,
     "fa_n": 0
    }
@@ -973,73 +1007,19 @@
   {
    "model": "openai/gpt-5",
    "terminus-2": {
-    "n": 43,
+    "n": 46,
     "solved": 2,
-    "rate": 0.047,
+    "rate": 0.043,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "Claude-Opus-4",
-   "single_shot": {
-    "n": 43,
-    "solved": 0,
-    "rate": 0.0,
-    "fa": null,
-    "fa_n": 0
-   },
-   "claude-code": {
-    "n": 44,
+   "model": "openai/o1-preview",
+   "terminus-2": {
+    "n": 46,
     "solved": 2,
-    "rate": 0.045,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "Claude-Opus-4.5",
-   "single_shot": {
-    "n": 43,
-    "solved": 0,
-    "rate": 0.0,
-    "fa": null,
-    "fa_n": 0
-   },
-   "claude-code": {
-    "n": 44,
-    "solved": 2,
-    "rate": 0.045,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/Claude-Opus-4.5",
-   "terminus-2": {
-    "n": 32,
-    "solved": 1,
-    "rate": 0.031,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/Llama-4-Maverick-17B",
-   "terminus-2": {
-    "n": 34,
-    "solved": 1,
-    "rate": 0.029,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/o3",
-   "terminus-2": {
-    "n": 34,
-    "solved": 1,
-    "rate": 0.029,
+    "rate": 0.043,
     "fa": null,
     "fa_n": 0
    }
@@ -1062,7 +1042,7 @@
    }
   },
   {
-   "model": "openai/codex-mini",
+   "model": "openai/Claude-Opus-4.5",
    "terminus-2": {
     "n": 36,
     "solved": 1,
@@ -1072,27 +1052,7 @@
    }
   },
   {
-   "model": "openai/gpt-4-32k",
-   "terminus-2": {
-    "n": 37,
-    "solved": 1,
-    "rate": 0.027,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/o1-mini",
-   "terminus-2": {
-    "n": 37,
-    "solved": 1,
-    "rate": 0.027,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "openai/o4-mini",
+   "model": "openai/o3",
    "terminus-2": {
     "n": 37,
     "solved": 1,
@@ -1136,7 +1096,7 @@
    }
   },
   {
-   "model": "openai/Claude-Opus-4.8",
+   "model": "openai/Llama-4-Maverick-17B",
    "terminus-2": {
     "n": 39,
     "solved": 1,
@@ -1146,7 +1106,7 @@
    }
   },
   {
-   "model": "openai/gemini-2.5-flash-lite",
+   "model": "openai/codex-mini",
    "terminus-2": {
     "n": 38,
     "solved": 1,
@@ -1156,19 +1116,19 @@
    }
   },
   {
-   "model": "openai/gpt-5-nano",
+   "model": "openai/Claude-Opus-4.8",
    "terminus-2": {
-    "n": 38,
+    "n": 40,
     "solved": 1,
-    "rate": 0.026,
+    "rate": 0.025,
     "fa": null,
     "fa_n": 0
    }
   },
   {
-   "model": "openai/o3-mini",
+   "model": "openai/o4-mini",
    "terminus-2": {
-    "n": 41,
+    "n": 42,
     "solved": 1,
     "rate": 0.024,
     "fa": null,
@@ -1193,7 +1153,7 @@
    }
   },
   {
-   "model": "openai/o1-preview",
+   "model": "openai/gpt-4-32k",
    "terminus-2": {
     "n": 44,
     "solved": 1,
@@ -1203,18 +1163,41 @@
    }
   },
   {
-   "model": "Claude-Opus-4.1",
-   "single_shot": {
-    "n": 46,
-    "solved": 0,
-    "rate": 0.0,
+   "model": "openai/o1-mini",
+   "terminus-2": {
+    "n": 43,
+    "solved": 1,
+    "rate": 0.023,
     "fa": null,
     "fa_n": 0
-   },
-   "claude-code": {
-    "n": 45,
-    "solved": 0,
-    "rate": 0.0,
+   }
+  },
+  {
+   "model": "openai/gpt-5-nano",
+   "terminus-2": {
+    "n": 46,
+    "solved": 1,
+    "rate": 0.022,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/gemini-2.5-flash-lite",
+   "terminus-2": {
+    "n": 47,
+    "solved": 1,
+    "rate": 0.021,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "openai/o3-mini",
+   "terminus-2": {
+    "n": 47,
+    "solved": 1,
+    "rate": 0.021,
     "fa": null,
     "fa_n": 0
    }
@@ -1229,7 +1212,24 @@
     "fa_n": 0
    },
    "claude-code": {
-    "n": 47,
+    "n": 49,
+    "solved": 1,
+    "rate": 0.02,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.1",
+   "single_shot": {
+    "n": 46,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "claude-code": {
+    "n": 49,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1933,7 +1933,7 @@
   {
    "model": "openai/Claude-Sonnet-4.5",
    "terminus-2": {
-    "n": 34,
+    "n": 38,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1943,7 +1943,7 @@
   {
    "model": "openai/DeepSeek-Coder-6.7B",
    "terminus-2": {
-    "n": 39,
+    "n": 45,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1953,7 +1953,7 @@
   {
    "model": "openai/DeepSeek-R1-Distill-Llama-8B",
    "terminus-2": {
-    "n": 32,
+    "n": 38,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1963,7 +1963,7 @@
   {
    "model": "openai/DeepSeek-R1-Distill-Qwen-14B",
    "terminus-2": {
-    "n": 42,
+    "n": 46,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1973,7 +1973,7 @@
   {
    "model": "openai/GPT-oss-20B",
    "terminus-2": {
-    "n": 38,
+    "n": 44,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1983,7 +1983,7 @@
   {
    "model": "openai/Llama-4-Scout-17B",
    "terminus-2": {
-    "n": 34,
+    "n": 41,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1993,7 +1993,7 @@
   {
    "model": "openai/Llama-Guard-4-12B",
    "terminus-2": {
-    "n": 33,
+    "n": 37,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2003,7 +2003,7 @@
   {
    "model": "openai/Phi-4",
    "terminus-2": {
-    "n": 32,
+    "n": 43,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2013,7 +2013,7 @@
   {
    "model": "openai/Phi-4-reasoning",
    "terminus-2": {
-    "n": 44,
+    "n": 49,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2023,7 +2023,7 @@
   {
    "model": "openai/computer-use-preview",
    "terminus-2": {
-    "n": 26,
+    "n": 30,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2033,7 +2033,7 @@
   {
    "model": "openai/gpt-4",
    "terminus-2": {
-    "n": 35,
+    "n": 39,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2043,7 +2043,7 @@
   {
    "model": "openai/gpt-4.1-nano",
    "terminus-2": {
-    "n": 39,
+    "n": 43,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2053,7 +2053,7 @@
   {
    "model": "openai/o1",
    "terminus-2": {
-    "n": 36,
+    "n": 40,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -2175,7 +2175,7 @@
     "model": "Claude-Opus-4",
     "g": [
      0,
-     0,
+     1,
      1,
      0,
      0,
@@ -2285,7 +2285,7 @@
     "model": "Claude-Opus-4.5",
     "g": [
      0,
-     0,
+     1,
      1,
      0,
      0,
@@ -2461,7 +2461,7 @@
      0,
      0,
      0,
-     0,
+     1,
      0,
      0,
      0,
@@ -2505,7 +2505,7 @@
     "model": "Claude-Opus-5",
     "g": [
      0,
-     0,
+     1,
      1,
      0,
      0,
@@ -2561,7 +2561,7 @@
     "g": [
      1,
      1,
-     0,
+     1,
      0,
      0,
      0,
@@ -2616,7 +2616,7 @@
     "g": [
      0,
      0,
-     0,
+     1,
      0,
      0,
      0,
@@ -2781,11 +2781,11 @@
  "quality": {
   "claude-code": {
    "D": 0.24,
-   "C": 0.40205702727701365,
-   "M": 0.9,
-   "composite": 0.4455142568192534,
-   "irt_info": 2.957400444838479,
-   "kr20": 0.7243638196019149,
+   "C": 0.4210583725759149,
+   "M": 0.92,
+   "composite": 0.4552645931439787,
+   "irt_info": 2.7409172532931136,
+   "kr20": 0.738344118135059,
    "D_ci": [
     0.12,
     0.34
@@ -2794,7 +2794,7 @@
    "n_models": 12,
    "ready": false,
    "bottleneck": "discrimination",
-   "required_n_D": 45
+   "required_n_D": 42
   },
   "codex": {
    "D": 0.32,
@@ -2832,11 +2832,11 @@
   },
   "terminus-2": {
    "D": 0.38,
-   "C": 0.36063993277625084,
-   "M": 0.64,
-   "composite": 0.4401599831940627,
-   "irt_info": 4.6324839450006055,
-   "kr20": 0.8009808486344279,
+   "C": 0.40881692844991574,
+   "M": 0.66,
+   "composite": 0.45720423211247896,
+   "irt_info": 5.593024967469313,
+   "kr20": 0.8329895831465126,
    "D_ci": [
     0.26,
     0.52

@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-06T13:48:20Z",
+ "generated": "2026-08-20T20:00:41Z",
  "scoring": {
   "schema_version": "td-public-scoring-status-v1",
   "relative_schema": "td-relative-capability-v3",
@@ -16,9 +16,9 @@
   "publication_bundle_approved": false,
   "relative_report_sha256": null,
   "relative_report_digest_matches": false,
-  "matrix_sha256": null,
+  "matrix_sha256": "79096edaafc30599ea73e68d190a96ec8533fd47b7d8bb1c655a661430923ebc",
   "matrix_digest_matches": false,
-  "matrix_task_id_roster_sha256": null,
+  "matrix_task_id_roster_sha256": "ba2400276d93dcf68fabe1eb591ad3bad80823fdb9d6d602d6234201d7be2e10",
   "matrix_task_roster_digest_matches": false,
   "anti_cheat_deployment_active": false,
   "matrix_published": false
@@ -51,6 +51,71 @@
    "fresh_tasks": 0,
    "carried_tasks": 0,
    "unknown_origin_tasks": 13
+  },
+  {
+   "id": "2026-08-19",
+   "status": "live",
+   "n_tasks": 50,
+   "note": "50 certified task(s): 0 fresh + 0 carried + 50 unknown-origin; gold withheld while live",
+   "languages": [
+    "python"
+   ],
+   "task_ids": [
+    "td-0263cd1c168cbeb6",
+    "td-06b850f0ba89c481",
+    "td-1112e680c9d5f642",
+    "td-123b3c8d9c22a9a3",
+    "td-1429f4968efb8658",
+    "td-1976e0af7536d92d",
+    "td-23116647bb846dae",
+    "td-2fbc804f19e8dad7",
+    "td-3f82c2e5c91b7c6e",
+    "td-40063b5d3aa6ab4b",
+    "td-4165a4fb9c0acddb",
+    "td-43934e7a811c9e83",
+    "td-48f89934de58e0e3",
+    "td-5842c10237b17bb4",
+    "td-5f952ce374849a64",
+    "td-5ffd97c260c02dfb",
+    "td-626b33ab47f3a6eb",
+    "td-646a8a15f64a3c90",
+    "td-6750abf1ab84864c",
+    "td-6a824a1ab9be8b9c",
+    "td-6c1b1fcb31cdc49f",
+    "td-6fedde17c75ca4cb",
+    "td-707da56342332cbc",
+    "td-70f94d2c6c42cc1d",
+    "td-73f42b67c97eae89",
+    "td-819f2ac85eeead88",
+    "td-8563a99b0ed0fb3d",
+    "td-85e626bf1f08c74f",
+    "td-8d79b8a28f8063d8",
+    "td-8e256eb038e80765",
+    "td-8e9ce87e4fecd3ab",
+    "td-9eda34d10676231e",
+    "td-a2c11ef966f5d11d",
+    "td-a311428baf682598",
+    "td-a59538ed3ac418d3",
+    "td-a6fc21dbafde8991",
+    "td-b6bf2798b6b9bed5",
+    "td-bca62cbd0a787fef",
+    "td-cade083deed931ce",
+    "td-cc0e5465a3dbd9e4",
+    "td-d0fe8274878b8840",
+    "td-d1fece63f49d45a5",
+    "td-dc3e10ec215c5100",
+    "td-e39d5a4a11cfc645",
+    "td-e85ca08bd7aceb52",
+    "td-eae154905e07a86b",
+    "td-ec2a4fa6a1834389",
+    "td-f187e1f16b1da3fc",
+    "td-f7231dfff7039690",
+    "td-ff79081914cd3936"
+   ],
+   "catalogued_tasks": 50,
+   "fresh_tasks": 0,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 50
   },
   {
    "id": "sample",
@@ -191,32 +256,6 @@
    "also_in": []
   },
   {
-   "id": "td-48f89934de58e0e3",
-   "suite": "2026-08-01",
-   "status": "live",
-   "suites": [
-    "2026-08-01"
-   ],
-   "suite_memberships": [
-    {
-     "suite": "2026-08-01",
-     "mode": "live"
-    }
-   ],
-   "repo": "kislyuk/argcomplete",
-   "pr_number": null,
-   "base_sha": "",
-   "merge_sha": "",
-   "license": "",
-   "language": "",
-   "title": "Expand ~ in DirectoriesCompleter ([redacted-ref])",
-   "n_fail_to_pass": 1,
-   "solved_by": null,
-   "n_models": null,
-   "difficulty": "",
-   "also_in": []
-  },
-  {
    "id": "td-5cf14361c19fc401",
    "suite": "2026-08-01",
    "status": "archive",
@@ -236,58 +275,6 @@
    "license": "",
    "language": "python",
    "title": "fix(locale): use Japanese date formats for the ja locale",
-   "n_fail_to_pass": 1,
-   "solved_by": null,
-   "n_models": null,
-   "difficulty": "",
-   "also_in": []
-  },
-  {
-   "id": "td-6c1b1fcb31cdc49f",
-   "suite": "2026-08-01",
-   "status": "archive",
-   "suites": [
-    "2026-08-01"
-   ],
-   "suite_memberships": [
-    {
-     "suite": "2026-08-01",
-     "mode": "archive"
-    }
-   ],
-   "repo": "hukkin/tomli",
-   "pr_number": 286,
-   "base_sha": "c20c49113890c226ffb27a67befe20d14fcf0c73",
-   "merge_sha": "e1fdb94bc998377f1c2545c7cd4f70ff2a3fb4e4",
-   "license": "",
-   "language": "python",
-   "title": "Limit number of parts of a key",
-   "n_fail_to_pass": 1,
-   "solved_by": null,
-   "n_models": null,
-   "difficulty": "",
-   "also_in": []
-  },
-  {
-   "id": "td-6fedde17c75ca4cb",
-   "suite": "2026-08-01",
-   "status": "archive",
-   "suites": [
-    "2026-08-01"
-   ],
-   "suite_memberships": [
-    {
-     "suite": "2026-08-01",
-     "mode": "archive"
-    }
-   ],
-   "repo": "jazzband/docopt-ng",
-   "pr_number": 71,
-   "base_sha": "fab01f5f19c9c7ca30f05e79a06d79bd066b475a",
-   "merge_sha": "ca3bb1f2c44d5e8b022537c48f88443d5f676dd5",
-   "license": "",
-   "language": "python",
-   "title": "Fix repeated option values across usage alternatives",
    "n_fail_to_pass": 1,
    "solved_by": null,
    "n_models": null,
@@ -419,6 +406,1323 @@
    "language": "python",
    "title": "Fix completion when wordbreak is first character",
    "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-0263cd1c168cbeb6",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "pdfminer/pdfminer.six",
+   "pr_number": 1242,
+   "base_sha": "9e1243c4ad000bf9bbe60e81fc8dde2fccc0ed3b",
+   "merge_sha": "b14d19be024b263ef7d1ef0eba8bf18a40d6eeaf",
+   "license": "",
+   "language": "python",
+   "title": "Fix: reproducibility when generating cmap .json.gz",
+   "n_fail_to_pass": 6,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-06b850f0ba89c481",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "python-attrs/cattrs",
+   "pr_number": 768,
+   "base_sha": "a6c0900533af780155510343c1472a46fcb984f5",
+   "merge_sha": "82b02c07ca535a1ba656b935767d819eac9d383b",
+   "license": "",
+   "language": "python",
+   "title": "Unpack the single type arg for Counter keys when unstructuring",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-1112e680c9d5f642",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "cornellius-gp/gpytorch",
+   "pr_number": 2756,
+   "base_sha": "93222a0f5e22b79fbfbf5c923572baefa5bfc325",
+   "merge_sha": "e99e33dbcb7c8b2c7b9db60c637f9286092e32e8",
+   "license": "",
+   "language": "python",
+   "title": "fix: incorrect q=2 coefficient in PiecewisePolynomialKernel",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-123b3c8d9c22a9a3",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "psf/cachecontrol",
+   "pr_number": 449,
+   "base_sha": "23c7cb048fafc46c6a290050eb17d7dc3f8f8b65",
+   "merge_sha": "e46a97fedcdd4ab4dcb41b40837768f58e71f602",
+   "license": "",
+   "language": "python",
+   "title": "fix(controller): Recover from invalid dates",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-1429f4968efb8658",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "mahmoud/boltons",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Edge-case hardening sweep: six long-standing crash/hang/correctness fixes",
+   "n_fail_to_pass": 18,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-1976e0af7536d92d",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "eleutherai/lm-evaluation-harness",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "fix: resolve fewshot gen_prefix against the fewshot doc, not the eval doc",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-23116647bb846dae",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "2captcha/2captcha-python",
+   "pr_number": 144,
+   "base_sha": "f596f77d3d697d0e0f9182dfc943aba95e625819",
+   "merge_sha": "d41a12a9cf55b244aa03ddee5d9dfcf084e8f085",
+   "license": "",
+   "language": "python",
+   "title": "RC-4713-add-tspd-captcha",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-2fbc804f19e8dad7",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "mahmoud/boltons",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "funcutils: forward target-keyword-only args as keywords in wraps invocations",
+   "n_fail_to_pass": 4,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-3f82c2e5c91b7c6e",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "aligfellow/xyzrender",
+   "pr_number": 172,
+   "base_sha": "5fe916c647cd3f5dee544c42d378a194e7546e4d",
+   "merge_sha": "5cb4a5feb5d5baae4e8ef3f5d7861f712856e2fd",
+   "license": "",
+   "language": "python",
+   "title": "Chiral hydrogens viewed by default",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-40063b5d3aa6ab4b",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "2captcha/2captcha-python",
+   "pr_number": 143,
+   "base_sha": "d981352f4f17b75b7211657162189d1efddf19b1",
+   "merge_sha": "f596f77d3d697d0e0f9182dfc943aba95e625819",
+   "license": "",
+   "language": "python",
+   "title": "RC-4712-add-alibaba-captcha",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-4165a4fb9c0acddb",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "yaml/pyyaml",
+   "pr_number": 937,
+   "base_sha": "d51d8a138f7230834fc6e95635ff09ebd329185f",
+   "merge_sha": "34a9bf82357f4952d8f194a5a31f1c39743652d0",
+   "license": "",
+   "language": "python",
+   "title": "Dos in merge key",
+   "n_fail_to_pass": 4,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-43934e7a811c9e83",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "HKUDS/DeepTutor",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "fix(chat): preserve provider stream failure boundaries",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-48f89934de58e0e3",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-01",
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "live"
+    },
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "kislyuk/argcomplete",
+   "pr_number": 553,
+   "base_sha": "6b4528d801bc38e4be7f374ffda416fd82785529",
+   "merge_sha": "fa5c56c6164f6f3d88e3c04695f2328dcd97ae4e",
+   "license": "",
+   "language": "python",
+   "title": "Expand ~ in DirectoriesCompleter ([redacted-ref])",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": [
+    "live"
+   ]
+  },
+  {
+   "id": "td-5842c10237b17bb4",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "networkx/networkx",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Allow spectral_layout to handle dim>=len(G). Added dim tests.",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-5f952ce374849a64",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "getzep/graphiti",
+   "pr_number": 1695,
+   "base_sha": "b0ec6d9303d80c8724606cc88c73dbcab654076a",
+   "merge_sha": "d9a2db9dd220dff562cc75711c4ee6c11be3027f",
+   "license": "",
+   "language": "python",
+   "title": "Consolidate overlapping backend fixes",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-5ffd97c260c02dfb",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "apiflask/apiflask",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Support response headers in @app.doc(responses={...})",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-626b33ab47f3a6eb",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "jazzband/docopt-ng",
+   "pr_number": 63,
+   "base_sha": "897226e71c766e99334aa61fad20505bc8f3b2eb",
+   "merge_sha": "c53ced76295ffb4a9995fa1f11f275b98da537fe",
+   "license": "",
+   "language": "python",
+   "title": "Include collected/left in DocoptExit exception all the time.",
+   "n_fail_to_pass": 8,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-646a8a15f64a3c90",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "aligfellow/xyzrender",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Add support for Avogadro Chemical JSON (CJSON)",
+   "n_fail_to_pass": 42,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-6750abf1ab84864c",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "araffin/sbx",
+   "pr_number": 90,
+   "base_sha": "30e370c4e2bc4192a15c7b73723790ad1034f393",
+   "merge_sha": "cd77f4201df80c9f2bbd369b71260693b4136702",
+   "license": "",
+   "language": "python",
+   "title": "Update OnPolicyAlgorithmJax & PPO to support custom rollout_buffer_class",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-6a824a1ab9be8b9c",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "sympy/sympy",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "improve evaluation speed for Min and Max with many arguments",
+   "n_fail_to_pass": 4,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-6c1b1fcb31cdc49f",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-01",
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    },
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "hukkin/tomli",
+   "pr_number": 286,
+   "base_sha": "c20c49113890c226ffb27a67befe20d14fcf0c73",
+   "merge_sha": "e1fdb94bc998377f1c2545c7cd4f70ff2a3fb4e4",
+   "license": "",
+   "language": "python",
+   "title": "Limit number of parts of a key",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-6fedde17c75ca4cb",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-01",
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-01",
+     "mode": "archive"
+    },
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "jazzband/docopt-ng",
+   "pr_number": 71,
+   "base_sha": "fab01f5f19c9c7ca30f05e79a06d79bd066b475a",
+   "merge_sha": "ca3bb1f2c44d5e8b022537c48f88443d5f676dd5",
+   "license": "",
+   "language": "python",
+   "title": "Fix repeated option values across usage alternatives",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-707da56342332cbc",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "scrapy/w3lib",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "strip script and noscript content in get_base_url",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-70f94d2c6c42cc1d",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "jacobgil/pytorch-grad-cam",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "fix: support 3D activations in gradient CAM weights",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-73f42b67c97eae89",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "google-research/timesfm",
+   "pr_number": 435,
+   "base_sha": "b3d0dec6ec3a5a86f87526284fbe9f16c101ce04",
+   "merge_sha": "e56854bc9e16427c65656ee735ab4ddaa18bea67",
+   "license": "",
+   "language": "python",
+   "title": "Fix model loading issues and forecast_naive slicing bug in [redacted-repo] 2.5",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-819f2ac85eeead88",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "petl-developers/petl",
+   "pr_number": 698,
+   "base_sha": "97fbbfdc61f18e75e670129400d87a407bee240e",
+   "merge_sha": "841973d903d996d9df2a8cbba65c1fc3137d78ac",
+   "license": "",
+   "language": "python",
+   "title": "Fix filldown RuntimeError on header-only tables",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-8563a99b0ed0fb3d",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "google-research/timesfm",
+   "pr_number": 459,
+   "base_sha": "8a22ca28a0239d34c095b1eba7fea92d22198e0c",
+   "merge_sha": "26d3e89261b152076b38e7aa57e93880493081da",
+   "license": "",
+   "language": "python",
+   "title": "Fix: `torch.compile` was a no-op in `load_checkpoint`",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-85e626bf1f08c74f",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "ets-labs/python-dependency-injector",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Fix required configuration option cache invalidation",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-8d79b8a28f8063d8",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "petl-developers/petl",
+   "pr_number": 705,
+   "base_sha": "f5e6e128b5143b8b6f51f6b006b37ca6818c7ab4",
+   "merge_sha": "aa03e269637d6b5abf21d71180cb37f687a2c7cb",
+   "license": "",
+   "language": "python",
+   "title": "Fix cache/complement/index/skip attributes shadowing Table methods",
+   "n_fail_to_pass": 20,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-8e256eb038e80765",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "guardrails-ai/guardrails",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Pre-0.11.0 Release Patch",
+   "n_fail_to_pass": 9,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-8e9ce87e4fecd3ab",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "has2k1/plotnine",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Fix installation under Pyodide 314 (matplotlib 3.10)",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-9eda34d10676231e",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "apiflask/apiflask",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Register nested Pydantic schemas used in parameter locations",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-a2c11ef966f5d11d",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "liuzhao1225/YouDub-webui",
+   "pr_number": 105,
+   "base_sha": "beadce60787e5b00071f5195e5f1ea7d6941d833",
+   "merge_sha": "ef1d4bb8474afa65834c108d4050a5778a8092ed",
+   "license": "",
+   "language": "python",
+   "title": "\u7edf\u4e00\u524d\u540e\u7aef\u4e0a\u4f20\u89c6\u9891\u683c\u5f0f\u5951\u7ea6",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-a311428baf682598",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "dwzhu-pku/PaperBanana",
+   "pr_number": 69,
+   "base_sha": "ddeb2a9a8cf6c8119dd29a97c1f1a7312d27dc7b",
+   "merge_sha": "114e4aec7ff85ac6944065a5fcb358e2038bf562",
+   "license": "",
+   "language": "python",
+   "title": "Fix legacy plot routing and figure sizing",
+   "n_fail_to_pass": 31,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-a59538ed3ac418d3",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "cft0808/edict",
+   "pr_number": 306,
+   "base_sha": "96abcd12ec59bc017bb8a505ee4cc83cfa3e9515",
+   "merge_sha": "5f4da4e184227508e1b7b465111994190c0fd0d5",
+   "license": "",
+   "language": "python",
+   "title": "fix(skills): remove broken default skills hub",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-a6fc21dbafde8991",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "apeworx/ape",
+   "pr_number": 2798,
+   "base_sha": "e7f87563a7beb244f5d6baa3d4ff0a5808f9eef2",
+   "merge_sha": "bf80da2cffa20a8e940bc43834ec6f5493713f88",
+   "license": "",
+   "language": "python",
+   "title": "fix: keep deployments successful when verification fails",
+   "n_fail_to_pass": 4,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-b6bf2798b6b9bed5",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "adamchainz/django-upgrade",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Fix erasing statements joined by semicolons",
+   "n_fail_to_pass": 6,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-bca62cbd0a787fef",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "google-research/timesfm",
+   "pr_number": 463,
+   "base_sha": "4a6c5cdae7ac73a450843e035fbfc3ffa08e9caf",
+   "merge_sha": "3dae50b20d7a724981e8ea36cda75578f80dd2dc",
+   "license": "",
+   "language": "python",
+   "title": "fix(torch): apply quantile flip to autoregressive outputs in force_flip_invariance",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-cade083deed931ce",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "dwzhu-pku/PaperBanana",
+   "pr_number": 71,
+   "base_sha": "ddeb2a9a8cf6c8119dd29a97c1f1a7312d27dc7b",
+   "merge_sha": "836455537e863b5a2f40dace487a782c0bc5ef94",
+   "license": "",
+   "language": "python",
+   "title": "Add opt-in planner metaphor mode",
+   "n_fail_to_pass": 6,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-cc0e5465a3dbd9e4",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "HKUDS/RAG-Anything",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "fix(processor): harden multimodal chunks_list merge against reprocessing and absent records (refs [redacted-ref])",
+   "n_fail_to_pass": 4,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-d0fe8274878b8840",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "python-attrs/cattrs",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Improve TypedDict key quoting",
+   "n_fail_to_pass": 1,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-d1fece63f49d45a5",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "anyoptimization/pymoo",
+   "pr_number": 788,
+   "base_sha": "2aa012be7e6049f436453eaba95ae054fe6b5b65",
+   "merge_sha": "cb9341e454c5f411a0dc51979dc7719facc34fcb",
+   "license": "",
+   "language": "python",
+   "title": "Fix SPEA2 truncation selection",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-dc3e10ec215c5100",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "koxudaxi/datamodel-code-generator",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Restrict template source paths",
+   "n_fail_to_pass": 13,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-e39d5a4a11cfc645",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "encode/starlette",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Limit `FileResponse` to 100 ranges",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-e85ca08bd7aceb52",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "scrapy/w3lib",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Fall back to a lenient meta charset scan",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-eae154905e07a86b",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "Ar9av/obsidian-wiki",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "feat(config): XDG-style config location, with legacy fallback ([redacted-ref])",
+   "n_fail_to_pass": 11,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-ec2a4fa6a1834389",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "petl-developers/petl",
+   "pr_number": 697,
+   "base_sha": "841973d903d996d9df2a8cbba65c1fc3137d78ac",
+   "merge_sha": "9c50905031e62faa2dafb692ce483556067d905a",
+   "license": "",
+   "language": "python",
+   "title": "Fix DictsView.dicts instance attr shadowing Table.dicts() method",
+   "n_fail_to_pass": 5,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-f187e1f16b1da3fc",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "2captcha/2captcha-python",
+   "pr_number": 145,
+   "base_sha": "d41a12a9cf55b244aa03ddee5d9dfcf084e8f085",
+   "merge_sha": "4889a70721254c301804caa7196c025da0f0fd61",
+   "license": "",
+   "language": "python",
+   "title": "RC-4714-add-basilisk-captcha",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-f7231dfff7039690",
+   "suite": "2026-08-19",
+   "status": "live",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "live"
+    }
+   ],
+   "repo": "adamchainz/django-upgrade",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Fix `admin_allow_tags` erasing assignments in wrong scopes",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "also_in": []
+  },
+  {
+   "id": "td-ff79081914cd3936",
+   "suite": "2026-08-19",
+   "status": "archive",
+   "suites": [
+    "2026-08-19"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-08-19",
+     "mode": "archive"
+    }
+   ],
+   "repo": "aiming-lab/AutoResearchClaw",
+   "pr_number": 286,
+   "base_sha": "e040e1dd9afcbda017f72181788a861e2e64d70c",
+   "merge_sha": "f61392de2b3f0104952284747b68d937fae8b023",
+   "license": "",
+   "language": "python",
+   "title": "Add medical observational research domain profile",
+   "n_fail_to_pass": 5,
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
