@@ -49,6 +49,9 @@ rename without updating that caller):
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parent))
 import argparse
 import json
 import re
@@ -173,39 +176,31 @@ def tags(*items) -> str:
 
 
 def stat_card(label, value, note: str = "") -> str:
-    """One metric card in the daily-window stat band."""
+    """One metric as a line: label, value, note.
+
+    It was a bordered card with a coloured stripe. Six of them opened every
+    task page -- a full screen for six numbers, most of which the fact table
+    directly underneath repeated. Same information, three columns, four lines.
+    """
     shown = DASH if value in (None, "") else esc(value)
-    body = (
-        f'<div data-slot="card" class="{cls(CARD)}">'
-        f'<div class="flex flex-1 flex-col justify-between gap-6 py-6">'
-        f'<div data-slot="card-header" class="{cls(CARD_HEADER)}">'
-        f'<p class="text-muted-foreground text-sm sm:text-xs">{esc(label)}</p>'
-        f'<p data-tdb-stat-value class="line-clamp-1 font-mono text-xl font-medium '
-        f'tabular-nums">{shown}</p>'
+    return (
+        f'<div class="tdb-statrow">'
+        f'<span class="tdb-statrow-k">{esc(label)}</span>'
+        f'<p data-tdb-stat-value class="tdb-statrow-v">{shown}</p>'
+        f'<span class="tdb-statrow-n">{esc(note)}</span>'
         f"</div>"
     )
-    if note:
-        body += (
-            f'<div data-slot="card-content" class="px-6">'
-            f'<p class="text-muted-foreground line-clamp-2 text-sm sm:text-xs">'
-            f"{esc(note)}</p></div>"
-        )
-    return body + "</div></div>"
 
 
 def strip(pairs) -> str:
-    """The stat band: independent metric cards, edge to edge on mobile.
+    """The stat band: one line per metric, two columns on a wide screen.
 
     `pairs` is [(label, value)] or [(label, value, note)].
     """
     cells = "".join(
         stat_card(p[0], p[1], p[2] if len(p) > 2 else "") for p in pairs
     )
-    return (
-        '<div class="-mx-4 mb-6 flex flex-col sm:mx-0">'
-        f'<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">{cells}</div>'
-        "</div>"
-    )
+    return f'<div class="tdb-statgrid mb-6">{cells}</div>'
 
 
 def sec_head(title, eyebrow: str = "", more=None) -> str:
@@ -289,22 +284,18 @@ def breadcrumb(trail) -> str:
 
 
 def button_row(buttons) -> str:
-    """Responsive CTA grid: [(label, href, primary_bool)].
+    """Related pages as one line of links: [(label, href, primary_bool)].
 
-    Only grid-cols variants actually compiled into tw.css are emitted
-    (sm:grid-cols-{1,2}, lg:grid-cols-{2,3,4}); a single button gets no lg track.
+    These were four full-width pill buttons in a responsive grid. Nothing here
+    is an action -- they are links to sibling pages -- and a row of buttons
+    above the content pushes the content off the screen.
     """
-    n = min(len(buttons), 4)
-    track = f" lg:grid-cols-{n}" if n >= 2 else ""
     cells = "".join(
-        f'<a class="{cls(BTN_PRIMARY if primary else BTN_SECONDARY)}" href="{esc(href)}">'
-        f"{esc(label)}</a>"
+        f'<a class="tdb-navlink" data-primary="{"true" if primary else "false"}" '
+        f'href="{esc(href)}">{esc(label)}</a>'
         for label, href, primary in buttons
     )
-    return (
-        f'<div class="mx-auto mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2{track}">'
-        f"{cells}</div>"
-    )
+    return f'<nav class="tdb-navrow mb-6" aria-label="Related pages">{cells}</nav>'
 
 
 def table_block(headers, rows) -> str:
@@ -337,6 +328,16 @@ def td(html, align: str = "left", extra: str = "", prose: bool = False) -> str:
     return f'<td data-slot="table-cell" class="{cls(base)}"><p class="{cls(p_cls)}">{html}</p></td>'
 
 
+# The cache-busting token on every asset URL, derived from the assets' own
+# bytes. It used to be a literal typed here AND into every hand-written page,
+# so changing an asset meant remembering to bump it in two places -- and the
+# first time that mattered, site.css changed, the token did not, and the
+# browser served the old stylesheet against the new markup. See
+# web/asset_version.py; `--check` fails the build when a page is stale.
+from asset_version import current as _asset_version   # noqa: E402
+
+ASSET_V = _asset_version()
+
 FAVICON = (
     "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>"
     "<text y='13' font-size='13'>&#9622;</text></svg>"
@@ -361,9 +362,9 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
-<link rel="stylesheet" href="{root}/assets/tw.css">
-<link rel="stylesheet" href="{root}/assets/tw-extra.css">
-<link rel="stylesheet" href="{root}/assets/site.css">
+<link rel="stylesheet" href="{root}/assets/tw.css?v={ASSET_V}">
+<link rel="stylesheet" href="{root}/assets/tw-extra.css?v={ASSET_V}">
+<link rel="stylesheet" href="{root}/assets/site.css?v={ASSET_V}">
 <link rel="icon" href="{FAVICON}">
 {head}</head>
 <body class="tdb-generated-page">
@@ -377,7 +378,7 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
   </div>
 </main>
 
-<script src="{root}/assets/site.js" data-root="{root}" data-page="{esc(page_key)}"></script>
+<script src="{root}/assets/site.js?v={ASSET_V}" data-root="{root}" data-page="{esc(page_key)}"></script>
 {tail}</body>
 </html>
 """
@@ -501,6 +502,18 @@ def instruction_title(text: str) -> str:
     return ""
 
 
+# Every instruction opens with the same harness preamble and closes with the same
+# goal line. Both are identical on all 61 task pages, so neither says anything about
+# the task the page is about; the excerpt starts at the task-specific text instead.
+_INSTRUCTION_BOILERPLATE = (
+    "You are working in a checked-out source repository. The upstream provenance "
+    "(origin remote, project name, and commit identifiers) has been removed; solve "
+    "the task from the working tree and the description below alone.",
+    "Make the change so that the project's regression tests pass. "
+    "Do not edit the test files.",
+)
+
+
 _MD = [
     (re.compile(r"`{1,3}([^`]*)`{1,3}"), r"\1"),          # code spans
     (re.compile(r"\*{1,3}([^*]+)\*{1,3}"), r"\1"),        # bold / italic
@@ -560,18 +573,17 @@ def _retrievability_note() -> str:
     PR is a descendant of that base commit in a public repository. Recovery is expensive,
     not impossible. Every PR-derived benchmark inherits this; what is avoidable is
     letting a reader assume we solved it.
+
+    The canary date and the never-run production replay are stated once, in the scoring
+    section directly above; repeating them here printed one caveat twice on one page.
     """
     return (
         '<p class="text-muted-foreground mx-auto mt-4 max-w-3xl text-center '
-        'text-sm/relaxed">These tasks are built from <span class="text-foreground">public '
-        "merged pull requests</span>, so the reference fix exists upstream. The commit is "
-        "redacted from a live package, but the task must name its source repo and base "
-        "commit to be buildable, and the fix is a descendant of that commit. An agent with "
-        "network access can therefore retrieve rather than solve. Read any online score on "
-        'a live task as an <span class="text-foreground">upper bound</span>. A staged-SIF '
-        "paired egress canary passed on 2026-08-06, but no production protected replay or "
-        "authority deployment has run; future official figures must bind the same network "
-        "cut in their receipts.</p>"
+        'text-sm/relaxed">Tasks come from <span class="text-foreground">public merged pull '
+        "requests</span>. A live package redacts the merge commit but still names the source "
+        "repo and base commit, so it can be built. An agent with network access can retrieve "
+        'rather than solve. Read any online score as an <span class="text-foreground">upper '
+        "bound</span>.</p>"
     )
 
 
@@ -586,17 +598,25 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         n_tasks = len(suite_tasks)
     scored_tasks = sum(1 for t in suite_tasks if t.get("n_models"))
     f2p = sum(t.get("n_fail_to_pass") or 0 for t in suite_tasks)
+    count = f"{n_tasks} task" + ("" if n_tasks == 1 else "s")
+
+    # The lede gives the size and the release state, then links out. What certification
+    # would additionally require is documentation; it is not reprinted on each daily page.
+    lede = (
+        f"{count}, live. Gold patch and protected tests withheld. Submissions are "
+        'unranked. <a class="hover:text-foreground underline underline-offset-4" '
+        'href="../../guide/task-format/#archive-vs-live">what live withholds &rarr;</a>'
+        if live
+        else f"{count}, archived. All artifacts released. Local runs require the patched "
+        'Harbor fork. <a class="hover:text-foreground underline '
+        'underline-offset-4" href="../../guide/quickstart/#requirements">fork status '
+        "&rarr;</a>"
+    )
 
     head = [
         breadcrumb([("Home", "../../"), ("Benchmarks", "../"), (f"suite {sid}", None)]),
         _h2(f"suite {sid}"),
-        _lede(
-            "Gold patch and protected tests are withheld while this suite is live; "
-            "submissions remain unranked until an official replay receipt exists."
-            if live
-            else "Archived task artifacts are released in full. End-to-end scoring currently "
-            "requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient."
-        ),
+        _lede(lede),
         tags(status_pill(suite.get("status", "")),
              *[pill(language, "outline") for language in langs]),
         button_row([
@@ -609,16 +629,20 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
 
     stats = strip([
         ("tasks", n_tasks, "one merged pull request each"),
-        ("languages", len(langs) or None, "mined across the ecosystem"),
+        ("languages", len(langs) or None, "upstream languages"),
         ("fail-to-pass tests", f2p or None, "re-laid over the agent's workspace"),
         (
             "official score coverage",
             f"{scored_tasks}/{len(suite_tasks)}" if scored_tasks else None,
-            "awaiting the certified 50-task v3 campaign" if not scored_tasks
-            else "tasks bound to the formal published matrix",
+            "none carries an official score" if not scored_tasks
+            else "bound to the published official matrix",
         ),
-        ("semantic exploit FA", None, "unmeasured for this published suite"),
-        ("status", suite.get("status") or None, "live withholds gold; archive publishes it"),
+        ("semantic exploit FA", None, "not measured"),
+        (
+            "status",
+            suite.get("status") or None,
+            "gold and protected tests withheld" if live else "all artifacts published",
+        ),
     ])
 
     if suite_tasks:
@@ -652,14 +676,15 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         table = (
             '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
             + empty(
-                "This suite has no published task list. Live suites expose their tasks only "
-                "through the scoring endpoint until they are archived."
+                "No published task list. A live suite exposes tasks through the scoring "
+                "endpoint until archived."
             )
             + "</div>"
         )
 
     cmd = (
-        ["tdb submit &lt;RESULTS.jsonl&gt;   # pending; no score until official replay"]
+        ["python web/submit_result.py record --authenticated-submitter github:LOGIN "
+         "&lt; submission.json   # pending; no score until official replay"]
         if live
         else [
             "tdb run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;",
@@ -678,19 +703,29 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
         _section(
             sec_head("how this suite is scored", "execution proof only")
             + code_figure(
-                "Local commands (the unpublished patched Harbor fork is required)"
+                "Local commands, patched Harbor fork required"
                 if not live else "Run your model, then submit the patch",
                 cmd,
             )
+            # Seven sentences of scoring narration, centred, on every suite page.
+            # Four of them are facts (throwaway copy, re-laid protected tests,
+            # the network cut, what an accepted run does NOT prove); three were
+            # emphasis. The facts stay, one clause each.
             + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
-              'text-sm/relaxed">A patch is applied to a throwaway copy of the workspace. The '
-              "workspace tests are discarded and protected tests are re-laid from the trusted "
-              "package. The receipt contract requires a verified network cut. A paired staged-SIF "
-              "egress canary passed on 2026-08-06, but production replay authority remains "
-              "inactive. An accepted run outcome proves replay integrity; it does not establish semantic "
-              "verifier false-accept, which remains unmeasured until labeled exploit trials run. "
-              "For archived tasks, these commands require our unpublished "
-              "patched Harbor fork; stock Harbor 0.13.1 cannot run them end to end.</p>"
+              'text-sm/relaxed">A patch applies to a throwaway copy; protected tests are '
+              "re-laid from the trusted package and the workspace tests are discarded. "
+              "The receipt contract requires a verified network cut, proven only by a "
+              "staged-SIF canary on 2026-08-06 -- no production protected replay has run. "
+              "An accepted run proves replay integrity, not semantic verifier false-accept, "
+              "which is unmeasured. "
+            # "unpublished" is the load-bearing word: it says WHY a third party
+            # cannot reproduce this run. The registry pages already said it; this
+            # site said only "patched", which reads as a version skew you could fix.
+            + ("Requires the unpublished patched Harbor fork; "
+               "stock Harbor 0.13.1 is insufficient end to end. "
+               if not live else "")
+            + '<a class="hover:text-foreground underline underline-offset-4" '
+              'href="../../guide/submission/#scoring">how scoring works &rarr;</a></p>'
             + (_retrievability_note() if live else "")
         ),
     ])
@@ -698,7 +733,7 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
 
 SUITE_SCRIPT = """(async function () {
   var T = window.TDB;
-  var site = await T.getJSON("site_data.json").catch(function () { return null; });
+  var site = await T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue"));
   if (site && site.suites) {
     T.dayRail(document.getElementById("rail"), site.suites, %s);
   }
@@ -735,11 +770,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
     head = [
         breadcrumb([("Home", "../../"), ("Tasks", "../"), (tid, None)]),
         _h2(title or tid),
-        _lede(
-            f'<span class="text-foreground">{esc(tid)}</span> &middot; source pull-request task. '
-            "The instruction, provenance, release state, and any formally published score "
-            "coverage follow."
-        ),
+        _lede(f'<span class="text-foreground">{esc(tid)}</span>'),
         tags(status_pill(task.get("status", "")),
              pill(language, "outline") if language else "",
              pill(difficulty) if difficulty else ""),
@@ -748,14 +779,14 @@ def task_page_body(task: dict, pkg: dict) -> str:
 
     solved, n_models = task.get("solved_by"), task.get("n_models")
     stats = strip([
-        ("language", language or None, "the upstream repository's language"),
-        ("difficulty", difficulty or None, "derived only from an official 50-task matrix"),
+        ("language", language or None, ""),
+        ("difficulty", difficulty or None, "official 50-task matrix only"),
         ("fail-to-pass tests", n_f2p, "must fail before the patch, pass after"),
         ("official solves",
          f"{solved}/{n_models}" if solved is not None and n_models else None,
          "dash means awaiting formal coverage, not zero solves"),
-        ("semantic exploit FA", None, "unmeasured for this task"),
-        ("suites", len(suites) or None, "versioned task sets containing this task"),
+        ("semantic exploit FA", None, "unmeasured"),
+        ("suites", len(suites) or None, ""),
     ])
 
     suite_links = [
@@ -770,7 +801,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
         ("Source", _pr_link(repo, pr)),
         ("Base commit", esc(rec.get("base_sha", "")) if rec.get("base_sha") else None),
         ("Merge commit", esc(rec.get("merge_sha", "")) if rec.get("merge_sha") else None),
-        ("Network at run time", esc(rec.get("network_profile") or "run-offline")),
+        ("Network", esc(rec.get("network_profile") or "run-offline")),
         ("Upstream license", esc(rec.get("source_license_spdx") or "see source repository")),
     ]
     fact_rows = [
@@ -789,10 +820,13 @@ def task_page_body(task: dict, pkg: dict) -> str:
 
     brief = ""
     if instruction:
+        text = instruction
+        for chunk in _INSTRUCTION_BOILERPLATE:
+            text = text.replace(chunk, "")
         brief = _section(
-            sec_head("what the agent is asked to do", "the instruction it sees")
+            sec_head("instruction")
             + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-            + prose_block(f"<p>{esc(instruction_excerpt(instruction))}</p>")
+            + prose_block(f"<p>{esc(instruction_excerpt(text, 260))}</p>")
             + "</div>"
         )
 
@@ -801,7 +835,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
             f'<li class="border-b py-2 last:border-b-0">{esc(x)}</li>' for x in f2p
         )
         f2p_block = _section(
-            sec_head("fail-to-pass tests", "must fail before the patch, pass after")
+            sec_head("fail-to-pass tests")
             + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
             + prose_block(f'<ul class="flex flex-col">{items}</ul>')
             + "</div>"
@@ -811,10 +845,9 @@ def task_page_body(task: dict, pkg: dict) -> str:
             sec_head("protected tests", "withheld while the suite is live")
             + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
             + empty(
-                "This task is in a live suite: the protected test bodies and the reference "
-                "solution are withheld. Only the failing-test identifiers are exposed to the "
-                "agent, and scoring happens server-side. The package is released in full when "
-                "the suite is archived, two weeks after it was sealed."
+                "Test bodies and the reference solution are withheld. The agent sees only the "
+                "failing-test identifiers. Scoring runs server-side. The package is released "
+                "when the suite is archived, two weeks after sealing."
             )
             + "</div>"
         )
@@ -822,7 +855,8 @@ def task_page_body(task: dict, pkg: dict) -> str:
         f2p_block = ""
 
     cmd = (
-        ["tdb submit &lt;RESULTS.jsonl&gt;"]
+        ["python web/submit_result.py record --authenticated-submitter github:LOGIN "
+         "&lt; submission.json"]
         if live
         else [
             f"tdb run    &lt;MODEL&gt; tasks/archive/{esc(tid)}",
@@ -830,17 +864,13 @@ def task_page_body(task: dict, pkg: dict) -> str:
         ]
     )
     run = _section(
-        sec_head(
-            "reproduce it",
-            "requires the unpublished patched Harbor fork" if not live else "live task",
-        )
-        + code_figure("Score a model on this task, then prove it is solvable", cmd)
+        sec_head("reproduce it")
+        + code_figure("Score a model, then run the oracle", cmd)
         + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
-          'text-sm/relaxed">The reward is the outcome of the re-laid protected tests, nothing '
-          "else. A submitted reward is advisory and never becomes a score by itself. "
-          "The production receipt authority is inactive, so every submission stays pending "
-          "and unranked with no numeric outcome. "
-          + ("The local commands above also require the unpublished patched Harbor fork; "
+          'text-sm/relaxed">The reward is the outcome of the re-laid protected tests. '
+          "A submitted reward is advisory: the receipt authority is inactive, so "
+          "submissions stay pending and unranked. "
+          + ("Requires the unpublished patched Harbor fork; "
              "stock Harbor 0.13.1 is insufficient. " if not live else "")
           + '<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
           "how to submit &rarr;</a></p>"
@@ -849,7 +879,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
     body = [
         "\n".join(h for h in head if h),
         _section(
-            sec_head("provenance", "mined from a real merged pull request")
+            sec_head("provenance")
             + stats
             + fact_table
         ),
@@ -914,8 +944,7 @@ def main(argv=None) -> int:
                 title=f"suite {sid} — terminal-daily-bench",
                 description=(
                     f"The {sid} daily suite: "
-                    f"{s.get('n_tasks', len(st))} tasks mined from merged pull requests, "
-                    "awaiting formally receipt-bound relative scoring."
+                    f"{s.get('n_tasks', len(st))} tasks mined from merged pull requests."
                 ),
                 page_key="benchmarks",
                 depth=2,
@@ -955,6 +984,15 @@ def main(argv=None) -> int:
         f"done: {total} page(s) - {counts['write']} new, "
         f"{counts['update']} updated, {counts['unchanged']} unchanged"
     )
+
+    # Generated pages get ASSET_V by construction; the hand-written ones carry a
+    # literal that would now be stale. Stamping them here means one command
+    # leaves the whole site consistent -- the alternative is remembering a
+    # second command, which is exactly how the token went stale the first time.
+    from asset_version import current as _v, stamp as _stamp   # noqa: PLC0415
+    token = _v()
+    changed = _stamp(token)
+    print(f"assets @ {token}: {changed} page(s) restamped")
     return 0
 
 

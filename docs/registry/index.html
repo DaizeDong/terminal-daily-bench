@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
-<meta name="description" content="Search the published terminal-daily-bench task catalogue; formal score coverage appears only with a trusted 50-task v3 report.">
-<link rel="stylesheet" href="../assets/tw.css">
-<link rel="stylesheet" href="../assets/tw-extra.css">
-<link rel="stylesheet" href="../assets/site.css">
+<meta name="description" content="Search the published terminal-daily-bench task catalogue. Catalogue membership is not a score.">
+<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -33,7 +33,7 @@
       </nav>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Catalogue membership is not a score; official coverage appears only after the certified 50-task v3 campaign publishes.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Catalogue membership is not a score.</p>
 
       <!-- catalogue summary in the Terminal Daily metric-card system -->
       <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
@@ -41,9 +41,8 @@
       </div>
 
       <p class="text-muted-foreground mb-6 font-mono text-sm" data-tdb-integrity>
-        <span class="text-foreground">live</span> tasks withhold gold and protected test bodies; submissions await official replay.
-        <span class="text-foreground">archive</span> tasks publish those artifacts; end-to-end execution currently requires the unpublished patched Harbor fork.
-        Receipt-authority code is complete, but production is active=false with one collaborator, so submissions remain unranked. The staged-SIF paired egress canary passed; no production protected replay has run.
+        <span class="text-foreground">live</span> tasks withhold gold and protected test bodies;
+        <span class="text-foreground">archive</span> tasks publish them. Running either end to end needs the <a class="hover:text-foreground underline underline-offset-4" href="../guide/">unpublished patched Harbor fork</a>.
       </p>
 
       <!-- ==================== filterable table ==================== -->
@@ -51,7 +50,7 @@
 
         <div class="flex flex-col">
           <div class="flex min-h-10 items-center justify-between px-4 py-1 md:px-0">
-            <p class="text-muted-foreground hidden font-mono text-sm sm:block" id="tdb-count">Showing 0 entries</p>
+            <p class="text-muted-foreground hidden font-mono text-sm sm:block" id="tdb-count">loading catalogue&hellip;</p>
             <div class="flex min-w-0 flex-wrap-reverse items-center justify-end gap-1" id="tdb-quick"></div>
           </div>
 
@@ -96,7 +95,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js" data-root=".." data-page="registry"></script>
+<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="registry"></script>
 <script>
 (function () {
   "use strict";
@@ -180,7 +179,7 @@
       'text-muted-foreground md:border-x">' + html + "</div>";
   }
 
-  T.getJSON("site_data.json").catch(function () { return null; }).then(start);
+  T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(start);
 
   function start(site) {
     /* The catalogue is the sole task authority. A result matrix cannot invent
@@ -189,14 +188,19 @@
       ? site.tasks.slice() : null;
 
     if (!tasks || !tasks.length) {
-      countEl.textContent = "Showing 0 entries";
+      /* Two bugs in one line before this: the entity was assigned through
+         textContent, so readers saw a literal "&hellip;", and the branch that
+         set it is the one where loading has FINISHED and found nothing -- the
+         block immediately below says exactly that. A count that says "loading"
+         after loading ended is a false claim, not a placeholder. */
+      countEl.textContent = "0 entries";
       rowsEl.innerHTML = "";
       document.querySelector("[data-slot=table-container]").parentNode.hidden = true;
       noneEl.hidden = false;
       noneEl.innerHTML = emptyBlock(
         "No task catalogue published yet. Run <span class=\"text-foreground\">tdb publish</span> " +
-        "to generate <span class=\"text-foreground\">site_data.json</span> at the site root; " +
-        "this table renders straight from it.", "border-y");
+        "to generate <span class=\"text-foreground\">site_data.json</span> at the site root.",
+        "border-y");
       statsEl.parentNode.hidden = true;
       return;
     }
@@ -219,7 +223,7 @@
       ["live now",             live,                                  "gold withheld, pending official replay"],
       ["protected f2p tests",  f2p || null,                           "re-laid over the agent's workspace"],
       ["official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
-        scoredTasks ? "bound to the formal matrix" : "awaiting certified 50-task results"]
+        scoredTasks ? "bound to the formal matrix" : "no official matrix published"]
     ];
     statsEl.innerHTML = stats.map(function (s) {
       return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col gap-6 ' +

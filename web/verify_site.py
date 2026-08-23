@@ -52,6 +52,7 @@ from __future__ import annotations
 import html.parser
 import json
 import re
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -142,7 +143,8 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
     bad += b.errors
 
     # --- 1. stylesheet contract -------------------------------------------
-    sheets = re.findall(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"', raw)
+    sheets = [h.split("?", 1)[0] for h in
+              re.findall(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"', raw)]
     want = [f"{root}/assets/{n}" for n in ("tw.css", "tw-extra.css", "site.css")]
     if sheets != want:
         bad.append(f"stylesheets {sheets} != {want}")
@@ -150,8 +152,9 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
     # --- 3. shell ----------------------------------------------------------
     if not re.search(r'<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">', raw):
         bad.append('<main id="nd-home-layout" class="flex flex-1 flex-col pt-14"> missing')
-    m = re.search(r'<script src="([^"]*assets/site\.js)" data-root="([^"]*)" data-page="([^"]*)"',
-                  raw)
+    # "?v=<token>" is a cache-buster, not part of the path -- see check_links.
+    m = re.search(r'<script src="([^"]*assets/site\.js)(?:\?[^"]*)?" '
+                  r'data-root="([^"]*)" data-page="([^"]*)"', raw)
     if not m:
         bad.append("site.js tag with data-root/data-page missing")
     else:
@@ -179,6 +182,306 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
     return bad
 
 
+def _visible_text(raw: str) -> str:
+    """The page minus its comments.
+
+    A command inside a JS or HTML comment is not an instruction to anybody, and
+    counting it means a comment that EXPLAINS a bad command gets reported as the
+    bad command. Script bodies themselves stay in: pages build their command
+    strings in JS, and those are exactly what a reader ends up copying.
+    """
+    raw = re.sub(r"<!--.*?-->", " ", raw, flags=re.S)
+    raw = re.sub(r"/\*.*?\*/", " ", raw, flags=re.S)
+    return re.sub(r"(?m)(^|\s)//[^\n]*", " ", raw)
+
+
+def _cli_surface() -> dict:
+    """The real `tdb` command surface, read out of argparse itself.
+
+    Parsed from the source rather than imported: verify_site runs in CI where
+    the package need not be installed, and an ImportError here would turn this
+    check into a no-op that still prints green.
+    """
+    src = (HERE.parent / "terminal_daily_bench" / "cli.py").read_text(
+        encoding="utf-8", errors="replace")
+    if "add_subparsers" not in src:
+        raise GitError("cli.py has no add_subparsers -- cannot read the command "
+                       "surface, so command claims on the site cannot be checked")
+    surface: dict = {}
+    # sub.add_parser("run", ...) assigned to a local, then <local>.add_argument("--x")
+    var_for = {}
+    for m in re.finditer(r"(\w+)\s*=\s*sub\.add_parser\(\s*[\"'](\w[\w-]*)[\"']", src):
+        var_for[m.group(1)] = m.group(2)
+        surface[m.group(2)] = set()
+    for m in re.finditer(r"(\w+)\.add_argument\(\s*[\"']([^\"']+)[\"']"
+                         r"(?:\s*,\s*[\"']([^\"']+)[\"'])?", src):
+        name = var_for.get(m.group(1))
+        if not name:
+            continue
+        for opt in (m.group(2), m.group(3)):
+            if opt and opt.startswith("-"):
+                surface[name].add(opt)
+    if not surface:
+        raise GitError("no subcommands parsed out of cli.py -- refusing to report "
+                       "a clean command check that examined nothing")
+    return surface
+
+
+def check_commands(pages: list[Path]) -> list[str]:
+    """Every `tdb ...` the site tells a reader to run must actually be runnable.
+
+    The leaderboard once shipped `tdb run --suite <date> -a <agent> -m <model>`
+    behind a COPY BUTTON. None of those three flags exist; `tdb run` takes a
+    positional model and task. It was invented by analogy with the reference
+    site and no check on the site could see it, because a command is just text.
+    """
+    surface = _cli_surface()
+    bad: list[str] = []
+    seen: set = set()
+    # a command run, up to the end of the line/tag/quote it lives in
+    cmd = re.compile(r"tdb\s+([a-z][a-z-]*)((?:\s+(?:--?[\w-]+|&lt;[^&]*&gt;|[^<\"'\s])+)*)")
+    for page in pages:
+        raw = _visible_text(page.read_text(encoding="utf-8", errors="replace"))
+        rel = page.relative_to(DOCS)
+        for m in cmd.finditer(raw):
+            sub, rest = m.group(1), m.group(2) or ""
+            key = (str(rel), sub, rest.strip())
+            if key in seen:
+                continue
+            seen.add(key)
+            if sub not in surface:
+                bad.append(f"{rel}: `tdb {sub}` is not a subcommand "
+                           f"(have: {', '.join(sorted(surface))})")
+                continue
+            for flag in re.findall(r"(?<![\w-])(--?[A-Za-z][\w-]*)", rest):
+                if flag not in surface[sub]:
+                    bad.append(f"{rel}: `tdb {sub}` has no option {flag} "
+                               f"(has: {', '.join(sorted(surface[sub])) or 'none'})")
+    return bad
+
+
+def check_silent_catches(pages: list[Path]) -> list[str]:
+    """A rejected fetch must never be rendered as an empty result.
+
+    Fourteen call sites used `.catch(function () { return null; })`. Downstream
+    code then drew its empty state, so a broken deploy, a 404 and a genuinely
+    empty catalogue all produced the same page -- "No suites are published."
+    Nobody, inside or outside, could tell which had happened.
+
+    `T.fetchFailed(what)` is the replacement: same null, plus a console error
+    and a banner that says the data could not be READ. This check bans the bare
+    form coming back, in the pages and in the generator that writes them.
+    """
+    bad: list[str] = []
+    silent = re.compile(
+        r"\.catch\(\s*function\s*\([^)]*\)\s*\{\s*return\s*(null|\[\]|\{\}|)\s*;?\s*\}\s*\)")
+    sources = list(pages) + sorted((DOCS / "assets").glob("*.js"))
+    sources += [HERE / "gen_pages.py"]
+    for src in sources:
+        raw = _visible_text(src.read_text(encoding="utf-8", errors="replace"))
+        try:
+            rel = src.relative_to(DOCS)
+        except ValueError:
+            rel = src.name
+        for m in silent.finditer(raw):
+            line = raw.count("\n", 0, m.start()) + 1
+            bad.append(f"{rel}:{line}: a rejected fetch is swallowed into "
+                       "an empty result -- use T.fetchFailed(<what>) instead")
+    return bad
+
+
+def check_asset_versions(pages: list[Path]) -> list[str]:
+    """Every ?v= on the site must match the assets that are actually shipped.
+
+    The token used to be a hand-typed literal in two unrelated places: the
+    generator, and every hand-written page. Change an asset, forget one, and the
+    browser serves a stale stylesheet against fresh markup -- which is
+    indistinguishable from the CSS edit not having worked. It happened the first
+    time it could.
+
+    Run `python web/asset_version.py --stamp` to fix.
+    """
+    sys.path.insert(0, str(HERE))
+    try:
+        from asset_version import current, stale          # noqa: PLC0415
+    except Exception as exc:                              # noqa: BLE001
+        # An import failure here would otherwise silently retire the check.
+        return [f"cannot read the asset version ({exc}) -- the ?v= stamps are unchecked"]
+    return stale(current())
+
+
+def check_published_days() -> list[str]:
+    """Every published day must say where it came from, and match the index.
+
+    While the results bridge was being tested, two SYNTHETIC days sat in
+    docs/data/days/ and rendered on the leaderboard as measured results. Nothing
+    on the page or in the file distinguished them from a real campaign, because
+    the emitter stamped no provenance at all. A day file must now carry
+    source/source_files/source_digest, and this refuses one without them.
+
+    It also checks the index against the directory in both directions: an index
+    naming a missing day is a 404 the reader sees as a broken page, and a day
+    file missing from the index is data nobody can reach.
+    """
+    days_dir = DOCS / "data" / "days"
+    index_path = DOCS / "data" / "index.json"
+    if not days_dir.is_dir():
+        return [] if not index_path.is_file() else [
+            "data/index.json exists but data/days/ does not"]
+
+    bad: list[str] = []
+    on_disk = set()
+    for path in sorted(days_dir.glob("*.json")):
+        on_disk.add(path.stem)
+        try:
+            day = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:                              # noqa: BLE001
+            bad.append(f"data/days/{path.name}: unreadable ({exc})")
+            continue
+        if not day.get("source"):
+            bad.append(f"data/days/{path.name}: no `source` -- a day with no "
+                       "provenance cannot be told from one assembled by hand")
+        if day.get("date") != path.stem:
+            bad.append(f"data/days/{path.name}: date is {day.get('date')!r}")
+        if day.get("official_ranking") is True and not day.get("source_digest"):
+            bad.append(f"data/days/{path.name}: claims official_ranking with no "
+                       "source_digest to bind it to its inputs")
+
+    try:
+        listed = set(json.loads(index_path.read_text(encoding="utf-8")).get("days") or [])
+    except Exception as exc:                                  # noqa: BLE001
+        return bad + [f"data/index.json: unreadable ({exc})"]
+    for missing in sorted(listed - on_disk):
+        bad.append(f"data/index.json lists {missing} but data/days/{missing}.json is absent")
+    for orphan in sorted(on_disk - listed):
+        bad.append(f"data/days/{orphan}.json exists but the index does not list it")
+    return bad
+
+
+_JS_STRING = re.compile(
+    r'"(?:[^"\\\n]|\\.)*"'      # double quoted, escapes allowed
+    r"|'(?:[^'\\\n]|\\.)*'"     # single quoted
+    r"|`(?:[^`\\]|\\.)*`",         # template, may span lines
+)
+
+
+def _strip_js_strings(src: str) -> str:
+    """Replace string-literal contents with spaces, character for character.
+
+    Tailwind class names live in JS strings and are full of things that parse
+    as calls -- "[&:has([role=checkbox])]", ":not([class*='size-'])" -- so a
+    scan for calls has to blank them first.
+
+    A hand-rolled state machine was tried and got this exactly backwards: one
+    unbalanced quote earlier in the file left it permanently "inside a string",
+    so it blanked the CODE and preserved the STRINGS, and then reported half
+    the file's own functions as undefined. Matching whole literals cannot drift
+    that way -- an unterminated quote simply fails to match and is left alone.
+    Length and newlines are preserved so line numbers still line up.
+    """
+    def blank(m: "re.Match[str]") -> str:
+        return "".join("\n" if c == "\n" else " " for c in m.group(0))
+    return _JS_STRING.sub(blank, src)
+
+def check_js_definitions(pages: list[Path]) -> list[str]:
+    """Nothing may be called or exported that is not defined.
+
+    `node --check` only parses; it never resolves a name. Twice in one session
+    an edit that replaced a function by slicing "from here to there" also ate
+    the function that happened to sit in between -- once `taskCard`, once
+    `fetchFailed` -- and both times the file still parsed, still shipped, and
+    only threw in a browser on a page nobody had reopened.
+
+    Two cheap resolutions catch that class:
+      * every name a runtime exports on `window.TDB` must be defined in the
+        same file;
+      * every bare call `name(...)` in a page's inline script must be defined
+        in that script, reached through `T.`/`TDB.`, or be a browser global.
+    """
+    KNOWN = {
+        "Array", "Boolean", "Date", "Error", "JSON", "Math", "Number", "Object",
+        "Promise", "RegExp", "String", "Set", "Map", "parseInt", "parseFloat",
+        "isNaN", "isFinite", "encodeURIComponent", "decodeURIComponent",
+        "setTimeout", "clearTimeout", "setInterval", "fetch", "alert",
+        "requestAnimationFrame", "console", "document", "window", "history",
+        "location", "navigator", "if", "for", "while", "switch", "catch",
+        "function", "return", "typeof", "new",
+    }
+    define = re.compile(r"function\s+([A-Za-z_$][\w$]*)\s*\(|"
+                        r"var\s+([A-Za-z_$][\w$]*)\s*=\s*function|"
+                        r"var\s+([A-Za-z_$][\w$]*)\s*=")
+    call = re.compile(r"(?<![\w.$])([A-Za-z_$][\w$]*)\s*\(")
+
+    bad: list[str] = []
+
+    for js in sorted((DOCS / "assets").glob("*.js")):
+        src = _visible_text(js.read_text(encoding="utf-8", errors="replace"))
+        scan = _strip_js_strings(src)
+        defined = {g for m in define.finditer(src) for g in m.groups() if g}
+        # the LAST window.TDB literal is the export; an earlier one is the
+        # file's own docstring describing it
+        starts = [m.start() for m in re.finditer(r"window\.TDB\s*=\s*\{", src)]
+        if not starts:
+            continue
+        chunk = src[starts[-1]:]
+        chunk = chunk[:chunk.index("}") + 1]
+        for name in sorted(set(re.findall(r"([A-Za-z_$][\w$]*)\s*[:,}]", chunk))):
+            if name and name not in defined and name not in KNOWN:
+                bad.append(f"assets/{js.name}: window.TDB exports {name!r}, "
+                           "which is not defined in this file")
+
+    for page in pages:
+        raw = page.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"<script>\n(.*?)</script>", raw, re.S)
+        if not m:
+            continue
+        src = _visible_text(m.group(1))
+        defined = {g for mm in define.finditer(src) for g in mm.groups() if g}
+        for name in set(call.findall(_strip_js_strings(src))):
+            if name in defined or name in KNOWN:
+                continue
+            if re.search(r"[\w$]\.\s*" + re.escape(name) + r"\s*\(", src):
+                continue          # a method call, e.g. T.dayNav(...)
+            bad.append(f"{page.relative_to(DOCS)}: calls {name}(), which is not "
+                       "defined in this script")
+    return bad
+
+
+def check_entities_in_text_nodes(pages: list[Path]) -> list[str]:
+    """An HTML entity assigned through textContent renders as its own source.
+
+    `el.textContent = "loading&hellip;"` puts the eight characters "&hellip;"
+    on the screen, because textContent does not parse markup. The same string
+    in the static HTML is correct, so this cannot be a plain grep for the
+    entity -- it has to be a grep for the entity ON THE ASSIGNMENT.
+
+    Found in registry/index.html, where the same line was also claiming to be
+    "loading" inside the branch that runs after loading has finished and found
+    nothing. Both halves were invisible to every other check the site has.
+    """
+    bad: list[str] = []
+    # Capture to end of LINE, not to the next ";". An entity ENDS in a
+    # semicolon, so a "[^;]" capture stops at the "&hellip;" it is hunting
+    # for and the check silently finds nothing. It was written that way
+    # first, and a mutation test caught it printing a clean zero with the
+    # bug put back in.
+    assign = re.compile(r"\.(?:textContent|nodeValue)\s*=\s*([^\n]+)")
+    entity = re.compile(r"&(?:[A-Za-z][A-Za-z0-9]{1,31}|#\d{1,7}|#[Xx][0-9A-Fa-f]{1,6});")
+    for page in pages + sorted((DOCS / "assets").glob("*.js")):
+        raw = page.read_text(encoding="utf-8", errors="replace")
+        try:
+            rel = page.relative_to(DOCS)
+        except ValueError:
+            rel = page
+        for m in assign.finditer(raw):
+            hit = entity.search(m.group(1))
+            if hit:
+                line = raw.count("\n", 0, m.start()) + 1
+                bad.append(f"{rel}:{line}: {hit.group(0)!r} assigned through "
+                           "textContent renders literally")
+    return bad
+
+
 def check_links(pages: list[Path], all_ids: dict) -> list[str]:
     bad = []
     for page in pages:
@@ -191,6 +494,16 @@ def check_links(pages: list[Path], all_ids: dict) -> list[str]:
             frag = ""
             if "#" in ref:
                 ref, frag = ref.split("#", 1)
+            # A query string is not part of the path. Assets carry a cache-busting
+            # "?v=<token>" so a reader with a tab open across a deploy does not
+            # keep the old CSS against the new data; without this the checker read
+            # "site.css?v=20260822b" as a filename and reported 101 dead links for
+            # files that were all present. A link checker that cannot resolve a
+            # URL the browser resolves is reporting on itself, not on the site.
+            if "?" in ref:
+                ref = ref.split("?", 1)[0]
+            if not ref:                                   # bare "?query" or "#frag"
+                continue
             if not ref:                                   # same-page fragment
                 if frag and frag not in all_ids[rel]:
                     bad.append(f"{rel}: dead same-page fragment #{frag}")
@@ -236,21 +549,61 @@ def check_site_css() -> list[str]:
     text = (DOCS / "assets" / "site.css").read_text(encoding="utf-8")
     body = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
 
+    # WHAT THIS GATE IS FOR, and what it is not for.
+    #
+    # Its purpose -- visible in the banned phrases below -- is that this site
+    # must not become a verbatim copy of the reference benchmark's stylesheet.
+    # That is a real constraint and it stays.
+    #
+    # It used to enforce that by requiring SPECIFIC DECORATIONS to exist: a
+    # conic-gradient blob behind the home masthead, and a bordered card rail of
+    # published suites. Those are one designer's answer to the constraint, not
+    # the constraint. When the brief changed to a dense status page -- label,
+    # value, note, hairline rules, no card -- the gate failed the new design
+    # while the old rules sat in the stylesheet applying to nothing, and it
+    # would have gone on printing green for exactly that dead code.
+    #
+    # So: assert the identity (own palette, own type hierarchy, own brand mark,
+    # own controls), assert the anti-clone bans, and let the decoration be a
+    # design decision. Each marker below must be a selector or token this site
+    # actually SHIPS, so a rule deleted as dead code fails here rather than
+    # being quietly preserved to satisfy a checker.
     required = {
         "day-window palette": ("--td-paper", "--td-night", "--td-coral", "--td-sun"),
         "humanist/display/data type hierarchy": (
             "--td-font-body", "--td-font-display", "--td-font-data"
         ),
-        "floating branded shell": ("#nd-nav", ".tdb-brand", ".tdb-brand-mark"),
-        "editorial daily-window hero": ('[data-tdb-section="intro"]', "conic-gradient"),
-        "independent metric cards": ('[data-slot="card"]', "border-radius"),
+        "branded shell": ("#nd-nav", ".tdb-brand", ".tdb-brand-mark"),
+        "own day navigation": (".tdb-daynav", ".tdb-daynav-arrow", ".tdb-suiterail"),
+        "own status treatment": (".tdb-statrow", ".tdb-block-head"),
+        # was ("border-radius") when a metric was a rounded card. The cards are
+        # flat now, and "border-radius" still appeared -- in the rule setting it
+        # to 0. A marker satisfied by the code that removes the thing it names
+        # is not a check.
+        "own metric treatment": ('[data-slot="card"]', "[data-tdb-stat-value]"),
         "data-table surface": ('[data-slot="table-container"]', "border-collapse"),
-        "daily suite rail": (".tdb-day-window", ".tdb-day"),
         "mobile layout": ("@media (max-width: 639px)",),
         "reduced motion": ("@media (prefers-reduced-motion: reduce)",),
     }
     for label, markers in required.items():
-        missing = [marker for marker in markers if marker not in body]
+        missing = []
+        for marker in markers:
+            # Two ways a bare substring test passed on a stylesheet that no
+            # longer had the thing:
+            #   * a custom property REFERENCED but not declared -- delete
+            #     "--td-coral: #..." and every "var(--td-coral)" still spells it;
+            #   * a class matched by a longer sibling -- delete ".tdb-daynav {"
+            #     and ".tdb-daynav-arrow" still contains ".tdb-daynav".
+            # So: a property must be declared, and a class must appear as a
+            # whole selector rather than as somebody else's prefix.
+            if marker.startswith("--"):
+                found = f"{marker}:" in body
+            elif marker.startswith((".", "#")):
+                found = bool(re.search(re.escape(marker) + r"(?![\w-])", body))
+            else:
+                found = marker in body
+            if not found:
+                missing.append(marker)
         if missing:
             bad.append(f"site.css missing {label}: {', '.join(missing)}")
 
@@ -700,14 +1053,25 @@ def check_public_frontend() -> list[str]:
         "scoring.anti_cheat_deployment_active === true",
         "rating.publishable === true",
         "ALLOWED_DIMENSIONS[axis.dimension]",
-        "authenticated_counts",
-        "untrusted_declared_counts",
-        "outcome:null",
-        "Task-family: unavailable",
     )
     for phrase in leaderboard_requirements:
         if phrase not in leaderboard_html:
             bad.append(f"leaderboard/index.html: v3 fail-closed marker missing {phrase!r}")
+
+    # How a non-SUCCESS run is treated is a claim about the METHOD, not about one
+    # day's table, so it is asserted where the method is documented. It was
+    # previously asserted on the leaderboard page; moving the home of a statement
+    # is fine, dropping the assertion is not -- these decide how every rate on
+    # the site is read, and "are not converted to zero" is the load-bearing one.
+    methods = source("guide/quality-methods/index.html").lower()
+    for phrase in ("outcome:null",
+                   "are not converted to zero",
+                   "authenticated_counts",
+                   "untrusted_declared_counts",
+                   "task-family: unavailable"):
+        if phrase not in methods:
+            bad.append("guide/quality-methods/index.html: outcome-treatment "
+                       f"statement missing {phrase!r}")
     registry_html = source("registry/index.html")
     if 'T.getJSON("leaderboard_data.json")' in registry_html or "board.matrix" in registry_html:
         bad.append("registry/index.html: legacy matrix must not invent task rows or scores")
@@ -803,7 +1167,12 @@ def main() -> int:
             for e in errs:
                 print("     " + e)
 
-    for group in (check_links(pages, all_ids), check_no_external(pages), check_site_css(),
+    for group in (check_links(pages, all_ids), check_entities_in_text_nodes(pages),
+                  check_commands(pages), check_silent_catches(pages),
+                  check_asset_versions(pages),
+                  check_published_days(),
+                  check_js_definitions(pages),
+                  check_no_external(pages), check_site_css(),
                   check_public_frontend(), check_suite_membership()):
         for e in group:
             failures += 1

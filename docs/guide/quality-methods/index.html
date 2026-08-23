@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality methods (MSQ) — terminal-daily-bench docs</title>
 <meta name="description" content="Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle coverage, diversity, 2PL IRT test information, KR-20 reliability, bootstrap intervals, required-N power, and the daily readiness verdict.">
-<link rel="stylesheet" href="../../assets/tw.css">
-<link rel="stylesheet" href="../../assets/tw-extra.css">
-<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -31,75 +31,78 @@
 
       <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
         <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">selection-quality methods (MSQ)</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Most benchmarks report a single number per model &mdash; a solve-rate scalar
-          &mdash; and stop there. That tells you <em>who</em> scored higher; it never tells you whether
-          the <strong>task set itself</strong> can separate models at all. A set where every model fails
-          every task, or passes every task, produces a leaderboard that is pure noise, yet its solve-rate
-          column looks perfectly normal.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><code>terminal_daily_bench.quality</code> is the instrument for that missing axis:
-          <strong>Multi-angle Selection-Quality (MSQ)</strong>. It reads a graded
-          <code>(task &times; model)</code> response matrix and reports, on orthogonal axes, <em>how well
-          a task set discriminates models</em> &mdash; plus the psychometric reliability of the set,
-          honest bootstrap uncertainty on every axis, the task counts needed to reach research-grade
-          precision, and a daily GO/NO-GO readiness verdict. This is the axis TB (Terminal-Bench) does
-          not measure.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything below is a <strong>pure function over plain lists</strong>: it neither
-          reads nor changes reward decisions, and it cannot measure semantic verifier false-accept.
-          All randomized routines are <strong>seeded and
-          deterministic</strong> (a resume reproduces the interval).</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><code>terminal_daily_bench.quality</code> scores <strong>Multi-angle Selection-Quality (MSQ)</strong>: how well a task set discriminates models, from a graded <code>(task &times; model)</code> matrix.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Pure functions over plain lists: they neither read nor change reward decisions, and cannot measure semantic verifier false-accept. Randomized routines are <strong>seeded and deterministic</strong>; a resume reproduces the interval.</p>
       </header>
 
       <article class="prose prose-no-margin">
 
         <h2 id="matrix" class="scroll-m-28 font-mono">The matrix convention</h2>
-        <p>Every function operates on one object:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">matrix   rows = tasks, cols = models
          matrix[t][j] = the graded outcome of model j on task t (int, 0 = fail)</pre></div>
-        <p>A model <strong>solved</strong> a task iff its grade <code>&gt;= solved_threshold</code>
-          (default <code>1</code>), so a binary <code>0/1</code> matrix and a graded <code>0..K</code>
-          matrix both work with the same code. The CLI builds this matrix for you from a results file;
-          see <a href="#surfaces">surfacing it</a>.</p>
+        <p><strong>Solved</strong> means grade <code>&gt;= solved_threshold</code> (default <code>1</code>); binary <code>0/1</code> and graded <code>0..K</code> both work. The CLI builds it from a results file (<a href="#surfaces">below</a>).</p>
+
+        <hr>
+
+        <h2 id="outcomes" class="scroll-m-28 font-mono">What enters the matrix</h2>
+        <p>A run produces a status before it produces a grade. Only an authenticated
+          <code>SUCCESS</code> with <code>score_accepted=true</code> becomes a numeric outcome.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-x-auto border">
+          <table class="w-full border-collapse font-mono text-sm">
+            <thead><tr class="border-b">
+              <th class="px-4 py-2 text-left font-medium">Execution status</th>
+              <th class="px-4 py-2 text-left font-medium">Outcome</th>
+              <th class="px-4 py-2 text-left font-medium">Coverage</th>
+            </tr></thead>
+            <tbody>
+              <tr class="border-b"><td class="px-4 py-2"><code>SUCCESS</code>, <code>score_accepted=true</code></td><td class="px-4 py-2">graded</td><td class="px-4 py-2">counted</td></tr>
+              <tr class="border-b"><td class="px-4 py-2"><code>SUCCESS</code>, <code>score_accepted=false</code></td><td class="px-4 py-2"><code>outcome:null</code></td><td class="px-4 py-2">counted</td></tr>
+              <tr class="border-b"><td class="px-4 py-2"><code>FAILED</code></td><td class="px-4 py-2"><code>outcome:null</code></td><td class="px-4 py-2">counted</td></tr>
+              <tr class="border-b"><td class="px-4 py-2"><code>BLOCKED</code></td><td class="px-4 py-2"><code>outcome:null</code></td><td class="px-4 py-2">counted</td></tr>
+              <tr><td class="px-4 py-2"><code>NOT_RUN</code></td><td class="px-4 py-2"><code>outcome:null</code></td><td class="px-4 py-2">counted</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The rows that use <code>outcome:null</code> <strong>are not converted to zero</strong>
+          and are <strong>excluded from ratings</strong>. A task that could not be attempted is not
+          a task the model failed; converting it would move a harness outage into the
+          model&rsquo;s score. They are <strong>counted in coverage, not outcomes</strong>, so a
+          model that ran few tasks shows low coverage rather than a clean-looking rate.</p>
+        <p>Statuses are tallied twice. <code>authenticated_counts</code> are receipt-bound;
+          <code>untrusted_declared_counts</code> are what a submission asserted about itself. A
+          declaration cannot authenticate its own status, so the two are never summed.</p>
+        <h3 id="dimensions" class="scroll-m-28 font-mono">Which dimensions may be ranked</h3>
+        <p>Three: <code>overall</code>, <code>language</code>, and the canonical C1&ndash;C14
+          capability labels bound by the trusted task catalogue. The leaderboard enforces this
+          list in code (<code>ALLOWED_DIMENSIONS</code>); a dimension outside it is not rendered,
+          however complete the data looks.</p>
+        <p><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound
+          family field. The site does not infer one from tracks, merged labels, or repository
+          metadata, and does not display zero &mdash; unavailable and zero are different claims.</p>
+        <p>Model, harness, and complete-configuration effects stay separate estimands. A
+          configuration score is never relabelled as model-only performance.</p>
 
         <hr>
 
         <h2 id="axes" class="scroll-m-28 font-mono">The measurement axes</h2>
-        <p>Each axis is a value in <code>[0, 1]</code> (higher = better) and is reported
-          <strong>separately</strong> &mdash; the composite never hides an axis that has collapsed.</p>
+        <p>Each axis is <code>[0, 1]</code>, higher = better, reported <strong>separately</strong>: the composite never hides a collapsed axis.</p>
 
         <h3 id="D" class="scroll-m-28 font-mono">D &mdash; discriminative yield &middot; <code>discriminative_yield</code></h3>
-        <p>The fraction of tasks that <strong>split the field</strong>:
-          <code>0 &lt; #solvers &lt; n_models</code>. A task everyone solves, or no one solves, carries
-          zero discrimination.</p>
+        <p>The fraction of tasks that <strong>split the field</strong>; all-pass and all-fail tasks carry zero discrimination.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">D = |{ tasks with 0 &lt; solvers &lt; n_models }| / n_tasks</pre></div>
-        <p>Returns <code>None</code> with fewer than 2 models (splitting is undefined with one column).
-          This is the single most important axis, and it carries the default composite weight of
-          0.5.</p>
+        <p>Returns <code>None</code> with fewer than 2 models. Default composite weight 0.5.</p>
 
         <h3 id="C" class="scroll-m-28 font-mono">C &mdash; difficulty coverage &middot; <code>difficulty_coverage</code></h3>
-        <p>The <strong>normalized entropy</strong> of the per-task solve-rate bucket occupancy. Each
-          task's solve-rate lands in one of <code>n_buckets</code> equal-width bins over
-          <code>[0, 1]</code>; the entropy of that occupancy, divided by <code>log(n_buckets)</code>, is
-          <code>1</code> when tasks spread evenly across difficulties and <code>0</code> when they all
-          cluster in one bucket.</p>
+        <p><strong>Normalized entropy</strong> of solve-rate bucket occupancy over <code>n_buckets</code> equal-width bins on <code>[0, 1]</code>: <code>1</code> when tasks spread evenly, <code>0</code> when they all cluster in one bucket.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">C = ( -Σ p_b · log p_b ) / log(n_buckets)      p_b = fraction of tasks in bucket b</pre></div>
-        <p>Measures whether the set spans easy &rarr; hard rather than clustering at one difficulty.</p>
 
         <h3 id="M" class="scroll-m-28 font-mono">M &mdash; monotonicity &middot; <code>monotonicity</code></h3>
-        <p>The fraction of tasks with <strong>no strong ability inversion</strong>. For each task, over
-          all model pairs <code>(i, j)</code> where model <code>i</code> is clearly abler than
-          <code>j</code> (<code>ability_i &gt; ability_j + ability_eps</code>, default
-          <code>eps = 0.05</code>), a <em>strong inversion</em> is
-          <code>solved_j and not solved_i</code> &mdash; a weaker model passing a task the abler one
-          misses. That is a noise/mislabel/gameability signal. A task is monotonic iff it has zero such
-          inversions.</p>
+        <p>Fraction of tasks with <strong>no strong ability inversion</strong>: over pairs where <code>ability_i &gt; ability_j + ability_eps</code> (default <code>eps = 0.05</code>), a <em>strong inversion</em> is <code>solved_j and not solved_i</code> &mdash; noise, mislabel, or gameability. Monotonic iff zero inversions.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">M = |{ monotonic tasks }| / n_tasks</pre></div>
-        <p>Ability defaults to each model's overall solve-rate. With no ability separation to violate, M
-          is vacuously <code>1.0</code>.</p>
+        <p>Ability defaults to each model's overall solve-rate; with no ability separation, M is vacuously <code>1.0</code>.</p>
 
         <h3 id="A" class="scroll-m-28 font-mono">A &mdash; angle coverage &middot; <code>angle_coverage</code></h3>
-        <p>Coding-agent capability is not one skill. From the ordinal gate-states <code>0..4</code>,
-          <code>capability_profile</code> decomposes ability into four <strong>conditional</strong>
-          rates, each isolating one capability by conditioning on having reached the previous stage:</p>
+        <p>From the ordinal gate-states <code>0..4</code>, <code>capability_profile</code> decomposes ability into four <strong>conditional</strong> rates, each conditioned on the previous stage:</p>
         <div class="overflow-x-auto">
           <table>
             <thead><tr><th>angle</th><th>meaning</th><th>conditions on state &ge;</th></tr></thead>
@@ -119,18 +122,10 @@
             </tbody>
           </table>
         </div>
-        <p>An angle whose <em>conditioning</em> population is empty is <code>None</code> &mdash; never a
-          fabricated number. <code>angle_coverage(graded, min_support=3)</code> reports, per angle, the
-          conditioning <code>support</code>, whether it is <code>covered</code> (support
-          <code>&ge; min_support</code>), the list of <code>uncovered_angles</code>, and
-          <code>all_covered</code>. A set that never reaches stage <code>&ge; 3</code> simply
-          <strong>cannot</strong> measure <code>clean_given_full_f2p</code>; this guard catches that dead
-          angle before the set ships. Advisory only.</p>
+        <p>An empty <em>conditioning</em> population gives <code>None</code>, never a fabricated number. <code>angle_coverage(graded, min_support=3)</code> reports per angle: <code>support</code>, <code>covered</code> (<code>support &ge; min_support</code>), <code>uncovered_angles</code>, <code>all_covered</code>. A set never reaching stage <code>&ge; 3</code> <strong>cannot</strong> measure <code>clean_given_full_f2p</code>. Advisory only.</p>
 
         <h3 id="R" class="scroll-m-28 font-mono">R &mdash; diversity / anti-redundancy &middot; <code>diversity</code></h3>
-        <p>A living daily set can silently fill with near-clones of one PR-family. R scores the set over
-          <strong>task signatures</strong> (<code>{repo, files, f2p}</code>), <em>not</em> the response
-          matrix:</p>
+        <p>R scores <strong>task signatures</strong> (<code>{repo, files, f2p}</code>), <em>not</em> the response matrix:</p>
         <ul>
           <li><code>task_similarity(a, b)</code> &rarr; <code>0.0</code> for different repos
             (definitionally diverse); for the same repo, the mean of the changed-file Jaccard and the F2P
@@ -143,9 +138,7 @@
           <code>None</code> for fewer than 2 tasks.</p>
 
         <h3 id="I" class="scroll-m-28 font-mono">I &mdash; IRT (2PL) test information &middot; <code>total_information_2pl</code></h3>
-        <p>The psychometric gold standard. The binary response matrix is fit to the
-          <strong>2-parameter logistic</strong> item-response model via <code>irt_item_stats</code>,
-          giving each task an <code>a</code> (discrimination) and <code>b</code> (difficulty):</p>
+        <p><code>irt_item_stats</code> fits the binary matrix to the <strong>2-parameter logistic</strong> model, giving each task an <code>a</code> (discrimination) and <code>b</code> (difficulty):</p>
         <ul>
           <li><code>b = logit(1 &minus; solve_rate)</code> &mdash; harder tasks (low solve-rate) get
             higher <code>b</code>.</li>
@@ -154,24 +147,17 @@
             all-fail / non-correlating item floors to a small <code>a</code> &mdash; it discriminates
             nothing.</li>
         </ul>
-        <p>Each item's <strong>Fisher information</strong> at ability <code>theta</code> is:</p>
+        <p>Each item's <strong>Fisher information</strong> at ability <code>theta</code>:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">I_item(theta) = a² · P · (1 − P)        P = 1 / (1 + e^{−a(theta − b)})</pre></div>
-        <p>Item information is <strong>additive</strong> (items conditionally independent), so test
-          information is the sum, and the max-information subset is exactly the top-k items by individual
-          information (<code>select_max_information</code>, no greedy interaction needed):</p>
+        <p>Item information is <strong>additive</strong> (items conditionally independent), so the max-information subset is exactly the top-k items (<code>select_max_information</code>, no greedy pass):</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">I_test(theta) = Σ_items a² · P · (1 − P)          SE(theta) = 1 / √I_test</pre></div>
-        <p><code>information_se(info)</code> returns that standard error (<code>∞</code> when there is no
-          information).</p>
+        <p><code>information_se(info)</code> returns that SE (<code>∞</code> with no information).</p>
 
         <h3 id="kr20" class="scroll-m-28 font-mono">KR-20 &mdash; reliability &middot; <code>reliability_kr20</code></h3>
-        <p>Internal-consistency reliability: do the items measure a <strong>consistent</strong> latent
-          ability, or noise? Kuder-Richardson 20 is the standard coefficient for binary items:</p>
+        <p>Internal-consistency reliability &mdash; Kuder-Richardson 20, for binary items:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">KR20 = ( k / (k−1) ) · ( 1 − Σ p_i·q_i / σ²_total )</pre></div>
-        <p>where <code>k</code> = tasks, <code>p_i</code> = task <code>i</code>'s pass rate across
-          models, <code>q_i = 1 &minus; p_i</code>, and <code>σ²_total</code> = variance of the per-model
-          total scores. <code>kr20</code> is <code>None</code> when <code>k &lt; 2</code> or the
-          total-score variance is <code>0</code> (no ability spread &rarr; undefined). Rule of thumb:
-          <code>&gt; 0.7</code> acceptable, <code>&gt; 0.8</code> good; it can go <strong>negative</strong>
+        <p><code>k</code> = tasks, <code>p_i</code> = pass rate of task <code>i</code>, <code>q_i = 1 &minus; p_i</code>, <code>σ²_total</code> = per-model total-score variance. <code>None</code> when <code>k &lt; 2</code> or that variance is <code>0</code>. Rule of thumb:
+          <code>&gt; 0.7</code> acceptable, <code>&gt; 0.8</code> good; <strong>negative</strong>
           when items are mutually inconsistent.</p>
 
         <hr>
@@ -179,66 +165,34 @@
         <h2 id="uncertainty" class="scroll-m-28 font-mono">Uncertainty and power</h2>
 
         <h3 id="bootstrap" class="scroll-m-28 font-mono">Bootstrap confidence intervals &middot; <code>msq_bootstrap_ci</code></h3>
-        <p>At <code>N &asymp; 6</code> tasks the point estimates carry huge sampling uncertainty; a
-          research-grade report must state it. This <strong>resamples the task rows with
-          replacement</strong> <code>n_boot</code> times (seeded RNG &rarr; resume-reproducible),
-          recomputing D/C/M each time, and returns per axis:</p>
+        <p><strong>Resamples the task rows with replacement</strong> <code>n_boot</code> times (seeded RNG &rarr; resume-reproducible), recomputing D/C/M. Per axis:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{ estimate, lo, hi, se, n_valid }</pre></div>
-        <p><code>estimate</code> is the point estimate on the full set, <code>[lo, hi]</code> the central
-          <code>ci</code>-percentile interval (default 95%), <code>se</code> the bootstrap standard
-          deviation. Thin sets produce <strong>wide</strong> intervals &mdash; that is the honest point,
-          not a defect.</p>
+        <p><code>estimate</code> is the full-set point estimate, <code>[lo, hi]</code> the central <code>ci</code>-percentile interval (default 95%), <code>se</code> the bootstrap SD. At <code>N &asymp; 6</code> tasks intervals are <strong>wide</strong>.</p>
 
         <h3 id="power" class="scroll-m-28 font-mono">Precision-power (required-N) &middot; <code>required_tasks_for_precision</code></h3>
-        <p>The actionable question: how many tasks buy a research-grade interval? Standard error scales
-          as <code>1/√N</code>, so from the bootstrap SE at the current <code>N₀</code>:</p>
+        <p>SE scales as <code>1/√N</code> from the bootstrap SE at <code>N₀</code>:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">half_width h(N) = z · SE(N₀) · √(N₀ / N)
 required N       = N₀ · ( z · SE(N₀) / target_half_width )²      (rounded up)</pre></div>
-        <p>Returns
-          <code>{axis, n_now, se_now, half_width_now, target_half_width, required_n}</code>.
-          <code>required_n</code> is <code>None</code> when the axis SE is undefined (too thin) and
-          <code>0</code> when SE is already <code>0</code>.
-          <code>precision_curve(matrix, sizes, axis="D")</code> gives the full precision-vs-size curve
-          <code>[{n, half_width}, ...]</code> for setting a daily task-count target.</p>
+        <p>Returns <code>{axis, n_now, se_now, half_width_now, target_half_width, required_n}</code>; <code>required_n</code> is <code>None</code> when the axis SE is undefined, <code>0</code> when SE is already <code>0</code>. <code>precision_curve(matrix, sizes, axis="D")</code> gives the curve <code>[{n, half_width}, ...]</code>.</p>
 
         <h3 id="reliability-power" class="scroll-m-28 font-mono">Reliability-power (required-N) &middot; <code>tasks_for_reliability</code></h3>
-        <p>The reliability twin of precision-power, via the <strong>Spearman-Brown prophecy</strong>: the
-          test <em>length</em> needed to reach a target KR-20 from the current one:</p>
+        <p><strong>Spearman-Brown prophecy</strong>: the test <em>length</em> needed to reach a target KR-20 from the current one:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">k' = k · [ ρ'·(1 − ρ) ] / [ ρ·(1 − ρ') ]        (rounded up, floored at 1)</pre></div>
-        <p>Returns <code>{current_kr20, current_k, target_kr20, required_k}</code>.
-          <code>required_k</code> is <code>None</code> when current reliability is undefined or
-          <code>&le; 0</code> (a test measuring noise cannot be prophesied) or the target is not in
-          <code>(0, 1)</code>. Two independent task-count targets (precision + reliability) triangulate
-          "how many tasks per day."</p>
+        <p>Returns <code>{current_kr20, current_k, target_kr20, required_k}</code>. <code>required_k</code> is <code>None</code> when reliability is undefined or <code>&le; 0</code>, or the target is outside <code>(0, 1)</code>.</p>
 
         <hr>
 
         <h2 id="readiness" class="scroll-m-28 font-mono">The readiness verdict &middot; <code>benchmark_readiness</code></h2>
-        <p>The capstone folds discrimination, reliability, and precision into <strong>one daily GO/NO-GO
-          advisory</strong> and names the binding bottleneck. A set is <code>ready</code> iff
-          <strong>all three</strong> hold:</p>
+        <p>Discrimination, reliability, and precision fold into one daily GO/NO-GO advisory naming the binding bottleneck. <code>ready</code> iff <strong>all three</strong> hold:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">D ≥ min_D            (default 0.4)
 KR-20 ≥ min_kr20     (default 0.7)
 D 95%-CI half-width ≤ max_d_halfwidth   (default 0.15)</pre></div>
-        <p>A <code>None</code> on any axis fails it (too thin to certify). On NO-GO, <code>reasons</code>
-          lists each failing constraint with its <code>value</code>, <code>threshold</code>, and
-          <code>required_n</code>; <code>bottleneck</code> is the constraint demanding the most tasks;
-          and <code>recommended_n = max(precision-required-N, reliability-required-N)</code> &mdash; the
-          task count that closes the day's gap. Purely advisory: it tells the pipeline when a set is too
-          thin to report a research-grade leaderboard; it never gates an accept.</p>
+        <p>A <code>None</code> on any axis fails it. On NO-GO, <code>reasons</code> lists each failing constraint with <code>value</code>, <code>threshold</code>, <code>required_n</code>; <code>bottleneck</code> demands the most tasks; <code>recommended_n = max(precision-required-N, reliability-required-N)</code>. Advisory only: never gates an accept.</p>
 
         <hr>
 
         <h2 id="card" class="scroll-m-28 font-mono">One-call quality card &middot; <code>benchmark_quality_report</code></h2>
-        <p><code>benchmark_quality_report(matrix, ..., deep=True)</code> aggregates every axis in a
-          single call: the MSQ profile (<code>D/C/M</code> + composite), diversity (from
-          <code>signatures</code>), angle coverage (from flat <code>graded</code> states), the
-          <code>noisy_task_indices</code> (monotonicity violations), a <strong>curated</strong> subset
-          (monotonic core &rarr; info-max pick &rarr; diverse filter), and &mdash; with
-          <code>deep=True</code> &mdash; the IRT <code>total_information</code> + SE, the bootstrap
-          <code>ci</code>, the precision <code>power</code> read, <code>reliability</code> (KR-20), and
-          the <code>reliability_prophecy</code>. Every axis is reported separately; never a single scalar
-          hiding a collapse.</p>
+        <p><code>benchmark_quality_report(matrix, ..., deep=True)</code> aggregates every axis: the MSQ profile (<code>D/C/M</code> + composite), diversity (from <code>signatures</code>), angle coverage (from flat <code>graded</code> states), <code>noisy_task_indices</code> (monotonicity violations), a <strong>curated</strong> subset (monotonic core &rarr; info-max &rarr; diverse filter). <code>deep=True</code> adds IRT <code>total_information</code> + SE, bootstrap <code>ci</code>, precision <code>power</code>, <code>reliability</code> (KR-20), <code>reliability_prophecy</code>.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">from terminal_daily_bench import quality as q
 
 matrix = [
@@ -258,46 +212,26 @@ print(card["reliability"]["kr20"])        <span class="text-muted-foreground"># 
 verdict = q.benchmark_readiness(matrix)
 print(verdict["ready"], verdict["bottleneck"], verdict["recommended_n"])
 <span class="text-muted-foreground"># False precision 37</span></pre></div>
-        <p>Selection helpers built on the same primitives: <code>select_informative_subset</code> (greedy
-          <code>D + C</code> max), <code>select_max_information</code> (top-k Fisher information),
-          <code>balanced_subset</code> (spread across difficulty buckets), <code>diverse_subset</code>
-          (farthest-point over signatures), <code>select_mid_difficulty</code> (scaffold-relative
-          discriminative band), and <code>filter_monotonic</code> / <code>flag_noisy_tasks</code> (drop
-          ability-inverting tasks). <code>cross_scaffold_quality</code> compares which scaffold frame
-          gives the most discriminative benchmark.</p>
+        <p>Selection helpers: <code>select_informative_subset</code> (greedy <code>D + C</code>), <code>select_max_information</code> (top-k Fisher), <code>balanced_subset</code> (difficulty-balanced), <code>diverse_subset</code> (farthest-point over signatures), <code>select_mid_difficulty</code> (scaffold-relative discriminative band), <code>filter_monotonic</code> / <code>flag_noisy_tasks</code> (drop ability-inverting tasks), <code>cross_scaffold_quality</code> (most discriminative scaffold frame).</p>
 
         <hr>
 
         <h2 id="surfaces" class="scroll-m-28 font-mono">How <code>tdb quality</code> surfaces it</h2>
-        <p>The CLI reads a results file (JSONL or a JSON list of records), builds the
-          <code>(task &times; model)</code> matrix, and prints the card plus the readiness line. Each
-          record needs a <code>task</code> and <code>model</code>, and either <code>solved</code> or a
-          <code>reward</code> (treated as solved when <code>reward &ge; 0.999</code>); records with
-          <code>model == "oracle"</code> are excluded from the matrix.</p>
+        <p>Reads a results file (JSONL or a JSON list), builds the <code>(task &times; model)</code> matrix, prints the card and readiness line. Records need <code>task</code>, <code>model</code>, and either <code>solved</code> or <code>reward</code> (solved when <code>reward &ge; 0.999</code>); <code>model == "oracle"</code> rows are excluded.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># results.jsonl — one record per (model, task) run, exactly as `tdb run` emits</span>
 <span class="text-muted-foreground"># {"task":"td-1","model":"A","reward":1.0}</span>
 <span class="text-muted-foreground"># {"task":"td-1","model":"B","reward":0.0}</span>
 <span class="text-muted-foreground"># ...</span>
 
 tdb quality results.jsonl</pre></div>
-        <p>Real output on the 6-task / 3-model example above:</p>
+        <p>Output on the 6-task / 3-model example above:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks=6 models=3
   D(discrimination)=0.667  C(coverage)=0.896  M(monotonicity)=0.833
   IRT test-information=1.808  KR-20 reliability=0.5142857142857141
   D 95% CI=[0.333, 1.000]
   readiness: NOT-ready (bottleneck=precision, need ~37 tasks)
 {"msq": {...}, "irt": {...}, "reliability": {...}, "readiness": {...}}</pre></div>
-        <p>The last line is the full machine-readable card (<code>msq</code>, <code>irt</code>,
-          <code>reliability</code>, <code>readiness</code>) as JSON for downstream tooling. The command
-          requires <strong>&ge; 1 task and &ge; 2 models</strong> (multi-angle quality is undefined with a
-          single model column) and exits <code>2</code> otherwise.</p>
-        <p>Read the example above: <code>D = 0.667</code> (4 of 6 tasks split the field &mdash; the
-          all-pass td-3 and all-fail td-4 do not), yet the <code>D 95% CI = [0.333, 1.000]</code> is
-          enormous because <code>N = 6</code> is tiny, and <code>KR-20 = 0.51</code> is below the
-          <code>0.70</code> bar. The verdict is <strong>NOT-ready</strong>, bottlenecked on
-          <strong>precision</strong>, needing ~37 tasks to certify a research-grade discrimination
-          interval. That is exactly the judgment a solve-rate scalar can never make &mdash; and the
-          reason MSQ exists.</p>
+        <p>The last line is that card as JSON. <code>tdb quality</code> requires <strong>&ge; 1 task and &ge; 2 models</strong>; exits <code>2</code> otherwise.</p>
 
       </article>
 
@@ -330,7 +264,7 @@ tdb quality results.jsonl</pre></div>
 </div>
 </main>
 
-<script src="../../assets/site.js" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */
@@ -371,7 +305,7 @@ tdb quality results.jsonl</pre></div>
     "tdb-panel bg-card text-card-foreground -mx-4 border px-6 py-6 " +
     "text-sm/relaxed text-muted-foreground sm:mx-0";
 
-  var board = await T.getJSON("leaderboard_data.json").catch(function () { return null; });
+  var board = await T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"));
   var q = board && board.quality;
 
   if (!q) {
@@ -390,7 +324,11 @@ tdb quality results.jsonl</pre></div>
                      : Number(x).toFixed(d == null ? 3 : d);
   };
 
-  var frames = [["single_shot", "single-shot"], ["terminus2", "agent"]].filter(function (f) {
+  /* Enumerated, not listed: the hard-coded "terminus2" never matched the data's
+     "terminus-2", so the agent frame was invisible here too. */
+  var frames = Object.keys(q).filter(function (k) {
+    return k !== "thresholds" && q[k] && typeof q[k] === "object";
+  }).sort().map(function (k) { return [k, k]; }).filter(function (f) {
     return q[f[0]];
   });
 

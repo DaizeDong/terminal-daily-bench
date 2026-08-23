@@ -8,7 +8,7 @@
    resilient layout; semantic tdb-* hooks let site.css express Terminal Daily's
    own day-window identity without coupling behavior to presentation.
 
-   window.TDB = { ROOT, getJSON, taskSuites, taskInSuite, wilson, pct,
+   window.TDB = { ROOT, getJSON, taskSuites, taskInSuite, wilson, pct, fetchFailed,
                   rateCell, dayRail, CANARY }
    ------------------------------------------------------------------------- */
 (function () {
@@ -20,6 +20,17 @@
   })();
   var ROOT = (self && self.getAttribute("data-root")) || ".";
   var PAGE = (self && self.getAttribute("data-page")) || "";
+
+  /* site.js builds markup on every page and had no escaper at all -- the suite
+     rail interpolated a suite id straight into innerHTML. tdb-data.js has one,
+     but only the leaderboard and home pages load that file, so the shell needs
+     its own. Same character set: everything that can close an attribute or
+     open a tag. */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
 
   function url(p) { return ROOT + "/" + p; }
 
@@ -373,28 +384,62 @@
   }
 
   /* the day rail: suites are date-versioned, because the benchmark is living */
+  /* The suite switcher: one line of links, not a strip of cards.
+
+     It used to render a bordered window with one bordered card per suite,
+     each carrying an id and a task count. Four suites therefore cost a panel,
+     five borders and a badge to say what a sentence says. The current suite is
+     marked, the rest are links, and the whole control is one line high. */
   function dayRail(el, suites, activeId) {
     if (!el) return;
     if (!suites || !suites.length) { el.innerHTML = ""; return; }
     var cells = suites.map(function (s) {
-      var on = (s.id === activeId) ? "true" : "false";
-      return '<a class="tdb-day flex shrink-0 flex-col gap-0.5 border-r px-4 py-3 ' +
-        'font-mono transition-colors hover:bg-sidebar dark:hover:bg-accent" ' +
-        'data-active="' + on + '" href="' + url("benchmarks/" + encodeURIComponent(s.id) + "/") +
-        '" title="' + (s.status || "") + ' suite">' +
-        '<span class="text-sm">' + s.id + "</span>" +
-        '<span class="text-muted-foreground text-xs tabular-nums">' +
-          (s.n_tasks != null ? s.n_tasks + " tasks" : "&mdash;") + "</span></a>";
+      var on = (s.id === activeId);
+      var n = (s.n_tasks != null) ? " (" + s.n_tasks + ")" : "";
+      if (on) {
+        return '<span class="tdb-suitelink" data-active="true">' + esc(s.id) + esc(n) + "</span>";
+      }
+      return '<a class="tdb-suitelink" href="' +
+        url("benchmarks/" + encodeURIComponent(s.id) + "/") + '">' + esc(s.id) + esc(n) + "</a>";
     }).join("");
     el.innerHTML =
-      '<div class="tdb-day-window bg-card text-card-foreground flex flex-col border font-mono">' +
-        '<div class="flex items-center gap-3 border-b px-4 py-2">' +
-          '<p class="text-muted-foreground text-xs">published suites</p>' +
-          '<span data-slot="badge" class="ml-auto ' + BADGE_SECONDARY + '">' +
-            suites.length + (suites.length === 1 ? " suite" : " suites") + "</span>" +
-        "</div>" +
-        '<div class="tdb-rail flex overflow-x-auto">' + cells + "</div>" +
-      "</div>";
+      '<nav class="tdb-suiterail" aria-label="Published suites">' +
+        '<span class="tdb-suiterail-k">suites</span>' + cells +
+      "</nav>";
+  }
+
+  /* A catch handler that keeps the page working and still tells the truth.
+
+     Ten call sites across the site used `.catch(function () { return null; })`.
+     Downstream code then rendered its empty state, so a broken deploy, a 404
+     and a genuinely empty catalogue all produced the SAME page -- "No suites
+     are published." A reader cannot tell those apart, and neither can we.
+
+     This keeps the null (so no caller has to change its shape) but makes the
+     failure visible: it logs, and it paints a banner at the top of the page
+     saying that the data could not be READ, which is not the same claim as
+     "there is nothing to show". */
+  function fetchFailed(what) {
+    return function (err) {
+      console.error("[TDB] could not load " + what + ":", err);
+      var host = document.querySelector("[data-tdb-canary-host]") ||
+                 document.querySelector("#nd-home-layout") || document.body;
+      var box = document.createElement("div");
+      box.className = "tdb-loaderr border-y px-6 py-8";
+      var h = document.createElement("p");
+      h.className = "font-medium";
+      h.textContent = "Could not load " + what + ".";
+      var d = document.createElement("p");
+      d.className = "text-muted-foreground mt-2 font-mono text-sm";
+      d.textContent = String(err);
+      var n = document.createElement("p");
+      n.className = "text-muted-foreground mt-2 text-sm";
+      n.textContent = "This is a failure to read the data, not an empty result. " +
+        "Anything below may be missing rather than absent.";
+      box.appendChild(h); box.appendChild(d); box.appendChild(n);
+      host.insertBefore(box, host.firstChild);
+      return null;
+    };
   }
 
   window.TDB = {
@@ -406,6 +451,8 @@
     pct: pct,
     rateCell: rateCell,
     dayRail: dayRail,
+    esc: esc,
+    fetchFailed: fetchFailed,
     CANARY: CANARY
   };
 

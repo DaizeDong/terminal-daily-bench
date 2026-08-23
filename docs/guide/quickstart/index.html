@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quickstart — terminal-daily-bench docs</title>
 <meta name="description" content="Install terminal-daily-bench, point it at an OpenAI-compatible endpoint, score a model on a task, run the oracle baseline, and read the quality card.">
-<link rel="stylesheet" href="../../assets/tw.css">
-<link rel="stylesheet" href="../../assets/tw-extra.css">
-<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -34,8 +34,8 @@
         <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>terminal-daily-bench</strong> is a living, execution-graded coding-agent
           benchmark. A model produces a patch; harbor re-lays a protected test suite the model never
           sees and runs it under a network cut. The reward is the test outcome, never a model's
-          opinion. This prevents claim bypass; semantic verifier false-accept remains unmeasured.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">This page walks you from install to a scored result and a quality card.</p>
+          opinion. That covers claim bypass only; semantic verifier false-accept remains
+          unmeasured.</p>
       </header>
 
       <article class="prose prose-no-margin">
@@ -64,14 +64,14 @@
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .</pre></div>
         <p>Or with uv:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">uv tool install terminal-daily-bench</pre></div>
-        <p>Either way you get the <code>tdb</code> console script (declared as
-          <code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>). Verify:</p>
+        <p>Both install the <code>tdb</code> console script
+          (<code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>). Verify:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb --version          <span class="text-muted-foreground"># -&gt; terminal-daily-bench 0.1.0</span></pre></div>
 
         <h2 id="endpoint" class="scroll-m-28 font-mono">Configure the model endpoint</h2>
         <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint, configured by
-          environment variables so the bundle is not tied to any vendor. Point it at OpenAI, OpenRouter,
-          vLLM, LiteLLM, or a local server:</p>
+          environment variables. Point it at OpenAI, OpenRouter, vLLM, LiteLLM, or a local
+          server:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="text-muted-foreground"># any OpenAI-compatible endpoint</span>
 export OPENAI_API_KEY=sk-...                        <span class="text-muted-foreground"># bearer key, read from env, never stored</span></pre></div>
         <ul>
@@ -80,6 +80,23 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
           <li>If the upstream rejects <code>max_tokens</code> (some reasoning models), the client
             automatically retries with <code>max_completion_tokens</code>.</li>
         </ul>
+
+        <h2 id="doctor" class="scroll-m-28 font-mono">Run <code>tdb doctor</code> first</h2>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb doctor tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
+        <p>It reports which of the pieces below your host is missing before you spend a
+          model call finding out.</p>
+
+        <h2 id="image" class="scroll-m-28 font-mono">Build the task image</h2>
+        <p>A published task ships no image: <code>docker_image</code> is the portable string
+          <code>environment/Dockerfile</code>, because the producer&rsquo;s host-specific
+          <code>.sif</code> path is stripped on publish. Nothing executes that as-is, so build the
+          task&rsquo;s own Dockerfile once and point <code>docker_image</code> at the result.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
+sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
+    tasks/archive/td-fc90ea8b76d5f6b6/task.toml</pre></div>
+        <p>Images are cached by task id + Dockerfile hash, so a second run is a no-op;
+          <code>--force</code> rebuilds. The <strong>build</strong> stage needs internet; the scored
+          run does not. See <a class="hover:text-foreground underline underline-offset-4" href="../task-format/">the task format</a>.</p>
 
         <h2 id="score" class="scroll-m-28 font-mono">Score a model on a task</h2>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
@@ -95,16 +112,16 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
         <p>The record is also printed to stdout.</p>
 
         <h2 id="oracle" class="scroll-m-28 font-mono">Run the oracle baseline</h2>
-        <p>The <code>oracle</code> model id runs the task's real <code>solution/oracle.patch</code>
-          &mdash; no model is called. It is the gate's own baseline and proves the execution gate returns
-          <strong>reward 1.0</strong> on a correct patch:</p>
+        <p>The <code>oracle</code> model id runs the task's real <code>solution/oracle.patch</code>;
+          no model is called. It proves the execution gate returns <strong>reward 1.0</strong> on a
+          correct patch:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb oracle tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
-        <p>Use this to confirm your apptainer/singularity host is wired up correctly before spending
-          model calls: if <code>oracle</code> does not yield <code>reward = 1.0</code>, the environment,
-          not the model, is the problem.</p>
+        <p>Run it before spending model calls: if <code>oracle</code> does not yield
+          <code>reward = 1.0</code>, the environment, not the model, is the problem.</p>
         <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed">Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship with
           <code>solution/</code>. <strong>Live</strong> tasks withhold the gold patch and the protected
-          test bodies; submitted patches remain unranked until official replay. See
+          test bodies; submitted patches stay unranked until official replay.
+          <a href="../task-format/#archive-vs-live">Archive vs. live</a> &middot;
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</div>
 
         <h2 id="record" class="scroll-m-28 font-mono">The result record</h2>
@@ -154,7 +171,7 @@ export OPENAI_API_KEY=sk-...                        <span class="text-muted-fore
             and nothing else.</li>
           <li><code>reward_source</code> &mdash; the reward is read from <code>result.json</code> with
             the same reader the admission gate uses
-            (<code>harbor_score.read_harbor_reward</code>), i.e. byte-for-byte execution truth.</li>
+            (<code>harbor_score.read_harbor_reward</code>).</li>
           <li><code>protected_tests_relaid_by_harbor: true</code> &mdash; the trusted
             <code>tests/</code> are re-laid from the task package <em>after</em> the patch, so a patch
             that edits tests only changes a discarded workspace.</li>
@@ -190,8 +207,8 @@ tdb quality results.jsonl</pre></div>
 
         <h2 id="submitting" class="scroll-m-28 font-mono">Submitting results</h2>
         <p>Every submission is recorded as <strong>pending</strong> and its claimed reward is ignored.
-          The public bundle does not run a replay worker; only a later operator-published gate
-          receipt can move a row into the verified ranking. See
+          The public bundle does not run a replay worker; only an operator-published gate receipt
+          can enter the verified ranking. See <a href="../submission/">submission</a> and
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>../CONTRIBUTING.md</code></a>.</p>
 
       </article>
@@ -225,7 +242,7 @@ tdb quality results.jsonl</pre></div>
 </div>
 </main>
 
-<script src="../../assets/site.js" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */
@@ -270,8 +287,8 @@ tdb quality results.jsonl</pre></div>
     "text-sm/relaxed text-muted-foreground sm:mx-0";
 
   var results = await Promise.all([
-    T.getJSON("site_data.json").catch(function () { return null; }),
-    T.getJSON("leaderboard_data.json").catch(function () { return null; })
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"))
   ]);
   var site = results[0];
   var board = results[1];

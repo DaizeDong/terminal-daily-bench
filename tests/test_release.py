@@ -35,15 +35,48 @@ def test_package_imports_without_private_stack():
     assert set(REGISTRY) >= {"single_shot", "terminus"}
 
 
+# Import prefixes that must never appear in this package. The names are already
+# what they are; what this comment deliberately does NOT do is describe the
+# layout, history or tooling of anything outside this repository. A public repo
+# that explains a private one's internals has leaked the private one.
+#
+# Prefix-matching a namespace rather than each submodule is the point: a module
+# added over there must not silently become importable here.
+#
+# BOTH generations are listed because a prefix list is a fail-OPEN guard -- drop
+# a name and this test keeps passing while the thing it exists to catch walks
+# straight through. Add first, and only remove a legacy prefix once nothing
+# anywhere can still emit it.
+_PRIVATE_IMPORT_PREFIXES = tuple(
+    f"{kw} {mod}"
+    for kw in ("from", "import")
+    for mod in ("td_pipeline", "rcvh", "td_phase0", "terminal_daily.")
+)
+
+
 def test_no_private_imports_in_package():
     bad = []
     for f in (ROOT / "terminal_daily_bench").rglob("*.py"):
         for i, line in enumerate(f.read_text().splitlines(), 1):
             s = line.strip()
-            if s.startswith(("from td_pipeline", "import td_pipeline",
-                             "from rcvh", "import rcvh")):
+            if s.startswith(_PRIVATE_IMPORT_PREFIXES):
                 bad.append(f"{f.name}:{i}")
     assert not bad, bad
+
+
+def test_private_import_guard_actually_matches():
+    """The guard above is a string-prefix test, so it fails open if a name rots.
+
+    This proves it still fires: every prefix must reject a synthetic line. Without
+    it, renaming a private package silently disarms the isolation contract and
+    nothing goes red.
+    """
+    for prefix in _PRIVATE_IMPORT_PREFIXES:
+        line = f"{prefix}foo import bar" if prefix.endswith(".") else f"{prefix} import bar"
+        assert line.strip().startswith(_PRIVATE_IMPORT_PREFIXES), prefix
+    assert not "from terminal_daily_bench import scoring".startswith(
+        _PRIVATE_IMPORT_PREFIXES
+    ), "the guard must not reject this package's own imports"
 
 
 def test_false_accept_is_zero_by_contract():

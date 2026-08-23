@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark status — terminal-daily-bench</title>
 <meta name="description" content="Published terminal-daily-bench suites, task counts, languages, and live/archive release status.">
-<link rel="stylesheet" href="../assets/tw.css">
-<link rel="stylesheet" href="../assets/tw-extra.css">
-<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -19,8 +19,8 @@
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
       <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest dated release first. Suite publication does not imply a formal score.</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 -mx-4 sm:mx-0" id="suites" data-tdb-primary-data>
-        <div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">loading suites&hellip;</div>
+      <div class="tdb-plain-table" id="suites" data-tdb-primary-data>
+        <p class="tdb-empty">loading suites&hellip;</p>
       </div>
 
       <section class="flex flex-col py-12 sm:pb-16" data-tdb-integrity>
@@ -34,17 +34,17 @@
           </div>
           <div class="px-6 py-6">
             <p class="font-medium">archive</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution still requires the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution requires the unpublished patched Harbor fork. Stock Harbor 0.13.1 is insufficient.</p>
           </div>
         </div>
-        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">The certified 50-task v3 campaign is awaiting formal publication. Historical matrices do not mark a suite scored. The deterministic execution gate ignores claimed rewards; semantic verifier false-accept remains unmeasured without labeled exploit trials.</p>
+        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">No certified 50-task v3 ranking is published. Historical matrices do not mark a suite scored. The deterministic execution gate ignores claimed rewards. Semantic verifier false-accept is unmeasured.</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="benchmarks"></script>
 <script>
 (function () {
   "use strict";
@@ -85,43 +85,43 @@
     return suites;
   }
 
-  function suiteCard(suite, tasks) {
-    var live = suite.status === "live";
-    var langs = (suite.languages || []).filter(Boolean);
-    if (!langs.length) {
-      tasks.forEach(function (task) {
-        if (T.taskInSuite(task, suite.id) && task.language && langs.indexOf(task.language) < 0) {
-          langs.push(task.language);
-        }
-      });
-    }
-    var pills = badge(suite.status || "unknown", live);
-    var facts = [];
-    if (suite.n_tasks != null) facts.push(plural(suite.n_tasks, "task", "tasks"));
-    if (langs.length) facts.push(langs.join(", "));
+  /* One row per suite instead of one card per suite.
 
-    return '<div data-slot="card" class="' + CARD + '">' +
-      '<a class="flex flex-1" href="./' + encodeURIComponent(suite.id) + '/">' +
-        '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
-          '<div data-slot="card-header" class="' + HEADER + '">' +
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(suite.id) + "</h2>" +
-            '<div class="mt-2 flex flex-wrap gap-2">' + pills + "</div>" +
-          "</div>" +
-          '<div data-slot="card-content" class="flex flex-1 flex-col justify-between gap-6 px-6">' +
-            '<p class="font-mono wrap-anywhere sm:text-sm">' + esc(suite.note || "No release note published.") + "</p>" +
-            '<p class="text-muted-foreground font-mono text-xs">' + (facts.length ? esc(facts.join(" · ")) : "&mdash;") + "</p>" +
-          "</div>" +
-        "</div>" +
-      "</a></div>";
+     Four suites used to take a full screen: a bordered card each, a coloured
+     stripe on top, a pill, and a title big enough that "2026-08-19" rendered
+     as "2026-...". The reader is comparing dates, task counts and release
+     status down three columns -- so give them three columns. */
+  function suiteRows(suites, tasks) {
+    var head = '<tr><th>suite</th><th>status</th><th class="tdb-num">tasks</th>' +
+      "<th>language</th><th>release note</th></tr>";
+    var body = suites.map(function (suite) {
+      var langs = (suite.languages || []).filter(Boolean);
+      if (!langs.length) {
+        tasks.forEach(function (task) {
+          if (T.taskInSuite(task, suite.id) && task.language && langs.indexOf(task.language) < 0) {
+            langs.push(task.language);
+          }
+        });
+      }
+      return "<tr>" +
+        '<td><a class="tdb-suitecell" href="./' + encodeURIComponent(suite.id) + '/">' +
+          esc(suite.id) + "</a></td>" +
+        "<td>" + esc(suite.status || "unknown") + "</td>" +
+        '<td class="tdb-num">' + (suite.n_tasks != null ? esc(suite.n_tasks) : "&mdash;") + "</td>" +
+        '<td class="tdb-muted">' + (langs.length ? esc(langs.join(", ")) : "&mdash;") + "</td>" +
+        '<td class="tdb-wrap">' + esc(suite.note || "No release note published.") + "</td>" +
+        "</tr>";
+    }).join("");
+    return '<table class="w-full"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>";
   }
 
-  T.getJSON("site_data.json").catch(function () { return null; }).then(function (data) {
+  T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(function (data) {
     var site = data || {};
     var suites = orderedSuites(site);
     var host = document.getElementById("suites");
     host.innerHTML = suites.length
-      ? suites.map(function (suite) { return suiteCard(suite, site.tasks || []); }).join("")
-      : '<div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">No suites are published.</div>';
+      ? suiteRows(suites, site.tasks || [])
+      : '<p class="tdb-empty">No suites are published.</p>';
   });
 })();
 </script>

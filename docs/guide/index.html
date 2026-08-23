@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>docs — terminal-daily-bench</title>
 <meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Four guides: quickstart, task format, submission, quality methods.">
-<link rel="stylesheet" href="../assets/tw.css">
-<link rel="stylesheet" href="../assets/tw-extra.css">
-<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -31,9 +31,8 @@
       </div>
       <h2 class="text-center font-mono text-3xl/tight font-medium tracking-tighter text-balance sm:mb-8 sm:text-6xl/tight">run the benchmark, read the score, submit a patch</h2>
       <p class="text-fd-muted-foreground mx-auto max-w-3xl text-center font-mono tracking-tight text-balance sm:text-xl/relaxed">A model produces a patch. Harbor re-lays a protected test suite the model never
-        sees and runs it under a network cut. The reward is the test outcome &mdash; never a model's
-        opinion. These four guides cover install, the on-disk task package, the submission contract,
-        and how we measure the benchmark itself.</p>
+        sees and runs it under a network cut. The reward is the test outcome, never a model's
+        opinion.</p>
     </div>
     <div class="mx-auto grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
       <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base rounded-none" href="quickstart/">quickstart</a>
@@ -84,8 +83,9 @@ tdb quality results.jsonl</pre>
 
     <div class="bg-fd-secondary/50 mt-6 w-full border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
       <strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
-      currently require our unpublished patched Harbor fork; stock Harbor 0.13.1 is
-      insufficient. The catalogue, quality card, publisher, and doctor remain usable.
+      require the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. The
+      catalogue, quality card, publisher and doctor do not.
+      <a class="underline-offset-4 hover:underline" href="quickstart/#requirements">Requirements</a>.
     </div>
 
     <div id="live-task" class="mt-8 w-full"></div>
@@ -201,7 +201,7 @@ tdb quality results.jsonl</pre>
                   coverage, diversity, 2PL test information, KR-20 reliability, bootstrap intervals,
                   required-N power, and the daily readiness verdict.</p>
                 <div class="space-y-6">
-                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">does the task set separate models at all?</p>
+                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">whether the task set separates models</p>
                 </div>
               </div>
             </div>
@@ -223,8 +223,9 @@ tdb quality results.jsonl</pre>
     <div id="strip" class="w-full"></div>
 
     <p class="text-muted-foreground mx-auto mt-8 max-w-3xl text-center font-mono text-sm/relaxed">Archived tasks (&ge; 2 weeks old) ship in full, including
-      the reference solution, so you can reproduce a number locally. Live tasks withhold the gold
-      patch and protected test bodies; submissions remain unranked until official replay.</p>
+      the reference solution. Live tasks withhold the gold patch and protected test bodies;
+      submissions stay unranked until official replay.
+      <a class="underline-offset-4 hover:underline" href="task-format/#archive-vs-live">Archive vs. live</a>.</p>
 
     <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard &rarr;</a>
   </div>
@@ -234,7 +235,7 @@ tdb quality results.jsonl</pre>
     <div class="mb-4 flex flex-col items-center gap-2">
       <p class="font-mono text-sm">the markdown sources</p>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">the same text, rendered by github</p>
+      <p class="text-muted-foreground font-mono text-xs">the full reference these pages summarise</p>
     </div>
 
     <div class="-mx-4 flex w-full flex-col gap-12 sm:mx-0 sm:gap-16">
@@ -250,15 +251,15 @@ tdb quality results.jsonl</pre>
               </div>
             </div>
             <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-              <p class="font-mono wrap-anywhere sm:text-sm">Each guide on this site is a hand-rendered copy of a markdown file that ships with the
-                bundle. Read whichever you prefer &mdash; the text is identical.</p>
+              <p class="font-mono wrap-anywhere sm:text-sm">Each guide here is the readable subset of a markdown file that ships with the
+                bundle. The markdown is longer and is the reference: when the two differ, it wins.</p>
               <p class="font-mono text-sm sm:text-xs">
                 <a class="underline-offset-4 hover:underline" href="../quickstart.md">quickstart.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../task-format.md">task-format.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../submission.md">submission.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../quality-methods.md">quality-methods.md</a></p>
               <div class="space-y-6">
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">no APIs are invented; everything maps to code in the bundle</p>
+                <p class="text-muted-foreground font-mono text-sm sm:text-xs">everything maps to code in the bundle</p>
               </div>
             </div>
           </div>
@@ -292,7 +293,7 @@ tdb quality results.jsonl</pre>
 </div>
 </main>
 
-<script src="../assets/site.js" data-root=".." data-page="docs"></script>
+<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="docs"></script>
 <script>
 (async function () {
   var T = window.TDB;
@@ -306,8 +307,8 @@ tdb quality results.jsonl</pre>
     "text-sm/relaxed text-muted-foreground sm:mx-0";
 
   var results = await Promise.all([
-    T.getJSON("leaderboard_data.json").catch(function () { return null; }),
-    T.getJSON("site_data.json").catch(function () { return null; })
+    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot")),
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue"))
   ]);
   var board = results[0];
   var site = results[1];
@@ -339,7 +340,11 @@ tdb quality results.jsonl</pre>
       board.date + " · " + board.n_cells + " scored cells";
     var p = board.pooled || {};
     var ss = p.single_shot;
-    var t2 = p.terminus2;
+    /* "terminus2" is not a key in the data; the agent frame is "terminus-2".
+       Pick the best-covered non-single_shot frame rather than name one. */
+    var _k = Object.keys(p).filter(function (k) { return k !== "single_shot"; })
+      .sort(function (a, b) { return (p[b].n || 0) - (p[a].n || 0); })[0];
+    var t2 = _k ? p[_k] : null;
     var cells = [
       ["tasks in suite", board.n_tasks],
       ["models under test", board.n_models],

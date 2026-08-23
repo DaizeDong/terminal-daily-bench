@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>terminal-daily-bench — status, tasks, and relative capability</title>
-<meta name="description" content="Current terminal-daily-bench catalogue, formal publication status, and receipt-bound relative capability results when available.">
-<link rel="stylesheet" href="./assets/tw.css">
-<link rel="stylesheet" href="./assets/tw-extra.css">
-<link rel="stylesheet" href="./assets/site.css">
+<meta name="description" content="Current terminal-daily-bench catalogue, measured solve rates, and formal publication status.">
+<link rel="stylesheet" href="./assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="./assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="./assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -16,73 +16,67 @@
   <div class="flex flex-1 flex-col items-center px-4 py-6">
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
-      <section class="mx-auto flex max-w-4xl flex-col items-center gap-6 py-8 text-center sm:pt-24" data-tdb-section="intro">
+      <section class="tdb-masthead" data-tdb-section="intro">
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
-        <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance sm:text-6xl/tight"><span>Terminal</span> <span>Daily</span></h1>
-        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance sm:text-xl/relaxed">Fresh merged pull requests become executable tasks. The catalogue is public; the certified 50-task relative ranking is still awaiting formal results.</p>
-        <div class="grid grid-cols-1 gap-2 lg:grid-cols-3">
-          <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-primary px-8 text-base font-medium text-primary-foreground transition-all hover:bg-primary/90" href="#status">current status</a>
-          <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-secondary px-8 text-base font-medium text-secondary-foreground transition-all hover:bg-secondary/80" href="./leaderboard/">relative scores</a>
-          <a class="font-mono inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-secondary px-8 text-base font-medium text-secondary-foreground transition-all hover:bg-secondary/80" href="./registry/">browse tasks</a>
+        <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance"><span>Terminal</span> <span>Daily</span></h1>
+        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks. The catalogue is public. Every candidate is unranked.</p>
+        <div class="tdb-masthead-links">
+          <a href="#status">current status</a>
+          <a href="./leaderboard/">relative scores</a>
+          <a href="./registry/">browse tasks</a>
         </div>
       </section>
 
-      <section id="status" class="flex w-full flex-col py-8" data-tdb-section="status">
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">benchmark status</p>
-          <p class="text-muted-foreground font-mono text-xs">catalogue availability is separate from ranking authority</p>
+      <section id="status" class="tdb-block" data-tdb-section="status">
+        <div class="tdb-block-head">
+          <h2>status</h2>
+          <p>catalogue availability is separate from ranking authority</p>
         </div>
 
-        <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
-          <div class="grid grid-cols-2 md:grid-cols-3" id="hp-status">
-            <div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">loading published data&hellip;</div>
-          </div>
+        <div class="tdb-statgrid" id="hp-status">
+          <p class="text-muted-foreground font-mono text-sm">loading published data&hellip;</p>
         </div>
 
-        <div class="-mx-4 mb-6 sm:mx-0" id="tdb-rail"></div>
-
-        <div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
+        <div class="tdb-integrity" data-tdb-integrity>
           <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores; a submitted reward is only a claim.</p>
-          <details class="mt-4 border-t py-4" data-tdb-integrity-details>
-            <summary class="cursor-pointer font-medium">integrity limits and current blockers</summary>
-            <div class="text-muted-foreground mt-4">
+          <details data-tdb-integrity-details>
+            <summary>integrity limits and current blockers</summary>
+            <div class="tdb-integrity-body">
               <p>Deterministic code re-lays and executes protected tests. A claimed reward is never accepted as a score.</p>
-              <p class="mt-4">A paired staged-SIF egress canary passed on the operator cluster on 2026-08-06: its control was reachable and its isolated run was blocked. This proves only that staged image/runtime/node/endpoint combination; no production protected replay has run.</p>
-              <p class="mt-4">Receipt-authority enforcement code is complete, but the deployment registry remains <span class="text-foreground">active=false</span>. Publication input is a <span class="text-foreground">code-controlled allowlist</span>; embedded trust booleans or self-signed report/matrix pins cannot approve themselves. This repository has one collaborator, so an independent environment reviewer cannot yet exist; every candidate remains unranked.</p>
-              <p class="mt-4"><span class="text-foreground">Live tasks</span> withhold gold and protected tests; submissions remain unranked until official replay. <span class="text-foreground">Archives</span> publish those artifacts, but local runs require an unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+              <p>A paired staged-SIF egress canary passed on 2026-08-06: control reachable, isolated run blocked. That is a staged proof; no production protected replay has run.</p>
+              <p>Receipt authority is <span class="text-foreground">active=false</span> and this repository has one collaborator, so every candidate is unranked. Publication runs off a code-controlled allowlist: self-signed report/matrix pins cannot approve themselves. <a href="./guide/submission/#operator-replay">replay authority contract &rarr;</a></p>
+              <p><span class="text-foreground">Live</span> tasks withhold gold and protected tests; <span class="text-foreground">archives</span> publish them. Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. <a href="./benchmarks/">release policy &rarr;</a></p>
             </div>
           </details>
-          <p class="text-muted-foreground mt-4"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> covers completed gate decisions only. <span id="hp-data-note"></span></p>
+          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> covers completed gate decisions only. <span id="hp-data-note"></span></p>
         </div>
       </section>
 
-      <section class="flex w-full flex-col py-8" data-tdb-section="leaderboard">
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm" id="hp-board-title">relative capability · awaiting results</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">v3 matched-task Bradley&ndash;Terry deltas with task-cluster confidence intervals</p>
+      <section class="tdb-block" data-tdb-section="leaderboard">
+        <div class="tdb-block-head">
+          <h2 id="hp-board-title">leaderboard</h2>
+          <p id="hp-board-sub">top solve rates on this day&rsquo;s suite</p>
+          <div class="tdb-block-tools">
+            <div id="daynav"></div>
+            <a href="./leaderboard/">full leaderboard &rarr;</a>
           </div>
-          <a class="text-muted-foreground hover:text-foreground font-mono text-sm underline-offset-4 hover:underline" href="./leaderboard/">full leaderboard &rarr;</a>
         </div>
-
-        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto" id="hp-board">
-            <p class="text-muted-foreground px-6 py-8 text-sm">checking formal publication authority&hellip;</p>
-          </div>
-          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="hp-board-foot">Only publishable v3 rows can appear here.</div>
+        <div data-slot="table-container" class="tdb-plain-table" id="hp-board">
+          <p class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
         </div>
+        <p class="tdb-block-foot" id="hp-board-foot">Only publishable rows can appear here.</p>
       </section>
 
-      <section class="flex w-full flex-col py-8 sm:pb-16" data-tdb-section="tasks">
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm">published tasks</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs" id="hp-task-scope">latest dated suite</p>
+      <section class="tdb-block" data-tdb-section="tasks">
+        <div class="tdb-block-head">
+          <h2>tasks</h2>
+          <p id="hp-task-scope">latest dated suite</p>
+          <div class="tdb-block-tools">
+            <a href="./registry/">all tasks &rarr;</a>
           </div>
-          <a class="text-muted-foreground hover:text-foreground font-mono text-sm underline-offset-4 hover:underline" href="./registry/">all tasks &rarr;</a>
         </div>
-        <div class="-mx-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:mx-0" id="hp-tasks">
-          <div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">loading tasks&hellip;</div>
+        <div class="tdb-plain-table" id="hp-tasks">
+          <p class="text-muted-foreground font-mono text-sm">loading tasks&hellip;</p>
         </div>
       </section>
 
@@ -90,7 +84,8 @@
   </div>
 </main>
 
-<script src="./assets/site.js" data-root="." data-page="home"></script>
+<script src="./assets/site.js?v=d064c7dcdd" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=d064c7dcdd"></script>
 <script>
 (function () {
   "use strict";
@@ -104,21 +99,8 @@
   function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
 
-  var BOARD_PREVIEW_LIMIT = 5;
   var TASK_PREVIEW_LIMIT = 3;
 
-  var CARD =
-    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
-    "transition-all duration-200";
-  var HEADER =
-    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 " +
-    "px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 gap-1 transition-[color,box-shadow] " +
-    "overflow-hidden border-transparent font-mono ";
-  var BADGE_PRIMARY = BADGE + "bg-primary text-primary-foreground";
-  var BADGE_SECONDARY = BADGE + "bg-secondary text-secondary-foreground";
   var TH =
     "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
     "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
@@ -126,11 +108,6 @@
     "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
     "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
   var TR = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
-
-  function badge(text, primary) {
-    return '<span data-slot="badge" class="' + (primary ? BADGE_PRIMARY : BADGE_SECONDARY) +
-      '">' + esc(text) + "</span>";
-  }
 
   function datedSuites(site) {
     var all = ((site && site.suites) || []).slice();
@@ -187,16 +164,16 @@
       ? String(numerator) + "/" + String(denominator) : "\u2014";
   }
 
-  function statCard(label, value, note) {
-    return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col border py-0">' +
-      '<div class="flex flex-1 flex-col justify-between gap-4 py-6">' +
-        '<div data-slot="card-header" class="px-6">' +
-          '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +
-          '<p data-tdb-stat-value class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
-            (value == null || value === "" ? "&mdash;" : esc(value)) + "</p>" +
-        "</div>" +
-        (note ? '<div data-slot="card-content" class="px-6"><p class="text-muted-foreground font-mono text-xs">' + esc(note) + "</p></div>" : "") +
-      "</div></div>";
+  /* A status line, not a card.
+     Six bordered rounded rectangles took a whole screen to carry twelve words
+     and six numbers. The same information as label / value / note reads in one
+     pass and fits above the fold, which is what a status page is for. */
+  function statRow(label, value, note) {
+    return '<div class="tdb-statrow">' +
+      '<span class="tdb-statrow-k">' + esc(label) + "</span>" +
+      '<p data-tdb-stat-value class="tdb-statrow-v">' +
+        (value == null || value === "" ? "&mdash;" : esc(value)) + "</p>" +
+      '<span class="tdb-statrow-n">' + esc(note || "") + "</span></div>";
   }
 
   function renderStatus(site, board) {
@@ -207,17 +184,17 @@
     var scoring = (site && site.scoring) || {};
     var ratings = formalModelRatings(report, scoring);
     var stats = [
-      ["latest suite", latest.id, "task catalogue"],
+      ["latest catalogue suite", latest.id, "published task list"],
       ["catalogue tasks", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
       ["formal roster", input.frozen_task_roster_n != null
-        ? input.frozen_task_roster_n + "/50" : "awaiting", "exactly 50 required"],
+        ? input.frozen_task_roster_n + "/50" : "not frozen", "exactly 50 required"],
       ["official ranking", ratings.length ? "published" : "unranked",
-        ratings.length ? ratings.length + " publishable models" : "awaiting trusted complete coverage"],
+        ratings.length ? ratings.length + " publishable models" : "measured, not certified"],
       ["accepted outcomes", input.successful_records_admitted_to_outcomes,
         "SUCCESS + score_accepted=true only"],
       ["receipt authority", "inactive", "active=false · one collaborator"]
     ];
-    set("hp-status", stats.map(function (s) { return statCard(s[0], s[1], s[2]); }).join(""));
+    set("hp-status", stats.map(function (s) { return statRow(s[0], s[1], s[2]); }).join(""));
 
     if (T.dayRail) T.dayRail(byId("tdb-rail"), suites, latest.id);
     var fa = document.querySelector("[data-tdb-fa]");
@@ -236,90 +213,188 @@
     }
   }
 
-  function renderBoard(board, site) {
-    var report = relativeReport(board);
-    var rows = formalModelRatings(report, (site && site.scoring) || {});
+  /* ------------------------------------------------------------------ *
+   * The day preview.
+   *
+   * This section used to render v3 relative-capability ratings, which are
+   * gated behind an authority that is not yet granted -- so it always said
+   * "no certified ranking is published" while the leaderboard page, one click
+   * away, showed a full table of real solve rates. A preview that never
+   * previews the thing it links to is worse than no preview.
+   *
+   * It now reads the SAME per-day file the leaderboard reads, so publishing a
+   * day changes this page too. The v3 gate is still here and still decides
+   * whether the numbers may call themselves a ranking -- see officialBadge.
+   * ------------------------------------------------------------------ */
+  var BOARD_PREVIEW_LIMIT = 5;
+  var DAYS = [];
+
+  function flattenDay(day) {
+    var out = [];
+    (day.leaderboard || []).forEach(function (entry) {
+      Object.keys(entry).forEach(function (key) {
+        var cell = entry[key];
+        if (key === "model" || !cell || typeof cell !== "object") return;
+        if (typeof cell.n !== "number" || cell.n <= 0) return;
+        var at = key.indexOf("@");
+        out.push({
+          model: entry.model,
+          agent: at < 0 ? key : key.slice(0, at),
+          solved: cell.solved, n: cell.n,
+          rate: cell.solved / cell.n
+        });
+      });
+    });
+    return out;
+  }
+
+  function officialBadge(day, site) {
+    /* Same conjunction as the leaderboard page. A day is a ranking only when
+       every independent condition holds; one mis-set boolean must not be able
+       to promote measured solve rates into a claimed ranking. */
+    var ranked = formalModelRatings(relativeReport(day), (site && site.scoring) || {});
+    return ranked.length
+      ? '<span class="tdb-badge" data-official="true">official</span>'
+      /* A caveat behind a title= attribute does not exist on a phone and is
+         easy to miss anywhere else. Print it, and link to what it means. */
+      : '<span class="tdb-badge" data-official="false">unofficial</span>' +
+        '<a class="tdb-badge-why" href="./guide/quality-methods/#outcomes">why</a>';
+  }
+
+  function renderBoard(day, site) {
+    var rows = flattenDay(day);
+    rows.sort(function (a, b) { return b.rate - a.rate; });
+    var last = null, lastRank = 0;
+    rows.forEach(function (r, i) {
+      if (last === null || r.rate !== last) { lastRank = i + 1; last = r.rate; }
+      r.rank = lastRank;
+    });
+
     if (!rows.length) {
-      set("hp-board", '<div class="px-6 py-8"><p class="font-medium">Official ranking awaiting certified results.</p>' +
-        '<p class="text-muted-foreground mt-2 text-sm">No trusted, complete exactly-50 ' +
-        'td-relative-capability-v3 model table is code-approved. Embedded booleans and ' +
-        'self-signed artifacts remain unranked and are not converted to zero.</p></div>');
-      set("hp-board-foot", "Awaiting frozen roster, manifest-bound receipts, and 100% coverage.");
+      set("hp-board", '<p class="tdb-empty">No measured cells on ' +
+        esc(day.date) + ".</p>");
+      set("hp-board-foot", "Nothing was scored on this day.");
       return;
     }
 
     var head = '<tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">' +
       '<th data-slot="table-head" class="' + TH + '">rank</th>' +
+      '<th data-slot="table-head" class="' + TH + '">agent</th>' +
       '<th data-slot="table-head" class="' + TH + '">model</th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">relative score</div></th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">95% CI</div></th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">attempt coverage</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">accuracy</div></th>' +
+      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">solved</div></th>' +
       "</tr>";
     var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
-      var score = (r.relative_score > 0 ? "+" : "") + r.relative_score;
-      var ci = Array.isArray(r.ci) && r.ci.length === 2
-        ? "[" + r.ci[0] + ", " + r.ci[1] + "]" : "\u2014";
       return '<tr data-slot="table-row" class="' + TR + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums">' + esc(r.rank_within_component) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(r.name) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(score) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(ci) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
-          esc(ratio(r.attempt_coverage_numerator, r.attempt_coverage_denominator)) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums text-muted-foreground">' + esc(r.rank) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-muted-foreground">' + esc(r.agent) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="font-medium">' + esc(r.model) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(T.pct(r.rate)) + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums text-muted-foreground">' +
+          esc(r.solved) + "/" + esc(r.n) + "</p></td>" +
         "</tr>";
     }).join("");
-    set("hp-board", '<table data-slot="table" class="w-full caption-bottom text-sm [&_tr>td:first-child]:pl-6 [&_tr>td:last-child]:pr-6 [&_tr>th:first-child]:pl-6 [&_tr>th:last-child]:pr-6">' +
-      '<thead data-slot="table-header" class="[&_tr]:border-b">' + head + "</thead>" +
-      '<tbody data-slot="table-body" class="[&_tr:last-child]:border-0">' + body + "</tbody></table>");
-    set("hp-board-title", "relative capability · v3 overall model effect");
-    set("hp-board-foot", "Centered Elo-style deltas; only publishable rows shown" +
-      (rows.length > BOARD_PREVIEW_LIMIT
-        ? " · showing " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " models"
-        : ""));
+
+    set("hp-board", '<table class="w-full caption-bottom">' +
+      "<thead>" + head + "</thead><tbody>" + body + "</tbody></table>");
+    set("hp-board-title", "terminal-daily@" + esc(day.date) + " " + officialBadge(day, site));
+    set("hp-board-sub", esc(rows.length) + " entries \u00b7 " + esc(day.n_tasks) + " tasks");
+    set("hp-board-foot", rows.length > BOARD_PREVIEW_LIMIT
+      ? "Top " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " entries."
+      : rows.length + (rows.length === 1 ? " entry." : " entries."));
   }
 
-  function taskCard(task) {
-    var pills = badge(task.status || "unknown", task.status === "live");
-    if (task.language) pills += badge(task.language, false);
-    var source = task.repo || "source withheld while live";
-    if (task.pr_number) source += " #" + task.pr_number;
-    return '<div data-slot="card" class="' + CARD + '">' +
-      '<a class="flex flex-1" href="./registry/' + encodeURIComponent(task.id) + '/">' +
-        '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
-          '<div data-slot="card-header" class="' + HEADER + '">' +
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium">' + esc(task.id) + "</h2>" +
-            '<div class="mt-2 flex flex-wrap gap-2">' + pills + "</div>" +
-          "</div>" +
-          '<div data-slot="card-content" class="flex flex-1 flex-col justify-between gap-6 px-6">' +
-            '<p class="font-mono wrap-anywhere sm:text-sm">' + esc(task.title || "No task summary published.") + "</p>" +
-            '<p class="text-muted-foreground font-mono text-xs">' + esc(source) +
-              (task.n_fail_to_pass != null ? " · " + esc(plural(task.n_fail_to_pass, "F2P test", "F2P tests")) : "") +
-            "</p>" +
-          "</div>" +
-        "</div>" +
-      "</a></div>";
+  /* One row per task instead of one card per task. A card devotes a border, a
+     radius and 24px of padding to four fields; the reader is scanning for an
+     id and a status, and wants to compare them down a column. */
+  function taskRows(tasks) {
+    var head = '<tr class="' + TR + '">' +
+      '<th class="' + TH + '">task</th>' +
+      '<th class="' + TH + '">status</th>' +
+      '<th class="' + TH + '">language</th>' +
+      '<th class="' + TH + '">summary</th>' +
+      '<th class="' + TH + '">source</th></tr>';
+    var body = tasks.map(function (task) {
+      var source = task.repo || "withheld while live";
+      if (task.pr_number) source += " #" + task.pr_number;
+      return '<tr class="' + TR + '">' +
+        '<td class="' + TD + '"><a class="tdb-tasklink" href="./registry/' +
+          encodeURIComponent(task.id) + '/">' + esc(task.id) + "</a></td>" +
+        '<td class="' + TD + '">' + esc(task.status || "unknown") + "</td>" +
+        '<td class="' + TD + '"><span class="text-muted-foreground">' +
+          esc(task.language || "\u2014") + "</span></td>" +
+        '<td class="' + TD + ' tdb-td-wrap">' +
+          esc(task.title || "No task summary published.") + "</td>" +
+        '<td class="' + TD + '"><span class="text-muted-foreground">' + esc(source) + "</span></td>" +
+        "</tr>";
+    }).join("");
+    return '<table class="w-full caption-bottom"><thead>' + head +
+           "</thead><tbody>" + body + "</tbody></table>";
   }
 
-  function renderTasks(site) {
+  function renderTasks(site, dayId) {
     var suites = datedSuites(site);
-    var latest = suites[0] || {};
+    /* Follow the day the reader chose above. A published day need not have a
+       suite in the catalogue: results and the catalogue are published by
+       separate steps and can be out of step. When it does not,
+       SAY so: silently showing a different suite's tasks under the chosen
+       day's heading is how the page came to display two dates at once. */
+    var match = dayId ? suites.filter(function (s) { return s.id === dayId; })[0] : null;
+    if (dayId && !match) {
+      set("hp-task-scope", "suite " + esc(dayId) + " is not in the published catalogue");
+      set("hp-tasks", '<p class="tdb-empty">' +
+        "Results exist for " + esc(dayId) + ", but its task list has not been published. " +
+        "Run <span class=\"text-foreground\">tdb publish</span> to add it.</p>");
+      return;
+    }
+    var latest = match || suites[0] || {};
     var all = ((site && site.tasks) || []).slice();
     var scoped = latest.id ? all.filter(function (t) {
       return T.taskInSuite(t, latest.id);
     }) : all;
     var shown = scoped.slice(0, TASK_PREVIEW_LIMIT);
     set("hp-task-scope", latest.id ? "suite " + esc(latest.id) + " · " + scoped.length + " tasks" : "published catalogue");
-    set("hp-tasks", shown.length ? shown.map(taskCard).join("") :
-      '<div class="bg-card border px-6 py-6 font-mono text-sm text-muted-foreground">No tasks are published.</div>');
+    set("hp-tasks", shown.length ? taskRows(shown) :
+      '<p class="tdb-empty">No tasks are published.</p>');
   }
 
-  Promise.all([
-    T.getJSON("site_data.json").catch(function () { return null; }),
-    T.getJSON("leaderboard_data.json").catch(function () { return null; })
-  ]).then(function (data) {
-    renderStatus(data[0], data[1]);
-    renderBoard(data[1], data[0]);
-    renderTasks(data[0]);
+  /* Boot.
+     The two silent `.catch(function () { return null; })` that used to sit here
+     turned a failed fetch into a page that renders exactly like a site with
+     nothing published. Nobody can tell those apart from the outside, so a
+     broken deploy looked like an empty one. Failures are loud now. */
+  function load(id, site) {
+    T.dayNav(byId("daynav"), { days: DAYS, active: id, onChange: function (d) { load(d, site); } });
+    renderTasks(site, id);
+    return T.dayData(id).then(function (day) { renderBoard(day, site); });
+  }
+
+  T.getJSON("site_data.json").then(function (site) {
+    renderStatus(site, null);
+    return T.dayIndex().then(function (idx) {
+      DAYS = idx.days;
+      var want = T.dayFromUrl();
+      var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;
+      if (!active) {
+        T.dayNav(byId("daynav"), { days: [], active: null, onChange: function () {} });
+        set("hp-board", '<p class="tdb-empty">No day has been published yet.</p>');
+        /* Do not name the publishing command here: whoever runs it is not
+           the reader of this page, and a command they cannot run is noise.
+           State the fact instead. */
+        set("hp-board-foot", "No results have been published for any day yet.");
+        renderTasks(site, null);
+        return;
+      }
+      return load(active, site);
+    });
+  }).catch(function (e) {
+    T.loadError(byId("hp-board"), "the site data", e);
+    set("hp-board-foot", "");
+  });
+
+  window.addEventListener("popstate", function () {
+    var d = T.dayFromUrl();
+    if (d) T.getJSON("site_data.json").then(function (site) { load(d, site); });
   });
 })();
 </script>

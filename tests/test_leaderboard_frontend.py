@@ -14,6 +14,10 @@ REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
 )
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
 SITE_CSS = (ROOT / "docs" / "assets" / "site.css").read_text(encoding="utf-8")
+METHODS = (ROOT / "docs" / "guide" / "quality-methods" / "index.html").read_text(
+    encoding="utf-8"
+)
+DATA_RUNTIME = (ROOT / "docs" / "assets" / "tdb-data.js").read_text(encoding="utf-8")
 PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
 DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
@@ -56,25 +60,34 @@ def test_site_data_generator_rejects_legacy_or_partial_matrix_authority():
 
 
 def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
+    # The enforcement is code and lives with the page that renders. The
+    # statement of what is enforced is documentation and lives with the method.
+    # Both halves are asserted: an allowlist nobody documents is unauditable,
+    # and a documented allowlist nobody enforces is decoration.
     assert (
         "var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };"
         in LEADERBOARD
     )
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
-    assert "Task-family: unavailable." in LEADERBOARD
-    assert "canonical C1&ndash;C14 capability labels" in LEADERBOARD
-    assert "does not infer one from tracks, merged labels" in LEADERBOARD
-    assert '["task-family", null, "unavailable; not inferred and not zero"]' in LEADERBOARD
+
+    assert "Task-family: unavailable." in METHODS
+    assert "canonical C1&ndash;C14" in METHODS
+    assert "does not infer one from tracks, merged labels" in METHODS
+    assert "does not display zero" in METHODS
+    assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS
 
 
 def test_non_success_statuses_are_null_not_zero_and_never_ranked():
     for status in ("FAILED", "BLOCKED", "NOT_RUN"):
-        assert f'"{status}"' in LEADERBOARD
-    assert "use <code>outcome:null</code>" in LEADERBOARD
-    assert "excluded from ratings" in LEADERBOARD
-    assert "authenticated_counts" in LEADERBOARD
-    assert "untrusted_declared_counts" in LEADERBOARD
-    assert "counted in coverage, not outcomes" in LEADERBOARD
+        assert f"<code>{status}</code>" in METHODS
+    assert "<code>outcome:null</code>" in METHODS
+    assert "are not converted to zero" in METHODS
+    assert "excluded from ratings" in METHODS
+    assert "counted in coverage, not outcomes" in METHODS
+    # A declaration must never be able to authenticate its own status, so the
+    # two tallies are named separately and never summed.
+    assert "authenticated_counts" in METHODS
+    assert "untrusted_declared_counts" in METHODS
     assert "worth zero" not in PAGE_GENERATOR.lower()
     assert "attempt worth zero" not in PAGE_GENERATOR.lower()
 
@@ -87,13 +100,197 @@ def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
     assert "official score coverage" in REGISTRY
 
 
-def test_output_values_are_escaped_before_entering_v3_tables():
-    assert "esc(row.axis)" in LEADERBOARD
-    assert "esc(row.kind)" in LEADERBOARD
-    assert "esc(participant(row))" in LEADERBOARD
-    assert "shown(rating.rank_within_component)" in LEADERBOARD
-    assert "ratio(rating.attempt_coverage_numerator" in LEADERBOARD
+_JS_WORDS = {
+    "typeof", "null", "true", "false", "undefined", "function", "return", "var",
+    "if", "else", "new", "this", "void", "in", "of", "instanceof", "NaN",
+}
 
+
+def _strip_comments(src):
+    """Drop // and /* */ comments before any quote-matching happens.
+
+    Not cosmetic. An apostrophe in a comment -- "the model's score" -- opens a
+    string as far as a naive scanner is concerned, and everything after it is
+    mis-paired. That is how a bare `A` from the middle of a sentence turned up
+    as an undeclared constant: the scanner had lost track of where strings were.
+    """
+    out, i, n, in_str = [], 0, len(src), ""
+    while i < n:
+        c = src[i]
+        if in_str:
+            out.append(c)
+            if c == "\\":
+                if i + 1 < n:
+                    out.append(src[i + 1])
+                i += 2
+                continue
+            if c == in_str:
+                in_str = ""
+            i += 1
+        elif c in "\"'":
+            in_str = c
+            out.append(c)
+            i += 1
+        elif c == "/" and i + 1 < n and src[i + 1] == "*":
+            j = src.find("*/", i + 2)
+            i = n if j < 0 else j + 2
+        elif c == "/" and i + 1 < n and src[i + 1] == "/":
+            j = src.find("\n", i)
+            i = n if j < 0 else j
+        else:
+            out.append(c)
+            i += 1
+    return "".join(out)
+
+
+def _concat_chunks(js):
+    """Group lines into whole assignment/concatenation expressions.
+
+    A line ending in `+` or `=` continues into the next, so the pieces of one
+    `x.innerHTML = "<td>" + esc(v) + "</td>"` are rejoined before anything is
+    judged. Both halves of that matter: without `+`, the line holding only
+    `(r.effort ? esc(r.effort) : "default") +` carries no '<' of its own and is
+    invisible to a markup filter; without `=`, a value is severed from the
+    `.textContent =` that makes it harmless, and a shell command template
+    containing `-a <agent>` gets scanned as if it were markup.
+
+    Two other splits were tried and both silently examined NOTHING: splitting
+    on `;` cuts inside HTML entities (`&middot;`, `&mdash;`), and splitting on
+    `;` at paren depth 0 never fires at all, because the whole script sits
+    inside an IIFE and is therefore never at depth 0.
+    """
+    chunks, buf = [], []
+    for line in js.splitlines():
+        stripped = line.rstrip()
+        buf.append(line.strip())
+        if not stripped.endswith(("+", "=")):
+            chunks.append(" ".join(buf))
+            buf = []
+    if buf:
+        chunks.append(" ".join(buf))
+    return chunks
+
+def _strip_strings(src):
+    out, i, n = [], 0, len(src)
+    while i < n:
+        c = src[i]
+        if c in "\"'":
+            j = i + 1
+            while j < n and src[j] != c:
+                j += 2 if src[j] == "\\" else 1
+            i = j + 1
+        else:
+            out.append(c)
+            i += 1
+    return "".join(out)
+
+
+def _strip_safe_calls(src, safe_names):
+    """Remove `esc(...)`, `T.pct(...)` and friends, arguments included.
+
+    What a safe formatter consumed is safe by definition; what is LEFT is raw
+    material. Removing the calls rather than pattern-matching them is what lets
+    `(r.effort ? esc(r.effort) : "x")` be judged on the `r.effort` that is NOT
+    wrapped -- the earlier version, which only looked at the token after a `+`,
+    never saw inside the parentheses at all.
+    """
+    import re
+    call = re.compile(r"(?:[A-Za-z_$][\w$]*\.)?(?:" + "|".join(safe_names) + r")\s*\(")
+    while True:
+        m = call.search(src)
+        if not m:
+            return src
+        i, depth = m.end() - 1, 0
+        while i < len(src):
+            if src[i] == "(":
+                depth += 1
+            elif src[i] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        src = src[:m.start()] + " " + src[i + 1:]
+
+
+def test_output_values_are_escaped_before_entering_the_dom():
+    """No data-derived value reaches innerHTML unescaped.
+
+    This replaces a version that named five call sites in one renderer. Naming
+    call sites only proves the sites that existed when it was written were
+    escaped; it says nothing about the next column somebody adds, and when the
+    renderer changes it fails for the wrong reason -- "renamed", not "unsafe".
+
+    So scan instead. Two filters keep it honest rather than noisy, because a
+    check that flags safe code gets switched off and then protects nothing:
+
+      * only expressions that BUILD MARKUP are scanned -- one with no '<' in
+        any string literal is assembling a search key or a URL, not a DOM sink;
+      * assignments to textContent/value/placeholder are skipped -- those
+        cannot inject however the value was produced.
+
+    Each surviving expression has its safe-formatter calls and then its string
+    literals removed. Any property access left standing reached markup raw.
+    """
+    import re
+
+    js = _strip_comments(LEADERBOARD[LEADERBOARD.index("<script>"):])
+    literal = re.compile(r"""(?:"[^"\n]*"|'[^'\n]*')""")
+    text_sink = re.compile(r"\.(?:textContent|value|placeholder)\s*=")
+    ident = re.compile(r"[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*")
+    SAFE = ("esc", "shown", "ratio", "pct", "wilson", "accuracyCell",
+            "officialBadge", "String", "Number", "encodeURIComponent", "toFixed")
+
+    scanned, covers_row, offenders = 0, False, []
+    for chunk in _concat_chunks(js):
+        if text_sink.search(chunk):
+            continue
+        if not any("<" in lit for lit in literal.findall(chunk)):
+            continue
+        scanned += 1
+        covers_row = covers_row or "<td" in chunk
+        bare = _strip_strings(_strip_safe_calls(chunk, SAFE))
+        for name in ident.findall(bare):
+            head, tail = name.split(".")[0], name.rsplit(".", 1)[-1]
+            if head in _JS_WORDS or name in _JS_WORDS:
+                continue
+            if tail == "length" or name.isdigit():
+                continue
+            if re.search(r"(?:Cell|Html)$", name):     # prebuilt escaped fragment
+                continue
+            if re.fullmatch(r"[A-Z][A-Z0-9_]*", name):
+                # SCREAMING_CASE is this file's convention for a compile-time
+                # constant -- but the name is not taken on faith. Follow it to a
+                # string-literal declaration here, or through a "var TD = T.TD"
+                # re-export to one in the shared runtime. A data value wearing a
+                # constant's name has no such declaration and is reported.
+                here = re.search(r"var\s+" + name + r"""\s*=\s*["']""", js)
+                alias = re.search(r"\b" + name + r"\s*=\s*T\.(\w+)", js)
+                origin = alias and re.search(
+                    r"var\s+" + alias.group(1) + r"""\s*=\s*["']""", DATA_RUNTIME)
+                if not (here or origin):
+                    offenders.append(name + " (undeclared pseudo-constant)")
+                continue
+            if "." not in name:        # a bare local flag or counter
+                continue
+            offenders.append(name)
+
+    # A scan that examined nothing prints the same green as a scan that passed,
+    # so it has to prove it reached the code that actually renders a row.
+    assert scanned >= 6, f"only {scanned} markup expressions found -- the scan did not run"
+    assert covers_row, "the scan never reached an expression building a <td> -- coverage lost"
+    assert not offenders, (
+        "values reaching markup without esc()/a numeric formatter: "
+        + ", ".join(sorted(set(offenders)))
+    )
+
+    # And the escaper must actually escape, not merely exist. Every character
+    # that can close an attribute or open a tag needs a mapping; a partial
+    # escaper is precisely what this scan would otherwise wave through.
+    body = DATA_RUNTIME[DATA_RUNTIME.index("function esc("):][:400]
+    assert """/[&<>"']/g""" in body, "esc() does not match the full dangerous set"
+    for ch, ent in (("&", "&amp;"), ("<", "&lt;"), (">", "&gt;"),
+                    ('"', "&quot;"), ("'", "&#39;")):
+        assert ent in body, f"esc() has no mapping for {ch!r}"
 
 def test_stat_values_are_not_document_headings():
     assert "<p data-tdb-stat-value" in HOME
@@ -157,15 +354,26 @@ def test_homepage_previews_stay_short_and_link_to_full_views():
 
 
 def test_terminal_daily_has_an_independent_visual_identity():
+    """Own palette, own type, own brand, own controls -- and not a clone.
+
+    This used to also require a conic-gradient blob behind the home masthead
+    and a card rail of published suites. Those were one design's answer to the
+    constraint, not the constraint; when the home page became a dense status
+    table they failed a design nobody had objected to, while the rules they
+    named sat in the stylesheet applying to nothing. Every marker below is a
+    selector or token the site actually ships, so deleting a rule as dead code
+    fails here instead of being kept alive to satisfy a checker.
+    """
     for marker in (
         "--td-paper",
         "--td-night",
         "--td-coral",
         "--td-font-display",
         ".tdb-brand-mark",
-        '[data-tdb-section="intro"]',
-        "conic-gradient",
+        ".tdb-daynav",
+        ".tdb-statrow",
         '[data-slot="card"]',
+        "[data-tdb-stat-value]",
         '[data-slot="table-container"]',
         "@media (prefers-reduced-motion: reduce)",
     ):

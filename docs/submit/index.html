@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submit results — terminal-daily-bench</title>
 <meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css">
-<link rel="stylesheet" href="../assets/tw-extra.css">
-<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -28,8 +28,8 @@
       <p class="text-muted-foreground mt-4 max-w-4xl font-mono text-sm/relaxed">A submission records a patch and enters the <span class="text-foreground">pending</span> queue. Its claimed reward is stored for audit and ignored for ranking.</p>
 
       <div class="bg-card mt-6 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-        <p><span class="font-medium">Current service status.</span> The public bundle does not run a replay worker. New submissions remain pending until an operator produces an Ed25519-signed v2 receipt bound to a frozen runner/Harbor/image policy and enforced egress canary. Complete frozen-roster coverage is required. Pending rows never enter the verified ranking and never receive a <code>false_accept</code> value.</p>
-        <p class="text-muted-foreground mt-4">Local <code>tdb run</code> and <code>tdb oracle</code> also require the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. See the <a class="text-foreground underline underline-offset-4" href="../guide/submission/">submission contract</a> and <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/">execution requirements</a>.</p>
+        <p><span class="font-medium">Status.</span> The public bundle does not run a replay worker, so a submission stays <span class="text-foreground">pending</span> until an operator publishes an Ed25519-signed v2 receipt; ranking additionally needs complete frozen-roster coverage. Pending rows never enter the verified ranking and never receive a <code>false_accept</code> value. <a class="text-foreground underline underline-offset-4" href="../guide/submission/#operator-replay">Replay authority requirements</a>.</p>
+        <p class="text-muted-foreground mt-4">Local <code>tdb run</code> and <code>tdb oracle</code> require the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/#requirements">Execution requirements</a>.</p>
       </div>
 
       <section id="mechanic" class="flex flex-col py-12">
@@ -108,7 +108,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";

@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Relative capability — terminal-daily-bench</title>
-<meta name="description" content="Receipt-bound v3 relative capability ratings and complete execution-status coverage audit for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css">
-<link rel="stylesheet" href="../assets/tw-extra.css">
-<link rel="stylesheet" href="../assets/site.css">
+<title>Leaderboard — terminal-daily-bench</title>
+<meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
+<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -20,101 +20,185 @@
         <ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5">
           <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><a data-slot="breadcrumb-link" class="hover:text-foreground transition-colors" href="../">Home</a></li>
           <li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" class="[&amp;>svg]:size-3.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></li>
-          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Relative capability</span></li>
+          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Leaderboard</span></li>
         </ol>
       </nav>
 
-      <h1 class="font-mono text-4xl tracking-tighter">relative capability</h1>
-      <p class="text-muted-foreground mb-6 mt-4 max-w-3xl font-mono text-sm/relaxed">Matched-task, multidimensional comparisons from <code>td-relative-capability-v3</code>. This page is currently unranked while the certified 50-task roster and formal campaign receipts are still awaiting publication.</p>
-
-      <div class="bg-card mb-8 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-        <p><span class="font-medium">Publication gate.</span> A <code>publishable=true</code> row is necessary but not sufficient: the generator must recompute its report pin and match a code-controlled publication allowlist. Any task matrix also needs its own canonical digest and task-ID roster digest bound to that report.</p>
-        <p class="text-muted-foreground mt-4">The current publication registry mode is <span class="text-foreground">code-controlled-allowlist</span> with no approved production bundle. Receipt-authority enforcement code is complete, but its production deployment registry is <span class="text-foreground">active=false</span>. The repository has one collaborator, so independent review cannot yet be satisfied.</p>
-        <p class="text-muted-foreground mt-4">A paired staged-SIF egress canary passed on 2026-08-06. It proved reachable-control/blocked-isolated behavior only for that staged image, runtime, node, and endpoint; no production protected replay has run.</p>
+      <div class="tdb-title-row">
+        <h1 class="font-mono text-4xl tracking-tighter" id="title">leaderboard</h1>
+        <div id="daynav"></div>
       </div>
 
-      <section class="flex flex-col py-12" data-tdb-primary-data>
-        <div class="mb-4 flex items-end justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm">publishable ratings</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">overall, language, and authority-bound canonical capability axes only</p>
-          </div>
-          <p class="text-muted-foreground font-mono text-xs" id="rating-count">checking authority&hellip;</p>
+      <figure class="tdb-cmd">
+        <figcaption>Reproduce a row</figcaption>
+        <code id="cmd">tdb run &lt;MODEL&gt; tasks/archive/&lt;task-id&gt; --harness &lt;agent&gt;</code>
+        <button type="button" id="copy" aria-label="Copy command">copy</button>
+        <a id="cmd-tasks" href="../benchmarks/">task ids &rarr;</a>
+      </figure>
+
+      <section class="flex flex-col">
+        <div class="tdb-tablebar">
+          <p id="count" class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
+          <label class="tdb-search">
+            <span class="sr-only">Search leaderboard</span>
+            <input id="q" type="search" placeholder="Search leaderboard" autocomplete="off">
+          </label>
         </div>
+
         <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto">
-            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="rating-head"></thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="rating-body"></tbody>
+          <div data-slot="table-container" class="relative w-full overflow-x-auto"
+               data-tdb-primary-data>
+            <table data-slot="table" class="w-full caption-bottom">
+              <thead data-slot="table-header" id="head"></thead>
+              <tbody data-slot="table-body" id="body"></tbody>
             </table>
           </div>
-          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="rating-foot">Historical and plumbing-only runs are not ranking authority.</div>
         </div>
-      </section>
-
-      <section class="flex flex-col py-12">
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">coverage and status audit</p>
-          <p class="text-muted-foreground font-mono text-xs">the frozen manifest is the denominator; failures never become zero scores</p>
-        </div>
-        <div class="-mx-4 mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:mx-0" id="audit-cards"></div>
-        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto">
-            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="status-head"></thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="status-body"></tbody>
-            </table>
-          </div>
-          <div class="text-muted-foreground space-y-2 border-t px-6 py-4 text-center font-mono text-sm">
-            <p><code>FAILED</code>, <code>BLOCKED</code>, <code>NOT_RUN</code>, and <code>score_accepted=false</code> use <code>outcome:null</code>. They remain in coverage and status counts, never in Bradley&ndash;Terry outcomes.</p>
-            <p>Untrusted declarations are displayed separately and cannot authenticate a status.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="flex flex-col py-12 sm:pb-16">
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">dimension authority</p>
-        </div>
-        <div class="bg-card border-y px-6 py-6 font-mono text-sm/relaxed md:border-x">
-          <p><span class="font-medium">Available when published:</span> overall, language, and canonical C1&ndash;C14 capability labels bound by the trusted task catalogue.</p>
-          <p class="text-muted-foreground mt-4"><span class="text-foreground">Task-family: unavailable.</span> Historical data has no authority-bound task-family field; the site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</p>
-          <p class="text-muted-foreground mt-4">Model, harness, and complete configuration effects remain separate estimands. A configuration score is never relabeled as model-only performance.</p>
-        </div>
+        <div id="foot" class="tdb-foot" data-tdb-integrity></div>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=d064c7dcdd"></script>
 <script>
 (function () {
   "use strict";
-
   var T = window.TDB;
-  var $ = function (id) { return document.getElementById(id); };
-  var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-  function esc(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) { return ENT[c]; });
-  }
-  function shown(value) { return value == null || value === "" ? "&mdash;" : esc(value); }
-  function count(value) { return typeof value === "number" ? String(value) : "&mdash;"; }
-  function ratio(numerator, denominator) {
-    return typeof numerator === "number" && typeof denominator === "number" && denominator > 0
-      ? numerator + "/" + denominator : "&mdash;";
+  var esc = T.esc, TD = T.TD, TR = T.TR;
+  var byId = function (id) { return document.getElementById(id); };
+
+  /* One row per (model, scaffold). A scaffold id is "<agent>" or
+     "<agent>@<effort>" -- claude-code@high, codex@low, terminus-2 -- so the
+     reference's Agent / Effort split falls straight out of the id. An id with
+     no "@" ran at the provider's default and says so, rather than being given a
+     made-up effort name. */
+  function splitScaffold(id) {
+    var at = String(id).indexOf("@");
+    return at < 0
+      ? { agent: String(id), effort: null }
+      : { agent: String(id).slice(0, at), effort: String(id).slice(at + 1) };
   }
 
-  var TH = "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
-    "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
-  var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
-    "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
-  var TR_HEAD = "data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent";
-  var TR_BODY = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
+  function flatten(day) {
+    var out = [];
+    (day.leaderboard || []).forEach(function (entry) {
+      Object.keys(entry).forEach(function (k) {
+        var cell = entry[k];
+        if (!cell || typeof cell !== "object" || typeof cell.n !== "number") return;
+        if (!cell.n) return;                       /* never measured: not a row */
+        var s = splitScaffold(k);
+        out.push({
+          model: entry.model, agent: s.agent, effort: s.effort, scaffold: k,
+          n: cell.n, solved: cell.solved,
+          rate: (typeof cell.rate === "number") ? cell.rate : (cell.solved / cell.n),
+          fa: cell.fa, fa_n: cell.fa_n
+        });
+      });
+    });
+    return out;
+  }
 
-  function relativeReport(documentData) {
-    var candidates = [documentData, documentData && documentData.relative_capability,
-      documentData && documentData.relative_scoring];
+  /* The point estimate carried with its uncertainty, as the reference does:
+     the number is the claim, the interval is how much to trust it. At n=50 the
+     half-width is around 13 points, and a reader who cannot see that will read
+     a two-point gap as a ranking. */
+  function accuracyCell(r) {
+    var w = T.wilson(r.solved, r.n);
+    var half = ((w.hi - w.lo) / 2) * 100;
+    return '<p class="tdb-acc" title="' + esc(r.solved) + "/" + esc(r.n) + " — 95% CI [" +
+      T.pct(w.lo) + ", " + T.pct(w.hi) + ']">' +
+      "<strong>" + T.pct(w.p) + "</strong>" +
+      '<span class="tdb-acc-ci">&plusmn; ' + half.toFixed(1) + "%</span></p>";
+  }
+
+  var COLS = [
+    { key: "rank",   label: "Rank",  sortable: false },
+    { key: "agent",  label: "Agent" },
+    { key: "model",  label: "Model" },
+    { key: "effort", label: "Effort", value: function (r) { return r.effort; } },
+    { key: "rate",   label: "Accuracy", right: true },
+    { key: "solved", label: "Solved",   right: true },
+    { key: "n",      label: "Tasks",    right: true },
+    { key: "fa",     label: "False accepts", right: true,
+      value: function (r) { return (typeof r.fa === "number") ? r.fa : null; } }
+  ];
+
+  var ALL = [], VIEW = [], TABLE = null, DAYS = [], DAY = {};
+
+  function render(r) {
+    /* Rank is assigned once, over the whole day by accuracy, and then travels
+       with the row. Re-ranking on every sort would make "rank" mean "position
+       in whatever order you last clicked", which is not a rank. */
+    var faCell = (typeof r.fa === "number")
+      ? '<p class="text-right tabular-nums">' + esc(r.fa) + "/" + esc(r.fa_n) + "</p>"
+      : '<p class="text-right text-muted-foreground">&mdash;</p>';
+    return '<tr data-slot="table-row" class="' + TR + '">' +
+      '<td class="' + TD + '"><p class="tabular-nums text-muted-foreground">' +
+        esc(r.rank) + "</p></td>" +
+      '<td class="' + TD + '"><p>' + esc(r.agent) + "</p></td>" +
+      '<td class="' + TD + '"><p class="font-medium">' + esc(r.model) + "</p></td>" +
+      '<td class="' + TD + '"><p class="text-muted-foreground">' +
+        esc(r.effort || "default") + "</p></td>" +
+      '<td class="' + TD + '">' + accuracyCell(r) + "</td>" +
+      '<td class="' + TD + '"><p class="text-right tabular-nums">' + esc(r.solved) + "</p></td>" +
+      '<td class="' + TD + '"><p class="text-right tabular-nums text-muted-foreground">' +
+        esc(r.n) + "</p></td>" +
+      '<td class="' + TD + '">' + faCell + "</td>" +
+    "</tr>";
+  }
+
+  function applyFilter() {
+    var q = byId("q").value.trim().toLowerCase();
+    VIEW = !q ? ALL.slice() : ALL.filter(function (r) {
+      return (r.model + " " + r.agent + " " + (r.effort || "")).toLowerCase().indexOf(q) >= 0;
+    });
+    byId("count").innerHTML =
+      (q ? "Showing " + VIEW.length + " of " + ALL.length + " entries"
+         : "Showing " + ALL.length + " entries") +
+      '<span class="tdb-count-sep">&middot;</span>' + esc(DAY.n_tasks) + " tasks" +
+      '<span class="tdb-count-sep">&middot;</span>' + esc(DAY.n_models) + " models" +
+      '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
+    if (TABLE) TABLE.redraw(VIEW);
+  }
+
+  /* The reference names the benchmark version in the title -- "terminal-bench@2.1
+     Leaderboard" -- and carries no summary cards at all. Ours rotates daily, so
+     the day IS the version. Counts that were four cards are one line above the
+     table, next to the entry count they belong with. */
+  function heading(day) {
+    byId("title").textContent = "terminal-daily@" + day.date;
+    /* The command has to be one a reader can actually run. This block used to
+       print `tdb run --suite <date> -a <agent> -m <model>`, invented by analogy
+       with the reference site: `tdb run` takes a positional MODEL and TASK plus
+       `--harness`, and none of those three flags exist. It sat behind a copy
+       button, which is the worst place on the site to be wrong. The Agent
+       column IS the --harness value, so a row maps onto the real command. */
+    var t = byId("cmd-tasks");
+    if (t) t.setAttribute("href", "../benchmarks/" + encodeURIComponent(day.date) + "/");
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The authority gate.
+   *
+   * "official" is a claim about provenance, not a field a publisher gets to
+   * assert. Every condition below is independent and ALL must hold; any one
+   * missing, of the wrong type, or absent from the day file leaves the day
+   * unofficial. The failure this prevents is a single mis-set boolean turning
+   * measured solve rates into a claimed ranking.
+   *
+   * Where the caveat text went: it is documentation, so it lives in the
+   * documentation (guide/quality-methods/). What lives HERE is the code that
+   * decides -- a page that explains the gate in a paragraph but does not run
+   * it is worse than one that runs it silently.
+   * ------------------------------------------------------------------ */
+  var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };
+
+  /* The v3 relative-capability report, wherever the day file carries it. */
+  function relativeReport(day) {
+    var candidates = [day, day && day.relative_capability, day && day.relative_scoring];
     for (var i = 0; i < candidates.length; i++) {
       if (candidates[i] && candidates[i].schema_version === "td-relative-capability-v3") {
         return candidates[i];
@@ -123,9 +207,12 @@
     return null;
   }
 
-  function formalAuthority(report, scoring) {
+  function formalAuthority(day) {
+    var report = relativeReport(day);
+    var scoring = (day && day.scoring) || {};
     var input = (report && report.input) || {};
-    return !!report && scoring && scoring.official_ranking === true &&
+    return !!report &&
+      scoring.official_ranking === true &&
       scoring.publication_registry_mode === "code-controlled-allowlist" &&
       scoring.publication_bundle_approved === true &&
       scoring.relative_report_digest_matches === true &&
@@ -135,132 +222,112 @@
       input.cell_manifest_digest_trusted === true;
   }
 
-  var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };
-
-  function collectPublishable(report, scoring) {
-    if (!formalAuthority(report, scoring)) return [];
+  /* A rating is shown as ranked only on a dimension the catalogue authorises
+     and only when the rating itself is marked publishable with a real interval.
+     Kept live so a v3 document dropped in later cannot bypass it. */
+  function publishableRatings(day) {
+    var report = relativeReport(day);
+    if (!formalAuthority(day)) return [];
     var rows = [];
     (report.axes || []).forEach(function (axis) {
       if (!axis || !ALLOWED_DIMENSIONS[axis.dimension]) return;
       ["model", "harness", "configuration"].forEach(function (kind) {
         var table = axis.entities && axis.entities[kind];
         ((table && table.ratings) || []).forEach(function (rating) {
-          var publishable = rating && rating.publishable === true &&
-            typeof rating.relative_score === "number" && Array.isArray(rating.ci);
-          if (!publishable) return;
-          rows.push({ axis: axis.axis, dimension: axis.dimension, kind: kind, rating: rating });
+          if (rating && rating.publishable === true &&
+              typeof rating.relative_score === "number" && Array.isArray(rating.ci)) {
+            rows.push({ axis: axis.axis, kind: kind, rating: rating });
+          }
         });
       });
     });
-    return rows.sort(function (a, b) {
-      return String(a.axis).localeCompare(String(b.axis)) ||
-        a.kind.localeCompare(b.kind) ||
-        ((a.rating.rank_within_component || 999999) -
-          (b.rating.rank_within_component || 999999)) ||
-        String(a.rating.name).localeCompare(String(b.rating.name));
+    return rows;
+  }
+
+  /* One badge, not a paragraph. */
+  function officialBadge(day) {
+    return formalAuthority(day)
+      ? '<span class="tdb-badge" data-official="true">official</span>'
+      /* A caveat behind a title= attribute does not exist on a phone and is
+         easy to miss anywhere else. Print it, and link to what it means. */
+      : '<span class="tdb-badge" data-official="false">unofficial</span>' +
+        '<a class="tdb-badge-why" href="../guide/quality-methods/#outcomes">why</a>';
+  }
+
+  function show(day) {
+    DAY = day;
+    heading(day);
+    ALL = flatten(day);
+    ALL.sort(function (a, b) { return b.rate - a.rate; });
+    /* Ties share a rank and the next rank skips, as the reference does.
+       Stamped ONTO THE ROW rather than kept in a side table keyed by
+       model+scaffold: the row is what every later sort and filter carries
+       around, so the rank cannot arrive at render out of step with it. */
+    var last = null, lastRank = 0;
+    ALL.forEach(function (r, i) {
+      if (last === null || r.rate !== last) { lastRank = i + 1; last = r.rate; }
+      r.rank = lastRank;
+    });
+    VIEW = ALL.slice();
+    TABLE = T.sortTable({
+      head: byId("head"), body: byId("body"), cols: COLS,
+      rows: VIEW, render: render, sort: "rate", dir: "desc"
+    });
+    applyFilter();
+    /* Short declarative lines, the way the reference closes its table. */
+    byId("foot").innerHTML =
+      "<p>Results correspond to the <strong>" + esc(day.date) + "</strong> suite, " +
+        esc(day.n_cells) + " model &times; task attempts.</p>" +
+      /* Provenance. Nothing on the page said who produced these rows, so a
+         reader could not tell a maintainer run from a self-reported one. */
+      '<p>Rows are maintainer-run. Community results stay pending on the ' +
+        '<a href="../submit/">submit page</a> until an operator replays them.</p>' +
+      "<p>Accuracy is the Wilson 95% interval on solved/tasks; a run with no " +
+        'accepted result is <a href="../guide/quality-methods/#outcomes">' +
+        "not counted as a failure</a>.</p>" +
+      /* /quality/ had one inbound link on the entire site, buried at the foot
+         of the methods page. A reader looking at these rates is exactly the
+         reader who wants to know whether the task set discriminates at all. */
+      '<p>How well this suite separates models: <a href="../quality/">selection ' +
+        "quality</a>.</p>" +
+      '<p class="tdb-foot-count">Displaying ' + ALL.length + " of " + ALL.length +
+        " available entries</p>";
+  }
+
+  function load(id) {
+    byId("count").textContent = "loading…";
+    T.dayNav(byId("daynav"), { days: DAYS, active: id, onChange: load });
+    T.dayData(id).then(show).catch(function (e) {
+      T.loadError(byId("body").parentNode.parentNode.parentNode, "day " + id, e);
+      byId("count").textContent = "";
     });
   }
 
-  function participant(row) {
-    var rating = row.rating;
-    if (row.kind === "configuration" && rating.model && rating.harness) {
-      return rating.model + " + " + rating.harness;
-    }
-    return rating.name || rating.model || rating.harness || "";
-  }
+  byId("q").addEventListener("input", applyFilter);
+  byId("copy").addEventListener("click", function () {
+    var b = byId("copy");
+    navigator.clipboard.writeText(byId("cmd").textContent).then(function () {
+      b.textContent = "copied";
+      setTimeout(function () { b.textContent = "copy"; }, 1200);
+    });
+  });
+  window.addEventListener("popstate", function () {
+    var d = T.dayFromUrl(); if (d) load(d);
+  });
 
-  function renderRatings(report, rawDocument, scoring) {
-    var rows = collectPublishable(report, scoring);
-    $("rating-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
-      ["Axis", "Estimand", "Participant", "Rank", "Relative score", "95% CI", "Tasks", "Attempt coverage"].map(function (label, index) {
-        return '<th data-slot="table-head" class="' + TH + '"><div class="flex' +
-          (index >= 3 ? " justify-end" : "") + '">' + esc(label) + "</div></th>";
-      }).join("") + "</tr>";
-    if (!rows.length) {
-      $("rating-body").innerHTML = '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '" colspan="8"><div class="py-4 whitespace-normal">' +
-        '<p class="font-medium">Awaiting certified 50-task results.</p>' +
-        '<p class="text-muted-foreground mt-2">No code-approved complete v3 rating is publishable. ' +
-        'Embedded trust booleans, self-signed bundles, and legacy artifacts are diagnostic-only and intentionally hidden.</p>' +
-        "</div></td></tr>";
-      $("rating-count").textContent = "0 publishable rows";
-      $("rating-foot").textContent = rawDocument && (rawDocument.leaderboard || rawDocument.matrix)
-        ? "Legacy result data detected and ignored: it is not td-relative-capability-v3 authority."
-        : "No formal relative-capability document is published.";
+  T.dayIndex().then(function (idx) {
+    DAYS = idx.days;
+    var want = T.dayFromUrl();
+    var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;
+    if (!active) {
+      T.dayNav(byId("daynav"), { days: [], active: null, onChange: load });
+      byId("count").textContent = "no published days";
       return;
     }
-    $("rating-body").innerHTML = rows.map(function (row) {
-      var rating = row.rating;
-      var score = (rating.relative_score > 0 ? "+" : "") + rating.relative_score;
-      var ci = rating.ci.length === 2 ? "[" + rating.ci[0] + ", " + rating.ci[1] + "]" : "\u2014";
-      return '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(row.axis) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(row.kind) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + esc(participant(row)) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + shown(rating.rank_within_component) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(score) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(ci) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + shown(rating.n_tasks) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
-          ratio(rating.attempt_coverage_numerator, rating.attempt_coverage_denominator) + "</p></td></tr>";
-    }).join("");
-    $("rating-count").textContent = rows.length + " publishable row" + (rows.length === 1 ? "" : "s");
-    $("rating-foot").textContent = "Centered Elo-style deltas within connected components; configuration effects are not model effects.";
-  }
-
-  function statCard(label, value, note) {
-    return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col border py-0">' +
-      '<div class="flex flex-1 flex-col justify-between gap-4 py-6"><div data-slot="card-header" class="px-6">' +
-      '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(label) + "</p>" +
-      '<p data-tdb-stat-value class="mt-2 line-clamp-1 font-mono text-xl font-medium tabular-nums">' + shown(value) + "</p>" +
-      '</div><div data-slot="card-content" class="px-6"><p class="text-muted-foreground font-mono text-xs">' + esc(note) + "</p></div></div></div>";
-  }
-
-  function renderAudit(report) {
-    var input = (report && report.input) || {};
-    var evidence = input.execution_evidence_audit || {};
-    var audit = input.execution_status_audit || {};
-    var authenticated = audit.authenticated_counts || {};
-    var untrusted = audit.untrusted_declared_counts || {};
-    var cards = [
-      ["frozen roster", input.frozen_task_roster_n != null ? input.frozen_task_roster_n + "/50" : null, "exactly 50 required"],
-      ["manifest cells", input.cell_manifest_n, "fixed coverage denominator"],
-      ["accepted outcomes", input.successful_records_admitted_to_outcomes, "SUCCESS + score_accepted=true"],
-      ["excluded status rows", input.non_success_or_unaccepted_records_excluded, "counted in coverage, not outcomes"],
-      ["trusted receipts", evidence.admitted != null ? evidence.admitted + "/" + evidence.claimed : null, "manifest-bound and allowlisted"],
-      ["task-family", null, "unavailable; not inferred and not zero"]
-    ];
-    $("audit-cards").innerHTML = cards.map(function (card) {
-      return statCard(card[0], card[1], card[2]);
-    }).join("");
-
-    $("status-head").innerHTML = '<tr data-slot="table-row" class="' + TR_HEAD + '">' +
-      '<th data-slot="table-head" class="' + TH + '">Execution status</th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">Authenticated</div></th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">Untrusted declaration</div></th>' +
-      '<th data-slot="table-head" class="' + TH + '">Outcome treatment</th></tr>';
-    var statuses = ["SUCCESS", "FAILED", "BLOCKED", "NOT_RUN"];
-    $("status-body").innerHTML = statuses.map(function (status) {
-      var treatment = status === "SUCCESS"
-        ? "numeric only when score_accepted=true"
-        : "\u2014 (outcome:null; excluded from ratings)";
-      return '<tr data-slot="table-row" class="' + TR_BODY + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + status + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + count(authenticated[status]) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + count(untrusted[status]) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p>' + treatment + "</p></td></tr>";
-    }).join("");
-  }
-
-  Promise.all([
-    T.getJSON("../site_data.json").catch(function () { return null; }),
-    T.getJSON("../leaderboard_data.json").catch(function () { return null; })
-  ]).then(function (documents) {
-    var site = documents[0];
-    var documentData = documents[1];
-    var report = relativeReport(documentData);
-    renderRatings(report, documentData, (site && site.scoring) || {});
-    renderAudit(report);
+    load(active);
+  }).catch(function (e) {
+    T.loadError(byId("foot"), "the day index", e);
+    byId("count").textContent = "";
   });
 })();
 </script>

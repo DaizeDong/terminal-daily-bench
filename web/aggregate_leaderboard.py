@@ -146,7 +146,18 @@ def build_payload(rows, date):
     if leaderboard:
         leaderboard[0]["lead"] = True
 
-    primary = "terminus2" if "terminus2" in scaffolds else (scaffolds[0] if scaffolds else "")
+    # SUPERSEDED by the per-day layout under docs/data/, which adds one file
+    # per day instead of overwriting this one. Kept working only so the legacy
+    # whole-site file is not actively wrong while it still exists.
+    #
+    # The name it looked for was "terminus2"; the scaffold is spelled
+    # "terminus-2". The test therefore never fired and sorted()[0] won, so the
+    # published drill-down silently described "claude-code" -- 12 of 152 models
+    # -- while claiming to be the flagship agent's matrix. Prefer the
+    # best-covered scaffold, which is a property of the data rather than a name
+    # someone has to keep in sync.
+    primary = max(scaffolds, key=lambda s_: sum(
+        1 for r in rows if r.get("scaffold") == s_), default="") if scaffolds else ""
     payload = {
         "date": date,
         "n_tasks": len(tasks), "n_models": len(models), "n_cells": len(rows),
