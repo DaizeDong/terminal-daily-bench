@@ -1,0 +1,223 @@
+{
+ "date": "2026-07-23",
+ "generated": "2026-08-25T22:51:16Z",
+ "leaderboard": [
+  {
+   "lead": true,
+   "model": "Claude-Opus-4.8",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.333,
+    "solved": 2
+   },
+   "terminus2": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.5,
+    "solved": 3
+   }
+  },
+  {
+   "model": "DeepSeek-V4-Flash",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.167,
+    "solved": 1
+   },
+   "terminus2": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 4,
+    "rate": 0.5,
+    "solved": 2
+   }
+  },
+  {
+   "model": "Claude-Sonnet-4.6",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   },
+   "terminus2": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.167,
+    "solved": 1
+   }
+  },
+  {
+   "model": "MiniMax-M2.7",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.167,
+    "solved": 1
+   }
+  },
+  {
+   "model": "gemini-2.5-flash",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.167,
+    "solved": 1
+   },
+   "terminus2": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "gemini-3.1-pro-preview",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.167,
+    "solved": 1
+   }
+  },
+  {
+   "model": "Claude-Haiku-4.5",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "DeepSeek-R1-Distill-Qwen-14B",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "GPT-oss-120B",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "Gemma-4-31B",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "Kimi-K2.6",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "Llama-4-Maverick-17B",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "gpt-4o",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "gpt-5",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   },
+   "terminus2": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "gpt-5.2",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  },
+  {
+   "model": "o3",
+   "single_shot": {
+    "fa": null,
+    "fa_n": 0,
+    "n": 6,
+    "rate": 0.0,
+    "solved": 0
+   }
+  }
+ ],
+ "n_cells": 124,
+ "n_models": 16,
+ "n_tasks": 6,
+ "official_ranking": false,
+ "pooled": {
+  "single_shot": {
+   "n": 96,
+   "solved": 6
+  },
+  "terminus2": {
+   "n": 28,
+   "solved": 6
+  }
+ },
+ "schema": "tdb-day-v1",
+ "source": "frontier evaluation 2026-07-22/24 (clean repo status.md R6+R7); recovered from git 27745fe^",
+ "source_digest": "sha256:5a3f9ad4ebfe8d1af144ad24993a683d6abef6b1092709ebb37476bedfdd642d",
+ "source_files": [
+  "docs/leaderboard_data.json@27745fe^"
+ ],
+ "suite": null
+}
