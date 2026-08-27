@@ -458,8 +458,16 @@ def test_generated_detail_pages_are_idempotent_and_include_all_suites(
 
 
 def test_public_indexes_use_shared_many_to_many_helper():
+    """Suite membership is many-to-many, so no page may hand-roll the test.
+
+    This used to name the three pages that filtered tasks by suite, home among
+    them. The home page was rebuilt to lead with the leaderboard and no longer
+    lists tasks at all, so naming it asserted a layout rather than the rule.
+    The rule is that the shared helpers exist, are actually used, and that
+    nowhere reaches past them into the raw field -- which binds every page,
+    including ones that do not exist yet.
+    """
     shell = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
-    home = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     suites = (ROOT / "docs" / "benchmarks" / "index.html").read_text(
         encoding="utf-8"
     )
@@ -469,6 +477,13 @@ def test_public_indexes_use_shared_many_to_many_helper():
 
     assert "function taskSuites(task)" in shell
     assert "function taskInSuite(task, suiteId)" in shell
-    assert "T.taskInSuite(t, latest.id)" in home
     assert "T.taskInSuite(task, suite.id)" in suites
     assert "T.taskSuites(t)" in registry
+
+    # A page that filters by suite must go through the helper. `task.suite` is
+    # the legacy single-valued field: reading it directly is how a task that
+    # belongs to several suites silently disappears from all but one of them.
+    for page in sorted((ROOT / "docs").rglob("*.html")):
+        source = page.read_text(encoding="utf-8", errors="replace")
+        assert ".suite ===" not in source, (
+            f"{page.relative_to(ROOT)} hand-rolls suite membership")

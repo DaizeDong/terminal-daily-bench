@@ -506,10 +506,12 @@ def check_links(pages: list[Path], all_ids: dict) -> list[str]:
             # URL the browser resolves is reporting on itself, not on the site.
             if "?" in ref:
                 ref = ref.split("?", 1)[0]
-            if not ref:                                   # bare "?query" or "#frag"
-                continue
-            if not ref:                                   # same-page fragment
-                if frag and frag not in all_ids[rel]:
+            if not ref:
+                # Same-page: "#frag" or "?query#frag". This used to sit behind
+                # an IDENTICAL `if not ref: continue` one line above, so the
+                # branch was unreachable and no same-page fragment on the site
+                # was ever checked -- a dead check that read as a live one.
+                if frag and frag not in all_ids.get(rel, ()):
                     bad.append(f"{rel}: dead same-page fragment #{frag}")
                 continue
             target = (page.parent / ref).resolve()
@@ -1088,6 +1090,145 @@ def check_suite_membership(release: Path | None = None) -> list[str]:
     return bad
 
 
+# The home page was previously pinned to one literal section list,
+# ["intro", "status", "leaderboard", "tasks"]. That froze a single layout: any
+# rearrangement failed, so the cheapest repair was always to paste the new list
+# in, and a check that is rewritten to match whatever it finds asserts nothing.
+#
+# The property worth defending is that THE RESULTS COME FIRST. It is asserted
+# positionally rather than by naming the sections that may not precede the
+# table, because a name-based set silently stops matching the moment a section
+# is renamed -- the same class of failure as a marker that has gone vacuous.
+# At most a masthead (title, tagline, calls to action) may sit above the
+# leaderboard, so its index among the home sections must be 0 or 1 whatever the
+# other blocks end up being called.
+HOME_LEADERBOARD_MAX_INDEX = 1
+
+
+def check_home_section_order(sections: list[str]) -> list[str]:
+    """The leaderboard must exist on home, with at most a masthead above it."""
+    bad: list[str] = []
+    if not sections:
+        bad.append("index.html: no data-tdb-section blocks found")
+        return bad
+    if len(set(sections)) != len(sections):
+        bad.append(f"index.html: duplicate data-tdb-section names in {sections}")
+    found = sections.count("leaderboard")
+    if found != 1:
+        bad.append(
+            'index.html: expected exactly one data-tdb-section="leaderboard" '
+            f"block, found {found} in {sections}"
+        )
+        return bad
+    index = sections.index("leaderboard")
+    if index > HOME_LEADERBOARD_MAX_INDEX:
+        bad.append(
+            f"index.html: results are not first -- leaderboard is section "
+            f"{index} behind {sections[:index]}; at most a masthead may precede "
+            f"it (index <= {HOME_LEADERBOARD_MAX_INDEX})"
+        )
+    return bad
+
+
+def check_home_results_above_the_fold(home_markup: str) -> list[str]:
+    """Nothing that reads like an explainer may sit above the results table.
+
+    `check_home_section_order` counts sections, so it still passes a home page
+    whose single pre-table block is an explainer rather than a masthead. This
+    closes that gap without naming sections, which would break on a rename: on
+    this site the masthead is the h1 block and every explanatory block opens
+    with an h2, so an h2 above the leaderboard marker means the reader meets
+    prose before numbers.
+    """
+    marker = 'data-tdb-section="leaderboard"'
+    at = home_markup.find(marker)
+    if at < 0:
+        return ['index.html: no data-tdb-section="leaderboard" block on the home page']
+    headings = re.findall(r"<h2\b[^>]*>(.*?)</h2>", home_markup[:at], flags=re.S | re.I)
+    if headings:
+        titles = [" ".join(re.sub(r"<[^>]+>", " ", h).split()) for h in headings]
+        return [
+            "index.html: results are not first -- section heading(s) "
+            f"{titles} are rendered above the leaderboard table"
+        ]
+    return []
+
+
+# Marketing copy that has been removed from the home page. Re-adding any of it
+# is a regression, not an edit: the home page states results and the caveat
+# that qualifies them, and nothing about how good the project is.
+#
+# The results-first rebuild was audited for new entries and added none, which
+# is a finding rather than an oversight. What it removed was a status grid, an
+# integrity disclosure and a task preview -- data and caveats, not self-
+# description -- so the phrases it retired ("availability is not ranking
+# authority", "latest dated suite", "integrity limits and current blockers")
+# are not marketing and do not belong here; banning a caveat would be exactly
+# backwards. "what the suite separates" left home but is still a live label on
+# /guide/ and /leaderboard/, so it is not retired at all. Copy that is still
+# shipped, or that was never written, makes a ban that catches nothing.
+#
+# What that rebuild actually retired was a set of PANELS, and a phrase list is
+# the wrong instrument for those: `check_home_section_order` and
+# `check_home_results_above_the_fold` keep them from coming back structurally,
+# whatever words they would use. Add a phrase here only after confirming it is
+# gone from the whole of docs/; `tests/test_site_home_architecture.py` asserts
+# that for every entry.
+RETIRED_HOME_PHRASES = (
+    "how the universe is grown",
+    "we measure the benchmark itself",
+    "explore our benchmarks",
+    "i want to test my agent",
+    # Added with the results-first rebuild. The masthead used to end
+    # "Fresh merged pull requests become executable tasks. The catalogue is
+    # public." -- the second sentence is the page describing its own feature
+    # rather than showing a result, which is what the rebuild removed. Verified
+    # absent from every page under docs/, not guessed: a ban-list entry naming
+    # copy that still ships (or never shipped) bans nothing while looking like
+    # it bans something.
+    "the catalogue is public",
+)
+
+
+def check_retired_home_copy(home_lower: str) -> list[str]:
+    """Home must not regrow a retired marketing panel."""
+    return [
+        f"index.html: retired marketing panel returned: {phrase!r}"
+        for phrase in RETIRED_HOME_PHRASES
+        if phrase in home_lower
+    ]
+
+
+# Integrity caveats that must survive somewhere on the public site. They used to
+# be asserted against index.html specifically; home now carries only the compact
+# point-of-claim marker (the UNOFFICIAL pill and its `why` link beside the
+# table), and the detail lives on the page the nav labels "status". Moving the
+# home of a statement is fine; dropping it is not -- so presence is asserted
+# across docs/ rather than on one page, which permits a future move and forbids
+# a loss. This mirrors the outcome-treatment relocation below.
+INTEGRITY_CAVEATS = (
+    "deterministic code",
+    "claimed reward",
+    "paired staged-sif egress canary passed",
+    "no production protected replay has run",
+    "active=false",
+    "one collaborator",
+    "certified 50-task",
+    "unpublished patched harbor fork",
+    "stock harbor 0.13.1 is insufficient",
+    "completed gate decisions",
+)
+
+
+def check_integrity_caveats(public_html_lower: str) -> list[str]:
+    """Every integrity caveat must still be published somewhere under docs/."""
+    return [
+        f"public HTML: integrity caveat lost from the whole site: {phrase!r}"
+        for phrase in INTEGRITY_CAVEATS
+        if phrase not in public_html_lower
+    ]
+
+
 def check_public_frontend() -> list[str]:
     """Keep the public surface data-first and its strongest claims qualified.
 
@@ -1103,36 +1244,17 @@ def check_public_frontend() -> list[str]:
     home = source("index.html")
     home_markup = markup_only(home)
     sections = re.findall(r'data-tdb-section="([^"]+)"', home_markup)
-    expected = ["intro", "status", "leaderboard", "tasks"]
-    if sections != expected:
-        bad.append(f"index.html: data sections {sections} != {expected}")
+    bad.extend(check_home_section_order(sections))
+    bad.extend(check_home_results_above_the_fold(home_markup))
 
-    retired = (
-        "how the universe is grown",
-        "we measure the benchmark itself",
-        "explore our benchmarks",
-        "i want to test my agent",
-    )
     lower_home = home.lower()
-    for phrase in retired:
-        if phrase in lower_home:
-            bad.append(f"index.html: retired marketing panel returned: {phrase!r}")
+    bad.extend(check_retired_home_copy(lower_home))
 
-    caveats = (
-        "deterministic code",
-        "claimed reward",
-        "paired staged-sif egress canary passed",
-        "no production protected replay has run",
-        "active=false",
-        "one collaborator",
-        "certified 50-task",
-        "unpublished patched harbor fork",
-        "stock harbor 0.13.1 is insufficient",
-        "completed gate decisions",
+    all_public_html = "\n".join(
+        page.read_text(encoding="utf-8", errors="replace").lower()
+        for page in DOCS.rglob("*.html")
     )
-    for phrase in caveats:
-        if phrase not in lower_home:
-            bad.append(f"index.html: integrity caveat missing {phrase!r}")
+    bad.extend(check_integrity_caveats(all_public_html))
 
     for rel in ("index.html", "benchmarks/index.html", "leaderboard/index.html",
                 "registry/index.html"):
@@ -1212,10 +1334,6 @@ def check_public_frontend() -> list[str]:
                   "every listed number was produced by replaying"):
         if stale in lower_submit:
             bad.append(f"submit/index.html: stale replay-worker claim remains {stale!r}")
-    all_public_html = "\n".join(
-        page.read_text(encoding="utf-8", errors="replace").lower()
-        for page in DOCS.rglob("*.html")
-    )
     for stale in (
         "re-scored on ingest",
         "node worker replays",
