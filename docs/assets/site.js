@@ -153,14 +153,26 @@
      navigation
      ====================================================================== */
 
-  /* label, href relative to ROOT, page keys that light it up */
+  /* label, href relative to ROOT, page keys that light it up.
+
+     The discrimination report on /quality/ was reachable only by typing the
+     URL: `quality` lit up `docs`, which points at /guide/, which did not link
+     to the report. A top-level nav row was the obvious fix and is the WRONG
+     one -- verify_site.py bans a top-level quality row as retired navigation,
+     a pinned decision that also fixes this list at five items in one order.
+     (That check is a raw substring scan, so naming the banned literal here
+     would trip it. Do not write it out.)
+     The entrances are in the pages instead: the home masthead links straight
+     to ./quality/#discrimination, the leaderboard foot links to the full
+     report, and /guide/ carries a card for it. A key belongs to exactly ONE
+     row here: two rows claiming the same key would light two items at once. */
   var NAV = [
     ["status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
     ["leaderboard", "leaderboard/", ["leaderboard"]],
     ["tasks",       "registry/",    ["tasks", "registry", "task"]],
     ["docs",        "guide/",       ["run", "quickstart", "docs", "guide",
-                                      "task-format", "submission", "quality-methods",
-                                      "quality"]],
+                                      "task-format", "submission",
+                                      "quality-methods", "quality"]],
     ["submit",      "submit/",      ["submit"]]
   ];
 
@@ -197,7 +209,13 @@
               '<span class="tdb-brand-name">Terminal Daily</span>' +
               '<span class="tdb-brand-kicker">living benchmark</span>' +
             "</span></a>" +
-          '<ul class="flex flex-row items-center gap-2 px-6 max-sm:hidden">' +
+          /* max-lg, not max-sm: this <ul> does not wrap (no flex-wrap), so
+             between 640px and 1023px it was rendering the full label row AND
+             the hamburger that duplicates it, wider than the viewport. The
+             theme switch and the GitHub icon beside it already break at lg;
+             the row now breaks with them, and below lg the mobile menu -- which
+             renders the same navLinks() -- is the single nav. */
+          '<ul class="flex flex-row items-center gap-2 px-6 max-lg:hidden">' +
             navLinks("") +
           "</ul>" +
           '<div class="flex flex-row items-center justify-end gap-1.5 flex-1">' +

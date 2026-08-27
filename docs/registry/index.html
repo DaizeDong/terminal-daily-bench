@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
 <meta name="description" content="Search the published terminal-daily-bench task catalogue. Catalogue membership is not a score.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -33,7 +32,7 @@
       </nav>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue. Catalogue membership is not a score.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue.</p>
 
       <!-- catalogue summary in the Terminal Daily metric-card system -->
       <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
@@ -41,8 +40,8 @@
       </div>
 
       <p class="text-muted-foreground mb-6 font-mono text-sm" data-tdb-integrity>
-        <span class="text-foreground">live</span> tasks withhold gold and protected test bodies;
-        <span class="text-foreground">archive</span> tasks publish them. Running either end to end needs the <a class="hover:text-foreground underline underline-offset-4" href="../guide/">unpublished patched Harbor fork</a>.
+        <span class="text-foreground">live</span> withholds gold and protected tests,
+        <span class="text-foreground">archive</span> publishes them; both need the <a class="hover:text-foreground underline underline-offset-4" href="../guide/">unpublished patched Harbor fork</a>.
       </p>
 
       <!-- ==================== filterable table ==================== -->
@@ -68,6 +67,7 @@
 
           <div class="bg-card -mb-px border-y font-mono md:border-x" id="tdb-facet-box" hidden>
             <div class="flex flex-wrap items-center gap-1 px-4 py-3" id="tdb-facets"></div>
+            <p class="text-muted-foreground px-4 pb-3 text-sm">Declared difficulty is editorial: a <code>task.toml</code> label, not measured.</p>
           </div>
         </div>
 
@@ -79,7 +79,7 @@
               </thead>
               <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="tdb-rows">
                 <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
-                  <td data-slot="table-cell" colspan="7" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
+                  <td data-slot="table-cell" colspan="8" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
                 </tr>
               </tbody>
             </table>
@@ -89,13 +89,13 @@
         <div id="tdb-none" hidden></div>
       </div>
 
-      <p class="text-muted-foreground mt-6 font-mono text-sm"><span class="text-foreground">F2P tests</span> must flip from failing to passing. A dash under <span class="text-foreground">Official solves</span> means awaiting formal coverage, not zero solves.</p>
+      <p class="text-muted-foreground mt-6 font-mono text-sm">Not a score: a dash under <span class="text-foreground">Official solves</span> means awaiting formal coverage, not zero solves.</p>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="registry"></script>
+<script src="../assets/site.js?v=100de7a1cd" data-root=".." data-page="registry"></script>
 <script>
 (function () {
   "use strict";
@@ -158,6 +158,12 @@
     { key: "language", label: "Language",  align: "left"  },
     { key: "suite",    label: "Suite",     align: "left"  },
     { key: "status",   label: "Status",    align: "left"  },
+    /* The facet rail filters on `declared_difficulty`; without a column for
+       it, clicking "hard 43" returned 43 rows in which nothing said "hard".
+       This is the EDITORIAL label from task.toml -- deliberately not the
+       measured `difficulty`, which is "" on every task while no official
+       ranking is published, and which gets its own column the day one is. */
+    { key: "declared", label: "Difficulty", align: "left"  },
     { key: "f2p",      label: "F2P Tests", align: "right" },
     { key: "solved",   label: "Official Solves", align: "right" }
   ];
@@ -198,19 +204,25 @@
       document.querySelector("[data-slot=table-container]").parentNode.hidden = true;
       noneEl.hidden = false;
       noneEl.innerHTML = emptyBlock(
-        "No task catalogue published yet. Run <span class=\"text-foreground\">tdb publish</span> " +
-        "to generate <span class=\"text-foreground\">site_data.json</span> at the site root.",
+        "<p>No task catalogue published yet.</p>" +
+        "<p>Run <span class=\"text-foreground\">tdb publish</span> " +
+        "to generate <span class=\"text-foreground\">site_data.json</span> at the site root.</p>",
         "border-y");
       statsEl.parentNode.hidden = true;
       return;
     }
 
     /* ---- summary ---- */
-    var suiteSet = {}, langs = {}, diffs = {}, live = 0, f2p = 0, scoredTasks = 0;
+    var suiteSet = {}, langs = {}, diffs = {}, declared = {}, live = 0, f2p = 0, scoredTasks = 0;
     tasks.forEach(function (t) {
       T.taskSuites(t).forEach(function (sid) { suiteSet[sid] = 1; });
       if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
       if (t.difficulty) diffs[t.difficulty] = (diffs[t.difficulty] || 0) + 1;
+      /* EDITORIAL label from task.toml. Distinct from t.difficulty, which is
+         MEASURED and stays empty while official_ranking is false. */
+      if (t.declared_difficulty) {
+        declared[t.declared_difficulty] = (declared[t.declared_difficulty] || 0) + 1;
+      }
       if (t.status === "live") live++;
       if (Number(t.n_models) > 0 && typeof t.solved_by === "number") scoredTasks++;
       f2p += Number(t.n_fail_to_pass) || 0;
@@ -237,20 +249,44 @@
               (s[1] == null ? "&mdash;" : esc(s[1])) + "</p>" +
           "</div>" +
           '<div data-slot="card-content" class="px-6">' +
-            '<p class="text-muted-foreground line-clamp-2 font-mono text-sm sm:text-xs">' +
+            '<p class="text-muted-foreground font-mono text-sm">' +
               esc(s[2]) + "</p>" +
           "</div>" +
         "</div></div>";
     }).join("");
 
     /* ---- filter state ---- */
-    var state = { q: "", language: null, difficulty: null, status: null };
+    var state = { q: "", language: null, difficulty: null, status: null, declared: null };
     var sort  = { key: "suite", dir: "desc" };
+
+    /* Facet group -> the task field it filters on. `declared` reads the
+       editorial task.toml label; nothing here is derived from a solve matrix,
+       which /registry/ deliberately never loads. */
+    var FACET_FIELD = {
+      language: "language", difficulty: "difficulty",
+      status: "status", declared: "declared_difficulty"
+    };
 
     function byCount(map) {
       return Object.keys(map).sort(function (a, b) {
         return map[b] - map[a] || a.localeCompare(b);
       });
+    }
+
+    /* A chip's number is what you would get if you clicked it: recount the
+       catalogue with every OTHER active facet applied but this group ignored.
+       The previous counts were computed once over all tasks and never updated,
+       so a chip could advertise 43 while clicking it returned 2. */
+    function looCount(group, value) {
+      var field = FACET_FIELD[group];
+      return tasks.filter(function (t) {
+        if (state.q && t._h.indexOf(state.q) < 0) return false;
+        for (var g in FACET_FIELD) {
+          if (g === group || !state[g]) continue;
+          if (t[FACET_FIELD[g]] !== state[g]) return false;
+        }
+        return t[field] === value;
+      }).length;
     }
 
     function chip(group, value, label, on) {
@@ -260,10 +296,12 @@
     }
 
     function paintFilters() {
-      var quick = chip("status", "live", "live " + live, state.status === "live") +
-                  chip("status", "archive", "archive " + (tasks.length - live),
+      var quick = chip("status", "live", "live " + looCount("status", "live"),
+                       state.status === "live") +
+                  chip("status", "archive", "archive " + looCount("status", "archive"),
                        state.status === "archive");
-      var dirty = state.q || state.language || state.difficulty || state.status;
+      var dirty = state.q || state.language || state.difficulty || state.status ||
+                  state.declared;
       if (dirty) {
         quick += '<button type="button" data-slot="button" id="tdb-reset" class="' +
           CHIP_OFF + '">reset</button>';
@@ -271,13 +309,17 @@
       quickEl.innerHTML = quick;
 
       var facets = "";
-      var ls = byCount(langs);
-      var ds = byCount(diffs);
-      ls.forEach(function (l) {
-        facets += chip("language", l, l + " " + langs[l], state.language === l);
+      byCount(langs).forEach(function (l) {
+        facets += chip("language", l, l + " " + looCount("language", l),
+                       state.language === l);
       });
-      ds.forEach(function (d) {
-        facets += chip("difficulty", d, d + " " + diffs[d], state.difficulty === d);
+      byCount(diffs).forEach(function (d) {
+        facets += chip("difficulty", d, d + " " + looCount("difficulty", d),
+                       state.difficulty === d);
+      });
+      byCount(declared).forEach(function (d) {
+        facets += chip("declared", d, d + " " + looCount("declared", d),
+                       state.declared === d);
       });
       if (facets) { facetBox.hidden = false; facetEl.innerHTML = facets; }
       else { facetBox.hidden = true; facetEl.innerHTML = ""; }
@@ -292,7 +334,7 @@
         return;
       }
       if (ev.target && ev.target.closest && ev.target.closest("#tdb-reset")) {
-        state = { q: "", language: null, difficulty: null, status: null };
+        state = { q: "", language: null, difficulty: null, status: null, declared: null };
         qEl.value = "";
         render();
         qEl.focus();
@@ -340,7 +382,7 @@
       t._f2p = (t.n_fail_to_pass == null) ? -1 : Number(t.n_fail_to_pass);
       t._solved = (typeof t.solved_by === "number") ? t.solved_by : -1;
       t._h = [t.id, t.repo, t.title, t.language, T.taskSuites(t).join(" "),
-              t.status, t.difficulty,
+              t.status, t.difficulty, t.declared_difficulty,
               (t.pr_number != null ? "#" + t.pr_number : "")].join(" ").toLowerCase();
     });
 
@@ -349,6 +391,7 @@
       if (k === "solved") return t._solved;
       if (k === "id") return String(t.id || "");
       if (k === "suite") return T.taskSuites(t).join(" ");
+      if (k === "declared") return String(t.declared_difficulty || "");
       return String(t[k] || "");
     }
 
@@ -358,7 +401,7 @@
       var idCell = '<a class="' + LINK + '" href="' + esc(href) + '">' +
         esc(t.id) + "</a>";
       var title = t.title
-        ? '<span class="text-muted-foreground block text-sm sm:text-xs">' + esc(t.title) + "</span>"
+        ? '<span class="text-muted-foreground block text-sm">' + esc(t.title) + "</span>"
         : "";
 
       var repoUrl = t.repo ? "https://github.com/" + t.repo : null;
@@ -387,9 +430,15 @@
       var status = (t.status === "live")
         ? '<span data-slot="badge" class="' + BADGE_PRIMARY + '">live</span>'
         : '<span data-slot="badge" class="' + BADGE_SECONDARY + '">archive</span>';
-      var diff = t.difficulty
-        ? ' <span data-slot="badge" class="' + BADGE_OUTLINE + '">' + esc(t.difficulty) + "</span>"
-        : "";
+      /* Was `t.difficulty` appended into the Status cell -- the MEASURED
+         field, which is "" on all 61 tasks until an official ranking
+         publishes, so the badge was never emitted and the difficulty facet
+         filtered on a value the table never showed. */
+      var declared = t.declared_difficulty
+        ? '<span data-slot="badge" class="' + BADGE_OUTLINE + '" ' +
+          'title="declared by the task author in task.toml; not measured">' +
+          esc(t.declared_difficulty) + "</span>"
+        : DASH;
 
       var n = Number(t.n_models) || 0;
       var solved = n && t._solved >= 0
@@ -406,7 +455,8 @@
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + lang + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + suite + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="flex items-center gap-1 text-left">' +
-          status + diff + "</p></td>" +
+          status + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + declared + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
           (t._f2p < 0 ? DASH : t._f2p) + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-right">' + solved + "</p></td>" +
@@ -430,6 +480,7 @@
       var out = tasks.filter(function (t) {
         if (state.language && t.language !== state.language) return false;
         if (state.difficulty && t.difficulty !== state.difficulty) return false;
+        if (state.declared && t.declared_difficulty !== state.declared) return false;
         if (state.status && t.status !== state.status) return false;
         if (state.q && t._h.indexOf(state.q) === -1) return false;
         return true;
@@ -450,7 +501,7 @@
       if (!out.length) {
         rowsEl.innerHTML = "";
         noneEl.hidden = false;
-        noneEl.innerHTML = emptyBlock("Nothing matches that filter.");
+        noneEl.innerHTML = emptyBlock("<p>Nothing matches that filter.</p>");
         return;
       }
       noneEl.hidden = true;

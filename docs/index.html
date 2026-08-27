@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>terminal-daily-bench — status, tasks, and relative capability</title>
 <meta name="description" content="Current terminal-daily-bench catalogue, measured solve rates, and formal publication status.">
-<link rel="stylesheet" href="./assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="./assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="./assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="./assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="./assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -19,18 +18,19 @@
       <section class="tdb-masthead" data-tdb-section="intro">
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
         <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance"><span>Terminal</span> <span>Daily</span></h1>
-        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks. The catalogue is public. Every candidate is unranked.</p>
+        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks. The catalogue is public.</p>
         <div class="tdb-masthead-links">
           <a href="#status">current status</a>
           <a href="./leaderboard/">relative scores</a>
           <a href="./registry/">browse tasks</a>
+          <a href="./quality/#discrimination">what the suite separates</a>
         </div>
       </section>
 
       <section id="status" class="tdb-block" data-tdb-section="status">
         <div class="tdb-block-head">
           <h2>status</h2>
-          <p>catalogue availability is separate from ranking authority</p>
+          <p>availability is not ranking authority</p>
         </div>
 
         <div class="tdb-statgrid" id="hp-status">
@@ -38,17 +38,22 @@
         </div>
 
         <div class="tdb-integrity" data-tdb-integrity>
-          <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores; a submitted reward is only a claim.</p>
+          <!-- The invariant and the first line of the details body used to say the
+               same thing twice: "protected tests decide scores, a reward claim does
+               not". Merged here, where it sits above the fold and next to the stat
+               rows it qualifies. The "unranked" fact left this block too: the
+               `official ranking` stat row prints it beside the number it belongs to. -->
+          <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores: deterministic code re-lays and executes them; a claimed reward never is.</p>
           <details data-tdb-integrity-details>
             <summary>integrity limits and current blockers</summary>
             <div class="tdb-integrity-body">
-              <p>Deterministic code re-lays and executes protected tests. A claimed reward is never accepted as a score.</p>
-              <p>A paired staged-SIF egress canary passed on 2026-08-06: control reachable, isolated run blocked. That is a staged proof; no production protected replay has run.</p>
-              <p>Receipt authority is <span class="text-foreground">active=false</span> and this repository has one collaborator, so every candidate is unranked. Publication runs off a code-controlled allowlist: self-signed report/matrix pins cannot approve themselves. <a href="./guide/submission/#operator-replay">replay authority contract &rarr;</a></p>
-              <p><span class="text-foreground">Live</span> tasks withhold gold and protected tests; <span class="text-foreground">archives</span> publish them. Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. <a href="./benchmarks/">release policy &rarr;</a></p>
+              <p>A paired staged-SIF egress canary passed on 2026-08-06; no production protected replay has run.</p>
+              <p>Receipt authority <span class="text-foreground">active=false</span>, one collaborator. Publication runs off a <a href="./guide/submission/#operator-replay">code-controlled allowlist</a>; self-signed report/matrix pins cannot approve themselves.</p>
+              <p><span class="text-foreground">Live</span> withholds gold and protected tests; <a href="./benchmarks/"><span class="text-foreground">archives</span> publish them</a>.</p>
+              <p>Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
             </div>
           </details>
-          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> covers completed gate decisions only. <span id="hp-data-note"></span></p>
+          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only. <span id="hp-data-note"></span></p>
         </div>
       </section>
 
@@ -84,8 +89,8 @@
   </div>
 </main>
 
-<script src="./assets/site.js?v=d064c7dcdd" data-root="." data-page="home"></script>
-<script src="./assets/tdb-data.js?v=d064c7dcdd"></script>
+<script src="./assets/site.js?v=100de7a1cd" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=100de7a1cd"></script>
 <script>
 (function () {
   "use strict";
@@ -176,6 +181,57 @@
       '<span class="tdb-statrow-n">' + esc(note || "") + "</span></div>";
   }
 
+  /* Catalogue composition, and nothing else.
+
+     The home page renders no solve-derived number. A bare "12 of 50 tasks
+     separated any model" on the highest-traffic surface arrives stripped of
+     every qualifier that makes it readable, and under a different scaffold in
+     the same file it is a different number. What CAN be said here without a
+     qualifier is what the catalogue is made of: the editorial difficulty the
+     task author recorded in task.toml when the task was minted.
+
+     Counted at render time, never written into the markup, and the buckets are
+     whatever the catalogue turns out to carry -- a third label appears here on
+     its own. If the field is not published, the row says so rather than
+     inventing a total.
+
+     SCOPED, and the scope travels back with the numbers so the caller can name
+     it. This used to count every task in `site.tasks` while the row directly
+     above it printed the LATEST SUITE's task count: two adjacent rows on the
+     site's highest-traffic surface disagreed about how many tasks exist, 50
+     above and a split summing to 61 below. A composition with no denominator is
+     not readable, and an unnamed denominator that contradicts the one two lines
+     up is worse than none.
+
+     `suiteId` restricts the count to one suite. A falsy `suiteId` falls back to
+     the whole catalogue rather than returning null -- "no declared difficulty is
+     published" would be a false claim about the DATA in order to describe a
+     missing SCOPE. `total` is reduced from the same counts the text is built
+     from, never `site.tasks.length`, which would include tasks carrying no
+     label and make the printed split fail to add up all over again. */
+  function declaredComposition(site, suiteId) {
+    var counts = {}, names = [];
+    ((site && site.tasks) || []).filter(function (task) {
+      return suiteId ? T.taskInSuite(task, suiteId) : true;
+    }).forEach(function (task) {
+      var label = task && task.declared_difficulty;
+      if (typeof label !== "string" || !label) return;
+      if (!counts[label]) { counts[label] = 0; names.push(label); }
+      counts[label] += 1;
+    });
+    if (!names.length) return null;
+    names.sort(function (a, b) {
+      return (counts[b] - counts[a]) || (a < b ? -1 : (a > b ? 1 : 0));
+    });
+    return {
+      text: names.map(function (name) {
+        return name + " " + counts[name];
+      }).join(" \u00b7 "),
+      total: names.reduce(function (n, k) { return n + counts[k]; }, 0),
+      scoped: !!suiteId
+    };
+  }
+
   function renderStatus(site, board) {
     var suites = datedSuites(site);
     var latest = suites[0] || {};
@@ -183,9 +239,24 @@
     var input = (report && report.input) || {};
     var scoring = (site && site.scoring) || {};
     var ratings = formalModelRatings(report, scoring);
+    var composition = declaredComposition(site, latest.id);
+    /* Name the denominator the split is over. Derived from the counts, so
+       regenerating the catalogue moves the number instead of falsifying it. */
+    var compScope = !composition ? "" :
+      (composition.scoped
+        ? plural(composition.total, "labelled task", "labelled tasks") +
+          " in suite " + latest.id
+        : plural(composition.total, "labelled task", "labelled tasks") +
+          " across the whole catalogue");
     var stats = [
       ["latest catalogue suite", latest.id, "published task list"],
-      ["catalogue tasks", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
+      /* Was "catalogue tasks", which named the catalogue while counting one
+         suite -- the word collision that made the difficulty split below it
+         look like it contradicted the row above. */
+      ["tasks in latest suite", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
+      ["tasks by declared difficulty", composition && composition.text,
+        composition ? "editorial label from task.toml over " + compScope + ", not measured"
+                    : "no declared difficulty is published in the catalogue"],
       ["formal roster", input.frozen_task_roster_n != null
         ? input.frozen_task_roster_n + "/50" : "not frozen", "exactly 50 required"],
       ["official ranking", ratings.length ? "published" : "unranked",
@@ -196,7 +267,6 @@
     ];
     set("hp-status", stats.map(function (s) { return statRow(s[0], s[1], s[2]); }).join(""));
 
-    if (T.dayRail) T.dayRail(byId("tdb-rail"), suites, latest.id);
     var fa = document.querySelector("[data-tdb-fa]");
     if (fa) {
       fa.textContent = ratings.length && board && typeof board.total_fa === "number" &&

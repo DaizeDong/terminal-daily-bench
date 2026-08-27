@@ -15,7 +15,6 @@ Both live two directories below the site root, so every generated page loads the
 same three stylesheets, in this order, and ends with the same script tag:
 
     ../../assets/tw.css        the vendored Tailwind build (all utilities)
-    ../../assets/tw-extra.css  its second chunk
     ../../assets/site.css      the Terminal Daily visual system
     ../../assets/site.js       data-root="../.." data-page="<key>"
 
@@ -363,7 +362,6 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
 <link rel="stylesheet" href="{root}/assets/tw.css?v={ASSET_V}">
-<link rel="stylesheet" href="{root}/assets/tw-extra.css?v={ASSET_V}">
 <link rel="stylesheet" href="{root}/assets/site.css?v={ASSET_V}">
 <link rel="icon" href="{FAVICON}">
 {head}</head>
@@ -756,7 +754,11 @@ def task_page_body(task: dict, pkg: dict) -> str:
     f2p = rec.get("fail_to_pass") or []
     n_f2p = task.get("n_fail_to_pass") or len(f2p) or None
     language = task.get("language") or rec.get("language")
-    difficulty = task.get("difficulty") or tom.get("difficulty")
+    # EDITORIAL, from task.toml -- NOT task["difficulty"], which is the
+    # MEASURED one and is gated on scoring authority (it is "" while
+    # unranked). Reading the measured field here would make the row note
+    # below false the day a ranking is published.
+    difficulty = task.get("declared_difficulty") or tom.get("difficulty") or ""
 
     buttons = []
     for sid in suites:
@@ -780,7 +782,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
     solved, n_models = task.get("solved_by"), task.get("n_models")
     stats = strip([
         ("language", language or None, ""),
-        ("difficulty", difficulty or None, "official 50-task matrix only"),
+        ("difficulty", difficulty or None, "declared by the task author in task.toml"),
         ("fail-to-pass tests", n_f2p, "must fail before the patch, pass after"),
         ("official solves",
          f"{solved}/{n_models}" if solved is not None and n_models else None,

@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>task format — terminal-daily-bench docs</title>
 <meta name="description" content="The on-disk schema of a terminal-daily-bench task package: task.toml, instruction.md, tests/, environment/, solution/, PROVENANCE.json, record.json — plus archive vs. live and how scoring re-lays the protected tests.">
-<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -34,11 +33,20 @@
         <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Self-contained, <strong>harbor-native</strong>
           packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>; ids like
           <code>td-fc90ea8b76d5f6b6</code>. Code: <code>terminal_daily_bench/</code>,
-          <code>tasks/publish_tasks.py</code>, <code>web/submit_result.py</code>. Everything below
+          <code>tasks/publish_tasks.py</code>, <code>web/submit_result.py</code>.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything below
           reflects the code in this bundle; no APIs are invented.</p>
       </header>
 
-      <article class="prose prose-no-margin">
+      <!-- wrap-anywhere (overflow-wrap:anywhere, inherited) so unbreakable
+           identifiers in body copy -- terminal_daily_bench/adapters/base.py::HarnessAdapter
+           at 440px, conftest.py/sitecustomize.py in the tests list -- break instead
+           of pushing the document to 456px inside a 390px viewport, where
+           body{overflow-x:hidden} silently CLIPS the tail with no scrollbar.
+           It cannot loosen the code blocks: every <pre> here sits in a .not-prose
+           wrapper and is white-space:pre, which suppresses wrapping outright, so
+           their deliberate horizontal scroll is untouched. -->
+      <article class="prose prose-no-margin wrap-anywhere">
 
         <h2 id="layout" class="scroll-m-28 font-mono">Package layout</h2>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks/archive/&lt;task-id&gt;/
@@ -308,23 +316,21 @@ output = AdapterResult(patch: str, telemetry: dict, error: str | None)</pre></di
   </div>
 
   <!-- ===================== packages in the wild ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">packages in the wild</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">published task directories</p>
+  <section class="tdb-block" data-tdb-section="next">
+    <div class="tdb-block-head">
+      <h2>packages in the wild</h2>
+      <p>published task directories</p>
+      <div class="tdb-block-tools"><a href="../../registry/">task registry &rarr;</a></div>
     </div>
 
     <div id="pkgs" class="w-full"></div>
-
-    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../registry/">task registry &rarr;</a>
-  </div>
+  </section>
 
 </div>
 </div>
 </main>
 
-<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=100de7a1cd" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */
