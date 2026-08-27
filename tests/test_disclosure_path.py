@@ -22,6 +22,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 
+# Both pages that render an UNOFFICIAL badge must answer the same question.
+# They pointed at different anchors for a while: home at the integrity block,
+# /leaderboard/ at "What enters the matrix" -- which explains how a row is
+# SCORED, not why it is unranked. A `why` that answers a different question
+# than the badge asks is a disclosure only in shape.
+PAGES_WITH_BADGE = ("index.html", "leaderboard/index.html")
+
 HOME = (DOCS / "index.html").read_text(encoding="utf-8")
 
 # The sentence that carries the invariant. It lived on the home page, was lost
@@ -29,8 +36,9 @@ HOME = (DOCS / "index.html").read_text(encoding="utf-8")
 INVARIANT = "Protected tests decide published scores"
 
 
-def _why_href() -> str:
-    m = re.search(r'class="tdb-badge-why"\s+href="([^"]+)"', HOME)
+def _why_href(rel: str = "index.html") -> str:
+    src = (DOCS / rel).read_text(encoding="utf-8")
+    m = re.search(r'class="tdb-badge-why"\s+href="([^"]+)"', src)
     assert m, (
         "the UNOFFICIAL badge's `why` link is gone from docs/index.html. It is "
         "the only route from an unqualified number to the reason it is "
@@ -39,10 +47,11 @@ def _why_href() -> str:
     return m.group(1)
 
 
-def _resolve(href: str) -> tuple[Path, str]:
+def _resolve(href: str, rel: str = "index.html") -> tuple[Path, str]:
     ref, _, frag = href.partition("#")
     ref = ref.split("?", 1)[0]
-    target = (DOCS / ref).resolve() if ref else (DOCS / "index.html")
+    base = (DOCS / rel).parent
+    target = (base / ref).resolve() if ref else (DOCS / rel)
     if target.is_dir():
         target = target / "index.html"
     return target, frag
@@ -93,3 +102,24 @@ def test_home_still_marks_the_claim_even_though_it_leads_with_results():
         "the marker sits beside the number it qualifies."
     )
     assert "tdb-badge-why" in HOME
+
+
+def test_every_unofficial_badge_answers_the_same_question():
+    """Both badges must lead to the reason for `unranked`, not somewhere near it."""
+    targets = set()
+    for rel in PAGES_WITH_BADGE:
+        href = _why_href(rel)
+        target, frag = _resolve(href, rel)
+        assert target.exists(), f"{rel}: `why` -> {href} does not resolve"
+        body = target.read_text(encoding="utf-8")
+        assert f'id="{frag}"' in body, f"{rel}: `why` -> #{frag} has no such id"
+        assert INVARIANT in body, (
+            f"{rel}: `why` leads to {target.relative_to(ROOT)}, which does not "
+            f"state the invariant -- the badge asks why this is UNOFFICIAL and "
+            f"the answer has to be on the page it opens"
+        )
+        targets.add((str(target.relative_to(DOCS)).replace("\\", "/"), frag))
+    assert len(targets) == 1, (
+        f"the UNOFFICIAL badges point at different places: {sorted(targets)}. "
+        f"One question, one answer."
+    )
