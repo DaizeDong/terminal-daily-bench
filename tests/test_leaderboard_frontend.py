@@ -87,14 +87,34 @@ def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
 
     assert "Task-family: unavailable." in METHODS
-    # WAS: assert "canonical C1&ndash;C14" in METHODS. That taxonomy is defined
-    # in zero .py files, C5 covers 61/61 tasks (zero bits) and nothing can
-    # render it, so the page asserted a label set it could neither produce nor
-    # attribute. Deleting the claim without pinning its replacement would let
-    # the next edit quietly re-assert one, so the NEW commitment is what is
-    # pinned: the dimension is authorised, and it is empty.
-    assert "canonical C1&ndash;C14" not in METHODS
-    assert "No capability label set is currently published" in METHODS
+
+    # This assertion has now been wrong in BOTH directions, so it pins the
+    # reasoning and not just the wording.
+    #
+    # It first pinned "canonical C1-C14". That was struck on the finding that
+    # the taxonomy was defined in zero .py files and that C5 covered 61/61
+    # tasks, i.e. the page asserted a label set it could neither produce nor
+    # attribute. The replacement pinned "No capability label set is currently
+    # published".
+    #
+    # The finding was half wrong. The codes ARE defined -- in the research
+    # pipeline's CAPABILITY_TAXONOMY -- and the assignment is deterministic:
+    # re-running the tagger over the 37 archive packages reproduces every
+    # stored capability_labels value exactly. What was true is narrower: this
+    # CATALOGUE cannot score on them. So a label set IS published now, and
+    # "No capability label set is currently published" became a false
+    # sentence on a live page.
+    #
+    # What is pinned now is the pair of claims that are actually true and that
+    # a future edit must not quietly collapse into one: the labels are
+    # published AND no axis clears the publish gate. Asserting only the first
+    # would let the page imply a capability score; only the second would let
+    # the deletion happen again.
+    assert "No capability label set is currently published" not in METHODS
+    assert "labels are published on every archive package" in METHODS
+    assert "no axis clears the publish gate on this catalogue" in METHODS
+    assert 'id="capability-taxonomy"' in METHODS
+    assert "An earlier revision of this page deleted the C1&ndash;C14 claim" in METHODS
     assert "does not infer one from tracks, merged labels" in METHODS
     assert "does not display zero" in METHODS
     assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS

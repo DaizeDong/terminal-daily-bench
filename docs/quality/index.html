@@ -73,6 +73,46 @@
         <div class="tdb-integrity" data-tdb-integrity id="disc-caveat"></div>
       </section>
 
+      <!-- ======================= CAPABILITY COVERAGE ======================= -->
+      <!-- Every cell below is written by capability() at load time from
+           ../data/capability.json. No code, name, scope or count is authored
+           into this markup, so a taxonomy change flows through the data. -->
+      <section class="tdb-block" data-tdb-section="capability" id="capability">
+        <div class="tdb-block-head">
+          <h2>capability coverage</h2>
+          <p>what the fourteen axes carry</p>
+          <div class="tdb-block-tools"><a href="../guide/quality-methods/#capability-taxonomy">what C1&ndash;C14 mean &rarr;</a></div>
+        </div>
+
+        <p class="tdb-page-lede">All fourteen axes are listed. An axis this catalogue does not cover is a fact about the catalogue, not a row to hide.</p>
+
+        <dl class="tdb-instrument" id="cap-instrument">
+          <dt>taxonomy</dt><dd id="cap-src">&mdash;</dd>
+          <dt>corpus</dt><dd id="cap-corpus">&mdash;</dd>
+          <dt>gate</dt><dd id="cap-gate">&mdash;</dd>
+          <dt>re-derived</dt><dd id="cap-verify">&mdash;</dd>
+        </dl>
+
+        <div class="tdb-plain-table" id="cap-table">
+          <p class="tdb-empty">loading the capability index&hellip;</p>
+        </div>
+        <p class="tdb-block-foot" id="cap-foot"></p>
+
+        <!-- The co-occurrence grid. Deliberately NOT the solve strip's visual
+             language: that strip fills a whole cell on a four-step ramp and
+             every square there means "a model solved this task". Here a mark
+             is a small centred dot on one ink, binary, and means "this package
+             carries this label". No model outcome enters this figure. -->
+        <figure class="tdb-strip" id="cap-strip">
+          <figcaption>label co-occurrence &mdash; one column per re-derivable package, one row per axis. Not a solve result: no model outcome is in this figure.</figcaption>
+          <div class="tdb-strip-body"></div>
+          <p class="tdb-legend" id="cap-legend"></p>
+        </figure>
+        <p class="tdb-block-foot" id="cap-note"></p>
+
+        <div class="tdb-integrity" data-tdb-integrity id="cap-caveat"></div>
+      </section>
+
       <!-- ============================= THE STRIP ============================= -->
       <section class="tdb-block" data-tdb-section="card">
         <div class="tdb-block-head">
@@ -1164,15 +1204,400 @@
       ' &nbsp;<a href="../guide/quality-methods/#outcomes">why &rarr;</a>');
   }
 
+  /* ====================================================================
+     CAPABILITY COVERAGE
+
+     Reads data/capability.json, which the generator re-derives from the task
+     packages themselves. Every axis row -- code, name, scope, count, threshold
+     and verdict -- comes from that file; this function holds no taxonomy and
+     no threshold of its own, so a renamed code or a retuned gate cannot go
+     stale here.
+
+     A criterion is read as TRI-STATE: `measured:false` / `met:null` is NOT a
+     failure. min_admitted_subtests needs a unit-test-validity audit that has
+     not run on this catalogue, and "not measured" must never render as
+     "failed" or, worse, as "passed". No axis on this page is publishable.
+
+     Both field vocabularies are accepted: the published one (`n_tasks`,
+     `criteria`, `gate_verdict`) and the flatter one it was contracted against
+     (`tasks`, `gate.tasks`). A page that renders only one of them goes blank
+     the day the other ships, and a blank capability table is indistinguishable
+     from a catalogue that covers nothing.
+     ==================================================================== */
+
+  function pctOf(x) {
+    return x == null ? null : (Number(x) * 100).toFixed(0) + "%";
+  }
+
+  /* first non-null of two readings of the same fact */
+  function pick(a, b) { return a == null ? b : a; }
+
+  /* A reason string arrives from the generator as a lower-case fragment with
+     no terminator. Concatenated raw it ran two sentences together ("...does
+     not exist Unmeasured is not failed"), which reads as a typo and quietly
+     costs the sentence after it. The text is never edited, only cased and
+     closed. */
+  function sentence(t) {
+    var v = String(t == null ? "" : t).trim();
+    if (!v) return "";
+    v = v.charAt(0).toUpperCase() + v.slice(1);
+    return /[.!?]$/.test(v) ? v : v + ".";
+  }
+
+  /* Same fragment, but as the predicate of a subject the sentence already
+     names: "measured a different corpus" reads as a fragment when capitalised
+     and as prose after "It". A reason that already opens with a capital is a
+     sentence of its own and is left alone. */
+  function clause(t, subject) {
+    var v = String(t == null ? "" : t).trim();
+    if (!v) return "";
+    return /^[a-z]/.test(v) ? sentence(subject + " " + v) : sentence(v);
+  }
+
+  /* a count field that must be a number: the published `repos` is the repo
+     LIST, and printing an array's length as if it were the published count
+     would be a different number on the day the two disagree. */
+  function count(x) { return typeof x === "number" ? x : null; }
+
+  /* A count that could not be read prints as an em dash, never as 0 and never
+     as the string "null". Pairs with count(): count() refuses to invent a
+     number, num() refuses to let the absence look like one. */
+  function num(x) { return typeof x === "number" ? String(x) : "&mdash;"; }
+
+  function axisView(a) {
+    var crit = a.criteria || null;
+    var flat = a.gate || null;
+    /* NOT `|| 0`. If the generator ever ships a third name for this field,
+       `|| 0` renders every axis as zero and the page states that the
+       catalogue covers no capability at all -- a measurement, and a false
+       one. /guide/quality-methods/ commits this site to the opposite:
+       "Unavailable and zero are different claims." A count that cannot be
+       read is null here and prints as an em dash. */
+    var tasks = pick(count(a.n_tasks), count(a.tasks));
+    var blockers = Array.isArray(a.gate_blockers) ? a.gate_blockers : null;
+    var unmeas = Array.isArray(a.gate_unmeasured) ? a.gate_unmeasured : null;
+
+    /* the flat vocabulary carries no criterion names, so they are rebuilt
+       from the two booleans it does carry plus the always-unmeasured third */
+    if (!blockers && flat) {
+      blockers = [];
+      if (flat.tasks === false) blockers.push("min_tasks");
+      if (flat.share === false) blockers.push("max_single_repo_share");
+      unmeas = [];
+      if (flat.admitted == null) unmeas.push("min_admitted_subtests");
+      if (flat.share == null) unmeas.push("max_single_repo_share");
+    }
+
+    return {
+      code: a.code == null ? "?" : String(a.code),
+      name: a.name == null ? "" : String(a.name),
+      scope: pick(a.description, a.scope),
+      tasks: tasks,
+      f2p: pick(count(a.n_fail_to_pass), count(a.f2p)),
+      repos: pick(count(a.n_repos), count(a.repos)),
+      share: a.top_repo_share == null ? null : Number(a.top_repo_share),
+      cover: a.coverage_share == null ? null : Number(a.coverage_share),
+      verdict: a.gate_verdict == null ? null : String(a.gate_verdict),
+      blockers: blockers || [],
+      unmeas: unmeas || [],
+      crit: crit,
+      declared: a.declared_unverified ? count(a.declared_unverified.n_tasks) : null,
+      /* clears every criterion that could be measured -- which is not the
+         same as clearing the gate, and is never rendered as if it were */
+      clears: !!(crit
+        ? (crit.min_tasks && crit.min_tasks.met === true &&
+           crit.max_single_repo_share && crit.max_single_repo_share.met === true)
+        : (flat && flat.tasks === true && flat.share === true))
+    };
+  }
+
+  /* The gate cell, in words. A tick would have to pick a side on the
+     unmeasured criterion, and there is no side to pick. */
+  function capVerdict(v) {
+    if (!v.tasks) return "no tasks &middot; fails min_tasks";
+    var out = [];
+    if (v.blockers.length) out.push("fails " + v.blockers.map(esc).join(", "));
+    if (v.unmeas.length) out.push(v.unmeas.map(esc).join(", ") + " unmeasured");
+    if (!out.length) out.push(v.verdict ? esc(v.verdict) : "no verdict published");
+    return out.join(" &middot; ");
+  }
+
+  function capability(cap) {
+    var host = document.getElementById("cap-table");
+    if (!host) return;
+
+    var raw = cap && Array.isArray(cap.axes) ? cap.axes : null;
+    if (!raw || !raw.length) {
+      host.innerHTML = '<p class="tdb-empty">The capability index did not load, ' +
+        "or carries no <code>axes</code> array. Nothing below was computed &mdash; " +
+        "this is absence of data, not absence of coverage.</p>";
+      put("cap-foot", "");
+      put("cap-note", "");
+      var dead = document.getElementById("cap-strip");
+      if (dead) dead.style.display = "none";
+      put("cap-caveat", "<p><strong>Capability coverage is unavailable.</strong> " +
+        "No axis on this page is measured, passing or failing; the index was not " +
+        "read, and a table of zeros would not have said so.</p>");
+      return;
+    }
+
+    var axes = raw.map(axisView);
+    var gate = cap.publish_gate || cap.gate || {};
+    var cat = cap.catalogue || cap.corpus || {};
+    var taggable = pick(count(cat.n_tasks_verifiable), count(cat.taggable));
+    var unverif = pick(count(cat.n_tasks_unverifiable), count(cat.untaggable));
+    var nTasks = pick(count(cat.n_tasks), count(cat.packages));
+
+    var HEAD = ["axis", "scope", "tasks", "F2P", "repos", "top repo", "gate"];
+    var thead = "<tr>" + HEAD.map(function (h, i) {
+      return "<th" + (i >= 2 && i <= 5 ? ' class="tdb-num"' : "") + ">" + h + "</th>";
+    }).join("") + "</tr>";
+
+    var covered = 0, blank = 0;
+    axes.forEach(function (v) { if (v.tasks) { covered += 1; } else { blank += 1; } });
+
+    var body = axes.map(function (v) {
+      var shown = pctOf(v.share);
+      var cells = [
+        num(v.tasks) + (taggable && v.tasks != null
+          ? '<span class="tdb-muted">/' + taggable + "</span>" : ""),
+        num(v.f2p), num(v.repos), (shown == null ? "&mdash;" : shown)
+      ].map(function (x) { return '<td class="tdb-num">' + x + "</td>"; }).join("");
+      return "<tr><td><strong>" + esc(v.code) + "</strong> " + esc(v.name) + "</td>" +
+        '<td class="tdb-wrap' + (v.tasks ? "" : " tdb-muted") + '">' +
+          (v.scope == null ? "&mdash;" : esc(v.scope)) + "</td>" +
+        cells +
+        '<td class="tdb-wrap tdb-muted">' + capVerdict(v) + "</td></tr>";
+    }).join("");
+
+    host.innerHTML = '<table class="w-full caption-bottom">' +
+      "<thead>" + thead + "</thead><tbody>" + body + "</tbody></table>";
+
+    /* ---- the masthead lines -------------------------------------------- */
+    var src = cap.rules_source || cap.source || {};
+    /* the file's basename: the full path is an unbreakable token, and the
+       masthead <dd> is a one-line slot. The path in full is on the methods
+       page this section links to. */
+    var where = String(pick(src.path, src.file) || "").split("/").pop();
+    put("cap-src", (src.symbol ? "<code>" + esc(String(src.symbol).split(" ")[0]) + "</code>" : "taxonomy") +
+      (where ? " in <code>" + esc(where) + "</code>" : "") +
+      (src.commit ? " &middot; " + esc(String(src.commit).slice(0, 7)) : "") +
+      " &middot; rule-based, deterministic");
+
+    put("cap-corpus", (nTasks == null ? "&mdash;" : nTasks) +
+      " task" + one(nTasks) + " &middot; " +
+      (taggable == null ? "&mdash;" : taggable) + " re-derivable &middot; " +
+      (unverif == null ? "&mdash;" : unverif) + " not re-derivable");
+
+    put("cap-gate", (gate.min_tasks == null ? "&mdash;" : "&ge; " + gate.min_tasks + " tasks") +
+      " &middot; " + (gate.max_single_repo_share == null
+        ? "&mdash;" : "top repo &le; " + pctOf(gate.max_single_repo_share)) +
+      " &middot; " + (gate.min_admitted_subtests == null
+        ? "&mdash;" : "&ge; " + gate.min_admitted_subtests + " admitted subtests") +
+      " &mdash; the third is unmeasured here, so no axis clears the gate");
+
+    var ver = cap.verification || {};
+    put("cap-verify", ver.stored_labels_match_rederivation === true
+      ? "every stored label reproduced on " + (ver.checked_packages == null
+          ? "the re-derivable packages" : ver.checked_packages + " package" +
+          one(ver.checked_packages))
+      : ver.stored_labels_match_rederivation === false
+        ? "<strong>a stored label did not reproduce</strong> &mdash; the shipped labels " +
+          "and the tagger disagree"
+        : "no re-derivation receipt published");
+
+    /* ---- the caption ---------------------------------------------------
+       The lesson -- a label carried by nearly every task separates nothing --
+       is the same one the discrimination report above already argues from the
+       solve matrix. It is stated once, here, and linked rather than redrawn. */
+    var broad = axes.filter(function (v) {
+      var c = v.cover != null ? v.cover : (taggable ? v.tasks / taggable : 0);
+      return v.tasks && c >= 0.9;
+    }).map(function (v) {
+      return esc(v.code) + " " + num(v.tasks) + "/" + (taggable == null ? "&mdash;" : taggable);
+    });
+    var clears = axes.filter(function (v) { return v.clears; })
+      .map(function (v) { return esc(v.code); });
+
+    put("cap-foot",
+      covered + " of " + axes.length + " axes carry a task; " + blank +
+      " carry none. " +
+      (clears.length
+        ? clears.join(" and ") + " clear every criterion that can be measured " +
+          "here, and nothing more. "
+        : "No axis clears both measurable criteria. ") +
+      (broad.length
+        ? "They are also the broadest labels in the catalogue (" +
+          broad.join(", ") + "), and a label carried by nearly every task " +
+          'separates nothing &mdash; the same reading as <a href="#discrimination">' +
+          "discrimination</a> above. "
+        : "") +
+      "Labels are multi-valued: a task carries every code its diff triggers, so " +
+      "these counts do not sum to " + (taggable == null ? "the task total" : taggable) + ".");
+
+    /* ---- the caveat block ----------------------------------------------- */
+    var unList = Array.isArray(cap.publish_gate_unmeasured) ? cap.publish_gate_unmeasured : null;
+    var unWhy = pick(cap.publish_gate_unmeasured_reason,
+      cap.unmeasured && cap.unmeasured.reason);
+    var unName = unList && unList.length
+      ? unList.join(", ")
+      : ((cap.unmeasured && cap.unmeasured.criterion) || "min_admitted_subtests");
+    var ref = cap.unit_test_validity_reference || cap.not_applicable || {};
+
+    var cparts = ["<p><strong>No capability axis is publishable today.</strong> " +
+      "Two of the three gate criteria can be computed from this catalogue and the " +
+      "third cannot, so every axis is short of a claim whatever its counts say.</p>"];
+
+    cparts.push("<p><strong><code>" + esc(unName) + "</code> is unmeasured here.</strong> " +
+      esc(sentence(unWhy || "it counts the subtests surviving a unit-test-validity " +
+        "audit, and no such audit has classified this catalogue")) +
+      " Unmeasured is not failed, and it is certainly not passed.</p>");
+
+    if (ref.path || ref.audit) {
+      cparts.push("<p><strong>The unit-test-validity audit on record does not " +
+        "describe this catalogue" +
+        (ref.release_commit || ref.commit
+          ? " (release " + esc(String(pick(ref.release_commit, ref.commit)).slice(0, 7)) + ")"
+          : "") + ".</strong> " +
+        esc(clause(pick(ref.reason, "measured a different corpus"), "It")) +
+        (ref.reason ? "" : " Its per-axis counts are not reproduced on this page.") +
+        "</p>");
+    }
+
+    if (blank) {
+      cparts.push("<p><strong>" + blank + " of " + axes.length +
+        " axes carry no task at all.</strong> They are listed at zero rather than " +
+        "dropped: a missing row reads as an axis that does not exist, which is a " +
+        "different claim from an axis this catalogue never reached.</p>");
+    }
+
+    if (unverif) {
+      cparts.push("<p><strong>" + unverif + " task" + one(unverif) +
+        " cannot be tagged here.</strong> The tagger reads the oracle diff and live " +
+        "withholds it, so their <code>task.toml</code> keywords stand as declared, " +
+        "never re-derived &mdash; and every count above is over the " +
+        (taggable == null ? "re-derivable" : taggable) + " that could be checked.</p>");
+    }
+
+    put("cap-caveat", cparts.join(""));
+    capStrip(axes, raw, taggable);
+  }
+
+  /* ---- the co-occurrence grid ------------------------------------------
+     What the table cannot show: which axes travel together on the same
+     package. C4 and C5 landing on nearly every column, side by side, is the
+     finding -- two labels that co-occur everywhere partition nothing.
+
+     The mark is a small centred dot drawn in `currentColor`, one ink, present
+     or absent. The solve strip above fills the whole cell on a four-step
+     ramp. Two strips on one page must not share a visual language while
+     meaning different things, so nothing here is a filled cell and nothing
+     here is shaded by degree. */
+  var DOT = 5;            /* mark edge, inside the CELL                     */
+
+  function capStrip(axes, raw, taggable) {
+    var host = document.querySelector("#cap-strip .tdb-strip-body");
+    var fig = document.getElementById("cap-strip");
+    if (!host || !fig) return;
+
+    /* one column per package that any axis names. A vocabulary carrying no
+       task_ids cannot say which package is which, and a grid drawn from
+       counts alone would be an invented arrangement, not an observation. */
+    var seen = Object.create(null), cols = [];
+    var haveIds = false;
+    raw.forEach(function (a) {
+      if (!Array.isArray(a.task_ids)) return;
+      haveIds = true;
+      a.task_ids.forEach(function (id) {
+        if (!seen[id]) { seen[id] = Object.create(null); cols.push(id); }
+        seen[id][String(a.code)] = 1;
+      });
+    });
+
+    if (!haveIds || !cols.length) {
+      if (fig) fig.style.display = "none";
+      put("cap-note", haveIds
+        ? "No package carries any label, so there is no co-occurrence to draw."
+        : "The index publishes no per-axis <code>task_ids</code>, so which axes " +
+          "share a package cannot be drawn &mdash; only the counts above are known.");
+      return;
+    }
+    fig.style.display = "";
+
+    /* Column order is DERIVED: most-labelled package first, then by the codes
+       it carries, then by id. Hand-ordering columns would let the arrangement
+       carry a claim the data does not. */
+    function sig(id) {
+      return axes.filter(function (v) { return seen[id][v.code]; })
+        .map(function (v) { return v.code; }).join(",");
+    }
+    cols.sort(function (x, y) {
+      var nx = sig(x).split(",").length, ny = sig(y).split(",").length;
+      if (nx !== ny) return ny - nx;
+      var sx = sig(x), sy = sig(y);
+      if (sx !== sy) return sx < sy ? -1 : 1;
+      return x < y ? -1 : (x > y ? 1 : 0);
+    });
+
+    var w = cols.length * PITCH - (PITCH - CELL);
+    var off = (CELL - DOT) / 2;
+
+    var rows = axes.map(function (v) {
+      var hits = 0;
+      var marks = cols.map(function (id, i) {
+        if (!seen[id][v.code]) return "";
+        hits += 1;
+        return '<rect x="' + (i * PITCH + off) + '" y="' + off + '" width="' + DOT +
+          '" height="' + DOT + '" fill="currentColor"><title>' + esc(id) +
+          " &middot; " + esc(v.code) + " " + esc(v.name) + "</title></rect>";
+      }).join("");
+      var aria = v.code + " " + v.name + ": carried by " + hits + " of " +
+        cols.length + " package" + one(cols.length);
+      return '<div class="tdb-strip-row">' +
+        '<span class="tdb-strip-k">' + esc(v.code) + " " + esc(v.name) + "</span>" +
+        '<div class="tdb-strip-cells">' +
+          '<svg viewBox="0 0 ' + w + " " + CELL + '" width="' + w + '" height="' +
+          CELL + '" preserveAspectRatio="xMinYMid meet" style="width:100%" ' +
+          'role="img" shape-rendering="crispEdges" aria-label="' + esc(aria) + '">' +
+          marks + "</svg>" +
+        "</div>" +
+        '<span class="tdb-strip-n">' + hits + "/" + cols.length + "</span>" +
+      "</div>";
+    }).join("");
+    host.innerHTML = rows;
+
+    put("cap-legend",
+      '<svg class="tdb-legend-sw" width="9" height="9" viewBox="0 0 9 9" ' +
+      'style="display:inline-block;vertical-align:-1px;margin:0 var(--sp-2) 0 0" ' +
+      'aria-hidden="true" shape-rendering="crispEdges">' +
+      '<rect x="2" y="2" width="5" height="5" fill="currentColor"/></svg>' +
+      "package carries this label &middot; blank = does not &middot; " +
+      "presence only, never a degree");
+
+    /* the one sentence the grid is for */
+    var pair = axes.filter(function (v) {
+      return taggable && v.tasks && v.tasks / taggable >= 0.9;
+    }).map(function (v) { return esc(v.code); });
+    put("cap-note",
+      "Columns are ordered by how many labels a package carries, so the dense " +
+      "left edge is arrangement, not a finding. " +
+      (pair.length > 1
+        ? "The finding is that " + pair.join(" and ") + " sit on almost the same " +
+          "columns: two labels that co-occur everywhere partition nothing."
+        : "Rows that share their columns are labels that cannot separate " +
+          "packages from each other."));
+  }
+
   function boot() {
-    if (!T.getJSON) { paint(null); discrimination(null, null); return; }
+    if (!T.getJSON) { paint(null); discrimination(null, null); capability(null); return; }
     /* Two files, one paint: the matrix carries the outcomes, the catalogue
        carries publication mode and the declared difficulty label. Neither
        alone can state what this instrument separates. */
     Promise.all([
       T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the solve matrix")),
-      T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue"))
-    ]).then(function (r) { paint(r[0]); discrimination(r[0], r[1]); });
+      T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+      T.getJSON("data/capability.json").catch(T.fetchFailed("the capability index"))
+    ]).then(function (r) { paint(r[0]); discrimination(r[0], r[1]); capability(r[2]); });
   }
 
   if (document.readyState === "loading") {

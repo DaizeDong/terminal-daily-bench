@@ -67,7 +67,15 @@
 
           <div class="bg-card -mb-px border-y font-mono md:border-x" id="tdb-facet-box" hidden>
             <div class="flex flex-wrap items-center gap-1 px-4 py-3" id="tdb-facets"></div>
-            <p class="text-muted-foreground px-4 pb-3 text-sm">Declared difficulty is editorial: a <code>task.toml</code> label, not measured.</p>
+            <!-- The capability taxonomy gets its own row rather than being mixed
+                 into the flat rail above: it is a fourteen-axis map of the whole
+                 declared taxonomy, not another handful of values, and reading it
+                 as a map is the point. Its label and its chips are painted from
+                 ../data/capability.json; the row stays hidden when that file
+                 could not be read, because fourteen chips reading zero and a
+                 catalogue that covers nothing look identical. -->
+            <div class="flex flex-wrap items-center gap-1 border-t px-4 py-3" id="tdb-caps" hidden></div>
+            <p class="text-muted-foreground px-4 pb-3 text-sm" id="tdb-facet-note"></p>
           </div>
         </div>
 
@@ -79,7 +87,7 @@
               </thead>
               <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="tdb-rows">
                 <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
-                  <td data-slot="table-cell" colspan="8" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
+                  <td data-slot="table-cell" colspan="9" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
                 </tr>
               </tbody>
             </table>
@@ -164,6 +172,12 @@
        measured `difficulty`, which is "" on every task while no official
        ranking is published, and which gets its own column the day one is. */
     { key: "declared", label: "Difficulty", align: "left"  },
+    /* The capability rail filters on a SET-valued label, so it gets a column
+       for the same reason `declared` did: a filter for an attribute the table
+       never renders is a dead end. The cell distinguishes three states that a
+       single dash would flatten -- axes matched, no axis matched, and not
+       taggable at all -- see `capCell`. */
+    { key: "capability", label: "Capability", align: "left"  },
     { key: "f2p",      label: "F2P Tests", align: "right" },
     { key: "solved",   label: "Official Solves", align: "right" }
   ];
@@ -176,6 +190,8 @@
   var quickEl = document.getElementById("tdb-quick");
   var facetEl = document.getElementById("tdb-facets");
   var facetBox = document.getElementById("tdb-facet-box");
+  var capEl    = document.getElementById("tdb-caps");
+  var noteEl   = document.getElementById("tdb-facet-note");
   var qEl     = document.getElementById("tdb-q");
   var clearEl = document.getElementById("tdb-clear");
 
@@ -185,9 +201,19 @@
       'text-muted-foreground md:border-x">' + html + "</div>";
   }
 
-  T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(start);
+  /* Two independent reads, each with its own banner. The capability label set
+     is NOT folded into site_data.json: that file is the scoring authority and
+     is generated elsewhere, while the labels are catalogue metadata derived
+     from the task packages. Keeping them apart means a missing label set
+     cannot take the catalogue down with it, and vice versa -- and it means a
+     failure to READ the labels is reported as such rather than drawn as a
+     catalogue with no capabilities in it. */
+  Promise.all([
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+    T.getJSON("data/capability.json").catch(T.fetchFailed("the capability label set"))
+  ]).then(function (loaded) { start(loaded[0], loaded[1]); });
 
-  function start(site) {
+  function start(site, cap) {
     /* The catalogue is the sole task authority. A result matrix cannot invent
        task rows or score fields when site_data.json is missing. */
     var tasks = (site && Array.isArray(site.tasks) && site.tasks.length)
@@ -211,6 +237,86 @@
       statsEl.parentNode.hidden = true;
       return;
     }
+
+    /* ---- capability axes -------------------------------------------------
+       Read from ../data/capability.json. Nothing here comes from a solve
+       matrix, which /registry/ deliberately never loads: an axis label is
+       catalogue metadata, and no rate, score or gate verdict is drawn from it
+       on this page. The gate lives on /quality/, next to the criteria it is
+       computed from.
+
+       `axes` is the FULL declared taxonomy, the axes no published package
+       carries included. An axis missing from the rail and an axis sitting at
+       zero are different claims, and only the second one is true here.
+
+       Each axis carries TWO id lists, and the difference between them is the
+       whole point:
+
+         task_ids                       re-derived by the tagger from the
+                                        package's own oracle patch and changed
+                                        files -- a fact about the package;
+         declared_unverified.task_ids   the task author's task.toml keywords,
+                                        for a live package that withholds the
+                                        patch the tagger would have read -- a
+                                        claim about the package.
+
+       Both are shown, and a row says which one it is. Flattening them into one
+       "capability" would let an author's keyword pass for a measurement. */
+    var axes = (cap && Array.isArray(cap.axes)) ? cap.axes : [];
+    var catalogue = (cap && cap.catalogue) ? cap.catalogue : {};
+    var capSpec = {};
+    /* task id -> codes, kept in two separate indexes for the two evidence
+       strengths; a task appears in exactly one of them. */
+    var capReDerived = {}, capDeclared = {};
+
+    function addCode(index, tid, code) {
+      if (!index[tid]) index[tid] = [];
+      if (index[tid].indexOf(code) < 0) index[tid].push(code);
+    }
+
+    axes.forEach(function (a) {
+      if (!a || !a.code) return;
+      capSpec[a.code] = a;
+      (Array.isArray(a.task_ids) ? a.task_ids : []).forEach(function (tid) {
+        addCode(capReDerived, tid, a.code);
+      });
+      var dec = a.declared_unverified || {};
+      (Array.isArray(dec.task_ids) ? dec.task_ids : []).forEach(function (tid) {
+        addCode(capDeclared, tid, a.code);
+      });
+    });
+
+    function capPad(code) {
+      return ("000" + String(code).replace(/[^0-9]/g, "")).slice(-3);
+    }
+
+    function capSortCodes(list) {
+      return list.sort(function (x, y) { return capPad(x).localeCompare(capPad(y)); });
+    }
+
+    function capTitle(code) {
+      var a = capSpec[code];
+      return a ? (a.code + " " + a.name + ": " + a.description) : code;
+    }
+
+    /* Counted here rather than read off `axes[].n_tasks`, so a chip can never
+       advertise a number the table cannot produce. The two agree today; the
+       point is that they are forced to. */
+    function capCount(code, index) {
+      var n = 0;
+      tasks.forEach(function (t) {
+        if ((index[t.id] || []).indexOf(code) >= 0) n++;
+      });
+      return n;
+    }
+
+    var axesReDerived = 0, widest = null, widestN = 0;
+    axes.forEach(function (a) {
+      if (!a || !a.code) return;
+      var n = capCount(a.code, capReDerived);
+      if (n > 0) axesReDerived++;
+      if (n > widestN) { widest = a; widestN = n; }
+    });
 
     /* ---- summary ---- */
     var suiteSet = {}, langs = {}, diffs = {}, declared = {}, live = 0, f2p = 0, scoredTasks = 0;
@@ -237,6 +343,13 @@
       ["official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
         scoredTasks ? "bound to the formal matrix" : "no official matrix published"]
     ];
+    /* Only when the label set was read. With `cap` null the honest statement
+       is the banner at the top of the page, not a card reading 0/0. */
+    if (cap && axes.length) {
+      stats.push(["capability axes", axesReDerived + "/" + axes.length,
+                  "of the declared taxonomy re-derived on a published package"]);
+    }
+
     statsEl.innerHTML = stats.map(function (s) {
       return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col gap-6 ' +
         'border py-0 transition-all duration-200">' +
@@ -256,16 +369,45 @@
     }).join("");
 
     /* ---- filter state ---- */
-    var state = { q: "", language: null, difficulty: null, status: null, declared: null };
+    /* One list of groups, so the state, the reset, the leave-one-out counts
+       and the row predicate can never drift out of step. Adding `capability`
+       by hand to four of those five places is exactly how a facet ends up
+       filtering nothing while its chip still lights up. */
+    var GROUPS = ["language", "difficulty", "status", "declared", "capability"];
+
+    function blankState() {
+      var fresh = { q: "" };
+      GROUPS.forEach(function (g) { fresh[g] = null; });
+      return fresh;
+    }
+
+    var state = blankState();
     var sort  = { key: "suite", dir: "desc" };
 
     /* Facet group -> the task field it filters on. `declared` reads the
        editorial task.toml label; nothing here is derived from a solve matrix,
-       which /registry/ deliberately never loads. */
+       which /registry/ deliberately never loads. `capability` is absent on
+       purpose: an axis is not a field but membership in a set-valued label
+       list, so it is matched by `facetMatches` instead of by equality. */
     var FACET_FIELD = {
       language: "language", difficulty: "difficulty",
       status: "status", declared: "declared_difficulty"
     };
+
+    function facetMatches(t, group, value) {
+      if (group === "capability") return t._caps.indexOf(value) >= 0;
+      return t[FACET_FIELD[group]] === value;
+    }
+
+    /* Every ACTIVE facet except `skip`; pass null to apply them all. */
+    function otherFacets(t, skip) {
+      for (var i = 0; i < GROUPS.length; i++) {
+        var g = GROUPS[i];
+        if (g === skip || !state[g]) continue;
+        if (!facetMatches(t, g, state[g])) return false;
+      }
+      return true;
+    }
 
     function byCount(map) {
       return Object.keys(map).sort(function (a, b) {
@@ -278,21 +420,55 @@
        The previous counts were computed once over all tasks and never updated,
        so a chip could advertise 43 while clicking it returned 2. */
     function looCount(group, value) {
-      var field = FACET_FIELD[group];
       return tasks.filter(function (t) {
         if (state.q && t._h.indexOf(state.q) < 0) return false;
-        for (var g in FACET_FIELD) {
-          if (g === group || !state[g]) continue;
-          if (t[FACET_FIELD[g]] !== state[g]) return false;
-        }
-        return t[field] === value;
+        if (!otherFacets(t, group)) return false;
+        return facetMatches(t, group, value);
       }).length;
     }
 
-    function chip(group, value, label, on) {
-      return '<button type="button" data-slot="button" data-group="' + group +
-        '" data-value="' + esc(value) + '" aria-pressed="' + (on ? "true" : "false") +
-        '" class="' + (on ? CHIP_ON : CHIP_OFF) + '">' + esc(label) + "</button>";
+    /* `opts.title` spells out an axis code; `opts.disabled` is for a chip whose
+       leave-one-out count is zero. A chip that filters to nothing is a dead
+       control, and there are two ways to deal with one: remove it, or show it
+       as unavailable. For the taxonomy only the second is honest -- seven
+       declared axes are carried by no published package, and an axis quietly
+       missing from the rail reads as an axis that was never declared. So it
+       stays, disabled, with its zero. */
+    function chip(group, value, label, on, opts) {
+      opts = opts || {};
+      var attrs = 'type="button" data-slot="button" data-group="' + group +
+        '" data-value="' + esc(value) + '" aria-pressed="' + (on ? "true" : "false") + '"';
+      if (opts.title) attrs += ' title="' + esc(opts.title) + '"';
+      if (opts.disabled) attrs += ' disabled aria-disabled="true"';
+      return "<button " + attrs + ' class="' + (on ? CHIP_ON : CHIP_OFF) + '">' +
+        esc(label) + "</button>";
+    }
+
+    /* The prose under the rail. Every number in it is counted right here;
+       none is typed into the markup, and none of it is a solve rate. */
+    function paintNote() {
+      var html = "Declared difficulty is editorial: a <code>task.toml</code> label, not measured.";
+      if (cap) {
+        html += " Capability axes are catalogue metadata, not a score. For " +
+          esc(catalogue.n_tasks_verifiable) + " of " + esc(catalogue.n_tasks) +
+          " packages a deterministic rule-based tagger re-derives them from the " +
+          "oracle patch and the changed files. The other " +
+          esc(catalogue.n_tasks_unverifiable) + ' carry axes marked ' +
+          '<span class="text-foreground">declared</span>: ' +
+          esc(catalogue.unverifiable_reason) + ".";
+        if (widest && widestN > 0) {
+          html += " " + axesReDerived + " of " + axes.length + " declared axes are " +
+            're-derived at all, and the widest, <span class="text-foreground">' +
+            esc(widest.code + " " + widest.name) + "</span>, covers " + widestN +
+            " of the " + esc(catalogue.n_tasks_verifiable) + " re-derived packages, so " +
+            (widestN >= Number(catalogue.n_tasks_verifiable)
+              ? "on this catalogue it separates nothing at all."
+              : "on this catalogue it separates almost nothing.");
+        }
+        html += " A chip selects both kinds of evidence; the Capability column " +
+          "says which kind each row has.";
+      }
+      noteEl.innerHTML = html;
     }
 
     function paintFilters() {
@@ -300,8 +476,7 @@
                        state.status === "live") +
                   chip("status", "archive", "archive " + looCount("status", "archive"),
                        state.status === "archive");
-      var dirty = state.q || state.language || state.difficulty || state.status ||
-                  state.declared;
+      var dirty = !!state.q || GROUPS.some(function (g) { return !!state[g]; });
       if (dirty) {
         quick += '<button type="button" data-slot="button" id="tdb-reset" class="' +
           CHIP_OFF + '">reset</button>';
@@ -321,8 +496,37 @@
         facets += chip("declared", d, d + " " + looCount("declared", d),
                        state.declared === d);
       });
-      if (facets) { facetBox.hidden = false; facetEl.innerHTML = facets; }
-      else { facetBox.hidden = true; facetEl.innerHTML = ""; }
+      facetEl.innerHTML = facets;
+
+      /* Taxonomy order, not count order. This row is a coverage map of the
+         whole declared taxonomy; sorting by count would sweep every empty axis
+         to the tail, which is exactly where a reader stops looking and where
+         "seven declared capabilities are carried by nothing" would stop being
+         visible. */
+      var caps = "";
+      if (cap && axes.length) {
+        caps = '<span class="text-muted-foreground shrink-0 text-sm">capability</span>';
+        axes.forEach(function (a) {
+          if (!a || !a.code) return;
+          var n = looCount("capability", a.code);
+          var rd = capCount(a.code, capReDerived);
+          var dc = capCount(a.code, capDeclared);
+          var why = rd + " re-derived, " + dc + " declared";
+          if (rd + dc === 0) {
+            why = "no published package carries this axis";
+          } else if (n === 0) {
+            why = why + "; no match under the current filters";
+          }
+          caps += chip("capability", a.code, a.code + " " + a.name + " " + n,
+                       state.capability === a.code,
+                       { title: capTitle(a.code) + " (" + why + ")", disabled: n === 0 });
+        });
+      }
+      capEl.innerHTML = caps;
+      capEl.hidden = !caps;
+
+      paintNote();
+      facetBox.hidden = !(facets || caps);
     }
 
     function onChipClick(ev) {
@@ -334,7 +538,7 @@
         return;
       }
       if (ev.target && ev.target.closest && ev.target.closest("#tdb-reset")) {
-        state = { q: "", language: null, difficulty: null, status: null, declared: null };
+        state = blankState();
         qEl.value = "";
         render();
         qEl.focus();
@@ -342,6 +546,10 @@
     }
     quickEl.addEventListener("click", onChipClick);
     facetEl.addEventListener("click", onChipClick);
+    /* The capability rail is a THIRD chip host. Without this line its chips
+       painted their counts, took their aria-pressed state and did nothing:
+       every click left all 61 rows on screen. */
+    capEl.addEventListener("click", onChipClick);
 
     qEl.addEventListener("input", function () {
       state.q = qEl.value.trim().toLowerCase();
@@ -381,8 +589,28 @@
     tasks.forEach(function (t) {
       t._f2p = (t.n_fail_to_pass == null) ? -1 : Number(t.n_fail_to_pass);
       t._solved = (typeof t.solved_by === "number") ? t.solved_by : -1;
+      /* Three states, never two. `rederived` means the tagger read this
+         package's own oracle patch; its verdict is a fact about the package,
+         and the empty verdict is one of the things it can say. `declared`
+         means the package withholds that patch, so what is shown is the task
+         author's task.toml keyword -- a claim, and it is labelled as one.
+         `unread` means the label FILE could not be fetched, which is not a
+         statement about this package at all, so the cell falls back to the
+         dash it uses for any other unknown and the banner at the top of the
+         page carries the explanation. */
+      var rd = capReDerived[t.id], dc = capDeclared[t.id];
+      t._capState = !cap ? "unread" : (dc && !rd ? "declared" : "rederived");
+      t._caps = capSortCodes((rd || dc || []).slice());
+      t._capSort = (t._capState === "rederived")
+        ? (t._caps.length ? "1 " + t._caps.map(capPad).join(" ") : "2")
+        : ((t._capState === "declared") ? "3 " + t._caps.map(capPad).join(" ") : "4");
+
+      /* Codes only in the haystack. The short NAMES would drag "test",
+         "impl", "build" and "data" into the free-text index of nearly every
+         row, so typing "test" would match the whole archive; the chips are
+         where the names are readable anyway. */
       t._h = [t.id, t.repo, t.title, t.language, T.taskSuites(t).join(" "),
-              t.status, t.difficulty, t.declared_difficulty,
+              t.status, t.difficulty, t.declared_difficulty, t._caps.join(" "),
               (t.pr_number != null ? "#" + t.pr_number : "")].join(" ").toLowerCase();
     });
 
@@ -392,6 +620,7 @@
       if (k === "id") return String(t.id || "");
       if (k === "suite") return T.taskSuites(t).join(" ");
       if (k === "declared") return String(t.declared_difficulty || "");
+      if (k === "capability") return t._capSort;
       return String(t[k] || "");
     }
 
@@ -440,6 +669,25 @@
           esc(t.declared_difficulty) + "</span>"
         : DASH;
 
+      var capSuffix = (t._capState === "declared")
+        ? '<span class="text-muted-foreground text-sm">declared</span>' : "";
+      var caps;
+      if (t._capState === "unread") {
+        caps = DASH;
+      } else if (t._caps.length) {
+        caps = t._caps.map(function (code) {
+          return '<span data-slot="badge" class="' + BADGE_OUTLINE + '" title="' +
+            esc(capTitle(code)) + (t._capState === "declared"
+              ? " (declared in task.toml by the task author; not re-derived, "
+                + "because this package withholds the oracle patch)"
+              : " (re-derived from the oracle patch of this package)") +
+            '">' + esc(code) + "</span>";
+        }).join("") + capSuffix;
+      } else {
+        caps = '<span class="text-muted-foreground text-sm" title="the tagger ran ' +
+          'and no axis in the taxonomy matched">no axis</span>';
+      }
+
       var n = Number(t.n_models) || 0;
       var solved = n && t._solved >= 0
         ? '<span class="tabular-nums">' +
@@ -457,6 +705,8 @@
         '<td data-slot="table-cell" class="' + TD + '"><p class="flex items-center gap-1 text-left">' +
           status + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + declared + "</p></td>" +
+        '<td data-slot="table-cell" class="' + TD + '"><p class="flex items-center gap-1 text-left">' +
+          caps + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
           (t._f2p < 0 ? DASH : t._f2p) + "</p></td>" +
         '<td data-slot="table-cell" class="' + TD + '"><p class="text-right">' + solved + "</p></td>" +
@@ -478,12 +728,8 @@
       if (!state.q) clearEl.className += " hidden";
 
       var out = tasks.filter(function (t) {
-        if (state.language && t.language !== state.language) return false;
-        if (state.difficulty && t.difficulty !== state.difficulty) return false;
-        if (state.declared && t.declared_difficulty !== state.declared) return false;
-        if (state.status && t.status !== state.status) return false;
         if (state.q && t._h.indexOf(state.q) === -1) return false;
-        return true;
+        return otherFacets(t, null);
       });
 
       var k = sort.key, s = (sort.dir === "asc") ? 1 : -1;

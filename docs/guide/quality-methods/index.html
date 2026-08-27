@@ -120,7 +120,7 @@
             <tbody>
               <tr><th><code>overall</code></th><td>rankable</td></tr>
               <tr><th><code>language</code></th><td>rankable</td></tr>
-              <tr><th><code>capability</code></th><td>authorised, not populated. <strong>No capability label set is currently published</strong>, so no capability axis can be rendered today.</td></tr>
+              <tr><th><code>capability</code></th><td>authorised. The <a href="#capability-taxonomy">C1&ndash;C14</a> labels are published on every archive package, but no axis clears the publish gate on this catalogue.</td></tr>
               <tr><th>task-family</th><td><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound family field. The site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</td></tr>
             </tbody>
           </table>
@@ -138,6 +138,69 @@
             </tbody>
           </table>
         </div>
+
+
+        <hr>
+
+        <h2 id="capability-taxonomy" class="scroll-m-28 font-mono">The capability taxonomy (C1&ndash;C14)</h2>
+        <p><strong>Correction.</strong> An earlier revision of this page deleted the C1&ndash;C14 claim, on the grounds that nothing defined the codes.</p>
+        <p>That was wrong, and it is restored here rather than re-added silently.</p>
+        <p>The codes are defined in one place and the assignment is deterministic.</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>fact</th><th>value</th></tr></thead>
+            <tbody>
+              <tr><th>source of truth</th><td><code>CAPABILITY_TAXONOMY</code> in <code>td_pipeline/selection.py</code>; code, name, scope and tagging rules are declared once, per code</td></tr>
+              <tr><th>tagger</th><td><code>label_capabilities(candidate)</code> &mdash; static path rules and patch-token rules. No model, no heuristic scoring, no human pass</td></tr>
+              <tr><th>inputs</th><td>three, all from the package: the changed-file list, the oracle diff, the test diff. The <code>task.toml</code> prose is not read</td></tr>
+              <tr><th>determinism</th><td>same inputs, same labels. Re-running the tagger reproduces each package&rsquo;s shipped <code>capability_labels</code> exactly</td></tr>
+              <tr><th>multi-label</th><td>a task carries every code its diff triggers, not one. The counts per code do not sum to the task count</td></tr>
+              <tr><th>live packages</th><td><strong>not taggable.</strong> Live withholds <code>solution/oracle.patch</code>, so the tagger has no oracle diff to read</td></tr>
+              <tr><th>not a difficulty</th><td>a label says what the fix touches. It never says how hard the task is</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="capability-codes" class="scroll-m-28 font-mono">The fourteen codes</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>code</th><th>name</th><th>scope</th></tr></thead>
+            <tbody>
+              <tr><th><code>C1</code></th><td>filesystem</td><td>filesystem / data wrangling</td></tr>
+              <tr><th><code>C2</code></th><td>build</td><td>build &amp; compile</td></tr>
+              <tr><th><code>C3</code></th><td>debug</td><td>debugging / fault localization</td></tr>
+              <tr><th><code>C4</code></th><td>impl</td><td>code implementation / refactor</td></tr>
+              <tr><th><code>C5</code></th><td>test</td><td>test authoring &amp; verification</td></tr>
+              <tr><th><code>C6</code></th><td>data</td><td>data processing / ETL / scientific</td></tr>
+              <tr><th><code>C7</code></th><td>net</td><td>networking &amp; protocols</td></tr>
+              <tr><th><code>C8</code></th><td>sec</td><td>crypto &amp; security</td></tr>
+              <tr><th><code>C9</code></th><td>ops</td><td>system config &amp; ops</td></tr>
+              <tr><th><code>C10</code></th><td>vcs</td><td>version control operations</td></tr>
+              <tr><th><code>C11</code></th><td>perf</td><td>performance optimization</td></tr>
+              <tr><th><code>C12</code></th><td>reverse</td><td>reverse engineering / low-level</td></tr>
+              <tr><th><code>C13</code></th><td>ml</td><td>ML / data-science engineering</td></tr>
+              <tr><th><code>C14</code></th><td>orch</td><td>environment / tool orchestration</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 id="capability-rules" class="scroll-m-28 font-mono">What triggers a label</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>trigger</th><th>effect</th></tr></thead>
+            <tbody>
+              <tr><th>a changed path matches a path rule</th><td>tags that rule&rsquo;s code, once per matching path</td></tr>
+              <tr><th>a token rule matches the diff</th><td>tags that rule&rsquo;s code. <strong>Added lines only</strong>, word-boundary matched &mdash; a deleted line or a diff header never tags a task</td></tr>
+              <tr><th>the test diff is non-empty</th><td>always adds <code>C5</code>; the test diff is what carries the verifiable signal</td></tr>
+              <tr><th>a changed non-test source file</th><td>always adds <code>C4</code></td></tr>
+              <tr><th>nothing matched</th><td>defaults to <code>C3</code>. The label list is never empty</td></tr>
+              <tr><th>order</th><td>hit count descending, then code number. The list is a total order, not a set</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The two unconditional rows are why <code>C5</code> and <code>C4</code> sit on nearly every archive package.</p>
+
+        <p>Per-axis coverage and gate status on today&rsquo;s catalogue: <a href="../../quality/#capability">capability coverage &rarr;</a></p>
+        <p>A defined label set is not a scoreable axis; see that page for which axes clear the gate.</p>
 
         <hr>
 
