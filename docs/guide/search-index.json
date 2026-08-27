@@ -1,0 +1,852 @@
+{
+ "generated": "2026-08-27T07:01:38Z",
+ "schema_version": "td-docs-search-index-v1",
+ "pages": [
+  {
+   "url": "guide/quality-methods/",
+   "title": "selection-quality methods (MSQ)",
+   "n_sections": 26
+  },
+  {
+   "url": "guide/quickstart/",
+   "title": "quickstart",
+   "n_sections": 23
+  },
+  {
+   "url": "guide/submission/",
+   "title": "submitting to terminal-daily-bench",
+   "n_sections": 31
+  },
+  {
+   "url": "guide/task-format/",
+   "title": "task format",
+   "n_sections": 23
+  }
+ ],
+ "entries": [
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Scope and limits",
+   "id": "scope",
+   "level": 2,
+   "text": "property what it means module terminal_daily_bench.quality pure pure functions over plain lists; they neither read nor change reward decisions blind to semantic verifier false-accept \u2014 MSQ cannot measure it\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "The matrix convention",
+   "id": "matrix",
+   "level": 2,
+   "text": "Solved means grade >= solved_threshold (default 1 ). Binary 0/1 and graded 0..K both work. The CLI builds the matrix for you ( below )."
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "What enters the matrix",
+   "id": "outcomes",
+   "level": 2,
+   "text": "A run produces a status before it produces a grade. Only an authenticated SUCCESS with score_accepted=true becomes a numeric outcome. Execution status Outcome Coverage SUCCESS , score_accepted=true graded counted\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Null is not zero",
+   "id": "null-not-zero",
+   "level": 3,
+   "text": "question how outcome:null rows are treated rule they are not converted to zero , and are excluded from ratings reason a task that could not be attempted is not a task the model failed what zeroing would do move a\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Two tallies, never summed",
+   "id": "tallies",
+   "level": 3,
+   "text": "tally bound to authenticated_counts receipts untrusted_declared_counts what a submission asserted about itself A declaration cannot authenticate its own status. The two tallies are never summed."
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Which dimensions may be ranked",
+   "id": "dimensions",
+   "level": 2,
+   "text": "Three dimensions, each bound by the trusted task catalogue. ALLOWED_DIMENSIONS enforces the list in code. A dimension outside it is not rendered. dimension state today overall rankable language rankable capability\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Separate estimands",
+   "id": "estimands",
+   "level": 3,
+   "text": "estimand rule model model, harness, and complete-configuration effects stay separate estimands harness a harness effect is never read as a model effect complete configuration a configuration score is never relabelled as\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "The measurement axes",
+   "id": "axes",
+   "level": 2,
+   "text": "Each axis is [0, 1] , higher = better, reported separately . The composite never hides a collapsed axis. axis function measures D discriminative_yield tasks that split the field C difficulty_coverage spread across\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "D \u2014 discriminative yield",
+   "id": "D",
+   "level": 3,
+   "text": "The fraction of tasks that split the field . case result all-pass or all-fail task carries zero discrimination fewer than 2 models None default composite weight 0.5"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "C \u2014 difficulty coverage",
+   "id": "C",
+   "level": 3,
+   "text": "Normalized entropy of solve-rate bucket occupancy. case result n_buckets equal-width bins on [0, 1] tasks spread evenly C = 1 tasks all cluster in one bucket C = 0"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "M \u2014 monotonicity",
+   "id": "M",
+   "level": 3,
+   "text": "Fraction of tasks with no strong ability inversion . term definition compared pairs those where ability_i > ability_j + ability_eps ability_eps default 0.05 strong inversion solved_j and not solved_i \u2014 noise, mislabel\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "A \u2014 angle coverage",
+   "id": "A",
+   "level": 3,
+   "text": "capability_profile decomposes the gate-states 0..4 into four conditional rates: angle meaning conditions on state \u2265 build_rate can produce a building env \u2014 P(state \u2265 1) 0 partial_given_build can start fixing (some F2P)\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "R \u2014 diversity",
+   "id": "R",
+   "level": 3,
+   "text": "R scores task signatures ( {repo, files, f2p} ), not the response matrix. call returns task_similarity(a, b) 0.0 for different repos (definitionally diverse); for the same repo, the mean of the changed-file Jaccard and\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "I \u2014 IRT test information",
+   "id": "I",
+   "level": 3,
+   "text": "irt_item_stats fits the binary matrix to the 2-parameter logistic model. item parameter estimate b \u2014 difficulty logit(1 \u2212 solve_rate) ; harder tasks (low solve-rate) get higher b a \u2014 discrimination max(0.2, |r_pb|\u00b72 +\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "KR-20 \u2014 reliability",
+   "id": "kr20",
+   "level": 3,
+   "text": "Kuder-Richardson 20 \u2014 internal-consistency reliability for binary items: term meaning k tasks p_i pass rate of task i q_i 1 \u2212 p_i \u03c3\u00b2_total per-model total-score variance k < 2 , or that variance is 0 None rule of thumb\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Uncertainty and power",
+   "id": "uncertainty",
+   "level": 2,
+   "text": ""
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Bootstrap confidence intervals",
+   "id": "bootstrap",
+   "level": 3,
+   "text": "msq_bootstrap_ci resamples the task rows with replacement , n_boot times. Each resample recomputes D/C/M. field meaning estimate the full-set point estimate [lo, hi] the central ci -percentile interval (default 95%) se\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Precision-power (required-N)",
+   "id": "power",
+   "level": 3,
+   "text": "required_tasks_for_precision scales SE as 1/\u221aN from the bootstrap SE at N\u2080 : returns notes {axis, n_now, se_now, half_width_now, target_half_width, required_n} one record per axis required_n is None when the axis SE is\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Reliability-power (required-N)",
+   "id": "reliability-power",
+   "level": 3,
+   "text": "tasks_for_reliability applies the Spearman-Brown prophecy . It gives the test length needed to reach a target KR-20: returns notes {current_kr20, current_k, target_kr20, required_k} measured from the current KR-20\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "The readiness verdict",
+   "id": "readiness",
+   "level": 2,
+   "text": "benchmark_readiness folds discrimination, reliability, and precision together. One daily GO/NO-GO advisory. ready iff all three hold:"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "What a NO-GO reports",
+   "id": "no-go",
+   "level": 3,
+   "text": "field contents reasons each failing constraint with value , threshold , required_n bottleneck the failing constraint that demands the most tasks recommended_n max(precision-required-N, reliability-required-N) a None on\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "One-call quality card",
+   "id": "card",
+   "level": 2,
+   "text": "benchmark_quality_report(matrix, ..., deep=True) aggregates every axis. key contents needs msq the MSQ profile: D/C/M + composite diversity from signatures angle coverage from flat graded states noisy_task_indices\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Selection helpers",
+   "id": "helpers",
+   "level": 3,
+   "text": "helper selects select_informative_subset greedy D + C select_max_information top-k Fisher balanced_subset difficulty-balanced diverse_subset farthest-point over signatures select_mid_difficulty scaffold-relative\u2026"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "How tdb quality surfaces it",
+   "id": "surfaces",
+   "level": 2,
+   "text": "Reads a results file and builds the matrix. Prints the quality card, then the readiness line."
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Input contract",
+   "id": "record-shape",
+   "level": 3,
+   "text": "requirement value file JSONL, or a JSON list required fields task , model , and either solved or reward solved when reward \u2265 0.999 excluded model == \"oracle\" rows minimum \u2265 1 task and \u2265 2 models; exits 2 otherwise"
+  },
+  {
+   "url": "guide/quality-methods/",
+   "page": "selection-quality methods (MSQ)",
+   "heading": "Output",
+   "id": "output",
+   "level": 3,
+   "text": "On the 6-task / 3-model example above: The last line is that card as JSON."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "How a run is scored",
+   "id": "how-scoring-works",
+   "level": 2,
+   "text": "The model sees the task instruction and produces a patch. Harbor re-lays a protected test suite the model never sees. The suite runs under a network cut; the reward is its outcome."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Requirements",
+   "id": "requirements",
+   "level": 2,
+   "text": "Component Needed by Note Python \u2265 3.11 everything the scoring core is pure stdlib; there are no runtime dependencies apptainer/singularity host tdb run , tdb oracle both invoke harbor run ... -e singularity , which\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Install",
+   "id": "install",
+   "level": 2,
+   "text": "uv pip With uv From a checkout of the release bundle"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Verify",
+   "id": "install-verify",
+   "level": 3,
+   "text": "Both install the tdb console script ( terminal_daily_bench.cli:main in pyproject.toml )."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Configure the model endpoint",
+   "id": "endpoint",
+   "level": 2,
+   "text": "The model call goes to a generic OpenAI-compatible endpoint: OpenAI, OpenRouter, vLLM, LiteLLM, or a local server. Variable Default Note OPENAI_BASE_URL https://api.openai.com/v1 requests go to <base>/chat/completions\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Reasoning-model fallback",
+   "id": "endpoint-retry",
+   "level": 3,
+   "text": "If the upstream rejects max_tokens , the client automatically retries with max_completion_tokens ."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Run tdb doctor first",
+   "id": "doctor",
+   "level": 2,
+   "text": "It reports which of the pieces below your host is missing, before you spend a model call finding out."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Build the task image",
+   "id": "image",
+   "level": 2,
+   "text": "A published task ships no image: docker_image is the portable string environment/Dockerfile . The producer\u2019s host-specific .sif path is stripped on publish, so nothing executes that as-is. Build the task\u2019s own\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Rebuilds and network",
+   "id": "image-cache",
+   "level": 3,
+   "text": "Behaviour Detail cache key task id + Dockerfile hash, so a second run is a no-op --force rebuilds network the build stage needs internet; the scored run does not See the task format ."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Score a model on a task",
+   "id": "score",
+   "level": 2,
+   "text": "<MODEL> is any model id your endpoint accepts, e.g. gpt-4o-mini ."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "What single_shot_patch does",
+   "id": "score-scaffold",
+   "level": 3,
+   "text": "Shows the model the task instruction plus the source file(s) the reference solution touches. Asks for a git apply -ready unified diff. Applies that diff inside the task container. Harbor re-lays the protected tests/\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Where the record goes",
+   "id": "score-out",
+   "level": 3,
+   "text": "Destination How ./.tdb_work/results/ the default another work root set TDB_WORK an explicit path --out stdout the record is always printed there too"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Run the oracle baseline",
+   "id": "oracle",
+   "level": 2,
+   "text": "The oracle model id runs the task\u2019s real solution/oracle.patch ; no model is called. It proves the execution gate returns reward 1.0 on a correct patch."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Run it before spending model calls",
+   "id": "oracle-first",
+   "level": 3,
+   "text": "If oracle does not yield reward = 1.0 , the environment, not the model, is the problem. Only archived tasks (\u2265 2 weeks old) ship solution/ . Live tasks withhold the gold patch and the protected test bodies; submitted\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "The result record",
+   "id": "record",
+   "level": 2,
+   "text": "Each run writes one JSON record. A solved run looks like:"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Fields",
+   "id": "record-fields",
+   "level": 3,
+   "text": "Field Meaning scaffold single_shot_patch for a model run, oracle_baseline for tdb oracle reward the protected-test outcome solved reward >= 0.999 patch_applied true once a reward is parsed, false if the patch failed to\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Failure never scores",
+   "id": "record-bad-safe",
+   "level": 3,
+   "text": "Runs are BAD-safe: any failure yields reward = 0.0 / solved = false , with the cause in error . Covered: no diff, patch does not apply, hung trial, unparseable result. Never a positive score on a crash."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "The false_accept_check block",
+   "id": "fa-block",
+   "level": 3,
+   "text": "This block records which deterministic execution boundary produced the score. It does not by itself establish semantic verifier quality. Field Meaning gate: \"harbor_protected_tests\" scoring is the harbor execution gate\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Aggregate a quality card",
+   "id": "quality",
+   "level": 2,
+   "text": "Collect result records into one file \u2014 JSON Lines (one record per line), or a JSON array."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Input requirements",
+   "id": "quality-input",
+   "level": 3,
+   "text": "tdb quality builds a (task \u00d7 model) solved matrix. It needs \u2265 1 task and \u2265 2 models . Records with model: \"oracle\" are excluded from the matrix."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Example output",
+   "id": "quality-output",
+   "level": 3,
+   "text": "The final line of stdout is the full card as JSON ( msq , irt , reliability , readiness ) for machine consumption."
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "What the card reports",
+   "id": "quality-metrics",
+   "level": 3,
+   "text": "Every metric comes from terminal_daily_bench.quality . Symbol Metric D discrimination C difficulty coverage M monotonicity IRT test-information 2PL IRT test-information KR-20 reliability D 95% CI a bootstrap CI on D\u2026"
+  },
+  {
+   "url": "guide/quickstart/",
+   "page": "quickstart",
+   "heading": "Submitting results",
+   "id": "submitting",
+   "level": 2,
+   "text": "Every submission is recorded as pending and its claimed reward is ignored. The public bundle does not run a replay worker. Only an operator-published gate receipt can enter the verified ranking. See submission and\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "1. Run a model on a task",
+   "id": "run",
+   "level": 2,
+   "text": "Entry point: tdb ( terminal_daily_bench/cli.py )."
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Endpoint, oracle, host",
+   "id": "endpoint",
+   "level": 3,
+   "text": "key what it does OPENAI_BASE_URL Defaults to https://api.openai.com/v1 . OpenRouter, vLLM, LiteLLM and local servers work too. model id oracle Runs the task's solution/oracle.patch ; needs no endpoint and no key\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The result record",
+   "id": "record",
+   "level": 3,
+   "text": "One JSON record per run, written by terminal_daily_bench/eval.py :"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Failure never scores positive",
+   "id": "failure",
+   "level": 3,
+   "text": "outcome what is recorded solved reward >= 0.999 . any failure No diff, an unapplied patch, a trial error or an unparseable result yields reward 0.0 / solved false , cause in error . a crash Never scores positive\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "2. How scoring works \u2014 deterministic execution gate",
+   "id": "scoring",
+   "level": 2,
+   "text": "The reward comes from harbor's result.json . the gate what it does reward source harbor_score._read_harbor_reward \u2014 the same reader the private admission gate uses. where the patch runs harbor applies it inside the task\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Why a patch cannot cheat the score",
+   "id": "no-cheat",
+   "level": 3,
+   "text": "attack why it fails edit the tests The protected tests/ are re-laid by harbor from the trusted task package after the patch is applied. A patch that edits tests/ only changes an agent-side workspace that is discarded\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Recording is not replay",
+   "id": "ingest",
+   "level": 3,
+   "text": "web/submit_result.py records the patch. It does not score it. on record what happens reward_claimed Advisory only \u2014 it is validated against nothing. the stored entry verify_status=\"pending\" , verified_reward=null , no\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "3. Submitting results",
+   "id": "submitting",
+   "level": 2,
+   "text": ""
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Submission schema (JSONL, one line per (model, task) cell)",
+   "id": "schema",
+   "level": 3,
+   "text": "Required fields: every key below except reward_claimed ."
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Validation rules",
+   "id": "rules",
+   "level": 3,
+   "text": "field rule all eight required date , submitter , model , model_build , scaffold , harness_version , task and patch must be present and non-empty. patch Must be a unified-diff string . task Must start with td-\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "CLI",
+   "id": "cli",
+   "level": 3,
+   "text": "web/submit_result.py reads a submission JSON from stdin :"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "One immutable cell per submission",
+   "id": "content-id",
+   "level": 3,
+   "text": "step what it binds record Computes a full SHA-256 content id over patch, authenticated submitter, model build, harness version and task. uniqueness One immutable authenticated cell per suite/build/harness/task. left\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "4. Operator-only replay authority",
+   "id": "operator-replay",
+   "level": 2,
+   "text": ""
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The replay extra",
+   "id": "replay-extra",
+   "level": 3,
+   "text": "Install the replay-only receipt dependency on the operator image: property what it means primitives Receipt signing and verification use Python cryptography 's in-process Ed25519 primitives. no subprocess\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The frozen execution policy",
+   "id": "frozen-policy",
+   "level": 3,
+   "text": "It must pin: pinned what the replay stack Replay runner and Harbor digests, backend, offline policy, authority key. per task The SIF digest. the container runtime Its canonical absolute path, binary SHA-256, exact\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Image and runtime checks",
+   "id": "image-checks",
+   "level": 3,
+   "text": "when what is checked before every Harbor execution The worker copies the expected SIF read-only into a worker-private attempt directory. the frozen digest Checked before Harbor and at the Harbor-to-canary boundary\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Implemented Harbor binding",
+   "id": "harbor-binding",
+   "level": 3,
+   "text": "Policy and receipts bind: bound fact what harbor_binary_path The canonical launcher path, plus its digest and version. harbor_package_root The canonical package root. tree hash SHA-256 of the complete Harbor package and\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Implemented result binding",
+   "id": "result-binding",
+   "level": 3,
+   "text": "control what the reader does descriptors The authoritative result.json reader opens root/run/result through O_NOFOLLOW file descriptors. links Rejects symlinks and hardlinks ( st_nlink != 1 ), and checks\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The canary requirement",
+   "id": "canary",
+   "level": 3,
+   "text": "run what must happen control The pinned image must reach the canary endpoint. isolated The same image must fail to reach it under --net --network none . anything else Missing image bytes, an unreachable control, or an\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Deployment boundary",
+   "id": "deployment",
+   "level": 3,
+   "text": "identity requirement signer vs. promoter Signer and ingest/promoter must use distinct UIDs or service identities. mounts A signer-only private-key mount and promoter read-only manifest/public-key mounts are required\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Evidence boundary",
+   "id": "evidence",
+   "level": 3,
+   "text": "test what it does and does not prove fake-runner and Fake Harbor tests Prove code and command boundaries only. not evidence of Fake-runner tests are not evidence of a production replay, real network isolation, or a\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Production blocker",
+   "id": "blocker",
+   "level": 3,
+   "text": "Production replay remains blocked until the official compute worker: step what it must do 1 Completes a real Harbor replay. 2 Demonstrates a reachable control canary and a blocked isolated canary. 3 Passes an operator\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Live vs. archived tasks",
+   "id": "live-tasks",
+   "level": 3,
+   "text": "release what ships Live (this week) Withholds the gold patch and protected test bodies; a patch stays pending until an official replay. Archived (\u2265 2 weeks old) Ships in full. Archive vs. live \u2192"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "5. Adding a scaffold / agent \u2014 the HarnessAdapter contract",
+   "id": "adapter",
+   "level": 2,
+   "text": "Contract ( terminal_daily_bench/adapters/base.py ):"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The interface",
+   "id": "interface",
+   "level": 3,
+   "text": "from dataclasses import dataclass, field from typing import Any, Dict, List, Optional @dataclass class AdapterResult: patch: str # unified diff the harness produced telemetry: Dict[str, Any] =\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "produce_patch rules",
+   "id": "produce-patch",
+   "level": 3,
+   "text": "From the base-class docstring: rule what it means MUST NOT read the answer No reading or writing the protected tests or the gold solution. MUST NOT score No computing a reward \u2014 scoring is done afterward by the\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Reference implementation",
+   "id": "reference",
+   "level": 3,
+   "text": "terminal_daily_bench/adapters/single_shot.py \u2014 SingleShotAdapter , name = \"single_shot\" . It: step call 1 loads the task ( eval.load_task ) 2 finds the file(s) the reference solution touches ( eval.solution_target_files\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "The multi-turn stub",
+   "id": "terminus",
+   "level": 3,
+   "text": "terminal_daily_bench/adapters/terminus.py \u2014 TerminusAdapter , name = \"terminus\" . what how it is a stub For a multi-turn agent: terminus-2, Claude Code, Aider, OpenHands, SWE-agent. to finish it Implement its\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Registering it",
+   "id": "registering",
+   "level": 3,
+   "text": "Discovery is by the registry in terminal_daily_bench/adapters/__init__.py : do what register Add your adapter class to that tuple and to __all__ with a unique name . declare Set the scaffold field of your submission\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "6. Task package layout (reference)",
+   "id": "layout",
+   "level": 2,
+   "text": "Each task lives in tasks/{archive|live}/<task-id>/ . Full schema: task format and tasks/SCHEMA.md . Path Purpose task.toml environment.docker_image (the SIF) \u00b7 environment.allow_internet instruction.md the\u2026"
+  },
+  {
+   "url": "guide/submission/",
+   "page": "submitting to terminal-daily-bench",
+   "heading": "Failing test ids",
+   "id": "failing-ids",
+   "level": 3,
+   "text": "release what an adapter is given every task The fail_to_pass selectors in record.json are the failing_test_ids passed to an adapter. live only Live tasks ship those IDs but withhold solution/ and the protected\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Package layout",
+   "id": "layout",
+   "level": 2,
+   "text": "Task ids look like td-fc90ea8b76d5f6b6 . Canonical short schema: tasks/SCHEMA.md . Code: terminal_daily_bench/ , tasks/publish_tasks.py , web/submit_result.py ."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "task.toml",
+   "id": "task-toml",
+   "level": 3,
+   "text": "Harbor's descriptor. The framework reads only [environment] ( eval.py::load_task ): [environment] key what it does docker_image Rewritten to the portable \"environment/Dockerfile\" on publish (\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "instruction.md",
+   "id": "instruction",
+   "level": 3,
+   "text": "Upstream provenance (origin remote, project name, commit ids) is stripped. Solve from the tree and the description alone."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "tests/",
+   "id": "tests",
+   "level": 3,
+   "text": "Re-laid from the trusted package after the patch is applied. file role test.sh The runner; writes the reward. Steps below. test_outputs.py The protected assertions. Carries the FAIL_TO_PASS / PASS_TO_PASS selectors\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "environment/Dockerfile",
+   "id": "environment",
+   "level": 3,
+   "text": "Parity/audit artifact: the recipe the image is built from."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "solution/ (archive only)",
+   "id": "solution",
+   "level": 3,
+   "text": "solve.sh the git-apply driver git apply --check oracle.patch git apply --3way oracle.patch falls back to plain `git apply` already-applied tree idempotent no-op genuinely inapplicable patch FAILS LOUDLY -- never\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "PROVENANCE.json",
+   "id": "provenance",
+   "level": 3,
+   "text": "Tasks derive only from permissively-licensed repositories."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "record.json (archive only)",
+   "id": "record",
+   "level": 3,
+   "text": "Host-specific and internal build fields are stripped on publish ( publish_tasks.py::_sanitize_record ), leaving:"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Archive vs. live",
+   "id": "archive-vs-live",
+   "level": 2,
+   "text": ""
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "The two-week cutoff",
+   "id": "cutoff",
+   "level": 3,
+   "text": "Live withholding blocks memorization and test-editing. Releasing archived tasks in full supports local reproduction."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "What ships in each mode",
+   "id": "shipped",
+   "level": 3,
+   "text": "shipped in archive shipped in live task.toml yes (sanitized) yes (sanitized) instruction.md yes yes PROVENANCE.json yes yes environment/ yes yes tests/test.sh yes yes tests/test_outputs.py (protected body) yes withheld\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "FAILING_TESTS.json (live only)",
+   "id": "failing-tests",
+   "level": 3,
+   "text": "Live submissions stay unranked until an official replay receipt exists."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "How scoring re-lays the protected tests",
+   "id": "scoring",
+   "level": 2,
+   "text": "Execution-only : no LLM judge can turn a claim into a score."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Flow",
+   "id": "scoring-flow",
+   "level": 3,
+   "text": "# terminal_daily_bench/eval.py \u00b7 terminal_daily_bench/harbor_score.py 1 task package -> run copy (.tdb_work/runs/...) the model never touches the trusted original 2 model <- instruction + the source file(s) the\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "What the gate does and does not cover",
+   "id": "scoring-guarantees",
+   "level": 3,
+   "text": "property what it means scope Proves replay integrity, not semantic verifier completeness. test edits A patch that edits tests/ only changes the discarded run-copy workspace \u2014 the protected tests come from the trusted\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Per-run result record",
+   "id": "scoring-record",
+   "level": 3,
+   "text": "{ \"model\": \"...\", \"task\": \"td-fc90ea8b76d5f6b6\", \"scaffold\": \"single_shot_patch\", \"reward\": 1.0, \"solved\": true, \"patch_applied\": true, \"false_accept_check\": { \"gate\": \"harbor_protected_tests\", \"reward_source\"\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Runnable examples",
+   "id": "examples",
+   "level": 2,
+   "text": "Needs an apptainer/singularity host."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Install and point at a model",
+   "id": "install",
+   "level": 3,
+   "text": "pip install -e . export OPENAI_BASE_URL=... # OpenAI / OpenRouter / vLLM / LiteLLM / local export OPENAI_API_KEY=..."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Score a task",
+   "id": "score-a-task",
+   "level": 3,
+   "text": "Both wrap terminal_daily_bench.eval , which accepts --max-tokens , --call-timeout and --harbor-timeout ."
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Read a live task",
+   "id": "read-a-live-task",
+   "level": 3,
+   "text": "cat tasks/live/td-fc90ea8b76d5f6b6/instruction.md cat tasks/live/td-fc90ea8b76d5f6b6/FAILING_TESTS.json # only the failing-test IDs"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Publish a task directory",
+   "id": "publish",
+   "level": 3,
+   "text": "# publish_tasks.py <src_task_dir> <merge_date> <today> <out_root> # idempotent; archive vs. live is picked from the dates python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./tasks # ->\u2026"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Submit a result",
+   "id": "submit",
+   "level": 3,
+   "text": "Recorded as pending: the public bundle does not run a replay worker (see CONTRIBUTING.md ). Complete frozen-roster signed replay coverage is required for community ranking. Validation rules \u2192"
+  },
+  {
+   "url": "guide/task-format/",
+   "page": "task format",
+   "heading": "Plugging in your own scaffold",
+   "id": "scaffold",
+   "level": 2,
+   "text": "Built-in: single_shot_patch , one localized shot at a diff. Multi-turn agents plug in via the adapter contract, over any OpenAI-compatible endpoint:"
+  }
+ ]
+}

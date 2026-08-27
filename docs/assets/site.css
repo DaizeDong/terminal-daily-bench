@@ -2191,3 +2191,312 @@ body.tdb-generated-page .prose :where(code),
 body.tdb-generated-page .prose :where(kbd) {
   border-radius: 0 !important;
 }
+
+/* ==========================================================================
+   "on this page" -- the docs section rail, and the docs index list.
+
+   Two components, one idea: a docs page should be navigable without being
+   read. The rail is built in site.js from the article's own <h2 id>/<h3 id>
+   elements, so nothing here names a section; the index list below is the
+   same rail one level up, listing pages instead of sections.
+   ========================================================================== */
+
+/* The aside ships as `sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6
+   max-lg:hidden`, so this rule owns only what the utilities cannot express:
+   the width (13rem is 19 characters of a 16px monospace, which wraps most
+   section titles onto three lines) and the fact that a 26-entry rail is
+   taller than the window and has to scroll inside itself rather than run off
+   the bottom of a sticky column. */
+.tdb-toc {
+  width: 15rem;
+  max-height: calc(100vh - var(--fd-sidebar-top, 5rem) - var(--sp-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--sp-6);
+}
+.tdb-toc-k {
+  margin: 0 0 var(--sp-3) 0;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro);
+  text-transform: uppercase;
+}
+.tdb-toc-list {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--td-line, var(--border));
+}
+/* Body size, not micro. These are section TITLES -- the same strings as the
+   headings they point at -- and the rail is the only navigation of a 26-section
+   page. The hairline is carried by the list; each entry re-declares it
+   transparent over a -1px pull, so the marked entry replaces that segment
+   instead of adding a second rule beside it. */
+.tdb-toc-link {
+  margin-left: -1px;
+  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
+  border-left: 1px solid transparent;
+  color: var(--muted-foreground);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tdb-toc-link[data-level="3"] { padding-left: var(--sp-6); }
+.tdb-toc-link:hover { color: var(--foreground); }
+.tdb-toc-link[data-active="true"] {
+  color: var(--foreground);
+  font-weight: var(--fw-medium);
+  border-left-color: var(--td-coral);
+}
+
+/* --- the docs index, read as a table of contents ------------------------ */
+/* Four destinations used to cost four bordered cards, nine badges and a
+   two-column grid -- about 90 lines of markup to say four names and four
+   sentences. This is the same information as a list: name, one line, rule. */
+.tdb-doclist {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--td-line, var(--border));
+  margin-top: var(--sp-5);
+}
+.tdb-doclist a {
+  display: grid;
+  grid-template-columns: 14rem 1fr;
+  gap: var(--sp-2) var(--sp-6);
+  align-items: baseline;
+  padding: var(--sp-5) 0;
+  border-bottom: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+  text-decoration: none;
+}
+.tdb-doclist a:hover { color: var(--foreground); }
+.tdb-doclist-n {
+  color: var(--foreground);
+  font-size: var(--ts-lead);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-head);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.tdb-doclist-d { overflow-wrap: anywhere; }
+
+/* Phones get neither component as a column: the rail is chrome the masthead
+   nav already covers, and a two-track grid at 22rem leaves 8rem for a
+   sentence. The rail goes away; the list stacks. */
+@media (max-width: 639px) {
+  .tdb-toc { display: none; }
+  .tdb-doclist a {
+    grid-template-columns: 1fr;
+    gap: var(--sp-2);
+    padding: var(--sp-5) 0;
+  }
+}
+
+/* --- Ctrl+K search over the guide --------------------------------------- */
+/* Two pieces: the masthead trigger, and the overlay it opens. Both are built
+   by site.js, so nothing here is reachable from a page's static markup --
+   which is also why the trigger has to LOOK like a control rather than rely
+   on a reader guessing that a keyboard shortcut exists.
+
+   No animation, and therefore nothing for the reduced-motion block further up
+   to undo: the panel is either there or it is not. */
+
+.tdb-findbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--td-line-strong, var(--border));
+  background: none;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tdb-findbtn:hover { color: var(--foreground); border-color: var(--td-coral); }
+.tdb-findbtn svg { width: 1em; height: 1em; flex: none; }
+.tdb-findbtn-t { letter-spacing: var(--tr-body, 0); }
+.tdb-findbtn-k {
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+}
+
+/* The overlay. z-index clears the fixed masthead (z-40) rather than sliding
+   under it, which is what a dialog rendered at the same level would do. */
+.tdb-find {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10vh var(--sp-6) var(--sp-6);
+  background: rgba(11, 19, 17, 0.55);
+}
+.tdb-find[hidden] { display: none; }
+:root.dark .tdb-find { background: rgba(0, 0, 0, 0.7); }
+
+.tdb-find-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 46rem;
+  max-height: 70vh;
+  border: 1px solid var(--td-line-strong, var(--border));
+  background: var(--td-table-surface, var(--background));
+}
+
+.tdb-find-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--td-line-strong, var(--border));
+  background: var(--td-table-head, var(--background));
+}
+.tdb-find-k {
+  display: inline-flex;
+  color: var(--muted-foreground);
+}
+.tdb-find-k svg { width: 1rem; height: 1rem; }
+.tdb-find-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose, 1.6);
+  padding: var(--sp-1) 0;
+  outline: none;
+}
+.tdb-find-input::placeholder { color: var(--muted-foreground); opacity: 1; }
+.tdb-find-x {
+  border: 1px solid var(--td-line, var(--border));
+  background: none;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+  line-height: 1;
+  padding: var(--sp-1);
+  cursor: pointer;
+}
+.tdb-find-x:hover { color: var(--foreground); border-color: var(--td-coral); }
+
+.tdb-find-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* One result = one section. The heading is the answer, the page name says
+   which document it lives in, the snippet is the evidence that the match is
+   not accidental. Three lines, no card. */
+.tdb-find-hit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-1) var(--sp-4);
+  align-items: baseline;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--td-line, var(--border));
+  border-left: 2px solid transparent;
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+.tdb-find-hit[data-level="3"] .tdb-find-hit-h { padding-left: var(--sp-4); }
+.tdb-find-hit-h {
+  color: var(--foreground);
+  font-size: var(--ts-body);
+  font-weight: var(--fw-medium, 500);
+  line-height: var(--lh-head, 1.25);
+  overflow-wrap: anywhere;
+}
+.tdb-find-hit-p {
+  justify-self: end;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  white-space: nowrap;
+}
+.tdb-find-hit-t {
+  grid-column: 1 / -1;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-prose, 1.6);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.tdb-find-hit:hover,
+.tdb-find-hit[aria-selected="true"] {
+  background: var(--td-table-head, var(--background));
+  border-left-color: var(--td-coral);
+}
+/* On the marked row the snippet stops being secondary: it is the line the
+   reader is about to act on, and muted-on-tinted is the one pairing in this
+   component that would drop under 7:1. */
+.tdb-find-hit:hover .tdb-find-hit-t,
+.tdb-find-hit[aria-selected="true"] .tdb-find-hit-t,
+.tdb-find-hit:hover .tdb-find-hit-p,
+.tdb-find-hit[aria-selected="true"] .tdb-find-hit-p { color: var(--foreground); }
+
+.tdb-find-msg { padding: var(--sp-5) var(--sp-4); }
+.tdb-find-msg-h {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--ts-body);
+  font-weight: var(--fw-medium, 500);
+}
+.tdb-find-msg-d,
+.tdb-find-msg-n {
+  margin: var(--sp-2) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-prose, 1.6);
+  overflow-wrap: anywhere;
+}
+/* A read that FAILED is not an empty result, and must not be mistakable for
+   one: the coral rule is the same one the site uses for a load error. */
+.tdb-find-err { border-left: 2px solid var(--td-coral); }
+.tdb-find-err .tdb-find-msg-d { color: var(--foreground); }
+
+.tdb-find-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+  padding: var(--sp-2) var(--sp-4);
+  border-top: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: 1.4;
+}
+.tdb-find-foot-n { margin-left: auto; }
+
+/* Phones: the trigger keeps only its glyph (the label and the key cap name a
+   keyboard that is not there), and the panel stops pretending to be a dialog
+   floating over a document -- it takes the screen, because at 390px a 46rem
+   panel inset by two gutters IS the screen. */
+@media (max-width: 639px) {
+  .tdb-findbtn { padding: var(--sp-1); border-color: transparent; }
+  .tdb-findbtn-t,
+  .tdb-findbtn-k { display: none; }
+  .tdb-findbtn svg { width: 1.25rem; height: 1.25rem; }
+  .tdb-find { padding: 0; }
+  .tdb-find-panel { max-width: none; max-height: none; height: 100%; border: 0; }
+  .tdb-find-hit { grid-template-columns: 1fr; }
+  .tdb-find-hit-p { justify-self: start; }
+  .tdb-find-foot-n { display: none; }
+}
