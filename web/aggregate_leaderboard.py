@@ -15,9 +15,20 @@ Each result JSON is one scored (model, task) cell as emitted by `tdb run`
     tasks[]        the day's task ids
     pooled{}       per-scaffold pooled n/solved
     leaderboard[]  one row per model, per-scaffold {n, solved, rate, fa}
-    matrix{}       per-task drill-down: {tasks[], rows[{model, g[]}], scaffold}
+    matrix{}       the primary scaffold's drill-down grid -- ONE grid, for the
+                   best-covered scaffold: {tasks[], rows[{model, g[]}], scaffold};
+                   g is TRI-STATE: 1 solved, 0 attempted-and-failed,
+                   null never attempted
     quality{}      the multi-angle MSQ card per scaffold (D/C/M, IRT info, KR-20,
-                   D 95% CI, readiness) -- via terminal_daily_bench.quality
+                   D 95% CI, readiness) -- via terminal_daily_bench.quality.
+                   NOT computed on `matrix`: it is computed on the COMPLETE-CASE
+                   reduction of that scaffold's grid, so its n_tasks / n_models
+                   are the REDUCED axes and its D can differ from any D a reader
+                   recomputes over the published grid. `complete_case`
+                   {unattempted_cells, tasks_dropped, models_dropped} is the
+                   receipt that says by how much; a page printing these
+                   denominators next to the matrix's own must read it, or the
+                   two silently describe different populations.
     community_verified[]  receipt-backed community submissions
     community_pending[]   unranked submissions/replay/promotion state
 
@@ -70,7 +81,17 @@ def load(d, scaffold):
 
 
 def _matrix(rows, scaffold):
-    """Per-task drill-down grid for ONE scaffold: {tasks, rows:[{model,g[]}], scaffold}."""
+    """Per-task drill-down grid for ONE scaffold: {tasks, rows:[{model,g[]}], scaffold}.
+
+    ``g`` is TRI-STATE: 1 solved, 0 attempted-and-failed, null never attempted.
+
+    ``solved`` is keyed over the cells that EXIST, so ``.get()`` returns None
+    for exactly the (model, task) pairs no run produced. The previous ``, 0``
+    default made 15 of the 600 cells in the shipped 2026-08-19 claude-code grid
+    indistinguishable from failures, and no consumer -- page, gate or reader --
+    could tell which. A grid is rectangular because its axes are; that does not
+    make every intersection an observation.
+    """
     cells = [r for r in rows if r["scaffold"] == scaffold]
     if not cells:
         return None
@@ -78,8 +99,46 @@ def _matrix(rows, scaffold):
     models = sorted({r["model"] for r in cells})
     solved = {(r["model"], r["task"]): int(r["solved"]) for r in cells}
     return {"tasks": tasks, "scaffold": scaffold,
-            "rows": [{"model": m, "g": [solved.get((m, t), 0) for t in tasks]}
+            "rows": [{"model": m, "g": [solved.get((m, t)) for t in tasks]}
                      for m in models]}
+
+
+def _complete_case(mx):
+    """Reduce a tri-state grid to its largest greedy null-free submatrix.
+
+    Returns ``(matrix, tasks_dropped, models_dropped, unattempted)`` where
+    ``matrix`` is rows=tasks, cols=models -- the orientation `quality` expects.
+
+    D, KR-20 and the IRT information total are all defined on a rectangular
+    grid of observed outcomes. A null is "no run produced this cell", so the
+    only two options are DROP or IMPUTE, and imputing a null as 0 is the exact
+    defect this file's tri-state ``g`` exists to remove -- it would feed a
+    never-run pair into the instrument as a failure and quietly depress D.
+
+    So: drop. Greedily remove whichever axis entry carries the most nulls,
+    preferring the task on a tie (an item run against only part of the field
+    has no well-defined difficulty) and breaking name ties by sort order, so
+    the reduction is deterministic and reproducible from the payload alone.
+    """
+    tasks, models = list(mx["tasks"]), [r["model"] for r in mx["rows"]]
+    grid = {(r["model"], t): r["g"][j]
+            for r in mx["rows"] for j, t in enumerate(mx["tasks"])}
+    unattempted = sum(1 for v in grid.values() if v is None)
+    live_t, live_m = list(tasks), list(models)
+    while live_t and live_m:
+        nulls = [(m, t) for m in live_m for t in live_t if grid[(m, t)] is None]
+        if not nulls:
+            break
+        per_t = collections.Counter(t for _, t in nulls)
+        per_m = collections.Counter(m for m, _ in nulls)
+        worst_t = min(per_t.items(), key=lambda kv: (-kv[1], kv[0]))
+        worst_m = min(per_m.items(), key=lambda kv: (-kv[1], kv[0]))
+        if worst_t[1] >= worst_m[1]:
+            live_t.remove(worst_t[0])
+        else:
+            live_m.remove(worst_m[0])
+    matrix = [[grid[(m, t)] for m in live_m] for t in live_t]
+    return matrix, len(tasks) - len(live_t), len(models) - len(live_m), unattempted
 
 
 def _quality(rows, scaffold):
@@ -89,8 +148,11 @@ def _quality(rows, scaffold):
     mx = _matrix(rows, scaffold)
     if not mx or len(mx["rows"]) < 2 or not mx["tasks"]:
         return None            # a multi-angle read needs >= 2 models
-    # quality expects rows = tasks, cols = models
-    matrix = [[r["g"][i] for r in mx["rows"]] for i in range(len(mx["tasks"]))]
+    # quality expects rows = tasks, cols = models, and every cell observed:
+    # `g` is tri-state now, so the nulls are DROPPED here, never imputed.
+    matrix, t_drop, m_drop, unattempted = _complete_case(mx)
+    if len(matrix) < 1 or len(matrix[0]) < 2:
+        return None            # nothing rectangular survives the reduction
     try:
         card = _q.benchmark_quality_report(matrix, deep=True, ci_n_boot=500)
         rd = _q.benchmark_readiness(matrix, ci_n_boot=500, **_MSQ_THRESHOLDS)
@@ -100,9 +162,13 @@ def _quality(rows, scaffold):
             "D": m["D"], "C": m["C"], "M": m["M"], "composite": m["composite"],
             "irt_info": irt["total_information"], "kr20": rel["kr20"] or 0.0,
             "D_ci": [ci["lo"], ci["hi"]],
+            # n_tasks / n_models describe the REDUCED grid the card was
+            # computed on, not the axes of the published matrix.
             "n_tasks": m["n_tasks"], "n_models": m["n_models"],
             "ready": rd["ready"], "bottleneck": rd["bottleneck"],
             "required_n_D": rd["recommended_n"],
+            "complete_case": {"unattempted_cells": unattempted,
+                              "tasks_dropped": t_drop, "models_dropped": m_drop},
         }
     except Exception as e:  # noqa: BLE001 -- an advisory card never blocks publishing
         print(f"[warn] quality card for {scaffold} failed: {type(e).__name__}: {e}",
@@ -168,6 +234,13 @@ def build_payload(rows, date):
         "tasks": tasks,
         "pooled": {s: dict(pooled[s]) for s in scaffolds},
         "leaderboard": leaderboard,
+        # ONE grid: the primary scaffold's. A `matrices` map keyed by every
+        # scaffold was emitted here alongside it; nothing on the site read it,
+        # and because JSON has no references the primary grid was serialised
+        # twice, so the map roughly quadrupled a file that `/`, `/quality/` and
+        # `/leaderboard/` all fetch on their critical path. Per-scaffold
+        # drill-downs belong in a separate on-demand file if a consumer ever
+        # ships -- build_day_data.validate_day already accepts one.
         "matrix": _matrix(rows, primary),
         "quality": None,
         "community_verified": [],

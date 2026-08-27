@@ -4,10 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark status — terminal-daily-bench</title>
-<meta name="description" content="Published terminal-daily-bench suites, task counts, languages, and live/archive release status.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<meta name="description" content="Published terminal-daily-bench suites, task counts, languages, release status, and the integrity limits on every published number.">
+<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -17,34 +16,71 @@
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest dated release first. Suite publication does not imply a formal score.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest first.</p>
 
       <div class="tdb-plain-table" id="suites" data-tdb-primary-data>
         <p class="tdb-empty">loading suites&hellip;</p>
       </div>
 
-      <section class="flex flex-col py-12 sm:pb-16" data-tdb-integrity>
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">release and scoring policy</p>
+      <!-- The status rows and the integrity block below arrived from the home
+           page, which now carries the leaderboard and nothing else. They were
+           moved rather than deleted: the scoring invariant in particular is
+           stated nowhere else on this site, and the nav already calls this
+           page "status", so this is where a reader who wants the caveat
+           behind a number is sent. -->
+      <section class="tdb-block" data-tdb-section="status">
+        <div class="tdb-block-head">
+          <h2>status</h2>
+          <p>availability is not ranking authority</p>
         </div>
-        <div class="bg-card -mx-4 grid grid-cols-1 border-y font-mono md:mx-0 md:grid-cols-2 md:border-x">
+
+        <div class="tdb-statgrid" id="hp-status">
+          <p class="text-muted-foreground font-mono text-sm">loading published data&hellip;</p>
+        </div>
+      </section>
+
+      <section class="tdb-block" data-tdb-section="policy">
+        <div class="tdb-block-head">
+          <h2>release and scoring policy</h2>
+          <p>what publication certifies</p>
+        </div>
+        <div class="bg-card grid grid-cols-1 border-y font-mono md:grid-cols-2 md:border-x">
           <div class="border-b px-6 py-6">
             <p class="font-medium">live</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected test bodies are withheld. Submissions remain unranked until an official replay receipt exists.</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected tests withheld; unranked until an official replay receipt.</p>
           </div>
           <div class="px-6 py-6">
             <p class="font-medium">archive</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution requires the unpublished patched Harbor fork. Stock Harbor 0.13.1 is insufficient.</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Artifacts public; end-to-end runs need the unpublished patched Harbor fork, not stock 0.13.1.</p>
           </div>
         </div>
-        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">No certified 50-task v3 ranking is published. Historical matrices do not mark a suite scored. The deterministic execution gate ignores claimed rewards. Semantic verifier false-accept is unmeasured.</p>
+
+        <div class="tdb-integrity" id="integrity" data-tdb-integrity>
+          <!-- The invariant and the first line of the details body used to say
+               the same thing twice: "protected tests decide scores, a reward
+               claim does not". Merged here, where it sits next to the release
+               policy it qualifies. -->
+          <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores: deterministic code re-lays and executes them; a claimed reward never is.</p>
+          <details data-tdb-integrity-details>
+            <summary>integrity limits and current blockers</summary>
+            <div class="tdb-integrity-body">
+              <p>A paired staged-SIF egress canary passed on 2026-08-06; no production protected replay has run.</p>
+              <p>Receipt authority <span class="text-foreground">active=false</span>, one collaborator. Publication runs off a <a href="../guide/submission/#operator-replay">code-controlled allowlist</a>; self-signed report/matrix pins cannot approve themselves.</p>
+              <p><span class="text-foreground">Live</span> withholds gold and protected tests; <span class="text-foreground">archives</span> publish them.</p>
+              <p>Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+            </div>
+          </details>
+          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only. <span id="hp-data-note"></span></p>
+        </div>
+
+        <p class="tdb-block-foot">No certified ranking. Claimed rewards are ignored; semantic false-accept is unmeasured.</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="benchmarks"></script>
 <script>
 (function () {
   "use strict";
@@ -54,25 +90,8 @@
     return String(value == null ? "" : value).replace(/[&<>"]/g, function (c) { return ENT[c]; });
   }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
-
-  var CARD =
-    "bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar " +
-    "dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none " +
-    "transition-all duration-200 sm:-mr-px sm:border-x";
-  var HEADER =
-    "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 " +
-    "px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6";
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 gap-1 transition-[color,box-shadow] " +
-    "overflow-hidden border-transparent font-mono ";
-  var PRIMARY = BADGE + "bg-primary text-primary-foreground";
-  var SECONDARY = BADGE + "bg-secondary text-secondary-foreground";
-
-  function badge(text, primary) {
-    return '<span data-slot="badge" class="' + (primary ? PRIMARY : SECONDARY) + '">' +
-      esc(text) + "</span>";
-  }
+  function byId(id) { return document.getElementById(id); }
+  function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
 
   function orderedSuites(site) {
     var suites = ((site && site.suites) || []).slice();
@@ -115,13 +134,180 @@
     return '<table class="w-full"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>";
   }
 
+  /* ------------------------------------------------------------------ *
+   * Status rows, moved verbatim from the home page.
+   *
+   * Every gate below is the one that shipped there; nothing was relaxed in
+   * the move. The board argument is still the second parameter so a future
+   * caller can pass a published report without rewriting the reducer.
+   * ------------------------------------------------------------------ */
+  function datedSuites(site) {
+    var all = ((site && site.suites) || []).slice();
+    all.sort(function (a, b) {
+      var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(a.id));
+      var bd = /^\d{4}-\d{2}-\d{2}$/.test(String(b.id));
+      if (ad !== bd) return ad ? -1 : 1;
+      return String(b.id).localeCompare(String(a.id));
+    });
+    return all;
+  }
+
+  function relativeReport(board) {
+    var candidates = [board, board && board.relative_capability,
+      board && board.relative_scoring];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i] &&
+          candidates[i].schema_version === "td-relative-capability-v3") {
+        return candidates[i];
+      }
+    }
+    return null;
+  }
+
+  function codeApproved(scoring) {
+    return scoring && scoring.official_ranking === true &&
+      scoring.publication_registry_mode === "code-controlled-allowlist" &&
+      scoring.publication_bundle_approved === true &&
+      scoring.relative_report_digest_matches === true &&
+      scoring.anti_cheat_deployment_active === true;
+  }
+
+  function formalModelRatings(report, scoring) {
+    var input = (report && report.input) || {};
+    var authority = codeApproved(scoring) &&
+      input.frozen_task_roster_n === 50 &&
+      input.task_roster_digest_trusted === true &&
+      input.cell_manifest_digest_trusted === true;
+    if (!authority) return [];
+    var axes = (report && report.axes) || [];
+    for (var i = 0; i < axes.length; i++) {
+      if (axes[i].axis !== "overall" || axes[i].dimension !== "overall") continue;
+      var table = axes[i].entities && axes[i].entities.model;
+      return ((table && table.ratings) || []).filter(function (row) {
+        return row && row.publishable === true &&
+          typeof row.relative_score === "number" && Array.isArray(row.ci);
+      });
+    }
+    return [];
+  }
+
+  /* A status line, not a card.
+     Six bordered rounded rectangles took a whole screen to carry twelve words
+     and six numbers. The same information as label / value / note reads in one
+     pass. */
+  function statRow(label, value, note) {
+    return '<div class="tdb-statrow">' +
+      '<span class="tdb-statrow-k">' + esc(label) + "</span>" +
+      '<p data-tdb-stat-value class="tdb-statrow-v">' +
+        (value == null || value === "" ? "&mdash;" : esc(value)) + "</p>" +
+      '<span class="tdb-statrow-n">' + esc(note || "") + "</span></div>";
+  }
+
+  /* Catalogue composition, and nothing else.
+
+     No solve-derived number is rendered here. What CAN be said without a
+     qualifier is what the catalogue is made of: the editorial difficulty the
+     task author recorded in task.toml when the task was minted.
+
+     Counted at render time, never written into the markup, and the buckets are
+     whatever the catalogue turns out to carry. If the field is not published,
+     the row says so rather than inventing a total.
+
+     SCOPED, and the scope travels back with the numbers so the caller can name
+     it. This used to count every task in `site.tasks` while the row directly
+     above it printed the LATEST SUITE's task count: two adjacent rows
+     disagreed about how many tasks exist, 50 above and a split summing to 61
+     below. A composition with no denominator is not readable, and an unnamed
+     denominator that contradicts the one two lines up is worse than none.
+
+     `suiteId` restricts the count to one suite. A falsy `suiteId` falls back to
+     the whole catalogue rather than returning null -- "no declared difficulty is
+     published" would be a false claim about the DATA in order to describe a
+     missing SCOPE. `total` is reduced from the same counts the text is built
+     from, never `site.tasks.length`, which would include tasks carrying no
+     label and make the printed split fail to add up all over again. */
+  function declaredComposition(site, suiteId) {
+    var counts = {}, names = [];
+    ((site && site.tasks) || []).filter(function (task) {
+      return suiteId ? T.taskInSuite(task, suiteId) : true;
+    }).forEach(function (task) {
+      var label = task && task.declared_difficulty;
+      if (typeof label !== "string" || !label) return;
+      if (!counts[label]) { counts[label] = 0; names.push(label); }
+      counts[label] += 1;
+    });
+    if (!names.length) return null;
+    names.sort(function (a, b) {
+      return (counts[b] - counts[a]) || (a < b ? -1 : (a > b ? 1 : 0));
+    });
+    return {
+      text: names.map(function (name) {
+        return name + " " + counts[name];
+      }).join(" \u00b7 "),
+      total: names.reduce(function (n, k) { return n + counts[k]; }, 0),
+      scoped: !!suiteId
+    };
+  }
+
+  function renderStatus(site, board) {
+    var suites = datedSuites(site);
+    var latest = suites[0] || {};
+    var report = relativeReport(board);
+    var input = (report && report.input) || {};
+    var scoring = (site && site.scoring) || {};
+    var ratings = formalModelRatings(report, scoring);
+    var composition = declaredComposition(site, latest.id);
+    /* Name the denominator the split is over. Derived from the counts, so
+       regenerating the catalogue moves the number instead of falsifying it. */
+    var compScope = !composition ? "" :
+      (composition.scoped
+        ? plural(composition.total, "labelled task", "labelled tasks") +
+          " in suite " + latest.id
+        : plural(composition.total, "labelled task", "labelled tasks") +
+          " across the whole catalogue");
+    var stats = [
+      ["latest catalogue suite", latest.id, "published task list"],
+      /* Was "catalogue tasks", which named the catalogue while counting one
+         suite -- the word collision that made the difficulty split below it
+         look like it contradicted the row above. */
+      ["tasks in latest suite", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
+      ["tasks by declared difficulty", composition && composition.text,
+        composition ? "editorial label from task.toml over " + compScope + ", not measured"
+                    : "no declared difficulty is published in the catalogue"],
+      ["formal roster", input.frozen_task_roster_n != null
+        ? input.frozen_task_roster_n + "/50" : "not frozen", "exactly 50 required"],
+      ["official ranking", ratings.length ? "published" : "unranked",
+        ratings.length ? ratings.length + " publishable models" : "measured, not certified"],
+      ["accepted outcomes", input.successful_records_admitted_to_outcomes,
+        "SUCCESS + score_accepted=true only"],
+      ["receipt authority", "inactive", "active=false \u00b7 one collaborator"]
+    ];
+    set("hp-status", stats.map(function (s) { return statRow(s[0], s[1], s[2]); }).join(""));
+
+    var fa = document.querySelector("[data-tdb-fa]");
+    if (fa) {
+      fa.textContent = ratings.length && board && typeof board.total_fa === "number" &&
+        typeof board.total_fa_n === "number" && board.total_fa_n > 0
+        ? String(board.total_fa) + "/" + String(board.total_fa_n) : "\u2014";
+    }
+
+    if (ratings.length) {
+      set("hp-data-note", "A trusted td-relative-capability-v3 report is published.");
+    } else if (scoring.legacy_snapshot_present || (board && board.leaderboard)) {
+      set("hp-data-note", "A legacy diagnostic snapshot exists but is not ranking authority and is not displayed.");
+    } else {
+      set("hp-data-note", "No certified 50-task relative-capability report is published.");
+    }
+  }
+
   T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(function (data) {
     var site = data || {};
     var suites = orderedSuites(site);
-    var host = document.getElementById("suites");
+    var host = byId("suites");
     host.innerHTML = suites.length
       ? suiteRows(suites, site.tasks || [])
       : '<p class="tdb-empty">No suites are published.</p>';
+    renderStatus(site, null);
   });
 })();
 </script>

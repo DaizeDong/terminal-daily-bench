@@ -1,6 +1,8 @@
 """Dependency-free structural fixtures for the static v3 capability frontend."""
 from __future__ import annotations
 
+import json
+import re
 from pathlib import Path
 
 
@@ -18,7 +20,21 @@ METHODS = (ROOT / "docs" / "guide" / "quality-methods" / "index.html").read_text
     encoding="utf-8"
 )
 DATA_RUNTIME = (ROOT / "docs" / "assets" / "tdb-data.js").read_text(encoding="utf-8")
+TASK_FORMAT = (ROOT / "docs" / "guide" / "task-format" / "index.html").read_text(
+    encoding="utf-8"
+)
+TW_CSS = (ROOT / "docs" / "assets" / "tw.css").read_text(encoding="utf-8")
 PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
+
+# Every published page as one haystack, case preserved. The home page was
+# rebuilt to lead with the leaderboard, which moved several claims off it; the
+# assertions below therefore ask whether the SITE still publishes a statement,
+# not whether index.html does. Relocating a statement stays legal; losing it
+# does not.
+PUBLISHED_PAGES = sorted((ROOT / "docs").rglob("*.html"))
+PUBLISHED = "\n".join(
+    page.read_text(encoding="utf-8", errors="replace") for page in PUBLISHED_PAGES
+)
 DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
 
@@ -71,7 +87,14 @@ def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
 
     assert "Task-family: unavailable." in METHODS
-    assert "canonical C1&ndash;C14" in METHODS
+    # WAS: assert "canonical C1&ndash;C14" in METHODS. That taxonomy is defined
+    # in zero .py files, C5 covers 61/61 tasks (zero bits) and nothing can
+    # render it, so the page asserted a label set it could neither produce nor
+    # attribute. Deleting the claim without pinning its replacement would let
+    # the next edit quietly re-assert one, so the NEW commitment is what is
+    # pinned: the dimension is authorised, and it is empty.
+    assert "canonical C1&ndash;C14" not in METHODS
+    assert "No capability label set is currently published" in METHODS
     assert "does not infer one from tracks, merged labels" in METHODS
     assert "does not display zero" in METHODS
     assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS
@@ -98,6 +121,124 @@ def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
     assert "Official Solves" in REGISTRY
     assert "means awaiting formal coverage, not zero solves" in REGISTRY
     assert "official score coverage" in REGISTRY
+
+
+def _nav_table():
+    """The NAV literal out of site.js, parsed rather than string-matched.
+
+    Every entry is `["label", "href/", ["page-key", ...]]` with double-quoted
+    strings, so the literal is already JSON once the newlines are gone.
+    """
+    assert "var NAV = [" in SHELL, "site.js no longer declares a NAV array"
+    body = SHELL.split("var NAV = ", 1)[1].split("\n  ];", 1)[0]
+    return json.loads(body + "\n  ]")
+
+
+def test_the_quality_report_is_reachable_without_typing_the_url():
+    """/quality/ was an orphan: reachable only by typing the URL.
+
+    A top-level nav row is the obvious fix and is the wrong one --
+    verify_site.py pins the header to five items and explicitly bans a
+    top-level quality entry as retired navigation. So `quality` stays a
+    `docs` key and the entrances live in the pages: the home masthead, the
+    leaderboard foot, and the docs shortcut rail. Each is asserted here
+    because losing any one of them puts the report back out of reach, and
+    nothing else in the suite would notice.
+    """
+    nav = _nav_table()
+
+    # the pinned five, in the pinned order, with quality NOT among them
+    assert [row[0] for row in nav] == [
+        "status", "leaderboard", "tasks", "docs", "submit"
+    ]
+
+    # every key belongs to exactly one row, or two header items light at once
+    keys = [k for row in nav for k in row[2]]
+    assert len(keys) == len(set(keys)), "a page key lights up two nav items"
+
+    # landing on the report lights `docs`, which is the row that owns the key
+    owners = [row[0] for row in nav if "quality" in row[2]]
+    assert owners == ["docs"], owners
+
+    quality_page = (ROOT / "docs" / "quality" / "index.html").read_text(
+        encoding="utf-8")
+    assert 'data-page="quality"' in quality_page
+    assert 'id="discrimination"' in quality_page
+
+    # In-page entrances. The home masthead used to carry one; the results-first
+    # rebuild cut it, so home is no longer named here. What is still required is
+    # the property that made the list worth asserting: the report must be
+    # reachable from more than one page, and specifically from the leaderboard,
+    # which is where the numbers the report qualifies are printed. Naming the
+    # pages individually is what made this test brittle; naming the leaderboard
+    # is not brittleness, it is the point.
+    linking = [
+        page for page in PUBLISHED_PAGES
+        if page.parent.name != "quality"
+        and "quality/#discrimination" in page.read_text(
+            encoding="utf-8", errors="replace")
+    ]
+    assert len(linking) >= 2, (
+        "the discrimination report is reachable from "
+        f"{len(linking)} page(s); it was an orphan once already")
+    assert (ROOT / "docs" / "leaderboard" / "index.html") in linking, (
+        "the leaderboard lost its link to the discrimination report")
+
+
+def _registry_columns():
+    assert "var COLS = [" in REGISTRY, "the registry no longer declares COLS"
+    block = REGISTRY.split("var COLS = ", 1)[1].split("\n  ];", 1)[0]
+    block = re.sub(r"/\*.*?\*/", " ", block, flags=re.S)
+    return re.findall(r'key:\s*"([^"]+)",\s*label:\s*"([^"]+)"', block)
+
+
+def test_the_declared_difficulty_facet_has_a_column_to_show_its_value():
+    """A filter for an attribute the table never renders is a dead end.
+
+    The facet rail offers "hard 43 / medium 18" and the predicate filters on
+    `declared_difficulty`; the Status cell rendered `t.difficulty` -- the
+    MEASURED field, which is "" on all 61 tasks while no official ranking is
+    published -- so clicking a chip returned rows that looked identical to the
+    ones it excluded.
+    """
+    cols = _registry_columns()
+    by_key = dict(cols)
+    assert by_key.get("declared") == "Difficulty", cols
+    assert "Official Solves" in by_key.values()
+
+    # sortable headers are driven by COLS; a key sortVal cannot read is inert
+    assert 'if (k === "declared") return String(t.declared_difficulty || "");'         in REGISTRY
+    # the cell is rendered from the EDITORIAL field ...
+    assert "esc(t.declared_difficulty)" in REGISTRY
+    # ... and the dead measured badge that used to sit in the Status cell is
+    # gone, so one row can never show two difficulty slots
+    assert "esc(t.difficulty)" not in REGISTRY
+
+    # header, body row and the static loading row must agree on the width
+    body_cells = REGISTRY.count(
+        "'<td data-slot=\"table-cell\" class=\"' + TD")
+    assert body_cells == len(cols), (body_cells, len(cols))
+    spans = re.findall(r'<td data-slot="table-cell" colspan="(\d+)"', REGISTRY)
+    assert spans and all(int(x) == len(cols) for x in spans), spans
+
+
+def test_guide_prose_can_break_the_identifiers_that_overflow_a_phone():
+    """/guide/task-format/ was the one page wider than a 390px viewport.
+
+    `terminal_daily_bench/adapters/base.py::HarnessAdapter` in body copy is one
+    unbreakable token 440px wide in a 358px content box, and because
+    `body { overflow-x: hidden }` propagates to the viewport the page got no
+    scrollbar -- the tail was simply cut off. The article opts its prose into
+    breaking anywhere; the code blocks are unaffected because `white-space:
+    pre` suppresses wrapping outright.
+    """
+    article = re.search(r'<article class="([^"]*prose[^"]*)"', TASK_FORMAT)
+    assert article, "task-format no longer wraps its body in an article.prose"
+    classes = article.group(1).split()
+    assert "wrap-anywhere" in classes, classes
+    # and the class must still BE something: a utility deleted from the
+    # stylesheet leaves the markup looking fixed and the page still clipped
+    assert ".wrap-anywhere{overflow-wrap:anywhere}" in TW_CSS
 
 
 _JS_WORDS = {
@@ -293,9 +434,15 @@ def test_output_values_are_escaped_before_entering_the_dom():
         assert ent in body, f"esc() has no mapping for {ch!r}"
 
 def test_stat_values_are_not_document_headings():
-    assert "<p data-tdb-stat-value" in HOME
+    # The stat grid left the home page with the rest of the explanatory
+    # blocks, so the marker is required of the SITE rather than of index.html.
+    # The ban on rendering a stat value as a heading is unconditional and is
+    # applied to every published page, which is stronger than the two pages it
+    # used to name.
+    assert "<p data-tdb-stat-value" in PUBLISHED, (
+        "no published page renders a stat value any more")
     assert "<p data-tdb-stat-value" in PAGE_GENERATOR
-    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in HOME
+    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in PUBLISHED
     assert (
         '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
         not in PAGE_GENERATOR
@@ -330,27 +477,50 @@ def test_shell_mounts_a_real_footer_landmark():
 
 
 def test_homepage_integrity_facts_match_current_operator_evidence():
-    assert "data-tdb-integrity-details" in HOME
-    assert "integrity limits and current blockers" in HOME
-    assert "Protected tests decide published scores" in HOME
-    assert "paired staged-SIF egress canary passed" in HOME
-    assert "no production protected replay has run" in HOME
-    assert "active=false" in HOME
-    assert "code-controlled allowlist" in HOME
-    assert "self-signed report/matrix pins cannot approve themselves" in HOME
-    assert "one collaborator" in HOME
-    assert "deployment egress canary is still pending" not in HOME
-    assert "unpublished patched Harbor fork" in HOME
-    assert "stock Harbor 0.13.1 is insufficient" in HOME
+    # These facts used to be asserted against index.html. The detail moved to
+    # the page the nav labels "status" when home was rebuilt to lead with the
+    # table; home keeps only the compact point-of-claim marker. Each fact is
+    # therefore required somewhere on the site -- a move is fine, a deletion is
+    # not -- while the stale claim stays banned everywhere.
+    for fact in (
+        "data-tdb-integrity-details",
+        "integrity limits and current blockers",
+        "Protected tests decide published scores",
+        "paired staged-SIF egress canary passed",
+        "no production protected replay has run",
+        "active=false",
+        "code-controlled allowlist",
+        "self-signed report/matrix pins cannot approve themselves",
+        "one collaborator",
+        "unpublished patched Harbor fork",
+        "stock Harbor 0.13.1 is insufficient",
+    ):
+        assert fact in PUBLISHED, (
+            f"operator-evidence fact published on no page under docs/: {fact!r}")
+    assert "deployment egress canary is still pending" not in PUBLISHED
+
+    # The disclosure must still sit beside the claim it qualifies, not only on
+    # a page a reader has to go looking for.
+    assert "data-tdb-integrity" in HOME
 
 
 def test_homepage_previews_stay_short_and_link_to_full_views():
+    # The task preview was removed from home: the registry has its own page,
+    # and previewing it pushed the only measured numbers below the fold. The
+    # board preview stays, so the rule is written to bind whatever previews
+    # home actually renders -- every declared *_PREVIEW_LIMIT must be used to
+    # slice, so a limit cannot be declared and quietly ignored.
     assert "var BOARD_PREVIEW_LIMIT = 5;" in HOME
     assert "rows.slice(0, BOARD_PREVIEW_LIMIT)" in HOME
-    assert "var TASK_PREVIEW_LIMIT = 3;" in HOME
-    assert "scoped.slice(0, TASK_PREVIEW_LIMIT)" in HOME
+    limits = re.findall(r"var (\w*PREVIEW_LIMIT) = \d+;", HOME)
+    assert "BOARD_PREVIEW_LIMIT" in limits
+    for name in limits:
+        assert f".slice(0, {name})" in HOME, (
+            f"home declares {name} but never slices by it")
+
+    # A preview is only honest if the full view is one click away.
     assert 'href="./leaderboard/">full leaderboard' in HOME
-    assert 'href="./registry/">all tasks' in HOME
+    assert 'href="./registry/"' in HOME, "home lost its way into the task registry"
 
 
 def test_terminal_daily_has_an_independent_visual_identity():
@@ -368,7 +538,12 @@ def test_terminal_daily_has_an_independent_visual_identity():
         "--td-paper",
         "--td-night",
         "--td-coral",
-        "--td-font-display",
+        # a DECLARATION, not a reference: "--td-font-display" survives only as
+        # an alias now, and every "var(--td-font-display)" still spells it, so
+        # the old marker would pass on a stylesheet that declares no family.
+        "--td-font:",
+        "--ts-body",
+        "--sp-7",
         ".tdb-brand-mark",
         ".tdb-daynav",
         ".tdb-statrow",
@@ -386,6 +561,36 @@ def test_terminal_daily_has_an_independent_visual_identity():
     ):
         assert retired not in SITE_CSS.lower()
         assert retired not in PAGE_GENERATOR.lower()
+
+    # site.css:390-397 re-pointed Tailwind's .font-mono back to the body face
+    # at specificity (0,1,1), silently reverting ~262 elements to sans while
+    # span/a/h1/h2/pre/figure stayed mono. It is the reason the site looked
+    # like three fonts. It must not come back.
+    assert "p.font-mono," not in SITE_CSS
+
+    # Exactly one font-family may be APPLIED to elements. @font-face blocks
+    # declare the vendored face rather than applying it, so they are stripped
+    # before counting -- but each one must name the same family, or the site
+    # would ship two faces under one alias.
+    faces = re.findall(r"@font-face\s*\{(.*?)\}", SITE_CSS, re.S)
+    assert faces, "the vendored face is gone; the type scale needs its weight axis"
+    face_names = {re.search(r'font-family:\s*([^;]+);', f).group(1).strip()
+                  for f in faces}
+    assert face_names == {'"Google Sans Code"'}, face_names
+    for f in faces:
+        # a variable axis is the whole point: static weights would resynthesise
+        assert re.search(r"font-weight:\s*300\s+800\s*;", f), f
+        assert "url(" in f and "//" not in f.split("url(", 1)[1][:40], (
+            "the face must stay self-hosted; a remote URL breaks offline render"
+        )
+
+    applied = SITE_CSS
+    for f in faces:
+        applied = applied.replace(f, "")
+    assert applied.count("font-family") == 1, (
+        "site.css must apply exactly one font-family; every other face is an "
+        "alias of it, so a second declaration is a second family"
+    )
 
     assert "Terminal Daily" in SHELL
     assert "tdb-brand-mark" in SHELL

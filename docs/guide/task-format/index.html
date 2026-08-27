@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>task format — terminal-daily-bench docs</title>
 <meta name="description" content="The on-disk schema of a terminal-daily-bench task package: task.toml, instruction.md, tests/, environment/, solution/, PROVENANCE.json, record.json — plus archive vs. live and how scoring re-lays the protected tests.">
-<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../../assets/site.css?v=a6e52a8c64">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -31,14 +30,31 @@
 
       <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
         <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">task format</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Self-contained, <strong>harbor-native</strong>
-          packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>; ids like
-          <code>td-fc90ea8b76d5f6b6</code>. Code: <code>terminal_daily_bench/</code>,
-          <code>tasks/publish_tasks.py</code>, <code>web/submit_result.py</code>. Everything below
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Self-contained,
+          <strong>harbor-native</strong> packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything here
           reflects the code in this bundle; no APIs are invented.</p>
       </header>
 
-      <article class="prose prose-no-margin">
+      <!-- wrap-anywhere (overflow-wrap:anywhere, inherited) so unbreakable
+           identifiers in body copy -- terminal_daily_bench/adapters/base.py::HarnessAdapter
+           at 440px, conftest.py/sitecustomize.py in the tests list -- break instead
+           of pushing the document to 456px inside a 390px viewport, where
+           body{overflow-x:hidden} silently CLIPS the tail with no scrollbar.
+           It cannot loosen the code blocks: every <pre> here sits in a .not-prose
+           wrapper and is white-space:pre, which suppresses wrapping outright, so
+           their deliberate horizontal scroll is untouched. -->
+
+      <!-- RESTRUCTURE NOTE (prose -> structure, not deletion). This page carried
+           6006 characters of body prose across 37 paragraphs; the reference docs
+           it is measured against carry ~700. Nothing was dropped: procedures
+           became listing/command blocks, reference material became two-column
+           tables, and the "why it was built this way" sentences moved into
+           comments like this one. Every H2/H3 keeps a stable id because the
+           "on this page" rail is built from those ids at runtime -- renaming an
+           id silently drops a row from the rail and breaks inbound deep links
+           (docs/benchmarks/*/index.html link to #archive-vs-live). -->
+      <article class="prose prose-no-margin wrap-anywhere">
 
         <h2 id="layout" class="scroll-m-28 font-mono">Package layout</h2>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks/archive/&lt;task-id&gt;/
@@ -49,12 +65,15 @@
   solution/           solve.sh (git apply driver) &middot; oracle.patch (the gold fix)
   PROVENANCE.json     source_repo &middot; source_ref &middot; source_license_spdx
   record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p selectors)</pre></div>
+        <p>Task ids look like <code>td-fc90ea8b76d5f6b6</code>.</p>
         <p>Canonical short schema:
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
+        <p>Code: <code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code>,
+          <code>web/submit_result.py</code>.</p>
 
         <h3 id="task-toml" class="scroll-m-28 font-mono"><code>task.toml</code></h3>
-        <p>Harbor's descriptor; the eval framework reads only
-          <code>[environment]</code> (<code>terminal_daily_bench/eval.py::load_task</code>):</p>
+        <p>Harbor's descriptor. The framework reads only <code>[environment]</code>
+          (<code>eval.py::load_task</code>):</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">schema_version = "1.1"
 
 [task]
@@ -77,59 +96,70 @@ allow_internet = false                      <span class="text-muted-foreground">
 cpus = 1
 memory_mb = 4096
 storage_mb = 16384</pre></div>
-        <ul>
-          <li><strong><code>environment.docker_image</code></strong> is rewritten to the portable value
-            <code>"environment/Dockerfile"</code> on publish (see
-            <code>publish_tasks.py::_sanitize_task_toml</code>). The host-specific absolute
-            <code>.sif</code> path is never shipped; you build the image from the task's own
-            <code>environment/Dockerfile</code>.</li>
-          <li><strong><code>environment.allow_internet</code></strong> drives the runtime network cut.
-            When <code>false</code>, the singularity backend gets the no-network <code>--ek</code> switch
-            injected automatically (<code>harbor_score.py::maybe_inject_offline_eks</code>), physically
-            cutting egress during scoring.</li>
-        </ul>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap"><code>[environment]</code> key</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>docker_image</code></th>
+                  <td>Rewritten to the portable <code>"environment/Dockerfile"</code> on publish
+                    (<code>publish_tasks.py::_sanitize_task_toml</code>). The host-specific absolute
+                    <code>.sif</code> path is never shipped &mdash; you build the image from the task's
+                    own <code>environment/Dockerfile</code>.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>allow_internet</code></th>
+                  <td>Drives the runtime network cut. When <code>false</code>, the singularity backend
+                    gets the no-network <code>--ek</code> switch injected automatically
+                    (<code>harbor_score.py::maybe_inject_offline_eks</code>), physically cutting egress
+                    during scoring.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="instruction" class="scroll-m-28 font-mono"><code>instruction.md</code></h3>
-        <p>Upstream provenance (origin remote, project name, commit ids) is stripped; solve from the tree and
-          description alone.</p>
+        <p>Upstream provenance (origin remote, project name, commit ids) is stripped.</p>
+        <p>Solve from the tree and the description alone.</p>
 
         <h3 id="tests" class="scroll-m-28 font-mono"><code>tests/</code></h3>
         <p>Re-laid from the trusted package <strong>after</strong> the patch is applied.</p>
-        <ul>
-          <li><strong><code>test.sh</code></strong> &mdash; the runner. It installs <code>pytest</code> +
-            project test extras, applies anti-tamper hardening (removes stray
-            <code>conftest.py</code>/<code>sitecustomize.py</code>, unsets <code>PYTHONPATH</code>, pins
-            <code>PATH</code>), runs <code>pytest -q -rA /tests/test_outputs.py</code>, and writes the
-            reward (<code>1</code> on all-pass, else <code>0</code>) to
-            <code>/logs/verifier/reward.txt</code>.</li>
-          <li><strong><code>test_outputs.py</code></strong> &mdash; the protected assertions. It carries
-            the <code>FAIL_TO_PASS</code> / <code>PASS_TO_PASS</code> selectors, lands the PR's
-            <code>test_patch.diff</code> onto the tree (<code>_ensure_tests_applied</code>), then runs
-            the fail-to-pass tests. <strong>Archive only</strong> &mdash; the body is withheld for live
-            tasks.</li>
-          <li><strong><code>test_patch.diff</code></strong> &mdash; the PR's test diff, applied at verify
-            time so the test signal is never baked into the environment image.</li>
-        </ul>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">file</th><th>role</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>test.sh</code></th>
+                  <td>The runner; writes the reward. Steps below.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>test_outputs.py</code></th>
+                  <td>The protected assertions. Carries the <code>FAIL_TO_PASS</code> /
+                    <code>PASS_TO_PASS</code> selectors, lands the PR's <code>test_patch.diff</code> onto
+                    the tree (<code>_ensure_tests_applied</code>), then runs the fail-to-pass tests.
+                    <strong>Archive only</strong> &mdash; the body is withheld for live tasks.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>test_patch.diff</code></th>
+                  <td>The PR's test diff, applied at verify time so the test signal is never baked into
+                    the environment image.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tests/test.sh
+  install    pytest + the project's test extras
+  harden     <span class="text-muted-foreground">remove stray conftest.py / sitecustomize.py &middot; unset PYTHONPATH &middot; pin PATH</span>
+  run        pytest -q -rA /tests/test_outputs.py
+  reward     1 on all-pass, else 0  -&gt;  /logs/verifier/reward.txt</pre></div>
 
         <h3 id="environment" class="scroll-m-28 font-mono"><code>environment/Dockerfile</code></h3>
-        <p>Parity/audit artifact. Base image; repo at <code>REPO_BASE_SHA</code>, <code>.git</code>
-          re-initialized to a single <code>baseline</code> commit; deps by search
-          (<code>pip install -e .</code> / <code>pip install .</code> /
-          <code>-r requirements.txt</code> &mdash; first that builds wins, hard-fails if
-          none).</p>
+        <p>Parity/audit artifact: the recipe the image is built from.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">base image
+repo @ REPO_BASE_SHA    <span class="text-muted-foreground">.git re-initialized to a single `baseline` commit</span>
+deps by search          pip install -e .  -&gt;  pip install .  -&gt;  pip install -r requirements.txt
+                        <span class="text-muted-foreground">first that builds wins; hard-fails if none</span></pre></div>
 
         <h3 id="solution" class="scroll-m-28 font-mono"><code>solution/</code> (archive only)</h3>
-        <ul>
-          <li><strong><code>solve.sh</code></strong> &mdash; the git-apply driver. It
-            <code>git apply --check</code>s <code>oracle.patch</code>, applies it
-            (<code>--3way</code>, falling back to plain apply), treats an already-applied tree as an
-            idempotent no-op, and <strong>fails loudly</strong> if the patch is genuinely inapplicable
-            (never pretends success on an unpatched tree). If the patch touches native/build inputs it
-            rebuilds the extension offline.</li>
-          <li><strong><code>oracle.patch</code></strong> &mdash; the gold fix from the merged PR. Its
-            sha256 is recorded in <code>task.toml</code>/<code>record.json</code>
-            (<code>oracle_patch_sha256</code>).</li>
-        </ul>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">solve.sh       <span class="text-muted-foreground">the git-apply driver</span>
+  git apply --check oracle.patch
+  git apply --3way oracle.patch      <span class="text-muted-foreground">falls back to plain `git apply`</span>
+  already-applied tree               <span class="text-muted-foreground">idempotent no-op</span>
+  genuinely inapplicable patch       <span class="text-muted-foreground">FAILS LOUDLY -- never pretends success on an unpatched tree</span>
+  patch touches native/build inputs  <span class="text-muted-foreground">rebuilds the extension offline</span>
+
+oracle.patch   <span class="text-muted-foreground">the gold fix from the merged PR</span>
+  sha256                             <span class="text-muted-foreground">recorded as oracle_patch_sha256 in task.toml / record.json</span></pre></div>
 
         <h3 id="provenance" class="scroll-m-28 font-mono"><code>PROVENANCE.json</code></h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
@@ -140,11 +170,10 @@ storage_mb = 16384</pre></div>
         <p>Tasks derive only from permissively-licensed repositories.</p>
 
         <h3 id="record" class="scroll-m-28 font-mono"><code>record.json</code> (archive only)</h3>
-        <p>Host-specific / internal build fields (<code>image_ref</code>,
-          <code>image_build</code>, <code>generator</code>, <code>repro</code>,
-          <code>netns_available</code>, <code>needs_network</code>) are stripped on publish
+        <p>Host-specific and internal build fields are stripped on publish
           (<code>publish_tasks.py::_sanitize_record</code>), leaving:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># stripped: image_ref &middot; image_build &middot; generator &middot; repro &middot; netns_available &middot; needs_network</span>
+{
   "task_id": "td-fc90ea8b76d5f6b6",
   "repo": "Delgan/loguru",
   "pr_number": 1451,
@@ -158,12 +187,15 @@ storage_mb = 16384</pre></div>
 }</pre></div>
 
         <h2 id="archive-vs-live" class="scroll-m-28 font-mono">Archive vs. live</h2>
-        <p><code>tasks/publish_tasks.py::publish</code> applies the 2-week cutoff
-          (<code>ARCHIVE_WEEKS = 2</code>): <em>archive</em> when
-          <code>(today - merge_date).days &gt;= 14</code>, else <em>live</em>.</p>
-        <p>Withholding the gold patch and protected test bodies on live tasks blocks
-          memorization and test-editing; releasing archived tasks in full supports local
-          reproduction.</p>
+
+        <h3 id="cutoff" class="scroll-m-28 font-mono">The two-week cutoff</h3>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># tasks/publish_tasks.py::publish &middot; ARCHIVE_WEEKS = 2</span>
+(today - merge_date).days &gt;= 14   -&gt;  archive
+(today - merge_date).days &lt;  14   -&gt;  live</pre></div>
+        <p>Live withholding blocks memorization and test-editing.</p>
+        <p>Releasing archived tasks in full supports local reproduction.</p>
+
+        <h3 id="shipped" class="scroll-m-28 font-mono">What ships in each mode</h3>
         <div class="overflow-x-auto">
           <table>
             <thead><tr>
@@ -190,43 +222,60 @@ storage_mb = 16384</pre></div>
             </tbody>
           </table>
         </div>
-        <p>Live submissions stay unranked until an <strong>official replay
-          receipt</strong> exists. <code>FAILING_TESTS.json</code> exposes only the failing-test IDs,
-          from the F2P selectors (<code>publish_tasks.py::_failing_test_ids</code>):</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
+
+        <h3 id="failing-tests" class="scroll-m-28 font-mono"><code>FAILING_TESTS.json</code> (live only)</h3>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># the failing-test IDs only, from the F2P selectors (publish_tasks.py::_failing_test_ids)</span>
+{
   "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
   "note": "protected assertions + gold solution withheld; pending official replay"
 }</pre></div>
+        <p>Live submissions stay unranked until an <strong>official replay receipt</strong> exists.</p>
 
         <h2 id="scoring" class="scroll-m-28 font-mono">How scoring re-lays the protected tests</h2>
-        <p><strong>Execution-only</strong>: no LLM judge can turn a claim into a score. Proves replay
-          integrity, not semantic verifier completeness. Flow
-          (<code>terminal_daily_bench/eval.py</code>,
-          <code>terminal_daily_bench/harbor_score.py</code>):</p>
-        <ol>
-          <li>The task package is copied to a <strong>run copy</strong>
-            (<code>.tdb_work/runs/...</code>); the model never touches the trusted original.</li>
-          <li>For a model run, the model is shown the instruction plus the source file(s) the reference
-            solution touches and asked for a single unified diff. That diff is extracted
-            (<code>eval.py::extract_diff</code>) and written into the run copy at
-            <code>solution/oracle.patch</code>.</li>
-          <li>Harbor runs its built-in <code>oracle</code> agent
-            (<code>harbor run -p &lt;run_task&gt; -a oracle -e singularity ...</code>,
-            <code>eval.py::run_harbor_oracle</code>). <code>solution/solve.sh</code> applies the (now
-            model-authored) patch via <code>git apply</code> inside the task's container.</li>
-          <li>Harbor then <strong>re-lays <code>tests/</code> from the trusted package</strong> and runs
-            them under a network cut, on a face the agent never touched. A patch that edits
-            <code>tests/</code> only changes the discarded run-copy workspace &mdash; the protected tests
-            come from the trusted package, not the patch.</li>
-          <li>The reward is read from harbor's <code>result.json</code> by
-            <code>harbor_score.read_harbor_reward</code> (the same reader the private admission gate
-            uses). <code>reward &gt;= 0.999</code> -&gt; <code>solved: true</code>.</li>
-        </ol>
-        <p>Offline tasks get the no-network switch from
-          <code>harbor_score.maybe_inject_offline_eks</code> (singularity-gated, task-driven,
-          idempotent); <code>harbor_score.clean_subprocess_env</code> scrubs host conda/venv
-          pollution.</p>
-        <p>Per-run result record:</p>
+        <p><strong>Execution-only</strong>: no LLM judge can turn a claim into a score.</p>
+
+        <h3 id="scoring-flow" class="scroll-m-28 font-mono">Flow</h3>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># terminal_daily_bench/eval.py &middot; terminal_daily_bench/harbor_score.py</span>
+1  task package  -&gt;  run copy (.tdb_work/runs/...)   <span class="text-muted-foreground">the model never touches the trusted original</span>
+2  model  &lt;-  instruction + the source file(s) the reference solution touches
+3  model  -&gt;  one unified diff                       <span class="text-muted-foreground">eval.py::extract_diff</span>
+              -&gt;  run copy solution/oracle.patch
+4  harbor run -p &lt;run_task&gt; -a oracle -e singularity ...   <span class="text-muted-foreground">eval.py::run_harbor_oracle</span>
+     solution/solve.sh  -&gt;  git apply                <span class="text-muted-foreground">the now model-authored patch, in the task container</span>
+5  harbor RE-LAYS tests/ FROM THE TRUSTED PACKAGE, runs them under a network cut
+     <span class="text-muted-foreground">on a face the agent never touched</span>
+6  result.json  -&gt;  harbor_score.read_harbor_reward
+              -&gt;  reward &gt;= 0.999  -&gt;  solved: true</pre></div>
+
+        <h3 id="scoring-guarantees" class="scroll-m-28 font-mono">What the gate does and does not cover</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">property</th><th>what it means</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">scope</th>
+                  <td>Proves replay integrity, <strong>not</strong> semantic verifier completeness.</td></tr>
+              <tr><th class="whitespace-nowrap">test edits</th>
+                  <td>A patch that edits <code>tests/</code> only changes the discarded run-copy workspace
+                    &mdash; the protected tests come from the trusted package, not the patch.</td></tr>
+              <tr><th class="whitespace-nowrap">reward source</th>
+                  <td><code>harbor_score.read_harbor_reward</code>, the same reader the private admission
+                    gate uses.</td></tr>
+              <tr><th class="whitespace-nowrap">BAD-safe</th>
+                  <td>No patch, a failed apply, a hung trial or an unparseable result yield
+                    <code>reward 0.0</code> / <code>solved: false</code>, cause recorded &mdash; never a
+                    positive score on a crash.</td></tr>
+              <tr><th class="whitespace-nowrap">offline cut</th>
+                  <td>Offline tasks get the no-network switch from
+                    <code>harbor_score.maybe_inject_offline_eks</code> (singularity-gated, task-driven,
+                    idempotent).</td></tr>
+              <tr><th class="whitespace-nowrap">host hygiene</th>
+                  <td><code>harbor_score.clean_subprocess_env</code> scrubs host conda/venv
+                    pollution.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="scoring-record" class="scroll-m-28 font-mono">Per-run result record</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{ "model": "...", "task": "td-fc90ea8b76d5f6b6", "scaffold": "single_shot_patch",
   "reward": 1.0, "solved": true, "patch_applied": true,
   "false_accept_check": { "gate": "harbor_protected_tests",
@@ -236,62 +285,66 @@ storage_mb = 16384</pre></div>
     "scope": "protected_test_replay_integrity",
     "claim_acceptance_without_replay": false,
     "semantic_false_accept": null, "false_accept": 0 } }</pre></div>
-        <p>BAD-safe: no patch, a failed apply, a hung trial or an unparseable result yield
-          <code>reward 0.0</code> / <code>solved: false</code>, cause recorded &mdash; never a
-          positive score on a crash.</p>
 
         <h2 id="examples" class="scroll-m-28 font-mono">Runnable examples</h2>
         <p>Needs an apptainer/singularity host.</p>
+
+        <h3 id="install" class="scroll-m-28 font-mono">Install and point at a model</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .
 export OPENAI_BASE_URL=...          <span class="text-muted-foreground"># OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
-export OPENAI_API_KEY=...
+export OPENAI_API_KEY=...</pre></div>
 
-<span class="text-muted-foreground"># baseline: the task's own oracle.patch -&gt; reward 1.0 (no model call, archive only)</span>
+        <h3 id="score-a-task" class="scroll-m-28 font-mono">Score a task</h3>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># baseline: the task's own oracle.patch -&gt; reward 1.0 (no model call, archive only)</span>
 tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
 
 <span class="text-muted-foreground"># score a model with the single_shot_patch scaffold</span>
 tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
 
 <span class="text-muted-foreground"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models in the results file)</span>
-tdb quality results.jsonl</pre></div>
-        <p><code>tdb run</code> / <code>tdb oracle</code> write result JSON under
-          <code>$TDB_WORK</code> (default <code>./.tdb_work</code>) or to
-          <code>--out PATH</code>. Both wrap <code>terminal_daily_bench.eval</code>, which accepts
+tdb quality results.jsonl
+
+<span class="text-muted-foreground"># result JSON lands under $TDB_WORK (default ./.tdb_work), or at --out PATH</span></pre></div>
+        <p>Both wrap <code>terminal_daily_bench.eval</code>, which accepts
           <code>--max-tokens</code>, <code>--call-timeout</code> and
           <code>--harbor-timeout</code>.</p>
-        <p>A <strong>live</strong> task:</p>
+
+        <h3 id="read-a-live-task" class="scroll-m-28 font-mono">Read a live task</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">cat tasks/live/td-fc90ea8b76d5f6b6/instruction.md
 cat tasks/live/td-fc90ea8b76d5f6b6/FAILING_TESTS.json     <span class="text-muted-foreground"># only the failing-test IDs</span></pre></div>
-        <p>Idempotent; archive vs. live is picked from the dates:</p>
+
+        <h3 id="publish" class="scroll-m-28 font-mono">Publish a task directory</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># publish_tasks.py &lt;src_task_dir&gt; &lt;merge_date&gt; &lt;today&gt; &lt;out_root&gt;</span>
+<span class="text-muted-foreground"># idempotent; archive vs. live is picked from the dates</span>
 python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./tasks
 <span class="text-muted-foreground"># -&gt; {"task": "td-...", "mode": "archive", "shipped_solution": true, "dest": "tasks/archive/td-..."}</span></pre></div>
-        <p>Submit a result for a live task &mdash; recorded as pending, because the public
-          bundle does not run a replay worker (see
-          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>):</p>
+
+        <h3 id="submit" class="scroll-m-28 font-mono">Submit a result</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># validate the submission JSON, then record it as pending re-verification</span>
 python web/submit_result.py validate &lt; submission.json
 python web/submit_result.py record   &lt; submission.json \
   --store community_submissions --authenticated-submitter github:YOUR_LOGIN</pre></div>
-        <p>One JSON object per <code>(model, task)</code> cell. Required:
-          <code>date</code>, <code>submitter</code>, <code>model</code>, <code>model_build</code>,
-          <code>scaffold</code>, <code>harness_version</code>, <code>task</code> (<code>td-</code>
-          prefix), <code>patch</code>. The auth layer supplies the authenticated submitter;
-          <code>reward_claimed</code> is advisory. Complete frozen-roster signed replay coverage is
-          required for <strong>community</strong> ranking.
-          <a href="../submission/#schema">Validation rules &rarr;</a></p>
+        <p>Recorded as pending: the public bundle does not run a replay worker (see
+          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>).</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># one JSON object per (model, task) cell; every key below is required</span>
+{ "date": "...", "submitter": "...", "model": "...", "model_build": "...",
+  "scaffold": "...", "harness_version": "...", "task": "td-...", "patch": "..." }
+<span class="text-muted-foreground"># the auth layer supplies the authenticated submitter; reward_claimed is advisory</span></pre></div>
+        <p>Complete frozen-roster signed replay coverage is required for
+          <strong>community</strong> ranking.</p>
+        <p><a href="../submission/#schema">Validation rules &rarr;</a></p>
 
         <h2 id="scaffold" class="scroll-m-28 font-mono">Plugging in your own scaffold</h2>
-        <p>Built-in scaffold: <code>single_shot_patch</code> (one localized shot at a diff). Multi-turn
-          agents plug in via the adapter contract; the model call uses any OpenAI-compatible
-          endpoint
-          (<code>terminal_daily_bench/adapters/base.py::HarnessAdapter</code>):</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">input  = (task dir, failing test ids, model id/endpoint)
-output = AdapterResult(patch: str, telemetry: dict, error: str | None)</pre></div>
-        <p>The execution gate stays the sole reward authority as harnesses are added.</p>
-        <p><code>produce_patch(...)</code> must <strong>not</strong> read or write the protected tests
-          or the gold solution, nor compute a reward. Semantic false-accept still requires labeled
-          exploit trials.</p>
+        <p>Built-in: <code>single_shot_patch</code>, one localized shot at a diff.</p>
+        <p>Multi-turn agents plug in via the adapter contract, over any OpenAI-compatible endpoint:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># terminal_daily_bench/adapters/base.py::HarnessAdapter</span>
+input  = (task dir, failing test ids, model id/endpoint)
+output = AdapterResult(patch: str, telemetry: dict, error: str | None)
+
+<span class="text-muted-foreground"># produce_patch(...) must NOT read or write the protected tests or the gold</span>
+<span class="text-muted-foreground"># solution, and must not compute a reward.</span>
+<span class="text-muted-foreground"># The execution gate stays the sole reward authority as harnesses are added.</span>
+<span class="text-muted-foreground"># Semantic false-accept still requires labeled exploit trials.</span></pre></div>
 
       </article>
 
@@ -308,23 +361,21 @@ output = AdapterResult(patch: str, telemetry: dict, error: str | None)</pre></di
   </div>
 
   <!-- ===================== packages in the wild ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">packages in the wild</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">published task directories</p>
+  <section class="tdb-block" data-tdb-section="next">
+    <div class="tdb-block-head">
+      <h2>packages in the wild</h2>
+      <p>published task directories</p>
+      <div class="tdb-block-tools"><a href="../../registry/">task registry &rarr;</a></div>
     </div>
 
     <div id="pkgs" class="w-full"></div>
-
-    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../registry/">task registry &rarr;</a>
-  </div>
+  </section>
 
 </div>
 </div>
 </main>
 
-<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=a6e52a8c64" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */

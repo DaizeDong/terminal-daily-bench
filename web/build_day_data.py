@@ -109,6 +109,48 @@ def validate_day(day: Dict[str, Any], source: str) -> None:
         bad("leaderboard has entries but not one measured cell -- the page would "
             "render an empty table for a file that is not empty")
 
+    # ---- solve grids -----------------------------------------------------
+    # `g` is TRI-STATE (1 solved / 0 attempted-and-failed / null never
+    # attempted). Two things can go wrong silently and both render as a
+    # plausible page: a row shorter than `tasks` slides every cell after the
+    # gap onto the wrong task, and a cell that is neither 1, 0 nor null (a
+    # bool, a float, the string "0") is truthy-tested somewhere downstream and
+    # becomes a solve. Neither is visible in a screenshot, so both are refused
+    # here rather than published.
+    grids = []
+    if isinstance(day.get("matrix"), dict):
+        grids.append(("matrix", day["matrix"]))
+    if isinstance(day.get("matrices"), dict):
+        for name in sorted(day["matrices"]):
+            if isinstance(day["matrices"][name], dict):
+                grids.append((f"matrices[{name!r}]", day["matrices"][name]))
+    for label, mx in grids:
+        mx_tasks = mx.get("tasks")
+        if not isinstance(mx_tasks, list):
+            bad(f"{label}.tasks is not a list")
+        mx_rows = mx.get("rows")
+        if not isinstance(mx_rows, list):
+            bad(f"{label}.rows is not a list")
+        for i, row in enumerate(mx_rows):
+            if not isinstance(row, dict) or not row.get("model"):
+                bad(f"{label}.rows[{i}] has no model")
+            g = row.get("g")
+            if not isinstance(g, list):
+                bad(f"{label}.rows[{i}].g is not a list")
+            if len(g) != len(mx_tasks):
+                bad(f"{label}.rows[{i}] ({row.get('model')!r}) has {len(g)} cells "
+                    f"for {len(mx_tasks)} tasks -- every cell after the gap would "
+                    "be attributed to the wrong task")
+            for j, cell in enumerate(g):
+                if cell is None:
+                    continue          # never attempted; NOT a failure
+                # `__class__ is not int` and not isinstance(): True is an int
+                # in Python and would slip through isinstance, then serialise
+                # back out as `true` -- a fourth state nothing downstream reads.
+                if cell.__class__ is not int or cell not in (0, 1):
+                    bad(f"{label}.rows[{i}].g[{j}] is {cell!r}; a solve cell is "
+                        "1, 0 or null (never attempted)")
+
 
 # ---------------------------------------------------------------------------
 # legacy conversion
@@ -142,6 +184,16 @@ def from_legacy(docs: Path) -> Dict[str, Any]:
         "leaderboard": board.get("leaderboard") or [],
         "pooled": board.get("pooled") or {},
     }
+    # The solve grids come across too. Without this, validate_day's tri-state
+    # checks had nothing to run against on any real file -- every day this
+    # repo can produce was built here, so a grid guard the converter never
+    # fed is a guard that cannot fire. Forwarded CONDITIONALLY: writing
+    # `"matrix": board.get("matrix")` would put a JSON null in the day for a
+    # legacy file that has no grid, and `null` is a value a reader has to
+    # interpret, where an absent key is not.
+    for key in ("matrix", "matrices"):
+        if isinstance(board.get(key), dict):
+            day[key] = board[key]
     validate_day(day, "converted from leaderboard_data.json")
     return day
 

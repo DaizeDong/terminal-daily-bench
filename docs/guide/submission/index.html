@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submission — terminal-daily-bench docs</title>
 <meta name="description" content="How to run the benchmark, record pending submissions, publish verified replay receipts, and extend it with a new scaffold.">
-<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../../assets/site.css?v=a6e52a8c64">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -31,12 +30,37 @@
 
       <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
         <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">submitting to terminal-daily-bench</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">No external service or hidden API is required to score a patch. A claimed reward is never trusted: only an official protected-test replay receipt can enter the verified ranking.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>A scaffold produces a candidate patch; the execution gate is the sole reward
-          authority.</strong> The model is the subject under test; it is never the judge.
-          Semantic verifier false-accept remains unmeasured pending an exploit corpus.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">No external service or hidden API is required to score a patch.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">A claimed reward is never trusted: only an official protected-test replay receipt can enter the verified ranking.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>A scaffold produces a candidate patch; the execution gate is the sole reward authority.</strong></p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">The model is the subject under test; it is never the judge.</p>
+        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Semantic verifier false-accept remains unmeasured pending an exploit corpus.</p>
       </header>
 
+      <!-- RESTRUCTURE NOTE (prose -> structure, not deletion). This page carried
+           8234 characters of body prose across 53 paragraphs, 24 of them over 160
+           characters; the reference pages it is measured against carry ~700-2100.
+           Nothing factual was dropped: reference material became two-column
+           tables, the bullet lists that were really reference material became
+           tables too, procedure text became comment lines inside the adjacent
+           command block, and the "why it was built this way" sentences moved into
+           comments like this one. Every honesty caveat survives -- recording is
+           not verification, a cell stays unranked until an operator publishes an
+           Ed25519-signed replay receipt, the public bundle runs no replay worker,
+           a claimed reward is validated against nothing and never becomes a
+           score, community ranking needs complete frozen-roster coverage, and
+           semantic false-accept is unmeasured -- most of them now as table cells.
+           Every H2/H3 keeps a stable id: the "on this page" rail is built from
+           those ids at runtime, and #scoring / #operator-replay / #schema are
+           deep-linked from docs/index.html, docs/submit/index.html,
+           docs/leaderboard/index.html, docs/benchmarks/*/index.html and
+           docs/guide/task-format/index.html. web/verify_site.py pins twenty
+           substrings of this page's authority caveats; they are preserved
+           verbatim and uninterrupted by markup -- a <code> tag opened in the
+           middle of one of those phrases would silently fail the site check, so
+           identifiers inside a pinned phrase stay plain text. Section 4 was
+           promoted from an H3 to an H2 because it is a self-contained operator
+           contract, not a step of "submitting results"; its id is unchanged. -->
       <article class="prose prose-no-margin">
 
         <h2 id="run" class="scroll-m-28 font-mono">1. Run a model on a task</h2>
@@ -54,17 +78,32 @@ tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
 
 <span class="text-muted-foreground"># Multi-angle quality card over a results file (needs &gt;=2 models)</span>
 tdb quality results.jsonl</pre></div>
-        <p><code>OPENAI_BASE_URL</code> defaults to <code>https://api.openai.com/v1</code>;
-          OpenRouter, vLLM, LiteLLM and local servers work too. Model id <code>oracle</code> runs the
-          task's <code>solution/oracle.patch</code> and needs no endpoint or key.</p>
-        <p>Scoring requires an <strong>apptainer/singularity</strong> host.
-          <code>TDB_SIF_CACHE</code> and <code>TDB_OVERLAY_DIR</code> override the singularity
-          scratch paths, <code>TDB_WORK</code> the work root.</p>
+
+        <h3 id="endpoint" class="scroll-m-28 font-mono">Endpoint, oracle, host</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">key</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>OPENAI_BASE_URL</code></th>
+                  <td>Defaults to <code>https://api.openai.com/v1</code>. OpenRouter, vLLM, LiteLLM and
+                    local servers work too.</td></tr>
+              <tr><th class="whitespace-nowrap">model id <code>oracle</code></th>
+                  <td>Runs the task's <code>solution/oracle.patch</code>; needs no endpoint and no
+                    key.</td></tr>
+              <tr><th class="whitespace-nowrap">apptainer/singularity</th>
+                  <td>Required host &mdash; scoring runs there.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>TDB_SIF_CACHE</code> &middot; <code>TDB_OVERLAY_DIR</code></th>
+                  <td>Override the singularity scratch paths.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>TDB_WORK</code></th>
+                  <td>Overrides the work root.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="record" class="scroll-m-28 font-mono">The result record</h3>
-        <p>Each run writes one JSON record (<code>terminal_daily_bench/eval.py</code>) to
-          <code>--out</code>, default <code>$TDB_WORK/results/</code>:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
+        <p>One JSON record per run, written by <code>terminal_daily_bench/eval.py</code>:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># lands in --out, default $TDB_WORK/results/</span>
+{
   "model": "gpt-4o",
   "task": "td-fc90ea8b76d5f6b6",
   "scaffold": "single_shot_patch",
@@ -85,56 +124,100 @@ tdb quality results.jsonl</pre></div>
     "false_accept": 0
   }
 }</pre></div>
-        <p><code>solved</code> is <code>reward &gt;= 0.999</code>. Any failure (no diff, unapplied
-          patch, trial error, unparseable result) yields <code>reward 0.0</code> /
-          <code>solved false</code>, cause in <code>error</code>. A crash never scores positive
-          (BAD-safe by construction).</p>
+
+        <h3 id="failure" class="scroll-m-28 font-mono">Failure never scores positive</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">outcome</th><th>what is recorded</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>solved</code></th>
+                  <td><code>reward &gt;= 0.999</code>.</td></tr>
+              <tr><th class="whitespace-nowrap">any failure</th>
+                  <td>No diff, an unapplied patch, a trial error or an unparseable result yields
+                    <code>reward 0.0</code> / <code>solved false</code>, cause in
+                    <code>error</code>.</td></tr>
+              <tr><th class="whitespace-nowrap">a crash</th>
+                  <td>Never scores positive (BAD-safe by construction).</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <hr>
 
         <h2 id="scoring" class="scroll-m-28 font-mono">2. How scoring works &mdash; deterministic execution gate</h2>
-        <p>The reward comes from harbor's <code>result.json</code> via
-          <code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong> reader the
-          private admission gate uses. harbor applies the patch inside the <strong>task container</strong>, re-lays the
-          protected <code>tests/</code>, and runs them under a network cut &mdash; which is why
-          scoring requires an apptainer/singularity host.</p>
-        <p>Why a patch cannot cheat the score:</p>
-        <ul>
-          <li>The protected <code>tests/</code> are <strong>re-laid by harbor from the trusted task
-            package</strong> <em>after</em> the patch is applied. A patch that edits <code>tests/</code>
-            only changes an agent-side workspace that is discarded before scoring.</li>
-          <li>Runtime egress is cut (<code>--network=none</code> / the offline <code>--ek</code> switch
-            injected by <code>harbor_score._maybe_inject_offline_eks</code>), so a "fix" cannot phone
-            home.</li>
-          <li>The reward is byte-for-byte execution truth from <code>result.json</code>, not any string
-            the model emitted.</li>
-        </ul>
+        <p>The reward comes from harbor's <code>result.json</code>.</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">the gate</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">reward source</th>
+                  <td><code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong>
+                    reader the private admission gate uses.</td></tr>
+              <tr><th class="whitespace-nowrap">where the patch runs</th>
+                  <td>harbor applies it inside the <strong>task container</strong>.</td></tr>
+              <tr><th class="whitespace-nowrap">the tests</th>
+                  <td>harbor re-lays the protected <code>tests/</code> and runs them under a network
+                    cut.</td></tr>
+              <tr><th class="whitespace-nowrap">host</th>
+                  <td>Which is why scoring requires an apptainer/singularity host.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="no-cheat" class="scroll-m-28 font-mono">Why a patch cannot cheat the score</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">attack</th><th>why it fails</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">edit the tests</th>
+                  <td>The protected <code>tests/</code> are <strong>re-laid by harbor from the trusted
+                    task package</strong> <em>after</em> the patch is applied. A patch that edits
+                    <code>tests/</code> only changes an agent-side workspace that is discarded before
+                    scoring.</td></tr>
+              <tr><th class="whitespace-nowrap">phone home</th>
+                  <td>Runtime egress is cut &mdash; <code>--network=none</code>, or the offline
+                    <code>--ek</code> switch injected by
+                    <code>harbor_score._maybe_inject_offline_eks</code>.</td></tr>
+              <tr><th class="whitespace-nowrap">claim a score</th>
+                  <td>The reward is byte-for-byte execution truth from <code>result.json</code>, not any
+                    string the model emitted.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="ingest" class="scroll-m-28 font-mono">Recording is not replay</h3>
-        <p><code>web/submit_result.py</code> records the patch:</p>
-        <ul>
-          <li><code>reward_claimed</code> is <strong>advisory only</strong> &mdash; it is validated
-            against nothing.</li>
-          <li>On record, the entry is stored as <code>verify_status="pending"</code> with
-            <code>verified_reward=null</code> and no <code>false_accept</code> value. Only an
-            execution-gate receipt can set a verified reward.</li>
-          <li>The public bundle <strong>does not run a replay worker</strong>. Pending rows remain in
-            <code>community_pending</code>, a separate audit view excluded from ranking.</li>
-          <li>Only an Ed25519-signed v2 receipt bound to the frozen suite, runner, Harbor,
-            runtime image, enforced offline canary and pinned authority key may enter
-            <code>community_verified</code>. Ranking also requires the complete frozen roster.</li>
-        </ul>
+        <p><code>web/submit_result.py</code> records the patch. It does not score it.</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">on record</th><th>what happens</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>reward_claimed</code></th>
+                  <td><strong>Advisory only</strong> &mdash; it is validated against nothing.</td></tr>
+              <tr><th class="whitespace-nowrap">the stored entry</th>
+                  <td><code>verify_status="pending"</code>, <code>verified_reward=null</code>, no
+                    <code>false_accept</code> value. Only an execution-gate receipt can set a verified
+                    reward.</td></tr>
+              <tr><th class="whitespace-nowrap">the public bundle</th>
+                  <td><strong>Does not run a replay worker.</strong> Pending rows remain in
+                    <code>community_pending</code>, a separate audit view excluded from
+                    ranking.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>community_verified</code></th>
+                  <td>Entry requires an Ed25519-signed v2 receipt bound to the frozen suite, runner,
+                    Harbor, runtime image, enforced offline canary and pinned authority key.</td></tr>
+              <tr><th class="whitespace-nowrap">ranking</th>
+                  <td>Also requires the complete frozen roster.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <hr>
 
         <h2 id="submitting" class="scroll-m-28 font-mono">3. Submitting results</h2>
 
         <h3 id="schema" class="scroll-m-28 font-mono">Submission schema (JSONL, one line per <code>(model, task)</code> cell)</h3>
-        <p>Required fields (<code>submit_result.validate</code>, the <code>REQUIRED</code> tuple):
-          <code>date</code>, <code>submitter</code>, <code>model</code>, <code>model_build</code>,
-          <code>scaffold</code>, <code>harness_version</code>, <code>task</code> and <code>patch</code>
-          &mdash; every key below except <code>reward_claimed</code>.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
+        <p>Required fields: every key below except <code>reward_claimed</code>.</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># submit_result.validate, the REQUIRED tuple</span>
+{
   "date": "2026-07-22",
   "submitter": "your-handle",
   "model": "your-model",
@@ -145,15 +228,30 @@ tdb quality results.jsonl</pre></div>
   "patch": "diff --git a/... b/...\n--- a/...\n+++ b/...\n@@ ...",
   "reward_claimed": 1.0
 }</pre></div>
-        <p>Validation rules:</p>
-        <ul>
-          <li>All eight required fields must be present and non-empty.</li>
-          <li><code>patch</code> must be a unified-diff <strong>string</strong>.</li>
-          <li><code>task</code> must start with <code>td-</code>.</li>
-          <li><code>reward_claimed</code> is advisory. Receipt signatures come only from the
-            official signer; the authenticated submitter comes from the deployment auth layer,
-            never the JSON body.</li>
-        </ul>
+
+        <h3 id="rules" class="scroll-m-28 font-mono">Validation rules</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">field</th><th>rule</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">all eight required</th>
+                  <td><code>date</code>, <code>submitter</code>, <code>model</code>,
+                    <code>model_build</code>, <code>scaffold</code>, <code>harness_version</code>,
+                    <code>task</code> and <code>patch</code> must be present and non-empty.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>patch</code></th>
+                  <td>Must be a unified-diff <strong>string</strong>.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>task</code></th>
+                  <td>Must start with <code>td-</code>.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>reward_claimed</code></th>
+                  <td>Advisory only; it never becomes a score.</td></tr>
+              <tr><th class="whitespace-nowrap">receipt signatures</th>
+                  <td>Come only from the official signer.</td></tr>
+              <tr><th class="whitespace-nowrap">the submitter</th>
+                  <td>The authenticated submitter comes from the deployment auth layer, never the JSON
+                    body.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="cli" class="scroll-m-28 font-mono">CLI</h3>
         <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>:</p>
@@ -169,66 +267,217 @@ python web/submit_result.py rebuild --store community_submissions \
   --manifest /read-only/suite-manifest.json \
   --trusted-keys /read-only/replay-authorities.json \
   --out web/leaderboard_data.json</pre></div>
-        <p><code>record</code> computes a full SHA-256 content id over patch, authenticated
-          submitter, model build, harness version and task. One immutable authenticated cell per
-          suite/build/harness/task; partial, duplicate and cross-date sets remain unranked. Every
-          rebuild re-verifies the receipt signature and content binding.</p>
 
-        <h3 id="operator-replay" class="scroll-m-28 font-mono">Operator-only replay authority</h3>
-        <p>Install the replay-only receipt dependency on the operator image:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e '.[replay]'</pre></div>
-        <p>Receipt signing and verification use Python <code>cryptography</code>'s in-process
-          Ed25519 primitives; <code>web/receipt_auth.py</code> does not search <code>PATH</code>
-          and does not invoke an external OpenSSL process. A missing or invalid replay extra
-          fails closed before signing or acceptance.</p>
-        <p>The frozen execution policy must pin the replay runner and Harbor digests, backend,
-          offline policy, authority key, per-task SIF digest, and the container runtime's
-          canonical absolute path, binary SHA-256, exact version, and kind. The worker must not
-          own or be able to write the runtime binary or its parent directory; neither may be
-          group- or world-writable.</p>
-        <p>Before every Harbor execution the worker copies the expected SIF read-only into a
-          worker-private attempt directory. The frozen digest is checked before Harbor and at the
-          Harbor-to-canary boundary, runtime facts before Harbor and in the canary preflight;
-          those snapshots must match before a receipt is returned. Image drift or a runtime
-          snapshot mismatch fails closed.</p>
-        <p><strong>Implemented Harbor binding:</strong> policy and receipts bind the canonical
-          <code>harbor_binary_path</code>, launcher digest/version, canonical
-          <code>harbor_package_root</code>, SHA-256 of the complete Harbor package and
-          network-patch tree, and immutable runtime-control facts. The worker recomputes and
-          compares those facts before and after replay, so changed imported modules or backend
-          patches fail closed.</p>
-        <p><strong>Implemented result binding:</strong> the authoritative <code>result.json</code>
-          reader opens root/run/result through <code>O_NOFOLLOW</code> file descriptors, rejects
-          symlinks and hardlinks (<code>st_nlink != 1</code>), checks inode/device/link-count
-          stability, and limits the snapshot to 16 MiB. Reward validation and receipt hashing use
-          the same already-open snapshot bytes; the selected pathname is never reopened.</p>
-        <p><code>run</code> requires a canary endpoint: the same pinned image must reach it in the
-          control run and fail in the isolated <code>--net --network none</code> run. Missing
-          image bytes, an unreachable control, or an unproven isolation failure is an
-          infrastructure error, never a zero reward or verified receipt.</p>
-        <p><strong>Deployment boundary:</strong> signer and ingest/promoter must use distinct UIDs
-          or service identities. A signer-only private-key mount and promoter read-only
-          manifest/public-key mounts are required; shared ownership plus mode bits is not
-          isolation.</p>
-        <p><strong>Evidence boundary:</strong> fake-runner and Fake Harbor tests prove code and
-          command boundaries only. Fake-runner tests are not evidence of a production replay,
-          real network isolation, or a correctly separated receipt authority.</p>
-        <p><strong>Production blocker:</strong> production replay remains blocked until the official
-          compute worker completes a real Harbor replay, demonstrates a reachable control canary
-          and a blocked isolated canary, and passes an operator audit of the deployment boundary
-          above plus the Harbor package/tree and single-snapshot result controls, against the real
-          installed package and replay artifacts.</p>
-        <p><strong>Live</strong> (this-week) tasks withhold the gold patch and protected test
-          bodies; a patch stays pending until an official replay.
-          <strong>Archived</strong> tasks (&ge; 2 weeks old) ship in full.
-          <a href="../task-format/#archive-vs-live">Archive vs. live &rarr;</a></p>
+        <h3 id="content-id" class="scroll-m-28 font-mono">One immutable cell per submission</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">step</th><th>what it binds</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>record</code></th>
+                  <td>Computes a full SHA-256 content id over patch, authenticated submitter, model
+                    build, harness version and task.</td></tr>
+              <tr><th class="whitespace-nowrap">uniqueness</th>
+                  <td>One immutable authenticated cell per suite/build/harness/task.</td></tr>
+              <tr><th class="whitespace-nowrap">left unranked</th>
+                  <td>Partial, duplicate and cross-date sets.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>rebuild</code></th>
+                  <td>Every rebuild re-verifies the receipt signature and content binding.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <hr>
 
-        <h2 id="adapter" class="scroll-m-28 font-mono">4. Adding a scaffold / agent &mdash; the <code>HarnessAdapter</code> contract</h2>
+        <h2 id="operator-replay" class="scroll-m-28 font-mono">4. Operator-only replay authority</h2>
+
+        <h3 id="replay-extra" class="scroll-m-28 font-mono">The replay extra</h3>
+        <p>Install the replay-only receipt dependency on the operator image:</p>
+        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e '.[replay]'</pre></div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">property</th><th>what it means</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">primitives</th>
+                  <td>Receipt signing and verification use Python <code>cryptography</code>'s
+                    in-process Ed25519 primitives.</td></tr>
+              <tr><th class="whitespace-nowrap">no subprocess</th>
+                  <td><code>web/receipt_auth.py</code> does not search <code>PATH</code> and does not
+                    invoke an external OpenSSL process.</td></tr>
+              <tr><th class="whitespace-nowrap">missing extra</th>
+                  <td>A missing or invalid replay extra fails closed before signing or
+                    acceptance.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="frozen-policy" class="scroll-m-28 font-mono">The frozen execution policy</h3>
+        <p>It must pin:</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">pinned</th><th>what</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">the replay stack</th>
+                  <td>Replay runner and Harbor digests, backend, offline policy, authority key.</td></tr>
+              <tr><th class="whitespace-nowrap">per task</th>
+                  <td>The SIF digest.</td></tr>
+              <tr><th class="whitespace-nowrap">the container runtime</th>
+                  <td>Its canonical absolute path, binary SHA-256, exact version, and kind.</td></tr>
+              <tr><th class="whitespace-nowrap">ownership</th>
+                  <td>The worker must not own or be able to write the runtime binary or its parent
+                    directory; neither may be group- or world-writable.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="image-checks" class="scroll-m-28 font-mono">Image and runtime checks</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">when</th><th>what is checked</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">before every Harbor execution</th>
+                  <td>The worker copies the expected SIF read-only into a worker-private attempt
+                    directory.</td></tr>
+              <tr><th class="whitespace-nowrap">the frozen digest</th>
+                  <td>Checked before Harbor and at the Harbor-to-canary boundary.</td></tr>
+              <tr><th class="whitespace-nowrap">runtime facts</th>
+                  <td>Checked before Harbor and in the canary preflight.</td></tr>
+              <tr><th class="whitespace-nowrap">before a receipt is returned</th>
+                  <td>Those snapshots must match. Image drift or a runtime snapshot mismatch fails
+                    closed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="harbor-binding" class="scroll-m-28 font-mono">Implemented Harbor binding</h3>
+        <p>Policy and receipts bind:</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">bound fact</th><th>what</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><code>harbor_binary_path</code></th>
+                  <td>The canonical launcher path, plus its digest and version.</td></tr>
+              <tr><th class="whitespace-nowrap"><code>harbor_package_root</code></th>
+                  <td>The canonical package root.</td></tr>
+              <tr><th class="whitespace-nowrap">tree hash</th>
+                  <td>SHA-256 of the complete Harbor package and network-patch tree.</td></tr>
+              <tr><th class="whitespace-nowrap">runtime control</th>
+                  <td>Immutable runtime-control facts.</td></tr>
+              <tr><th class="whitespace-nowrap">drift</th>
+                  <td>The worker recomputes and compares those facts before and after replay, so
+                    changed imported modules or backend patches fail closed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="result-binding" class="scroll-m-28 font-mono">Implemented result binding</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">control</th><th>what the reader does</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">descriptors</th>
+                  <td>The authoritative <code>result.json</code> reader opens root/run/result through
+                    <code>O_NOFOLLOW</code> file descriptors.</td></tr>
+              <tr><th class="whitespace-nowrap">links</th>
+                  <td>Rejects symlinks and hardlinks (<code>st_nlink != 1</code>), and checks
+                    inode/device/link-count stability.</td></tr>
+              <tr><th class="whitespace-nowrap">size</th>
+                  <td>Limits the snapshot to 16 MiB.</td></tr>
+              <tr><th class="whitespace-nowrap">hashing</th>
+                  <td>Reward validation and receipt hashing use the same already-open snapshot bytes;
+                    the selected pathname is never reopened.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="canary" class="scroll-m-28 font-mono">The canary requirement</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">run</th><th>what must happen</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">control</th>
+                  <td>The pinned image must reach the canary endpoint.</td></tr>
+              <tr><th class="whitespace-nowrap">isolated</th>
+                  <td>The same image must fail to reach it under
+                    <code>--net --network none</code>.</td></tr>
+              <tr><th class="whitespace-nowrap">anything else</th>
+                  <td>Missing image bytes, an unreachable control, or an unproven isolation failure is
+                    an infrastructure error &mdash; never a zero reward, never a verified
+                    receipt.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="deployment" class="scroll-m-28 font-mono">Deployment boundary</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">identity</th><th>requirement</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">signer vs. promoter</th>
+                  <td>Signer and ingest/promoter must use distinct UIDs or service identities.</td></tr>
+              <tr><th class="whitespace-nowrap">mounts</th>
+                  <td>A signer-only private-key mount and promoter read-only manifest/public-key mounts
+                    are required.</td></tr>
+              <tr><th class="whitespace-nowrap">not sufficient</th>
+                  <td>Shared ownership plus mode bits is not isolation.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="evidence" class="scroll-m-28 font-mono">Evidence boundary</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">test</th><th>what it does and does not prove</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">fake-runner and Fake Harbor tests</th>
+                  <td>Prove code and command boundaries only.</td></tr>
+              <tr><th class="whitespace-nowrap">not evidence of</th>
+                  <td>Fake-runner tests are not evidence of a production replay, real network
+                    isolation, or a correctly separated receipt authority.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="blocker" class="scroll-m-28 font-mono">Production blocker</h3>
+        <p>Production replay remains blocked until the official compute worker:</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">step</th><th>what it must do</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">1</th>
+                  <td>Completes a real Harbor replay.</td></tr>
+              <tr><th class="whitespace-nowrap">2</th>
+                  <td>Demonstrates a reachable control canary and a blocked isolated canary.</td></tr>
+              <tr><th class="whitespace-nowrap">3</th>
+                  <td>Passes an operator audit of the deployment boundary above, plus the Harbor
+                    package/tree and single-snapshot result controls.</td></tr>
+              <tr><th class="whitespace-nowrap">against</th>
+                  <td>The real installed package and replay artifacts.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="live-tasks" class="scroll-m-28 font-mono">Live vs. archived tasks</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">release</th><th>what ships</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><strong>Live</strong> (this week)</th>
+                  <td>Withholds the gold patch and protected test bodies; a patch stays pending until
+                    an official replay.</td></tr>
+              <tr><th class="whitespace-nowrap"><strong>Archived</strong> (&ge; 2 weeks old)</th>
+                  <td>Ships in full. <a href="../task-format/#archive-vs-live">Archive vs.
+                    live &rarr;</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr>
+
+        <h2 id="adapter" class="scroll-m-28 font-mono">5. Adding a scaffold / agent &mdash; the <code>HarnessAdapter</code> contract</h2>
         <p>Contract (<code>terminal_daily_bench/adapters/base.py</code>):</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">input  = (task dir, failing test ids, model id/endpoint)
 output = (unified diff, telemetry)</pre></div>
+
         <h3 id="interface" class="scroll-m-28 font-mono">The interface</h3>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -246,49 +495,97 @@ class HarnessAdapter(abc.ABC):
     def produce_patch(self, task_dir: str, failing_test_ids: List[str],
                       model: str, **kwargs: Any) -&gt; AdapterResult:
         ...</pre></div>
-        <p><code>produce_patch</code> rules (base-class docstring):</p>
-        <ul>
-          <li><strong>MUST NOT</strong> read or write the protected tests or the gold solution.</li>
-          <li><strong>MUST NOT</strong> compute a reward &mdash; scoring is done afterward by the
-            execution gate.</li>
-          <li>A harness failure should be returned as an <code>AdapterResult</code> with
-            <code>error</code> set and an empty <code>patch</code> (a 0-reward attempt),
-            <strong>not</strong> raised as a crash.</li>
-        </ul>
+
+        <h3 id="produce-patch" class="scroll-m-28 font-mono"><code>produce_patch</code> rules</h3>
+        <p>From the base-class docstring:</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">rule</th><th>what it means</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap"><strong>MUST NOT</strong> read the answer</th>
+                  <td>No reading or writing the protected tests or the gold solution.</td></tr>
+              <tr><th class="whitespace-nowrap"><strong>MUST NOT</strong> score</th>
+                  <td>No computing a reward &mdash; scoring is done afterward by the execution
+                    gate.</td></tr>
+              <tr><th class="whitespace-nowrap">on failure</th>
+                  <td>Return an <code>AdapterResult</code> with <code>error</code> set and an empty
+                    <code>patch</code> &mdash; a 0-reward attempt, <strong>not</strong> a raised
+                    crash.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="reference" class="scroll-m-28 font-mono">Reference implementation</h3>
-        <p><code>terminal_daily_bench/adapters/single_shot.py</code> (<code>SingleShotAdapter</code>,
-          <code>name = "single_shot"</code>) is a working example. It:</p>
-        <ol>
-          <li>loads the task (<code>eval.load_task</code>),</li>
-          <li>finds the file(s) the reference solution touches
-            (<code>eval.solution_target_files</code>),</li>
-          <li>reads those files out of the SIF image for context
-            (<code>eval.extract_repo_files</code>),</li>
-          <li>builds a strict prompt (<code>eval.build_prompt</code>) asking for one unified diff,</li>
-          <li>calls the model (<code>eval.call_model</code>) and extracts the diff
-            (<code>eval.extract_diff</code>),</li>
-          <li>returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry &mdash; no
-            scoring.</li>
-        </ol>
-        <p><code>terminal_daily_bench/adapters/terminus.py</code> (<code>TerminusAdapter</code>,
-          <code>name = "terminus"</code>) is a stub for a multi-turn agent
-          (terminus-2, Claude Code, Aider, OpenHands, SWE-agent): implement its
-          <code>produce_patch</code> to run your agent CLI and return the diff. Any harness taking a
-          custom OpenAI base URL drives an arbitrary model unchanged.</p>
+        <p><code>terminal_daily_bench/adapters/single_shot.py</code> &mdash;
+          <code>SingleShotAdapter</code>, <code>name = "single_shot"</code>. It:</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">step</th><th>call</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">1</th>
+                  <td>loads the task (<code>eval.load_task</code>)</td></tr>
+              <tr><th class="whitespace-nowrap">2</th>
+                  <td>finds the file(s) the reference solution touches
+                    (<code>eval.solution_target_files</code>)</td></tr>
+              <tr><th class="whitespace-nowrap">3</th>
+                  <td>reads those files out of the SIF image for context
+                    (<code>eval.extract_repo_files</code>)</td></tr>
+              <tr><th class="whitespace-nowrap">4</th>
+                  <td>builds a strict prompt (<code>eval.build_prompt</code>) asking for one unified
+                    diff</td></tr>
+              <tr><th class="whitespace-nowrap">5</th>
+                  <td>calls the model (<code>eval.call_model</code>) and extracts the diff
+                    (<code>eval.extract_diff</code>)</td></tr>
+              <tr><th class="whitespace-nowrap">6</th>
+                  <td>returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry
+                    &mdash; no scoring</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="terminus" class="scroll-m-28 font-mono">The multi-turn stub</h3>
+        <p><code>terminal_daily_bench/adapters/terminus.py</code> &mdash; <code>TerminusAdapter</code>,
+          <code>name = "terminus"</code>.</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">what</th><th>how</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">it is a stub</th>
+                  <td>For a multi-turn agent: terminus-2, Claude Code, Aider, OpenHands,
+                    SWE-agent.</td></tr>
+              <tr><th class="whitespace-nowrap">to finish it</th>
+                  <td>Implement its <code>produce_patch</code> to run your agent CLI and return the
+                    diff.</td></tr>
+              <tr><th class="whitespace-nowrap">any model</th>
+                  <td>Any harness taking a custom OpenAI base URL drives an arbitrary model
+                    unchanged.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <h3 id="registering" class="scroll-m-28 font-mono">Registering it</h3>
         <p>Discovery is by the registry in <code>terminal_daily_bench/adapters/__init__.py</code>:</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</pre></div>
-        <p>Add your adapter class to that tuple and to <code>__all__</code> with a unique
-          <code>name</code>; set the <code>scaffold</code> field of your submission records to it.
-          The leaderboard groups runs by <code>(submitter, model, scaffold)</code>.</p>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">do</th><th>what</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">register</th>
+                  <td>Add your adapter class to that tuple and to <code>__all__</code> with a unique
+                    <code>name</code>.</td></tr>
+              <tr><th class="whitespace-nowrap">declare</th>
+                  <td>Set the <code>scaffold</code> field of your submission records to it.</td></tr>
+              <tr><th class="whitespace-nowrap">grouping</th>
+                  <td>The leaderboard groups runs by <code>(submitter, model, scaffold)</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
         <hr>
 
-        <h2 id="layout" class="scroll-m-28 font-mono">5. Task package layout (reference)</h2>
-        <p>Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code>. Full schema:
-          <a href="../task-format/">task format</a> and
+        <h2 id="layout" class="scroll-m-28 font-mono">6. Task package layout (reference)</h2>
+        <p>Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code>.</p>
+        <p>Full schema: <a href="../task-format/">task format</a> and
           <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
         <div class="overflow-x-auto">
           <table>
@@ -314,9 +611,21 @@ class HarnessAdapter(abc.ABC):
             </tbody>
           </table>
         </div>
-        <p>The <code>fail_to_pass</code> selectors in <code>record.json</code> are the
-          <code>failing_test_ids</code> passed to an adapter. Live tasks ship those IDs but withhold
-          <code>solution/</code> and the protected <code>test_outputs.py</code> body.</p>
+
+        <h3 id="failing-ids" class="scroll-m-28 font-mono">Failing test ids</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th class="whitespace-nowrap">release</th><th>what an adapter is given</th></tr></thead>
+            <tbody>
+              <tr><th class="whitespace-nowrap">every task</th>
+                  <td>The <code>fail_to_pass</code> selectors in <code>record.json</code> are the
+                    <code>failing_test_ids</code> passed to an adapter.</td></tr>
+              <tr><th class="whitespace-nowrap">live only</th>
+                  <td>Live tasks ship those IDs but withhold <code>solution/</code> and the protected
+                    <code>test_outputs.py</code> body.</td></tr>
+            </tbody>
+          </table>
+        </div>
 
       </article>
 
@@ -333,23 +642,21 @@ class HarnessAdapter(abc.ABC):
   </div>
 
   <!-- ===================== community submissions ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">community submissions</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">verified rows only count toward a rate</p>
+  <section class="tdb-block" data-tdb-section="next">
+    <div class="tdb-block-head">
+      <h2>community submissions</h2>
+      <p>verified rows only count toward a rate</p>
+      <div class="tdb-block-tools"><a href="../../submit/">submit &rarr;</a></div>
     </div>
 
     <div id="community" class="w-full"></div>
-
-    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../submit/">submit &rarr;</a>
-  </div>
+  </section>
 
 </div>
 </div>
 </main>
 
-<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=a6e52a8c64" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */

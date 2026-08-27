@@ -1,68 +1,338 @@
 /* Terminal Daily visual system
    --------------------------------------------------------------------------
    The vendored utility build supplies layout primitives. This layer owns the
-   product identity: an editorial, day-window motif; warm paper and deep ink;
-   rounded data surfaces; a floating navigation capsule; and mono type only
-   where the content is genuinely machine-shaped. No remote fonts or images
-   are requested, so the benchmark site remains deterministic and offline.
+   product identity: an editorial, day-window motif; white ground and near-black ink;
+   rounded data surfaces; a full-width navigation bar; and one type family for
+   the whole site, because the content is machine-shaped throughout. The face
+   is vendored into assets/fonts/, so no remote font or image is requested and
+   the benchmark site stays deterministic and renders identically offline.
    -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   Google Sans Code -- the same face Terminal-Bench uses, self-hosted.
+
+   A system stack (ui-monospace -> Cascadia Code / Consolas) was the previous
+   choice and it was wrong for one measurable reason: this design asks for
+   four weights (400/500/600/700), and those families ship two. Windows
+   SYNTHESISES the intermediates, and a synthesised 500 next to a real 400
+   reads as a second typeface -- which is exactly the "still several fonts"
+   the single-family refactor was supposed to end. Google Sans Code is a
+   VARIABLE font with a real 300-800 weight axis, so every step is drawn, not
+   smeared.
+
+   Two subsets, latin and latin-ext, one variable file each. woff2, vendored,
+   no network. SIL Open Font License 1.1 -- assets/fonts/OFL.txt.
+   ========================================================================== */
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/google-sans-code-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/google-sans-code-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* A glyph the vendored subsets do not carry does NOT fall back quietly to a
+   different weight of the same face -- it falls back to a DIFFERENT FAMILY,
+   for that character only. An audit of every character the site renders
+   against the fonts' cmap found 125 uncovered, and the worst was the humble
+   `->` (U+2192) in 73 files: every "full leaderboard ->" arrow on the site was
+   being drawn by whatever font the OS chose. These three subsets close it. */
+
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/google-sans-code-math.woff2") format("woff2");
+  unicode-range: U+0302-0303, U+0305, U+0307-0308, U+0310, U+0312, U+0315, U+031A, U+0326-0327, U+032C, U+032F-0330, U+0332-0333, U+0338, U+033A, U+0346, U+034D, U+0391-03A1, U+03A3-03A9, U+03B1-03C9, U+03D1, U+03D5-03D6, U+03F0-03F1, U+03F4-03F5, U+2016-2017, U+2034-2038, U+203C, U+2040, U+2043, U+2047, U+2050, U+2057, U+205F, U+2070-2071, U+2074-208E, U+2090-209C, U+20D0-20DC, U+20E1, U+20E5-20EF, U+2100-2112, U+2114-2115, U+2117-2121, U+2123-214F, U+2190, U+2192, U+2194-21AE, U+21B0-21E5, U+21F1-21F2, U+21F4-2211, U+2213-2214, U+2216-22FF, U+2308-230B, U+2310, U+2319, U+231C-2321, U+2336-237A, U+237C, U+2395, U+239B-23B7, U+23D0, U+23DC-23E1, U+2474-2475, U+25AF, U+25B3, U+25B7, U+25BD, U+25C1, U+25CA, U+25CC, U+25FB, U+266D-266F, U+27C0-27FF, U+2900-2AFF, U+2B0E-2B11, U+2B30-2B4C, U+2BFE, U+3030, U+FF5B, U+FF5D, U+1D400-1D7FF, U+1EE00-1EEFF;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/google-sans-code-symbols.woff2") format("woff2");
+  unicode-range: U+0001-000C, U+000E-001F, U+007F-009F, U+20DD-20E0, U+20E2-20E4, U+2150-218F, U+2190, U+2192, U+2194-2199, U+21AF, U+21E6-21F0, U+21F3, U+2218-2219, U+2299, U+22C4-22C6, U+2300-243F, U+2440-244A, U+2460-24FF, U+25A0-27BF, U+2800-28FF, U+2921-2922, U+2981, U+29BF, U+29EB, U+2B00-2BFF, U+4DC0-4DFF, U+FFF9-FFFB, U+10140-1018E, U+10190-1019C, U+101A0, U+101D0-101FD, U+102E0-102FB, U+10E60-10E7E, U+1D2C0-1D2D3, U+1D2E0-1D37F, U+1F000-1F0FF, U+1F100-1F1AD, U+1F1E6-1F1FF, U+1F30D-1F30F, U+1F315, U+1F31C, U+1F31E, U+1F320-1F32C, U+1F336, U+1F378, U+1F37D, U+1F382, U+1F393-1F39F, U+1F3A7-1F3A8, U+1F3AC-1F3AF, U+1F3C2, U+1F3C4-1F3C6, U+1F3CA-1F3CE, U+1F3D4-1F3E0, U+1F3ED, U+1F3F1-1F3F3, U+1F3F5-1F3F7, U+1F408, U+1F415, U+1F41F, U+1F426, U+1F43F, U+1F441-1F442, U+1F444, U+1F446-1F449, U+1F44C-1F44E, U+1F453, U+1F46A, U+1F47D, U+1F4A3, U+1F4B0, U+1F4B3, U+1F4B9, U+1F4BB, U+1F4BF, U+1F4C8-1F4CB, U+1F4D6, U+1F4DA, U+1F4DF, U+1F4E3-1F4E6, U+1F4EA-1F4ED, U+1F4F7, U+1F4F9-1F4FB, U+1F4FD-1F4FE, U+1F503, U+1F507-1F50B, U+1F50D, U+1F512-1F513, U+1F53E-1F54A, U+1F54F-1F5FA, U+1F610, U+1F650-1F67F, U+1F687, U+1F68D, U+1F691, U+1F694, U+1F698, U+1F6AD, U+1F6B2, U+1F6B9-1F6BA, U+1F6BC, U+1F6C6-1F6CF, U+1F6D3-1F6D7, U+1F6E0-1F6EA, U+1F6F0-1F6F3, U+1F6F7-1F6FC, U+1F700-1F7FF, U+1F800-1F80B, U+1F810-1F847, U+1F850-1F859, U+1F860-1F887, U+1F890-1F8AD, U+1F8B0-1F8BB, U+1F8C0-1F8C1, U+1F900-1F90B, U+1F93B, U+1F946, U+1F984, U+1F996, U+1F9E9, U+1FA00-1FA6F, U+1FA70-1FA7C, U+1FA80-1FA89, U+1FA8F-1FAC6, U+1FACE-1FADC, U+1FADF-1FAE9, U+1FAF0-1FAF8, U+1FB00-1FBFF;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("./fonts/google-sans-code-symbols2.woff2") format("woff2");
+  unicode-range: U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F;
+}
+
 
 :root {
   color-scheme: light;
 
-  --font-geist-sans: "Avenir Next", Avenir, "Segoe UI Variable", "Segoe UI",
-                     Helvetica, Arial, sans-serif;
-  --font-geist-mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Menlo,
-                     Consolas, "Liberation Mono", monospace;
-  --font-google-sans-code: var(--font-geist-mono);
+  /* -- TYPE ---------------------------------------------------------------
+     One physical family. Every legacy name is an alias, so no declaration
+     path can diverge and the ~460 class="font-mono" attributes in generated
+     HTML become no-ops. Do not edit vendored tw.css; site.css loads after it
+     and overrides its :root. The stack below is a fallback chain, not a set
+     of choices: everything after the vendored face exists only for the
+     moment before it loads, or if it fails to.                            */
+  /* One family for every Latin glyph on the site. The tail is not a set of
+     alternatives -- it is the named fallback for the glyphs Google Sans Code
+     does NOT contain, verified against the full 674-glyph font, not a subset:
+     the math notation on /guide/quality-methods/ (SIGMA rho sigma, sub-zero,
+     radical, infinity, almost-equal) and the CJK in one mined PR title. A
+     glyph the face lacks falls back to a different FAMILY for that character
+     alone, so the choice is to name the fallback or let the OS pick it.
+     tests/test_font_coverage.py fails if any NEW uncovered glyph appears. */
+  --td-font: "Google Sans Code", ui-monospace, "SFMono-Regular",
+             "Cascadia Code", "JetBrains Mono", "Roboto Mono", Menlo,
+             Consolas, "Liberation Mono",
+             "Sarasa Mono SC", "Noto Sans Mono CJK SC", "Microsoft YaHei",
+             "PingFang SC", "Hiragino Sans GB", monospace;
 
-  --td-font-body: var(--font-geist-sans);
-  --td-font-display: "Avenir Next", Avenir, "Trebuchet MS", var(--font-geist-sans);
-  --td-font-data: var(--font-geist-mono);
+  --td-font-body:          var(--td-font);
+  --td-font-display:       var(--td-font);
+  --td-font-data:          var(--td-font);
+  --font-geist-sans:       var(--td-font);
+  --font-geist-mono:       var(--td-font);
+  --font-google-sans-code: var(--td-font);
+  --font-sans:             var(--td-font);   /* overrides tw.css :root */
+  --font-mono:             var(--td-font);   /* overrides tw.css :root */
 
-  --td-paper: #f5f3ec;
-  --td-surface: #fffdf8;
+  /* -- TYPE SCALE -- 5 steps, re-cut against a measured reference ---------
+     Three preceding rounds moved this ladder up one notch at a time and the
+     verdict each time was that the page still reads small. It did, and
+     nudging was the wrong instrument: the reference this site is judged
+     against sets its BODY and its TABLE CELLS at 16px and its section
+     headings at 36px, which is not one notch away from 15/22.4 -- it is a
+     different scale. So the ladder is re-cut once, onto round CSS pixels at
+     the default root size, and then left alone:
+
+       micro  13    -> 14px    uppercase labels, table heads, legends, CIs
+       body   15    -> 16px    all prose, all table cells, all data
+       lead   17    -> 20px    ledes, block heads, stat values, inputs
+       sub    22.4  -> 28px    bare <h2>, section headings
+       title  28.8  -> 36px min   page titles (clamped)
+              38.4  -> 48px max
+
+     Adjacent ratios are 1.14 / 1.25 / 1.4 / 1.29 -- the ladder opens as it
+     climbs, which is what makes a heading read as a heading on a page where
+     every glyph is the same width. Do not add a sixth step; a component that
+     needs an in-between size is a component that needs to pick a side.    */
+  --ts-micro: 0.875rem;                       /* 14px */
+  --ts-body:  1rem;                           /* 16px */
+  --ts-lead:  1.25rem;                        /* 20px */
+  --ts-sec:   2rem;                           /* 32px  section headings */
+  --ts-sub:   1.75rem;                        /* 28px */
+  --ts-title: clamp(2.25rem, 4.2vw, 3rem);    /* 36-48px */
+
+  /* -- LINE HEIGHT -- 3 -- */
+  --lh-flat:  1;      /* numerals, single-line data */
+  --lh-head:  1.1;    /* every heading */
+  /* 1.7 -> 1.55. This looks like a reduction and is the opposite: the line
+     BOX went 25.5px -> 24.8px at a body size that went 15px -> 16px, so the
+     glyphs grew while the interline gap shrank, 10.5px of air per line down
+     to 8.8px. A tall ratio was compensating for small type; with the type
+     fixed, that compensation is what made a paragraph read as a loose stack
+     of separate lines. The reference runs 1.5 at 16px. The separation a
+     reader actually needs is BETWEEN paragraphs, and that is --rh-para,
+     which doubled.                                                        */
+  --lh-prose: 1.55;   /* body copy, caveats, table prose cells */
+
+  /* -- WEIGHT -- 4. The vendored face has a real 300-800 axis, so each of
+     these is drawn rather than synthesised. */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semi:   600;
+  --fw-bold:   700;
+
+  /* -- TRACKING -- 3. --tr-head went -0.02em -> -0.04em: at 36-48px a
+     monospace face's fixed advance leaves visible holes between caps, and
+     the reference tracks its 36px headings at -1.8px, which is -0.05em. */
+  --tr-head:  -0.04em;   /* every heading >= --ts-sub, and the brand name */
+  --tr-body:  0;         /* body, tables, all data, button labels */
+  --tr-micro: 0.06em;    /* uppercase micro-labels only */
+
+  /* -- SPACING -- 9 steps, re-cut as a clean 4px ladder -------------------
+     The old scale was derived from this file's own measured values --
+     1.6 / 4 / 6.4 / 9.6 / 14.4 / 16 / 22.4 / 33.6 / 48 -- which means it
+     encoded the density the reader objected to. Every step is now a multiple
+     of 4px and the ladder is roughly doubled:
+
+       4 / 8 / 12 / 16 / 24 / 32 / 44 / 64 / 96
+
+     --sp-3 and --sp-4 are the two that matter most, because they are the
+     table head and table cell padding-block, and they are what turns a 39px
+     row into a 58px one. THIS SCALE APPLIES TO padding / margin / gap /
+     inset ONLY. It must never be substituted into border-radius (there is no
+     radius any more), font-size, width, height or stroke-width -- those are
+     separate ladders.                                                     */
+  --sp-0: 0;
+  --sp-1: 0.25rem;   /*  4px   hairline insets, chip padding-block       */
+  --sp-2: 0.5rem;    /*  8px   intra-group gap, table cell inline-end    */
+  --sp-3: 0.75rem;   /* 12px   table HEAD padding-block                  */
+  --sp-4: 1rem;      /* 16px   table CELL padding-block, heading -> text */
+  --sp-5: 1.5rem;    /* 24px   table cell inline-start, head -> body     */
+  --sp-6: 2rem;      /* 32px   page gutter, panel padding, paragraph gap */
+  --sp-7: 2.75rem;   /* 44px   section padding-block                     */
+  --sp-8: 4rem;      /* 64px   masthead / footer separation              */
+  --sp-9: 6rem;      /* 96px   page-level separation                     */
+  --chrome-h: 4.25rem; /* 68px header height. NOT a spacing step. */
+
+  /* -- WIDTH -- 2 steps. A separate ladder from spacing, on purpose ------
+     --w-page was 76rem, which at a 1440px viewport is 84% of the window: it
+     put the leaderboard's ten columns behind a horizontal scroller while
+     224px of empty gutter sat either side, and it clipped the registry's
+     suite column outright. The reference runs its table at 97% of the same
+     viewport. 88rem inside the existing 16px page gutters is 1408px at 1440
+     -- 97.8%.
+     --w-prose is the counterweight, and it is not optional: 1408px of 16px
+     monospace is 146 characters a line. Running text is capped independently
+     at 44rem = 73 characters, inside the 45-75 range, while tables and data
+     keep the full page width.                                             */
+  --w-page:  88rem;
+  --w-prose: 44rem;
+
+  /* -- PROSE RHYTHM -- 3 semantic aliases, no new numbers ------------------
+       --rh-head  <  --rh-para  <  --rh-block
+     That ordering is the rule: a heading must sit closer to the text it
+     introduces than that text sits to the paragraph above it, or the heading
+     reads as belonging to the block it follows. --rh-para doubled, 16 -> 32,
+     which on a 24.8px line box is 1.29 of a line; the reference measures
+     36px. Anything that needs a fourth rhythm is a component, and picks a
+     --sp step by name.                                                     */
+  --rh-head:  var(--sp-4);   /* 16px  heading -> the text it introduces */
+  --rh-para:  var(--sp-6);   /* 32px  paragraph -> paragraph            */
+  --rh-block: var(--sp-7);   /* 44px  section padding-block (88px + rule
+                                between two sections, was 67px)         */
+
+  /* == IDENTITY CALL 1: white ground, near-black ink =======================
+     Stated rather than slipped in, because it changes what the product looks
+     like. The site ran warm paper (#f5f3ec) under dark green ink (#152923),
+     plus two radial colour washes and a dot-grid overlay, all at once. Each
+     is defensible alone; together they spend about a quarter of the
+     available contrast on every glyph of a face whose stems are thin and
+     uniform, and they are the single largest reason the page reads as a
+     brochure rather than an instrument.
+
+     So: the ground is white and the ink is near-black. The warmth does not
+     survive as a tint under the text -- that is the point of the change --
+     it survives where it can be seen doing a job: the coral accent, the deep
+     green of the brand mark and the primary button, and the green cast still
+     in the dark theme's ground. What is given up is a soft, distinctive page
+     colour; what is bought is that every number on the site is now read at
+     18.6:1 instead of 13.8:1 against a ground that is not also carrying two
+     gradients.
+
+     Measured: ink 18.6:1 on paper; muted 8.4:1 on paper and 7.3:1 on the
+     darkest ground it ever lands on (a --secondary chip). Both ends AAA, and
+     1.15 stops apart, so the muted/ink hierarchy that carries the whole page
+     is still legible AS a hierarchy.                                       */
+  --td-paper: #ffffff;
+  --td-surface: #fafaf9;
   --td-surface-strong: #ffffff;
-  --td-ink: #152923;
-  --td-muted: #66736e;
-  --td-line: #d8ded8;
-  --td-line-strong: #b9c6bf;
-  --td-night: #173f38;
-  --td-night-2: #0e2d29;
-  --td-coral: #ff6846;
-  --td-coral-soft: #ffe1d7;
-  --td-sky: #cfe9ff;
-  --td-mint: #d9f1df;
+  --td-ink: #111312;
+  --td-muted: #494f4b;
+  --td-line: #e6e6e2;
+  --td-line-strong: #c9c9c4;
+  --td-night: #14312b;
+  --td-night-2: #0b1f1b;
+  --td-coral: #ff5533;
+  --td-coral-soft: #ffe8e2;
+  /* The four data hues are DATA ONLY now. They used to tint the table head,
+     the row hover, the card fill and the page background, which is four
+     places where a reader has to decide whether a colour means something. It
+     never did. They survive because the quality report's interval band and
+     its item strip are the two places on the site where a hue IS the
+     argument. */
+  --td-sky: #dbeeff;
+  --td-mint: #dcf3e2;
   --td-sun: #ffd66b;
-  --td-violet: #ddd7ff;
-  --td-shadow: 0 18px 50px rgba(20, 52, 45, 0.09);
-  --td-shadow-small: 0 8px 24px rgba(20, 52, 45, 0.07);
+  --td-violet: #e2ddff;
+  /* The item strip's neutral floor. "No model solved this" is an absence of
+     information, not a low score, so it is grey rather than the dark end of
+     the coral ramp. 2.69:1 on white -- clearly a filled cell, and quieter
+     than any step of the ramp above it. */
+  --td-cell-zero: #9aa19d;
 
-  --radius: 0.9rem;
+  /* Tables were indistinguishable from the page: the plain variant had no
+     background and no border at all, and the panel variant was tinted with
+     --td-sky, a COOL blue-white sitting on warm cream. One warm surface and
+     one head band, shared by every table on the site. */
+  --td-table-surface: #fbfbfa;
+  --td-table-head:    #f0f0ec;
+  /* There are no shadows. A shadow says "this surface floats above the
+     page"; nothing on a benchmark does, and a shadow under a square-cornered
+     panel on a white ground reads as a rendering artefact. The two tokens
+     stay declared so the remaining `box-shadow: var(--td-shadow)` references
+     resolve to a no-op rather than each needing its own deletion. */
+  --td-shadow: none;
+  --td-shadow-small: none;
+
+  /* == IDENTITY CALL 2: there is no radius anywhere ========================
+     Sharp corners are most of why the reference reads as an instrument, and
+     a monospace page is already a fixed cell grid -- a rounded container
+     around it is the one shape on the page that is not on that grid.
+
+     This is also, on net, a DELETION. The file declared 0.72 / 0.8 / 0.85 /
+     0.9 / 1 / 1.15rem and 999px, and then spent about twenty
+     `border-radius: 0 !important` rules taking them back on the pages that
+     had already been flattened. One value, zero, replaces both halves.
+
+     The token was the last thing holding out. It sat at 0.9rem underneath
+     this comment, which already claimed zero, so every corner it fed had to
+     be argued back to square one !important at a time -- and anything that
+     merely picked up a vendored `rounded-*` class was round again with no
+     rule in this file to blame. It is zero now, and the rules below spell
+     the zero literally instead of routing it through a token that no longer
+     names a scale.
+
+     --radius still has to be DECLARED, because it is not only ours. tw.css
+     derives .rounded-lg (the token), .rounded-md (token - 2px) and
+     .rounded-sm (token - 4px) from it, so zeroing it squares all three; the
+     two negative results clamp to zero. It does NOT square .rounded-xl,
+     which is (token + 4px) and lands on 4px, nor .rounded-xs / .rounded-2xl
+     / .rounded-full, which carry their own values. Those four are squared by
+     name at the foot of this file.
+
+     Two exceptions survive, and both are geometry rather than chrome: the
+     circles inside .tdb-brand-mark, which are a drawn logo, and .tdb-ci-dot,
+     which is a plotted point. Each is commented at its own rule. */
+  --radius: 0;
   --background: var(--td-paper);
   --foreground: var(--td-ink);
-  --card: var(--td-surface);
+  --card: var(--td-surface-strong);
   --card-foreground: var(--td-ink);
   --popover: var(--td-surface-strong);
   --popover-foreground: var(--td-ink);
   --primary: var(--td-night);
-  --primary-foreground: #fffdf7;
-  --secondary: #e4ebe7;
-  --secondary-foreground: var(--td-night-2);
-  --muted: #e8ece8;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0ec;
+  --secondary-foreground: var(--td-ink);
+  --muted: #f4f4f1;
   --muted-foreground: var(--td-muted);
   --accent: var(--td-coral-soft);
-  --accent-foreground: #6c2514;
-  --destructive: #c83c2b;
+  --accent-foreground: #8c2a13;
+  --destructive: #b8301f;
   --border: var(--td-line);
-  --input: var(--td-line);
+  --input: var(--td-line-strong);
   --ring: var(--td-coral);
-  --sidebar: #edf0eb;
+  --sidebar: var(--td-surface);
   --sidebar-foreground: var(--td-ink);
   --sidebar-primary: var(--td-night);
-  --sidebar-primary-foreground: #fffdf7;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--td-coral-soft);
-  --sidebar-accent-foreground: #6c2514;
+  --sidebar-accent-foreground: #8c2a13;
   --sidebar-border: var(--td-line);
   --sidebar-ring: var(--td-coral);
 }
@@ -70,23 +340,34 @@
 :root.dark {
   color-scheme: dark;
 
-  --td-paper: #0c1715;
-  --td-surface: #12221f;
-  --td-surface-strong: #172a26;
-  --td-ink: #f0f1e9;
-  --td-muted: #a5b4ae;
-  --td-line: #2c403b;
-  --td-line-strong: #49605a;
-  --td-night: #b9eadb;
-  --td-night-2: #d4f6eb;
-  --td-coral: #ff876b;
-  --td-coral-soft: #4a2b25;
-  --td-sky: #173c51;
-  --td-mint: #193a2d;
-  --td-sun: #493d1f;
-  --td-violet: #302d50;
-  --td-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
-  --td-shadow-small: 0 8px 26px rgba(0, 0, 0, 0.18);
+  /* The dark theme is the counterpart of the same call: a near-neutral,
+     near-black ground with a whisper of green left in it, near-white ink,
+     and the accent unchanged in role. It is held to the same two ratios as
+     the light theme -- ink 17.3:1 on paper, muted 9.4:1 on paper and 7.3:1
+     on a --secondary chip -- so neither theme is the one that "also works". */
+  --td-paper: #0d0f0e;
+  --td-surface: #151918;
+  --td-surface-strong: #1c211f;
+  --td-ink: #f2f3f1;
+  --td-muted: #b0b7b3;
+  --td-line: #2b302e;
+  --td-line-strong: #4c534f;
+  --td-night: #a9e8d4;
+  --td-night-2: #d6f6ea;
+  --td-coral: #ff7a5c;
+  --td-coral-soft: #3d211a;
+  --td-sky: #14313f;
+  --td-mint: #16302a;
+  --td-sun: #453a1c;
+  --td-violet: #2b294a;
+  /* 2.99:1 on the dark paper, and it has to stay distinguishable from the
+     dark .c-lo above it as well as from the ground below it. */
+  --td-cell-zero: #5a625e;
+
+  --td-table-surface: #161a19;
+  --td-table-head:    #202523;
+  --td-shadow: none;
+  --td-shadow-small: none;
 
   --background: var(--td-paper);
   --foreground: var(--td-ink);
@@ -95,23 +376,23 @@
   --popover: var(--td-surface-strong);
   --popover-foreground: var(--td-ink);
   --primary: var(--td-night);
-  --primary-foreground: #10241f;
-  --secondary: #263a35;
+  --primary-foreground: #0b1f1b;
+  --secondary: #232827;
   --secondary-foreground: var(--td-ink);
-  --muted: #22342f;
+  --muted: #1e2321;
   --muted-foreground: var(--td-muted);
   --accent: var(--td-coral-soft);
-  --accent-foreground: #ffd8ce;
-  --destructive: #ff8272;
+  --accent-foreground: #ffd0c2;
+  --destructive: #ff7a6a;
   --border: var(--td-line);
-  --input: var(--td-line);
+  --input: var(--td-line-strong);
   --ring: var(--td-coral);
-  --sidebar: #10201d;
+  --sidebar: var(--td-surface);
   --sidebar-foreground: var(--td-ink);
   --sidebar-primary: var(--td-night);
-  --sidebar-primary-foreground: #10241f;
+  --sidebar-primary-foreground: #0b1f1b;
   --sidebar-accent: var(--td-coral-soft);
-  --sidebar-accent-foreground: #ffd8ce;
+  --sidebar-accent-foreground: #ffd0c2;
   --sidebar-border: var(--td-line);
   --sidebar-ring: var(--td-coral);
 }
@@ -121,30 +402,24 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* The one and only type-family declaration in this stylesheet. Everything
+   else inherits it. A second one is how the site came to render three
+   faces at once; a checker in tests/ now counts them. */
 body {
   position: relative;
   isolation: isolate;
   overflow-x: hidden;
-  font-family: var(--td-font-body);
-  letter-spacing: -0.008em;
-  background:
-    radial-gradient(circle at 8% 3%, color-mix(in srgb, var(--td-sun) 42%, transparent) 0 11rem, transparent 30rem),
-    radial-gradient(circle at 94% 14%, color-mix(in srgb, var(--td-sky) 52%, transparent) 0 10rem, transparent 29rem),
-    var(--background);
+  font-family: var(--td-font);
+  font-size: var(--ts-body);
+  letter-spacing: var(--tr-body);
+  line-height: var(--lh-prose);
+  background: var(--background);
 }
 
-body::before {
-  position: fixed;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-  content: "";
-  opacity: 0.32;
-  background-image: radial-gradient(color-mix(in srgb, var(--td-ink) 14%, transparent) 0.65px, transparent 0.8px);
-  background-size: 18px 18px;
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent 72%);
-  mask-image: linear-gradient(to bottom, black, transparent 72%);
-}
+/* Was a fixed dot-grid texture at 32% opacity over the whole viewport. On a
+   white ground it is visible noise behind every table of numbers, and the
+   reference this design now follows has no texture at all. */
+body::before { content: none; }
 
 ::selection {
   color: var(--td-night-2);
@@ -166,10 +441,6 @@ input:focus-visible {
   outline-offset: 3px;
 }
 
-main#nd-home-layout {
-  padding-top: 6rem;
-}
-
 [data-tdb-canary-host] {
   width: min(100%, 76rem) !important;
   min-width: 0;
@@ -180,13 +451,35 @@ main#nd-home-layout {
 .tdb-generated-page { min-width: 0; }
 .tdb-page-frame { position: relative; min-width: 0; }
 .tdb-page-title { overflow-wrap: anywhere; text-wrap: balance; }
-.tdb-page-lede { max-width: 48rem; line-height: 1.7; }
+
+/* The home page leads with results, so its masthead is a hero and everything
+   after it is the table. The reference this follows sets its home title at
+   72px and puts the leaderboard at y=418 in a 900px viewport; a 48px title
+   with a full section gap under it left ours at y=643 with 185px of nothing
+   between the buttons and the table. Home only -- inner pages keep --ts-title,
+   where a hero would just push their content down. */
+.tdb-page-home main#nd-home-layout [data-tdb-section="intro"] h1 {
+  font-size: clamp(2.75rem, 6vw, 4.5rem) !important;
+  line-height: var(--lh-head) !important;
+  letter-spacing: var(--tr-head) !important;
+}
+.tdb-page-home main#nd-home-layout [data-tdb-section="intro"] {
+  padding-bottom: var(--sp-5) !important;
+}
+.tdb-page-home main#nd-home-layout [data-tdb-section="leaderboard"] {
+  padding-top: var(--sp-5) !important;
+}
+
+@media (max-width: 639px) {
+  .tdb-page-home main#nd-home-layout [data-tdb-section="intro"] h1 {
+    font-size: var(--ts-title) !important;
+  }
+}
+.tdb-page-lede { max-width: 44rem; line-height: var(--lh-prose); }
 .tdb-badge { max-width: 100%; }
-.tdb-button { text-align: center; }
 .tdb-content-section { position: relative; width: 100%; min-width: 0; max-width: 100%; }
 .tdb-section-head { max-width: 54rem; }
-.tdb-card,
-.tdb-card-header { min-width: 0; }
+.tdb-card { min-width: 0; }
 .tdb-table-shell {
   width: 100%;
   min-width: 0;
@@ -200,7 +493,7 @@ main#nd-home-layout {
   min-width: 0;
   max-width: 100%;
   border: 1px solid var(--td-line) !important;
-  border-radius: 1.15rem;
+  border-radius: 0;
   overflow-wrap: anywhere;
   background: var(--td-surface) !important;
   box-shadow: var(--td-shadow-small);
@@ -212,15 +505,14 @@ main#nd-home-layout {
   word-break: break-word;
 }
 
-/* Floating site shell ----------------------------------------------------- */
+/* Site shell -------------------------------------------------------------- */
 
 #nd-nav {
   top: 0.75rem !important;
-  right: 1rem !important;
-  left: 1rem !important;
+  right: var(--sp-6) !important;
+  left: var(--sp-6) !important;
   width: auto;
   border: 0 !important;
-  font-family: var(--td-font-body) !important;
   background: transparent !important;
   pointer-events: none;
 }
@@ -233,7 +525,7 @@ main#nd-home-layout {
 #nd-nav > div:first-child {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--td-line-strong) 70%, transparent);
-  border-radius: 1.15rem;
+  border-radius: 0;
   background: color-mix(in srgb, var(--td-surface-strong) 88%, transparent);
   box-shadow: 0 14px 40px rgba(18, 48, 42, 0.12);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
@@ -241,14 +533,14 @@ main#nd-home-layout {
 }
 
 #nd-nav nav {
-  height: 4rem;
-  padding-inline: 0.8rem;
+  height: var(--chrome-h);
+  padding-inline: var(--sp-4);
 }
 
 .tdb-brand {
   min-width: max-content;
-  border-radius: 0.8rem;
-  padding: 0.35rem 0.45rem;
+  border-radius: 0;
+  padding: var(--sp-2) var(--sp-3);
 }
 
 .tdb-brand:hover {
@@ -263,11 +555,16 @@ main#nd-home-layout {
   flex: 0 0 auto;
   place-items: center;
   overflow: hidden;
-  border-radius: 0.72rem;
+  border-radius: 0;
   background: var(--td-night);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, white 20%, transparent);
 }
 
+/* -0.18rem / -0.22rem are optical nudges on the mark, deliberately out of the
+   spacing scale: they align a circle's visual edge, not a rhythm.
+   RADIUS EXCEPTION 1 of 2. These two 999px are the drawn logo -- a coral disc
+   behind a hollow ring -- not a container corner. Squaring them would not
+   make the site sharper, it would delete the mark. */
 .tdb-brand-mark::before {
   position: absolute;
   right: -0.18rem;
@@ -291,38 +588,39 @@ main#nd-home-layout {
 .tdb-brand-copy {
   display: flex;
   flex-direction: column;
-  line-height: 1;
+  line-height: var(--lh-flat);
 }
 
 .tdb-brand-name {
-  font-family: var(--td-font-display);
-  font-size: 0.94rem;
-  font-weight: 750;
-  letter-spacing: -0.035em;
+  font-size: var(--ts-lead);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tr-head);
 }
 
 .tdb-brand-kicker {
-  margin-top: 0.3rem;
+  margin-top: var(--sp-2);
   color: var(--td-muted);
-  font-family: var(--td-font-data);
-  font-size: 0.57rem;
-  font-weight: 650;
+  font-size: var(--ts-micro);
+  font-weight: var(--fw-medium);
+  /* 0.13em is a documented fourth tracking value, not a token: this is the
+     only tracked uppercase display element on the site, and the tracking is
+     what makes the mark read as a mark. */
   letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 
 #nd-nav nav > ul:nth-of-type(1) {
-  gap: 0.15rem;
-  padding-inline: 1rem;
+  gap: var(--sp-1);
+  padding-inline: var(--sp-6);
 }
 
 .tdb-nav-link {
-  border-radius: 999px;
-  padding: 0.48rem 0.72rem !important;
+  border-radius: 0;
+  padding: var(--sp-3) var(--sp-4) !important;
   color: var(--td-muted) !important;
-  font-size: 0.82rem !important;
-  font-weight: 620;
-  letter-spacing: 0.005em;
+  font-size: var(--ts-body) !important;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tr-body);
 }
 
 .tdb-nav-link:hover {
@@ -346,69 +644,54 @@ main#nd-home-layout {
 }
 
 .tdb-mobile-menu {
-  margin-top: 0.45rem;
+  margin-top: var(--sp-3);
   overflow: hidden;
   border: 1px solid var(--td-line) !important;
-  border-radius: 1rem;
+  border-radius: 0;
   background: var(--td-surface-strong) !important;
   box-shadow: var(--td-shadow);
 }
 
-/* Type hierarchy --------------------------------------------------------- */
+/* Type hierarchy ---------------------------------------------------------- */
 
-h1,
-h2,
-h3,
-
+/* A bare `h1, h2, h3` used to head this selector list, which gave EVERY
+   heading on the site font-size: clamp(2.55rem, 6vw, 4.8rem) !important.
+   Only h1 and .tdb-block-head h2 were ever rescued, so a bare <h2> on a guide
+   subpage rendered at up to 76.8px under a 33.6px page title. The h2/h3 steps
+   are declared with the title rule further down, and they are BELOW it. */
 .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h1,
 .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h2 {
   max-width: 54rem;
-  margin-top: clamp(1rem, 4vw, 3.5rem);
-  font-size: clamp(2.55rem, 6vw, 4.8rem) !important;
+  margin-top: var(--sp-9);
+  font-size: var(--ts-title) !important;
   text-wrap: balance;
 }
 
 .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h1 + p,
 .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h2 + p {
-  max-width: 48rem;
-  margin-top: 1rem;
-  margin-bottom: 2.25rem;
-  font-family: var(--td-font-body) !important;
-  font-size: 1.02rem !important;
-  line-height: 1.7;
+  /* 48rem at 13px was 84 characters a line; at 17px the same box is 71, which
+     is inside the 45-75 range. The measure did not need re-picking, only the
+     type under it. margin-top is the heading rhythm, not a page gap: the lede
+     belongs to the title above it. */
+  max-width: 44rem;
+  margin-top: var(--rh-head);
+  margin-bottom: var(--sp-9);
+  font-size: var(--ts-lead) !important;
+  line-height: var(--lh-prose);
 }
 
+/* Not every fallback mono is tabular by default, and these are the elements
+   whose whole job is that columns of digits line up. */
 code,
 kbd,
 samp,
 pre,
 .tabular-nums,
 [data-tdb-stat-value] {
-  font-family: var(--td-font-data) !important;
+  font-variant-numeric: tabular-nums;
 }
 
-p.font-mono,
-div.font-mono,
-nav.font-mono,
-section.font-mono,
-td.font-mono,
-th.font-mono {
-  font-family: var(--td-font-body);
-}
-
-/* Home: a daily-window editorial masthead ------------------------------- */
-
-
-
-
-
-
-
-
-
-
-
-/* Buttons, badges, and links -------------------------------------------- */
+/* Buttons, badges, and links ---------------------------------------------- */
 
 a.bg-primary,
 a.bg-secondary,
@@ -416,10 +699,9 @@ button.bg-primary,
 button.bg-secondary {
   min-height: 3rem;
   border: 1px solid transparent;
-  border-radius: 0.85rem !important;
-  font-family: var(--td-font-body) !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.01em;
+  border-radius: 0 !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: var(--tr-head);
   box-shadow: 0 5px 0 color-mix(in srgb, var(--td-night-2) 22%, transparent);
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
@@ -439,39 +721,44 @@ button.bg-secondary {
 }
 
 [data-slot="badge"] {
-  min-height: 1.55rem;
+  min-height: 1.8rem;
   border: 1px solid color-mix(in srgb, var(--td-line-strong) 66%, transparent) !important;
-  border-radius: 999px !important;
-  padding-inline: 0.62rem !important;
-  font-family: var(--td-font-data) !important;
-  font-size: 0.66rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.055em;
+  border-radius: 0 !important;
+  padding-inline: var(--sp-4) !important;
+  font-size: var(--ts-micro) !important;
+  font-weight: var(--fw-bold) !important;
+  letter-spacing: var(--tr-micro);
   text-transform: uppercase;
 }
 
+/* #fffaf5 on solid --td-coral measured 2.77:1 in light and 2.27:1 in dark --
+   the only rule on the site that was WORSE in dark mode, on 11.5px uppercase
+   bold. Solid coral cannot be fixed by changing the text: its luminance caps
+   the achievable ratio at about 6.5:1 even against pure black. So the accent
+   moves off the fill and onto the edge, which is the treatment the active nav
+   link already uses: soft coral ground, deep coral ink, coral hairline.
+   8.89:1 light, 9.60:1 dark, and it still reads as the accent badge. */
 [data-slot="badge"].bg-primary {
-  border-color: transparent !important;
-  background: var(--td-coral) !important;
-  color: #fffaf5 !important;
+  border-color: color-mix(in srgb, var(--td-coral) 45%, transparent) !important;
+  background: var(--td-coral-soft) !important;
+  color: var(--accent-foreground) !important;
 }
 
 a[class*="underline-offset"] {
-  font-family: var(--td-font-body) !important;
-  font-weight: 650;
+  font-weight: var(--fw-medium);
   text-decoration-thickness: 1.5px;
   text-decoration-color: var(--td-coral);
 }
 
-/* Section rhythm --------------------------------------------------------- */
+/* Section rhythm ---------------------------------------------------------- */
 
 section:not([data-tdb-section="intro"]),
 .tdb-page [data-tdb-canary-host] > .flex.flex-col.py-12 {
-  scroll-margin-top: 7rem;
+  scroll-margin-top: calc(var(--chrome-h) + var(--sp-7));
 }
 
 [data-tdb-section]:not([data-tdb-section="intro"]) {
-  padding-block: clamp(2.5rem, 7vw, 5.5rem) !important;
+  padding-block: var(--rh-block) !important;
 }
 
 section > .mb-4:first-child {
@@ -481,24 +768,22 @@ section > .mb-4:first-child {
 
 section > .mb-4:first-child > p:first-child {
   position: relative;
-  padding-left: 1.35rem;
+  padding-left: var(--sp-7);
   color: var(--td-ink);
-  font-family: var(--td-font-display) !important;
-  font-size: clamp(1.35rem, 3vw, 2rem) !important;
-  font-weight: 720;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
+  font-size: var(--ts-lead) !important;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-head);
 }
 
 section > .mb-4:first-child > div > p:first-child {
   position: relative;
-  padding-left: 1.35rem;
+  padding-left: var(--sp-7);
   color: var(--td-ink);
-  font-family: var(--td-font-display) !important;
-  font-size: clamp(1.35rem, 3vw, 2rem) !important;
-  font-weight: 720;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
+  font-size: var(--ts-lead) !important;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-head);
 }
 
 section > .mb-4:first-child > p:first-child::before {
@@ -507,7 +792,7 @@ section > .mb-4:first-child > p:first-child::before {
   left: 0;
   width: 0.62rem;
   height: 0.62rem;
-  border-radius: 0.18rem 0.18rem 0.6rem 0.18rem;
+  border-radius: 0;
   background: var(--td-coral);
   content: "";
 }
@@ -518,7 +803,7 @@ section > .mb-4:first-child > div > p:first-child::before {
   left: 0;
   width: 0.62rem;
   height: 0.62rem;
-  border-radius: 0.18rem 0.18rem 0.6rem 0.18rem;
+  border-radius: 0;
   background: var(--td-coral);
   content: "";
 }
@@ -528,45 +813,28 @@ section > .mb-4:first-child > svg {
 }
 
 section > .mb-4:first-child > p:not(:first-child) {
-  padding-left: 1.35rem;
-  font-family: var(--td-font-body) !important;
-  font-size: 0.82rem !important;
+  padding-left: var(--sp-7);
+  font-size: var(--ts-body) !important;
 }
 
 section > .mb-4:first-child > div > p:not(:first-child) {
-  padding-left: 1.35rem;
-  font-family: var(--td-font-body) !important;
-  font-size: 0.82rem !important;
+  padding-left: var(--sp-7);
+  font-size: var(--ts-body) !important;
 }
 
-/* Cards ------------------------------------------------------------------ */
+/* Cards ------------------------------------------------------------------- */
 
 [data-slot="card"] {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  margin: 0.42rem !important;
+  margin: var(--sp-3) !important;
   border: 1px solid color-mix(in srgb, var(--td-line-strong) 64%, transparent) !important;
-  border-radius: 1.15rem !important;
+  border-radius: 0 !important;
   background: color-mix(in srgb, var(--td-surface-strong) 91%, var(--td-mint)) !important;
   box-shadow: var(--td-shadow-small) !important;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease !important;
 }
-
-[data-slot="card"]::before {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 0.32rem;
-  background: var(--td-coral);
-  content: "";
-}
-
-[data-slot="card"]:nth-child(4n + 2)::before { background: #5e9ee9; }
-[data-slot="card"]:nth-child(4n + 3)::before { background: #66a977; }
-[data-slot="card"]:nth-child(4n + 4)::before { background: #9a86dc; }
 
 [data-slot="card"]:hover {
   z-index: 2;
@@ -576,64 +844,23 @@ section > .mb-4:first-child > div > p:not(:first-child) {
   transform: translateY(-3px);
 }
 
-[data-slot="card-header"] > p:first-child,
-[data-slot="card-content"] > p:last-child {
-  font-family: var(--td-font-body) !important;
-}
-
 [data-slot="card-header"] > p:first-child {
   color: var(--td-muted);
-  font-size: 0.68rem !important;
-  font-weight: 720;
-  letter-spacing: 0.08em;
+  font-size: var(--ts-micro) !important;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tr-micro);
   text-transform: uppercase;
 }
 
-[data-tdb-stat-value] {
-  margin-top: 0.35rem;
-  color: var(--td-night-2);
-  font-size: clamp(1.45rem, 3vw, 2.1rem) !important;
-  font-weight: 720 !important;
-  letter-spacing: -0.045em;
-}
+/* Integrity and policy surfaces ------------------------------------------- */
 
-.dark [data-tdb-stat-value] {
-  color: var(--td-ink);
-}
-
-#hp-tasks [data-slot="card"],
-#suites [data-slot="card"] {
-  min-height: 15rem;
-}
-
-/* Integrity and policy surfaces ----------------------------------------- */
-
+/* Everything this rule used to set -- border, radius, padding, background,
+   shadow, family, line-height -- is cancelled further down the file by the
+   density pass. Only the two declarations that survived the cascade are
+   left here; the rest is declared once, at the bottom, where it wins. */
 [data-tdb-integrity] {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--td-coral) 30%, var(--td-line)) !important;
-  border-radius: 1.2rem !important;
-  padding: clamp(1.25rem, 3vw, 2rem) !important;
-  font-family: var(--td-font-body) !important;
-  line-height: 1.75;
-  background:
-    linear-gradient(110deg, color-mix(in srgb, var(--td-coral-soft) 67%, var(--td-surface)) 0 5.5rem, var(--td-surface) 5.5rem) !important;
-  box-shadow: var(--td-shadow-small);
-}
-
-[data-tdb-integrity]::before {
-  position: absolute;
-  top: 1.15rem;
-  left: 1.15rem;
-  width: 0.72rem;
-  height: 0.72rem;
-  border: 3px solid var(--td-coral);
-  border-radius: 999px;
-  content: "";
-}
-
-[data-tdb-integrity] > :first-child {
-  padding-left: 1.5rem;
 }
 
 [data-tdb-integrity] details {
@@ -642,52 +869,81 @@ section > .mb-4:first-child > div > p:not(:first-child) {
 
 [data-tdb-integrity] summary {
   width: fit-content;
-  border-radius: 999px;
-  padding: 0.3rem 0.65rem;
+  border-radius: 0;
+  padding: var(--sp-2) var(--sp-4);
   background: color-mix(in srgb, var(--td-coral-soft) 70%, transparent);
 }
 
-/* Tables and search ------------------------------------------------------ */
+/* Tables and search ------------------------------------------------------- */
 
 [data-slot="table-container"] {
   width: 100%;
   min-width: 0;
   max-width: 100%;
   overflow: auto;
-  border: 1px solid color-mix(in srgb, var(--td-line-strong) 62%, transparent);
-  border-radius: 1.15rem;
-  background: color-mix(in srgb, var(--td-surface-strong) 93%, var(--td-sky));
+  border: 1px solid var(--td-line-strong);
+  border-radius: 0;
+  background: var(--td-table-surface);
   box-shadow: var(--td-shadow-small);
 }
 
 [data-slot="table-container"] table {
   border-collapse: separate;
   border-spacing: 0;
-  font-family: var(--td-font-body);
 }
 
-[data-slot="table-header"] {
-  background: color-mix(in srgb, var(--td-mint) 62%, var(--td-surface));
+/* One head band for every table. Was a mint-green mix here and NOTHING at all
+   on .tdb-plain-table, so the two table families did not read as the same
+   component. --td-table-head is a warm step off the table surface. */
+[data-slot="table-header"],
+.tdb-plain-table thead {
+  background: var(--td-table-head);
 }
 
+/* height:auto plus padding-block is half of the row-height unification: the
+   markup's h-10 / py-3 / py-4 come from constants in tdb-data.js and in
+   per-page JS that this stylesheet cannot edit, so the height is taken back
+   here rather than there. */
 [data-slot="table-head"] {
-  height: 2.8rem !important;
+  height: auto !important;
+  padding-block: var(--sp-2) !important;
   color: var(--td-muted) !important;
-  font-family: var(--td-font-body) !important;
-  font-size: 0.68rem !important;
-  font-weight: 760 !important;
-  letter-spacing: 0.07em;
+  font-size: var(--ts-micro) !important;
+  font-weight: var(--fw-semi) !important;
+  letter-spacing: var(--tr-micro);
+  line-height: var(--lh-prose) !important;
   text-transform: uppercase;
 }
 
+/* One rule carries both the mono-width mitigation and the other half of the
+   row-height unification. The legibility pass grew --ts-body from 13px to
+   15px and --lh-prose from 1.6 to 1.7; the row absorbs both by dropping one
+   spacing step, --sp-3 -> --sp-2. 15 x 1.7 + 2 x 4 + 1 = 34.5px, against the
+   34.6px this rule and .tdb-plain-table, .tdb-statrow and a generated task
+   row have always measured. The table is 15% more legible and exactly as
+   dense: the complaint was about prose. -- OVERTURNED. The reader compared
+   the site to tbench.ai, whose rows are 56.5px against our 39px, and asked
+   for a major change. Cell padding-block is --sp-4 (16px), matching theirs
+   exactly; a row you can track across is worth more than rows-per-screen. */
 [data-slot="table-cell"] {
   border-bottom: 1px solid color-mix(in srgb, var(--td-line) 82%, transparent);
-  font-family: var(--td-font-body) !important;
-  font-size: 0.9rem !important;
+  padding-block: var(--sp-4) !important;
+  font-size: var(--ts-body) !important;
+  line-height: var(--lh-prose) !important;
 }
 
 [data-slot="table-row"]:last-child [data-slot="table-cell"] {
   border-bottom: 0;
+}
+
+/* The leaderboard, registry and quality tables are built by per-page JS and
+   by tdb-data.js, whose TD constant is "p-2 ... py-3 text-sm" -- a plain <td>
+   carrying no data-slot at all. The rule above therefore never reached them
+   and they kept a 12px padding-block, so the site's largest table ran 51px
+   rows against 34px everywhere else. Matching on the utility class the
+   generators actually emit is what makes the four table variants one row. */
+main#nd-home-layout table :is(td, th):is(.py-3, .py-4) {
+  padding-block: var(--sp-4) !important;
 }
 
 [data-slot="table-body"] [data-slot="table-row"] {
@@ -699,22 +955,20 @@ section > .mb-4:first-child > div > p:not(:first-child) {
   background: color-mix(in srgb, var(--td-sky) 36%, transparent) !important;
 }
 
-[data-slot="table-container"] + div {
-  margin-top: -1.15rem;
-  border: 1px solid var(--td-line);
-  border-top: 0 !important;
-  border-radius: 0 0 1.15rem 1.15rem;
-  padding-top: 1.85rem !important;
-  background: color-mix(in srgb, var(--td-surface) 85%, var(--td-mint));
-}
-
 #tdb-q {
   height: 3.6rem !important;
   border: 1px solid var(--td-line-strong) !important;
-  border-radius: 1rem !important;
-  padding-inline: 1.1rem 3.2rem !important;
-  font-family: var(--td-font-body) !important;
-  font-size: 0.95rem !important;
+  border-radius: 0 !important;
+  /* The right inset is the clear button's own width (w-12 = 3rem) plus its
+     0.25rem offset: a control clearance, not a rhythm step, so it is derived
+     from the control rather than snapped onto the spacing scale. */
+  padding-inline: var(--sp-6) calc(3rem + var(--sp-2)) !important;
+  font-size: var(--ts-lead) !important;
+  /* The input reset in tw.css leaves this at 1.4286, the one ratio on the
+     whole site outside the three-step ladder. It is invisible here (the
+     field is a fixed 3.6rem tall) but it is still a fourth value, and the
+     next component to inherit from a bare input would show it. */
+  line-height: var(--lh-head) !important;
   background: var(--td-surface-strong) !important;
   box-shadow: var(--td-shadow-small) !important;
 }
@@ -724,66 +978,42 @@ section > .mb-4:first-child > div > p:not(:first-child) {
 }
 
 #tdb-clear {
-  right: 0.25rem !important;
+  right: var(--sp-2) !important;
   height: 3.1rem !important;
-  border-radius: 0.8rem !important;
+  border-radius: 0 !important;
 }
 
-/* Daily suite rail ------------------------------------------------------- */
-
-
-
-
-
-#tdb-rail > div,
-#rail > div {
-  overflow: hidden;
-  border: 1px solid var(--td-line-strong) !important;
-  border-radius: 1.15rem;
-  background: color-mix(in srgb, var(--td-surface-strong) 92%, var(--td-sky));
-  box-shadow: var(--td-shadow-small);
-}
-
-#tdb-rail > div > div:first-child,
-#rail > div > div:first-child {
-  border-color: var(--td-line) !important;
-  background: color-mix(in srgb, var(--td-mint) 50%, var(--td-surface));
-}
-
-
-
-
-
-
-/* Breadcrumbs and code --------------------------------------------------- */
+/* Breadcrumbs and code ---------------------------------------------------- */
 
 [data-slot="breadcrumb"] {
   width: fit-content;
   border: 1px solid var(--td-line);
-  border-radius: 999px;
-  padding: 0.45rem 0.72rem;
-  font-family: var(--td-font-body) !important;
+  border-radius: 0;
+  padding: var(--sp-3) var(--sp-4);
   background: color-mix(in srgb, var(--td-surface) 80%, transparent);
 }
 
 [data-slot="breadcrumb-list"] {
-  font-size: 0.74rem !important;
+  font-size: var(--ts-body) !important;
 }
 
 figure.shiki {
   overflow: hidden;
   border: 1px solid #35514a !important;
-  border-radius: 1.15rem !important;
+  border-radius: 0 !important;
   padding: 0 !important;
   color: #eff8f4;
   background: #102b26 !important;
   box-shadow: var(--td-shadow);
 }
 
+/* #a7beb7 on #173a33 was 6.33:1 -- the filename is a label, not decoration,
+   and it is theme-independent, so one value has to serve both. #c2d5ce is
+   8.11:1. */
 figure.shiki > div:first-child {
   height: 2.9rem;
-  padding-inline: 1rem;
-  color: #a7beb7;
+  padding-inline: var(--sp-6);
+  color: #c2d5ce;
   background: #173a33;
 }
 
@@ -795,37 +1025,28 @@ figure.shiki > div:last-child {
 }
 
 figure.shiki .line {
-  padding-block: 0.12rem;
+  padding-block: var(--sp-1);
 }
 
-/* Footer ----------------------------------------------------------------- */
+/* Footer ------------------------------------------------------------------ */
 
 #tdb-footer {
-  margin-top: 4rem !important;
+  margin-top: var(--sp-9) !important;
   border-top: 0 !important;
-  padding: 1rem 1rem 2rem !important;
-}
-
-.tdb-footer-inner {
-  border: 1px solid var(--td-line);
-  border-radius: 1rem;
-  padding: 1rem 1.2rem;
-  background: color-mix(in srgb, var(--td-surface) 72%, transparent);
+  padding: var(--sp-6) var(--sp-6) var(--sp-8) !important;
 }
 
 #tdb-canary {
-  font-size: 0.58rem !important;
-  letter-spacing: 0.035em;
+  font-size: var(--ts-micro) !important;
+  letter-spacing: var(--tr-micro);
 }
 
-/* Responsive adjustments ------------------------------------------------ */
+/* Responsive adjustments -------------------------------------------------- */
 
 @media (max-width: 1023px) {
   #nd-nav nav > ul:nth-of-type(1) {
     display: none !important;
   }
-
-
 }
 
 @media (max-width: 639px) {
@@ -836,31 +1057,27 @@ figure.shiki .line {
   }
 
   main#nd-home-layout {
-    padding-top: 5.6rem;
+    padding-top: calc(var(--chrome-h) + var(--sp-4));
   }
 
   #nd-nav {
-    top: 0.5rem !important;
-    right: 0.55rem !important;
-    left: 0.55rem !important;
+    top: var(--sp-3) !important;
+    right: var(--sp-3) !important;
+    left: var(--sp-3) !important;
   }
 
   #nd-nav nav {
     height: 3.8rem;
-    padding-inline: 0.55rem;
+    padding-inline: var(--sp-3);
   }
 
   .tdb-brand-kicker {
     display: none;
   }
 
-
-
-
-
   [data-slot="card"] {
-    margin: 0.34rem 0 !important;
-    border-radius: 1rem !important;
+    margin: var(--sp-2) 0 !important;
+    border-radius: 0 !important;
   }
 
   [data-slot="table-container"] {
@@ -878,8 +1095,8 @@ figure.shiki .line {
 
   .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h1,
   .tdb-page:not(.tdb-page-home) [data-tdb-canary-host] > h2 {
-    margin-top: 1rem;
-    font-size: clamp(2.45rem, 13vw, 3.6rem) !important;
+    margin-top: var(--sp-6);
+    font-size: var(--ts-title) !important;
   }
 }
 
@@ -894,25 +1111,24 @@ figure.shiki .line {
 }
 
 /* ==========================================================================
-   Leaderboard v2 — the day rail's replacement, and the table that reads like
+   Leaderboard v2 -- the day rail's replacement, and the table that reads like
    a leaderboard rather than a status report.
    ========================================================================== */
 
 .tdb-title-row {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 1.5rem; flex-wrap: wrap;
+  gap: var(--sp-7); flex-wrap: wrap;
 }
 
 /* --- day navigation: arrows step, the select jumps ----------------------- */
 .tdb-daynav {
   display: inline-flex; align-items: stretch;
   border: 1px solid var(--border); background: var(--card);
-  font-family: var(--font-mono, ui-monospace, monospace);
 }
 .tdb-daynav-arrow {
   appearance: none; background: none; border: 0; cursor: pointer;
-  color: inherit; font: inherit; font-size: 1.15rem; line-height: 1;
-  padding: .3rem .7rem;
+  color: inherit; font: inherit; font-size: var(--ts-sub); line-height: var(--lh-flat);
+  padding: var(--sp-2) var(--sp-4);
 }
 .tdb-daynav-arrow:hover:not(:disabled) { background: var(--muted); }
 /* At the end of the range the arrow is disabled, not hidden: a control that
@@ -921,84 +1137,119 @@ figure.shiki .line {
 .tdb-daynav select {
   appearance: none; background: none; border: 0; border-left: 1px solid var(--border);
   border-right: 1px solid var(--border); color: inherit; font: inherit;
-  font-size: .8125rem; padding: .3rem .8rem; cursor: pointer; text-align: center;
+  font-size: var(--ts-body); padding: var(--sp-2) var(--sp-4); cursor: pointer; text-align: center;
 }
 .tdb-daynav-pos {
-  padding: .3rem .7rem; font-size: .75rem; color: var(--muted-foreground);
+  padding: var(--sp-2) var(--sp-4); font-size: var(--ts-micro); color: var(--muted-foreground);
   align-self: center; white-space: nowrap;
 }
 
 /* --- the copy-able command ---------------------------------------------- */
+/* One flex line held the caption, the command, the copy button and the link.
+   At 13px the command measured 927px inside a 927px box -- flush, with
+   nothing to spare. At 15px the same 108 characters measure 972px inside
+   901px, so the tail (`=<effort>]`) sat behind an overflow scroller on the
+   one string on this page whose entire job is to be read and copied.
+   The label and the two controls have no reason to share the command's line,
+   so the figure is two grid rows instead: caption + controls above, the
+   command across the full width below. It fits with ~200px to spare at
+   1440px, the code cell keeps its scroller for the narrow case, and no
+   spacing or type value changed to get there. */
 .tdb-cmd {
-  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
-  margin: 1.25rem 0; padding: .55rem .9rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) max-content max-content;
+  align-items: center; gap: var(--sp-3) var(--sp-5);
+  margin: var(--sp-6) 0; padding: var(--sp-3) var(--sp-5);
   border: 1px solid var(--border); background: var(--card);
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  font-size: var(--ts-body);
 }
-.tdb-cmd figcaption { color: var(--muted-foreground); font-size: .72rem; white-space: nowrap; }
-.tdb-cmd code { flex: 1 1 20rem; overflow-x: auto; white-space: nowrap; }
+.tdb-cmd figcaption {
+  grid-column: 1; grid-row: 1;
+  color: var(--muted-foreground); font-size: var(--ts-micro); white-space: nowrap;
+}
+.tdb-cmd code {
+  grid-column: 1 / -1; grid-row: 2;
+  min-width: 0; overflow-x: auto; white-space: nowrap;
+}
 .tdb-cmd button {
+  grid-column: 2; grid-row: 1;
   appearance: none; background: none; cursor: pointer; color: var(--muted-foreground);
-  border: 1px solid var(--border); font: inherit; font-size: .72rem; padding: .15rem .55rem;
+  border: 1px solid var(--border); font: inherit; font-size: var(--ts-micro); padding: var(--sp-1) var(--sp-3);
 }
 .tdb-cmd button:hover { color: var(--foreground); }
-.tdb-cmd a { color: var(--muted-foreground); font-size: .72rem; white-space: nowrap; }
+.tdb-cmd a {
+  grid-column: 3; grid-row: 1;
+  color: var(--muted-foreground); font-size: var(--ts-micro); white-space: nowrap;
+}
 .tdb-cmd a:hover { color: var(--foreground); }
+/* On a phone the caption, the button and the link do not fit on one line
+   either; the link takes its own row under the command rather than being
+   allowed to squeeze the caption into a wrap. */
+@media (max-width: 639px) {
+  .tdb-cmd   { grid-template-columns: minmax(0, 1fr) max-content; }
+  .tdb-cmd a { grid-column: 1 / -1; grid-row: 3; justify-self: start; }
+}
 
 /* --- the bar above the table -------------------------------------------- */
 .tdb-tablebar {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; margin-bottom: .75rem; flex-wrap: wrap;
+  gap: var(--sp-6); margin-bottom: var(--sp-4); flex-wrap: wrap;
 }
 .tdb-search input {
   appearance: none; background: var(--card); color: inherit;
-  border: 1px solid var(--border); padding: .45rem .7rem;
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  border: 1px solid var(--border); padding: var(--sp-3) var(--sp-4);
+  font-size: var(--ts-body);
   min-width: 16rem;
 }
 .tdb-search input:focus-visible { outline: 2px solid var(--foreground); outline-offset: -1px; }
 
 .tdb-badge {
-  display: inline-block; font-size: .68rem; letter-spacing: .06em;
-  text-transform: uppercase; padding: .1rem .4rem; border: 1px solid var(--border);
+  display: inline-block; font-size: var(--ts-micro); letter-spacing: var(--tr-micro);
+  text-transform: uppercase; padding: var(--sp-1) var(--sp-3); border: 1px solid var(--border);
   color: var(--muted-foreground);
 }
 .tdb-badge[data-official="true"] { color: var(--foreground); border-color: currentColor; }
 /* the badge says WHAT; this says where to find out why. It replaced a
    title= tooltip, which does not exist on a touch device. */
 .tdb-badge-why {
-  margin-left: .3rem; font-size: .68rem; color: var(--muted-foreground);
+  margin-left: var(--sp-2); font-size: var(--ts-micro); color: var(--muted-foreground);
   text-decoration: underline; text-underline-offset: 2px;
 }
 .tdb-badge-why:hover { color: var(--foreground); }
-.tdb-count-sep { margin: 0 .5rem; color: var(--border); }
+/* This was `color: var(--border)` -- 1.23:1 on paper, 1.66:1 in the dark, by
+   a factor of three the worst ratio in the file. A border token is tuned to
+   disappear; a separator between two counts is read. */
+.tdb-count-sep { margin: 0 var(--sp-3); color: var(--muted-foreground); }
 
 /* --- the closing notes: short lines, not an essay ------------------------ */
 /* The foot carries data-tdb-integrity so the marker stays semantic, but the
    coral callout chrome belongs to the home page's integrity panel; on a table
-   foot it added a ring, a gradient wedge and the body font, breaking the mono
-   register the reference uses for exactly these lines. */
+   foot it added a ring and a gradient wedge over lines that are already the
+   quietest thing on the page. */
 .tdb-foot[data-tdb-integrity] {
   border: 0 !important; border-radius: 0 !important; padding: 0 !important;
   background: none !important; box-shadow: none !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  line-height: 1.6;
+  line-height: var(--lh-prose);
 }
 .tdb-foot[data-tdb-integrity]::before { content: none; }
 .tdb-foot[data-tdb-integrity] > :first-child { padding-left: 0; }
+/* Eight paragraphs of the most important prose on the site sat at --ts-micro
+   with `margin: var(--sp-1) 0` -- 1.59px between paragraphs on a 20.8px line
+   box. They are footnotes by position, not by importance: --ts-body, and the
+   paragraph margin deleted outright so the site-wide rhythm at the bottom of
+   this file reaches them. Do not re-declare a margin here; a `.tdb-foot p`
+   rule scores (0,1,1) and would shadow it again. */
 .tdb-foot {
-  margin-top: 1rem; color: var(--muted-foreground);
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .75rem;
+  margin-top: var(--sp-6); color: var(--muted-foreground);
+  font-size: var(--ts-body);
 }
-.tdb-foot p { margin: .2rem 0; }
 .tdb-foot a { text-decoration: underline; text-underline-offset: 2px; }
-.tdb-foot-count { margin-top: .6rem !important; }
+.tdb-foot-count { margin-top: var(--sp-6) !important; }
 
 /* --- sortable column headers -------------------------------------------- */
 .tdb-sort {
   appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
-  color: var(--muted-foreground); font: inherit; font-size: .78rem;
-  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted-foreground); font: inherit; font-size: var(--ts-body);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
 }
 .tdb-sort { display: inline-block; }
 .tdb-sort:hover { color: var(--foreground); }
@@ -1008,18 +1259,18 @@ figure.shiki .line {
 .tdb-sort[data-static="true"]:hover { color: var(--muted-foreground); }
 
 /* --- a claim and its consequence, without six cards around them ---------- */
-.tdb-limits { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1.25rem; }
+.tdb-limits { display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-2) var(--sp-6); }
 .tdb-limits dt { color: var(--foreground); }
 .tdb-limits dd { margin: 0; color: var(--muted-foreground); }
 @media (max-width: 40rem) {
-  .tdb-limits { grid-template-columns: 1fr; gap: .1rem; }
-  .tdb-limits dd { margin-bottom: .6rem; }
+  .tdb-limits { grid-template-columns: 1fr; gap: var(--sp-1); }
+  .tdb-limits dd { margin-bottom: var(--sp-4); }
 }
 
 /* --- the accuracy cell: claim on top, uncertainty under it --------------- */
-.tdb-acc { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; }
-.tdb-acc strong { font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.1; }
-.tdb-acc-ci { color: var(--muted-foreground); font-size: .72rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.tdb-acc { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+.tdb-acc strong { font-weight: var(--fw-medium); font-variant-numeric: tabular-nums; line-height: var(--lh-head); }
+.tdb-acc-ci { color: var(--muted-foreground); font-size: var(--ts-micro); line-height: var(--lh-flat); font-variant-numeric: tabular-nums; }
 
 /* --- a failure to READ the data, which is not an empty result ------------ */
 .tdb-loaderr {
@@ -1044,11 +1295,11 @@ figure.shiki .line {
 /* --- the masthead: three lines and a rule ------------------------------- */
 [data-tdb-section="intro"].tdb-masthead {
   display: flex; flex-direction: column; align-items: flex-start !important;
-  gap: .5rem;
+  gap: var(--sp-3);
   min-height: 0 !important;
   max-width: none !important;
-  margin: 0 0 2rem !important;
-  padding: 1.5rem 0 1.75rem !important;
+  margin: 0 0 var(--sp-9) !important;
+  padding: var(--rh-block) 0 !important;
   border: 0 !important; border-bottom: 1px solid var(--td-line, var(--border)) !important;
   border-radius: 0 !important;
   background: none !important;
@@ -1062,21 +1313,21 @@ figure.shiki .line {
 [data-tdb-section="intro"].tdb-masthead > p:first-of-type {
   display: block !important;
   color: var(--muted-foreground);
-  font-size: .78rem; letter-spacing: .04em; text-transform: uppercase;
+  font-size: var(--ts-body); letter-spacing: var(--tr-micro); text-transform: uppercase;
 }
 [data-tdb-section="intro"].tdb-masthead h1 {
   margin: 0 !important;
-  font-size: clamp(1.9rem, 4vw, 2.5rem) !important;
-  line-height: 1.05;
+  font-size: var(--ts-title) !important;
+  line-height: var(--lh-head);
 }
 [data-tdb-section="intro"].tdb-masthead h1 + p {
   margin: 0 !important; max-width: 46rem;
-  font-size: .95rem !important; line-height: 1.55;
+  font-size: var(--ts-lead) !important; line-height: var(--lh-prose);
   color: var(--muted-foreground);
 }
 .tdb-masthead-links {
-  display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: .35rem;
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-top: var(--sp-2);
+  font-size: var(--ts-body);
 }
 .tdb-masthead-links a {
   color: var(--muted-foreground);
@@ -1085,111 +1336,214 @@ figure.shiki .line {
 .tdb-masthead-links a:hover { color: var(--foreground); }
 
 /* --- a section: a small heading, a rule, then the data ------------------ */
+/* Section to section was 22.4px of padding either side of a hairline -- 45.8px
+   of measured separation -- against 1.6px between two paragraphs INSIDE a
+   section. The rule was carrying the whole job of telling one group of text
+   from another, and it still had to shout to do it. With a real paragraph
+   rhythm underneath, the section step can be what it should be: 33.6px either
+   side, 67.2px between two blocks, comfortably more than any gap within one. */
 .tdb-block {
   display: flex; flex-direction: column; width: 100%;
   align-items: stretch !important;
-  padding: 1.5rem 0 !important;
+  padding: var(--rh-block) 0 !important;
   border-top: 1px solid var(--td-line, var(--border));
 }
 .tdb-block:first-of-type { border-top: 0; }
+/* The section head used to be a baseline-aligned flex row, which put a 20px
+   h2 and its dek on the SAME line at nearly the same size -- so the page had
+   no findable skeleton: every section title read as another line of prose.
+   Block display gives the heading its own line at --ts-sec, and the dek falls
+   under it in the muted colour. */
 .tdb-block-head {
-  display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap;
-  margin-bottom: .9rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  display: block;
+  margin-bottom: var(--sp-5);
 }
 .tdb-block-head h2 {
-  margin: 0; font-size: .95rem; font-weight: 500; letter-spacing: .02em;
+  margin: 0 0 var(--sp-1) 0; font-size: var(--ts-sec);
+  line-height: var(--lh-head); font-weight: var(--fw-medium);
+  letter-spacing: var(--tr-head);
 }
 .tdb-block-head > p {
-  margin: 0; color: var(--muted-foreground); font-size: .78rem;
+  margin: 0; color: var(--muted-foreground); font-size: var(--ts-body);
 }
 .tdb-block-tools {
-  display: flex; align-items: center; gap: 1rem; margin-left: auto;
-  font-size: .8125rem;
+  display: flex; align-items: center; gap: var(--sp-6); margin-left: auto;
+  font-size: var(--ts-body);
 }
 .tdb-block-tools a { color: var(--muted-foreground); }
 .tdb-block-tools a:hover { color: var(--foreground); }
+/* The single most consistently misapplied use of --ts-micro: this is a
+   SENTENCE, on every page, carrying the qualification that the numbers above
+   it depend on -- and it was set at the smallest size and the lowest contrast
+   on the site at the same time. It reads at body size now. */
+/* The footnote is the last prose in its block, and what follows is the NEXT
+   block's first line -- a different parent, so no `p + p` sibling rule can
+   reach across. On /leaderboard/ that put the command note 6.5px (0.25 of a
+   line) from "Showing N entries", the tightest prose gap left on the site.
+   A trailing margin is the only selector-independent way to separate them. */
 .tdb-block-foot {
-  margin-top: .6rem; color: var(--muted-foreground);
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .75rem;
+  margin-top: var(--sp-6);
+  margin-bottom: var(--rh-para);
+  color: var(--muted-foreground);
+  font-size: var(--ts-body);
 }
+/* Prose list items were inheriting only tw.css's list spacing, stacking real
+   sentences 7.5px apart (0.29 of a line) -- tighter than the 0.63 every
+   paragraph gets, on the four guide subpages where the lists ARE the content.
+   Those sentences are prose and read on the paragraph rhythm.
+
+   Scoped to `article.prose` on purpose: the 3-6 `<li>` on every other page are
+   the breadcrumb, a horizontal flex row where a top margin is either noise or
+   a visible nudge. A bare `main li + li` loosened those too. */
+main#nd-home-layout article.prose li + li { margin-top: var(--rh-para); }
+
 .tdb-empty {
-  padding: 1rem 0; color: var(--muted-foreground);
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  padding: var(--sp-6) 0; color: var(--muted-foreground);
+  font-size: var(--ts-body);
 }
 
 /* --- status: label, value, note, one line each -------------------------- */
-.tdb-statgrid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0 2.5rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
-}
+/* The grid/columns split and the 11rem track that used to live here were
+   re-declared 90 lines further down and cancelled outright; both are folded
+   into their single surviving form (see .tdb-statgrid below). */
+/* The three column widths were measured against the system mono this file
+   used to ship. Google Sans Code runs wider per character, which wrapped
+   "latest catalogue suite" onto two lines and butted the note against its
+   value. min-content on the label keeps the row honest at any face: it takes
+   what the longest label needs and no more, instead of a fixed guess. */
+/* The two minmax FLOORS summed to 19rem and do not shrink, while the
+   max-content label track grows with the face. At 15px that overflowed the
+   1024px two-column layout. The floors drop to 16rem -- they only exist to
+   stop a one-word label collapsing the column -- and the column-count
+   breakpoint below moves up to 1100px, which is where two 19rem-plus tracks
+   stop fitting side by side at the new size. */
 .tdb-statrow {
-  display: grid; grid-template-columns: 11rem auto 1fr;
-  align-items: baseline; gap: .9rem;
-  padding: .42rem 0;
+  display: grid;
+  /* The note column had only `minmax(0, 1fr)` against two `max-content`
+     columns, so a long value ("hard 37 · medium 13") starved it and the note
+     wrapped one word per line down ten lines. The note needs a floor; when
+     the row cannot afford it the whole row wraps instead (below). */
+  grid-template-columns: minmax(9rem, max-content) minmax(7rem, max-content) minmax(14rem, 1fr);
+  align-items: baseline; gap: var(--sp-5);
+  padding: var(--sp-2) 0;
   border-bottom: 1px dotted color-mix(in srgb, var(--border) 80%, transparent);
-  font-size: .8125rem;
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
 }
 .tdb-statrow-k { color: var(--muted-foreground); }
 .tdb-statrow-v {
-  margin: 0; font-weight: 500; font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  margin: 0; font-weight: var(--fw-medium); font-variant-numeric: tabular-nums;
+  /* Was `nowrap`. A composed value ("hard 37 · medium 13") then overflowed its
+     grid track and printed ON TOP of the note in the next column. `nowrap`
+     also silently disables overflow-wrap, so the later `anywhere` rule could
+     not save it -- the two have to agree here, not fight in two places. */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
+/* The note was right-aligned against a 1fr column, so "published task list"
+   broke after two words while empty space sat to its left. */
+/* A bare `1fr` floors at min-content, and this column's min-content is
+   "score_accepted=true" -- one unbreakable token that pushed the row, and the
+   whole page with it, 97px off the right edge at 768px. minmax(0, 1fr) lets
+   the track shrink; overflow-wrap lets the token follow it. */
 .tdb-statrow-n {
-  color: var(--muted-foreground); font-size: .72rem; text-align: right;
+  color: var(--muted-foreground); font-size: var(--ts-micro);
+  text-align: left; white-space: normal; overflow-wrap: anywhere;
 }
-@media (max-width: 900px) {
-  .tdb-statgrid { grid-template-columns: 1fr; }
+@media (max-width: 1100px) {
+  .tdb-statgrid { column-count: 1; }
 }
 @media (max-width: 520px) {
-  .tdb-statrow { grid-template-columns: 1fr auto; gap: .5rem; }
+  .tdb-statrow { grid-template-columns: 1fr auto; gap: var(--sp-3); }
   .tdb-statrow-n { grid-column: 1 / -1; text-align: left; }
 }
 
 /* --- integrity: the same weight as everything else ---------------------- */
 .tdb-integrity[data-tdb-integrity] {
-  margin-top: 1.25rem;
+  margin-top: var(--sp-6);
   border: 0 !important; border-left: 2px solid var(--td-coral, var(--border)) !important;
   border-radius: 0 !important;
-  padding: .1rem 0 .1rem 1rem !important;
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-6) !important;
   background: none !important;
   box-shadow: none !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .8125rem; line-height: 1.6;
+  font-size: var(--ts-body); line-height: var(--lh-prose);
 }
 .tdb-integrity[data-tdb-integrity]::before { content: none !important; }
 .tdb-integrity[data-tdb-integrity] > :first-child { padding-left: 0 !important; }
-.tdb-integrity p { margin: .35rem 0; }
+/* `.tdb-integrity p { margin: var(--sp-2) 0 }` used to live here: 4px between
+   caveats that a reader has to be able to tell apart. Deleted rather than
+   re-valued, so the one site-wide paragraph rhythm reaches this block too. */
 .tdb-integrity summary {
   cursor: pointer; color: var(--muted-foreground);
-  width: fit-content; margin: .5rem 0;
+  width: fit-content; margin: var(--rh-para) 0;
 }
 .tdb-integrity summary:hover { color: var(--foreground); }
 .tdb-integrity details[data-tdb-integrity-details] {
   border: 0 !important; padding: 0 !important; margin: 0 !important;
 }
 .tdb-integrity-body {
-  margin: .35rem 0 .6rem; padding-left: .9rem;
+  margin: var(--rh-para) 0 var(--sp-6); padding-left: var(--sp-5);
   border-left: 1px solid var(--border);
   color: var(--muted-foreground);
 }
 .tdb-integrity a { text-decoration: underline; text-underline-offset: 2px; }
 
 /* --- tables on the home page: rules, not a surface ---------------------- */
-.tdb-plain-table { width: 100%; overflow-x: auto; }
+/* The reference the other three row heights are matched to. It was
+   13px x 1.6 + 2 x 6.4px + 1px of rule = 34.6px; it is now
+   15px x 1.7 + 2 x 4px + 1px = 34.5px, and [data-slot="table-cell"],
+   .tdb-statrow and a generated task-page row still measure the same. */
+/* The plain variant shipped with NO background and NO border -- on the home
+   page and /benchmarks/ the table WAS the page, and a reader could not see
+   where it began. It gets the same surface as the panel variant. */
+.tdb-plain-table {
+  width: 100%; overflow-x: auto;
+  border: 1px solid var(--td-line-strong);
+  border-radius: 0;
+  background: var(--td-table-surface);
+}
+/* A scroll container only protects the page if it can actually shrink: inside
+   a grid or flex parent its automatic minimum size is its CONTENT width, so a
+   976px table pushed the page to 472px at a 390px viewport even though the
+   wrapper said overflow-x:auto. min-width:0 is what lets it shrink and scroll.
+   Prose tables have no wrapper at all, so they become their own. */
+.tdb-plain-table,
+[data-slot="table-container"] { max-width: 100%; min-width: 0; }
+
+main#nd-home-layout article.prose table {
+  display: block; max-width: 100%; overflow-x: auto;
+  border: 1px solid var(--td-line-strong);
+  border-radius: 0;
+  background: var(--td-table-surface);
+}
+main#nd-home-layout article.prose thead { background: var(--td-table-head); }
+
+/* Catch-all. Tables live under at least four different wrappers here (plain,
+   panel, prose, and a bare .bg-card), and chasing wrappers one at a time is
+   how three of them ended up invisible. The surface goes on the TABLE, so a
+   table always reads as a table; wrappers only add the border and radius. */
+main#nd-home-layout table { background: var(--td-table-surface); }
+main#nd-home-layout thead { background: var(--td-table-head); }
+
+body.tdb-generated-page figure.shiki,
+body.tdb-generated-page pre { min-width: 0; max-width: 100%; }
+
+.tdb-plain-table th:first-child,
+.tdb-plain-table td:first-child { padding-left: var(--sp-5) !important; }
+.tdb-plain-table th:last-child,
+.tdb-plain-table td:last-child  { padding-right: var(--sp-5) !important; }
 .tdb-plain-table table { width: 100%; border-collapse: collapse; }
 .tdb-plain-table th,
 .tdb-plain-table td {
-  padding: .5rem .9rem .5rem 0 !important;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: .8125rem !important;
+  padding: var(--sp-4) var(--sp-5) var(--sp-4) 0 !important;
+  font-size: var(--ts-body) !important;
+  line-height: var(--lh-prose);
   white-space: nowrap;
 }
 .tdb-plain-table thead th {
-  border-bottom: 1px solid var(--border);
-  color: var(--muted-foreground); font-weight: 400;
-  font-size: .72rem !important; letter-spacing: .05em; text-transform: uppercase;
+  border-bottom: 1px solid var(--td-line-strong);
+  color: var(--muted-foreground); font-weight: var(--fw-normal);
+  font-size: var(--ts-micro) !important; letter-spacing: var(--tr-micro); text-transform: uppercase;
 }
 .tdb-plain-table tbody tr { border-bottom: 1px dotted color-mix(in srgb, var(--border) 80%, transparent); }
 .tdb-plain-table tbody tr:hover { background: color-mix(in srgb, var(--muted) 45%, transparent); }
@@ -1208,24 +1562,18 @@ figure.shiki .line {
 .tdb-statrow .tdb-statrow-v[data-tdb-stat-value] {
   margin: 0 !important;
   color: inherit !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .8125rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
+  font-size: var(--ts-body) !important;
+  font-weight: var(--fw-semi) !important;
+  letter-spacing: var(--tr-body) !important;
 }
-
-/* The note was right-aligned against a 1fr column, so "published task list"
-   broke after two words while empty space sat to its left. */
-.tdb-statrow { grid-template-columns: 10.5rem 8.5rem 1fr; }
-.tdb-statrow-n { text-align: left; white-space: normal; }
 
 /* Sections carried clamp(2.5rem, 7vw, 5.5rem) of block padding each, which is
    most of a screen of nothing between four groups of text. */
 [data-tdb-section].tdb-block {
-  padding-block: 1.4rem !important;
+  padding-block: var(--rh-block) !important;
 }
 [data-tdb-section].tdb-masthead {
-  padding-block: 1.25rem 1.5rem !important;
+  padding-block: var(--sp-6) var(--rh-block) !important;
 }
 
 /* The generic section-heading rule turns the first <p> of a section into a
@@ -1233,22 +1581,25 @@ figure.shiki .line {
 .tdb-block .tdb-block-head > p,
 .tdb-block .tdb-block-head > h2 {
   padding-left: 0 !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-weight: 500 !important;
-  letter-spacing: .02em !important;
+  font-weight: var(--fw-medium) !important;
 }
-.tdb-block .tdb-block-head > h2 { font-size: .95rem !important; }
-.tdb-block .tdb-block-head > p { font-size: .78rem !important; }
+/* Was `font-size: var(--ts-lead) !important` with micro tracking -- the rule
+   that flattened every section title to dek size. The heading keeps its own
+   step now; only the bullet suppression below is still needed. */
+.tdb-block .tdb-block-head > h2 {
+  font-size: var(--ts-sec) !important;
+  letter-spacing: var(--tr-head) !important;
+  margin-top: 0 !important;
+}
+.tdb-block .tdb-block-head > p { letter-spacing: var(--tr-micro) !important; }
+.tdb-block .tdb-block-head > p { font-size: var(--ts-body) !important; }
 .tdb-block .tdb-block-head > h2::before,
 .tdb-block .tdb-block-head > p::before { content: none !important; }
 
-/* Two washes of colour behind a page of numbers. Keep one, faint, at the top
-   so the shell still reads as this site and not as a bare document. */
-body {
-  background:
-    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--td-sun) 16%, transparent) 0 8rem, transparent 26rem),
-    var(--background) !important;
-}
+/* Both colour washes are gone with the move to a white ground. A tint at the
+   top of a white page reads as a rendering artefact, not as identity, and the
+   identity now lives in the type, the square geometry and the data surfaces. */
+body { background: var(--background) !important; }
 
 /* --- flatten the two remaining floating boxes --------------------------- */
 
@@ -1270,10 +1621,15 @@ body {
 #nd-nav > div:first-child > * { max-width: 76rem; margin-inline: auto; width: 100%; }
 
 /* Same for the canary strip at the bottom. */
+/* The canary note is the last text on the site outside the three-step
+   line-height ladder: it carries Tailwind's .text-xs, whose paired 1.333
+   ratio the normaliser does not reach inside the footer shell. */
+#tdb-footer p[class] { line-height: var(--lh-prose) !important; }
+
 .tdb-footer-inner {
   border: 0 !important; border-top: 1px solid var(--td-line, var(--border)) !important;
   border-radius: 0 !important;
-  padding: .9rem 0 !important;
+  padding: var(--sp-5) 0 !important;
   background: none !important;
 }
 
@@ -1282,52 +1638,78 @@ body {
    ("SUCCESS + score_accepted=true only") stretched the row beside it to match.
    Columns instead: each row is as tall as its own content. */
 .tdb-statgrid {
-  display: block; column-count: 2; column-gap: 3rem;
+  display: block; column-count: 2; column-gap: var(--sp-8);
 }
 .tdb-statrow { break-inside: avoid; }
-@media (max-width: 900px) {
-  .tdb-statgrid { column-count: 1; }
+
+/* Two statrow columns side by side leave each row ~600px at 1440. If the note
+   floor cannot be met, drop the note onto its own line under the label+value
+   pair rather than shredding it into one-word lines. */
+@media (max-width: 1200px) {
+  /* `max-content` on the label column cannot wrap, so at 390px this row
+     demanded 456px inside a 343px column and pushed the whole PAGE to 472px.
+     The overflow read as a table bug; it was this. Both columns must be able
+     to shrink, and below 640px the row stacks outright. */
+  .tdb-statrow { grid-template-columns: minmax(0, auto) minmax(0, 1fr); }
+  .tdb-statrow > :nth-child(3) { grid-column: 1 / -1; }
 }
+@media (max-width: 639px) {
+  .tdb-statrow { grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
+  .tdb-statrow > * { grid-column: 1 / -1; }
+}
+
+/* Three separate things still pushed the page wider than the viewport at
+   390px, none of them tables: a stat VALUE that could not wrap ("hard 37 ·
+   medium 13" wanted 182px in a 140px column), the block tool rail that had no
+   flex-wrap, and a guide heading containing an unbreakable identifier. */
+.tdb-statrow-v { overflow-wrap: anywhere; }
+.tdb-block-tools { flex-wrap: wrap; }
+main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere; }
 
 /* --- the last of the panels --------------------------------------------- */
 
 /* The header no longer floats 0.75rem off the top, so 6rem of clearance under
-   it is 4rem of nothing. */
-main#nd-home-layout { padding-top: 4rem; }
-main#nd-home-layout > div:first-child { padding-top: .5rem !important; }
+   it is 4rem of nothing. This is the only main padding-top in the file. */
+main#nd-home-layout { padding-top: var(--chrome-h); }
+main#nd-home-layout > div:first-child { padding-top: var(--sp-3) !important; }
 
 /* A table-container is a rounded, shadowed, tinted panel. Under a leaderboard
    that is a surface competing with its own contents: the tasks table two
    sections down carries the same information with rules alone and reads
    better. Rules on the home page; the panel stays elsewhere. */
+/* An element carrying BOTH wrapper classes used to have its panel stripped so
+   the two treatments would not double up. Now that both resolve to the same
+   surface there is nothing to double, and stripping it left one home-page
+   table sitting bare on the page. Declare the shared treatment once. */
 .tdb-plain-table[data-slot="table-container"] {
-  border: 0 !important; border-radius: 0 !important;
-  background: none !important; box-shadow: none !important;
+  border: 1px solid var(--td-line-strong) !important;
+  border-radius: 0 !important;
+  background: var(--td-table-surface) !important;
+  box-shadow: none !important;
 }
 .tdb-plain-table[data-slot="table-container"] table {
   border-collapse: collapse !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
 }
 
 /* --- the suite switcher: one line of links ------------------------------ */
 .tdb-suiterail {
-  display: flex; align-items: baseline; flex-wrap: wrap; gap: .35rem 1.1rem;
-  padding: .6rem 0; margin-bottom: 1rem;
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-2) var(--sp-6);
+  padding: var(--sp-4) 0; margin-bottom: var(--sp-6);
   border-bottom: 1px solid var(--td-line, var(--border));
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  font-size: var(--ts-body);
 }
 .tdb-suiterail-k {
-  color: var(--muted-foreground); font-size: .72rem;
-  letter-spacing: .05em; text-transform: uppercase; margin-right: .2rem;
+  color: var(--muted-foreground); font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase; margin-right: var(--sp-1);
 }
 .tdb-suitelink { color: var(--muted-foreground); }
 a.tdb-suitelink { text-decoration: underline; text-underline-offset: 3px; }
 a.tdb-suitelink:hover { color: var(--foreground); }
-.tdb-suitelink[data-active="true"] { color: var(--foreground); font-weight: 600; }
+.tdb-suitelink[data-active="true"] { color: var(--foreground); font-weight: var(--fw-semi); }
 
 /* --- the plain table, used on any page that lists things ---------------- */
 .tdb-plain-table td.tdb-num,
-.tdb-plain-table th.tdb-num { text-align: right; padding-right: 1.4rem !important; }
+.tdb-plain-table th.tdb-num { text-align: right; padding-right: var(--sp-7) !important; }
 .tdb-plain-table .tdb-muted { color: var(--muted-foreground); }
 .tdb-plain-table .tdb-wrap {
   white-space: normal !important; max-width: 40rem; color: var(--muted-foreground);
@@ -1337,18 +1719,25 @@ a.tdb-suitelink:hover { color: var(--foreground); }
 /* The integrity callout appears on several pages; the coral ring, the gradient
    wedge and the 2rem radius were the "floating rectangle" objection. Keep the
    colour as a rule down the left edge -- it still marks the block as the one
-   that qualifies everything above it. */
+   that qualifies everything above it. This is the single declaration of the
+   block's chrome; the rule near the top of the file no longer duplicates it. */
 [data-tdb-integrity] {
   border: 0 !important; border-left: 2px solid var(--td-coral, var(--border)) !important;
   border-radius: 0 !important;
-  padding: .1rem 0 .1rem 1rem !important;
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-6) !important;
   background: none !important;
   box-shadow: none !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .8125rem; line-height: 1.65;
+  font-size: var(--ts-body); line-height: var(--lh-prose);
 }
 [data-tdb-integrity]::before { content: none !important; }
 [data-tdb-integrity] > :first-child { padding-left: 0 !important; }
+
+/* Prose in the integrity block had no measure at all, so at 13px in a 76rem
+   canary host a caveat ran to about 155 characters a line. 46rem was the
+   first fix and it was still 94 characters -- its own legibility defect,
+   independent of size and of colour. At 15px, 40rem is 68 characters, inside
+   the 45-75 range. The data around it keeps the full width. */
+[data-tdb-integrity] p { max-width: 40rem; }
 
 /* --- one type scale for the whole site ---------------------------------- */
 /* Page titles ran to clamp(2.4rem, 6vw, 3.6rem) and section headings to 2rem
@@ -1357,11 +1746,23 @@ a.tdb-suitelink:hover { color: var(--foreground); }
    different document. */
 main#nd-home-layout h1,
 .tdb-page-title {
-  font-size: clamp(1.6rem, 3.2vw, 2.1rem) !important;
-  line-height: 1.1 !important;
-  letter-spacing: -0.02em;
+  font-size: var(--ts-title) !important;
+  line-height: var(--lh-head) !important;
+  letter-spacing: var(--tr-head);
 }
-.tdb-page-lede { font-size: .9rem !important; line-height: 1.6 !important; }
+/* h2 and h3 are steps BELOW the title, which is the whole fix: the old rule
+   sized every bare heading at up to 76.8px under a 33.6px h1. */
+main#nd-home-layout h2 {
+  font-size: var(--ts-sub); line-height: var(--lh-head);
+  letter-spacing: var(--tr-head); font-weight: var(--fw-medium);
+  margin-top: var(--sp-8);
+}
+main#nd-home-layout h3 {
+  font-size: var(--ts-lead); line-height: var(--lh-head);
+  letter-spacing: var(--tr-head); font-weight: var(--fw-medium);
+  margin-top: var(--sp-7);
+}
+.tdb-page-lede { font-size: var(--ts-lead) !important; line-height: var(--lh-prose) !important; }
 
 /* The generic "first <p> of a section is a big display title with a bullet"
    rule fired on every section head, including inside the integrity block. */
@@ -1369,10 +1770,9 @@ section > .mb-4:first-child > p:first-child,
 section > .mb-4:first-child > div > p:first-child,
 [data-tdb-integrity] .mb-4:first-child > p:first-child {
   padding-left: 0 !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .95rem !important;
-  font-weight: 500 !important;
-  letter-spacing: .02em !important;
+  font-size: var(--ts-lead) !important;
+  font-weight: var(--fw-medium) !important;
+  letter-spacing: var(--tr-micro) !important;
 }
 section > .mb-4:first-child > p:first-child::before,
 section > .mb-4:first-child > div > p:first-child::before,
@@ -1387,18 +1787,22 @@ section > .mb-4:first-child > div > p:first-child::before,
 
 /* --- generated pages: the same flat treatment --------------------------- */
 .tdb-navrow {
-  display: flex; flex-wrap: wrap; gap: .35rem 1.25rem;
-  padding: .55rem 0; border-bottom: 1px solid var(--td-line, var(--border));
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: .8125rem;
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-6);
+  padding: var(--sp-3) 0; border-bottom: 1px solid var(--td-line, var(--border));
+  font-size: var(--ts-body);
 }
 .tdb-navlink { color: var(--muted-foreground); text-decoration: underline; text-underline-offset: 3px; }
 .tdb-navlink:hover { color: var(--foreground); }
-.tdb-navlink[data-primary="true"] { color: var(--foreground); font-weight: 600; }
+.tdb-navlink[data-primary="true"] { color: var(--foreground); font-weight: var(--fw-semi); }
 
 /* The task/suite pages wrap every block -- the fact table, the instruction,
    the test list -- in its own rounded, shadowed, tinted panel. Four stacked
    panels are four rectangles; the content is a table, a paragraph and a list. */
-body.tdb-generated-page [data-slot="table-container"],
+/* The 65 generated task pages used to strip the table panel back to a bare
+   top rule -- so a table there was indistinguishable from the page, the exact
+   complaint that prompted this pass. They now carry the same surface as every
+   other table; only the card/shell wrappers stay flat, because on these pages
+   the panel and the card would otherwise nest two surfaces deep. */
 body.tdb-generated-page .bg-card,
 body.tdb-generated-page .tdb-table-shell {
   border: 0 !important;
@@ -1406,36 +1810,40 @@ body.tdb-generated-page .tdb-table-shell {
   background: none !important;
   box-shadow: none !important;
 }
-body.tdb-generated-page [data-slot="table-container"] { border-top: 1px solid var(--border) !important; }
+body.tdb-generated-page [data-slot="table-container"] {
+  border: 1px solid var(--td-line-strong) !important;
+  border-radius: 0 !important;
+  background: var(--td-table-surface) !important;
+  box-shadow: var(--td-shadow-small) !important;
+}
 body.tdb-generated-page [data-slot="table-container"] table { border-collapse: collapse !important; }
 body.tdb-generated-page [data-slot="table-container"] th,
 body.tdb-generated-page [data-slot="table-container"] td {
   border-bottom: 1px dotted color-mix(in srgb, var(--border) 80%, transparent) !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .8125rem !important;
+  font-size: var(--ts-body) !important;
+  line-height: var(--lh-prose) !important;
 }
 /* the badge pills under a task title */
 body.tdb-generated-page [data-slot="badge"] {
   border: 0 !important; border-radius: 0 !important; background: none !important;
-  padding: 0 !important; margin-right: .9rem;
+  padding: 0 !important; margin-right: var(--sp-5);
   color: var(--muted-foreground) !important;
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .72rem !important; letter-spacing: .05em;
+  font-size: var(--ts-micro) !important; letter-spacing: var(--tr-micro);
 }
 
 /* Generated pages stacked sections at py-12 sm:pb-16 -- 6rem of nothing
    between a table and the paragraph under it, repeated four times down a
    page whose whole point is to be read quickly. */
 body.tdb-generated-page .tdb-content-section {
-  padding-top: 1.4rem !important;
-  padding-bottom: 1.4rem !important;
+  padding-top: var(--rh-block) !important;
+  padding-bottom: var(--rh-block) !important;
   border-top: 1px solid var(--td-line, var(--border));
 }
 body.tdb-generated-page .tdb-content-section:first-of-type { border-top: 0; }
-body.tdb-generated-page [data-tdb-section] { padding-block: 1.4rem !important; }
+body.tdb-generated-page [data-tdb-section] { padding-block: var(--rh-block) !important; }
 /* section heads on generated pages: same size as everything else */
 body.tdb-generated-page .tdb-section-head p:first-child {
-  font-size: .95rem !important;
+  font-size: var(--ts-lead) !important;
 }
 
 /* --- no cards anywhere -------------------------------------------------- */
@@ -1449,25 +1857,715 @@ body.tdb-generated-page .tdb-section-head p:first-child {
   border-radius: 0 !important;
   background: none !important;
   box-shadow: none !important;
-  padding: .5rem 0 !important;
-  gap: .25rem !important;
+  padding: var(--sp-3) 0 !important;
+  gap: var(--sp-2) !important;
 }
 [data-slot="card"] > *,
 [data-slot="card-header"],
 [data-slot="card-content"] {
   padding-left: 0 !important; padding-right: 0 !important;
   padding-top: 0 !important; padding-bottom: 0 !important;
-  gap: .25rem !important;
+  gap: var(--sp-2) !important;
 }
 [data-slot="card"] [data-tdb-stat-value] {
-  font-family: var(--font-mono, ui-monospace, monospace) !important;
-  font-size: .95rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
-  margin-top: .1rem !important;
+  font-size: var(--ts-lead) !important;
+  font-weight: var(--fw-semi) !important;
+  letter-spacing: var(--tr-body) !important;
+  margin-top: var(--sp-1) !important;
 }
 
 /* The 0.32rem colour stripe on top of every card, cycling coral/blue/green/
    violet by nth-child. With the card gone it is a rainbow of rules across a
    page of numbers, and the colour never meant anything -- it was position. */
 [data-slot="card"]::before { content: none !important; }
+
+/* ==========================================================================
+   Tailwind size utilities, normalised onto the five-step scale.
+
+   The four hand-written pages were never converted to the block system and
+   still carry ~1400 text-base, ~900 text-sm and ~380 text-xs. Deleting the
+   old element-scoped .font-mono reversion rule removed the only rule that
+   reached a <p class="font-mono text-sm/relaxed">, which would then
+   render at 14px -- a sixth size introduced by subtraction. This maps every
+   size utility the site actually uses onto a step, and -- since every one of
+   those utilities declares font-size AND a paired line-height -- the matching
+   step of the three-value line-height scale, so a normalised 11.5px label
+   cannot sit on a 1.333 row beside a component-styled one on 1.6. It is
+   scoped to element names, so it cannot reach pre, code, figure.shiki or a
+   16px inherited down from <article class="prose">; those are reclaimed by
+   their own rules below. `table` is in the list because a bare `text-sm` on
+   the table element leaks 14px down the whole subtree by inheritance, which
+   no cell-level rule can reclaim; `nav`, `ol` and `ul` are there for the same
+   reason -- the guide breadcrumb is a <nav class="... text-xs"> whose <a> and
+   <span> children carry no size class of their own.
+   ========================================================================== */
+
+main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-base,
+main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-base\/relaxed,
+main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-sm,
+main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-sm\/relaxed { font-size: var(--ts-body) !important; line-height: var(--lh-prose) !important; }
+main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-xs          { font-size: var(--ts-micro) !important; line-height: var(--lh-prose) !important; }
+/* Code blocks are the last holdout: a bare `text-sm` renders 14px against a
+   13px body. With one family site-wide that 1px reads as an accident rather
+   than a distinction, so a shipped command snaps onto --ts-body like every
+   other line of the page. Kept as its own rule because it is the one place
+   the element-name scoping above is deliberately relaxed. */
+main#nd-home-layout :is(pre, code):is(.text-sm, .text-sm\/relaxed),
+main#nd-home-layout figure.shiki,
+main#nd-home-layout figure.shiki :is(pre, code)                              { font-size: var(--ts-body) !important; line-height: var(--lh-prose) !important; }
+main#nd-home-layout :is(h1, h2, h3, p, span, div).text-xl                    { font-size: var(--ts-lead) !important; line-height: var(--lh-head) !important; }
+main#nd-home-layout :is(h1, h2, h3, p).text-3xl\/tight,
+main#nd-home-layout :is(h1, h2).text-3xl,
+main#nd-home-layout :is(h1, h2).text-4xl                                     { font-size: var(--ts-title) !important; line-height: var(--lh-head) !important; }
+
+@media (min-width: 40rem) {
+  main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).sm\:text-base,
+  main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).sm\:text-sm  { font-size: var(--ts-body) !important; line-height: var(--lh-prose) !important; }
+  main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).sm\:text-xs  { font-size: var(--ts-micro) !important; line-height: var(--lh-prose) !important; }
+  main#nd-home-layout :is(h1, h2, h3, p, span, div).sm\:text-xl\/relaxed   { font-size: var(--ts-lead) !important; line-height: var(--lh-head) !important; }
+  main#nd-home-layout :is(h1, h2).sm\:text-6xl\/tight                      { font-size: var(--ts-title) !important; line-height: var(--lh-head) !important; }
+}
+
+/* The normaliser above scores (1,1,2), which outranks a bare attribute
+   selector, so the two components whose step is deliberately SMALLER than
+   their own utility class says have to reclaim it at HIGHER specificity --
+   not equal, because a tie would be decided by source order and the next
+   person to append a rule would silently flip it. Without this a table head
+   reads 13px because its class list says text-base, and a badge reads 13px
+   because its class list says text-sm; both are micro-labels.
+   `[class]` is what buys the extra point: every one of these carries one. */
+main#nd-home-layout table th[data-slot="table-head"],
+main#nd-home-layout [data-slot="badge"][class],
+main#nd-home-layout .tdb-plain-table thead th { font-size: var(--ts-micro) !important; }
+
+/* Same collision, same idiom. The generated pages emit
+   class="tdb-page-lede text-muted-foreground mb-6 text-sm", so the normaliser
+   beat the component and the one-sentence summary under the page title
+   rendered at body size on every generated page while the hand-written pages
+   kept --ts-lead -- the same named component at two sizes, and a scale step
+   that existed on 11 pages and not on the other 65. `[class]` buys the extra
+   point: (1,2,1) wins on the class column rather than on source order. */
+main#nd-home-layout .tdb-page-lede[class] { font-size: var(--ts-lead) !important; }
+
+/* The normaliser now sets line-height as well as font-size, so a DELIBERATE
+   leading has to be reclaimed the same way -- otherwise the flat sub-line
+   under each accuracy figure (`text-xs leading-none`) would open to 1.6 and
+   the figure would grow a row of air it was written not to have. This is the
+   only leading-* utility the site uses; it is already exactly --lh-flat, so
+   the rule changes nothing today and keeps it true tomorrow. */
+main#nd-home-layout [class][class*="leading-none"] { line-height: var(--lh-flat) !important; }
+
+/* The four guide subpages wrap their whole body in <article class="prose">.
+   tw.css's `.prose` sets font-size:1rem/line-height:1.75rem at (0,1,0) and the
+   element-scoped normaliser above cannot reach it, because the elements that
+   render 16px carry no class at all -- the size arrives by INHERITANCE from
+   the article. (1,1,1) settles that without !important, so the h1/.tdb-page-title
+   and .text-* rules still win where they should.
+   The descendant rule is not optional: tw.css also sizes `.prose :where(table)`
+   and `:where(figcaption)` at .875em, so reclaiming only the article would drop
+   the bare tables inside these pages to 11.375px -- trading one off-scale leak
+   for another. Headings keep their own step from `main#nd-home-layout h2/h3`;
+   their inline <code> is pulled back to the heading's size, because with one
+   family site-wide `.prose`'s .875em/.9em reads as a mis-set line, not as code. */
+main#nd-home-layout article.prose {
+  font-size: var(--ts-body); line-height: var(--lh-prose);
+}
+main#nd-home-layout article.prose :is(table, td, th, figcaption) {
+  font-size: var(--ts-body); line-height: var(--lh-prose);
+}
+main#nd-home-layout article.prose :is(h1, h2, h3) code { font-size: inherit; }
+
+/* ==========================================================================
+   The discrimination report on /quality/ -- instrument masthead, item strip,
+   interval figure. Colour in this block is reserved entirely for data: one
+   hue in three steps, one neutral floor, one hollow absence.
+   ========================================================================== */
+
+/* -- the instrument masthead: what produced the numbers below ------------- */
+/* Every fixed rem track in this block was cut against 13px body / 11.5px
+   labels. Google Sans Code advances at exactly 0.6em, so a track holds
+   track/0.6em characters and each one lost 13% of its capacity when the
+   ladder moved up. The three that were already flush are re-cut here; they
+   are the only fixed tracks on the site, and each is mirrored by a margin or
+   an axis that has to move with it. */
+.tdb-instrument {
+  display: grid; grid-template-columns: 8.5rem 1fr;
+  gap: var(--sp-1) var(--sp-5);
+  margin-block: var(--sp-4) var(--sp-7);
+  padding-block: var(--sp-3);
+  border-block: 1px solid var(--td-line, var(--border));
+  font-size: var(--ts-body); line-height: var(--lh-prose);
+}
+.tdb-instrument dt {
+  margin: 0; color: var(--muted-foreground);
+  font-size: var(--ts-micro); letter-spacing: var(--tr-micro); text-transform: uppercase;
+}
+.tdb-instrument dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 639px) {
+  .tdb-instrument { grid-template-columns: 1fr; }
+}
+
+/* -- item strip: one square per catalogue task ---------------------------- */
+/* Row length IS n: each row's <svg> takes a percentage of a fixed cells
+   column, so every square is the same physical size in every row at every
+   viewport. Never let a row scale to its own content. */
+.tdb-strip { margin: var(--sp-5) 0 0; }
+.tdb-strip figcaption {
+  margin-bottom: var(--sp-3); color: var(--muted-foreground);
+  font-size: var(--ts-micro); letter-spacing: var(--tr-micro); text-transform: uppercase;
+}
+.tdb-strip-body { min-width: 0; }
+/* 9rem held "archive . medium" at 13px with 0.6px to spare and wrapped it at
+   15px, tripling the row height. 11rem holds 18 characters. */
+.tdb-strip-row {
+  display: grid; grid-template-columns: 11rem minmax(0, 380px) auto;
+  align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-2);
+}
+.tdb-strip-k { color: var(--muted-foreground); font-size: var(--ts-body); }
+.tdb-strip-n { color: var(--muted-foreground); font-size: var(--ts-micro); font-variant-numeric: tabular-nums; }
+.tdb-strip-cells { min-width: 0; }
+.tdb-strip svg { display: block; height: auto; }
+.tdb-strip .c-hi   { fill: var(--td-coral); }
+.tdb-strip .c-mid  { fill: color-mix(in srgb, var(--td-coral) 62%, var(--td-surface)); }
+.tdb-strip .c-lo   { fill: color-mix(in srgb, var(--td-coral) 30%, var(--td-surface)); }
+/* deliberately neutral, not the dark end of a ramp: "no model solved this"
+   is an absence of information, not a low score. */
+.tdb-strip .c-zero { fill: var(--td-cell-zero); }
+/* "never run" is a third state, not a paler second one: it stays hollow and
+   dashed so it differs in KIND from the solid floor, but the outline is drawn
+   from the text colour at 45% (2.66:1 on paper, 4.11:1 in the dark) instead of
+   a 1.59:1 border token that vanished at 8px. */
+.tdb-strip .c-none {
+  fill: none; stroke: var(--foreground); stroke-opacity: 0.45;
+  stroke-width: 1; stroke-dasharray: 2 2;
+}
+/* Two columns, placed explicitly. Auto-placement cannot produce the intended
+   "label left, count right, bar under both": .tdb-strip-cells spans 1/-1, so
+   it is pushed to row 2, the cursor ends past row 2, and .tdb-strip-n lands in
+   row 3 col 1 -- nothing ever occupies the `auto` track, which then resolves to
+   0px and the row triples in height. */
+@media (max-width: 639px) {
+  .tdb-strip-row   { grid-template-columns: 1fr auto; gap: var(--sp-2) var(--sp-4); }
+  .tdb-strip-k     { grid-column: 1; grid-row: 1; }
+  .tdb-strip-n     { grid-column: 2; grid-row: 1; text-align: right; }
+  .tdb-strip-cells { grid-column: 1 / -1; grid-row: 2; }
+}
+/* A sentence explaining what the five square colours mean. It is prose, and
+   it was the one piece of prose on the page a reader most needs to read. */
+.tdb-legend {
+  margin-top: var(--sp-5); color: var(--muted-foreground);
+  font-size: var(--ts-body); line-height: var(--lh-prose);
+}
+
+/* -- discrimination intervals: HTML + CSS, no SVG, no text in a viewBox --- */
+.tdb-ci { margin: var(--sp-5) 0 0; }
+.tdb-ci figcaption {
+  margin-bottom: var(--sp-3); color: var(--muted-foreground);
+  font-size: var(--ts-micro); letter-spacing: var(--tr-micro); text-transform: uppercase;
+}
+.tdb-ci-axis {
+  /* These two are not decoration: they are the same tracks as .tdb-ci-row's
+     first and third columns, and if they drift the tick labels stop lining up
+     with the bars they label. Change them together or not at all. */
+  position: relative; height: 1rem; margin-left: 11rem; margin-right: 8.5rem;
+  color: var(--muted-foreground); font-size: var(--ts-micro);
+}
+.tdb-ci-axis > span { position: absolute; transform: translateX(-50%); }
+.tdb-ci-body { min-width: 0; }
+/* 7rem held "12/28 . 42.9%" (13 characters) at 13px and not at 15px, which
+   wrapped every row in the figure to two lines. 8.5rem holds 14. Mirrored by
+   .tdb-ci-axis above. */
+.tdb-ci-row {
+  display: grid; grid-template-columns: 11rem 1fr 8.5rem;
+  align-items: center; gap: var(--sp-4); padding-block: var(--sp-2);
+}
+.tdb-ci-k { color: var(--muted-foreground); font-size: var(--ts-body); }
+.tdb-ci-v { font-size: var(--ts-body); font-variant-numeric: tabular-nums; text-align: right; }
+.tdb-ci-track {
+  position: relative; height: 1.1rem;
+  border-left: 1px solid var(--td-line); border-right: 1px solid var(--td-line);
+}
+/* the argument of the figure: painted only where two intervals actually
+   overlap, so the overlap is drawn rather than asserted. */
+.tdb-ci-band {
+  position: absolute; inset-block: 0;
+  background: color-mix(in srgb, var(--td-sun) 55%, transparent);
+}
+.tdb-ci-whisker {
+  position: absolute; top: 50%; height: 1px; margin-top: -0.5px;
+  background: var(--foreground);
+}
+.tdb-ci-whisker::before, .tdb-ci-whisker::after {
+  content: ""; position: absolute; top: -4px; width: 1px; height: 9px;
+  background: var(--foreground);
+}
+.tdb-ci-whisker::before { left: 0; }
+.tdb-ci-whisker::after  { right: 0; }
+.tdb-ci-dot {
+  position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  /* RADIUS EXCEPTION 2 of 2: a plotted point estimate. A 7px square dot on a
+     whisker reads as a tick mark, which is what the whisker ends already
+     are. Geometry, not chrome. */
+  border-radius: 999px; background: var(--foreground);
+}
+/* Same explicit placement as the strip, for the same reason. .tdb-ci-v also
+   gets its `text-align: right` back the moment it is in the right-hand track
+   again -- it never needed a second declaration, only a column to sit in. */
+@media (max-width: 639px) {
+  .tdb-ci-axis  { margin-inline: 0; }
+  .tdb-ci-row   { grid-template-columns: 1fr auto; gap: var(--sp-2) var(--sp-4); }
+  .tdb-ci-k     { grid-column: 1; grid-row: 1; }
+  .tdb-ci-v     { grid-column: 2; grid-row: 1; }
+  .tdb-ci-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* -- horizontal-overflow escape hatch for wide data ----------------------- */
+/* The page body must never scroll sideways; a single wide table may. */
+.tdb-scroll-x { overflow-x: auto; }
+@media (max-width: 639px) {
+  .tdb-scroll-x { margin-inline: 0; }
+}
+
+/* ==========================================================================
+   PROSE RHYTHM -- the one rule that gives a paragraph a bottom.
+
+   WHAT ZEROED THE MARGINS. Not this file, and not a `.prose-no-margin` class:
+   it is Tailwind v4's preflight, the very first thing in the vendored
+   tw.css --
+
+       @layer base { *, ::after, ::before, ::backdrop { margin: 0; padding: 0 } }
+
+   For a bare `main p` exactly two rules matched, the UA's 1em block margins
+   and that reset, and the reset won. site.css never re-established a
+   paragraph margin at all except in four component-scoped places, so the only
+   real paragraph rhythm anywhere on the site was 1.25em on the four guide
+   subpages -- and that came from tw.css's `.prose`, not from this design
+   system. 76 pages, four of them with paragraphs.
+
+   WHY THIS BEATS IT WITHOUT !important. The reset lives in @layer base.
+   site.css is UNLAYERED, and unlayered styles beat any layered rule whatever
+   their specificity. A bare element selector is enough. Do not reach for
+   !important here; if one of these rules loses, it lost to a component rule
+   in this same file, and the fix is to look at that component.
+
+   WHY ADJACENT SIBLINGS AND NOT `main p`. Most <p> on this site are the only
+   child of a <td>, a flex row or a meter -- 218 of 230 on /quality/ alone.
+   Giving every paragraph a margin would have loosened every data row on the
+   site to fix prose that only exists where two paragraphs actually stack.
+   `+` says exactly that and nothing more.
+   ========================================================================== */
+
+/* A paragraph now ends 16px above the next one, on a 25.5px line box: 0.63 of
+   a line, against the 0.076 of a line the leaderboard's closing notes had.
+   Where a Tailwind `.space-y-*` utility is already spacing the same pair, the
+   two margins collapse to the larger and this one wins; where nothing is,
+   this is the only separation there is. */
+main :is(p, ul, ol, dl, blockquote) + :is(p, ul, ol, dl, blockquote) {
+  margin-top: var(--rh-para);
+}
+
+/* A heading belongs to what comes after it. --rh-head is deliberately SMALLER
+   than --rh-para, and both are much smaller than the section step: the reader
+   should see the heading bind downwards, not float between two blocks. */
+main :is(h1, h2, h3, h4) + :is(p, ul, ol, dl, blockquote) {
+  margin-top: var(--rh-head);
+}
+
+/* The four guide subpages are wrapped in <article class="prose">, whose
+   `.prose :where(p) { margin-top: 1.25em }` scores (0,1,0) and outranks the
+   two element-only rules above. Its paragraph rhythm is already right, so it
+   is left alone; only the heading pairing is reclaimed, at (0,1,4), so a
+   heading on those pages binds downwards like every other heading. */
+main article.prose :is(h1, h2, h3, h4) + :is(p, ul, ol, blockquote) {
+  margin-top: var(--rh-head);
+}
+
+/* The exception list, and the reason the rules above can stay this short.
+   Twelve places on the site stack two <p> inside a flex or grid parent -- a
+   card's label over its value, a meter's axis name beside its numeral, a
+   section head's title beside its subtitle. In a flex column a margin-top
+   opens a gap that was never meant to be there; in a grid it shifts an item
+   inside its own cell and breaks the baseline the row is aligned on. Neither
+   is prose. (0,1,2) clears both element-only rules above, and this block sits
+   last in the file so it also wins a tie against any component rule that
+   scores the same. */
+main :is([class~="flex"], [class~="inline-flex"], [class~="grid"],
+         .tdb-block-head, .tdb-statrow, .tdb-acc, .tdb-card, .tdb-strip-row,
+         .tdb-ci-row, .tdb-limits, .tdb-instrument)
+     > :is(h1, h2, h3, h4, p, ul, ol, dl) + :is(p, ul, ol, dl, blockquote) {
+  margin-top: 0;
+}
+
+/* Small screens: the section step is 33.6px of padding on each side of a
+   hairline, which is right next to a 76rem column and is a third of a phone
+   screen next to a 22rem one. The paragraph rhythm does NOT shrink with it --
+   it is the thing the reader asked for, and it costs one line per paragraph. */
+@media (max-width: 639px) {
+  [data-tdb-section]:not([data-tdb-section="intro"]),
+  [data-tdb-section].tdb-block,
+  .tdb-block,
+  body.tdb-generated-page .tdb-content-section,
+  body.tdb-generated-page [data-tdb-section] {
+    padding-block: var(--sp-7) !important;
+  }
+
+  [data-tdb-section="intro"].tdb-masthead,
+  [data-tdb-section].tdb-masthead {
+    margin-bottom: var(--sp-8) !important;
+    padding-block: var(--sp-5) var(--sp-7) !important;
+  }
+}
+
+/* == the vendored radius ladder =============================================
+   Zeroing --radius squares tw.css's .rounded-lg, .rounded-md and .rounded-sm,
+   because all three are derived from it. Four utilities are not, and they
+   stayed round on a page that is otherwise square:
+
+     .rounded-xl    calc(var(--radius) + 4px)   ->  4px
+     .rounded-xs    var(--radius-xs)            ->  2px
+     .rounded-2xl   var(--radius-2xl)           -> 16px
+     .rounded-full  3.40282e38px                -> pill
+
+   This is not a theoretical gap. .rounded-xl is on the code figure of all 65
+   generated task pages, and .rounded-full is on the theme switch in the
+   masthead -- between them, the most-seen element on a task page and the one
+   control visible on every page of the site. A class that spells a radius is
+   also the one way a radius re-enters the site without any rule in this file
+   changing, so the three bracket utilities the build emits are named too.
+
+   These are tw.css's classes. The site's own two circles are drawn by
+   .tdb-brand-mark and .tdb-ci-dot, which are not in this list and are not
+   reached by it. */
+.rounded-xs,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-full,
+.rounded-\[2px\],
+.rounded-\[3px\],
+.rounded-\[4px\] {
+  border-radius: 0 !important;
+}
+
+/* Two more vendor radii that --radius cannot reach, because tw.css hardcodes
+   them instead of deriving them from the token: `.prose :where(code)` at 5px
+   and `:where(kbd)` at .3125rem. They are not rare -- the four guide subpages
+   render 445 inline <code> chips between them, each an opaque bordered box.
+   Squared here rather than in tw.css, which is vendored. */
+main#nd-home-layout .prose :where(code),
+main#nd-home-layout .prose :where(kbd),
+body.tdb-generated-page .prose :where(code),
+body.tdb-generated-page .prose :where(kbd) {
+  border-radius: 0 !important;
+}
+
+/* ==========================================================================
+   "on this page" -- the docs section rail, and the docs index list.
+
+   Two components, one idea: a docs page should be navigable without being
+   read. The rail is built in site.js from the article's own <h2 id>/<h3 id>
+   elements, so nothing here names a section; the index list below is the
+   same rail one level up, listing pages instead of sections.
+   ========================================================================== */
+
+/* The aside ships as `sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6
+   max-lg:hidden`, so this rule owns only what the utilities cannot express:
+   the width (13rem is 19 characters of a 16px monospace, which wraps most
+   section titles onto three lines) and the fact that a 26-entry rail is
+   taller than the window and has to scroll inside itself rather than run off
+   the bottom of a sticky column. */
+.tdb-toc {
+  width: 15rem;
+  max-height: calc(100vh - var(--fd-sidebar-top, 5rem) - var(--sp-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--sp-6);
+}
+.tdb-toc-k {
+  margin: 0 0 var(--sp-3) 0;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro);
+  text-transform: uppercase;
+}
+.tdb-toc-list {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--td-line, var(--border));
+}
+/* Body size, not micro. These are section TITLES -- the same strings as the
+   headings they point at -- and the rail is the only navigation of a 26-section
+   page. The hairline is carried by the list; each entry re-declares it
+   transparent over a -1px pull, so the marked entry replaces that segment
+   instead of adding a second rule beside it. */
+.tdb-toc-link {
+  margin-left: -1px;
+  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
+  border-left: 1px solid transparent;
+  color: var(--muted-foreground);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tdb-toc-link[data-level="3"] { padding-left: var(--sp-6); }
+.tdb-toc-link:hover { color: var(--foreground); }
+.tdb-toc-link[data-active="true"] {
+  color: var(--foreground);
+  font-weight: var(--fw-medium);
+  border-left-color: var(--td-coral);
+}
+
+/* --- the docs index, read as a table of contents ------------------------ */
+/* Four destinations used to cost four bordered cards, nine badges and a
+   two-column grid -- about 90 lines of markup to say four names and four
+   sentences. This is the same information as a list: name, one line, rule. */
+.tdb-doclist {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--td-line, var(--border));
+  margin-top: var(--sp-5);
+}
+.tdb-doclist a {
+  display: grid;
+  grid-template-columns: 14rem 1fr;
+  gap: var(--sp-2) var(--sp-6);
+  align-items: baseline;
+  padding: var(--sp-5) 0;
+  border-bottom: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+  text-decoration: none;
+}
+.tdb-doclist a:hover { color: var(--foreground); }
+.tdb-doclist-n {
+  color: var(--foreground);
+  font-size: var(--ts-lead);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-head);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.tdb-doclist-d { overflow-wrap: anywhere; }
+
+/* Phones get neither component as a column: the rail is chrome the masthead
+   nav already covers, and a two-track grid at 22rem leaves 8rem for a
+   sentence. The rail goes away; the list stacks. */
+@media (max-width: 639px) {
+  .tdb-toc { display: none; }
+  .tdb-doclist a {
+    grid-template-columns: 1fr;
+    gap: var(--sp-2);
+    padding: var(--sp-5) 0;
+  }
+}
+
+/* --- Ctrl+K search over the guide --------------------------------------- */
+/* Two pieces: the masthead trigger, and the overlay it opens. Both are built
+   by site.js, so nothing here is reachable from a page's static markup --
+   which is also why the trigger has to LOOK like a control rather than rely
+   on a reader guessing that a keyboard shortcut exists.
+
+   No animation, and therefore nothing for the reduced-motion block further up
+   to undo: the panel is either there or it is not. */
+
+.tdb-findbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--td-line-strong, var(--border));
+  background: none;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tdb-findbtn:hover { color: var(--foreground); border-color: var(--td-coral); }
+.tdb-findbtn svg { width: 1em; height: 1em; flex: none; }
+.tdb-findbtn-t { letter-spacing: var(--tr-body, 0); }
+.tdb-findbtn-k {
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+}
+
+/* The overlay. z-index clears the fixed masthead (z-40) rather than sliding
+   under it, which is what a dialog rendered at the same level would do. */
+.tdb-find {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10vh var(--sp-6) var(--sp-6);
+  background: rgba(11, 19, 17, 0.55);
+}
+.tdb-find[hidden] { display: none; }
+:root.dark .tdb-find { background: rgba(0, 0, 0, 0.7); }
+
+.tdb-find-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 46rem;
+  max-height: 70vh;
+  border: 1px solid var(--td-line-strong, var(--border));
+  background: var(--td-table-surface, var(--background));
+}
+
+.tdb-find-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--td-line-strong, var(--border));
+  background: var(--td-table-head, var(--background));
+}
+.tdb-find-k {
+  display: inline-flex;
+  color: var(--muted-foreground);
+}
+.tdb-find-k svg { width: 1rem; height: 1rem; }
+.tdb-find-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose, 1.6);
+  padding: var(--sp-1) 0;
+  outline: none;
+}
+.tdb-find-input::placeholder { color: var(--muted-foreground); opacity: 1; }
+.tdb-find-x {
+  border: 1px solid var(--td-line, var(--border));
+  background: none;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--ts-micro);
+  line-height: 1;
+  padding: var(--sp-1);
+  cursor: pointer;
+}
+.tdb-find-x:hover { color: var(--foreground); border-color: var(--td-coral); }
+
+.tdb-find-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* One result = one section. The heading is the answer, the page name says
+   which document it lives in, the snippet is the evidence that the match is
+   not accidental. Three lines, no card. */
+.tdb-find-hit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-1) var(--sp-4);
+  align-items: baseline;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--td-line, var(--border));
+  border-left: 2px solid transparent;
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+.tdb-find-hit[data-level="3"] .tdb-find-hit-h { padding-left: var(--sp-4); }
+.tdb-find-hit-h {
+  color: var(--foreground);
+  font-size: var(--ts-body);
+  font-weight: var(--fw-medium, 500);
+  line-height: var(--lh-head, 1.25);
+  overflow-wrap: anywhere;
+}
+.tdb-find-hit-p {
+  justify-self: end;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  white-space: nowrap;
+}
+.tdb-find-hit-t {
+  grid-column: 1 / -1;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-prose, 1.6);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.tdb-find-hit:hover,
+.tdb-find-hit[aria-selected="true"] {
+  background: var(--td-table-head, var(--background));
+  border-left-color: var(--td-coral);
+}
+/* On the marked row the snippet stops being secondary: it is the line the
+   reader is about to act on, and muted-on-tinted is the one pairing in this
+   component that would drop under 7:1. */
+.tdb-find-hit:hover .tdb-find-hit-t,
+.tdb-find-hit[aria-selected="true"] .tdb-find-hit-t,
+.tdb-find-hit:hover .tdb-find-hit-p,
+.tdb-find-hit[aria-selected="true"] .tdb-find-hit-p { color: var(--foreground); }
+
+.tdb-find-msg { padding: var(--sp-5) var(--sp-4); }
+.tdb-find-msg-h {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--ts-body);
+  font-weight: var(--fw-medium, 500);
+}
+.tdb-find-msg-d,
+.tdb-find-msg-n {
+  margin: var(--sp-2) 0 0;
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-prose, 1.6);
+  overflow-wrap: anywhere;
+}
+/* A read that FAILED is not an empty result, and must not be mistakable for
+   one: the coral rule is the same one the site uses for a load error. */
+.tdb-find-err { border-left: 2px solid var(--td-coral); }
+.tdb-find-err .tdb-find-msg-d { color: var(--foreground); }
+
+.tdb-find-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+  padding: var(--sp-2) var(--sp-4);
+  border-top: 1px solid var(--td-line, var(--border));
+  color: var(--muted-foreground);
+  font-size: var(--ts-micro);
+  line-height: 1.4;
+}
+.tdb-find-foot-n { margin-left: auto; }
+
+/* Phones: the trigger keeps only its glyph (the label and the key cap name a
+   keyboard that is not there), and the panel stops pretending to be a dialog
+   floating over a document -- it takes the screen, because at 390px a 46rem
+   panel inset by two gutters IS the screen. */
+@media (max-width: 639px) {
+  .tdb-findbtn { padding: var(--sp-1); border-color: transparent; }
+  .tdb-findbtn-t,
+  .tdb-findbtn-k { display: none; }
+  .tdb-findbtn svg { width: 1.25rem; height: 1.25rem; }
+  .tdb-find { padding: 0; }
+  .tdb-find-panel { max-width: none; max-height: none; height: 100%; border: 0; }
+  .tdb-find-hit { grid-template-columns: 1fr; }
+  .tdb-find-hit-p { justify-self: start; }
+  .tdb-find-foot-n { display: none; }
+}

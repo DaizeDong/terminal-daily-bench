@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard — terminal-daily-bench</title>
 <meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -31,10 +30,11 @@
 
       <figure class="tdb-cmd">
         <figcaption>Reproduce a row</figcaption>
-        <code id="cmd">tdb run &lt;MODEL&gt; tasks/archive/&lt;task-id&gt; --harness &lt;agent&gt;</code>
+        <code id="cmd">tdb run &lt;MODEL&gt; tasks/archive/&lt;task-id&gt; --harness &lt;agent&gt; [--agent-kwarg reasoning_effort=&lt;effort&gt;]</code>
         <button type="button" id="copy" aria-label="Copy command">copy</button>
         <a id="cmd-tasks" href="../benchmarks/">task ids &rarr;</a>
       </figure>
+      <p class="tdb-block-foot"><span id="cmd-warn"></span>Bound to the top row; other rows swap model, <code>--harness</code> and effort. Needs the unpublished patched Harbor fork.</p>
 
       <section class="flex flex-col">
         <div class="tdb-tablebar">
@@ -61,8 +61,8 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="leaderboard"></script>
-<script src="../assets/tdb-data.js?v=d064c7dcdd"></script>
+<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=a6e52a8c64"></script>
 <script>
 (function () {
   "use strict";
@@ -70,11 +70,65 @@
   var esc = T.esc, TD = T.TD, TR = T.TR;
   var byId = function (id) { return document.getElementById(id); };
 
+  /* Two published files besides the day itself.
+
+     site_data.json is the task catalogue: it is what makes the reproduce
+     command name a task a reader may actually run, and it carries the
+     publication mode every task was measured under. leaderboard_data.json
+     carries the per-cell solve matrix, which is the only thing on the site
+     that can say what this suite SEPARATES rather than how a model scored.
+
+     Both are read once at boot and both fail loudly: a null here means "could
+     not be read", never "there is nothing there", and every line below that
+     depends on one of them is omitted rather than guessed. */
+  var siteData = null, boardData = null;
+
+  /* Raised by faCell() while a body is built: at least one non-zero False
+     accepts count had no evidence record to point at, and the foot has to say
+     so rather than let an unlinked number look audited. */
+  var faUnlinked = false;
+
+  /* The shipped angle-bracket string, kept so a day with no runnable command
+     falls back to a template that is obviously a template -- never to a
+     half-substituted command. */
+  var cmdPlaceholder = byId("cmd") ? byId("cmd").textContent : "";
+
+  /* ------------------------------------------------------------------ *
+   * The provenance block, as copy.
+   *
+   * Held as named constants rather than inlined so the sentences a reader is
+   * asked to trust can be read in one place, and so every expression that
+   * builds markup below stays short enough to check by eye. Nothing here
+   * carries a number: every count in the foot is interpolated at render time
+   * from the day file and the two published data files.
+   * ------------------------------------------------------------------ */
+  var FOOT_WHO =
+    "<p>Every cell is maintainer-run. A " +
+    '<a href="../submit/">submission</a> stays pending until an ' +
+    '<a href="../guide/submission/#operator-replay">operator replays it</a> ' +
+    "under protected tests; a submitted reward is only a claim.</p>";
+
+  var FOOT_OUTCOMES =
+    "<p>A run with no accepted result is " +
+    '<a href="../guide/quality-methods/#outcomes">not a failure</a>: ' +
+    "non-SUCCESS is <code>outcome:null</code>, counted in coverage.</p>";
+
+  var FOOT_FA_NOTE =
+    "<p>Unlinked false-accept counts have no published evidence record.</p>";
+
+  var LINK_QUALITY =
+    '<p>Full report: <a href="../quality/#discrimination">selection ' +
+    "quality</a>.</p>";
+
   /* One row per (model, scaffold). A scaffold id is "<agent>" or
      "<agent>@<effort>" -- claude-code@high, codex@low, terminus-2 -- so the
      reference's Agent / Effort split falls straight out of the id. An id with
      no "@" ran at the provider's default and says so, rather than being given a
      made-up effort name. */
+  function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+  }
+
   function splitScaffold(id) {
     var at = String(id).indexOf("@");
     return at < 0
@@ -94,7 +148,7 @@
           model: entry.model, agent: s.agent, effort: s.effort, scaffold: k,
           n: cell.n, solved: cell.solved,
           rate: (typeof cell.rate === "number") ? cell.rate : (cell.solved / cell.n),
-          fa: cell.fa, fa_n: cell.fa_n
+          fa: cell.fa, fa_n: cell.fa_n, fa_evidence: cell.fa_evidence
         });
       });
     });
@@ -128,13 +182,35 @@
 
   var ALL = [], VIEW = [], TABLE = null, DAYS = [], DAY = {};
 
+  /* A penalty a reader cannot check is an accusation, not a measurement. Where
+     the cell names the record that produced the count -- the failing protected
+     test, the replay trial -- the number IS that link. Where it does not, the
+     number stays plain text and the foot says that no evidence record is
+     published, because an unlinked number dressed as a linked one is worse
+     than the plain one it replaced. Zero is never linked: there is nothing to
+     audit, and a link would imply there were. */
+  function faCell(r) {
+    var count = r.fa;
+    if (typeof count !== "number") {
+      return '<p class="text-right text-muted-foreground">&mdash;</p>';
+    }
+    var text = esc(count) + "/" + esc(r.fa_n);
+    var href = count ? r.fa_evidence : null;
+    if (count && (typeof href !== "string" || !href)) {
+      faUnlinked = true;
+      href = null;
+    }
+    if (!href) {
+      return '<p class="text-right tabular-nums">' + text + "</p>";
+    }
+    return '<p class="text-right tabular-nums"><a href="' + esc(href) + '">' +
+      text + "</a></p>";
+  }
+
   function render(r) {
     /* Rank is assigned once, over the whole day by accuracy, and then travels
        with the row. Re-ranking on every sort would make "rank" mean "position
        in whatever order you last clicked", which is not a rank. */
-    var faCell = (typeof r.fa === "number")
-      ? '<p class="text-right tabular-nums">' + esc(r.fa) + "/" + esc(r.fa_n) + "</p>"
-      : '<p class="text-right text-muted-foreground">&mdash;</p>';
     return '<tr data-slot="table-row" class="' + TR + '">' +
       '<td class="' + TD + '"><p class="tabular-nums text-muted-foreground">' +
         esc(r.rank) + "</p></td>" +
@@ -146,7 +222,7 @@
       '<td class="' + TD + '"><p class="text-right tabular-nums">' + esc(r.solved) + "</p></td>" +
       '<td class="' + TD + '"><p class="text-right tabular-nums text-muted-foreground">' +
         esc(r.n) + "</p></td>" +
-      '<td class="' + TD + '">' + faCell + "</td>" +
+      '<td class="' + TD + '">' + faCell(r) + "</td>" +
     "</tr>";
   }
 
@@ -162,6 +238,17 @@
       '<span class="tdb-count-sep">&middot;</span>' + esc(DAY.n_models) + " models" +
       '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
     if (TABLE) TABLE.redraw(VIEW);
+    /* The foot's count is patched in place rather than by re-rendering the
+       foot: renderFoot re-runs the digest and the Wilson widths on every
+       keystroke, and it re-reads `faUnlinked`, a flag set during row render and
+       cleared only in show() -- so the false-accept footnote would blink in and
+       out with the search box. The guard is load-bearing: applyFilter runs once
+       before renderFoot has ever written this node. */
+    var fc = document.querySelector(".tdb-foot-count");
+    if (fc) {
+      fc.textContent = "Displaying " + VIEW.length + " of " + ALL.length +
+        " available entries.";
+    }
   }
 
   /* The reference names the benchmark version in the title -- "terminal-bench@2.1
@@ -251,11 +338,285 @@
       /* A caveat behind a title= attribute does not exist on a phone and is
          easy to miss anywhere else. Print it, and link to what it means. */
       : '<span class="tdb-badge" data-official="false">unofficial</span>' +
-        '<a class="tdb-badge-why" href="../guide/quality-methods/#outcomes">why</a>';
+        '<a class="tdb-badge-why" href="../benchmarks/#integrity">why</a>';
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The reproduce command.
+   *
+   * This shipped `tdb run <MODEL> tasks/archive/<task-id> --harness <agent>`
+   * behind a copy button. Angle brackets are not copy-pasteable, so the one
+   * control on the page whose entire job is to hand a reader something they
+   * can run handed them something they could not.
+   *
+   * It is bound to a real row now. The model and harness come from the
+   * top-ranked row of the loaded day, which is the row directly under the
+   * button. The task is the lexicographically first ARCHIVE task in that
+   * day's suite: live tasks withhold gold patches and protected test bodies,
+   * so a command naming one cannot be run by the reader it is shown to.
+   * ------------------------------------------------------------------ */
+
+  /* The reasoning effort is part of the measurement, not a decoration.
+     splitScaffold() already separates `codex@low` into agent + effort, and the
+     command spent only the agent -- so the button bound to rank 1 printed the
+     command for a DIFFERENT row of the same table: gpt-5.6-sol at the codex
+     default, which is a separate line with a separate score. A reader who runs
+     the one control on this page whose whole job is to be runnable, and gets a
+     number that cannot match the row above it, concludes the leaderboard is
+     wrong.
+
+     Only an effort whose CLI spelling is attested in THIS repository is
+     expressed. `tdb run` takes `--agent-kwarg KEY=VALUE`, and the codex
+     adapter's key is `reasoning_effort` (tests/test_vendor_harness.py builds a
+     codex run spec with exactly that kwarg). No other harness publishes an
+     effort key here, so no other harness gets one invented for it: an
+     unmappable effort yields no command rather than a confident wrong one. Add
+     a harness to the map when its kwarg is verified, never when it is guessed.
+  */
+  var EFFORT_KWARG = { codex: "reasoning_effort" };
+
+  /* {cmd, why}: the reason travels with the refusal, because "no runnable
+     command" has three different causes here and the page used to print the
+     archive-task one for all of them. */
+  function reproduce(day, site, top) {
+    var ids = ((site && site.tasks) || []).filter(function (t) {
+      return t && t.status === "archive" && T.taskSuites(t).indexOf(day.date) >= 0;
+    }).map(function (t) { return t.id; }).sort();
+    if (!ids.length) {
+      return { cmd: null, why: "No archive task is published for this suite. " };
+    }
+    if (!top) {
+      return { cmd: null, why: "No measured row is published for this day. " };
+    }
+    var cmd = "tdb run " + top.model + " tasks/archive/" + ids[0] +
+      " --harness " + top.agent;
+    if (top.effort) {
+      var kw = hasOwn(EFFORT_KWARG, top.agent) ? EFFORT_KWARG[top.agent] : null;
+      if (!kw) {
+        return { cmd: null, why: "The effort kwarg for " + top.agent + " is not " +
+          "published here, so no command is shown rather than one that would " +
+          "reproduce a different row. " };
+      }
+      cmd += " --agent-kwarg " + kw + "=" + top.effort;
+    }
+    return { cmd: cmd, why: "" };
+  }
+
+  function bindReproduce(day) {
+    var bound = reproduce(day, siteData, ALL[0]);
+    var code = byId("cmd"), warn = byId("cmd-warn"), copy = byId("copy");
+    if (code) { code.textContent = bound.cmd || cmdPlaceholder; }
+    if (warn) { warn.textContent = bound.why; }
+    /* Nothing runnable to hand over means nothing to copy. A copy button that
+       yields a template is the failure this whole block exists to remove. */
+    if (copy) { copy.disabled = !bound.cmd; }
+  }
+
+  /* The Wilson half-width at a given rate, recomputed for THIS day's task
+     count. It depends on the rate as much as on n, so the one figure the foot
+     prints is labelled with the rate it belongs to (50%, the widest); an
+     unlabelled figure would overstate a 5% row by half, and a hard-coded one
+     would be wrong the first time n changes. */
+  function halfWidth(rate, n) {
+    if (!n) { return "0"; }
+    /* Not Math.round(rate * n): forcing an integer solve count moves the rate
+       off the one being illustrated (2/50 is 4%, 3/50 is 6%) and the printed
+       figure then swings a whole point on a rounding rule. Wilson only reads
+       solved/n, so the exact rate is passed straight through. */
+    var w = T.wilson(rate * n, n);
+    return (((w.hi - w.lo) / 2) * 100).toFixed(0);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * The discrimination digest.
+   *
+   * What the suite separates, decomposed from the published solve matrix and
+   * the task catalogue at page load. Every number is recomputed here rather
+   * than copied out of the /quality/ report, so regenerating either file
+   * UPDATES this digest instead of falsifying it.
+   *
+   * A cell that was never run is null, not a failure: it is dropped from a
+   * task's denominator rather than counted as a zero. A task no model solved
+   * and a task every model solved both separate nothing; only the ones in
+   * between carry information, and that count over the task count is D.
+   * ------------------------------------------------------------------ */
+  function discriminationDigest(board, site) {
+    var matrix = board && board.matrix;
+    var rows = matrix && matrix.rows;
+    var ids = matrix && matrix.tasks;
+    if (!rows || !rows.length || !ids || !ids.length) { return null; }
+    var status = {};
+    ((site && site.tasks) || []).forEach(function (t) {
+      if (t && t.id) { status[t.id] = t.status || "unrecorded"; }
+    });
+    /* `scaffold` and `models` are what makes the sentence below true. This
+       grid is ONE scaffold's roster; the table above the digest is the whole
+       day. Both have to be in the returned object, because digestHtml cannot
+       see this function's locals. */
+    var out = { n: ids.length, disc: 0, floor: 0, ceiling: 0, unmeasured: 0,
+                date: board.date, scaffold: matrix.scaffold || null,
+                models: rows.length, modes: {}, order: [] };
+    var seen = 0;
+    ids.forEach(function (id, j) {
+      var k = 0, m = 0;
+      rows.forEach(function (row) {
+        var cell = (row && row.g) ? row.g[j] : null;
+        if (cell === null || cell === undefined) { return; }
+        m += 1;
+        if (cell) { k += 1; }
+      });
+      seen += m;
+      var band = !m ? "unmeasured" : (!k ? "floor" : (k === m ? "ceiling" : "disc"));
+      out[band] += 1;
+      /* A task no run touched belongs to no band and to no denominator. It is
+         carried as `unmeasured` and named separately, never folded into a mode
+         bucket where it would read as a task this scaffold failed. */
+      if (band === "unmeasured") { return; }
+      var mode = status[id] || "unrecorded";
+      if (!out.modes[mode]) { out.modes[mode] = { disc: 0, n: 0 }; out.order.push(mode); }
+      out.modes[mode].n += 1;
+      if (band === "disc") { out.modes[mode].disc += 1; }
+    });
+    out.order.sort();
+
+    /* Per-cell coverage, computed the way /quality/ computes it so the two
+       pages cannot disagree. `unmeasured` above counts whole COLUMNS with no
+       observation; it says nothing about a grid whose columns are all present
+       and 15 of whose cells were never executed and ship as zeros. Without
+       this, the leaderboard reprinted the floor count as a floor when it is a
+       ceiling.
+
+       Which source is authoritative depends on the artifact. Once the matrix
+       ships nulls its own non-null count IS the attempt count and the
+       per-model `n` sum must not be used, or the two double-count. Today's
+       matrix has no nulls, so the roster-restricted `n` sum is the only thing
+       that knows 15 cells are missing. */
+    var grid = rows.length * ids.length;
+    var inRoster = {};
+    rows.forEach(function (r) { if (r && r.model) { inRoster[r.model] = 1; } });
+    var scaffold = String(matrix.scaffold || "");
+    var reported = 0;
+    ((board && board.leaderboard) || []).forEach(function (e) {
+      var cell = (e && hasOwn(inRoster, e.model)) ? e[scaffold] : null;
+      if (cell && typeof cell.n === "number") { reported += cell.n; }
+    });
+    out.grid = grid;
+    out.attempted = (grid - seen) > 0 ? seen : (reported || grid);
+    out.unrun = Math.max(0, grid - out.attempted);
+    return out;
+  }
+
+  function digestHtml(d) {
+    var link = LINK_QUALITY;
+    if (!d) { return link; }
+    var disc = d.disc, floor = d.floor, ceiling = d.ceiling;
+    /* The denominator is the tasks this scaffold actually ran, not every column
+       in the grid. Where a task was never attempted it is named on its own
+       line; counting it as a task nobody solved would turn a gap in coverage
+       into a finding about the models. */
+    var measured = d.n - d.unmeasured;
+    var dval = measured ? (disc / measured).toFixed(2) : "0";
+    var ceilTxt = (ceiling === 0) ? "none" : String(ceiling);
+    /* Never "this suite". That phrase means the whole day -- every model under
+       every scaffold -- while this grid is a SINGLE scaffold's roster. Stated
+       unqualified, the sentence was refutable by a row on the same screen: a
+       codex row solving more of these tasks than the claim said any model had
+       solved. Naming the roster size and the grid inside the sentence is what
+       makes the number true, so the follow-up paragraph that used to repeat the
+       scope is gone but the scope itself is not. */
+    var nm = d.models;
+    var who = esc(nm) + " model" + (nm === 1 ? "" : "s");
+    var scope = d.scaffold
+      ? "the " + esc(d.scaffold) + " grid"
+      : "this solve matrix";
+    /* The 15 unrun cells, disclosed where the number is printed rather than
+       only on /quality/. They ship as zeros, so a task can be counted as
+       solved-by-none on the strength of a run that never happened: the floor
+       count is an upper bound, and saying so is the whole fix. D itself is NOT
+       recomputed here -- it is the published metric and must keep matching
+       /quality/. */
+    var un = d.unrun || 0;
+    var cover = un
+      ? " " + esc(un) + " of the " + esc(d.grid) + " cells never ran and ship " +
+        "as zeros, so solved-by-none is an upper bound."
+      : "";
+    var gap = d.unmeasured
+      ? " " + esc(d.unmeasured) + " of " + esc(d.n) + " tasks never ran and " +
+        "are left out."
+      : "";
+    /* Modes are only worth splitting when the catalogue named more than one.
+       With a single mode there is no difference to attribute, and with none the
+       catalogue could not be read at all. */
+    var known = d.order.filter(function (mode) { return mode !== "unrecorded"; });
+    var split = "";
+    if (known.length) {
+      var counts = d.order.map(function (mode) {
+        return esc(mode) + " " + esc(d.modes[mode].disc) + "/" + esc(d.modes[mode].n);
+      }).join(", ");
+      var clause = (known.length > 1)
+        ? " &mdash; what is withheld differs, not measured difficulty."
+        : ".";
+      /* Name the convention. /quality/ prints an identically formatted
+         "archive 12/28" meaning (discriminating + ceiling) over in-matrix
+         tasks; this one is discriminating over measured. They agree only while
+         no task is solved by every model, and a reader comparing the two pages
+         has no way to see which is which. */
+      split = "<p>By publication mode (discriminating / measured): " +
+        counts + clause + "</p>";
+    }
+    return "<p><strong>Discrimination.</strong> " + esc(disc) + " of " + esc(measured) +
+      " tasks separated any of the " + who + " on " + scope +
+      " (D " + dval + "); " + esc(floor) + " solved by none, " + ceilTxt +
+      " by all." + gap + cover + "</p>" + split + link;
+  }
+
+  /* Where the numbers came from, who produced them, how to add to them, and
+     what the interval beside every rate actually means.
+
+     The CI definition used to run four sentences: a worked table of half-widths
+     at 5 / 30 / 50 percent, plus a closing note that rows scored on overlapping
+     subsets make two independent intervals indicative rather than exact. Both
+     are true and neither changes what a reader does with the number, so the
+     definition is one parenthetical now. The half-width is still COMPUTED for
+     this day's task count rather than quoted, because it moves with n. */
+  function renderFoot(day) {
+    var faNote = faUnlinked ? FOOT_FA_NOTE : "";
+    var digest = digestHtml(discriminationDigest(boardData, siteData));
+    var cells = esc(day.n_cells);
+    var models = esc(day.n_models), tasks = esc(day.n_tasks);
+    /* n_cells counts (model x scaffold x task) attempts. Describing it as
+       "across <models> models on <tasks> tasks" claimed 16387 attempts over a
+       152 x 50 grid that has 7600 intersections -- an impossible decomposition
+       printed inside the block that invites the reader to check the
+       arithmetic. The missing factor is the scaffold, and the count of
+       scaffolds is whatever `pooled` turns out to carry. `across N
+       configurations` is descriptive, not multiplicative: coverage is
+       deliberately ragged, so it asserts no ceiling. An empty pooled map is
+       legitimate (build_day_data writes `pooled: board.get("pooled") or {}`),
+       and there the pre-change wording -- which was not wrong -- stands. */
+    var nScaf = Object.keys(day.pooled || {}).length;
+    var span = nScaf
+      ? cells + " model &times; scaffold &times; task attempts: " + models +
+        " models, " + esc(nScaf) + " agent/effort configuration" +
+        (nScaf === 1 ? "" : "s") + ", " + tasks + " tasks"
+      : cells + " model &times; task attempts: " + models + " models, " +
+        tasks + " tasks";
+    var h50 = halfWidth(0.5, day.n_tasks);
+    byId("foot").innerHTML =
+      FOOT_WHO +
+      "<p>" + span + ".</p>" +
+      "<p>Accuracy is solved/tasks; &plusmn; is the 95% Wilson score interval " +
+      "half-width (about " + h50 + " points at 50% on " + tasks + " tasks).</p>" +
+      FOOT_OUTCOMES +
+      faNote +
+      digest +
+      '<p class="tdb-foot-count">Displaying ' + VIEW.length + " of " +
+      ALL.length + " available entries.</p>";
   }
 
   function show(day) {
     DAY = day;
+    faUnlinked = false;
     heading(day);
     ALL = flatten(day);
     ALL.sort(function (a, b) { return b.rate - a.rate; });
@@ -274,24 +635,8 @@
       rows: VIEW, render: render, sort: "rate", dir: "desc"
     });
     applyFilter();
-    /* Short declarative lines, the way the reference closes its table. */
-    byId("foot").innerHTML =
-      "<p>Results correspond to the <strong>" + esc(day.date) + "</strong> suite, " +
-        esc(day.n_cells) + " model &times; task attempts.</p>" +
-      /* Provenance. Nothing on the page said who produced these rows, so a
-         reader could not tell a maintainer run from a self-reported one. */
-      '<p>Rows are maintainer-run. Community results stay pending on the ' +
-        '<a href="../submit/">submit page</a> until an operator replays them.</p>' +
-      "<p>Accuracy is the Wilson 95% interval on solved/tasks; a run with no " +
-        'accepted result is <a href="../guide/quality-methods/#outcomes">' +
-        "not counted as a failure</a>.</p>" +
-      /* /quality/ had one inbound link on the entire site, buried at the foot
-         of the methods page. A reader looking at these rates is exactly the
-         reader who wants to know whether the task set discriminates at all. */
-      '<p>How well this suite separates models: <a href="../quality/">selection ' +
-        "quality</a>.</p>" +
-      '<p class="tdb-foot-count">Displaying ' + ALL.length + " of " + ALL.length +
-        " available entries</p>";
+    bindReproduce(day);
+    renderFoot(day);
   }
 
   function load(id) {
@@ -315,7 +660,19 @@
     var d = T.dayFromUrl(); if (d) load(d);
   });
 
-  T.dayIndex().then(function (idx) {
+  /* The catalogue and the solve matrix are fetched alongside the day index, so
+     the first table this page draws already carries a runnable command and a
+     discrimination digest. Either may fail on its own; T.fetchFailed says so
+     on the page and hands back null, and the lines that needed it are omitted
+     rather than filled with a guess. */
+  Promise.all([
+    T.dayIndex(),
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the solve matrix"))
+  ]).then(function (loaded) {
+    var idx = loaded[0];
+    siteData = loaded[1];
+    boardData = loaded[2];
     DAYS = idx.days;
     var want = T.dayFromUrl();
     var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;
