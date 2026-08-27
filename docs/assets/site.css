@@ -451,6 +451,30 @@ input:focus-visible {
 .tdb-generated-page { min-width: 0; }
 .tdb-page-frame { position: relative; min-width: 0; }
 .tdb-page-title { overflow-wrap: anywhere; text-wrap: balance; }
+
+/* The home page leads with results, so its masthead is a hero and everything
+   after it is the table. The reference this follows sets its home title at
+   72px and puts the leaderboard at y=418 in a 900px viewport; a 48px title
+   with a full section gap under it left ours at y=643 with 185px of nothing
+   between the buttons and the table. Home only -- inner pages keep --ts-title,
+   where a hero would just push their content down. */
+.tdb-page-home main#nd-home-layout [data-tdb-section="intro"] h1 {
+  font-size: clamp(2.75rem, 6vw, 4.5rem) !important;
+  line-height: var(--lh-head) !important;
+  letter-spacing: var(--tr-head) !important;
+}
+.tdb-page-home main#nd-home-layout [data-tdb-section="intro"] {
+  padding-bottom: var(--sp-5) !important;
+}
+.tdb-page-home main#nd-home-layout [data-tdb-section="leaderboard"] {
+  padding-top: var(--sp-5) !important;
+}
+
+@media (max-width: 639px) {
+  .tdb-page-home main#nd-home-layout [data-tdb-section="intro"] h1 {
+    font-size: var(--ts-title) !important;
+  }
+}
 .tdb-page-lede { max-width: 44rem; line-height: var(--lh-prose); }
 .tdb-badge { max-width: 100%; }
 .tdb-content-section { position: relative; width: 100%; min-width: 0; max-width: 100%; }

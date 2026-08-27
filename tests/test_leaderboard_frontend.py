@@ -25,6 +25,16 @@ TASK_FORMAT = (ROOT / "docs" / "guide" / "task-format" / "index.html").read_text
 )
 TW_CSS = (ROOT / "docs" / "assets" / "tw.css").read_text(encoding="utf-8")
 PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
+
+# Every published page as one haystack, case preserved. The home page was
+# rebuilt to lead with the leaderboard, which moved several claims off it; the
+# assertions below therefore ask whether the SITE still publishes a statement,
+# not whether index.html does. Relocating a statement stays legal; losing it
+# does not.
+PUBLISHED_PAGES = sorted((ROOT / "docs").rglob("*.html"))
+PUBLISHED = "\n".join(
+    page.read_text(encoding="utf-8", errors="replace") for page in PUBLISHED_PAGES
+)
 DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
 
@@ -155,15 +165,24 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
     assert 'data-page="quality"' in quality_page
     assert 'id="discrimination"' in quality_page
 
-    # the three in-page entrances
-    entrances = {
-        "docs/index.html": './quality/#discrimination',
-        "docs/guide/index.html": '../quality/#discrimination',
-        "docs/leaderboard/index.html": '../quality/#discrimination',
-    }
-    for rel, href in entrances.items():
-        text = (ROOT / rel).read_text(encoding="utf-8")
-        assert href in text, f"{rel} lost its link to the discrimination report"
+    # In-page entrances. The home masthead used to carry one; the results-first
+    # rebuild cut it, so home is no longer named here. What is still required is
+    # the property that made the list worth asserting: the report must be
+    # reachable from more than one page, and specifically from the leaderboard,
+    # which is where the numbers the report qualifies are printed. Naming the
+    # pages individually is what made this test brittle; naming the leaderboard
+    # is not brittleness, it is the point.
+    linking = [
+        page for page in PUBLISHED_PAGES
+        if page.parent.name != "quality"
+        and "quality/#discrimination" in page.read_text(
+            encoding="utf-8", errors="replace")
+    ]
+    assert len(linking) >= 2, (
+        "the discrimination report is reachable from "
+        f"{len(linking)} page(s); it was an orphan once already")
+    assert (ROOT / "docs" / "leaderboard" / "index.html") in linking, (
+        "the leaderboard lost its link to the discrimination report")
 
 
 def _registry_columns():
@@ -415,9 +434,15 @@ def test_output_values_are_escaped_before_entering_the_dom():
         assert ent in body, f"esc() has no mapping for {ch!r}"
 
 def test_stat_values_are_not_document_headings():
-    assert "<p data-tdb-stat-value" in HOME
+    # The stat grid left the home page with the rest of the explanatory
+    # blocks, so the marker is required of the SITE rather than of index.html.
+    # The ban on rendering a stat value as a heading is unconditional and is
+    # applied to every published page, which is stronger than the two pages it
+    # used to name.
+    assert "<p data-tdb-stat-value" in PUBLISHED, (
+        "no published page renders a stat value any more")
     assert "<p data-tdb-stat-value" in PAGE_GENERATOR
-    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in HOME
+    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in PUBLISHED
     assert (
         '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
         not in PAGE_GENERATOR
@@ -452,27 +477,50 @@ def test_shell_mounts_a_real_footer_landmark():
 
 
 def test_homepage_integrity_facts_match_current_operator_evidence():
-    assert "data-tdb-integrity-details" in HOME
-    assert "integrity limits and current blockers" in HOME
-    assert "Protected tests decide published scores" in HOME
-    assert "paired staged-SIF egress canary passed" in HOME
-    assert "no production protected replay has run" in HOME
-    assert "active=false" in HOME
-    assert "code-controlled allowlist" in HOME
-    assert "self-signed report/matrix pins cannot approve themselves" in HOME
-    assert "one collaborator" in HOME
-    assert "deployment egress canary is still pending" not in HOME
-    assert "unpublished patched Harbor fork" in HOME
-    assert "stock Harbor 0.13.1 is insufficient" in HOME
+    # These facts used to be asserted against index.html. The detail moved to
+    # the page the nav labels "status" when home was rebuilt to lead with the
+    # table; home keeps only the compact point-of-claim marker. Each fact is
+    # therefore required somewhere on the site -- a move is fine, a deletion is
+    # not -- while the stale claim stays banned everywhere.
+    for fact in (
+        "data-tdb-integrity-details",
+        "integrity limits and current blockers",
+        "Protected tests decide published scores",
+        "paired staged-SIF egress canary passed",
+        "no production protected replay has run",
+        "active=false",
+        "code-controlled allowlist",
+        "self-signed report/matrix pins cannot approve themselves",
+        "one collaborator",
+        "unpublished patched Harbor fork",
+        "stock Harbor 0.13.1 is insufficient",
+    ):
+        assert fact in PUBLISHED, (
+            f"operator-evidence fact published on no page under docs/: {fact!r}")
+    assert "deployment egress canary is still pending" not in PUBLISHED
+
+    # The disclosure must still sit beside the claim it qualifies, not only on
+    # a page a reader has to go looking for.
+    assert "data-tdb-integrity" in HOME
 
 
 def test_homepage_previews_stay_short_and_link_to_full_views():
+    # The task preview was removed from home: the registry has its own page,
+    # and previewing it pushed the only measured numbers below the fold. The
+    # board preview stays, so the rule is written to bind whatever previews
+    # home actually renders -- every declared *_PREVIEW_LIMIT must be used to
+    # slice, so a limit cannot be declared and quietly ignored.
     assert "var BOARD_PREVIEW_LIMIT = 5;" in HOME
     assert "rows.slice(0, BOARD_PREVIEW_LIMIT)" in HOME
-    assert "var TASK_PREVIEW_LIMIT = 3;" in HOME
-    assert "scoped.slice(0, TASK_PREVIEW_LIMIT)" in HOME
+    limits = re.findall(r"var (\w*PREVIEW_LIMIT) = \d+;", HOME)
+    assert "BOARD_PREVIEW_LIMIT" in limits
+    for name in limits:
+        assert f".slice(0, {name})" in HOME, (
+            f"home declares {name} but never slices by it")
+
+    # A preview is only honest if the full view is one click away.
     assert 'href="./leaderboard/">full leaderboard' in HOME
-    assert 'href="./registry/">all tasks' in HOME
+    assert 'href="./registry/"' in HOME, "home lost its way into the task registry"
 
 
 def test_terminal_daily_has_an_independent_visual_identity():
