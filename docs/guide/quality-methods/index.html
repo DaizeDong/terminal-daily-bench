@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality methods (MSQ) — terminal-daily-bench docs</title>
 <meta name="description" content="Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle coverage, diversity, 2PL IRT test information, KR-20 reliability, bootstrap intervals, required-N power, and the daily readiness verdict.">
-<link rel="stylesheet" href="../../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -72,10 +71,12 @@
           <code>untrusted_declared_counts</code> are what a submission asserted about itself. A
           declaration cannot authenticate its own status, so the two are never summed.</p>
         <h3 id="dimensions" class="scroll-m-28 font-mono">Which dimensions may be ranked</h3>
-        <p>Three: <code>overall</code>, <code>language</code>, and the canonical C1&ndash;C14
-          capability labels bound by the trusted task catalogue. The leaderboard enforces this
-          list in code (<code>ALLOWED_DIMENSIONS</code>); a dimension outside it is not rendered,
-          however complete the data looks.</p>
+        <p>Three: <code>overall</code>, <code>language</code>, and <code>capability</code>, each
+          bound by the trusted task catalogue. The leaderboard enforces this list in code
+          (<code>ALLOWED_DIMENSIONS</code>); a dimension outside it is not rendered, however
+          complete the data looks. <strong>No capability label set is currently published</strong>,
+          so no capability axis can be rendered today &mdash; the dimension is authorised, not
+          populated.</p>
         <p><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound
           family field. The site does not infer one from tracks, merged labels, or repository
           metadata, and does not display zero &mdash; unavailable and zero are different claims.</p>
@@ -248,23 +249,21 @@ tdb quality results.jsonl</pre></div>
   </div>
 
   <!-- ===================== today's card ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">today's card</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs" id="card-sub">the same axes, on the live suite</p>
+  <section class="tdb-block" data-tdb-section="next">
+    <div class="tdb-block-head">
+      <h2>today's card</h2>
+      <p id="card-sub">the same axes, on the live suite</p>
+      <div class="tdb-block-tools"><a href="../../quality/">quality page &rarr;</a></div>
     </div>
 
     <div id="quality-card" class="w-full"></div>
-
-    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../../quality/">quality page &rarr;</a>
-  </div>
+  </section>
 
 </div>
 </div>
 </main>
 
-<script src="../../assets/site.js?v=d064c7dcdd" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=100de7a1cd" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */

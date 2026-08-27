@@ -16,7 +16,12 @@ Reads (all optional, degrades to whatever exists):
 Emits:
     { generated, scoring, suites: [{id, status, n_tasks, languages, note}],
       tasks:  [{id, suite, status, repo, pr_number, base_sha, merge_sha, license,
-                language, title, difficulty, n_fail_to_pass, solved_by, n_models}] }
+                language, title, difficulty, declared_difficulty, n_fail_to_pass,
+                solved_by, n_models}] }
+
+``difficulty`` is MEASURED and stays gated on scoring authority (it is "" while
+unranked). ``declared_difficulty`` is the EDITORIAL label the task author wrote
+into ``task.toml``; it carries no model performance and is therefore ungated.
 
 Task packages carry no secrets (publish_tasks.py sanitises them). Per-task
 difficulty is derived only when a trusted, publishable 50-task v3 report binds
@@ -31,6 +36,11 @@ import json
 import os
 import re
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover -- py<3.11
+    import tomli as tomllib
 
 _LANG_BY_EXT = {".py": "python", ".rs": "rust", ".go": "go", ".js": "javascript",
                 ".ts": "typescript", ".rb": "ruby", ".java": "java",
@@ -126,6 +136,27 @@ def _difficulty(solved_by, n_models) -> str:
     if r < 0.6:
         return "medium"
     return "easy"
+
+
+def _declared_difficulty(task_dir: Path) -> str:
+    """The EDITORIAL difficulty the task author recorded in task.toml.
+
+    Deliberately not routed through _difficulty(): that one is MEASURED and is
+    gated on scoring authority, which is why site_data.json ships '' on all 61
+    tasks today while the pages generated from it render 43 hard / 18 medium
+    (gen_pages.py falls back to this same scalar). site_data.json is strictly
+    lossier than its own output; this closes that gap. task.toml is the only
+    source that covers live tasks -- record.json exists for 37 of 61.
+    """
+    f = task_dir / "task.toml"
+    if not f.exists():
+        return ""
+    try:
+        doc = tomllib.loads(f.read_text(encoding="utf-8", errors="replace"))
+    except Exception:  # noqa: BLE001 -- a malformed package is not a difficulty
+        return ""
+    value = ((doc.get("metadata") or {}).get("difficulty") or "")
+    return str(value).strip().lower()
 
 
 def relative_report(board: dict) -> dict:
@@ -436,6 +467,7 @@ def collect(release: Path, board: dict) -> dict:
             package_rows.append({
                 "status": status, "dir": d, "record": rec, "provenance": prov,
                 "f2p": f2p, "language": lang,
+                "declared_difficulty": _declared_difficulty(d),
             })
 
     for package in package_rows:
@@ -481,7 +513,8 @@ def collect(release: Path, board: dict) -> dict:
             "title": _title_from_instruction(d),
             "n_fail_to_pass": len(f2p) if isinstance(f2p, list) else None,
             "solved_by": sb, "n_models": n_models if sb is not None else None,
-            "difficulty": _difficulty(sb, n_models),
+            "difficulty": _difficulty(sb, n_models),          # MEASURED. gated.
+            "declared_difficulty": package["declared_difficulty"],   # EDITORIAL. ungated.
         })
         if lang:
             for sid in suite_ids:

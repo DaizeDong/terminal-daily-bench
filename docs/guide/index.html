@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>docs — terminal-daily-bench</title>
 <meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Four guides: quickstart, task format, submission, quality methods.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -23,31 +22,28 @@
     <span class="text-foreground">docs</span>
   </nav>
 
-  <!-- ===================== hero ===================== -->
-  <div class="flex flex-col justify-center gap-16 pt-12 sm:pt-24 sm:pb-0">
-    <div class="space-y-8">
-      <div class="flex flex-col items-center gap-2">
-        <p class="text-muted-foreground font-mono text-sm">docs</p>
-      </div>
-      <h2 class="text-center font-mono text-3xl/tight font-medium tracking-tighter text-balance sm:mb-8 sm:text-6xl/tight">run the benchmark, read the score, submit a patch</h2>
-      <p class="text-fd-muted-foreground mx-auto max-w-3xl text-center font-mono tracking-tight text-balance sm:text-xl/relaxed">A model produces a patch. Harbor re-lays a protected test suite the model never
-        sees and runs it under a network cut. The reward is the test outcome, never a model's
-        opinion.</p>
-    </div>
-    <div class="mx-auto grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 text-base rounded-none" href="quickstart/">quickstart</a>
-      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../submit/">submit results</a>
-      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">source</a>
-      <a class="font-mono inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard</a>
-    </div>
+  <!-- ===================== page head =====================
+       Was a 60px display <h2> acting as the page title over 13px content,
+       four 48px buttons and a 90vh guides block. The title is now a real
+       <h1> on the page scale and the buttons are a one-line link rail. -->
+  <div class="w-full">
+    <h1 class="tdb-page-title" id="title">run the benchmark, read the score, submit a patch</h1>
+    <p class="tdb-page-lede">A patch in, a test outcome out.</p>
+    <nav class="tdb-navrow" aria-label="Docs shortcuts">
+      <a class="tdb-navlink" data-primary="true" href="quickstart/">quickstart</a>
+      <a class="tdb-navlink" href="../submit/">submit results</a>
+      <a class="tdb-navlink" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">source</a>
+      <a class="tdb-navlink" href="../leaderboard/">leaderboard</a>
+      <a class="tdb-navlink" href="../quality/#discrimination">what the suite separates</a>
+    </nav>
   </div>
 
   <!-- ===================== install and command surface ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">install and command surface</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">python &ge; 3.11 &middot; apptainer/singularity for the gate</p>
+  <section class="tdb-block" data-tdb-section="install">
+    <div class="tdb-block-head">
+      <h2>install and command surface</h2>
+      <p>python &ge; 3.11 &middot; apptainer for the gate</p>
+      <div class="tdb-block-tools"><a href="quickstart/">full quickstart &rarr;</a></div>
     </div>
 
     <div data-slot="card" class="bg-card text-card-foreground -mx-4 flex w-full flex-col gap-6 self-stretch border rounded-none border-x-0 py-6 font-mono shadow-none sm:mx-0 sm:border-x">
@@ -65,7 +61,8 @@ tdb --version                        <span class="text-muted-foreground"># -&gt;
 export OPENAI_BASE_URL=https://api.openai.com/v1
 export OPENAI_API_KEY=sk-...
 
-<span class="text-muted-foreground"># baseline first: the task's own oracle.patch -&gt; reward 1.0, no model call</span>
+<span class="text-muted-foreground"># baseline first: the task's own oracle.patch -&gt; reward 1.0, no model call
+# anything below 1.0 here is the environment, not the model</span>
 tdb oracle  tasks/archive/&lt;task-id&gt;
 
 <span class="text-muted-foreground"># then score a model with the single_shot_patch scaffold</span>
@@ -74,32 +71,26 @@ tdb run     &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;
 <span class="text-muted-foreground"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models)</span>
 tdb quality results.jsonl</pre>
       </div>
-      <div data-orientation="horizontal" role="none" data-slot="separator-root" class="bg-border h-px w-full shrink-0"></div>
-      <div data-slot="card-footer" class="flex items-center px-6">
-        <p class="text-muted-foreground mx-auto max-w-3xl text-center font-mono text-sm/relaxed">If <code>tdb oracle</code> does not yield
-          <code>reward = 1.0</code>, the environment &mdash; not the model &mdash; is the problem.</p>
-      </div>
     </div>
 
     <div class="bg-fd-secondary/50 mt-6 w-full border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
       <strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
-      require the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. The
-      catalogue, quality card, publisher and doctor do not.
+      need the unpublished patched Harbor fork, not stock 0.13.1; the catalogue, quality card,
+      publisher and doctor do not.
       <a class="underline-offset-4 hover:underline" href="quickstart/#requirements">Requirements</a>.
     </div>
 
     <div id="live-task" class="mt-8 w-full"></div>
-  </div>
+  </section>
 
   <!-- ===================== guides ===================== -->
-  <div class="flex min-h-[90vh] flex-col justify-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">guides</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">four pages, each mapped to code in the bundle</p>
+  <section class="tdb-block" data-tdb-section="docs">
+    <div class="tdb-block-head">
+      <h2>guides</h2>
+      <p>four pages</p>
     </div>
 
-    <div class="-mx-4 flex flex-col gap-12 sm:mx-0 sm:gap-16">
+    <div class="flex flex-col gap-6">
       <div class="grid grid-cols-1 md:grid-cols-2">
 
         <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
@@ -108,7 +99,7 @@ tdb quality results.jsonl</pre>
               <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
                 <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                   <div class="flex items-center gap-2">
-                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">quickstart</h2></div>
+                    <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">quickstart</h2></div>
                   </div>
                 </div>
                 <div class="flex gap-2">
@@ -117,10 +108,9 @@ tdb quality results.jsonl</pre>
                 </div>
               </div>
               <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-                <p class="font-mono wrap-anywhere sm:text-sm">Requirements, install, endpoint configuration, scoring one task, the oracle baseline,
-                  the result record and its <code>false_accept_check</code> block, and the quality card.</p>
+                <p class="font-mono wrap-anywhere sm:text-sm">Install, endpoint configuration, the oracle baseline, scoring one task.</p>
                 <div class="space-y-6">
-                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">install &rarr; scored result &rarr; quality card</p>
+                  <p class="text-muted-foreground font-mono text-sm">install &rarr; scored result &rarr; quality card</p>
                 </div>
               </div>
             </div>
@@ -133,7 +123,7 @@ tdb quality results.jsonl</pre>
               <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
                 <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                   <div class="flex items-center gap-2">
-                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">task format</h2></div>
+                    <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">task format</h2></div>
                   </div>
                 </div>
                 <div class="flex gap-2">
@@ -143,12 +133,9 @@ tdb quality results.jsonl</pre>
                 </div>
               </div>
               <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-                <p class="font-mono wrap-anywhere sm:text-sm">The on-disk package: <code>task.toml</code>, <code>instruction.md</code>,
-                  <code>tests/</code>, <code>environment/</code>, <code>solution/</code>,
-                  <code>PROVENANCE.json</code>, <code>record.json</code> &mdash; plus archive vs. live and
-                  how scoring re-lays the protected tests.</p>
+                <p class="font-mono wrap-anywhere sm:text-sm">The on-disk package, archive vs. live, and how scoring re-lays the protected tests.</p>
                 <div class="space-y-6">
-                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">one directory per task, harbor-native</p>
+                  <p class="text-muted-foreground font-mono text-sm">one directory per task, harbor-native</p>
                 </div>
               </div>
             </div>
@@ -161,7 +148,7 @@ tdb quality results.jsonl</pre>
               <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
                 <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                   <div class="flex items-center gap-2">
-                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">submission</h2></div>
+                    <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">submission</h2></div>
                   </div>
                 </div>
                 <div class="flex gap-2">
@@ -170,11 +157,9 @@ tdb quality results.jsonl</pre>
                 </div>
               </div>
               <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-                <p class="font-mono wrap-anywhere sm:text-sm">The submission schema and validation rules, why ingest re-scores every patch, and the
-                  <code>HarnessAdapter</code> contract for plugging in your own scaffold or multi-turn
-                  agent.</p>
+                <p class="font-mono wrap-anywhere sm:text-sm">The submission schema, its validation rules, and the <code>HarnessAdapter</code> contract.</p>
                 <div class="space-y-6">
-                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">a claimed reward is never trusted</p>
+                  <p class="text-muted-foreground font-mono text-sm">a claimed reward is never trusted</p>
                 </div>
               </div>
             </div>
@@ -187,7 +172,7 @@ tdb quality results.jsonl</pre>
               <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
                 <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                   <div class="flex items-center gap-2">
-                    <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">quality methods</h2></div>
+                    <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">quality methods</h2></div>
                   </div>
                 </div>
                 <div class="flex gap-2">
@@ -197,11 +182,9 @@ tdb quality results.jsonl</pre>
                 </div>
               </div>
               <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-                <p class="font-mono wrap-anywhere sm:text-sm">Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle
-                  coverage, diversity, 2PL test information, KR-20 reliability, bootstrap intervals,
-                  required-N power, and the daily readiness verdict.</p>
+                <p class="font-mono wrap-anywhere sm:text-sm">Multi-angle Selection-Quality: discrimination, 2PL information, KR-20, readiness verdict.</p>
                 <div class="space-y-6">
-                  <p class="text-muted-foreground font-mono text-sm sm:text-xs">whether the task set separates models</p>
+                  <p class="text-muted-foreground font-mono text-sm">whether the task set separates models</p>
                 </div>
               </div>
             </div>
@@ -210,35 +193,30 @@ tdb quality results.jsonl</pre>
 
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- ===================== what you are scoring against ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">what you are scoring against</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs" id="board-sub">today's suite</p>
+  <section class="tdb-block" data-tdb-section="workflow">
+    <div class="tdb-block-head">
+      <h2>what you are scoring against</h2>
+      <p id="board-sub">today's suite</p>
+      <div class="tdb-block-tools"><a href="../leaderboard/">leaderboard &rarr;</a></div>
     </div>
 
     <div id="strip" class="w-full"></div>
 
-    <p class="text-muted-foreground mx-auto mt-8 max-w-3xl text-center font-mono text-sm/relaxed">Archived tasks (&ge; 2 weeks old) ship in full, including
-      the reference solution. Live tasks withhold the gold patch and protected test bodies;
-      submissions stay unranked until official replay.
+    <p class="tdb-block-foot">Archive ships in full; live withholds gold and protected tests, unranked until official replay.
       <a class="underline-offset-4 hover:underline" href="task-format/#archive-vs-live">Archive vs. live</a>.</p>
-
-    <a class="font-mono mx-auto mt-8 inline-flex shrink-0 items-center justify-center gap-2 font-medium whitespace-nowrap transition-all outline-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-8 text-base rounded-none" href="../leaderboard/">leaderboard &rarr;</a>
-  </div>
+  </section>
 
   <!-- ===================== the markdown sources ===================== -->
-  <div class="flex w-full flex-col items-center py-12 sm:pb-16">
-    <div class="mb-4 flex flex-col items-center gap-2">
-      <p class="font-mono text-sm">the markdown sources</p>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      <p class="text-muted-foreground font-mono text-xs">the full reference these pages summarise</p>
+  <section class="tdb-block" data-tdb-section="repository">
+    <div class="tdb-block-head">
+      <h2>the markdown sources</h2>
+      <p>the reference these pages summarise</p>
     </div>
 
-    <div class="-mx-4 flex w-full flex-col gap-12 sm:mx-0 sm:gap-16">
+    <div class="flex w-full flex-col gap-6">
       <div class="grid grid-cols-1 md:grid-cols-2">
 
         <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 border hover:bg-sidebar dark:hover:bg-accent -mb-px rounded-none border-x-0 py-0 font-mono shadow-none transition-all duration-200 sm:-mr-px sm:border-x">
@@ -246,20 +224,19 @@ tdb quality results.jsonl</pre>
             <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
               <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                 <div class="flex items-center gap-2">
-                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">in the repository</h2></div>
+                  <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">in the repository</h2></div>
                 </div>
               </div>
             </div>
             <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-              <p class="font-mono wrap-anywhere sm:text-sm">Each guide here is the readable subset of a markdown file that ships with the
-                bundle. The markdown is longer and is the reference: when the two differ, it wins.</p>
-              <p class="font-mono text-sm sm:text-xs">
+              <p class="font-mono wrap-anywhere sm:text-sm">When the two differ, the shipped markdown wins.</p>
+              <p class="font-mono text-sm">
                 <a class="underline-offset-4 hover:underline" href="../quickstart.md">quickstart.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../task-format.md">task-format.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../submission.md">submission.md</a> &middot;
                 <a class="underline-offset-4 hover:underline" href="../quality-methods.md">quality-methods.md</a></p>
               <div class="space-y-6">
-                <p class="text-muted-foreground font-mono text-sm sm:text-xs">everything maps to code in the bundle</p>
+                <p class="text-muted-foreground font-mono text-sm">everything maps to code in the bundle</p>
               </div>
             </div>
           </div>
@@ -270,14 +247,13 @@ tdb quality results.jsonl</pre>
             <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
               <div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                 <div class="flex items-center gap-2">
-                  <div data-slot="card-title" class="leading-none font-semibold"><h2 class="line-clamp-1 font-mono text-xl font-medium">the invariant behind all of it</h2></div>
+                  <div data-slot="card-title" class="font-semibold"><h2 class="font-mono text-xl font-medium">the invariant behind all of it</h2></div>
                 </div>
               </div>
             </div>
             <div data-slot="card-content" class="flex flex-1 flex-col justify-between space-y-6 px-6">
-              <p class="font-mono wrap-anywhere sm:text-sm">A scaffold produces a candidate patch; the execution gate is the sole reward authority.
-                The protected tests are re-laid from the trusted package after the patch is applied, so a
-                patch that edits tests only changes a workspace that is discarded before scoring.</p>
+              <p class="font-mono wrap-anywhere sm:text-sm">The execution gate is the sole reward authority: tests are re-laid after the patch,
+                so editing them changes only a discarded workspace.</p>
               <div class="space-y-6">
                 <span data-slot="badge" class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono"><span class="text-muted-foreground">semantic FA</span> unmeasured</span>
               </div>
@@ -287,13 +263,13 @@ tdb quality results.jsonl</pre>
 
       </div>
     </div>
-  </div>
+  </section>
 
 </div>
 </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="docs"></script>
+<script src="../assets/site.js?v=100de7a1cd" data-root=".." data-page="docs"></script>
 <script>
 (async function () {
   var T = window.TDB;
@@ -322,15 +298,15 @@ tdb quality results.jsonl</pre>
   if (taskId) {
     lt.innerHTML =
       '<div class="' + CARD + ' flex-row flex-wrap items-center gap-3 px-6 py-6">' +
-        '<span class="text-muted-foreground text-xs">a real task id to paste in</span>' +
+        '<span class="text-muted-foreground text-sm">a real task id to paste in</span>' +
         '<code class="text-sm">' + taskId + "</code>" +
-        '<a class="text-muted-foreground hover:text-foreground ml-auto text-xs underline-offset-4 ' +
+        '<a class="text-muted-foreground hover:text-foreground ml-auto text-sm underline-offset-4 ' +
           'transition-colors hover:underline" href="' +
           T.ROOT + "/registry/" + encodeURIComponent(taskId) + '/">task page &rarr;</a>' +
       "</div>";
   } else {
-    lt.innerHTML = '<div class="' + NOTE + '">No task catalogue published yet, so no id to paste. ' +
-      'Run <code>tdb publish</code> to generate <code>site_data.json</code>.</div>';
+    lt.innerHTML = '<div class="' + NOTE + '"><p>No task catalogue published yet, so no id to paste.</p>' +
+      '<p>Run <code>tdb publish</code> to generate <code>site_data.json</code>.</p></div>';
   }
 
   /* today's suite, straight from the board data */
@@ -364,9 +340,9 @@ tdb quality results.jsonl</pre>
           '<p class="text-xl font-medium tabular-nums">' + c[1] + "</p></div>";
       }).join("") + "</div>";
   } else {
-    strip.innerHTML = '<div class="' + NOTE + '">No leaderboard data published yet ' +
-      '(<code>leaderboard_data.json</code> is missing). The commands above still run offline ' +
-      'against any archived task.</div>';
+    strip.innerHTML = '<div class="' + NOTE + '"><p>No leaderboard data published yet ' +
+      '(<code>leaderboard_data.json</code> is missing).</p><p>The commands above still run offline ' +
+      'against any archived task.</p></div>';
   }
 })();
 </script>

@@ -1,6 +1,8 @@
 """Dependency-free structural fixtures for the static v3 capability frontend."""
 from __future__ import annotations
 
+import json
+import re
 from pathlib import Path
 
 
@@ -18,6 +20,10 @@ METHODS = (ROOT / "docs" / "guide" / "quality-methods" / "index.html").read_text
     encoding="utf-8"
 )
 DATA_RUNTIME = (ROOT / "docs" / "assets" / "tdb-data.js").read_text(encoding="utf-8")
+TASK_FORMAT = (ROOT / "docs" / "guide" / "task-format" / "index.html").read_text(
+    encoding="utf-8"
+)
+TW_CSS = (ROOT / "docs" / "assets" / "tw.css").read_text(encoding="utf-8")
 PAGE_GENERATOR = (ROOT / "web" / "gen_pages.py").read_text(encoding="utf-8")
 DATA_GENERATOR = (ROOT / "web" / "gen_site_data.py").read_text(encoding="utf-8")
 
@@ -71,7 +77,14 @@ def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
 
     assert "Task-family: unavailable." in METHODS
-    assert "canonical C1&ndash;C14" in METHODS
+    # WAS: assert "canonical C1&ndash;C14" in METHODS. That taxonomy is defined
+    # in zero .py files, C5 covers 61/61 tasks (zero bits) and nothing can
+    # render it, so the page asserted a label set it could neither produce nor
+    # attribute. Deleting the claim without pinning its replacement would let
+    # the next edit quietly re-assert one, so the NEW commitment is what is
+    # pinned: the dimension is authorised, and it is empty.
+    assert "canonical C1&ndash;C14" not in METHODS
+    assert "No capability label set is currently published" in METHODS
     assert "does not infer one from tracks, merged labels" in METHODS
     assert "does not display zero" in METHODS
     assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS
@@ -98,6 +111,115 @@ def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
     assert "Official Solves" in REGISTRY
     assert "means awaiting formal coverage, not zero solves" in REGISTRY
     assert "official score coverage" in REGISTRY
+
+
+def _nav_table():
+    """The NAV literal out of site.js, parsed rather than string-matched.
+
+    Every entry is `["label", "href/", ["page-key", ...]]` with double-quoted
+    strings, so the literal is already JSON once the newlines are gone.
+    """
+    assert "var NAV = [" in SHELL, "site.js no longer declares a NAV array"
+    body = SHELL.split("var NAV = ", 1)[1].split("\n  ];", 1)[0]
+    return json.loads(body + "\n  ]")
+
+
+def test_the_quality_report_is_reachable_without_typing_the_url():
+    """/quality/ was an orphan: reachable only by typing the URL.
+
+    A top-level nav row is the obvious fix and is the wrong one --
+    verify_site.py pins the header to five items and explicitly bans a
+    top-level quality entry as retired navigation. So `quality` stays a
+    `docs` key and the entrances live in the pages: the home masthead, the
+    leaderboard foot, and the docs shortcut rail. Each is asserted here
+    because losing any one of them puts the report back out of reach, and
+    nothing else in the suite would notice.
+    """
+    nav = _nav_table()
+
+    # the pinned five, in the pinned order, with quality NOT among them
+    assert [row[0] for row in nav] == [
+        "status", "leaderboard", "tasks", "docs", "submit"
+    ]
+
+    # every key belongs to exactly one row, or two header items light at once
+    keys = [k for row in nav for k in row[2]]
+    assert len(keys) == len(set(keys)), "a page key lights up two nav items"
+
+    # landing on the report lights `docs`, which is the row that owns the key
+    owners = [row[0] for row in nav if "quality" in row[2]]
+    assert owners == ["docs"], owners
+
+    quality_page = (ROOT / "docs" / "quality" / "index.html").read_text(
+        encoding="utf-8")
+    assert 'data-page="quality"' in quality_page
+    assert 'id="discrimination"' in quality_page
+
+    # the three in-page entrances
+    entrances = {
+        "docs/index.html": './quality/#discrimination',
+        "docs/guide/index.html": '../quality/#discrimination',
+        "docs/leaderboard/index.html": '../quality/#discrimination',
+    }
+    for rel, href in entrances.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        assert href in text, f"{rel} lost its link to the discrimination report"
+
+
+def _registry_columns():
+    assert "var COLS = [" in REGISTRY, "the registry no longer declares COLS"
+    block = REGISTRY.split("var COLS = ", 1)[1].split("\n  ];", 1)[0]
+    block = re.sub(r"/\*.*?\*/", " ", block, flags=re.S)
+    return re.findall(r'key:\s*"([^"]+)",\s*label:\s*"([^"]+)"', block)
+
+
+def test_the_declared_difficulty_facet_has_a_column_to_show_its_value():
+    """A filter for an attribute the table never renders is a dead end.
+
+    The facet rail offers "hard 43 / medium 18" and the predicate filters on
+    `declared_difficulty`; the Status cell rendered `t.difficulty` -- the
+    MEASURED field, which is "" on all 61 tasks while no official ranking is
+    published -- so clicking a chip returned rows that looked identical to the
+    ones it excluded.
+    """
+    cols = _registry_columns()
+    by_key = dict(cols)
+    assert by_key.get("declared") == "Difficulty", cols
+    assert "Official Solves" in by_key.values()
+
+    # sortable headers are driven by COLS; a key sortVal cannot read is inert
+    assert 'if (k === "declared") return String(t.declared_difficulty || "");'         in REGISTRY
+    # the cell is rendered from the EDITORIAL field ...
+    assert "esc(t.declared_difficulty)" in REGISTRY
+    # ... and the dead measured badge that used to sit in the Status cell is
+    # gone, so one row can never show two difficulty slots
+    assert "esc(t.difficulty)" not in REGISTRY
+
+    # header, body row and the static loading row must agree on the width
+    body_cells = REGISTRY.count(
+        "'<td data-slot=\"table-cell\" class=\"' + TD")
+    assert body_cells == len(cols), (body_cells, len(cols))
+    spans = re.findall(r'<td data-slot="table-cell" colspan="(\d+)"', REGISTRY)
+    assert spans and all(int(x) == len(cols) for x in spans), spans
+
+
+def test_guide_prose_can_break_the_identifiers_that_overflow_a_phone():
+    """/guide/task-format/ was the one page wider than a 390px viewport.
+
+    `terminal_daily_bench/adapters/base.py::HarnessAdapter` in body copy is one
+    unbreakable token 440px wide in a 358px content box, and because
+    `body { overflow-x: hidden }` propagates to the viewport the page got no
+    scrollbar -- the tail was simply cut off. The article opts its prose into
+    breaking anywhere; the code blocks are unaffected because `white-space:
+    pre` suppresses wrapping outright.
+    """
+    article = re.search(r'<article class="([^"]*prose[^"]*)"', TASK_FORMAT)
+    assert article, "task-format no longer wraps its body in an article.prose"
+    classes = article.group(1).split()
+    assert "wrap-anywhere" in classes, classes
+    # and the class must still BE something: a utility deleted from the
+    # stylesheet leaves the markup looking fixed and the page still clipped
+    assert ".wrap-anywhere{overflow-wrap:anywhere}" in TW_CSS
 
 
 _JS_WORDS = {
@@ -368,7 +490,12 @@ def test_terminal_daily_has_an_independent_visual_identity():
         "--td-paper",
         "--td-night",
         "--td-coral",
-        "--td-font-display",
+        # a DECLARATION, not a reference: "--td-font-display" survives only as
+        # an alias now, and every "var(--td-font-display)" still spells it, so
+        # the old marker would pass on a stylesheet that declares no family.
+        "--td-font:",
+        "--ts-body",
+        "--sp-7",
         ".tdb-brand-mark",
         ".tdb-daynav",
         ".tdb-statrow",
@@ -386,6 +513,36 @@ def test_terminal_daily_has_an_independent_visual_identity():
     ):
         assert retired not in SITE_CSS.lower()
         assert retired not in PAGE_GENERATOR.lower()
+
+    # site.css:390-397 re-pointed Tailwind's .font-mono back to the body face
+    # at specificity (0,1,1), silently reverting ~262 elements to sans while
+    # span/a/h1/h2/pre/figure stayed mono. It is the reason the site looked
+    # like three fonts. It must not come back.
+    assert "p.font-mono," not in SITE_CSS
+
+    # Exactly one font-family may be APPLIED to elements. @font-face blocks
+    # declare the vendored face rather than applying it, so they are stripped
+    # before counting -- but each one must name the same family, or the site
+    # would ship two faces under one alias.
+    faces = re.findall(r"@font-face\s*\{(.*?)\}", SITE_CSS, re.S)
+    assert faces, "the vendored face is gone; the type scale needs its weight axis"
+    face_names = {re.search(r'font-family:\s*([^;]+);', f).group(1).strip()
+                  for f in faces}
+    assert face_names == {'"Google Sans Code"'}, face_names
+    for f in faces:
+        # a variable axis is the whole point: static weights would resynthesise
+        assert re.search(r"font-weight:\s*300\s+800\s*;", f), f
+        assert "url(" in f and "//" not in f.split("url(", 1)[1][:40], (
+            "the face must stay self-hosted; a remote URL breaks offline render"
+        )
+
+    applied = SITE_CSS
+    for f in faces:
+        applied = applied.replace(f, "")
+    assert applied.count("font-family") == 1, (
+        "site.css must apply exactly one font-family; every other face is an "
+        "alias of it, so a second declaration is a second family"
+    )
 
     assert "Terminal Daily" in SHELL
     assert "tdb-brand-mark" in SHELL

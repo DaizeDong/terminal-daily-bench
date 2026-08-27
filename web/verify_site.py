@@ -9,7 +9,7 @@ It is deliberately dependency-free and fast, so it can sit in front of a
 publish. It checks, for every docs/**/*.html:
 
   1. STYLESHEET CONTRACT  every page links exactly
-         <depth>/assets/tw.css, <depth>/assets/tw-extra.css, <depth>/assets/site.css
+         <depth>/assets/tw.css, <depth>/assets/site.css
      in that order, with <depth> derived from where the file sits. This is the
      invariant that three generated pages silently broke: they linked site.css
      alone and rendered as unstyled HTML.
@@ -34,9 +34,13 @@ publish. It checks, for every docs/**/*.html:
   7. UNIQUE IDS           no id appears twice in one document.
 
   8. TERMINAL DAILY IDENTITY  site.css must own a complete, self-contained brand
-     layer (day-window palette, type hierarchy, floating shell, rounded cards,
-     data surfaces, responsive hero, and reduced-motion handling). It must not
-     regress to the retired square/hairline/all-mono reference treatment.
+     layer (day-window palette, type hierarchy, flush shell, square component
+     geometry, data surfaces, responsive hero, and reduced-motion handling).
+     It must not regress to being a verbatim copy of the vendored reference
+     stylesheet, and its geometry must stay square: --radius pinned to 0, no
+     rounded corner anywhere, and the two drawn circles -- the brand mark's
+     discs and the confidence-interval point estimate -- still round. That
+     last rule used to be its own opposite; see check_square_geometry.
 
   9. PUBLIC INFORMATION ARCHITECTURE  the home page presents status, leaderboard,
      then tasks; core catalogue pages put published data ahead of explanation;
@@ -89,7 +93,7 @@ class Balance(html.parser.HTMLParser):
 
 def css_selectors() -> set[str]:
     text = ""
-    for name in ("tw.css", "tw-extra.css", "site.css"):
+    for name in ("tw.css", "site.css"):
         text += (DOCS / "assets" / name).read_text(encoding="utf-8", errors="replace")
     out = set()
     for m in re.finditer(r"\.((?:\\.|[^\s,{>+~)\[\]:.'\"])+)", text):
@@ -145,7 +149,7 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
     # --- 1. stylesheet contract -------------------------------------------
     sheets = [h.split("?", 1)[0] for h in
               re.findall(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"', raw)]
-    want = [f"{root}/assets/{n}" for n in ("tw.css", "tw-extra.css", "site.css")]
+    want = [f"{root}/assets/{n}" for n in ("tw.css", "site.css")]
     if sheets != want:
         bad.append(f"stylesheets {sheets} != {want}")
 
@@ -171,7 +175,7 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
             tok = (tok.replace("&amp;", "&").replace("&gt;", ">").replace("&lt;", "<"))
             if tok in sel or NO_CSS_MARKERS.match(tok):
                 continue
-            bad.append(f"class {tok!r} has no rule in tw.css / tw-extra.css / site.css")
+            bad.append(f"class {tok!r} has no rule in tw.css / site.css")
 
     # --- 7. unique ids -----------------------------------------------------
     ids = re.findall(r'\sid="([^"]+)"', raw)
@@ -529,7 +533,7 @@ def check_no_external(pages: list[Path]) -> list[str]:
         for m in re.finditer(r'<(link|script|img|iframe|source|video|audio)\b[^>]*?'
                              r'\s(?:href|src)="(https?:)?//([^"]+)"', raw, re.I):
             bad.append(f"{page.relative_to(DOCS)}: external <{m.group(1)}> -> //{m.group(3)}")
-    for name in ("tw.css", "tw-extra.css", "site.css"):
+    for name in ("tw.css", "site.css"):
         css = (DOCS / "assets" / name).read_text(encoding="utf-8", errors="replace")
         for m in re.finditer(r"url\(\s*['\"]?([^)'\"]+)", css):
             u = m.group(1).strip()
@@ -570,16 +574,30 @@ def check_site_css() -> list[str]:
     # being quietly preserved to satisfy a checker.
     required = {
         "day-window palette": ("--td-paper", "--td-night", "--td-coral", "--td-sun"),
-        "humanist/display/data type hierarchy": (
-            "--td-font-body", "--td-font-display", "--td-font-data"
+        # WAS ("--td-font-body", "--td-font-display", "--td-font-data") under
+        # the label "humanist/display/data type hierarchy". The site now ships
+        # ONE physical family and keeps those three names as aliases of it, so
+        # that marker would have gone on printing green while the hierarchy it
+        # named no longer existed -- the same vacuous-marker failure the
+        # "own metric treatment" comment below records. What is actually load
+        # bearing after the unification is that the one family is DECLARED and
+        # that the legacy names still resolve, so that is what is asserted.
+        "single type family with legacy aliases": (
+            "--td-font", "--td-font-body", "--td-font-display", "--td-font-data"
         ),
+        "five-step type scale": ("--ts-micro", "--ts-body", "--ts-lead",
+                                 "--ts-sub", "--ts-title"),
+        "nine-step spacing scale": ("--sp-0", "--sp-4", "--sp-7", "--sp-8",
+                                    "--chrome-h"),
         "branded shell": ("#nd-nav", ".tdb-brand", ".tdb-brand-mark"),
         "own day navigation": (".tdb-daynav", ".tdb-daynav-arrow", ".tdb-suiterail"),
         "own status treatment": (".tdb-statrow", ".tdb-block-head"),
-        # was ("border-radius") when a metric was a rounded card. The cards are
-        # flat now, and "border-radius" still appeared -- in the rule setting it
-        # to 0. A marker satisfied by the code that removes the thing it names
-        # is not a check.
+        # was ("border-radius") when a metric was a rounded card. The cards
+        # are flat now -- and site-wide the geometry is square, so
+        # "border-radius" still appeared in the file only in the rules setting
+        # it to 0. A marker satisfied by the code that removes the thing it
+        # names is not a check. (The geometry itself is asserted by
+        # check_square_geometry, not by any substring marker here.)
         "own metric treatment": ('[data-slot="card"]', "[data-tdb-stat-value]"),
         "data-table surface": ('[data-slot="table-container"]', "border-collapse"),
         "mobile layout": ("@media (max-width: 639px)",),
@@ -618,10 +636,209 @@ def check_site_css() -> list[str]:
         if phrase in lower:
             bad.append(f"site.css retains retired reference treatment: {phrase!r}")
 
-    if re.search(r"--radius\s*:\s*0(?:rem|px)?\s*;", body):
-        bad.append("site.css collapses the Terminal Daily rounded geometry to zero")
-    if body.count("border-radius") < 8:
-        bad.append("site.css rounded component geometry is incomplete")
+    bad.extend(check_square_geometry(body))
+    return bad
+
+
+# -- GEOMETRY ---------------------------------------------------------------
+#
+# The site is SQUARE by decision: zero radius everywhere, with exactly two
+# exceptions that are geometry rather than chrome (the two discs in the brand
+# mark, and the plotted point estimate on a confidence interval).
+#
+# This replaces the inverse gate, which read:
+#
+#     if re.search(r"--radius\s*:\s*0(?:rem|px)?\s*;", body):
+#         bad.append("site.css collapses the Terminal Daily rounded geometry
+#                     to zero")
+#     if body.count("border-radius") < 8:
+#         bad.append("site.css rounded component geometry is incomplete")
+#
+# It was rewritten rather than removed. Deleting it would have left the new
+# decision resting on nothing: the next person to paste in a component with a
+# 0.5rem corner would get a green run. A decision worth codifying in one
+# direction is worth codifying in the other, at the same strength.
+#
+# The old second check counted `border-radius` occurrences, on the theory that
+# a stylesheet with too few of them had not finished styling its components.
+# That question does not survive the flip -- under square geometry the healthy
+# count is unbounded below, because one zeroed token squares most of the page.
+# The completeness question that DOES survive is the same question asked the
+# other way round: not "are enough corners rounded" but "is any corner
+# rounded". So every border-radius in the file is classified, and anything
+# that is neither square nor a documented circle is reported with its
+# selector.
+
+_CSS_RULE = re.compile(r"(?P<sel>[^{}]+)\{(?P<decl>[^{}]*)\}")
+# Both the shorthand and the four longhands. A verify pass found that
+# `border-top-left-radius: 8px` slipped through a shorthand-only regex --
+# a gate that can be evaded by spelling the property differently is not a
+# gate. `border-radius` alone would also match the longhands' prefix, so
+# the alternation is ordered longest-first and anchored on the colon.
+_BORDER_RADIUS = re.compile(
+    r"border-(?:top|bottom)-(?:left|right)-radius\s*:\s*([^;}]+)"
+    r"|border-radius\s*:\s*([^;}]+)")
+_RADIUS_TOKEN = re.compile(r"(--radius[\w-]*)\s*:\s*([^;}]+)")
+# Token NAMES referenced inside a value, so an allowance can compare names
+# rather than substrings (var(--radius-2xl) is not var(--radius)).
+_VAR_REF = re.compile(r"var\(\s*(--[\w-]+)")
+
+# The two exceptions, by the selector that owns each. Both are commented at
+# their own rule in site.css; both are drawn shapes, not container corners.
+_CIRCLE_SELECTORS = (
+    ".tdb-brand-mark::before",  # the coral disc behind the mark
+    ".tdb-brand-mark::after",   # the hollow ring sitting on it
+    ".tdb-ci-dot",              # a plotted point estimate on a CI whisker
+)
+
+
+def _css_rules(body: str):
+    """Yield (selector, declarations) for each flat rule in a stylesheet.
+
+    Rules nested one level inside @media come through individually; the
+    @media prelude itself never matches, since a prelude cannot span a brace.
+    """
+    for match in _CSS_RULE.finditer(body):
+        yield " ".join(match.group("sel").split()), match.group("decl")
+
+
+def _radius_value(raw: str) -> str:
+    return " ".join(re.sub(r"!important", "", raw, flags=re.I).split()).lower()
+
+
+def _is_square(value: str) -> bool:
+    """True when every corner in the shorthand is zero.
+
+    `0`, `0px` and `0 0 0 0` are the same shape. `0 0 6px 6px` is not, and it
+    is exactly the half-measure a bare `"border-radius: 0" in body` substring
+    test would have waved through.
+    """
+    corners = value.split("/")[0].split()
+    return bool(corners) and all(
+        re.fullmatch(r"0(?:rem|px|em|%)?", corner) for corner in corners)
+
+
+def _is_circular(value: str) -> bool:
+    """True for the disc/pill idiom, as opposed to a rounded corner.
+
+    999px, 9999px, 50% and Tailwind's calc(infinity*1px) / 3.40282e38px all
+    mean "make this round". A 0.5rem corner does not, and must not be able to
+    pass itself off as one of the two geometry exceptions.
+    """
+    if re.fullmatch(r"calc\(\s*infinity\s*\*\s*1px\s*\)", value):
+        return True
+    match = re.fullmatch(r"(\d+(?:\.\d+)?(?:e\+?\d+)?)(px|rem|%)", value)
+    if not match:
+        return False
+    size, unit = float(match.group(1)), match.group(2)
+    return {"%": size >= 50, "px": size >= 100, "rem": size >= 6}[unit]
+
+
+def check_square_geometry(body: str) -> list[str]:
+    """Fail closed when the square geometry decision is reversed by accident.
+
+    ``body`` is site.css with comments stripped.
+    """
+    bad: list[str] = []
+
+    # 1. --radius is declared, and pinned to zero.
+    #
+    #    Every vendored tw.css corner utility is arithmetic over this one
+    #    token: .rounded-lg is var(--radius), .rounded-md is
+    #    calc(var(--radius) - 2px), .rounded-xl is calc(var(--radius) + 4px).
+    #    Pinning it squares all of them without a rule each -- which is why
+    #    the file is allowed to go on writing `border-radius: var(--radius)`
+    #    in the rules below.
+    #
+    #    DECLARED and ZERO are two requirements, not one. tw.css ships its own
+    #    `--radius` declaration, so deleting site.css's line does not mean "no
+    #    radius" -- it means the vendored value silently wins and every
+    #    .rounded-* utility on the site comes back.
+    tokens = _RADIUS_TOKEN.findall(body)
+    if not any(name == "--radius" for name, _ in tokens):
+        bad.append(
+            "site.css does not declare --radius: the site's geometry is "
+            "square, and tw.css declares its own --radius, so an absent "
+            "declaration hands every .rounded-* utility back to the vendor")
+    for name, raw in tokens:
+        value = _radius_value(raw)
+        if not _is_square(value):
+            bad.append(
+                f"site.css declares {name}: {value} -- the site's geometry is "
+                "square; this token must be 0")
+
+    # The tokens clause 1 just proved square. Only these may be referenced as
+    # an allowance below; a var() naming anything else is the vendor's value.
+    declared_tokens = {name for name, _ in tokens}
+
+    # 2. Nothing else in the file rounds anything, and the two shapes that are
+    #    geometry rather than chrome are still round.
+    circles: dict[str, str] = {}
+    for selector, decl in _css_rules(body):
+        owner = next(
+            (circle for circle in _CIRCLE_SELECTORS
+             if re.search(re.escape(circle) + r"(?![\w-])", selector)), None)
+        for pair in _BORDER_RADIUS.findall(decl):
+            raw = pair[0] or pair[1]
+            value = _radius_value(raw)
+            if owner is not None:
+                circles[owner] = value
+                if not _is_circular(value):
+                    bad.append(
+                        f"site.css gives {owner} border-radius: {value} -- "
+                        "the brand mark's discs and the CI point estimate are "
+                        "drawn GEOMETRY, not container chrome; squaring them "
+                        "deletes a logo and turns a point estimate into a "
+                        "third tick mark on a whisker that already has two")
+                continue
+            # Only a token THIS file declares is known to be zero. A verify
+            # pass found `var(--radius-2xl)` passing here: it is declared in
+            # vendored tw.css at 16px, never checked by clause 1, so the
+            # allowance handed the corner straight back to the vendor.
+            #  -- and matched EXACTLY. `f"var(--radius" in value` is a prefix
+            #     test, so it also accepts var(--radius-2xl); the token names
+            #     referenced have to be pulled out and compared as names.
+            referenced = set(_VAR_REF.findall(value))
+            if _is_square(value) or (referenced and referenced <= declared_tokens):
+                continue
+            shape = "a disc/pill" if _is_circular(value) else "a rounded corner"
+            bad.append(
+                f"site.css gives {selector!r} border-radius: {value} -- "
+                f"{shape} outside the two documented geometry exceptions; "
+                "the site's component geometry is square")
+    for circle in _CIRCLE_SELECTORS:
+        if circle not in circles:
+            bad.append(
+                f"site.css no longer gives {circle} a border-radius at all: "
+                "it is one of the two shapes that must stay round")
+
+    # 3. The one utility --radius cannot reach.
+    #
+    #    tw.css hardcodes .rounded-full to 3.40282e38px instead of deriving it
+    #    from the token, so zeroing --radius does not touch it. Measured on
+    #    the running site: the theme switch and its toggle buttons, emitted by
+    #    site.js, stay pills at --radius: 0 -- the only rounded chrome left on
+    #    an otherwise square page. Either site.css squares that utility, or
+    #    nothing the site ships asks for it.
+    emitters = [DOCS / "assets" / "site.js", *sorted(DOCS.rglob("*.html"))]
+    shipping = [path for path in emitters if path.exists()
+                and "rounded-full" in path.read_text(
+                    encoding="utf-8", errors="replace")]
+    if shipping:
+        neutralised = any(
+            "rounded-full" in selector
+            and any(_is_square(_radius_value(raw))
+                    for pair in _BORDER_RADIUS.findall(decl)
+                    for raw in (pair[0] or pair[1],))
+            for selector, decl in _css_rules(body))
+        if not neutralised:
+            where = ", ".join(str(path.relative_to(DOCS)) for path in shipping[:3])
+            bad.append(
+                "site.css does not square the vendored .rounded-full utility, "
+                f"which {where} still ships: tw.css hardcodes it to "
+                "3.40282e38px rather than var(--radius), so --radius: 0 "
+                "cannot reach it and those controls render as pills")
+
     return bad
 
 

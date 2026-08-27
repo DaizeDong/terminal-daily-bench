@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark status — terminal-daily-bench</title>
 <meta name="description" content="Published terminal-daily-bench suites, task counts, languages, and live/archive release status.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -17,34 +16,35 @@
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
       <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest dated release first. Suite publication does not imply a formal score.</p>
+      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest first.</p>
 
       <div class="tdb-plain-table" id="suites" data-tdb-primary-data>
         <p class="tdb-empty">loading suites&hellip;</p>
       </div>
 
-      <section class="flex flex-col py-12 sm:pb-16" data-tdb-integrity>
-        <div class="mb-4 flex flex-col items-center gap-2">
-          <p class="font-mono text-sm">release and scoring policy</p>
+      <section class="tdb-block" data-tdb-section="policy" data-tdb-integrity>
+        <div class="tdb-block-head">
+          <h2>release and scoring policy</h2>
+          <p>what publication certifies</p>
         </div>
-        <div class="bg-card -mx-4 grid grid-cols-1 border-y font-mono md:mx-0 md:grid-cols-2 md:border-x">
+        <div class="bg-card grid grid-cols-1 border-y font-mono md:grid-cols-2 md:border-x">
           <div class="border-b px-6 py-6">
             <p class="font-medium">live</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected test bodies are withheld. Submissions remain unranked until an official replay receipt exists.</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected tests withheld; unranked until an official replay receipt.</p>
           </div>
           <div class="px-6 py-6">
             <p class="font-medium">archive</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Task artifacts are public. End-to-end execution requires the unpublished patched Harbor fork. Stock Harbor 0.13.1 is insufficient.</p>
+            <p class="text-muted-foreground mt-2 text-sm/relaxed">Artifacts public; end-to-end runs need the unpublished patched Harbor fork, not stock 0.13.1.</p>
           </div>
         </div>
-        <p class="text-muted-foreground mt-4 font-mono text-sm/relaxed">No certified 50-task v3 ranking is published. Historical matrices do not mark a suite scored. The deterministic execution gate ignores claimed rewards. Semantic verifier false-accept is unmeasured.</p>
+        <p class="tdb-block-foot">No certified ranking. Claimed rewards are ignored; semantic false-accept is unmeasured.</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/site.js?v=100de7a1cd" data-root=".." data-page="benchmarks"></script>
 <script>
 (function () {
   "use strict";

@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-20T20:00:41Z",
+ "generated": "2026-08-25T22:57:18Z",
  "scoring": {
   "schema_version": "td-public-scoring-status-v1",
   "relative_schema": "td-relative-capability-v3",
@@ -16,7 +16,7 @@
   "publication_bundle_approved": false,
   "relative_report_sha256": null,
   "relative_report_digest_matches": false,
-  "matrix_sha256": "79096edaafc30599ea73e68d190a96ec8533fd47b7d8bb1c655a661430923ebc",
+  "matrix_sha256": "f961a13e3a2423008a6322b4fb96f6f9a87d49317c25446fc5721c3e9863ec29",
   "matrix_digest_matches": false,
   "matrix_task_id_roster_sha256": "ba2400276d93dcf68fabe1eb591ad3bad80823fdb9d6d602d6234201d7be2e10",
   "matrix_task_roster_digest_matches": false,
@@ -175,6 +175,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -201,6 +202,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -227,6 +229,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -253,6 +256,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -279,6 +283,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -305,6 +310,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -331,6 +337,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -357,6 +364,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -383,6 +391,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -409,6 +418,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -435,6 +445,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -461,6 +472,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -487,6 +499,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -513,6 +526,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -539,6 +553,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -565,6 +580,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -591,6 +607,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -617,6 +634,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -643,6 +661,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -669,6 +688,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -695,6 +715,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -721,6 +742,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -752,6 +774,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": [
     "live"
    ]
@@ -780,6 +803,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -806,6 +830,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -832,6 +857,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -858,6 +884,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -884,6 +911,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -910,6 +938,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -936,6 +965,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -967,6 +997,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -998,6 +1029,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1024,6 +1056,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1050,6 +1083,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1076,6 +1110,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1102,6 +1137,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1128,6 +1164,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1154,6 +1191,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1180,6 +1218,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1206,6 +1245,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1232,6 +1272,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1258,6 +1299,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1284,6 +1326,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1310,6 +1353,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1336,6 +1380,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1362,6 +1407,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1388,6 +1434,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1414,6 +1461,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1440,6 +1488,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1466,6 +1515,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1492,6 +1542,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1518,6 +1569,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1544,6 +1596,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1570,6 +1623,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1596,6 +1650,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": []
   },
   {
@@ -1622,6 +1677,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1648,6 +1704,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1674,6 +1731,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1700,6 +1758,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1726,6 +1785,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
@@ -1757,6 +1817,7 @@
    "solved_by": null,
    "n_models": null,
    "difficulty": "",
+   "declared_difficulty": "medium",
    "also_in": [
     "live"
    ]

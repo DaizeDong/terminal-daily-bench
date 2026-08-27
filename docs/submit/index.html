@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submit results — terminal-daily-bench</title>
 <meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/tw-extra.css?v=d064c7dcdd">
-<link rel="stylesheet" href="../assets/site.css?v=d064c7dcdd">
+<link rel="stylesheet" href="../assets/tw.css?v=100de7a1cd">
+<link rel="stylesheet" href="../assets/site.css?v=100de7a1cd">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -25,37 +24,34 @@
       </nav>
 
       <h1 class="font-mono text-4xl tracking-tighter">Submit results</h1>
-      <p class="text-muted-foreground mt-4 max-w-4xl font-mono text-sm/relaxed">A submission records a patch and enters the <span class="text-foreground">pending</span> queue. Its claimed reward is stored for audit and ignored for ranking.</p>
+      <p class="text-muted-foreground mt-4 max-w-4xl font-mono text-sm/relaxed">Recorded is not verified.</p>
 
       <div class="bg-card mt-6 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-        <p><span class="font-medium">Status.</span> The public bundle does not run a replay worker, so a submission stays <span class="text-foreground">pending</span> until an operator publishes an Ed25519-signed v2 receipt; ranking additionally needs complete frozen-roster coverage. Pending rows never enter the verified ranking and never receive a <code>false_accept</code> value. <a class="text-foreground underline underline-offset-4" href="../guide/submission/#operator-replay">Replay authority requirements</a>.</p>
-        <p class="text-muted-foreground mt-4">Local <code>tdb run</code> and <code>tdb oracle</code> require the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient. <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/#requirements">Execution requirements</a>.</p>
+        <p>The public bundle does not run a replay worker: a submission stays <span class="text-foreground">pending</span> until an operator publishes an Ed25519-signed v2 receipt, and ranking needs complete frozen-roster coverage.</p>
+        <p class="mt-4">Pending rows never enter the verified ranking. <a class="text-foreground underline underline-offset-4" href="../guide/submission/#operator-replay">Replay authority</a>.</p>
+        <p class="text-muted-foreground mt-4">Local runs need the unpublished patched Harbor fork, not stock 0.13.1. <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/#requirements">Requirements</a>.</p>
       </div>
 
-      <section id="mechanic" class="flex flex-col py-12">
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm">submission state</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">authenticated record → pending → official replay → signed receipt → complete roster</p>
-          </div>
-          <a class="text-muted-foreground hover:text-foreground font-mono text-sm underline-offset-4 hover:underline" href="../guide/submission/">format and validation &rarr;</a>
+      <section id="mechanic" class="tdb-block" data-tdb-section="mechanic">
+        <div class="tdb-block-head">
+          <h2>submission state</h2>
+          <p>record → pending → replay receipt</p>
+          <div class="tdb-block-tools"><a href="../guide/submission/">format and validation &rarr;</a></div>
         </div>
         <div class="bg-fd-secondary/50 border px-6 py-4 font-mono text-sm/relaxed">
           <code>python3 web/submit_result.py record --authenticated-submitter github:LOGIN &lt; submission.json</code>
-          <p class="text-muted-foreground mt-2">Recording is not verification. Model and scaffold labels remain self-reported; official controlled results are a separate table.</p>
+          <p class="text-muted-foreground mt-2">Labels are self-reported; a claimed reward is stored for audit, never scored.</p>
         </div>
       </section>
 
-      <section id="verified" class="flex flex-col py-12" data-tdb-primary-data>
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm">verified community results · replay authority</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">signed receipts + complete frozen roster only</p>
-          </div>
-          <p class="text-muted-foreground font-mono text-sm" id="verified-count">0 entries</p>
+      <section id="verified" class="tdb-block" data-tdb-section="verified" data-tdb-primary-data>
+        <div class="tdb-block-head">
+          <h2>verified community results · replay authority</h2>
+          <p>signed receipts + full frozen roster</p>
+          <div class="tdb-block-tools"><p id="verified-count">0 entries</p></div>
         </div>
-        <div class="-mx-4 mb-6 grid grid-cols-2 md:mx-0 md:grid-cols-3" id="verified-strip"></div>
-        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
+        <div class="mb-6 grid grid-cols-2 md:grid-cols-3" id="verified-strip"></div>
+        <div class="bg-card border-y font-mono md:border-x">
           <div data-slot="table-container" class="relative w-full overflow-x-auto">
             <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
               <thead data-slot="table-header" class="[&amp;_tr]:border-b">
@@ -77,15 +73,13 @@
         </div>
       </section>
 
-      <section id="pending" class="flex flex-col py-12 sm:pb-16">
-        <div class="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <p class="font-mono text-sm">pending submissions</p>
-            <p class="text-muted-foreground mt-1 font-mono text-xs">listed for audit; excluded from ranking</p>
-          </div>
-          <p class="text-muted-foreground font-mono text-sm" id="pending-count">0 entries</p>
+      <section id="pending" class="tdb-block" data-tdb-section="pending">
+        <div class="tdb-block-head">
+          <h2>pending submissions</h2>
+          <p>listed for audit; excluded from ranking</p>
+          <div class="tdb-block-tools"><p id="pending-count">0 entries</p></div>
         </div>
-        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
+        <div class="bg-card border-y font-mono md:border-x">
           <div data-slot="table-container" class="relative w-full overflow-x-auto">
             <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
               <thead data-slot="table-header" class="[&amp;_tr]:border-b">
@@ -108,7 +102,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=d064c7dcdd" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=100de7a1cd" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";

@@ -1,17 +1,15 @@
 # Selection-Quality methods (MSQ)
 
-Most benchmarks report a single number per model — a solve-rate scalar — and stop
-there. That tells you *who* scored higher; it never tells you whether the **task
-set itself** can separate models at all. A set where every model fails every task,
-or passes every task, produces a leaderboard that is pure noise, yet its solve-rate
-column looks perfectly normal.
+A solve-rate scalar tells you *who* scored higher; it never tells you whether the
+**task set itself** can separate models at all. A set where every model fails every
+task produces a leaderboard of pure noise behind a perfectly normal-looking
+solve-rate column.
 
 `terminal_daily_bench.quality` is the instrument for that missing axis: **Multi-angle
 Selection-Quality (MSQ)**. It reads a graded `(task × model)` response matrix and
-reports, on orthogonal axes, *how well a task set discriminates models* — plus the
-psychometric reliability of the set, honest bootstrap uncertainty on every axis, the
-task counts needed to reach research-grade precision, and a daily GO/NO-GO readiness
-verdict. This is the axis TB (Terminal-Bench) does not measure.
+reports, on orthogonal axes, *how well a task set discriminates models* — plus
+reliability, bootstrap uncertainty on every axis, the task counts needed for
+research-grade precision, and a daily GO/NO-GO readiness verdict.
 
 Everything below is a **pure function over plain lists**: it never reads or changes a
 reward decision. It therefore cannot alter replay integrity, and it also cannot measure
@@ -32,6 +30,67 @@ A model **solved** a task iff its grade `>= solved_threshold` (default `1`), so 
 binary `0/1` matrix and a graded `0..K` matrix both work with the same code. The CLI
 builds this matrix for you from a results file; see [surfacing it](#how-tdb-quality-surfaces-it).
 
+**A cell that was never run is not a cell.** `matrix.rows[].g` in
+`leaderboard_data.json` is *defined* as tri-state: `1` solved, `0` attempted and
+failed, `null` never attempted. Every axis here is defined on a rectangular grid
+of *observed* outcomes, so the publisher *reduces* the grid to complete cases
+&mdash; dropping whole tasks or whole models until no `null` remains &mdash; and
+the `n_tasks` / `n_models` on the resulting card describe that reduced grid, not
+the axes of the published matrix. A `null` is never imputed as `0`: imputing
+moves a harness outage into the item statistics, depressing D and inflating the
+item's apparent difficulty, invisibly.
+
+> **The currently published grid (2026-08-19) predates this change.** It carries
+> no `null` at all: it records 15 of its 600 `claude-code` cells &mdash; pairs
+> that were never run &mdash; as `0`, and its quality card was computed on the
+> full 50 &times; 12 axes rather than on a complete-case reduction. A payload
+> built by the current publisher carries a `complete_case` block naming the
+> dropped tasks, dropped models and unattempted cells; this one does not, and
+> that absence is how you tell the two apart. The
+> [quality report](quality/) states the same thing about the same 600 cells,
+> derives the figure at page load rather than asserting it, and reads
+> &ldquo;solved by none&rdquo; as a ceiling for exactly this reason.
+
+---
+
+## What enters the matrix
+
+A run produces a status before it produces a grade. Only an authenticated
+`SUCCESS` with `score_accepted=true` becomes a numeric outcome.
+
+| Execution status | Outcome | Coverage |
+|---|---|---|
+| `SUCCESS`, `score_accepted=true` | graded | counted |
+| `SUCCESS`, `score_accepted=false` | `outcome:null` | counted |
+| `FAILED` | `outcome:null` | counted |
+| `BLOCKED` | `outcome:null` | counted |
+| `NOT_RUN` | `outcome:null` | counted |
+
+Rows that use `outcome:null` **are not converted to zero** and are **excluded from
+ratings** — a task that could not be attempted is not a task the model failed. They
+are **counted in coverage, not outcomes**, so a model that ran few tasks shows low
+coverage rather than a clean-looking rate.
+
+Statuses are tallied twice. `authenticated_counts` are receipt-bound;
+`untrusted_declared_counts` are what a submission asserted about itself. A
+declaration cannot authenticate its own status, so the two are never summed.
+
+### Which dimensions may be ranked
+
+Three: `overall`, `language`, and `capability`, each bound by the trusted task
+catalogue. The leaderboard enforces this list in code (`ALLOWED_DIMENSIONS`); a
+dimension outside it is not rendered, however complete the data looks. **No
+capability label set is currently published**, so no capability axis can be
+rendered today &mdash; the dimension is authorised, not populated.
+
+**Task-family: unavailable.** Historical data carries no authority-bound family
+field. The site does not infer one from tracks, merged labels, or repository
+metadata, and does not display zero &mdash; unavailable and zero are different
+claims.
+
+Model, harness, and complete-configuration effects stay separate estimands. A
+configuration score is never relabelled as model-only performance.
+
 ---
 
 ## The measurement axes
@@ -48,8 +107,8 @@ everyone solves, or no one solves, carries zero discrimination.
 D = |{ tasks with 0 < solvers < n_models }| / n_tasks
 ```
 
-Returns `None` with fewer than 2 models (splitting is undefined with one column). This
-is the single most important axis, and it carries the default composite weight of 0.5.
+Returns `None` with fewer than 2 models (splitting is undefined with one column).
+Default composite weight `0.5`, the largest of the three.
 
 ### C — difficulty coverage · `difficulty_coverage`
 
@@ -61,8 +120,6 @@ difficulties and `0` when they all cluster in one bucket.
 ```
 C = ( -Σ p_b · log p_b ) / log(n_buckets)      p_b = fraction of tasks in bucket b
 ```
-
-Measures whether the set spans easy → hard rather than clustering at one difficulty.
 
 ### M — monotonicity · `monotonicity`
 
@@ -115,7 +172,7 @@ fewer than 2 tasks.
 
 ### I — IRT (2PL) test information · `total_information_2pl`
 
-The psychometric gold standard. The binary response matrix is fit to the **2-parameter
+The binary response matrix is fit to the **2-parameter
 logistic** item-response model via `irt_item_stats`, giving each task an
 `a` (discrimination) and `b` (difficulty):
 
@@ -160,9 +217,8 @@ acceptable, `> 0.8` good; it can go **negative** when items are mutually inconsi
 
 ### Bootstrap confidence intervals · `msq_bootstrap_ci`
 
-At `N ≈ 6` tasks the point estimates carry huge sampling uncertainty; a research-grade
-report must state it. This **resamples the task rows with replacement** `n_boot` times
-(seeded RNG → resume-reproducible), recomputing D/C/M each time, and returns per axis:
+**Resamples the task rows with replacement** `n_boot` times (seeded RNG →
+resume-reproducible), recomputing D/C/M each time, and returns per axis:
 
 ```
 { estimate, lo, hi, se, n_valid }
@@ -174,8 +230,8 @@ intervals — that is the honest point, not a defect.
 
 ### Precision-power (required-N) · `required_tasks_for_precision`
 
-The actionable question: how many tasks buy a research-grade interval? Standard error
-scales as `1/√N`, so from the bootstrap SE at the current `N₀`:
+How many tasks buy a research-grade interval? Standard error scales as `1/√N`, so
+from the bootstrap SE at the current `N₀`:
 
 ```
 half_width h(N) = z · SE(N₀) · √(N₀ / N)
@@ -272,7 +328,7 @@ and `model`, and either `solved` or a `reward` (treated as solved when `reward �
 records with `model == "oracle"` are excluded from the matrix.
 
 ```bash
-# results.jsonl — one record per (model, task) run, exactly as `tdb run` emits
+# results.jsonl — one record per (model, task) run, as `tdb run` emits
 # {"task":"td-1","model":"A","reward":1.0}
 # {"task":"td-1","model":"B","reward":0.0}
 # ...
@@ -296,9 +352,7 @@ The last line is the full machine-readable card (`msq`, `irt`, `reliability`,
 models** (multi-angle quality is undefined with a single model column) and exits `2`
 otherwise.
 
-Read the example above: `D = 0.667` (4 of 6 tasks split the field — the all-pass td-3
-and all-fail td-4 do not), yet the `D 95% CI = [0.333, 1.000]` is enormous because
-`N = 6` is tiny, and `KR-20 = 0.51` is below the `0.70` bar. The verdict is **NOT-ready**,
-bottlenecked on **precision**, needing ~37 tasks to certify a research-grade
-discrimination interval. That is exactly the judgment a solve-rate scalar can never
-make — and the reason MSQ exists.
+Reading it: `D = 0.667` (4 of 6 tasks split the field — all-pass td-3 and all-fail
+td-4 do not), yet `D 95% CI = [0.333, 1.000]` is enormous at `N = 6`, and
+`KR-20 = 0.51` is below the `0.70` bar — **NOT-ready**, bottlenecked on **precision**,
+needing ~37 tasks. A solve-rate scalar cannot make that judgment.
