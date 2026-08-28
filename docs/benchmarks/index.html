@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark status — terminal-daily-bench</title>
 <meta name="description" content="Published terminal-daily-bench suites, task counts, languages, release status, and the integrity limits on every published number.">
-<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -22,12 +22,19 @@
         <p class="tdb-empty">loading suites&hellip;</p>
       </div>
 
-      <!-- The status rows and the integrity block below arrived from the home
+      <!-- The status rows and the policy tables below arrived from the home
            page, which now carries the leaderboard and nothing else. They were
            moved rather than deleted: the scoring invariant in particular is
            stated nowhere else on this site, and the nav already calls this
            page "status", so this is where a reader who wants the caveat
-           behind a number is sent. -->
+           behind a number is sent.
+
+           The standing explanation is a `key -> what it does` table now. Nine
+           paragraphs carried what six rows carry, and two of them carried it
+           twice: the release grid and the details body each explained live
+           vs. archive, and each named the Harbor fork separately. Nothing was
+           dropped in the compression -- every caveat below is the sentence
+           that shipped, moved into the cell it qualifies. -->
       <section class="tdb-block" data-tdb-section="status">
         <div class="tdb-block-head">
           <h2>status</h2>
@@ -35,7 +42,7 @@
         </div>
 
         <div class="tdb-statgrid" id="hp-status">
-          <p class="text-muted-foreground font-mono text-sm">loading published data&hellip;</p>
+          <p class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
         </div>
       </section>
 
@@ -44,43 +51,44 @@
           <h2>release and scoring policy</h2>
           <p>what publication certifies</p>
         </div>
-        <div class="bg-card grid grid-cols-1 border-y font-mono md:grid-cols-2 md:border-x">
-          <div class="border-b px-6 py-6">
-            <p class="font-medium">live</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Gold and protected tests withheld; unranked until an official replay receipt.</p>
-          </div>
-          <div class="px-6 py-6">
-            <p class="font-medium">archive</p>
-            <p class="text-muted-foreground mt-2 text-sm/relaxed">Artifacts public; end-to-end runs need the unpublished patched Harbor fork, not stock 0.13.1.</p>
-          </div>
+
+        <div class="tdb-plain-table">
+          <table class="w-full">
+            <thead><tr><th>release</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><td>live</td><td class="tdb-wrap">Gold and protected tests withheld; unranked until an official replay receipt.</td></tr>
+              <tr><td>archive</td><td class="tdb-wrap">Gold, protected tests and artifacts published in full.</td></tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="tdb-integrity" id="integrity" data-tdb-integrity>
-          <!-- The invariant and the first line of the details body used to say
-               the same thing twice: "protected tests decide scores, a reward
-               claim does not". Merged here, where it sits next to the release
-               policy it qualifies. -->
           <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores: deterministic code re-lays and executes them; a claimed reward never is.</p>
           <details data-tdb-integrity-details>
             <summary>integrity limits and current blockers</summary>
-            <div class="tdb-integrity-body">
-              <p>A paired staged-SIF egress canary passed on 2026-08-06; no production protected replay has run.</p>
-              <p>Receipt authority <span class="text-foreground">active=false</span>, one collaborator. Publication runs off a <a href="../guide/submission/#operator-replay">code-controlled allowlist</a>; self-signed report/matrix pins cannot approve themselves.</p>
-              <p><span class="text-foreground">Live</span> withholds gold and protected tests; <span class="text-foreground">archives</span> publish them.</p>
-              <p>Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+            <div class="tdb-plain-table mb-6">
+              <table class="w-full">
+                <thead><tr><th>blocker</th><th>state</th></tr></thead>
+                <tbody>
+                  <tr><td>protected replay</td><td class="tdb-wrap">A paired staged-SIF egress canary passed on 2026-08-06; no production protected replay has run.</td></tr>
+                  <tr><td>receipt authority</td><td class="tdb-wrap"><span class="text-foreground">active=false</span>, one collaborator. Publication runs off a <a href="../guide/submission/#operator-replay">code-controlled allowlist</a>; self-signed report/matrix pins cannot approve themselves.</td></tr>
+                  <tr><td>local runs</td><td class="tdb-wrap">Need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</td></tr>
+                  <tr><td>report</td><td class="tdb-wrap" id="hp-data-note">&mdash;</td></tr>
+                </tbody>
+              </table>
             </div>
           </details>
-          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only. <span id="hp-data-note"></span></p>
+          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only.</p>
         </div>
 
-        <p class="tdb-block-foot">No certified ranking. Claimed rewards are ignored; semantic false-accept is unmeasured.</p>
+        <p class="tdb-block-foot">No certified ranking; semantic false-accept is unmeasured.</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="benchmarks"></script>
 <script>
 (function () {
   "use strict";

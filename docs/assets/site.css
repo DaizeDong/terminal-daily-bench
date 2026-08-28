@@ -1202,6 +1202,19 @@ figure.shiki .line {
 }
 .tdb-search input:focus-visible { outline: 2px solid var(--foreground); outline-offset: -1px; }
 
+/* --- the filter rail ----------------------------------------------------- */
+/* The chips themselves are the registry's, class for class, so the two
+   filterable tables on this site are one control and not two. What is local is
+   the row label: a rail of eight buttons with no word in front of it is a row
+   of eight unrelated buttons, and the two dimensions this board actually has
+   -- the harness and the reasoning effort -- are exactly the split the reader
+   is trying to make. */
+.tdb-facet-label {
+  color: var(--muted-foreground); font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  margin-right: var(--sp-2); min-width: 3.5rem;
+}
+
 .tdb-badge {
   display: inline-block; font-size: var(--ts-micro); letter-spacing: var(--tr-micro);
   text-transform: uppercase; padding: var(--sp-1) var(--sp-3); border: 1px solid var(--border);
@@ -1246,17 +1259,34 @@ figure.shiki .line {
 .tdb-foot-count { margin-top: var(--sp-6) !important; }
 
 /* --- sortable column headers -------------------------------------------- */
+/* These rules existed and nothing was wired to them. The header is a real
+   control now, so the affordance has to be visible BEFORE the click: every
+   sortable label carries a direction glyph, muted while the column is idle
+   and full ink while it is the active key. A table that sorts but does not
+   say which key it is in is a table whose order you cannot check.
+
+   The glyph is an inline SVG, not a character. The site ships one self-hosted
+   family and a glyph-level coverage test; a caret typed as text would be drawn
+   by whatever face the OS picked for it. */
 .tdb-sort {
   appearance: none; background: none; border: 0; padding: 0; cursor: pointer;
   color: var(--muted-foreground); font: inherit; font-size: var(--ts-body);
   letter-spacing: var(--tr-micro); text-transform: uppercase;
 }
-.tdb-sort { display: inline-block; }
+.tdb-sort { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .tdb-sort:hover { color: var(--foreground); }
 .tdb-sort[data-active="true"] { color: var(--foreground); }
+.tdb-sort svg { width: 0.8125rem; height: 0.8125rem; opacity: 0.45; }
+.tdb-sort:hover svg { opacity: 0.8; }
+.tdb-sort[data-active="true"] svg { opacity: 1; }
+.tdb-sort:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
 /* the label of a column you cannot sort: same type, no affordance */
 .tdb-sort[data-static="true"] { cursor: default; }
 .tdb-sort[data-static="true"]:hover { color: var(--muted-foreground); }
+/* right-aligned columns hang their control off the right edge, so the label
+   stays over the digits it sorts rather than over the gutter */
+.tdb-sort-wrap { display: flex; }
+.tdb-sort-wrap[data-align="right"] { justify-content: flex-end; }
 
 /* --- a claim and its consequence, without six cards around them ---------- */
 .tdb-limits { display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-2) var(--sp-6); }
@@ -1271,6 +1301,44 @@ figure.shiki .line {
 .tdb-acc { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
 .tdb-acc strong { font-weight: var(--fw-medium); font-variant-numeric: tabular-nums; line-height: var(--lh-head); }
 .tdb-acc-ci { color: var(--muted-foreground); font-size: var(--ts-micro); line-height: var(--lh-flat); font-variant-numeric: tabular-nums; }
+
+/* The score bar.
+
+   A column of percentages is 354 numbers a reader has to compare by reading;
+   one length beside each number turns the same column into a shape. The
+   geometry is the reference's: a 12px square track, the fill monochrome at 80%
+   of the ink, nothing written inside it.
+
+   The number sits BESIDE the track, never on it. That is not a layout
+   preference: text over a partially filled bar has two different backgrounds
+   under it and the contrast of the half that lands on the fill cannot be
+   fixed without dimming the fill into invisibility. Beside the track the digits
+   keep the cell's own foreground on the cell's own background, unchanged.
+
+   `min-width` on the number is what keeps the tracks in one vertical line --
+   without it "100%" and "4%" push their bars to different left edges and the
+   column stops being comparable at a glance, which was the entire point.
+
+   There is NO track for an unmeasured cell. A zero-width bar and a bar that
+   was never drawn look the same from two feet away, and the difference is
+   "this configuration scored nothing" versus "this configuration was never
+   run". The renderer returns an em dash and no track at all; see barCell(). */
+.tdb-acc-row { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-3); }
+.tdb-acc-row strong { min-width: 3.5rem; text-align: right; }
+.tdb-acc-track {
+  position: relative; display: block; flex: 0 0 auto;
+  width: 5rem; height: 12px;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+.tdb-acc-fill {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+/* On a phone the table already scrolls sideways; the bar is the part of the
+   cell that can be dropped without losing a number. */
+@media (max-width: 639px) {
+  .tdb-acc-track { display: none; }
+}
 
 /* --- a failure to READ the data, which is not an empty result ------------ */
 .tdb-loaderr {
@@ -1738,6 +1806,16 @@ a.tdb-suitelink:hover { color: var(--foreground); }
    independent of size and of colour. At 15px, 40rem is 68 characters, inside
    the 45-75 range. The data around it keeps the full width. */
 [data-tdb-integrity] p { max-width: 40rem; }
+/* The same measure for a definition. The leaderboard foot's standing notes are
+   a <dl>, and a dd left unconstrained ran to 130 characters beside a paragraph
+   held at 68 -- one block of caveats set two different ways. The term column is
+   short by construction and stays as wide as its longest word.
+
+   Scoped to .tdb-foot, not to [data-tdb-integrity]: that marker is on eight
+   pages and /quality/ carries ten definition lists under it whose measure is
+   not this one's to set. A rule written for one block must not reach seven
+   others because they happen to share a semantic marker. */
+.tdb-foot dd { max-width: 40rem; }
 
 /* --- one type scale for the whole site ---------------------------------- */
 /* Page titles ran to clamp(2.4rem, 6vw, 3.6rem) and section headings to 2rem

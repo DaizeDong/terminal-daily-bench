@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
 <meta name="description" content="Search the published terminal-daily-bench task catalogue. Catalogue membership is not a score.">
-<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -75,7 +75,7 @@
                  could not be read, because fourteen chips reading zero and a
                  catalogue that covers nothing look identical. -->
             <div class="flex flex-wrap items-center gap-1 border-t px-4 py-3" id="tdb-caps" hidden></div>
-            <p class="text-muted-foreground px-4 pb-3 text-sm" id="tdb-facet-note"></p>
+            <div class="px-4 pb-3" id="tdb-facet-note"></div>
           </div>
         </div>
 
@@ -103,7 +103,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="registry"></script>
+<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="registry"></script>
 <script>
 (function () {
   "use strict";
@@ -310,12 +310,14 @@
       return n;
     }
 
-    var axesReDerived = 0, widest = null, widestN = 0;
+    /* Which axis is WIDEST, and the reading that a label carried by nearly
+       every task separates nothing, are stated once on /quality/#capability
+       next to the solve matrix that argues the same point. Only the count
+       that feeds the summary card is needed here. */
+    var axesReDerived = 0;
     axes.forEach(function (a) {
       if (!a || !a.code) return;
-      var n = capCount(a.code, capReDerived);
-      if (n > 0) axesReDerived++;
-      if (n > widestN) { widest = a; widestN = n; }
+      if (capCount(a.code, capReDerived) > 0) axesReDerived++;
     });
 
     /* ---- summary ---- */
@@ -334,12 +336,17 @@
       f2p += Number(t.n_fail_to_pass) || 0;
     });
 
+    /* Card sublines are the qualifier on the number above them, not a place to
+       restate the page. Each is trimmed to the one thing the figure would be
+       misread without: what a task is, that a suite is sealed, what "live"
+       withholds, that the f2p tests are re-laid rather than trusted from the
+       workspace, and whether the coverage figure is bound to a formal matrix. */
     var stats = [
-      ["tasks",                tasks.length,                          "one merged pull request each"],
-      ["suites",               Object.keys(suiteSet).length || 1,     "every day is its own sealed suite"],
-      ["languages",            Object.keys(langs).length || null,     "mined across the ecosystem"],
-      ["live now",             live,                                  "gold withheld, pending official replay"],
-      ["protected f2p tests",  f2p || null,                           "re-laid over the agent's workspace"],
+      ["tasks",                tasks.length,                          "one merged PR each"],
+      ["suites",               Object.keys(suiteSet).length || 1,     "one sealed suite per day"],
+      ["languages",            Object.keys(langs).length || null,     "across the catalogue"],
+      ["live now",             live,                                  "gold withheld until replay"],
+      ["protected f2p tests",  f2p || null,                           "re-laid over the workspace"],
       ["official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
         scoredTasks ? "bound to the formal matrix" : "no official matrix published"]
     ];
@@ -347,7 +354,7 @@
        is the banner at the top of the page, not a card reading 0/0. */
     if (cap && axes.length) {
       stats.push(["capability axes", axesReDerived + "/" + axes.length,
-                  "of the declared taxonomy re-derived on a published package"]);
+                  "re-derived on a published package"]);
     }
 
     statsEl.innerHTML = stats.map(function (s) {
@@ -444,29 +451,27 @@
         esc(label) + "</button>";
     }
 
-    /* The prose under the rail. Every number in it is counted right here;
+    /* The prose under the rail, cut to what qualifies the numbers ON THIS
+       PAGE. The standing methodology it used to restate -- how the tagger
+       works, what it reads, why a live package cannot be tagged, and why the
+       broadest axis separates nothing -- is not a fact about the catalogue
+       search, so it lives once on /guide/quality-methods/#capability-taxonomy
+       and /quality/#capability and is linked from here. What stays is the
+       shape of the evidence, because a reader clicking a chip is about to mix
+       both kinds in one result set. Every number is still counted right here;
        none is typed into the markup, and none of it is a solve rate. */
     function paintNote() {
-      var html = "Declared difficulty is editorial: a <code>task.toml</code> label, not measured.";
+      var P = '<p class="text-muted-foreground text-sm">';
+      var html = P + "Declared difficulty is editorial. Capability axes are " +
+        "catalogue metadata, not a score.</p>";
       if (cap) {
-        html += " Capability axes are catalogue metadata, not a score. For " +
-          esc(catalogue.n_tasks_verifiable) + " of " + esc(catalogue.n_tasks) +
-          " packages a deterministic rule-based tagger re-derives them from the " +
-          "oracle patch and the changed files. The other " +
-          esc(catalogue.n_tasks_unverifiable) + ' carry axes marked ' +
-          '<span class="text-foreground">declared</span>: ' +
-          esc(catalogue.unverifiable_reason) + ".";
-        if (widest && widestN > 0) {
-          html += " " + axesReDerived + " of " + axes.length + " declared axes are " +
-            're-derived at all, and the widest, <span class="text-foreground">' +
-            esc(widest.code + " " + widest.name) + "</span>, covers " + widestN +
-            " of the " + esc(catalogue.n_tasks_verifiable) + " re-derived packages, so " +
-            (widestN >= Number(catalogue.n_tasks_verifiable)
-              ? "on this catalogue it separates nothing at all."
-              : "on this catalogue it separates almost nothing.");
-        }
-        html += " A chip selects both kinds of evidence; the Capability column " +
-          "says which kind each row has.";
+        html += P + esc(catalogue.n_tasks_verifiable) + " of " +
+          esc(catalogue.n_tasks) + " re-derived from the package, " +
+          esc(catalogue.n_tasks_unverifiable) + ' <span class="text-foreground">' +
+          "declared</span> only &mdash; live withholds the oracle patch. " +
+          '<a class="hover:text-foreground underline underline-offset-4" ' +
+          'href="../guide/quality-methods/#capability-taxonomy">How axes are ' +
+          "derived</a></p>";
       }
       noteEl.innerHTML = html;
     }

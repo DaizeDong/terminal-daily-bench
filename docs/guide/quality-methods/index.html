@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality methods (MSQ) — terminal-daily-bench docs</title>
 <meta name="description" content="Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle coverage, diversity, 2PL IRT test information, KR-20 reliability, bootstrap intervals, required-N power, and the daily readiness verdict.">
-<link rel="stylesheet" href="../../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../../assets/tw.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../../assets/site.css?v=cf54a71b8f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -156,6 +156,7 @@
               <tr><th>determinism</th><td>same inputs, same labels. Re-running the tagger reproduces each package&rsquo;s shipped <code>capability_labels</code> exactly</td></tr>
               <tr><th>multi-label</th><td>a task carries every code its diff triggers, not one. The counts per code do not sum to the task count</td></tr>
               <tr><th>live packages</th><td><strong>not taggable.</strong> Live withholds <code>solution/oracle.patch</code>, so the tagger has no oracle diff to read</td></tr>
+              <tr><th>in the registry</th><td>a capability chip selects both kinds of evidence &mdash; re-derived and declared-only. The <code>Capability</code> column is what says which kind a given row has</td></tr>
               <tr><th>not a difficulty</th><td>a label says what the fix touches. It never says how hard the task is</td></tr>
             </tbody>
           </table>
@@ -224,6 +225,7 @@
 
         <h3 id="D" class="scroll-m-28 font-mono">D &mdash; discriminative yield</h3>
         <p>The fraction of tasks that <strong>split the field</strong>.</p>
+        <p>Only tasks some models solve and others miss carry information; the rest are the blind spot.</p>
         <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">D = |{ tasks with 0 &lt; solvers &lt; n_models }| / n_tasks</pre></div>
         <div class="overflow-x-auto">
           <table>
@@ -363,6 +365,24 @@
           </table>
         </div>
 
+        <h3 id="axis-failure-modes" class="scroll-m-28 font-mono">What a bad value looks like</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>axis</th><th>what it asks</th><th>reads</th><th>what a bad value looks like</th></tr></thead>
+            <tbody>
+              <tr><th><code>D</code></th><td>Discriminative yield: tasks that split the field (<code>0 &lt; solvers &lt; n_models</code>).</td><td><code>[0,1]</code></td><td>Low D: mostly all-pass or all-fail rows. Below the <code>min_D</code> gate the day cannot rank anyone.</td></tr>
+              <tr><th><code>C</code></th><td>Difficulty coverage: normalized entropy of the per-task solve-rate buckets.</td><td><code>[0,1]</code></td><td>C near 0: every task in one difficulty band. The set then measures one point on the ability curve.</td></tr>
+              <tr><th><code>M</code></th><td>Monotonicity: tasks with no strong ability inversion. Inversion: a weaker model passes what an abler one misses.</td><td><code>[0,1]</code></td><td>M below 1 flags flaky, mislabeled or gameable tasks. M is <em>vacuously</em> 1.0 when no model pair is clearly separated.</td></tr>
+              <tr><th><code>I</code></th><td>2PL Fisher test-information: discrimination <code>a</code> from point-biserial, difficulty <code>b</code> from solve-rate. Additive, and <code>SE = 1/&radic;I</code>.</td><td><code>&ge; 0</code></td><td>Information concentrated in one or two items. An all-pass or all-fail task contributes almost none of it.</td></tr>
+              <tr><th><code>KR-20</code></th><td>Internal-consistency reliability over binary items.</td><td><code>&le; 1</code></td><td>Below the bar (<code>min_kr20</code>) the set is not yet one instrument. A <em>negative</em> KR-20 means items contradict each other.</td></tr>
+              <tr><th><code>A</code></th><td>Angle coverage. Advisory: it does not read the solve matrix.</td><td>advisory</td><td>An angle with fewer than <code>min_support</code> tasks in its conditioning population is undefined.</td></tr>
+              <tr><th><code>R</code></th><td>Diversity, <code>1 &minus; near-duplicate rate</code>. Advisory: it does not read the solve matrix.</td><td>advisory</td><td>Low R: the day filled with near-clones of one PR family. Two tasks in the same repo above the similarity cut count as duplicates.</td></tr>
+              <tr><th><code>D CI</code></th><td>Seeded bootstrap over resampled task rows, 95% central interval.</td><td><code>[0,1]</code></td><td>A half-width above <code>max_d_halfwidth</code> (default <code>0.15</code>): the day cannot place D precisely enough to claim anything.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><code>A</code> (angle coverage) and <code>R</code> (<code>1 &minus; near-duplicate rate</code>) are advisory: neither reads the solve matrix.</p>
+
         <hr>
 
         <h2 id="uncertainty" class="scroll-m-28 font-mono">Uncertainty and power</h2>
@@ -434,6 +454,60 @@ D 95%-CI half-width ≤ max_d_halfwidth   (default 0.15)</pre></div>
               <tr><th><code>recommended_n</code></th><td><code>max(precision-required-N, reliability-required-N)</code></td></tr>
               <tr><th>a <code>None</code> on any axis</th><td>fails that axis</td></tr>
               <tr><th>status</th><td>advisory only: never gates an accept</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="limits" class="scroll-m-28 font-mono">What the card does not license</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>limit</th><th>why</th></tr></thead>
+            <tbody>
+              <tr><th>A ranking is not a result.</th><td>At this N one model&rsquo;s Wilson interval covers most of the others.</td></tr>
+              <tr><th>D is coarse at small N.</th><td>One task flipping moves it a step.</td></tr>
+              <tr><th>Not yet one instrument.</th><td>Below the KR-20 bar the total is not a skill estimate.</td></tr>
+              <tr><th>A vacuous high is not a win.</th><td>M reaches 1.0 when no separation is left to violate.</td></tr>
+              <tr><th>Required-N is an order of magnitude.</th><td>It assumes the next tasks are drawn like today&rsquo;s; it is today&rsquo;s bootstrap SE extrapolated at <code>1/&radic;N</code>.</td></tr>
+              <tr><th>Readiness is advisory.</th><td>It never gates an accept or touches the reward path.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>What it does catch is a collapsed set: all-pass or all-fail rows, a negatively correlating item, a missing difficulty band.</p>
+
+        <hr>
+
+        <h2 id="report" class="scroll-m-28 font-mono">Reading the quality report</h2>
+        <p>These notes qualify the figures on the <a href="../../quality/">selection-quality report</a>.</p>
+        <p>They are standing methodology, so they live here rather than beside every figure.</p>
+
+        <h3 id="report-discrimination" class="scroll-m-28 font-mono">The discrimination report</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>what you are looking at</th><th>how to read it</th></tr></thead>
+            <tbody>
+              <tr><th>provisional readings</th><td>Provisional readings, not properties &mdash; every number on that page is recomputed from the published matrix at page load.</td></tr>
+              <tr><th>scaffold scope</th><td>The solve matrix is <strong>one scaffold</strong>, one model family, one day. It is never the whole model suite, and its cells are not independent trials.</td></tr>
+              <tr><th>hollow squares</th><td>A hollow square is a task <strong>from another suite</strong>, not a skipped run. Where a run really was skipped under the reported scaffold, the note on the figure says so instead and names the count.</td></tr>
+              <tr><th>overlapping intervals</th><td>Overlapping Wilson intervals are <strong>not a significance test</strong>. Where a figure paints a shaded band, that band marks the range every count in that group still allows.</td></tr>
+              <tr><th>the level rows</th><td>The difficulty rows are a <strong>partition</strong> of the publication-mode row above them, not peer groups. They are compared inside one publication mode only: pooling the modes puts structurally-zero tasks into the comparison and the result is an artifact of pooling.</td></tr>
+              <tr><th>publication mode</th><td><strong>live vs archive is a difference in what is withheld, not measured difficulty.</strong> Live withholds gold patches, protected test bodies and merge provenance; archive publishes them. Harder, newer and measured differently cannot be told apart. Any other publication mode likewise differs in what the task package publishes, so those rows are coverage facts, not difficulty findings.</td></tr>
+              <tr><th>declared difficulty</th><td><strong>Declared difficulty is editorial</strong> &mdash; the <code>task.toml</code> label, never measured.</td></tr>
+              <tr><th>authority</th><td>Nothing on that page is ranked or certified: no publication bundle is approved, no matrix digest is trusted, and receipt authority is inactive &mdash; which is why the registry&rsquo;s <strong>Official solves</strong> column is a dash.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 id="report-capability" class="scroll-m-28 font-mono">The capability coverage report</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead><tr><th>what you are looking at</th><th>how to read it</th></tr></thead>
+            <tbody>
+              <tr><th>every axis is listed</th><td>All fourteen axes are listed. An axis this catalogue does not cover is a fact about the catalogue, not a row to hide &mdash; so an axis carrying no task at all is listed at zero rather than dropped: a missing row reads as an axis that does not exist, which is a different claim from an axis this catalogue never reached.</td></tr>
+              <tr><th>the co-occurrence grid</th><td>One column per re-derivable package, one row per axis; a mark is presence, never a degree. <strong>No model outcome is in that figure</strong> &mdash; it is not a solve result. Columns are ordered by how many labels a package carries, so the dense left edge is arrangement, not a finding.</td></tr>
+              <tr><th>multi-valued labels</th><td>A task carries every code its diff triggers, so the per-code counts do not sum to the task count.</td></tr>
+              <tr><th>the unmeasured criterion</th><td><code>min_admitted_subtests</code> counts the subtests surviving a unit-test-validity audit, and no such audit has classified this catalogue. Unmeasured is not failed, and it is certainly not passed &mdash; so no axis clears the publish gate whatever its counts say.</td></tr>
+              <tr><th>the audit on record</th><td><strong>The unit-test-validity audit on record does not describe this catalogue</strong> (release <code>b3fc3e6</code>, <code>experiments/reports/unit-test-validity-r001/SUMMARY.json</code>). It measured a different corpus at a different release commit; its per-axis counts describe that corpus, so they are not reproduced on the report and <code>min_admitted_subtests</code> stays unmeasured here.</td></tr>
+              <tr><th>packages that cannot be tagged</th><td>The tagger reads the oracle diff and live withholds it, so a live package&rsquo;s <code>task.toml</code> keywords stand as declared, never re-derived &mdash; and every count on the report is over the packages that could be checked.</td></tr>
             </tbody>
           </table>
         </div>
@@ -560,7 +634,7 @@ tdb quality results.jsonl</pre></div>
 </div>
 </main>
 
-<script src="../../assets/site.js?v=a6e52a8c64" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=cf54a71b8f" data-root="../.." data-page="docs"></script>
 <script>
 /* the "on this page" rail — built from the section ids already in the prose,
    so the navigation can never drift from the text. */

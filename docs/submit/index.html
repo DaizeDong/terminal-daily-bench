@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submit results — terminal-daily-bench</title>
 <meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -26,10 +26,21 @@
       <h1 class="font-mono text-4xl tracking-tighter">Submit results</h1>
       <p class="text-muted-foreground mt-4 max-w-4xl font-mono text-sm/relaxed">Recorded is not verified.</p>
 
-      <div class="bg-card mt-6 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-        <p>The public bundle does not run a replay worker: a submission stays <span class="text-foreground">pending</span> until an operator publishes an Ed25519-signed v2 receipt, and ranking needs complete frozen-roster coverage.</p>
-        <p class="mt-4">Pending rows never enter the verified ranking. <a class="text-foreground underline underline-offset-4" href="../guide/submission/#operator-replay">Replay authority</a>.</p>
-        <p class="text-muted-foreground mt-4">Local runs need the unpublished patched Harbor fork, not stock 0.13.1. <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/#requirements">Requirements</a>.</p>
+      <!-- Three stacked caveat paragraphs, 327 characters, carried what four
+           `gate -> state` rows carry. Every phrase the site contract pins is
+           still here verbatim; only the connective prose around them left. -->
+      <div class="mt-6" data-tdb-integrity>
+        <div class="tdb-plain-table">
+          <table class="w-full">
+            <thead><tr><th>gate</th><th>state</th></tr></thead>
+            <tbody>
+              <tr><td>replay worker</td><td class="tdb-wrap">The public bundle does not run a replay worker.</td></tr>
+              <tr><td>pending</td><td class="tdb-wrap">A submission stays pending until an operator publishes an Ed25519-signed v2 receipt. Pending rows never enter the verified ranking. <a href="../guide/submission/#operator-replay">Replay authority</a>.</td></tr>
+              <tr><td>ranking</td><td class="tdb-wrap">Needs complete frozen-roster coverage.</td></tr>
+              <tr><td>local runs</td><td class="tdb-wrap">Need the unpublished patched Harbor fork, not stock 0.13.1. <a href="../guide/quickstart/#requirements">Requirements</a>.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <section id="mechanic" class="tdb-block" data-tdb-section="mechanic">
@@ -102,7 +113,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";
