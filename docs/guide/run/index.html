@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>run a task — terminal-daily-bench docs</title>
+<meta name="description" content="Build a task image, score a model on a task with the single_shot_patch scaffold, and prove the execution gate with the oracle baseline.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of ../quickstart/, which carried this and three other topics
+     under one title. The ids here (#image #score #score-scaffold #oracle
+     #task-ids) are the ones that page used to own; its foot forwards them
+     here, so an old bookmark still lands on the section.
+
+     The task-id block at the foot was six <h2> inside six cards -- a grid of
+     badges, borders and hover transitions around what is, in the end, a task
+     id and the one command you would paste it into. It is a definition list
+     now: the id (linked to its registry page, as the cards were) over the
+     command. Same data, same source files, same fallback. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="run">
+  <article class="tdb-doc">
+
+    <h1>Run a task</h1>
+    <p class="tdb-doc-sub">Build the image, score a model against the protected tests, and prove the gate with the oracle.</p>
+
+    <h2 id="image"><a href="#image">Build the task image</a></h2>
+    <p>A published task ships no image: <code>docker_image</code> is the portable string
+      <code>environment/Dockerfile</code>, because the producer&rsquo;s host-specific
+      <code>.sif</code> path is stripped on publish and nothing executes that as-is.</p>
+    <p>Build the task&rsquo;s own Dockerfile once, then point <code>docker_image</code> at the
+      result.</p>
+    <figure class="tdb-code"><pre><code>IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
+sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
+    tasks/archive/td-fc90ea8b76d5f6b6/task.toml</code></pre></figure>
+    <p>The cache key is the task id plus the Dockerfile hash, so a second run is a no-op and
+      <code>--force</code> rebuilds. The <strong>build</strong> stage needs internet; the scored run
+      does not. See <a href="../task-format/">the task format</a>.</p>
+
+    <h2 id="score"><a href="#score">Score a model on a task</a></h2>
+    <p><code>&lt;MODEL&gt;</code> is any model id your endpoint accepts, e.g.
+      <code>gpt-4o-mini</code>.</p>
+    <figure class="tdb-code"><pre><code>tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
+
+# the record lands in ./.tdb_work/results/ by default; set TDB_WORK to move that
+# root, or --out to name the file. It is always printed to stdout as well.
+tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.json</code></pre></figure>
+
+    <h2 id="score-scaffold"><a href="#score-scaffold">What single_shot_patch does</a></h2>
+    <p>It shows the model the task instruction plus the source file(s) the reference solution
+      touches, and asks for a <code>git apply</code>-ready unified diff.</p>
+    <p>That diff is applied inside the task container, Harbor re-lays the protected
+      <code>tests/</code>, and the reward is written to <code>result.json</code>.</p>
+
+    <h2 id="oracle"><a href="#oracle">Run the oracle baseline</a></h2>
+    <p>The <code>oracle</code> model id runs the task&rsquo;s real
+      <code>solution/oracle.patch</code>; no model is called, and it proves the execution gate
+      returns <strong>reward 1.0</strong> on a correct patch. Run it before spending model calls: if
+      it does not yield <code>reward = 1.0</code>, the environment, not the model, is the
+      problem.</p>
+    <figure class="tdb-code"><pre><code>tdb oracle tasks/archive/td-fc90ea8b76d5f6b6</code></pre></figure>
+    <p>Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship <code>solution/</code>.
+      <strong>Live</strong> tasks withhold the gold patch and the protected test bodies; submitted
+      patches stay unranked until official replay. See
+      <a href="../task-format/#archive-vs-live">archive vs. live</a> and
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
+
+    <h2 id="task-ids"><a href="#task-ids">A task id you can paste</a></h2>
+    <p>From the published catalogue; every id links to its entry in
+      <a href="../../registry/">the task registry</a>.</p>
+    <div id="task-id-list"></div>
+
+    <p>Each run writes one JSON record &mdash; <a href="../result-record/">what is in it</a>.</p>
+
+  </article>
+</main>
+
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="run"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var el = document.getElementById("task-id-list");
+
+  var results = await Promise.all([
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"))
+  ]);
+  var site = results[0];
+  var board = results[1];
+
+  var ids = [];
+  if (site && site.tasks && site.tasks.length) {
+    ids = site.tasks.slice(0, 6).map(function (t) { return { id: t.id, status: t.status }; });
+  } else if (board && board.tasks && board.tasks.length) {
+    ids = board.tasks.slice(0, 6).map(function (id) { return { id: id, status: null }; });
+  }
+
+  if (!ids.length) {
+    el.innerHTML = "<p>No task catalogue published yet. The commands on this page work against " +
+      "any task directory you have locally; run <code>tdb publish</code> to generate " +
+      "<code>site_data.json</code>.</p>";
+    return;
+  }
+
+  el.innerHTML = '<dl class="tdb-defs">' + ids.map(function (t) {
+    var status, cmd;
+    if (t.status === "live") {
+      status = "live";
+      cmd = "tdb run &lt;MODEL&gt; tasks/live/" + t.id;
+    } else if (t.status === "archive") {
+      status = "archive";
+      cmd = "tdb oracle tasks/archive/" + t.id;
+    } else {
+      status = "task";
+      cmd = "tdb run &lt;MODEL&gt; tasks/&lt;archive|live&gt;/" + t.id;
+    }
+    return "<dt><a href=\"" + T.ROOT + "/registry/" + encodeURIComponent(t.id) + "/\"><code>" +
+      t.id + "</code></a></dt><dd>" + status + " &middot; <code>" + cmd + "</code></dd>";
+  }).join("") + "</dl>";
+})();
+</script>
+</body>
+</html>

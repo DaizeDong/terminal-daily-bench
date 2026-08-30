@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the quality card — terminal-daily-bench docs</title>
+<meta name="description" content="Aggregate result records into a selection-quality card with tdb quality, read the card it prints, and submit results.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of ../quickstart/, which owned #quality, #quality-output and
+     #submitting; that page forwards those three ids here. #quality-input and
+     #quality-metrics are new ids on material that was already inside those
+     sections -- the matrix rule, and the sentence naming where each metric
+     comes from. The method behind the numbers is ../quality-methods/. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>The quality card</h1>
+    <p class="tdb-doc-sub">What a set of result records says about the benchmark, rather than about one model.</p>
+
+    <h2 id="quality"><a href="#quality">Aggregate a quality card</a></h2>
+    <p>Collect result records into one file &mdash; JSON Lines (one record per line), or a JSON
+      array.</p>
+    <figure class="tdb-code"><pre><code>cat results/*.json | jq -c . &gt; results.jsonl
+tdb quality results.jsonl</code></pre></figure>
+
+    <h2 id="quality-input"><a href="#quality-input">What the card needs</a></h2>
+    <p><code>tdb quality</code> builds a (task &times; model) solved matrix and needs
+      <strong>&ge; 1 task and &ge; 2 models</strong>. Records with <code>model: "oracle"</code> are
+      excluded from it.</p>
+
+    <h2 id="quality-output"><a href="#quality-output">Reading the card</a></h2>
+    <figure class="tdb-code"><pre><code>tasks=40 models=6
+  D(discrimination)=0.517  C(coverage)=0.750  M(monotonicity)=0.912
+  IRT test-information=8.431  KR-20 reliability=0.78
+  D 95% CI=[0.402, 0.631]
+  readiness: NOT-ready (bottleneck=discrimination, need ~64 tasks)</code></pre></figure>
+
+    <h2 id="quality-metrics"><a href="#quality-metrics">Where each metric comes from</a></h2>
+    <p>Every metric comes from <code>terminal_daily_bench.quality</code>: <code>D</code>
+      discrimination, <code>C</code> difficulty coverage, <code>M</code> monotonicity, 2PL IRT
+      test-information, KR-20 reliability, a bootstrap 95% CI on <code>D</code>, and a readiness
+      verdict naming the bottleneck axis and a recommended task count.</p>
+    <p>The final line of stdout is the full card as JSON (<code>msq</code>, <code>irt</code>,
+      <code>reliability</code>, <code>readiness</code>) for machine consumption. The method behind
+      these numbers is <a href="../quality-methods/">quality methods</a>.</p>
+
+    <h2 id="submitting"><a href="#submitting">Submitting results</a></h2>
+    <p>Every submission is recorded as <strong>pending</strong> and its claimed reward is ignored.
+      The public bundle does not run a replay worker, and only an operator-published gate receipt can
+      enter the verified ranking.</p>
+    <p>See <a href="../submission/">submission</a> and
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a>.</p>
+
+  </article>
+</main>
+
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
+</body>
+</html>

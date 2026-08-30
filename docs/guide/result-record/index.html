@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the result record — terminal-daily-bench docs</title>
+<meta name="description" content="The JSON one run writes, the three fields you will read, and why a failure never scores.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of ../quickstart/, which owned #record, #record-bad-safe and
+     #fa-block; that page forwards the first two here and #fa-block on to
+     ../false-accept/, which this page ends by linking. #record-fields is a
+     new id over material that was already inside #record -- the field list
+     under the JSON.
+
+     THE SPLIT WENT ONE STEP FURTHER THAN PLANNED. With the false_accept_check
+     block still on it this page measured 2633px, over the shell's 2500px
+     bound, and the shell said so in the console. The bound is not decoration:
+     a page that has to be told where it is, is a page carrying two topics. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>The result record</h1>
+    <p class="tdb-doc-sub">What one run writes, and the three fields you will actually read.</p>
+
+    <h2 id="record"><a href="#record">What one run writes</a></h2>
+    <p>Each run writes one JSON record. A solved run looks like this.</p>
+    <figure class="tdb-code"><pre><code>{
+  "model": "gpt-4o-mini",
+  "task": "td-fc90ea8b76d5f6b6",
+  "task_dir": "/abs/path/tasks/archive/td-fc90ea8b76d5f6b6",
+  "scaffold": "single_shot_patch",
+  "reward": 1.0,
+  "solved": true,
+  "patch_applied": true,
+  "error": null,
+  "model_endpoint": "https://api.openai.com/v1/chat/completions",
+  "runtime_sec": 142.7,
+  "false_accept_check": {
+    "gate": "harbor_protected_tests",
+    "reward_source": "result.json via harbor_score.read_harbor_reward",
+    "protected_tests_relaid_by_harbor": true,
+    "model_is_judge": false,
+    "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
+    "false_accept": 0
+  }
+}</code></pre></figure>
+
+    <h2 id="record-fields"><a href="#record-fields">The three fields you will read</a></h2>
+    <dl class="tdb-defs">
+      <dt><code>scaffold</code></dt>
+      <dd><code>single_shot_patch</code> for a model run, <code>oracle_baseline</code> for
+        <code>tdb oracle</code>.</dd>
+      <dt><code>reward</code></dt>
+      <dd>The protected-test outcome. <code>solved</code> is <code>reward &gt;= 0.999</code>.</dd>
+      <dt><code>patch_applied</code></dt>
+      <dd><code>true</code> once a reward is parsed, <code>false</code> if the patch failed to apply,
+        <code>null</code> if the gate never reached the apply step.</dd>
+    </dl>
+
+    <h2 id="record-bad-safe"><a href="#record-bad-safe">Failure never scores</a></h2>
+    <p>Runs are BAD-safe: any failure yields <code>reward = 0.0</code> and
+      <code>solved = false</code>, with the cause in <code>error</code>.</p>
+    <p>That covers no diff, a patch that does not apply, a hung trial and an unparseable result.
+      There is never a positive score on a crash.</p>
+
+    <p>What that reward does and does not certify is
+      <a href="../false-accept/">the false-accept check</a>.</p>
+
+  </article>
+</main>
+
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
+</body>
+</html>

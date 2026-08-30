@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tdb quality — terminal-daily-bench docs</title>
+<meta name="description" content="What `tdb quality` reads from a results file, what it prints, and today's card recomputed from the published snapshot.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Running <span class="tdb-id">tdb quality</span></h1>
+    <p class="tdb-doc-sub">What the command reads, what it prints, and the same axes on today&rsquo;s published suite.</p>
+
+    <h2 id="surfaces"><a href="#surfaces">What the command reads</a></h2>
+    <p>It reads a results file &mdash; JSONL or a JSON list &mdash; builds the matrix, prints the quality card and then the readiness line. Each record needs <code>task</code>, <code>model</code>, and either <code>solved</code> or <code>reward</code>; <code>solved</code> is taken as <code>reward &ge; 0.999</code>, rows with <code>model == "oracle"</code> are excluded, and the command exits <code>2</code> below &ge; 1 task and &ge; 2 models.</p>
+    <figure class="tdb-code"><pre><code><span class="text-muted-foreground"># results.jsonl &mdash; one record per (model, task) run, exactly as `tdb run` emits</span>
+<span class="text-muted-foreground"># {"task":"td-1","model":"A","reward":1.0}</span>
+<span class="text-muted-foreground"># {"task":"td-1","model":"B","reward":0.0}</span>
+<span class="text-muted-foreground"># ...</span>
+
+tdb quality results.jsonl</code></pre></figure>
+
+    <h2 id="output"><a href="#output">Output</a></h2>
+    <p>On the <a href="../api/#card">6-task / 3-model example</a>. The last line is that card as JSON.</p>
+    <figure class="tdb-code"><pre><code>tasks=6 models=3
+  D(discrimination)=0.667  C(coverage)=0.896  M(monotonicity)=0.833
+  IRT test-information=1.808  KR-20 reliability=0.5142857142857141
+  D 95% CI=[0.333, 1.000]
+  readiness: NOT-ready (bottleneck=precision, need ~37 tasks)
+{"msq": {...}, "irt": {...}, "reliability": {...}, "readiness": {...}}</code></pre></figure>
+
+    <h2 id="today"><a href="#today">Today&rsquo;s card</a></h2>
+    <p id="card-sub">The same axes, on the live suite</p>
+    <div id="quality-card"></div>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script>
+(async function () {
+  var T = window.TDB;
+  var el = document.getElementById("quality-card");
+
+  var board = await T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"));
+  var q = board && board.quality;
+
+  if (!q) {
+    el.innerHTML = '<p>No quality card published yet (<code>leaderboard_data.json</code> ' +
+      'has no <code>quality</code> block). Run <code>tdb quality results.jsonl</code> ' +
+      'to compute one locally.</p>';
+    return;
+  }
+
+  document.getElementById("card-sub").textContent =
+    board.date + " · thresholds D≥" + (q.thresholds ? q.thresholds.min_D : "?") +
+    ", KR-20≥" + (q.thresholds ? q.thresholds.min_kr20 : "?");
+
+  var num = function (x, d) {
+    return x == null ? "—" : Number(x).toFixed(d == null ? 3 : d);
+  };
+
+  /* Enumerated, not listed: the hard-coded "terminus2" never matched the data's
+     "terminus-2", so the agent frame was invisible here too. */
+  var frames = Object.keys(q).filter(function (k) {
+    return k !== "thresholds" && q[k] && typeof q[k] === "object";
+  }).sort();
+
+  if (!frames.length) {
+    el.innerHTML = '<p>The quality block carries no scaffold frame yet.</p>';
+    return;
+  }
+
+  el.innerHTML =
+    '<div class="tdb-plain-table"><table class="tdb-table"><thead><tr>' +
+      '<th>Scaffold</th><th class="tdb-num">D</th><th class="tdb-num">C</th>' +
+      '<th class="tdb-num">M</th><th class="tdb-num">IRT info</th>' +
+      '<th class="tdb-num">KR-20</th><th class="tdb-num">D 95% CI</th>' +
+      "<th>Readiness</th>" +
+    "</tr></thead><tbody>" +
+    frames.map(function (name) {
+      var r = q[name];
+      var ci = r.D_ci ? "[" + num(r.D_ci[0], 2) + ", " + num(r.D_ci[1], 2) + "]" : "—";
+      var verdict = r.ready ? "ready"
+        : "not ready" + (r.bottleneck ? " · " + r.bottleneck : "");
+      var need = r.required_n_D != null
+        ? ' <span class="tdb-muted">need ~' + r.required_n_D + " tasks</span>"
+        : "";
+      return "<tr><th>" + name + "</th>" +
+        '<td class="tdb-num">' + num(r.D) + "</td>" +
+        '<td class="tdb-num">' + num(r.C) + "</td>" +
+        '<td class="tdb-num">' + num(r.M) + "</td>" +
+        '<td class="tdb-num">' + num(r.irt_info) + "</td>" +
+        '<td class="tdb-num">' + num(r.kr20) + "</td>" +
+        '<td class="tdb-num">' + ci + "</td>" +
+        "<td>" + verdict + need + "</td></tr>";
+    }).join("") + "</tbody></table></div>";
+})();
+</script>
+</body>
+</html>

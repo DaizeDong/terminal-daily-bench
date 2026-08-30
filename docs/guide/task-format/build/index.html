@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>build and audit trail — terminal-daily-bench docs</title>
+<meta name="description" content="The four files behind a terminal-daily-bench task package that a solver does not read: environment/Dockerfile, solution/, PROVENANCE.json and record.json.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split off ../files/, which carried seven file schemas and measured 3739px
+     against the shell's 2500px bound. #environment, #solution, #provenance and
+     #record arrived here unchanged. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc prose-no-margin wrap-anywhere">
+
+    <h1>Build and audit trail</h1>
+    <p class="tdb-doc-sub">The four files a solver never reads: how the image is built, and what the package records about where it came from.</p>
+
+    <h2 id="environment"><a href="#environment"><span class="tdb-id">environment/Dockerfile</span></a></h2>
+    <p>A parity and audit artifact: the recipe the image is built from.</p>
+    <figure class="tdb-code">
+      <figcaption>environment/Dockerfile</figcaption>
+      <pre><code>base image
+repo @ REPO_BASE_SHA    <span class="text-muted-foreground">.git re-initialized to a single `baseline` commit</span>
+deps by search          pip install -e .  -&gt;  pip install .  -&gt;  pip install -r requirements.txt
+                        <span class="text-muted-foreground">first that builds wins; hard-fails if none</span></code></pre>
+    </figure>
+
+    <h2 id="solution"><a href="#solution"><span class="tdb-id">solution/</span> (archive only)</a></h2>
+    <p>The gold fix from the merged PR, and the driver that applies it.</p>
+    <figure class="tdb-code">
+      <figcaption>solution/</figcaption>
+      <pre><code>solve.sh       <span class="text-muted-foreground">the git-apply driver</span>
+  git apply --check oracle.patch
+  git apply --3way oracle.patch      <span class="text-muted-foreground">falls back to plain `git apply`</span>
+  already-applied tree               <span class="text-muted-foreground">idempotent no-op</span>
+  genuinely inapplicable patch       <span class="text-muted-foreground">FAILS LOUDLY -- never pretends success on an unpatched tree</span>
+  patch touches native/build inputs  <span class="text-muted-foreground">rebuilds the extension offline</span>
+
+oracle.patch   <span class="text-muted-foreground">the gold fix from the merged PR</span>
+  sha256                             <span class="text-muted-foreground">recorded as oracle_patch_sha256 in task.toml / record.json</span></code></pre>
+    </figure>
+
+    <h2 id="provenance"><a href="#provenance"><span class="tdb-id">PROVENANCE.json</span></a></h2>
+    <p>Tasks derive only from permissively-licensed repositories.</p>
+    <figure class="tdb-code">
+      <figcaption>PROVENANCE.json</figcaption>
+      <pre><code>{
+  "source_repo": "Delgan/loguru",
+  "source_ref": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+  "source_license_spdx": ""
+}</code></pre>
+    </figure>
+
+    <h2 id="record"><a href="#record"><span class="tdb-id">record.json</span> (archive only)</a></h2>
+    <p>Host-specific and internal build fields are stripped on publish
+      (<code>publish_tasks.py::_sanitize_record</code>), leaving:</p>
+    <figure class="tdb-code">
+      <figcaption>record.json</figcaption>
+      <pre><code><span class="text-muted-foreground"># stripped: image_ref &middot; image_build &middot; generator &middot; repro &middot; netns_available &middot; needs_network</span>
+{
+  "task_id": "td-fc90ea8b76d5f6b6",
+  "repo": "Delgan/loguru",
+  "pr_number": 1451,
+  "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",
+  "merge_sha": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
+  "oracle_patch_sha256": "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8",
+  "test_files": ["tests/test_add_option_format.py"],
+  "fail_to_pass": ["tests/test_add_option_format.py::test_invalid_format_key_...", "..."],
+  "pass_to_pass": [],
+  "capability_labels": ["C5", "C4"]
+}</code></pre>
+    </figure>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

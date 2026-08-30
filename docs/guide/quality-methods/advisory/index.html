@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>angle coverage and diversity — terminal-daily-bench docs</title>
+<meta name="description" content="The two advisory axes: angle coverage over the four conditional gate-state rates, and diversity over task signatures.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>The two advisory axes</h1>
+    <p class="tdb-doc-sub">Angle coverage and diversity score the task set itself; neither reads the solve matrix.</p>
+
+    <h2 id="A"><a href="#A">A &mdash; angle coverage</a></h2>
+    <p><code>capability_profile</code> decomposes the gate-states <code>0..4</code> into four <strong>conditional</strong> rates.</p>
+    <dl class="tdb-defs">
+      <dt class="tdb-id">build_rate</dt>
+      <dd>Can produce a building env &mdash; <code>P(state &ge; 1)</code>.</dd>
+      <dt class="tdb-id">partial_given_build</dt>
+      <dd>Can start fixing, some F2P &mdash; <code>P(state &ge; 2 | &ge; 1)</code>.</dd>
+      <dt class="tdb-id">full_f2p_given_partial</dt>
+      <dd>Can complete the F2P fix &mdash; <code>P(state &ge; 3 | &ge; 2)</code>.</dd>
+      <dt class="tdb-id">clean_given_full_f2p</dt>
+      <dd>Can fix without breaking P2P &mdash; <code>P(state = 4 | &ge; 3)</code>.</dd>
+    </dl>
+
+    <h2 id="A-support"><a href="#A-support">What angle coverage reports</a></h2>
+    <p><code>angle_coverage(graded, min_support=3)</code> reports, per angle, the <code>support</code> (size of the conditioning population), whether it is <code>covered</code> (<code>support &ge; min_support</code>), the <code>uncovered_angles</code> that fall short, and <code>all_covered</code>. An empty <em>conditioning</em> population returns <code>None</code>, never a fabricated number, so a set that never reaches stage <code>&ge; 3</code> <strong>cannot</strong> measure <code>clean_given_full_f2p</code>. The whole axis is advisory.</p>
+
+    <h2 id="R"><a href="#R">R &mdash; diversity</a></h2>
+    <p>R scores <strong>task signatures</strong> (<code>{repo, files, f2p}</code>), <em>not</em> the response matrix.</p>
+    <dl class="tdb-defs">
+      <dt class="tdb-id">task_similarity(a, b)</dt>
+      <dd><code>0.0</code> for different repos (definitionally diverse); for the same repo, the mean of the changed-file Jaccard and the F2P-selector Jaccard.</dd>
+      <dt class="tdb-id">redundancy_rate(sigs, threshold=0.6)</dt>
+      <dd>The fraction of tasks with at least one near-duplicate.</dd>
+      <dt class="tdb-id">diversity</dt>
+      <dd><code>1 &minus; redundancy_rate</code>, and <code>None</code> below two tasks.</dd>
+      <dt class="tdb-id">signature_of(task)</dt>
+      <dd>A best-effort duck-typed signature from a task object.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

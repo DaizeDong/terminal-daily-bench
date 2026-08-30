@@ -4,186 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submission — terminal-daily-bench docs</title>
-<meta name="description" content="How to run the benchmark, record pending submissions, publish verified replay receipts, and extend it with a new scaffold.">
-<link rel="stylesheet" href="../../assets/tw.css?v=edae671ad0">
-<link rel="stylesheet" href="../../assets/site.css?v=edae671ad0">
+<meta name="description" content="How a candidate patch becomes a verified score: the execution gate, the pending record, the submission schema and the operator-only replay authority.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-<div class="flex flex-1 flex-col items-center px-4 py-6">
-<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
+<!-- This page carried 29 h2 and 12466px. It is five pages now, and this is the
+     spine: what makes a reward real. The other four are running/, recording/,
+     replay-integrity/ and adapters/, reached from the sidebar site.js builds.
 
-  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
+     THE THREE IDS THAT MAY NOT MOVE are #scoring (the four docs/benchmarks
+     pages, and web/gen_pages.py writes it), #operator-replay (docs/leaderboard
+     and docs/submit) and #schema (docs/guide/task-format). All three are still
+     real sections here, so nothing off this page had to be edited.
 
-    <!-- ===================== the prose column ===================== -->
-    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
+     The unit is the reference's: h2, one to three sentences, at most one code
+     figure. No h3, no table, no definition list, no rule. Every field and flag
+     that used to sit in a two-column list is now either a sentence or a
+     comment inside the block that runs it. -->
 
-      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-        <a class="hover:text-foreground transition-colors" href="../../">Home</a>
-        <span>/</span>
-        <a class="hover:text-foreground transition-colors" href="../">Docs</a>
-        <span>/</span>
-        <span class="text-foreground">Submission</span>
-      </nav>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
 
-      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
-        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">Submitting to terminal-daily-bench</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">No external service or hidden API is required to score a patch.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">A claimed reward is never trusted: only an official protected-test replay receipt can enter the verified ranking.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>A scaffold produces a candidate patch; the execution gate is the sole reward authority.</strong></p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">The model is the subject under test; it is never the judge.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Semantic verifier false-accept remains unmeasured pending an exploit corpus.</p>
-      </header>
+    <h1>Submitting to terminal-daily-bench</h1>
+    <p class="tdb-doc-sub">A scaffold produces a candidate patch; the execution gate is the sole reward authority.</p>
 
-      <!-- ONE HEADING LEVEL, NO TABLES. This page shipped twenty-three tables
-           and every one of them was two columns: `key -> what it does`, which is
-           a definition list with rules drawn round it, a header row invented to
-           give the rules something to sit under, and a horizontal scroller
-           wrapped round the whole thing. They are <dl class="tdb-defs"> now --
-           term in ink on its own line, sentence under it, no rule, no fill.
-           The twenty-five h3 are h2: a third heading level is evidence that
-           the section above it ran longer than a reader holds at once, so each
-           subsection became a section carrying one claim and at most one block.
+    <h2 id="scoring"><a href="#scoring">How scoring works</a></h2>
+    <p>The reward comes from Harbor&rsquo;s <code>result.json</code>, read by
+      <code>harbor_score._read_harbor_reward</code> &mdash; the same reader the private admission
+      gate uses. Harbor applies the patch inside the task container, re-lays the protected
+      <code>tests/</code> and runs them under a network cut, which is why scoring requires an
+      apptainer/singularity host. No external service or hidden API is required to score a patch.</p>
 
-           NOTHING FACTUAL WAS DROPPED, and one duplicate was: the old section 6
-           restated the task package layout that docs/guide/task-format/ owns in
-           full, so it is a pointer now. Every honesty caveat survives on this
-           page -- recording is not verification, a cell stays unranked until an
-           operator publishes an Ed25519-signed replay receipt, the public bundle
-           runs no replay worker, a claimed reward is validated against nothing
-           and never becomes a score, community ranking needs complete
-           frozen-roster coverage, fake-runner tests are not evidence of a
-           production replay, and semantic false-accept is unmeasured.
+    <h2 id="no-cheat"><a href="#no-cheat">Why a patch cannot cheat the score</a></h2>
+    <p>The protected <code>tests/</code> are re-laid by Harbor from the trusted task package
+      <em>after</em> the patch is applied, so a patch that edits <code>tests/</code> only changes an
+      agent-side workspace that is discarded before scoring. Runtime egress is cut &mdash;
+      <code>--network=none</code>, or the offline <code>--ek</code> switch injected by
+      <code>harbor_score._maybe_inject_offline_eks</code>. The reward is byte-for-byte execution
+      truth from <code>result.json</code>, not any string the model emitted: the model is the
+      subject under test; it is never the judge.</p>
 
-           Every h2 keeps a stable id: the "on this page" rail is built from
-           those ids at runtime, and #scoring / #operator-replay / #schema are
-           deep-linked from docs/index.html, docs/submit/index.html,
-           docs/leaderboard/index.html, docs/benchmarks/*/index.html and
-           docs/guide/task-format/index.html. web/verify_site.py pins twenty
-           substrings of this page's authority caveats; they are preserved
-           verbatim and uninterrupted by markup -- a <code> tag opened in the
-           middle of one of those phrases would silently fail the site check, so
-           identifiers inside a pinned phrase stay plain text. -->
-      <article class="prose prose-no-margin">
+    <h2 id="ingest"><a href="#ingest">Recording is not replay</a></h2>
+    <p><code>web/submit_result.py</code> records the patch; it does not score it. The stored entry
+      carries <code>verify_status="pending"</code>, <code>verified_reward=null</code> and no
+      <code>false_accept</code> value, because only an execution-gate receipt can set a verified
+      reward. A claimed reward is never trusted: only an official protected-test replay receipt can
+      enter the verified ranking.</p>
 
-        <h2 id="run" class="scroll-m-28 font-mono">Run a model on a task</h2>
-        <p>Entry point: <code>tdb</code> (<code>terminal_daily_bench/cli.py</code>).</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">pip install -e .                          <span class="text-muted-foreground"># installs the `tdb` console script</span>
-
-export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="text-muted-foreground"># any OpenAI-compatible endpoint</span>
-export OPENAI_API_KEY=sk-...                        <span class="text-muted-foreground"># bearer key, read from env, never stored</span>
-
-<span class="text-muted-foreground"># Score a model on one task (single-shot patch scaffold + execution gate)</span>
-tdb run gpt-4o tasks/archive/td-fc90ea8b76d5f6b6
-
-<span class="text-muted-foreground"># Baseline: replay the task's own gold patch &mdash; proves the gate returns 1.0</span>
-tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
-
-<span class="text-muted-foreground"># Multi-angle quality card over a results file (needs &gt;=2 models)</span>
-tdb quality results.jsonl</pre>
-
-        <h2 id="endpoint" class="scroll-m-28 font-mono">Endpoint, oracle, host</h2>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">OPENAI_BASE_URL</dt>
-          <dd>Defaults to <code>https://api.openai.com/v1</code>. OpenRouter, vLLM, LiteLLM and local
-            servers work too.</dd>
-          <dt>Model id <code>oracle</code></dt>
-          <dd>Runs the task&rsquo;s <code>solution/oracle.patch</code>; needs no endpoint and no key.</dd>
-          <dt>apptainer/singularity</dt>
-          <dd>Required host &mdash; scoring runs there.</dd>
-          <dt class="tdb-id">TDB_SIF_CACHE &middot; TDB_OVERLAY_DIR</dt>
-          <dd>Override the singularity scratch paths.</dd>
-          <dt class="tdb-id">TDB_WORK</dt>
-          <dd>Overrides the work root.</dd>
-        </dl>
-
-        <h2 id="record" class="scroll-m-28 font-mono">The result record</h2>
-        <p>One JSON record per run, written by <code>terminal_daily_bench/eval.py</code>:</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># lands in --out, default $TDB_WORK/results/</span>
-{
-  "model": "gpt-4o",
-  "task": "td-fc90ea8b76d5f6b6",
-  "scaffold": "single_shot_patch",
-  "reward": 1.0,
-  "solved": true,
-  "patch_applied": true,
-  "error": null,
-  "runtime_sec": 214.3,
-  "false_accept_check": {
-    "gate": "harbor_protected_tests",
-    "reward_source": "result.json via harbor_score.read_harbor_reward",
-    "protected_tests_relaid_by_harbor": true,
-    "model_is_judge": false,
-    "model_patch_touched_tests": false,
-    "scope": "protected_test_replay_integrity",
-    "claim_acceptance_without_replay": false,
-    "semantic_false_accept": null,
-    "false_accept": 0
-  }
-}</pre>
-
-        <h2 id="failure" class="scroll-m-28 font-mono">Failure never scores positive</h2>
-        <p><code>solved</code> means <code>reward &gt;= 0.999</code>. No diff, an unapplied patch, a
-          trial error or an unparseable result yields <code>reward 0.0</code> /
-          <code>solved false</code> with the cause in <code>error</code>, and a crash never scores
-          positive: the run path is BAD-safe by construction.</p>
-
-        <h2 id="scoring" class="scroll-m-28 font-mono">How scoring works &mdash; deterministic execution gate</h2>
-        <p>The reward comes from Harbor&rsquo;s <code>result.json</code>.</p>
-        <dl class="tdb-defs">
-          <dt>Reward source</dt>
-          <dd><code>harbor_score._read_harbor_reward</code> &mdash; the <strong>same</strong> reader
-            the private admission gate uses.</dd>
-          <dt>Where the patch runs</dt>
-          <dd>Harbor applies it inside the <strong>task container</strong>.</dd>
-          <dt>The tests</dt>
-          <dd>Harbor re-lays the protected <code>tests/</code> and runs them under a network cut.</dd>
-          <dt>Host</dt>
-          <dd>Which is why scoring requires an apptainer/singularity host.</dd>
-        </dl>
-
-        <h2 id="no-cheat" class="scroll-m-28 font-mono">Why a patch cannot cheat the score</h2>
-        <dl class="tdb-defs">
-          <dt>Edit the tests</dt>
-          <dd>The protected <code>tests/</code> are <strong>re-laid by Harbor from the trusted task
-            package</strong> <em>after</em> the patch is applied. A patch that edits
-            <code>tests/</code> only changes an agent-side workspace that is discarded before
-            scoring.</dd>
-          <dt>Phone home</dt>
-          <dd>Runtime egress is cut &mdash; <code>--network=none</code>, or the offline
-            <code>--ek</code> switch injected by
-            <code>harbor_score._maybe_inject_offline_eks</code>.</dd>
-          <dt>Claim a score</dt>
-          <dd>The reward is byte-for-byte execution truth from <code>result.json</code>, not any
-            string the model emitted.</dd>
-        </dl>
-
-        <h2 id="ingest" class="scroll-m-28 font-mono">Recording is not replay</h2>
-        <p><code>web/submit_result.py</code> records the patch. It does not score it.</p>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">reward_claimed</dt>
-          <dd><strong>Advisory only</strong> &mdash; it is validated against nothing.</dd>
-          <dt>The stored entry</dt>
-          <dd><code>verify_status="pending"</code>, <code>verified_reward=null</code>, no
-            <code>false_accept</code> value. Only an execution-gate receipt can set a verified
-            reward.</dd>
-          <dt>The public bundle</dt>
-          <dd><strong>Does not run a replay worker.</strong> Pending rows remain in
-            <code>community_pending</code>, a separate audit view excluded from ranking.</dd>
-          <dt class="tdb-id">community_verified</dt>
-          <dd>Entry requires an Ed25519-signed v2 receipt bound to the frozen suite, runner, Harbor,
-            runtime image, enforced offline canary and pinned authority key.</dd>
-          <dt>Ranking</dt>
-          <dd>Also requires the complete frozen roster.</dd>
-        </dl>
-
-        <h2 id="schema" class="scroll-m-28 font-mono">Submission schema</h2>
-        <p>JSONL, one line per <code>(model, task)</code> cell. Every key below except
-          <code>reward_claimed</code> is required.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># submit_result.validate, the REQUIRED tuple</span>
-{
+    <h2 id="schema"><a href="#schema">Submission schema</a></h2>
+    <p>JSONL, one line per <code>(model, task)</code> cell; every key except
+      <code>reward_claimed</code> is required, and the
+      <a href="recording/">validation rules and the recording CLI</a> have their own page.</p>
+    <figure class="tdb-code">
+      <figcaption>submit_result.validate — the REQUIRED tuple</figcaption>
+      <pre><code>{
   "date": "2026-07-22",
   "submitter": "your-handle",
   "model": "your-model",
@@ -192,283 +69,35 @@ tdb quality results.jsonl</pre>
   "harness_version": "your-scaffold@immutable-version",
   "task": "td-fc90ea8b76d5f6b6",
   "patch": "diff --git a/... b/...\n--- a/...\n+++ b/...\n@@ ...",
-  "reward_claimed": 1.0
-}</pre>
+  "reward_claimed": 1.0        # advisory only; it never becomes a score
+}</code></pre>
+    </figure>
 
-        <h2 id="rules" class="scroll-m-28 font-mono">Validation rules</h2>
-        <dl class="tdb-defs">
-          <dt>All eight required</dt>
-          <dd><code>date</code>, <code>submitter</code>, <code>model</code>,
-            <code>model_build</code>, <code>scaffold</code>, <code>harness_version</code>,
-            <code>task</code> and <code>patch</code> must be present and non-empty.</dd>
-          <dt class="tdb-id">patch</dt>
-          <dd>Must be a unified-diff <strong>string</strong>.</dd>
-          <dt class="tdb-id">task</dt>
-          <dd>Must start with <code>td-</code>.</dd>
-          <dt class="tdb-id">reward_claimed</dt>
-          <dd>Advisory only; it never becomes a score.</dd>
-          <dt>Receipt signatures</dt>
-          <dd>Come only from the official signer.</dd>
-          <dt>The submitter</dt>
-          <dd>The authenticated submitter comes from the deployment auth layer, never the JSON
-            body.</dd>
-        </dl>
+    <h2 id="operator-replay"><a href="#operator-replay">Operator-only replay authority</a></h2>
+    <p>Receipt signing and verification are operator-only, and they use Python
+      <code>cryptography</code>&rsquo;s in-process Ed25519 primitives:
+      <code>web/receipt_auth.py</code> does not search <code>PATH</code> and does not invoke an
+      external OpenSSL process. A missing or invalid replay extra fails closed before signing or
+      acceptance, and what the worker has to prove before it may sign is on
+      <a href="replay-integrity/">replay integrity</a>.</p>
+    <figure class="tdb-code">
+      <figcaption>the replay-only receipt dependency, on the operator image</figcaption>
+      <pre><code>pip install -e '.[replay]'</code></pre>
+    </figure>
 
-        <h2 id="cli" class="scroll-m-28 font-mono">CLI</h2>
-        <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>:</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># 1. Validate structure (exit 0 = valid, 1 = errors)</span>
-python web/submit_result.py validate &lt; submission.json
+    <h2 id="community-submissions"><a href="#community-submissions">Community submissions</a></h2>
+    <p>The public bundle does not run a replay worker, so pending rows remain in
+      <code>community_pending</code>, a separate audit view excluded from ranking; a row enters
+      <code>community_verified</code> only with an Ed25519-signed v2 receipt bound to the frozen
+      suite, runner, Harbor, runtime image, enforced offline canary and pinned authority key, and
+      ranking also requires the complete frozen roster.</p>
+    <div id="community"></div>
 
-<span class="text-muted-foreground"># 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)</span>
-python web/submit_result.py record --store community_submissions \
-  --authenticated-submitter github:YOUR_LOGIN &lt; submission.json
-
-<span class="text-muted-foreground"># 3. After an operator replay receipt exists, rebuild the two public views</span>
-python web/submit_result.py rebuild --store community_submissions \
-  --manifest /read-only/suite-manifest.json \
-  --trusted-keys /read-only/replay-authorities.json \
-  --out web/leaderboard_data.json</pre>
-
-        <h2 id="content-id" class="scroll-m-28 font-mono">One immutable cell per submission</h2>
-        <p><code>record</code> computes a full SHA-256 content id over patch, authenticated
-          submitter, model build, harness version and task, which yields one immutable authenticated
-          cell per suite/build/harness/task. Partial, duplicate and cross-date sets are left
-          unranked, and every <code>rebuild</code> re-verifies the receipt signature and content
-          binding.</p>
-
-        <h2 id="operator-replay" class="scroll-m-28 font-mono">Operator-only replay authority</h2>
-        <p>Install the replay-only receipt dependency on the operator image:</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">pip install -e '.[replay]'</pre>
-        <dl class="tdb-defs">
-          <dt>Primitives</dt>
-          <dd>Receipt signing and verification use Python <code>cryptography</code>&rsquo;s in-process
-            Ed25519 primitives.</dd>
-          <dt>No subprocess</dt>
-          <dd><code>web/receipt_auth.py</code> does not search <code>PATH</code> and does not invoke
-            an external OpenSSL process.</dd>
-          <dt>Missing extra</dt>
-          <dd>A missing or invalid replay extra fails closed before signing or acceptance.</dd>
-        </dl>
-
-        <h2 id="frozen-policy" class="scroll-m-28 font-mono">The frozen execution policy</h2>
-        <dl class="tdb-defs">
-          <dt>The replay stack</dt>
-          <dd>Replay runner and Harbor digests, backend, offline policy, authority key.</dd>
-          <dt>Per task</dt>
-          <dd>The SIF digest.</dd>
-          <dt>The container runtime</dt>
-          <dd>Its canonical absolute path, binary SHA-256, exact version, and kind.</dd>
-          <dt>Ownership</dt>
-          <dd>The worker must not own or be able to write the runtime binary or its parent directory;
-            neither may be group- or world-writable.</dd>
-        </dl>
-
-        <h2 id="image-checks" class="scroll-m-28 font-mono">Image and runtime checks</h2>
-        <dl class="tdb-defs">
-          <dt>Before every Harbor execution</dt>
-          <dd>The worker copies the expected SIF read-only into a worker-private attempt
-            directory.</dd>
-          <dt>The frozen digest</dt>
-          <dd>Checked before Harbor and at the Harbor-to-canary boundary.</dd>
-          <dt>Runtime facts</dt>
-          <dd>Checked before Harbor and in the canary preflight.</dd>
-          <dt>Before a receipt is returned</dt>
-          <dd>Those snapshots must match. Image drift or a runtime snapshot mismatch fails closed.</dd>
-        </dl>
-
-        <h2 id="harbor-binding" class="scroll-m-28 font-mono">Implemented Harbor binding</h2>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">harbor_binary_path</dt>
-          <dd>The canonical launcher path, plus its digest and version.</dd>
-          <dt class="tdb-id">harbor_package_root</dt>
-          <dd>The canonical package root.</dd>
-          <dt>Tree hash</dt>
-          <dd>SHA-256 of the complete Harbor package and network-patch tree.</dd>
-          <dt>Runtime control</dt>
-          <dd>Immutable runtime-control facts.</dd>
-          <dt>Drift</dt>
-          <dd>The worker recomputes and compares those facts before and after replay, so changed
-            imported modules or backend patches fail closed.</dd>
-        </dl>
-
-        <h2 id="result-binding" class="scroll-m-28 font-mono">Implemented result binding</h2>
-        <dl class="tdb-defs">
-          <dt>Descriptors</dt>
-          <dd>The authoritative <code>result.json</code> reader opens root/run/result through
-            <code>O_NOFOLLOW</code> file descriptors.</dd>
-          <dt>Links</dt>
-          <dd>Rejects symlinks and hardlinks (<code>st_nlink != 1</code>), and checks
-            inode/device/link-count stability.</dd>
-          <dt>Size</dt>
-          <dd>Limits the snapshot to 16 MiB.</dd>
-          <dt>Hashing</dt>
-          <dd>Reward validation and receipt hashing use the same already-open snapshot bytes; the
-            selected pathname is never reopened.</dd>
-        </dl>
-
-        <h2 id="canary" class="scroll-m-28 font-mono">The canary requirement</h2>
-        <dl class="tdb-defs">
-          <dt>Control</dt>
-          <dd>The pinned image must reach the canary endpoint.</dd>
-          <dt>Isolated</dt>
-          <dd>The same image must fail to reach it under <code>--net --network none</code>.</dd>
-          <dt>Anything else</dt>
-          <dd>Missing image bytes, an unreachable control, or an unproven isolation failure is an
-            infrastructure error &mdash; never a zero reward, never a verified receipt.</dd>
-        </dl>
-
-        <h2 id="deployment" class="scroll-m-28 font-mono">Deployment boundary</h2>
-        <p>Signer and ingest/promoter must use distinct UIDs or service identities. A signer-only
-          private-key mount and promoter read-only manifest/public-key mounts are required. Shared
-          ownership plus mode bits is not isolation.</p>
-
-        <h2 id="evidence" class="scroll-m-28 font-mono">Evidence boundary, and what stays blocked</h2>
-        <p>The fake-runner and Fake Harbor tests prove code and command boundaries only. Fake-runner
-          tests are not evidence of a production replay, real network isolation, or a correctly
-          separated receipt authority.</p>
-        <p>Production replay remains blocked until the official compute worker, against the real
-          installed package and replay artifacts:</p>
-        <ul>
-          <li>completes a real Harbor replay;</li>
-          <li>demonstrates a reachable control canary and a blocked isolated canary;</li>
-          <li>passes an operator audit of the deployment boundary above, plus the Harbor
-            package/tree and single-snapshot result controls.</li>
-        </ul>
-
-        <h2 id="live-tasks" class="scroll-m-28 font-mono">Live vs. archived tasks</h2>
-        <p><strong>Live</strong> tasks &mdash; this week&rsquo;s &mdash; withhold the gold patch and
-          the protected test bodies, and a patch against one stays pending until an official replay.
-          <strong>Archived</strong> tasks, at least two weeks old, ship in full.
-          <a href="../task-format/#archive-vs-live">Archive vs. live &rarr;</a></p>
-
-        <h2 id="adapter" class="scroll-m-28 font-mono">Adding a scaffold &mdash; the <span class="tdb-id">HarnessAdapter</span> contract</h2>
-        <p>Contract (<code>terminal_daily_bench/adapters/base.py</code>):</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">input  = (task dir, failing test ids, model id/endpoint)
-output = (unified diff, telemetry)</pre>
-
-        <h2 id="interface" class="scroll-m-28 font-mono">The interface</h2>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
-
-@dataclass
-class AdapterResult:
-    patch: str                                               <span class="text-muted-foreground"># unified diff the harness produced</span>
-    telemetry: Dict[str, Any] = field(default_factory=dict)  <span class="text-muted-foreground"># tokens, cost_usd, turns, wall_s</span>
-    error: Optional[str] = None
-
-class HarnessAdapter(abc.ABC):
-    name: str = "base"
-
-    @abc.abstractmethod
-    def produce_patch(self, task_dir: str, failing_test_ids: List[str],
-                      model: str, **kwargs: Any) -&gt; AdapterResult:
-        ...</pre>
-
-        <h2 id="produce-patch" class="scroll-m-28 font-mono"><span class="tdb-id">produce_patch</span> rules</h2>
-        <p>From the base-class docstring:</p>
-        <dl class="tdb-defs">
-          <dt><strong>MUST NOT</strong> read the answer</dt>
-          <dd>No reading or writing the protected tests or the gold solution.</dd>
-          <dt><strong>MUST NOT</strong> score</dt>
-          <dd>No computing a reward &mdash; scoring is done afterward by the execution gate.</dd>
-          <dt>On failure</dt>
-          <dd>Return an <code>AdapterResult</code> with <code>error</code> set and an empty
-            <code>patch</code> &mdash; a 0-reward attempt, <strong>not</strong> a raised crash.</dd>
-        </dl>
-
-        <h2 id="reference" class="scroll-m-28 font-mono">Reference implementation</h2>
-        <p><code>terminal_daily_bench/adapters/single_shot.py</code> &mdash;
-          <code>SingleShotAdapter</code>, <code>name = "single_shot"</code>. It:</p>
-        <ol>
-          <li>loads the task (<code>eval.load_task</code>);</li>
-          <li>finds the file(s) the reference solution touches
-            (<code>eval.solution_target_files</code>);</li>
-          <li>reads those files out of the SIF image for context
-            (<code>eval.extract_repo_files</code>);</li>
-          <li>builds a strict prompt (<code>eval.build_prompt</code>) asking for one unified diff;</li>
-          <li>calls the model (<code>eval.call_model</code>) and extracts the diff
-            (<code>eval.extract_diff</code>);</li>
-          <li>returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry &mdash;
-            no scoring.</li>
-        </ol>
-
-        <h2 id="terminus" class="scroll-m-28 font-mono">The multi-turn stub</h2>
-        <p><code>terminal_daily_bench/adapters/terminus.py</code> &mdash; <code>TerminusAdapter</code>,
-          <code>name = "terminus"</code> &mdash; is a stub for a multi-turn agent: terminus-2, Claude
-          Code, Aider, OpenHands, SWE-agent. To finish it, implement its <code>produce_patch</code>
-          to run your agent CLI and return the diff. Any harness taking a custom OpenAI base URL
-          drives an arbitrary model unchanged.</p>
-
-        <h2 id="registering" class="scroll-m-28 font-mono">Registering it</h2>
-        <p>Discovery is by the registry in <code>terminal_daily_bench/adapters/__init__.py</code>:</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</pre>
-        <p>Add your adapter class to that tuple and to <code>__all__</code> with a unique
-          <code>name</code>, then set the <code>scaffold</code> field of your submission records to
-          it. The leaderboard groups runs by <code>(submitter, model, scaffold)</code>.</p>
-
-        <h2 id="layout" class="scroll-m-28 font-mono">Task package layout</h2>
-        <p>Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code>. The seven paths in
-          a package, what each carries and which of them live releases withhold are documented once,
-          in <a href="../task-format/">Task format</a>; the canonical short schema is
-          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
-
-        <h2 id="failing-ids" class="scroll-m-28 font-mono">Failing test ids</h2>
-        <p>The <code>fail_to_pass</code> selectors in <code>record.json</code> are the
-          <code>failing_test_ids</code> passed to an adapter. Live tasks ship those ids but withhold
-          <code>solution/</code> and the protected <code>test_outputs.py</code> body.</p>
-
-      </article>
-
-      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">Next:
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quality-methods/">Quality methods</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../task-format/">Task format</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quickstart/">Quickstart</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../submission.md">Markdown source</a></p>
-    </div>
-
-    <!-- ===================== on this page ===================== -->
-    <aside id="toc" class="sticky top-(--fd-sidebar-top) shrink-0 overflow-y-auto pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem;max-height:calc(100dvh - 7rem)" aria-label="On this page"></aside>
-
-  </div>
-
-  <!-- ===================== community submissions ===================== -->
-  <section class="tdb-block" data-tdb-section="next">
-    <div class="tdb-block-head">
-      <h2>Community submissions</h2>
-      <p>Verified rows only count toward a rate</p>
-      <div class="tdb-block-tools"><a href="../../submit/">Submit &rarr;</a></div>
-    </div>
-
-    <div id="community" class="w-full"></div>
-  </section>
-
-</div>
-</div>
+  </article>
 </main>
 
-<script src="../../assets/site.js?v=edae671ad0" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
 <script>
-/* the "on this page" rail — built from the section ids already in the prose,
-   so the navigation can never drift from the text. One heading level, so one
-   indent. */
-(function buildToc() {
-  var toc = document.getElementById("toc");
-  if (!toc) return;
-  var hs = document.querySelectorAll(".prose h2[id]");
-  if (!hs.length) { toc.style.display = "none"; return; }
-  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
-             '<div class="flex flex-col border-l">'];
-  for (var i = 0; i < hs.length; i++) {
-    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
-    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
-    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 pl-4' +
-      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
-      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
-  }
-  out.push("</div>");
-  toc.innerHTML = out.join("");
-})();
-
 (async function () {
   var T = window.TDB;
   var el = document.getElementById("community");
@@ -529,6 +158,50 @@ class HarnessAdapter(abc.ABC):
           (pending ? SECONDARY : PRIMARY) +
           '">' + (pending ? pending + " pending" : "all verified") + "</span></td></tr>";
     }).join("") + "</tbody></table></div>";
+})();
+</script>
+<script>
+/* Fragments that moved when this page was split.
+
+   Nothing under docs/, web/ or tests/ links any of the ids below -- they were
+   checked -- but a reader's bookmark is a referrer nobody can grep for, so the
+   old URL still has to land on the content instead of on a page that silently
+   ignores its own fragment. Two sibling pages already shipped this and two did
+   not; one treatment survives a bookmark and the other does not, so the site
+   now does the same thing in all four places.
+
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "adapter": "./adapters/",
+    "canary": "./replay-integrity/",
+    "cli": "./recording/",
+    "content-id": "./recording/",
+    "deployment": "./replay-integrity/",
+    "endpoint": "./running/",
+    "evidence": "./replay-integrity/",
+    "failing-ids": "./adapters/",
+    "failure": "./running/",
+    "frozen-policy": "./replay-integrity/",
+    "harbor-binding": "./replay-integrity/",
+    "image-checks": "./replay-integrity/",
+    "interface": "./adapters/",
+    "layout": "./running/",
+    "live-tasks": "./running/",
+    "produce-patch": "./adapters/",
+    "record": "./running/",
+    "reference": "./adapters/",
+    "registering": "./adapters/",
+    "result-binding": "./replay-integrity/",
+    "rules": "./recording/",
+    "run": "./running/",
+    "terminus": "./adapters/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
 })();
 </script>
 </body>

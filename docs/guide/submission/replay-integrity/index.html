@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>replay integrity — terminal-daily-bench docs</title>
+<meta name="description" content="The frozen execution policy, the image, Harbor and result bindings a receipt carries, the canary requirement, the deployment boundary, and what no test here has proven yet.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of guide/submission/. These seven sections are the controls a
+     receipt asserts, and they end with the one section that says what is still
+     unproven. That section is last on purpose: a page that lists seven controls
+     and stops has told the reader the system is finished. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>Replay integrity</h1>
+    <p class="tdb-doc-sub">What the operator worker has to prove before a receipt exists &mdash; and what nothing here has proven yet.</p>
+
+    <h2 id="frozen-policy"><a href="#frozen-policy">The frozen execution policy</a></h2>
+    <p>The policy freezes the replay stack &mdash; replay runner and Harbor digests, backend,
+      offline policy, authority key &mdash; and, per task, the SIF digest. It also freezes the
+      container runtime: its canonical absolute path, binary SHA-256, exact version, and kind. The
+      worker must not own or be able to write the runtime binary or its parent directory, and
+      neither may be group- or world-writable.</p>
+
+    <h2 id="image-checks"><a href="#image-checks">Image and runtime checks</a></h2>
+    <p>Before every Harbor execution the worker copies the expected SIF read-only into a
+      worker-private attempt directory. The frozen digest is checked before Harbor and at the
+      Harbor-to-canary boundary; the runtime facts are checked before Harbor and in the canary
+      preflight. Before a receipt is returned those snapshots must match, and image drift or a
+      runtime snapshot mismatch fails closed.</p>
+
+    <h2 id="harbor-binding"><a href="#harbor-binding">Implemented Harbor binding</a></h2>
+    <p>A receipt binds <code>harbor_binary_path</code> &mdash; the canonical launcher path, plus its
+      digest and version &mdash; and <code>harbor_package_root</code>, the canonical package root,
+      together with a SHA-256 of the complete Harbor package and network-patch tree and the
+      immutable runtime-control facts. The worker recomputes and compares those facts before and
+      after replay, so changed imported modules or backend patches fail closed.</p>
+
+    <h2 id="result-binding"><a href="#result-binding">Implemented result binding</a></h2>
+    <p>The authoritative <code>result.json</code> reader opens root/run/result through
+      <code>O_NOFOLLOW</code> file descriptors, rejects symlinks and hardlinks
+      (<code>st_nlink != 1</code>), checks inode/device/link-count stability, and limits the
+      snapshot to 16 MiB. Reward validation and receipt hashing use the same already-open snapshot
+      bytes; the selected pathname is never reopened.</p>
+
+    <h2 id="canary"><a href="#canary">The canary requirement</a></h2>
+    <p>The pinned image must reach the canary endpoint as a control, and the same image must fail to
+      reach it under <code>--net --network none</code>. Anything else &mdash; missing image bytes,
+      an unreachable control, or an unproven isolation failure &mdash; is an infrastructure error,
+      never a zero reward and never a verified receipt.</p>
+
+    <h2 id="deployment"><a href="#deployment">Deployment boundary</a></h2>
+    <p>Signer and ingest/promoter must use distinct UIDs or service identities. A signer-only
+      private-key mount and promoter read-only manifest/public-key mounts are required. Shared
+      ownership plus mode bits is not isolation.</p>
+
+    <h2 id="evidence"><a href="#evidence">Evidence boundary, and what stays blocked</a></h2>
+    <p>The fake-runner and Fake Harbor tests prove code and command boundaries only. Fake-runner
+      tests are not evidence of a production replay, real network isolation, or a correctly
+      separated receipt authority, and semantic verifier false-accept remains unmeasured pending an
+      exploit corpus.</p>
+    <p>Production replay remains blocked until the official compute worker, against the real
+      installed package and replay artifacts, completes a real Harbor replay, demonstrates a
+      reachable control canary and a blocked isolated canary, and passes an operator audit of the
+      deployment boundary above plus the Harbor package/tree and single-snapshot result controls.</p>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

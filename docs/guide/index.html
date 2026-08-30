@@ -4,115 +4,49 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>docs — terminal-daily-bench</title>
-<meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Four guides: quickstart, task format, submission, quality methods.">
-<link rel="stylesheet" href="../assets/tw.css?v=edae671ad0">
-<link rel="stylesheet" href="../assets/site.css?v=edae671ad0">
+<meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Twenty-nine pages across running it and the measurement method.">
+<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-<div class="flex flex-1 flex-col items-center px-4 py-6">
-<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
+<!-- The docs front door. It was the last page still on the legacy frame: no
+     sidebar, and a hand-written list naming FOUR destinations for what is now
+     a twenty-nine page set. Every one of those pages is in the sidebar this
+     page now renders, generated from DOCNAV, so restating them here would be
+     a second index that drifts from the first the moment either changes.
+     What is left is the two things a sidebar cannot say: where to start, and
+     the two limits that apply before a reader runs anything. -->
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Run the benchmark, read the score, submit a patch</h1>
+    <p class="tdb-doc-sub">A patch in, a test outcome out. Every page is in the sidebar; this is where to start.</p>
 
-  <!-- ===================== breadcrumb ===================== -->
-  <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-    <a class="hover:text-foreground transition-colors" href="../">Home</a>
-    <span>/</span>
-    <span class="text-foreground">Docs</span>
-  </nav>
+    <h2 id="start"><a href="#start">Start here</a></h2>
+    <p><a href="quickstart/">Quickstart</a> installs the tool, points it at a model
+      endpoint and scores one task. <a href="run/">Run a task</a> follows it with the
+      oracle baseline and the scoring command.</p>
 
-  <!-- ===================== page head =====================
-       INDEX, NOT LANDING PAGE. This page carried 17 paragraphs, 10 <h2> and
-       a two-column grid of four bordered cards with nine badges between them
-       to name four destinations and describe each in one sentence. Cards are
-       what a page uses when it is selling the choice; a docs index is read by
-       somebody who has already chosen and wants the shortest path to the
-       page. It is a list now: name, one line, hairline.
+    <h2 id="running"><a href="#running">Running it</a></h2>
+    <p>How a task package is laid out on disk, what archive publishes and live
+      withholds, how scoring re-lays the protected tests, and the
+      <code>HarnessAdapter</code> contract for plugging in your own scaffold.</p>
 
-       What was dropped was DUPLICATION, not content. The install/command
-       surface is quickstart/ verbatim, and the suite statistics strip is the
-       leaderboard's. Every CAVEAT that stood here still stands here -- the
-       execution dependency, archive vs. live, markdown-wins, the sole reward
-       authority and the unmeasured semantic false-accept. -->
-  <div class="w-full">
-    <h1 class="tdb-page-title" id="title">Run the benchmark, read the score, submit a patch</h1>
-    <p class="tdb-page-lede">A patch in, a test outcome out.</p>
-    <nav class="tdb-navrow" aria-label="Docs shortcuts">
-      <a class="tdb-navlink" data-primary="true" href="quickstart/">Quickstart</a>
-      <a class="tdb-navlink" href="../submit/">Submit results</a>
-      <a class="tdb-navlink" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">Source</a>
-      <a class="tdb-navlink" href="../leaderboard/">Leaderboard</a>
-      <a class="tdb-navlink" href="../quality/#discrimination">What the suite separates</a>
-    </nav>
-  </div>
+    <h2 id="method"><a href="#method">Method</a></h2>
+    <p>Whether the task set separates models at all: discrimination, the C1&ndash;C14
+      capability taxonomy, 2PL information, KR-20 and the readiness verdict. The
+      report itself is at <a href="../quality/#discrimination">selection quality</a>.</p>
 
-  <!-- ===================== guides ===================== -->
-  <section class="tdb-block" data-tdb-section="docs">
-    <div class="tdb-block-head">
-      <h2>Guides</h2>
-    </div>
-
-    <nav class="tdb-doclist" aria-label="Guides">
-      <a href="quickstart/">
-        <span class="tdb-doclist-n">Quickstart</span>
-        <span class="tdb-doclist-d">Install, endpoint configuration, the oracle baseline, scoring one task.</span>
-      </a>
-      <a href="task-format/">
-        <span class="tdb-doclist-n">Task format</span>
-        <span class="tdb-doclist-d">The on-disk package, archive vs. live, and how scoring re-lays the protected tests.</span>
-      </a>
-      <a href="submission/">
-        <span class="tdb-doclist-n">Submission</span>
-        <span class="tdb-doclist-d">The submission schema, its validation rules, and the <code>HarnessAdapter</code> contract.</span>
-      </a>
-      <a href="quality-methods/">
-        <span class="tdb-doclist-n">Quality methods</span>
-        <span class="tdb-doclist-d">Multi-angle Selection-Quality: discrimination, 2PL information, KR-20, readiness verdict.</span>
-      </a>
-    </nav>
-
-        <p><strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
-    need the unpublished patched Harbor fork, not stock 0.13.1; the catalogue, quality card,
-    publisher and doctor do not.
-    <a class="underline-offset-4 hover:underline" href="quickstart/#requirements">Requirements</a>.</p>
-  
-  </section>
-
-  <!-- ===================== the markdown sources ===================== -->
-  <section class="tdb-block" data-tdb-section="repository">
-    <div class="tdb-block-head">
-      <h2>The Markdown sources</h2>
-      <p>The reference these pages summarise</p>
-    </div>
-
-    <nav class="tdb-doclist" aria-label="Markdown sources">
-      <a href="../quickstart.md">
-        <span class="tdb-doclist-n">quickstart.md</span>
-        <span class="tdb-doclist-d">When the two differ, the shipped Markdown wins.</span>
-      </a>
-      <a href="../task-format.md">
-        <span class="tdb-doclist-n">task-format.md</span>
-        <span class="tdb-doclist-d">Archive ships in full; live withholds gold and protected tests, unranked until official replay.</span>
-      </a>
-      <a href="../submission.md">
-        <span class="tdb-doclist-n">submission.md</span>
-        <span class="tdb-doclist-d">A claimed reward is never trusted; the execution gate is the sole reward authority.</span>
-      </a>
-      <a href="../quality-methods.md">
-        <span class="tdb-doclist-n">quality-methods.md</span>
-        <span class="tdb-doclist-d">Whether the task set separates models. Semantic false-accept is unmeasured.</span>
-      </a>
-    </nav>
-
-    <p class="tdb-block-foot">Editing tests changes only a discarded workspace.
-      <a class="underline-offset-4 hover:underline" href="task-format/#archive-vs-live">Archive vs. live</a>.</p>
-  </section>
-
-</div>
-</div>
+    <h2 id="before-you-run"><a href="#before-you-run">Before you run anything</a></h2>
+    <p><code>tdb run</code> and <code>tdb oracle</code> need the unpublished patched
+      Harbor fork, not stock 0.13.1; the catalogue, quality card, publisher and doctor
+      do not. <a href="quickstart/#requirements">Requirements</a>.</p>
+    <p>Editing tests changes only a discarded workspace.
+      <a href="task-format/#archive-vs-live">Archive vs. live</a>.</p>
+  </article>
 </main>
 
-<script src="../assets/site.js?v=edae671ad0" data-root=".." data-page="docs"></script>
+<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="docs"></script>
 </body>
 </html>

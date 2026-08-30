@@ -4,677 +4,96 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality methods (MSQ) — terminal-daily-bench docs</title>
-<meta name="description" content="Multi-angle Selection-Quality: discrimination, difficulty coverage, monotonicity, angle coverage, diversity, 2PL IRT test information, KR-20 reliability, bootstrap intervals, required-N power, and the daily readiness verdict.">
-<link rel="stylesheet" href="../../assets/tw.css?v=edae671ad0">
-<link rel="stylesheet" href="../../assets/site.css?v=edae671ad0">
+<meta name="description" content="Multi-angle Selection-Quality: the graded matrix convention, what enters it, the two tallies, and which dimensions may be ranked.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-<div class="flex flex-1 flex-col items-center px-4 py-6">
-<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Selection-quality methods (MSQ)</h1>
+    <p class="tdb-doc-sub">Multi-angle Selection-Quality &mdash; how well a task set discriminates models, scored from a graded <code>(task &times; model)</code> matrix.</p>
 
-  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
+    <h2 id="matrix"><a href="#matrix">The matrix convention</a></h2>
+    <p><strong>Solved</strong> means grade <code>&gt;= solved_threshold</code> (default <code>1</code>). Binary <code>0/1</code> and graded <code>0..K</code> both work, and the CLI <a href="cli/#surfaces">builds the matrix for you</a>.</p>
+    <figure class="tdb-code"><pre><code>matrix   rows = tasks, cols = models
+         matrix[t][j] = the graded outcome of model j on task t (int, 0 = fail)</code></pre></figure>
 
-    <!-- ===================== the prose column ===================== -->
-    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
+    <h2 id="outcomes"><a href="#outcomes">What enters the matrix</a></h2>
+    <p>A run produces a status before it produces a grade. Only an authenticated <code>SUCCESS</code> with <code>score_accepted=true</code> becomes a numeric outcome; <code>SUCCESS</code> with <code>score_accepted=false</code>, <code>FAILED</code>, <code>BLOCKED</code> and <code>NOT_RUN</code> all record <code>outcome:null</code>. All five statuses are counted in coverage.</p>
+    <p>Null is not zero. Those rows <strong>are not converted to zero</strong> and are excluded from ratings, because a task that could not be attempted is not a task the model failed &mdash; zeroing them would move a harness outage into the model&rsquo;s score. They are <strong>counted in coverage, not outcomes</strong>, so a model that ran few tasks shows low coverage rather than a clean-looking rate.</p>
 
-      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-        <a class="hover:text-foreground transition-colors" href="../../">Home</a>
-        <span>/</span>
-        <a class="hover:text-foreground transition-colors" href="../">Docs</a>
-        <span>/</span>
-        <span class="text-foreground">Quality methods</span>
-      </nav>
+    <h2 id="tallies"><a href="#tallies">Two tallies, never summed</a></h2>
+    <p>A declaration cannot authenticate its own status, so the two tallies are never summed.</p>
+    <dl class="tdb-defs">
+      <dt class="tdb-id">authenticated_counts</dt>
+      <dd>Bound to receipts.</dd>
+      <dt class="tdb-id">untrusted_declared_counts</dt>
+      <dd>Bound to what a submission asserted about itself.</dd>
+    </dl>
 
-      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
-        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">Selection-quality methods (MSQ)</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Multi-angle Selection-Quality &mdash; how well a task set discriminates models.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Scored from a graded <code>(task &times; model)</code> matrix.</p>
-      </header>
+    <h2 id="dimensions"><a href="#dimensions">Which dimensions may be ranked</a></h2>
+    <p>Three dimensions, each bound by the trusted task catalogue. <code>ALLOWED_DIMENSIONS</code> enforces the list in code, and a dimension outside it is not rendered. Unavailable and zero are different claims.</p>
+    <dl class="tdb-defs">
+      <dt class="tdb-id">overall</dt>
+      <dd>Rankable.</dd>
+      <dt class="tdb-id">language</dt>
+      <dd>Rankable.</dd>
+      <dt class="tdb-id">capability</dt>
+      <dd>Authorised. The <a href="capability/#capability-taxonomy">C1&ndash;C14</a> labels are published on every archive package, but no axis clears the publish gate on this catalogue.</dd>
+      <dt>task-family</dt>
+      <dd><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound family field. The site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</dd>
+    </dl>
 
-      <!-- ONE HEADING LEVEL, THREE TABLES. This page shipped thirty-one tables
-           and twenty-three h3. Twenty-eight of those tables were two columns
-           -- `term -> meaning` -- which is a definition list with rules drawn
-           round it, a header row invented to give the rules something to sit
-           under, and a horizontal scroller wrapped round the whole thing. They
-           are <dl class="tdb-defs"> or plain sentences now.
-
-           The three that stayed are genuinely two-dimensional and their rows
-           exist to be read across: the fourteen capability codes (code, name,
-           scope), the seven measurement axes (symbol, function, what it
-           measures), and the failure-mode table (axis, what it asks, range,
-           what a bad value looks like). Nothing else on this page had a second
-           dimension; a two-column table only ever had a first.
-
-           No claim was deleted. Every h3 became an h2 carrying one claim,
-           its supporting sentences and at most one formula block, and the fifteen
-           hr between them are gone -- 48px above a heading already says a new
-           section starts. Ids are stable: the "on this page" rail is built from
-           them at runtime, #outcomes / #capability-taxonomy / #report-capability
-           are deep-linked from docs/quality/ and docs/leaderboard/, and
-           web/verify_site.py pins five outcome-treatment substrings of this page
-           verbatim -- 'outcome:null', 'are not converted to zero',
-           'authenticated_counts', 'untrusted_declared_counts' and
-           'Task-family: unavailable'. Those are matched against the raw source
-           with no whitespace normalisation, so each stays on one line and
-           uninterrupted by markup. -->
-      <article class="prose prose-no-margin">
-
-        <h2 id="scope" class="scroll-m-28 font-mono">Scope and limits</h2>
-        <dl class="tdb-defs">
-          <dt>Module</dt>
-          <dd><code>terminal_daily_bench.quality</code></dd>
-          <dt>Pure</dt>
-          <dd>Pure functions over plain lists; they neither read nor change reward decisions.</dd>
-          <dt>Blind to</dt>
-          <dd>Semantic verifier false-accept &mdash; MSQ cannot measure it.</dd>
-          <dt>Deterministic</dt>
-          <dd>Randomized routines are <strong>seeded</strong>; a resume reproduces the interval.</dd>
-          <dt>Advisory</dt>
-          <dd>No MSQ number and no readiness verdict ever gates an accept.</dd>
-          <dt>Undefined</dt>
-          <dd>An axis without a population returns <code>None</code>, never a fabricated number.</dd>
-        </dl>
-
-        <h2 id="matrix" class="scroll-m-28 font-mono">The matrix convention</h2>
-        <p><strong>Solved</strong> means grade <code>&gt;= solved_threshold</code> (default
-          <code>1</code>). Binary <code>0/1</code> and graded <code>0..K</code> both work, and the
-          CLI builds the matrix for you (<a href="#surfaces">below</a>).</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">matrix   rows = tasks, cols = models
-         matrix[t][j] = the graded outcome of model j on task t (int, 0 = fail)</pre>
-
-        <h2 id="outcomes" class="scroll-m-28 font-mono">What enters the matrix</h2>
-        <p>A run produces a status before it produces a grade. Only an authenticated
-          <code>SUCCESS</code> with <code>score_accepted=true</code> becomes a numeric outcome;
-          <code>SUCCESS</code> with <code>score_accepted=false</code>, <code>FAILED</code>,
-          <code>BLOCKED</code> and <code>NOT_RUN</code> all record <code>outcome:null</code>. All
-          five statuses are counted in coverage.</p>
-        <p>Null is not zero. Those rows <strong>are not converted to zero</strong> and are
-          excluded from ratings, because a task that could not be attempted is not a task the model failed
-          &mdash; zeroing them would move a harness outage into the model&rsquo;s score. They are
-          <strong>counted in coverage, not outcomes</strong>, so a model that ran few tasks shows low
-          coverage rather than a clean-looking rate.</p>
-
-        <h2 id="tallies" class="scroll-m-28 font-mono">Two tallies, never summed</h2>
-        <p>A declaration cannot authenticate its own status, so the two tallies are never summed.</p>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">authenticated_counts</dt>
-          <dd>Bound to receipts.</dd>
-          <dt class="tdb-id">untrusted_declared_counts</dt>
-          <dd>Bound to what a submission asserted about itself.</dd>
-        </dl>
-
-        <h2 id="dimensions" class="scroll-m-28 font-mono">Which dimensions may be ranked</h2>
-        <p>Three dimensions, each bound by the trusted task catalogue.
-          <code>ALLOWED_DIMENSIONS</code> enforces the list in code, and a dimension outside it is
-          not rendered. Unavailable and zero are different claims.</p>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">overall</dt>
-          <dd>Rankable.</dd>
-          <dt class="tdb-id">language</dt>
-          <dd>Rankable.</dd>
-          <dt class="tdb-id">capability</dt>
-          <dd>Authorised. The <a href="#capability-taxonomy">C1&ndash;C14</a>
-            labels are published on every archive package, but no axis clears the publish gate on this catalogue.</dd>
-          <dt>task-family</dt>
-          <dd><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound family field. The site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</dd>
-        </dl>
-
-        <h2 id="estimands" class="scroll-m-28 font-mono">Separate estimands</h2>
-        <p>Model, harness, and complete-configuration effects stay separate estimands: a harness
-          effect is never read as a model effect, and a configuration score is never relabelled as
-          model-only performance.</p>
-
-        <h2 id="capability-taxonomy" class="scroll-m-28 font-mono">The capability taxonomy (C1&ndash;C14)</h2>
-        <p><strong>Correction.</strong>
-          An earlier revision of this page deleted the C1&ndash;C14 claim, on the grounds that nothing defined the codes. That was wrong, and it is restored
-          here rather than re-added silently: the codes are defined in one place and the assignment
-          is deterministic.</p>
-        <dl class="tdb-defs">
-          <dt>Source of truth</dt>
-          <dd><code>CAPABILITY_TAXONOMY</code> in <code>td_pipeline/selection.py</code>; code, name,
-            scope and tagging rules are declared once, per code.</dd>
-          <dt>Tagger</dt>
-          <dd><code>label_capabilities(candidate)</code> &mdash; static path rules and patch-token
-            rules. No model, no heuristic scoring, no human pass.</dd>
-          <dt>Inputs</dt>
-          <dd>Three, all from the package: the changed-file list, the oracle diff, the test diff. The
-            <code>task.toml</code> prose is not read.</dd>
-          <dt>Determinism</dt>
-          <dd>Same inputs, same labels. Re-running the tagger reproduces each package&rsquo;s shipped
-            <code>capability_labels</code> exactly.</dd>
-          <dt>Multi-label</dt>
-          <dd>A task carries every code its diff triggers, not one. The counts per code do not sum to
-            the task count.</dd>
-          <dt>Live packages</dt>
-          <dd><strong>Not taggable.</strong> Live withholds <code>solution/oracle.patch</code>, so
-            the tagger has no oracle diff to read.</dd>
-          <dt>In the registry</dt>
-          <dd>A capability chip selects both kinds of evidence &mdash; re-derived and declared-only.
-            The <code>Capability</code> column is what says which kind a given row has.</dd>
-          <dt>Not a difficulty</dt>
-          <dd>A label says what the fix touches. It never says how hard the task is.</dd>
-        </dl>
-
-        <h2 id="capability-codes" class="scroll-m-28 font-mono">The fourteen codes</h2>
-        <table>
-          <thead><tr><th>code</th><th>name</th><th>scope</th></tr></thead>
-          <tbody>
-            <tr><th class="tdb-id">C1</th><td>filesystem</td><td>filesystem / data wrangling</td></tr>
-            <tr><th class="tdb-id">C2</th><td>build</td><td>build &amp; compile</td></tr>
-            <tr><th class="tdb-id">C3</th><td>debug</td><td>debugging / fault localization</td></tr>
-            <tr><th class="tdb-id">C4</th><td>impl</td><td>code implementation / refactor</td></tr>
-            <tr><th class="tdb-id">C5</th><td>test</td><td>test authoring &amp; verification</td></tr>
-            <tr><th class="tdb-id">C6</th><td>data</td><td>data processing / ETL / scientific</td></tr>
-            <tr><th class="tdb-id">C7</th><td>net</td><td>networking &amp; protocols</td></tr>
-            <tr><th class="tdb-id">C8</th><td>sec</td><td>crypto &amp; security</td></tr>
-            <tr><th class="tdb-id">C9</th><td>ops</td><td>system config &amp; ops</td></tr>
-            <tr><th class="tdb-id">C10</th><td>vcs</td><td>version control operations</td></tr>
-            <tr><th class="tdb-id">C11</th><td>perf</td><td>performance optimization</td></tr>
-            <tr><th class="tdb-id">C12</th><td>reverse</td><td>reverse engineering / low-level</td></tr>
-            <tr><th class="tdb-id">C13</th><td>ml</td><td>ML / data-science engineering</td></tr>
-            <tr><th class="tdb-id">C14</th><td>orch</td><td>environment / tool orchestration</td></tr>
-          </tbody>
-        </table>
-
-        <h2 id="capability-rules" class="scroll-m-28 font-mono">What triggers a label</h2>
-        <dl class="tdb-defs">
-          <dt>A changed path matches a path rule</dt>
-          <dd>Tags that rule&rsquo;s code, once per matching path.</dd>
-          <dt>A token rule matches the diff</dt>
-          <dd>Tags that rule&rsquo;s code. <strong>Added lines only</strong>, word-boundary matched
-            &mdash; a deleted line or a diff header never tags a task.</dd>
-          <dt>The test diff is non-empty</dt>
-          <dd>Always adds <code>C5</code>; the test diff is what carries the verifiable signal.</dd>
-          <dt>A changed non-test source file</dt>
-          <dd>Always adds <code>C4</code>.</dd>
-          <dt>Nothing matched</dt>
-          <dd>Defaults to <code>C3</code>. The label list is never empty.</dd>
-          <dt>Order</dt>
-          <dd>Hit count descending, then code number. The list is a total order, not a set.</dd>
-        </dl>
-        <p>The two unconditional rules are why <code>C5</code> and <code>C4</code> sit on nearly
-          every archive package. Per-axis coverage and gate status on today&rsquo;s catalogue is on
-          the <a href="../../quality/#capability">capability coverage report</a>; a defined label set
-          is not a scoreable axis, and that page says which axes clear the gate.</p>
-
-        <h2 id="axes" class="scroll-m-28 font-mono">The measurement axes</h2>
-        <p>Each axis is <code>[0, 1]</code>, higher = better, and every one is reported
-          <strong>separately</strong> so the composite never hides a collapsed axis.</p>
-        <table>
-          <thead><tr><th>axis</th><th>function</th><th>measures</th></tr></thead>
-          <tbody>
-            <tr><th><a href="#D">D</a></th><td class="tdb-id">discriminative_yield</td><td>tasks that split the field</td></tr>
-            <tr><th><a href="#C">C</a></th><td class="tdb-id">difficulty_coverage</td><td>spread across difficulty</td></tr>
-            <tr><th><a href="#M">M</a></th><td class="tdb-id">monotonicity</td><td>absence of ability inversions</td></tr>
-            <tr><th><a href="#A">A</a></th><td class="tdb-id">angle_coverage</td><td>which capability stages are observable</td></tr>
-            <tr><th><a href="#R">R</a></th><td class="tdb-id">diversity</td><td>absence of near-duplicate tasks</td></tr>
-            <tr><th><a href="#I">I</a></th><td class="tdb-id">total_information_2pl</td><td>2PL Fisher test information</td></tr>
-            <tr><th><a href="#kr20">KR-20</a></th><td class="tdb-id">reliability_kr20</td><td>internal consistency</td></tr>
-          </tbody>
-        </table>
-
-        <h2 id="D" class="scroll-m-28 font-mono">D &mdash; discriminative yield</h2>
-        <p>The fraction of tasks that <strong>split the field</strong>: only tasks some models solve
-          and others miss carry information, and the rest are the blind spot.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">D = |{ tasks with 0 &lt; solvers &lt; n_models }| / n_tasks</pre>
-        <p>An all-pass or all-fail task therefore carries zero discrimination. With fewer than two
-          models D is <code>None</code>. Its default composite weight is <code>0.5</code>.</p>
-
-        <h2 id="C" class="scroll-m-28 font-mono">C &mdash; difficulty coverage</h2>
-        <p><strong>Normalized entropy</strong> of solve-rate bucket occupancy, over equal-width bins
-          on <code>[0, 1]</code>.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">C = ( -Σ p_b · log p_b ) / log(n_buckets)      p_b = fraction of tasks in bucket b</pre>
-        <p>Tasks spread evenly give <code>C = 1</code>; tasks all clustered in one bucket give
-          <code>C = 0</code>.</p>
-
-        <h2 id="M" class="scroll-m-28 font-mono">M &mdash; monotonicity</h2>
-        <p>The fraction of tasks with <strong>no strong ability inversion</strong>.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">M = |{ monotonic tasks }| / n_tasks</pre>
-        <dl class="tdb-defs">
-          <dt>Compared pairs</dt>
-          <dd>Those where <code>ability_i &gt; ability_j + ability_eps</code>, with
-            <code>ability_eps</code> defaulting to <code>0.05</code>.</dd>
-          <dt>Strong inversion</dt>
-          <dd><code>solved_j and not solved_i</code> &mdash; noise, mislabel, or gameability.</dd>
-          <dt>Monotonic task</dt>
-          <dd>One with zero inversions.</dd>
-          <dt>Ability</dt>
-          <dd>Defaults to each model&rsquo;s overall solve-rate; with no ability separation M is
-            vacuously <code>1.0</code>.</dd>
-        </dl>
-
-        <h2 id="A" class="scroll-m-28 font-mono">A &mdash; angle coverage</h2>
-        <p><code>capability_profile</code> decomposes the gate-states <code>0..4</code> into four
-          <strong>conditional</strong> rates:</p>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">build_rate</dt>
-          <dd>Can produce a building env &mdash; <code>P(state &ge; 1)</code>.</dd>
-          <dt class="tdb-id">partial_given_build</dt>
-          <dd>Can start fixing, some F2P &mdash; <code>P(state &ge; 2 | &ge; 1)</code>.</dd>
-          <dt class="tdb-id">full_f2p_given_partial</dt>
-          <dd>Can complete the F2P fix &mdash; <code>P(state &ge; 3 | &ge; 2)</code>.</dd>
-          <dt class="tdb-id">clean_given_full_f2p</dt>
-          <dd>Can fix without breaking P2P &mdash; <code>P(state = 4 | &ge; 3)</code>.</dd>
-        </dl>
-        <p><code>angle_coverage(graded, min_support=3)</code> reports, per angle, the
-          <code>support</code> (size of the conditioning population), whether it is
-          <code>covered</code> (<code>support &ge; min_support</code>), the
-          <code>uncovered_angles</code> that fall short, and <code>all_covered</code>. An empty
-          <em>conditioning</em> population returns <code>None</code>, never a fabricated number, so a
-          set that never reaches stage <code>&ge; 3</code> <strong>cannot</strong> measure
-          <code>clean_given_full_f2p</code>. The whole axis is advisory.</p>
-
-        <h2 id="R" class="scroll-m-28 font-mono">R &mdash; diversity</h2>
-        <p>R scores <strong>task signatures</strong> (<code>{repo, files, f2p}</code>), <em>not</em>
-          the response matrix.</p>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">task_similarity(a, b)</dt>
-          <dd><code>0.0</code> for different repos (definitionally diverse); for the same repo, the
-            mean of the changed-file Jaccard and the F2P-selector Jaccard.</dd>
-          <dt class="tdb-id">redundancy_rate(sigs, threshold=0.6)</dt>
-          <dd>The fraction of tasks with at least one near-duplicate.</dd>
-          <dt class="tdb-id">diversity</dt>
-          <dd><code>1 &minus; redundancy_rate</code>, and <code>None</code> below two tasks.</dd>
-          <dt class="tdb-id">signature_of(task)</dt>
-          <dd>A best-effort duck-typed signature from a task object.</dd>
-        </dl>
-
-        <h2 id="I" class="scroll-m-28 font-mono">I &mdash; IRT test information</h2>
-        <p><code>irt_item_stats</code> fits the binary matrix to the <strong>2-parameter
-          logistic</strong> model, and information is <strong>additive</strong> across items
-          (conditionally independent), so it sums over the test.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">I_item(theta) = a² · P · (1 − P)        P = 1 / (1 + e^{−a(theta − b)})
-I_test(theta) = Σ_items a² · P · (1 − P)          SE(theta) = 1 / √I_test</pre>
-        <dl class="tdb-defs">
-          <dt><code>b</code> &mdash; difficulty</dt>
-          <dd><code>logit(1 &minus; solve_rate)</code>; harder tasks (low solve-rate) get higher
-            <code>b</code>.</dd>
-          <dt><code>a</code> &mdash; discrimination</dt>
-          <dd><code>max(0.2, |r_pb|&middot;2 + 0.2)</code>, where <code>r_pb</code> is the
-            task&rsquo;s <strong>point-biserial</strong> correlation with the per-model total score.
-            An all-pass, all-fail or non-correlating item floors to a small <code>a</code> &mdash; it
-            discriminates nothing.</dd>
-          <dt class="tdb-id">select_max_information</dt>
-          <dd>The max-information subset is exactly the top-k items, so there is no greedy pass.</dd>
-          <dt class="tdb-id">information_se(info)</dt>
-          <dd>That SE; <code>&infin;</code> with no information.</dd>
-        </dl>
-
-        <h2 id="kr20" class="scroll-m-28 font-mono">KR-20 &mdash; reliability</h2>
-        <p>Kuder-Richardson 20 &mdash; internal-consistency reliability for binary items.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">KR20 = ( k / (k−1) ) · ( 1 − Σ p_i·q_i / σ²_total )</pre>
-        <dl class="tdb-defs">
-          <dt><code>k</code>, <code>p_i</code>, <code>q_i</code>, <code>&sigma;²_total</code></dt>
-          <dd>Tasks; the pass rate of task <code>i</code>; <code>1 &minus; p_i</code>; the per-model
-            total-score variance.</dd>
-          <dt>Undefined</dt>
-          <dd><code>None</code> when <code>k &lt; 2</code>, or when that variance is <code>0</code>.</dd>
-          <dt>Rule of thumb</dt>
-          <dd><code>&gt; 0.7</code> acceptable, <code>&gt; 0.8</code> good; a <strong>negative</strong>
-            value means the items are mutually inconsistent.</dd>
-        </dl>
-
-        <h2 id="axis-failure-modes" class="scroll-m-28 font-mono">What a bad value looks like</h2>
-        <table>
-          <thead><tr><th>axis</th><th>what it asks</th><th>reads</th><th>what a bad value looks like</th></tr></thead>
-          <tbody>
-            <tr><th class="tdb-id">D</th><td>Discriminative yield: tasks that split the field (<code>0 &lt; solvers &lt; n_models</code>).</td><td class="tdb-id">[0,1]</td><td>Low D: mostly all-pass or all-fail rows. Below the <code>min_D</code> gate the day cannot rank anyone.</td></tr>
-            <tr><th class="tdb-id">C</th><td>Difficulty coverage: normalized entropy of the per-task solve-rate buckets.</td><td class="tdb-id">[0,1]</td><td>C near 0: every task in one difficulty band. The set then measures one point on the ability curve.</td></tr>
-            <tr><th class="tdb-id">M</th><td>Monotonicity: tasks with no strong ability inversion. Inversion: a weaker model passes what an abler one misses.</td><td class="tdb-id">[0,1]</td><td>M below 1 flags flaky, mislabeled or gameable tasks. M is <em>vacuously</em> 1.0 when no model pair is clearly separated.</td></tr>
-            <tr><th class="tdb-id">I</th><td>2PL Fisher test-information: discrimination <code>a</code> from point-biserial, difficulty <code>b</code> from solve-rate. Additive, and <code>SE = 1/&radic;I</code>.</td><td class="tdb-id">&ge; 0</td><td>Information concentrated in one or two items. An all-pass or all-fail task contributes almost none of it.</td></tr>
-            <tr><th class="tdb-id">KR-20</th><td>Internal-consistency reliability over binary items.</td><td class="tdb-id">&le; 1</td><td>Below the bar (<code>min_kr20</code>) the set is not yet one instrument. A <em>negative</em> KR-20 means items contradict each other.</td></tr>
-            <tr><th class="tdb-id">A</th><td>Angle coverage. Advisory: it does not read the solve matrix.</td><td>advisory</td><td>An angle with fewer than <code>min_support</code> tasks in its conditioning population is undefined.</td></tr>
-            <tr><th class="tdb-id">R</th><td>Diversity, <code>1 &minus; near-duplicate rate</code>. Advisory: it does not read the solve matrix.</td><td>advisory</td><td>Low R: the day filled with near-clones of one PR family. Two tasks in the same repo above the similarity cut count as duplicates.</td></tr>
-            <tr><th class="tdb-id">D CI</th><td>Seeded bootstrap over resampled task rows, 95% central interval.</td><td class="tdb-id">[0,1]</td><td>A half-width above <code>max_d_halfwidth</code> (default <code>0.15</code>): the day cannot place D precisely enough to claim anything.</td></tr>
-          </tbody>
-        </table>
-
-        <h2 id="bootstrap" class="scroll-m-28 font-mono">Bootstrap confidence intervals</h2>
-        <p><code>msq_bootstrap_ci</code> <strong>resamples the task rows with replacement</strong>,
-          <code>n_boot</code> times, recomputing D/C/M on each resample.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">{ estimate, lo, hi, se, n_valid }</pre>
-        <p><code>estimate</code> is the full-set point estimate, <code>[lo, hi]</code> the central
-          <code>ci</code>-percentile interval (default 95%), and <code>se</code> the bootstrap SD.
-          The RNG is seeded, so a resume is reproducible. At <code>N &asymp; 6</code> tasks the
-          intervals are <strong>wide</strong>.</p>
-
-        <h2 id="power" class="scroll-m-28 font-mono">Precision-power (required-N)</h2>
-        <p><code>required_tasks_for_precision</code> scales SE as <code>1/&radic;N</code> from the
-          bootstrap SE at <code>N₀</code>.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">half_width h(N) = z · SE(N₀) · √(N₀ / N)
-required N       = N₀ · ( z · SE(N₀) / target_half_width )²      (rounded up)</pre>
-        <p>It returns one record per axis &mdash;
-          <code>{axis, n_now, se_now, half_width_now, target_half_width, required_n}</code> &mdash;
-          where <code>required_n</code> is <code>None</code> when the axis SE is undefined and
-          <code>0</code> when SE is already <code>0</code>.
-          <code>precision_curve(matrix, sizes, axis="D")</code> gives the curve
-          <code>[{n, half_width}, ...]</code>.</p>
-
-        <h2 id="reliability-power" class="scroll-m-28 font-mono">Reliability-power (required-N)</h2>
-        <p><code>tasks_for_reliability</code> applies the <strong>Spearman-Brown prophecy</strong> to
-          give the test <em>length</em> needed to reach a target KR-20.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">k' = k · [ ρ'·(1 − ρ) ] / [ ρ·(1 − ρ') ]        (rounded up, floored at 1)</pre>
-        <p>It returns <code>{current_kr20, current_k, target_kr20, required_k}</code> measured from
-          the current KR-20, with <code>required_k</code> <code>None</code> when reliability is
-          undefined or <code>&le; 0</code>, or the target is outside <code>(0, 1)</code>.</p>
-
-        <h2 id="readiness" class="scroll-m-28 font-mono">The readiness verdict</h2>
-        <p><code>benchmark_readiness</code> folds discrimination, reliability and precision into one
-          daily GO/NO-GO advisory. It is <code>ready</code> iff <strong>all three</strong> hold:</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">D ≥ min_D            (default 0.4)
-KR-20 ≥ min_kr20     (default 0.7)
-D 95%-CI half-width ≤ max_d_halfwidth   (default 0.15)</pre>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">reasons</dt>
-          <dd>Each failing constraint with its <code>value</code>, <code>threshold</code> and
-            <code>required_n</code>. A <code>None</code> on any axis fails that axis.</dd>
-          <dt class="tdb-id">bottleneck</dt>
-          <dd>The failing constraint that demands the most tasks.</dd>
-          <dt class="tdb-id">recommended_n</dt>
-          <dd><code>max(precision-required-N, reliability-required-N)</code>.</dd>
-          <dt>status</dt>
-          <dd>Advisory only: it never gates an accept.</dd>
-        </dl>
-
-        <h2 id="limits" class="scroll-m-28 font-mono">What the card does not license</h2>
-        <dl class="tdb-defs">
-          <dt>A ranking is not a result.</dt>
-          <dd>At this N one model&rsquo;s Wilson interval covers most of the others.</dd>
-          <dt>D is coarse at small N.</dt>
-          <dd>One task flipping moves it a step.</dd>
-          <dt>Not yet one instrument.</dt>
-          <dd>Below the KR-20 bar the total is not a skill estimate.</dd>
-          <dt>A vacuous high is not a win.</dt>
-          <dd>M reaches 1.0 when no separation is left to violate.</dd>
-          <dt>Required-N is an order of magnitude.</dt>
-          <dd>It assumes the next tasks are drawn like today&rsquo;s; it is today&rsquo;s bootstrap SE
-            extrapolated at <code>1/&radic;N</code>.</dd>
-          <dt>Readiness is advisory.</dt>
-          <dd>It never gates an accept or touches the reward path.</dd>
-        </dl>
-        <p>What it does catch is a collapsed set: all-pass or all-fail rows, a negatively correlating
-          item, a missing difficulty band.</p>
-
-        <h2 id="report-discrimination" class="scroll-m-28 font-mono">Reading the discrimination report</h2>
-        <p>These notes are standing methodology for the
-          <a href="../../quality/">selection-quality report</a>, so they live here rather than beside
-          every figure.</p>
-        <dl class="tdb-defs">
-          <dt>Provisional readings</dt>
-          <dd>Provisional readings, not properties &mdash; every number on that page is recomputed
-            from the published matrix at page load.</dd>
-          <dt>Scaffold scope</dt>
-          <dd>The solve matrix is <strong>one scaffold</strong>, one model family, one day. It is
-            never the whole model suite, and its cells are not independent trials.</dd>
-          <dt>Hollow squares</dt>
-          <dd>A hollow square is a task <strong>from another suite</strong>, not a skipped run. Where
-            a run really was skipped under the reported scaffold, the note on the figure says so
-            instead and names the count.</dd>
-          <dt>Overlapping intervals</dt>
-          <dd>Overlapping Wilson intervals are <strong>not a significance test</strong>. Where a
-            figure paints a shaded band, that band marks the range every count in that group still
-            allows.</dd>
-          <dt>The level rows</dt>
-          <dd>The difficulty rows are a <strong>partition</strong> of the publication-mode row above
-            them, not peer groups. They are compared inside one publication mode only: pooling the
-            modes puts structurally-zero tasks into the comparison and the result is an artifact of
-            pooling.</dd>
-          <dt>Publication mode</dt>
-          <dd><strong>Live vs archive is a difference in what is withheld, not measured
-            difficulty.</strong> Live withholds gold patches, protected test bodies and merge
-            provenance; archive publishes them. Harder, newer and measured differently cannot be told
-            apart. Any other publication mode likewise differs in what the task package publishes, so
-            those rows are coverage facts, not difficulty findings.</dd>
-          <dt>Declared difficulty</dt>
-          <dd><strong>Declared difficulty is editorial</strong> &mdash; the <code>task.toml</code>
-            label, never measured.</dd>
-          <dt>Authority</dt>
-          <dd>Nothing on that page is ranked or certified: no publication bundle is approved, no
-            matrix digest is trusted, and receipt authority is inactive &mdash; which is why the
-            registry&rsquo;s <strong>Official solves</strong> column is a dash.</dd>
-        </dl>
-
-        <h2 id="report-capability" class="scroll-m-28 font-mono">Reading the capability coverage report</h2>
-        <dl class="tdb-defs">
-          <dt>Every axis is listed</dt>
-          <dd>All fourteen axes are listed. An axis this catalogue does not cover is a fact about the
-            catalogue, not a row to hide &mdash; so an axis carrying no task at all is listed at zero
-            rather than dropped: a missing row reads as an axis that does not exist, which is a
-            different claim from an axis this catalogue never reached.</dd>
-          <dt>The co-occurrence grid</dt>
-          <dd>One column per re-derivable package, one row per axis; a mark is presence, never a
-            degree. <strong>No model outcome is in that figure</strong> &mdash; it is not a solve
-            result. Columns are ordered by how many labels a package carries, so the dense left edge
-            is arrangement, not a finding.</dd>
-          <dt>Multi-valued labels</dt>
-          <dd>A task carries every code its diff triggers, so the per-code counts do not sum to the
-            task count.</dd>
-          <dt>The unmeasured criterion</dt>
-          <dd><code>min_admitted_subtests</code> counts the subtests surviving a unit-test-validity
-            audit, and no such audit has classified this catalogue. Unmeasured is not failed, and it
-            is certainly not passed &mdash; so no axis clears the publish gate whatever its counts
-            say.</dd>
-          <dt>The audit on record</dt>
-          <dd><strong>The unit-test-validity audit on record does not describe this
-            catalogue</strong> (release <code>b3fc3e6</code>,
-            <code>experiments/reports/unit-test-validity-r001/SUMMARY.json</code>). It measured a
-            different corpus at a different release commit; its per-axis counts describe that corpus,
-            so they are not reproduced on the report and <code>min_admitted_subtests</code> stays
-            unmeasured here.</dd>
-          <dt>Packages that cannot be tagged</dt>
-          <dd>The tagger reads the oracle diff and live withholds it, so a live package&rsquo;s
-            <code>task.toml</code> keywords stand as declared, never re-derived &mdash; and every
-            count on the report is over the packages that could be checked.</dd>
-        </dl>
-
-        <h2 id="card" class="scroll-m-28 font-mono">One-call quality card</h2>
-        <p><code>benchmark_quality_report(matrix, ..., deep=True)</code> aggregates every axis:
-          <code>msq</code> (the <code>D/C/M</code> profile plus composite), diversity from
-          <code>signatures</code>, angle coverage from the flat <code>graded</code> states,
-          <code>noisy_task_indices</code> (monotonicity violations), and a curated subset (monotonic
-          core &rarr; info-max &rarr; diverse filter). Under <code>deep=True</code> it adds IRT
-          (<code>total_information</code> + SE), <code>ci</code> bootstrap intervals,
-          <code>power</code> precision required-N, <code>reliability</code> KR-20, and
-          <code>reliability_prophecy</code> Spearman-Brown required-k.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">from terminal_daily_bench import quality as q
-
-matrix = [
-    [1, 0, 0],   <span class="text-muted-foreground"># td-1: A solves, B/C fail  -&gt; splits</span>
-    [1, 1, 0],   <span class="text-muted-foreground"># td-2</span>
-    [1, 1, 1],   <span class="text-muted-foreground"># td-3: all-pass            -&gt; no discrimination</span>
-    [0, 0, 0],   <span class="text-muted-foreground"># td-4: all-fail            -&gt; no discrimination</span>
-    [1, 0, 1],   <span class="text-muted-foreground"># td-5</span>
-    [1, 1, 0],   <span class="text-muted-foreground"># td-6</span>
-]
-
-card = q.benchmark_quality_report(matrix, deep=True)
-print(card["msq"])          <span class="text-muted-foreground"># {'D': 0.667, 'C': 0.896, 'M': 0.833, 'composite': 0.766, ...}</span>
-print(card["irt"]["total_information"])   <span class="text-muted-foreground"># 1.808</span>
-print(card["reliability"]["kr20"])        <span class="text-muted-foreground"># 0.514</span>
-
-verdict = q.benchmark_readiness(matrix)
-print(verdict["ready"], verdict["bottleneck"], verdict["recommended_n"])
-<span class="text-muted-foreground"># False precision 37</span></pre>
-
-        <h2 id="helpers" class="scroll-m-28 font-mono">Selection helpers</h2>
-        <dl class="tdb-defs">
-          <dt class="tdb-id">select_informative_subset</dt>
-          <dd>Greedy <code>D + C</code>.</dd>
-          <dt class="tdb-id">select_max_information</dt>
-          <dd>Top-k Fisher.</dd>
-          <dt class="tdb-id">balanced_subset</dt>
-          <dd>Difficulty-balanced.</dd>
-          <dt class="tdb-id">diverse_subset</dt>
-          <dd>Farthest-point over signatures.</dd>
-          <dt class="tdb-id">select_mid_difficulty</dt>
-          <dd>Scaffold-relative discriminative band.</dd>
-          <dt class="tdb-id">filter_monotonic / flag_noisy_tasks</dt>
-          <dd>Drop ability-inverting tasks.</dd>
-          <dt class="tdb-id">cross_scaffold_quality</dt>
-          <dd>Most discriminative scaffold frame.</dd>
-        </dl>
-
-        <h2 id="surfaces" class="scroll-m-28 font-mono">How <span class="tdb-id">tdb quality</span> surfaces it</h2>
-        <p>It reads a results file &mdash; JSONL or a JSON list &mdash; builds the matrix, prints the
-          quality card and then the readiness line. Each record needs <code>task</code>,
-          <code>model</code>, and either <code>solved</code> or <code>reward</code>;
-          <code>solved</code> is taken as <code>reward &ge; 0.999</code>, rows with
-          <code>model == "oracle"</code> are excluded, and the command exits <code>2</code> below
-          &ge; 1 task and &ge; 2 models.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># results.jsonl — one record per (model, task) run, exactly as `tdb run` emits</span>
-<span class="text-muted-foreground"># {"task":"td-1","model":"A","reward":1.0}</span>
-<span class="text-muted-foreground"># {"task":"td-1","model":"B","reward":0.0}</span>
-<span class="text-muted-foreground"># ...</span>
-
-tdb quality results.jsonl</pre>
-
-        <h2 id="output" class="scroll-m-28 font-mono">Output</h2>
-        <p>On the 6-task / 3-model example above. The last line is that card as JSON.</p>
-        <pre class="not-prose bg-fd-secondary/50 overflow-x-auto border px-4 py-3 font-mono text-sm/relaxed">tasks=6 models=3
-  D(discrimination)=0.667  C(coverage)=0.896  M(monotonicity)=0.833
-  IRT test-information=1.808  KR-20 reliability=0.5142857142857141
-  D 95% CI=[0.333, 1.000]
-  readiness: NOT-ready (bottleneck=precision, need ~37 tasks)
-{"msq": {...}, "irt": {...}, "reliability": {...}, "readiness": {...}}</pre>
-
-      </article>
-
-      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">Next:
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quickstart/">Quickstart</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../task-format/">Task format</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../submission/">Submission</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../quality-methods.md">Markdown source</a></p>
-    </div>
-
-    <!-- ===================== on this page ===================== -->
-    <aside id="toc" class="sticky top-(--fd-sidebar-top) shrink-0 overflow-y-auto pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem;max-height:calc(100dvh - 7rem)" aria-label="On this page"></aside>
-
-  </div>
-
-  <!-- ===================== today's card ===================== -->
-  <section class="tdb-block" data-tdb-section="next">
-    <div class="tdb-block-head">
-      <h2>Today&rsquo;s card</h2>
-      <p id="card-sub">The same axes, on the live suite</p>
-      <div class="tdb-block-tools"><a href="../../quality/">Quality page &rarr;</a></div>
-    </div>
-
-    <div id="quality-card" class="w-full"></div>
-  </section>
-
-</div>
-</div>
+    <h2 id="map"><a href="#map">Sections that moved</a></h2>
+    <p>This was one document of thirty sections; it is eleven pages now, listed in the sidebar. Every id it used to carry still resolves here, and each one below links to the page that holds it: <a id="scope" href="scope/#scope">scope</a> &middot; <a id="estimands" href="scope/#estimands">estimands</a> &middot; <a id="limits" href="scope/#limits">limits</a> &middot; <a id="capability-taxonomy" href="capability/#capability-taxonomy">capability-taxonomy</a> &middot; <a id="capability-codes" href="capability/#capability-codes">capability-codes</a> &middot; <a id="capability-rules" href="labels/#capability-rules">capability-rules</a> &middot; <a id="report-capability" href="labels/#report-capability">report-capability</a> &middot; <a id="axes" href="axes/#axes">axes</a> &middot; <a id="D" href="axes/#D">D</a> &middot; <a id="C" href="axes/#C">C</a> &middot; <a id="M" href="axes/#M">M</a> &middot; <a id="A" href="advisory/#A">A</a> &middot; <a id="R" href="advisory/#R">R</a> &middot; <a id="I" href="information/#I">I</a> &middot; <a id="kr20" href="information/#kr20">kr20</a> &middot; <a id="bootstrap" href="power/#bootstrap">bootstrap</a> &middot; <a id="power" href="power/#power">power</a> &middot; <a id="reliability-power" href="power/#reliability-power">reliability-power</a> &middot; <a id="axis-failure-modes" href="readiness/#axis-failure-modes">axis-failure-modes</a> &middot; <a id="readiness" href="readiness/#readiness">readiness</a> &middot; <a id="report-discrimination" href="reports/#report-discrimination">report-discrimination</a> &middot; <a id="card" href="api/#card">card</a> &middot; <a id="helpers" href="api/#helpers">helpers</a> &middot; <a id="surfaces" href="cli/#surfaces">surfaces</a> &middot; <a id="output" href="cli/#output">output</a>.</p>
+  </article>
 </main>
 
-<script src="../../assets/site.js?v=edae671ad0" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
 <script>
-/* the "on this page" rail — built from the section ids already in the prose,
-   so the navigation can never drift from the text. One heading level, so one
-   indent. */
-(function buildToc() {
-  var toc = document.getElementById("toc");
-  if (!toc) return;
-  var hs = document.querySelectorAll(".prose h2[id]");
-  if (!hs.length) { toc.style.display = "none"; return; }
-  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
-             '<div class="flex flex-col border-l">'];
-  for (var i = 0; i < hs.length; i++) {
-    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
-    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
-    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 pl-4' +
-      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
-      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
-  }
-  out.push("</div>");
-  toc.innerHTML = out.join("");
-})();
-
-(async function () {
-  var T = window.TDB;
-  var el = document.getElementById("quality-card");
-
-  /* Shared metadata badge; the caller appends the semantic colour pair. */
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden border-transparent ";
-  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
-  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
-  var NOTE =
-    "tdb-panel bg-card text-card-foreground border px-6 py-6 " +
-    "text-sm/relaxed text-muted-foreground";
-
-  var board = await T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"));
-  var q = board && board.quality;
-
-  if (!q) {
-    el.innerHTML = '<div class="' + NOTE + '">No quality card published yet ' +
-      '(<code>leaderboard_data.json</code> has no <code>quality</code> block). Run ' +
-      '<code>tdb quality results.jsonl</code> to compute one locally.</div>';
-    return;
-  }
-
-  document.getElementById("card-sub").textContent =
-    board.date + " · thresholds D≥" + (q.thresholds ? q.thresholds.min_D : "?") +
-    ", KR-20≥" + (q.thresholds ? q.thresholds.min_kr20 : "?");
-
-  var num = function (x, d) {
-    return x == null ? '<span class="text-muted-foreground">—</span>'
-                     : Number(x).toFixed(d == null ? 3 : d);
+/* Anchor continuity. A reader arriving on an old `quality-methods/#<id>` link
+   should land on the SECTION, not on the top of a page that no longer carries
+   it. Each moved id is still present above, on its own link under "Sections
+   that moved", so a reader with no JavaScript lands on a line that names the
+   section and links to it; this sends everyone else the whole way. */
+(function () {
+  var MOVED = {
+    "scope": "scope/",
+    "estimands": "scope/",
+    "limits": "scope/",
+    "capability-taxonomy": "capability/",
+    "capability-codes": "capability/",
+    "capability-rules": "labels/",
+    "report-capability": "labels/",
+    "axes": "axes/",
+    "D": "axes/",
+    "C": "axes/",
+    "M": "axes/",
+    "A": "advisory/",
+    "R": "advisory/",
+    "I": "information/",
+    "kr20": "information/",
+    "bootstrap": "power/",
+    "power": "power/",
+    "reliability-power": "power/",
+    "axis-failure-modes": "readiness/",
+    "readiness": "readiness/",
+    "report-discrimination": "reports/",
+    "card": "api/",
+    "helpers": "api/",
+    "surfaces": "cli/",
+    "output": "cli/"
   };
-
-  /* Enumerated, not listed: the hard-coded "terminus2" never matched the data's
-     "terminus-2", so the agent frame was invisible here too. */
-  var frames = Object.keys(q).filter(function (k) {
-    return k !== "thresholds" && q[k] && typeof q[k] === "object";
-  }).sort().map(function (k) { return [k, k]; }).filter(function (f) {
-    return q[f[0]];
-  });
-
-  if (!frames.length) {
-    el.innerHTML = '<div class="' + NOTE + '">The quality block carries no scaffold frame yet.</div>';
-    return;
-  }
-
-  el.innerHTML =
-    '<div class="bg-card text-card-foreground overflow-x-auto border ' +
-      'border-x-0 font-mono text-sm sm:border-x">' +
-    '<table class="w-full"><thead class="text-muted-foreground"><tr class="border-b">' +
-      '<th class="px-4 py-3 text-left font-medium">Scaffold</th>' +
-      '<th class="px-4 py-3 text-right font-medium">D</th>' +
-      '<th class="px-4 py-3 text-right font-medium">C</th>' +
-      '<th class="px-4 py-3 text-right font-medium">M</th>' +
-      '<th class="px-4 py-3 text-right font-medium">IRT info</th>' +
-      '<th class="px-4 py-3 text-right font-medium">KR-20</th>' +
-      '<th class="px-4 py-3 text-right font-medium">D 95% CI</th>' +
-      '<th class="px-4 py-3 text-left font-medium">Readiness</th>' +
-    "</tr></thead><tbody>" +
-    frames.map(function (f) {
-      var r = q[f[0]];
-      var ci = r.D_ci ? "[" + num(r.D_ci[0], 2) + ", " + num(r.D_ci[1], 2) + "]" : "&mdash;";
-      var verdict = r.ready
-        ? '<span class="' + BADGE + PRIMARY + '">ready</span>'
-        : '<span class="' + BADGE + SECONDARY + '">not ready' +
-          (r.bottleneck ? " · " + r.bottleneck : "") + "</span>";
-      var need = r.required_n_D != null
-        ? ' <span class="text-muted-foreground text-xs">need ~' + r.required_n_D + " tasks</span>"
-        : "";
-      return '<tr class="border-b">' +
-        '<th class="px-4 py-3 text-left font-medium">' + f[1] + "</th>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + num(r.D) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + num(r.C) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + num(r.M) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + num(r.irt_info) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + num(r.kr20) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + ci + "</td>" +
-        '<td class="px-4 py-3">' + verdict + need + "</td></tr>";
-    }).join("") + "</tbody></table></div>";
+  var hop = function () {
+    var id = decodeURIComponent(String(location.hash || "").slice(1));
+    var to = Object.prototype.hasOwnProperty.call(MOVED, id) ? MOVED[id] : null;
+    if (to) location.replace(to + "#" + encodeURIComponent(id));
+  };
+  hop();
+  window.addEventListener("hashchange", hop);
 })();
 </script>
 </body>

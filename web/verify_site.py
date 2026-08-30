@@ -16,7 +16,8 @@ publish. It checks, for every docs/**/*.html:
 
   2. TAG BALANCE          no unclosed / stray end tags, doctype first, </html> last.
 
-  3. SHELL                <main> carries id="nd-home-layout" and the pt-14 frame;
+  3. SHELL                exactly one <main>, carrying id="nd-home-layout" and one
+                          of SANCTIONED_MAIN_FRAMES (legacy pt-14, or tdb-docs);
      the trailing <script src=".../site.js"> has a data-root matching the depth
      and a non-empty data-page.
 
@@ -126,6 +127,16 @@ def root_for(depth: int) -> str:
     return "/".join([".."] * depth) if depth else "."
 
 
+# The frames a <main> may wear. The legacy trio is what web/gen_pages.py emits
+# for registry and day pages; tdb-docs carries the sidebar and the
+# on-this-page rail. Subset test, so a page may add utilities but never drop
+# the frame.
+SANCTIONED_MAIN_FRAMES = (
+    frozenset({"flex", "flex-1", "flex-col", "pt-14"}),
+    frozenset({"tdb-docs"}),
+)
+
+
 def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
     source = page.read_text(encoding="utf-8", errors="replace")
     raw = markup_only(source)
@@ -154,8 +165,33 @@ def check(page: Path, sel: set[str], all_ids: dict) -> list[str]:
         bad.append(f"stylesheets {sheets} != {want}")
 
     # --- 3. shell ----------------------------------------------------------
-    if not re.search(r'<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">', raw):
-        bad.append('<main id="nd-home-layout" class="flex flex-1 flex-col pt-14"> missing')
+    # This asserted one literal frame, which was right while the site had one
+    # layout and wrong the moment it grew a second. The docs rebuild needs
+    # class="tdb-docs" -- site.js keys the sidebar and the on-this-page rail
+    # off main.tdb-docs -- and the literal made the two mutually exclusive: a
+    # page that adopted the shell failed the gate, and a page that passed the
+    # gate got no shell. Three separate lanes hit it within minutes.
+    #
+    # What the gate is FOR is that every page wears one of the site's frames
+    # instead of inventing its own, so that is what it now asserts. The frames
+    # are named, so adding a third is a deliberate edit here rather than one
+    # more alternative slipped quietly into a regex. The exactly-one-<main>
+    # check comes free and is new: two <main> elements satisfied the old
+    # literal perfectly well.
+    mains = re.findall(r'<main\b[^>]*>', raw)
+    if len(mains) != 1:
+        bad.append(f"expected exactly one <main>, found {len(mains)}")
+    else:
+        tag = mains[0]
+        if 'id="nd-home-layout"' not in tag:
+            bad.append('<main> is missing id="nd-home-layout"')
+        else:
+            found = re.search(r'\sclass="([^"]*)"', tag)
+            classes = set((found.group(1) if found else "").split())
+            if not any(frame <= classes for frame in SANCTIONED_MAIN_FRAMES):
+                bad.append(
+                    f"<main> frame {sorted(classes)} is not one of the site's "
+                    f"layouts {[sorted(f) for f in SANCTIONED_MAIN_FRAMES]}")
     # "?v=<token>" is a cache-buster, not part of the path -- see check_links.
     m = re.search(r'<script src="([^"]*assets/site\.js)(?:\?[^"]*)?" '
                   r'data-root="([^"]*)" data-page="([^"]*)"', raw)
@@ -1304,7 +1340,16 @@ def check_public_frontend() -> list[str]:
         bad.append("submit/index.html: must read distinct community_verified/community_pending views")
     if lower_submit.find('id="verified"') > lower_submit.find('id="pending"'):
         bad.append("submit/index.html: verified view must precede the non-ranked pending view")
-    submission_guide = " ".join(source("guide/submission/index.html").lower().split())
+    # Twenty authority caveats, pinned to one file while the submission guide
+    # WAS one file. The split makes them span sibling pages, and a per-file pin
+    # would force every phrase to stay on an index that would then need nine
+    # h2 sections -- the gate dictating the page structure rather than
+    # guarding the claims. Same resolution as the integrity caveats before it:
+    # assert presence across the SUBTREE, so a move stays legal and a loss does
+    # not. rglob, because the split nests.
+    submission_guide = " ".join(
+        " ".join(page.read_text(encoding="utf-8", errors="replace").lower().split())
+        for page in sorted((DOCS / "guide" / "submission").rglob("index.html")))
     for phrase in (
         "pip install -e '.[replay]'",
         "in-process ed25519",
@@ -1328,7 +1373,7 @@ def check_public_frontend() -> list[str]:
         "read-only manifest/public-key mounts",
     ):
         if phrase not in submission_guide:
-            bad.append(f"guide/submission/index.html: authority caveat missing {phrase!r}")
+            bad.append(f"guide/submission/**: authority caveat published on no page under it: {phrase!r}")
     for stale in ("on ingest the patch is replayed", "pending cells sit in the denominator",
                   "every listed number was produced by replaying"):
         if stale in lower_submit:

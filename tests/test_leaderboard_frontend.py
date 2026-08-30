@@ -16,8 +16,17 @@ REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
 )
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
 SITE_CSS = (ROOT / "docs" / "assets" / "site.css").read_text(encoding="utf-8")
-METHODS = (ROOT / "docs" / "guide" / "quality-methods" / "index.html").read_text(
-    encoding="utf-8"
+# The quality-methods guide was one page when these assertions were written and
+# is now seven. Every claim below still ships -- only the C1-C14 correction
+# moved, onto `capability/`, which is where a reader looking for it would go.
+# A file-scoped pin would have failed on a legitimate relocation and, worse,
+# would have pushed the content back onto an index that has no room for it:
+# the gate dictating page structure instead of guarding claims. Same fix as
+# verify_site's submission authority gate. The negative assertion below gets
+# stronger for free -- the banned sentence must now be absent from all seven.
+METHODS = chr(10).join(
+    page.read_text(encoding="utf-8")
+    for page in sorted((ROOT / "docs" / "guide" / "quality-methods").rglob("index.html"))
 )
 DATA_RUNTIME = (ROOT / "docs" / "assets" / "tdb-data.js").read_text(encoding="utf-8")
 TASK_FORMAT = (ROOT / "docs" / "guide" / "task-format" / "index.html").read_text(

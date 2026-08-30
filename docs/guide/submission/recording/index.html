@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>recording a submission — terminal-daily-bench docs</title>
+<meta name="description" content="The submit_result CLI, the eight required fields it validates, and the content id that makes one submission one immutable cell.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of guide/submission/, which keeps the schema itself at #schema
+     because docs/guide/task-format links to it. This page is the three things
+     that happen to a submission after the schema is satisfied: the commands,
+     the checks, and the identity the store gives it. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>Recording a submission</h1>
+    <p class="tdb-doc-sub">The recorder writes a pending row; nothing it does can write a score.</p>
+
+    <h2 id="cli"><a href="#cli">The recording CLI</a></h2>
+    <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>, in the
+      <a href="../#schema">shape the schema fixes</a>.</p>
+    <figure class="tdb-code">
+      <figcaption>validate, record, rebuild</figcaption>
+      <pre><code># 1. Validate structure (exit 0 = valid, 1 = errors)
+python web/submit_result.py validate &lt; submission.json
+
+# 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)
+python web/submit_result.py record --store community_submissions \
+  --authenticated-submitter github:YOUR_LOGIN &lt; submission.json
+
+# 3. After an operator replay receipt exists, rebuild the two public views
+python web/submit_result.py rebuild --store community_submissions \
+  --manifest /read-only/suite-manifest.json \
+  --trusted-keys /read-only/replay-authorities.json \
+  --out web/leaderboard_data.json</code></pre>
+    </figure>
+
+    <h2 id="rules"><a href="#rules">Validation rules</a></h2>
+    <p>All eight of <code>date</code>, <code>submitter</code>, <code>model</code>,
+      <code>model_build</code>, <code>scaffold</code>, <code>harness_version</code>,
+      <code>task</code> and <code>patch</code> must be present and non-empty; <code>patch</code>
+      must be a unified-diff <strong>string</strong> and <code>task</code> must start with
+      <code>td-</code>. <code>reward_claimed</code> is advisory only: it is validated against nothing, and it never
+      becomes a score.
+      Receipt signatures come only from the official signer, and the authenticated submitter comes
+      from the deployment auth layer, never the JSON body.</p>
+
+    <h2 id="content-id"><a href="#content-id">One immutable cell per submission</a></h2>
+    <p><code>record</code> computes a full SHA-256 content id over patch, authenticated submitter,
+      model build, harness version and task, which yields one immutable authenticated cell per
+      suite/build/harness/task. Partial, duplicate and cross-date sets are left unranked, and every
+      <code>rebuild</code> re-verifies the receipt signature and content binding.</p>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

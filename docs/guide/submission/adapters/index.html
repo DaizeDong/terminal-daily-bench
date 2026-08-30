@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>adding a scaffold — terminal-daily-bench docs</title>
+<meta name="description" content="The HarnessAdapter contract: the interface, the rules produce_patch must hold, the reference and stub adapters, and how a new one is registered.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of guide/submission/. The reference implementation's six-step
+     ordered list is one sentence here: it was a sequence of calls, and a
+     sequence of calls reads as a sentence. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>Adding a scaffold</h1>
+    <p class="tdb-doc-sub">A scaffold produces a candidate patch and nothing else; it never computes a reward.</p>
+
+    <h2 id="adapter"><a href="#adapter">The HarnessAdapter contract</a></h2>
+    <p>The contract is one function, in <code>terminal_daily_bench/adapters/base.py</code>.</p>
+    <p id="failing-ids">The <code>fail_to_pass</code> selectors in <code>record.json</code> are the
+      <code>failing_test_ids</code> it receives. Live tasks ship those ids but withhold
+      <code>solution/</code> and the protected <code>test_outputs.py</code> body.</p>
+    <figure class="tdb-code">
+      <figcaption>terminal_daily_bench/adapters/base.py</figcaption>
+      <pre><code>input  = (task dir, failing test ids, model id/endpoint)
+output = (unified diff, telemetry)</code></pre>
+    </figure>
+
+    <h2 id="interface"><a href="#interface">The interface</a></h2>
+    <p>An adapter subclasses <code>HarnessAdapter</code> and implements <code>produce_patch</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>the abstract base and its result type</figcaption>
+      <pre><code>from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+@dataclass
+class AdapterResult:
+    patch: str                                               # unified diff the harness produced
+    telemetry: Dict[str, Any] = field(default_factory=dict)  # tokens, cost_usd, turns, wall_s
+    error: Optional[str] = None
+
+class HarnessAdapter(abc.ABC):
+    name: str = "base"
+
+    @abc.abstractmethod
+    def produce_patch(self, task_dir: str, failing_test_ids: List[str],
+                      model: str, **kwargs: Any) -&gt; AdapterResult:
+        ...</code></pre>
+    </figure>
+
+    <h2 id="produce-patch"><a href="#produce-patch">produce_patch rules</a></h2>
+    <p>From the base-class docstring: an adapter <strong>MUST NOT</strong> read or write the
+      protected tests or the gold solution, and <strong>MUST NOT</strong> compute a reward, because
+      scoring is done afterward by the <a href="../#scoring">execution gate</a>. On failure it
+      returns an <code>AdapterResult</code> with <code>error</code> set and an empty
+      <code>patch</code> &mdash; a 0-reward attempt, <strong>not</strong> a raised crash.</p>
+
+    <h2 id="reference"><a href="#reference">Reference implementation</a></h2>
+    <p><code>terminal_daily_bench/adapters/single_shot.py</code> is
+      <code>SingleShotAdapter</code>, <code>name = "single_shot"</code>. It loads the task
+      (<code>eval.load_task</code>), finds the file(s) the reference solution touches
+      (<code>eval.solution_target_files</code>), reads those files out of the SIF image for context
+      (<code>eval.extract_repo_files</code>), builds a strict prompt
+      (<code>eval.build_prompt</code>) asking for one unified diff, calls the model
+      (<code>eval.call_model</code>) and extracts the diff (<code>eval.extract_diff</code>), then
+      returns an <code>AdapterResult</code> with <code>touches_tests</code> telemetry &mdash; no
+      scoring.</p>
+
+    <h2 id="terminus"><a href="#terminus">The multi-turn stub</a></h2>
+    <p><code>terminal_daily_bench/adapters/terminus.py</code> &mdash;
+      <code>TerminusAdapter</code>, <code>name = "terminus"</code> &mdash; is a stub for a
+      multi-turn agent: terminus-2, Claude Code, Aider, OpenHands, SWE-agent. To finish it,
+      implement its <code>produce_patch</code> to run your agent CLI and return the diff. Any
+      harness taking a custom OpenAI base URL drives an arbitrary model unchanged.</p>
+
+    <h2 id="registering"><a href="#registering">Registering it</a></h2>
+    <p>Discovery is by the registry in <code>terminal_daily_bench/adapters/__init__.py</code>: add
+      your adapter class to that tuple and to <code>__all__</code> with a unique <code>name</code>,
+      then set the <code>scaffold</code> field of your submission records to it. The leaderboard
+      groups runs by <code>(submitter, model, scaffold)</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>terminal_daily_bench/adapters/__init__.py</figcaption>
+      <pre><code>REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</code></pre>
+    </figure>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

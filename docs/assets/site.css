@@ -978,8 +978,19 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
 /* WHICH PAGE YOU ARE ON, without a hue and without a fill. This was a coral
    pill with a coral hairline and a per-scheme ink -- the loudest object in
    the header. Position in the nav already says which link it is; all the
-   state has to add is "this one", so it is full-strength ink, semibold, and
-   the same 1px underline the site uses for every other link. */
+   state has to add is "this one".
+
+   COLOUR ALONE, as of the docs rebuild. It kept a semibold and a 1px
+   underline on top of the colour change until the reference was measured:
+   there, the ONLY difference between the current page and every other link
+   is the ink -- no weight, no rule, no fill, no indent. Three markers for one
+   fact is two markers of decoration, and the underline in particular
+   collided with the underline this site gives every real link, so the
+   current page read as the most clickable item in the row. The muted-to-ink
+   step here is 8.4:1 -> 18.6:1 light and 9.4:1 -> 17.3:1 dark, which is a
+   wider separation than the reference's own 4.83 -> 17.72 and is doing the
+   whole job. The sidebar below marks its active entry the same way, and
+   there is now exactly one way this site says "you are here". */
 .tdb-nav-link {
   border-radius: 0;
   padding: var(--sp-3) var(--sp-4);
@@ -992,10 +1003,8 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
 .tdb-nav-link[data-active="true"] {
   color: var(--td-ink);
   background: none;
-  font-weight: var(--fw-semi);
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 1px;
+  font-weight: var(--fw-normal);
+  text-decoration: none;
 }
 
 .tdb-theme-switch { border-color: var(--td-line); background: none; }
@@ -2324,6 +2333,363 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
   line-height: var(--lh-ui);
 }
 .tdb-find-foot-n { margin-left: auto; }
+
+/* ==========================================================================
+   THE DOCUMENTATION SHELL
+
+   WHAT THE REFERENCE ACTUALLY SHOWED, and what this file therefore does NOT
+   copy. The reference benchmark's whole doc set is ONE page: no sidebar, no
+   section rail, no search, five h2, 1529px. Its shell is a 56px sticky
+   header over a single 736px column, and the reason it needs nothing else is
+   that a five-entry list of headings is already visible without a rail, and a
+   one-page doc set needs no index.
+
+   We are about to ship roughly twenty pages, so the one thing the reference
+   cannot tell us is how to navigate twenty of anything -- it never has to.
+   So the DECISIONS are copied, and the OMISSIONS are copied wherever the
+   omission's premise still holds:
+
+     * ONE MEASURE, INVARIANT.  736px (--w-doc), at every viewport above the
+       phone breakpoint. The reference holds this across 1440 and 1024 by
+       moving nothing; we hold it by shrinking the sidebar instead of the
+       text. A reader's line length must not be a function of their window.
+     * THE TOP BAR SURVIVES.  The reference marks the current page in a
+       persistent sticky strip and has no sidebar at all, so nothing in it
+       argues for replacing the masthead. The sidebar is ADDED, at doc scale
+       only, and is built to the masthead's own rules rotated 90 degrees.
+     * ACTIVE IS COLOUR ALONE.  No fill, no rule, no indent, no weight change
+       -- in the sidebar, and now in the masthead too. Position in the list
+       already says which link it is.
+     * THE RAIL IS CONDITIONAL.  The reference omits "on this page" because
+       its headings fit on one and a half screens. That premise is checkable,
+       so it is checked at runtime rather than assumed: a page inside the
+       shell's bound (7 or fewer h2, 2500px or shorter) is its own table of
+       contents and gets no rail; a page that has outgrown the bound gets one
+       and says so in the console. The rail is scaffolding for a defect, not
+       furniture.
+     * WHAT IS NOT COPIED.  The reference sets h1/h2 in mono, and its muted
+       prose colour measures 4.83:1. This site's type rule (sans for prose AND
+       headings) is pinned by tests/test_leaderboard_frontend.py and is not
+       reopened here, and every colour below is one of the two prose tokens,
+       which measure 8.4:1 and 18.6:1 light, 9.4:1 and 17.3:1 dark.
+
+   THE MARKUP A PAGE HAS TO WRITE is exactly this -- site.js builds the rest:
+
+     main#nd-home-layout.tdb-docs
+       > article.tdb-doc
+           h1
+           p.tdb-doc-sub
+           h2[id]
+           p
+           figure.tdb-code > pre > code
+   ========================================================================== */
+
+:root {
+  /* The measure. 46rem is 736px, which is the reference's 768px article box
+     less its 16px gutters -- 69 characters of Geist at 16px. It is a
+     CONSTANT: no breakpoint below changes it, and nothing else on the site
+     may set a width on running text inside .tdb-doc. */
+  --w-doc: 46rem;
+  /* The sidebar track. It is the variable the layout spends when the window
+     narrows, precisely so that --w-doc is not. */
+  --w-docnav: 12rem;
+  /* Where an anchor jump parks a heading: the masthead plus a clear line.
+     TOC_FOLD in site.js is 128 and must stay ABOVE this, or clicking a rail
+     entry would land on its heading and light up the previous one. */
+  --doc-anchor: 7rem;
+}
+
+/* -- the grid ------------------------------------------------------------
+   One column on a phone and a tablet; two once a sidebar fits; three once a
+   rail fits beside it. The third track is declared whether or not the rail
+   mounts, so the prose column never moves between two pages that differ only
+   in how long they are. */
+main.tdb-docs {
+  width: 100%;
+  /* The masthead is `position: fixed`, so the docs frame has to clear it
+     itself. The legacy frame did this with Tailwind's `pt-14` -- 56px against
+     a header that measures 68 -- so content there has been riding 12px under
+     the bar. `--chrome-h` is the measured height and the only place it is
+     declared; hard-coding a second number is how the first 12px went missing. */
+  padding-top: var(--chrome-h);
+  padding-inline: var(--sp-4);
+  padding-bottom: var(--sp-8);
+}
+.tdb-doc-shell {
+  display: grid;
+  grid-template-columns: minmax(0, var(--w-doc));
+  justify-content: center;
+  width: 100%;
+}
+
+@media (min-width: 64rem) {
+  .tdb-doc-shell {
+    grid-template-columns: var(--w-docnav) minmax(0, var(--w-doc));
+    column-gap: var(--sp-5);
+  }
+}
+@media (min-width: 80rem) {
+  .tdb-doc-shell {
+    grid-template-columns: 15rem minmax(0, var(--w-doc));
+    column-gap: var(--sp-7);
+  }
+}
+@media (min-width: 88rem) {
+  .tdb-doc-shell {
+    grid-template-columns: 15rem minmax(0, var(--w-doc)) 15rem;
+  }
+}
+
+/* -- the content column --------------------------------------------------
+   Its own type rules rather than tw.css's .prose, because .prose sizes its
+   descendants through :where() at zero specificity and every value here would
+   otherwise be an argument with a vendored sheet. */
+.tdb-doc {
+  min-width: 0;
+  max-width: var(--w-doc);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+}
+.tdb-doc > h1 {
+  margin: 0;
+  font-size: var(--ts-title);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-head);
+  text-wrap: balance;
+}
+/* The two distances the reference spends on its page head and nowhere else:
+   8 under the title, 32 under the subtitle. They are not a fifth and a sixth
+   rhythm step -- they are the internal spacing of one component, the page
+   head, and they take --sp names for exactly that reason. */
+.tdb-doc > .tdb-doc-sub {
+  margin: var(--sp-2) 0 var(--sp-6);
+  color: var(--td-muted);
+  font-size: var(--ts-lead);
+  line-height: var(--lh-sub);
+  text-wrap: pretty;
+}
+.tdb-doc > h2 {
+  margin: var(--rh-sec) 0 var(--rh-head);
+  scroll-margin-top: var(--doc-anchor);
+  font-size: var(--ts-sub);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--tr-head);
+  line-height: var(--lh-sub);
+}
+.tdb-doc > h2:first-child { margin-top: 0; }
+.tdb-doc > p {
+  margin: 0 0 var(--rh-para);
+  font-size: var(--ts-body);
+  line-height: var(--lh-prose);
+}
+.tdb-doc > * { max-width: 100%; }
+.tdb-doc > :last-child { margin-bottom: 0; }
+
+/* A self-referencing heading, as the reference has: the whole heading is the
+   anchor, and there is no hover glyph beside it. */
+.tdb-doc > h2 > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* A link in running text is FOREGROUND plus an underline, never a hue -- the
+   reference's rule and this site's, and the same 1px/3px underline every
+   other link on the site already draws. Without this the article is not
+   .prose, so a link would fall back to the browser's blue. */
+.tdb-doc a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* An inline term, with no chip drawn round it: a container belongs round an
+   instrument, not round a word. (The reference has zero inline code in prose
+   -- its commands live only in figures -- so this rule exists for the terms
+   ours cannot avoid: a field name, a task id, a flag inside a sentence.) */
+.tdb-doc :not(pre) > code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--td-font-mono);
+  font-size: 1em;
+}
+
+/* The reference runs zero lists. If one appears here it gets the paragraph
+   rhythm and nothing else -- no marker restyling, no indent of its own
+   beyond the one the browser needs to hang a bullet. */
+.tdb-doc :is(ul, ol) {
+  margin: 0 0 var(--rh-para);
+  padding-left: var(--sp-5);
+}
+.tdb-doc li + li { margin-top: var(--rh-para); }
+
+/* -- the code figure -----------------------------------------------------
+   16 above and below, one hairline, no fill beyond the site's own surface,
+   no radius, no shadow. Flags belong INSIDE this block, never in a table
+   beside it. */
+.tdb-code {
+  position: relative;
+  margin: var(--rh-fig) 0;
+  overflow: hidden;
+  border: 1px solid var(--td-line);
+  background: var(--td-surface);
+}
+/* 2.75rem is a component height, like --chrome-h, not a spacing step: it is
+   the one value that lets a 1.75rem copy button inset by --sp-2 sit clear of
+   the rule under the caption. */
+.tdb-code > figcaption {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  margin: 0;
+  border-bottom: 1px solid var(--td-line);
+  padding: 0 3.25rem 0 var(--sp-4);
+  color: var(--td-muted);
+  font-family: var(--td-font-mono);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-ui);
+}
+.tdb-code > pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  color: var(--foreground);
+  font-family: var(--td-font-mono);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-ui);
+  tab-size: 2;
+}
+.tdb-code code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+/* Always visible, not hover-gated: a control that appears on hover does not
+   exist on a touch screen, and a reader who has to discover it has been given
+   nothing. */
+.tdb-copy {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: var(--td-surface);
+  color: var(--td-muted);
+  cursor: pointer;
+  line-height: var(--lh-flat);
+}
+.tdb-copy svg { width: 0.875rem; height: 0.875rem; }
+.tdb-copy:hover { color: var(--foreground); }
+.tdb-copy[data-copied="true"] { color: var(--foreground); }
+/* A clipboard write can be refused, and a button that says nothing when it
+   fails has told the reader their command is copied when it is not. The
+   failure is the site's ONE state marker -- 2px of coral -- drawn as an
+   outline rather than as the glyph's colour: coral on this surface measures
+   3.05:1 light, which is fine for a 2px marker and nowhere near the 7:1 this
+   site holds anything readable to. The glyph itself stays at full ink, and
+   the button's aria-label changes to "Copy failed". */
+.tdb-copy[data-copied="false"] {
+  color: var(--foreground);
+  outline: 2px solid var(--td-coral);
+  outline-offset: -2px;
+}
+
+/* -- the sidebar ---------------------------------------------------------
+   The masthead's nav rules, rotated: one colour for idle, one for here,
+   nothing else. Below 64rem it does not exist as a column -- its entries are
+   rendered into the masthead's own push-down panel instead, which is where
+   the site nav already goes at that width, so the collapse is ONE panel and
+   ONE breakpoint rather than two competing menus. */
+.tdb-docnav {
+  display: none;
+  font-family: var(--td-font-sans);
+}
+@media (min-width: 64rem) {
+  .tdb-docnav {
+    display: block;
+    position: sticky;
+    top: calc(var(--chrome-h) + var(--sp-5));
+    max-height: calc(100dvh - var(--chrome-h) - var(--sp-7));
+    align-self: start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: var(--sp-6);
+  }
+}
+.tdb-docnav-g {
+  margin: var(--sp-5) 0 var(--sp-2);
+  color: var(--td-muted);
+  font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro);
+  line-height: var(--lh-ui);
+  text-transform: uppercase;
+}
+.tdb-docnav-g:first-child { margin-top: 0; }
+.tdb-docnav-l { display: flex; flex-direction: column; }
+.tdb-docnav-a {
+  padding: var(--sp-2) 0;
+  color: var(--td-muted);
+  font-size: var(--ts-body);
+  line-height: var(--lh-ui);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.tdb-docnav-a:hover { color: var(--foreground); }
+.tdb-docnav-a[data-active="true"] { color: var(--foreground); }
+
+/* A page the index does not know about is a page nobody can reach from any
+   other page. That is a defect, and the fix is to make it loud on the page
+   itself rather than to let the sidebar quietly render one entry short --
+   which is the failure that would survive a review. Same coral left rule the
+   site already uses for a failed read. */
+.tdb-docnav-x {
+  margin: 0 0 var(--sp-5);
+  border-left: 2px solid var(--td-coral);
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--foreground);
+  font-size: var(--ts-micro);
+  line-height: var(--lh-ui);
+}
+
+/* The same list in the masthead's push-down panel, below 64rem. It reuses
+   .tdb-nav-link so there is one idle colour, one active colour and one hover
+   for every navigation link on the site. */
+.tdb-menu-g {
+  margin: var(--sp-3) var(--sp-4) var(--sp-1);
+  color: var(--td-muted);
+  font-size: var(--ts-micro);
+  letter-spacing: var(--tr-micro);
+  line-height: var(--lh-ui);
+  text-transform: uppercase;
+}
+
+/* -- the section rail, inside the shell ----------------------------------
+   .tdb-toc keeps its own type and marker rules (declared with the rest of
+   document navigation, above); what changes here is only that in the grid it
+   is a track rather than a 15rem flex item, and that it does not exist at all
+   until a third track does. */
+.tdb-doc-shell > #toc { display: none; }
+@media (min-width: 88rem) {
+  .tdb-doc-shell > #toc.tdb-toc {
+    display: block;
+    position: sticky;
+    top: calc(var(--chrome-h) + var(--sp-5));
+    width: auto;
+    max-height: calc(100dvh - var(--chrome-h) - var(--sp-7));
+    align-self: start;
+  }
+}
 
 /* ==========================================================================
    RESPONSIVE

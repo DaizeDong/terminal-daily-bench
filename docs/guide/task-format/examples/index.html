@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>runnable examples — terminal-daily-bench docs</title>
+<meta name="description" content="Install terminal-daily-bench, score a task, read a live task, publish a task directory and submit a result. Every flag is documented inside the block that uses it.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of /guide/task-format/. #examples, #score-a-task,
+     #read-a-live-task, #publish and #submit arrived here unchanged.
+
+     Flags are documented INSIDE the block that uses them, never in an options
+     table beside it: a table of flags is a second place for the command line
+     to be wrong. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc prose-no-margin wrap-anywhere">
+
+    <h1>Runnable examples</h1>
+    <p class="tdb-doc-sub">Install, score, read, publish, submit.</p>
+
+    <h2 id="examples"><a href="#examples">Install and point at a model</a></h2>
+    <p>The runnable examples below need an apptainer/singularity host.</p>
+    <figure class="tdb-code">
+      <figcaption>install</figcaption>
+      <pre><code>pip install -e .
+export OPENAI_BASE_URL=...          <span class="text-muted-foreground"># OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
+export OPENAI_API_KEY=...</code></pre>
+    </figure>
+
+    <h2 id="score-a-task"><a href="#score-a-task">Score a task</a></h2>
+    <p><code>tdb run</code> and <code>tdb oracle</code> both wrap
+      <code>terminal_daily_bench.eval</code>, which accepts <code>--max-tokens</code>,
+      <code>--call-timeout</code> and <code>--harbor-timeout</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>score</figcaption>
+      <pre><code><span class="text-muted-foreground"># baseline: the task's own oracle.patch -&gt; reward 1.0 (no model call, archive only)</span>
+tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
+
+<span class="text-muted-foreground"># score a model with the single_shot_patch scaffold</span>
+tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
+
+<span class="text-muted-foreground"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models in the results file)</span>
+tdb quality results.jsonl
+
+<span class="text-muted-foreground"># result JSON lands under $TDB_WORK (default ./.tdb_work), or at --out PATH</span></code></pre>
+    </figure>
+
+    <h2 id="read-a-live-task"><a href="#read-a-live-task">Read a live task</a></h2>
+    <p>A live package ships the instruction and the failing-test IDs; the protected assertions and
+      the gold solution are withheld.</p>
+    <figure class="tdb-code">
+      <figcaption>read</figcaption>
+      <pre><code>cat tasks/live/td-fc90ea8b76d5f6b6/instruction.md
+cat tasks/live/td-fc90ea8b76d5f6b6/FAILING_TESTS.json     <span class="text-muted-foreground"># only the failing-test IDs</span></code></pre>
+    </figure>
+
+    <h2 id="publish"><a href="#publish">Publish a task directory</a></h2>
+    <p>One source directory in, one published task directory out.</p>
+    <figure class="tdb-code">
+      <figcaption>publish</figcaption>
+      <pre><code><span class="text-muted-foreground"># publish_tasks.py &lt;src_task_dir&gt; &lt;merge_date&gt; &lt;today&gt; &lt;out_root&gt;</span>
+<span class="text-muted-foreground"># idempotent; archive vs. live is picked from the dates</span>
+python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./tasks
+<span class="text-muted-foreground"># -&gt; {"task": "td-...", "mode": "archive", "shipped_solution": true, "dest": "tasks/archive/td-..."}</span></code></pre>
+    </figure>
+
+    <h2 id="submit"><a href="#submit">Submit a result</a></h2>
+    <p>A submission is recorded as pending: the public bundle does not run a replay worker (see
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>),
+      and complete frozen-roster signed replay coverage is required for <strong>community</strong>
+      ranking. <a href="../../submission/#schema">Validation rules &rarr;</a></p>
+    <figure class="tdb-code">
+      <figcaption>submit</figcaption>
+      <pre><code><span class="text-muted-foreground"># validate the submission JSON, then record it as pending re-verification</span>
+python web/submit_result.py validate &lt; submission.json
+python web/submit_result.py record   &lt; submission.json \
+  --store community_submissions --authenticated-submitter github:YOUR_LOGIN
+
+<span class="text-muted-foreground"># one JSON object per (model, task) cell; every key below is required</span>
+{ "date": "...", "submitter": "...", "model": "...", "model_build": "...",
+  "scaffold": "...", "harness_version": "...", "task": "td-...", "patch": "..." }
+<span class="text-muted-foreground"># the auth layer supplies the authenticated submitter; reward_claimed is advisory</span></code></pre>
+    </figure>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>running a model — terminal-daily-bench docs</title>
+<meta name="description" content="Install tdb, point it at an OpenAI-compatible endpoint, run a model or the oracle on a task, and read the JSON record the run writes.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of guide/submission/. Every flag and environment variable that
+     used to sit in a two-column list is documented by example inside the block
+     that runs it, which is the reference's rule and the reason this page has
+     no table and no definition list. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>Running a model</h1>
+    <p class="tdb-doc-sub">One command scores one model on one task; the gate, not the model, decides what it was worth.</p>
+
+    <h2 id="run"><a href="#run">Run a model on a task</a></h2>
+    <p><code>tdb</code> is the console script, defined by <code>terminal_daily_bench/cli.py</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>install, then score</figcaption>
+      <pre><code>pip install -e .                          # installs the `tdb` console script
+
+# Score a model on one task (single-shot patch scaffold + execution gate)
+tdb run gpt-4o tasks/archive/td-fc90ea8b76d5f6b6
+
+# Baseline: replay the task's own gold patch &mdash; proves the gate returns 1.0
+tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
+
+# Multi-angle quality card over a results file (needs &gt;=2 models)
+tdb quality results.jsonl</code></pre>
+    </figure>
+
+    <h2 id="endpoint"><a href="#endpoint">Endpoint, oracle, host</a></h2>
+    <p>Any OpenAI-compatible endpoint works: OpenRouter, vLLM, LiteLLM, a local server. The model
+      id <code>oracle</code> runs the task&rsquo;s <code>solution/oracle.patch</code> and needs
+      neither an endpoint nor a key. Scoring needs an apptainer/singularity host.</p>
+    <figure class="tdb-code">
+      <figcaption>environment variables, read at run time</figcaption>
+      <pre><code>export OPENAI_BASE_URL=https://api.openai.com/v1  # the default; any OpenAI-compatible endpoint
+export OPENAI_API_KEY=sk-...                     # bearer key, read from env, never stored
+
+export TDB_SIF_CACHE=...    # override the singularity scratch paths
+export TDB_OVERLAY_DIR=...
+export TDB_WORK=...         # overrides the work root</code></pre>
+    </figure>
+
+    <h2 id="record"><a href="#record">The result record</a></h2>
+    <p>One JSON record per run, written by <code>terminal_daily_bench/eval.py</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>lands in --out, default $TDB_WORK/results/</figcaption>
+      <pre><code>{
+  "model": "gpt-4o",
+  "task": "td-fc90ea8b76d5f6b6",
+  "scaffold": "single_shot_patch",
+  "reward": 1.0,
+  "solved": true,
+  "patch_applied": true,
+  "error": null,
+  "runtime_sec": 214.3,
+  "false_accept_check": {
+    "gate": "harbor_protected_tests",
+    "reward_source": "result.json via harbor_score.read_harbor_reward",
+    "protected_tests_relaid_by_harbor": true,
+    "model_is_judge": false,
+    "model_patch_touched_tests": false,
+    "scope": "protected_test_replay_integrity",
+    "claim_acceptance_without_replay": false,
+    "semantic_false_accept": null,
+    "false_accept": 0
+  }
+}</code></pre>
+    </figure>
+
+    <h2 id="failure"><a href="#failure">Failure never scores positive</a></h2>
+    <p><code>solved</code> means <code>reward &gt;= 0.999</code>. No diff, an unapplied patch, a
+      trial error or an unparseable result yields <code>reward 0.0</code> / <code>solved false</code>
+      with the cause in <code>error</code>, and a crash never scores positive: the run path is
+      BAD-safe by construction.</p>
+
+    <h2 id="live-tasks"><a href="#live-tasks">Task packages, live and archived</a></h2>
+    <p><strong>Live</strong> tasks &mdash; this week&rsquo;s &mdash; withhold the gold patch and
+      the protected test bodies, and a patch against one stays pending until an official replay.
+      <strong>Archived</strong> tasks, at least two weeks old, ship in full.
+      <a href="../../task-format/#archive-vs-live">Archive vs. live &rarr;</a></p>
+    <p id="layout">Each task lives in <code>tasks/{archive|live}/&lt;task-id&gt;/</code>. The seven
+      paths in a package, what each carries and which of them live releases withhold are documented
+      once, in <a href="../../task-format/">Task format</a>; the canonical short schema is
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

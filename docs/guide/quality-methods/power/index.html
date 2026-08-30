@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uncertainty and required N — terminal-daily-bench docs</title>
+<meta name="description" content="Seeded bootstrap confidence intervals, precision-power required-N, and the Spearman-Brown reliability-power required-k.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Uncertainty and required N</h1>
+    <p class="tdb-doc-sub">How wide today&rsquo;s interval is, and how many tasks it would take to narrow it.</p>
+
+    <h2 id="bootstrap"><a href="#bootstrap">Bootstrap confidence intervals</a></h2>
+    <p><code>msq_bootstrap_ci</code> <strong>resamples the task rows with replacement</strong>, <code>n_boot</code> times, recomputing D/C/M on each resample. <code>estimate</code> is the full-set point estimate, <code>[lo, hi]</code> the central <code>ci</code>-percentile interval (default 95%), and <code>se</code> the bootstrap SD. The RNG is seeded, so a resume is reproducible, and at <code>N &asymp; 6</code> tasks the intervals are <strong>wide</strong>.</p>
+    <figure class="tdb-code"><pre><code>{ estimate, lo, hi, se, n_valid }</code></pre></figure>
+
+    <h2 id="power"><a href="#power">Precision-power (required-N)</a></h2>
+    <p><code>required_tasks_for_precision</code> scales SE as <code>1/&radic;N</code> from the bootstrap SE at <code>N&#8320;</code>. It returns one record per axis &mdash; <code>{axis, n_now, se_now, half_width_now, target_half_width, required_n}</code> &mdash; where <code>required_n</code> is <code>None</code> when the axis SE is undefined and <code>0</code> when SE is already <code>0</code>. <code>precision_curve(matrix, sizes, axis="D")</code> gives the curve <code>[{n, half_width}, ...]</code>.</p>
+    <figure class="tdb-code"><pre><code>half_width h(N) = z &middot; SE(N&#8320;) &middot; &radic;(N&#8320; / N)
+required N       = N&#8320; &middot; ( z &middot; SE(N&#8320;) / target_half_width )&sup2;      (rounded up)</code></pre></figure>
+
+    <h2 id="reliability-power"><a href="#reliability-power">Reliability-power (required-N)</a></h2>
+    <p><code>tasks_for_reliability</code> applies the <strong>Spearman-Brown prophecy</strong> to give the test <em>length</em> needed to reach a target KR-20. It returns <code>{current_kr20, current_k, target_kr20, required_k}</code> measured from the current KR-20, with <code>required_k</code> <code>None</code> when reliability is undefined or <code>&le; 0</code>, or the target is outside <code>(0, 1)</code>.</p>
+    <figure class="tdb-code"><pre><code>k' = k &middot; [ &rho;'&middot;(1 &minus; &rho;) ] / [ &rho;&middot;(1 &minus; &rho;') ]        (rounded up, floored at 1)</code></pre></figure>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

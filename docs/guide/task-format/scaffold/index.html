@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scaffold adapters — terminal-daily-bench docs</title>
+<meta name="description" content="The HarnessAdapter contract a multi-turn agent plugs into, and the three things an adapter may not do.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of /guide/task-format/. #scaffold arrived here unchanged.
+
+     The four constraint lines that used to sit as trailing comments inside the
+     code figure are prose now, under #scaffold-limits. Same words; a rule an
+     implementer must obey is not a comment on a listing. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc prose-no-margin wrap-anywhere">
+
+    <h1>Scaffold adapters</h1>
+    <p class="tdb-doc-sub">Plugging in your own scaffold.</p>
+
+    <h2 id="scaffold"><a href="#scaffold">The adapter contract</a></h2>
+    <p>The built-in scaffold is <code>single_shot_patch</code>, one localized shot at a diff.
+      Multi-turn agents plug in via the adapter contract, over any OpenAI-compatible endpoint.</p>
+    <figure class="tdb-code">
+      <figcaption>terminal_daily_bench/adapters/base.py::HarnessAdapter</figcaption>
+      <pre><code>input  = (task dir, failing test ids, model id/endpoint)
+output = AdapterResult(patch: str, telemetry: dict, error: str | None)</code></pre>
+    </figure>
+
+    <h2 id="scaffold-limits"><a href="#scaffold-limits">What an adapter may not do</a></h2>
+    <p><code>produce_patch(...)</code> must NOT read or write the protected tests or the gold
+      solution, and must not compute a reward.</p>
+    <p>The execution gate stays the sole reward authority as harnesses are added. Semantic
+      false-accept still requires labeled exploit trials.</p>
+
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

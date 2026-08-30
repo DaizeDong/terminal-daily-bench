@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the quality API — terminal-daily-bench docs</title>
+<meta name="description" content="benchmark_quality_report, what deep=True adds, and the seven selection helpers that build a subset from the same axes.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>The quality API</h1>
+    <p class="tdb-doc-sub">One call that aggregates every axis, and the selection helpers beside it.</p>
+
+    <h2 id="card"><a href="#card">One-call quality card</a></h2>
+    <p><code>benchmark_quality_report(matrix, ..., deep=True)</code> aggregates every axis: <code>msq</code> (the <code>D/C/M</code> profile plus composite), diversity from <code>signatures</code>, angle coverage from the flat <code>graded</code> states, <code>noisy_task_indices</code> (monotonicity violations), and a curated subset (monotonic core &rarr; info-max &rarr; diverse filter). Under <code>deep=True</code> it adds IRT (<code>total_information</code> + SE), <code>ci</code> bootstrap intervals, <code>power</code> precision required-N, <code>reliability</code> KR-20, and <code>reliability_prophecy</code> Spearman-Brown required-k.</p>
+    <figure class="tdb-code"><pre><code>from terminal_daily_bench import quality as q
+
+matrix = [
+    [1, 0, 0],   <span class="text-muted-foreground"># td-1: A solves, B/C fail  -&gt; splits</span>
+    [1, 1, 0],   <span class="text-muted-foreground"># td-2</span>
+    [1, 1, 1],   <span class="text-muted-foreground"># td-3: all-pass            -&gt; no discrimination</span>
+    [0, 0, 0],   <span class="text-muted-foreground"># td-4: all-fail            -&gt; no discrimination</span>
+    [1, 0, 1],   <span class="text-muted-foreground"># td-5</span>
+    [1, 1, 0],   <span class="text-muted-foreground"># td-6</span>
+]
+
+card = q.benchmark_quality_report(matrix, deep=True)
+print(card["msq"])          <span class="text-muted-foreground"># {'D': 0.667, 'C': 0.896, 'M': 0.833, 'composite': 0.766, ...}</span>
+print(card["irt"]["total_information"])   <span class="text-muted-foreground"># 1.808</span>
+print(card["reliability"]["kr20"])        <span class="text-muted-foreground"># 0.514</span>
+
+verdict = q.benchmark_readiness(matrix)
+print(verdict["ready"], verdict["bottleneck"], verdict["recommended_n"])
+<span class="text-muted-foreground"># False precision 37</span></code></pre></figure>
+
+    <h2 id="helpers"><a href="#helpers">Selection helpers</a></h2>
+    <dl class="tdb-defs">
+      <dt class="tdb-id">select_informative_subset</dt>
+      <dd>Greedy <code>D + C</code>.</dd>
+      <dt class="tdb-id">select_max_information</dt>
+      <dd>Top-k Fisher.</dd>
+      <dt class="tdb-id">balanced_subset</dt>
+      <dd>Difficulty-balanced.</dd>
+      <dt class="tdb-id">diverse_subset</dt>
+      <dd>Farthest-point over signatures.</dd>
+      <dt class="tdb-id">select_mid_difficulty</dt>
+      <dd>Scaffold-relative discriminative band.</dd>
+      <dt class="tdb-id">filter_monotonic / flag_noisy_tasks</dt>
+      <dd>Drop ability-inverting tasks.</dd>
+      <dt class="tdb-id">cross_scaffold_quality</dt>
+      <dd>Most discriminative scaffold frame.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

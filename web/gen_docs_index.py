@@ -39,7 +39,13 @@ from pathlib import Path
 # The prose column. Everything outside it is shell, breadcrumb and footer --
 # chrome that is identical on all four pages and would therefore match every
 # query equally, which is the same as matching nothing.
-_ARTICLE = re.compile(r'<article[^>]*\bclass="[^"]*\bprose\b[^"]*"[^>]*>(.*?)</article>', re.S)
+# `prose` was the only article class while the guide was four flat pages.
+# The docs shell wraps content in `article.tdb-doc`, so a rebuilt page matches
+# nothing and its sections vanish from Ctrl+K -- silently, because an empty
+# match is indistinguishable from a page that simply has no prose.
+_ARTICLE = re.compile(
+    r'<article[^>]*\bclass="[^"]*\b(?:prose|tdb-doc)\b[^"]*"[^>]*>(.*?)</article>',
+    re.S)
 _H1 = re.compile(r"<h1\b[^>]*>(.*?)</h1>", re.S | re.I)
 _HEADING = re.compile(r"<h([23])\b([^>]*)>(.*?)</h\1\s*>", re.S | re.I)
 _ID_ATTR = re.compile(r'\bid="([^"]+)"')
@@ -110,7 +116,9 @@ def collect_page(page: Path, docs: Path) -> tuple[str, str, list[dict]]:
 def collect(docs: Path) -> dict:
     pages: list[dict] = []
     entries: list[dict] = []
-    for page in sorted((docs / "guide").glob("*/index.html")):
+    # rglob, not glob: the split nests pages under guide/<topic>/<sub>/, and a
+    # one-level glob indexes the parents while quietly dropping every child.
+    for page in sorted((docs / "guide").rglob("index.html")):
         url, title, rows = collect_page(page, docs)
         pages.append({"url": url, "title": title, "n_sections": len(rows)})
         entries.extend(rows)

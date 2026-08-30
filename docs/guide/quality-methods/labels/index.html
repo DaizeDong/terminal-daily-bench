@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>capability labels and coverage — terminal-daily-bench docs</title>
+<meta name="description" content="The deterministic rules that put a capability code on a task, and the standing methodology for reading the capability coverage report.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>How a task gets its labels</h1>
+    <p class="tdb-doc-sub">The rules that put a capability code on a task, and what the coverage report built from them does and does not claim.</p>
+
+    <h2 id="capability-rules"><a href="#capability-rules">What triggers a label</a></h2>
+    <p>The two unconditional rules are why <code>C5</code> and <code>C4</code> sit on nearly every archive package.</p>
+    <dl class="tdb-defs">
+      <dt>A changed path matches a path rule</dt>
+      <dd>Tags that rule&rsquo;s code, once per matching path.</dd>
+      <dt>A token rule matches the diff</dt>
+      <dd>Tags that rule&rsquo;s code. <strong>Added lines only</strong>, word-boundary matched &mdash; a deleted line or a diff header never tags a task.</dd>
+      <dt>The test diff is non-empty</dt>
+      <dd>Always adds <code>C5</code>; the test diff is what carries the verifiable signal.</dd>
+      <dt>A changed non-test source file</dt>
+      <dd>Always adds <code>C4</code>.</dd>
+      <dt>Nothing matched</dt>
+      <dd>Defaults to <code>C3</code>. The label list is never empty.</dd>
+      <dt>Order</dt>
+      <dd>Hit count descending, then code number. The list is a total order, not a set.</dd>
+    </dl>
+
+    <h2 id="capability-gate"><a href="#capability-gate">A label set is not a scoreable axis</a></h2>
+    <p>Per-axis coverage and gate status on today&rsquo;s catalogue is on the <a href="../../../quality/#capability">capability coverage report</a>; a defined label set is not a scoreable axis, and that page says which axes clear the gate. The codes themselves are <a href="../capability/#capability-taxonomy">declared in the taxonomy</a>.</p>
+
+    <h2 id="report-capability"><a href="#report-capability">Reading the capability coverage report</a></h2>
+    <dl class="tdb-defs">
+      <dt>Every axis is listed</dt>
+      <dd>All fourteen axes are listed. An axis this catalogue does not cover is a fact about the catalogue, not a row to hide &mdash; so an axis carrying no task at all is listed at zero rather than dropped: a missing row reads as an axis that does not exist, which is a different claim from an axis this catalogue never reached.</dd>
+      <dt>The co-occurrence grid</dt>
+      <dd>One column per re-derivable package, one row per axis; a mark is presence, never a degree. <strong>No model outcome is in that figure</strong> &mdash; it is not a solve result. Columns are ordered by how many labels a package carries, so the dense left edge is arrangement, not a finding.</dd>
+      <dt>Multi-valued labels</dt>
+      <dd>A task carries every code its diff triggers, so the per-code counts do not sum to the task count.</dd>
+      <dt>The unmeasured criterion</dt>
+      <dd><code>min_admitted_subtests</code> counts the subtests surviving a unit-test-validity audit, and no such audit has classified this catalogue. Unmeasured is not failed, and it is certainly not passed &mdash; so no axis clears the publish gate whatever its counts say.</dd>
+      <dt>The audit on record</dt>
+      <dd><strong>The unit-test-validity audit on record does not describe this catalogue</strong> (release <code>b3fc3e6</code>, <code>experiments/reports/unit-test-validity-r001/SUMMARY.json</code>). It measured a different corpus at a different release commit; its per-axis counts describe that corpus, so they are not reproduced on the report and <code>min_admitted_subtests</code> stays unmeasured here.</dd>
+      <dt>Packages that cannot be tagged</dt>
+      <dd>The tagger reads the oracle diff and live withholds it, so a live package&rsquo;s <code>task.toml</code> keywords stand as declared, never re-derived &mdash; and every count on the report is over the packages that could be checked.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>
