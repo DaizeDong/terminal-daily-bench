@@ -186,7 +186,7 @@
     "[&_svg]:size-4 text-sm tdb-nav-link";
 
   var ICON_BTN_CLS =
-    "inline-flex items-center justify-center rounded-md text-sm font-medium " +
+    "inline-flex items-center justify-center text-sm font-medium " +
     "transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 " +
     "focus-visible:outline-none hover:bg-fd-accent hover:text-fd-accent-foreground " +
     "p-1.5 [&_svg]:size-5";
@@ -206,7 +206,7 @@
   function headerHTML() {
     return '' +
       '<div style="position:relative">' +
-        '<nav class="flex h-14 w-full items-center px-4">' +
+        '<nav class="flex w-full items-center px-4">' +
           '<a class="tdb-brand inline-flex items-center gap-2.5 font-semibold" href="' + url("") + '" aria-label="Terminal Daily home">' +
             '<span class="tdb-brand-mark" aria-hidden="true"></span>' +
             '<span class="tdb-brand-copy">' +
@@ -343,7 +343,7 @@
     footer.setAttribute("aria-label", "Site footer");
     footer.innerHTML =
       '<div class="tdb-footer-inner flex w-full max-w-7xl flex-col">' +
-        '<p id="tdb-canary" class="text-muted-foreground/50 font-mono text-xs">' +
+        '<p id="tdb-canary" class="text-muted-foreground font-mono text-xs">' +
           CANARY +
         "</p>" +
       "</div>";
@@ -630,7 +630,7 @@
         '<span class="tdb-find-k" aria-hidden="true">' + ICON_SEARCH + "</span>" +
         '<input id="tdb-find-input" class="tdb-find-input" type="text" ' +
           'autocomplete="off" autocapitalize="off" spellcheck="false" ' +
-          'placeholder="search the guide" aria-label="Search the guide" ' +
+          'placeholder="Search the guide" aria-label="Search the guide" ' +
           'role="combobox" aria-expanded="true" aria-autocomplete="list" ' +
           'aria-controls="tdb-find-list">' +
         '<button type="button" class="tdb-find-x" data-tdb-find-close="" ' +
@@ -703,7 +703,7 @@
         "tdb-find-err",
         "Could not load the search index.",
         searchError,
-        "This is a failure to read " + url(SEARCH_PATH) + " -- not an empty " +
+        "This is a failure to read " + url(SEARCH_PATH) + " — not an empty " +
         "result. Nothing is being searched here; the guide pages themselves " +
         "are unaffected and still open normally.");
       return;

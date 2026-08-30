@@ -1199,34 +1199,38 @@ def check_retired_home_copy(home_lower: str) -> list[str]:
     ]
 
 
-# Integrity caveats that must survive somewhere on the public site. They used to
-# be asserted against index.html specifically; home now carries only the compact
-# point-of-claim marker (the UNOFFICIAL pill and its `why` link beside the
-# table), and the detail lives on the page the nav labels "status". Moving the
-# home of a statement is fine; dropping it is not -- so presence is asserted
-# across docs/ rather than on one page, which permits a future move and forbids
-# a loss. This mirrors the outcome-treatment relocation below.
-INTEGRITY_CAVEATS = (
-    "deterministic code",
-    "claimed reward",
-    "paired staged-sif egress canary passed",
-    "no production protected replay has run",
-    "active=false",
-    "one collaborator",
-    "certified 50-task",
-    "unpublished patched harbor fork",
-    "stock harbor 0.13.1 is insufficient",
-    "completed gate decisions",
-)
+# The integrity disclosure was REMOVED on the owner's instruction: the coral
+# quote block on nine pages, the scoring-invariant sentence, the replay-blocker
+# ledger, the `#integrity` anchor and the `why` link the UNOFFICIAL badge used
+# to carry. The gate that asserted those caveats is gone with them -- asserting
+# the presence of deleted copy would fail the build forever, and keeping a dead
+# check is worse than keeping none.
+#
+# What is NOT gone is the reason the caveats existed: these numbers are not a
+# certified ranking. The word `unofficial` is now the only thing on the site
+# that says so, which makes it load-bearing in a way it never was while the
+# disclosure stood behind it. So the check narrows rather than disappears --
+# it guards the one marker that remains instead of the ten sentences that did.
+#
+# Read from the raw source, not markup_only(): both badges are built by JS
+# string concatenation, and markup_only() blanks script bodies. That is exactly
+# how the old `why` link once pointed at a non-existent anchor with every gate
+# green.
+UNOFFICIAL_MARKER_PAGES = ("index.html", "leaderboard/index.html")
 
 
-def check_integrity_caveats(public_html_lower: str) -> list[str]:
-    """Every integrity caveat must still be published somewhere under docs/."""
-    return [
-        f"public HTML: integrity caveat lost from the whole site: {phrase!r}"
-        for phrase in INTEGRITY_CAVEATS
-        if phrase not in public_html_lower
-    ]
+def check_unofficial_marker(source) -> list[str]:
+    """The pages that render a leaderboard must still mark it unofficial."""
+    bad = []
+    for rel in UNOFFICIAL_MARKER_PAGES:
+        raw = source(rel)
+        if 'data-official="false"' not in raw or "unofficial" not in raw.lower():
+            bad.append(
+                f"{rel}: the `unofficial` marker is gone. With the integrity "
+                f"disclosure removed this word is the only thing telling a "
+                f"reader these numbers are not a certified ranking."
+            )
+    return bad
 
 
 def check_public_frontend() -> list[str]:
@@ -1254,13 +1258,8 @@ def check_public_frontend() -> list[str]:
         page.read_text(encoding="utf-8", errors="replace").lower()
         for page in DOCS.rglob("*.html")
     )
-    bad.extend(check_integrity_caveats(all_public_html))
 
-    for rel in ("index.html", "benchmarks/index.html", "leaderboard/index.html",
-                "registry/index.html"):
-        raw = source(rel)
-        if "data-tdb-integrity" not in markup_only(raw):
-            bad.append(f"{rel}: data-tdb-integrity marker missing")
+    bad.extend(check_unofficial_marker(source))
 
     for rel in ("benchmarks/index.html", "leaderboard/index.html", "registry/index.html"):
         raw = markup_only(source(rel))

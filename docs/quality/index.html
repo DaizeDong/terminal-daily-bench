@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quality — terminal-daily-bench</title>
 <meta name="description" content="Multi-angle Selection-Quality (MSQ): discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, and a readiness verdict.">
-<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
-<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/tw.css?v=edae671ad0">
+<link rel="stylesheet" href="../assets/site.css?v=edae671ad0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -19,7 +19,7 @@
       <!-- The parent flex column is items-center, so a bare block child would
            shrink-wrap and float; the page head needs its own full-width box. -->
       <div class="w-full">
-        <h1 class="tdb-page-title" id="title">selection quality</h1>
+        <h1 class="tdb-page-title" id="title">Selection quality</h1>
         <p class="tdb-page-lede">MSQ measures whether a task set can separate models at all.
           <a href="../guide/quality-methods/">quality methods &rarr;</a></p>
 
@@ -38,13 +38,13 @@
       <!-- =================== THE DISCRIMINATION REPORT =================== -->
       <section class="tdb-block" data-tdb-section="discrimination" id="discrimination">
         <div class="tdb-block-head">
-          <h2>discrimination</h2>
-          <div class="tdb-block-tools"><a href="../guide/quality-methods/#D">how D is defined &rarr;</a></div>
+          <h2>Discrimination</h2>
+          <div class="tdb-block-tools"><a href="../guide/quality-methods/#D">How D is defined &rarr;</a></div>
         </div>
 
         <!-- (a) coverage ledger: the n accounting, before any finding -->
         <div class="tdb-plain-table" id="disc-ledger" data-tdb-primary-data>
-          <p class="tdb-empty">loading the solve matrix&hellip;</p>
+          <p class="tdb-empty">Loading the solve matrix&hellip;</p>
         </div>
 
         <!-- (b) item strip: one square per catalogue task -->
@@ -68,7 +68,7 @@
         <p class="tdb-block-foot" id="disc-ci-note"></p>
 
         <!-- (d) the caveat block -->
-        <div class="tdb-integrity" data-tdb-integrity id="disc-caveat"></div>
+        <div id="disc-caveat"></div>
       </section>
 
       <!-- ======================= CAPABILITY COVERAGE ======================= -->
@@ -77,8 +77,8 @@
            into this markup, so a taxonomy change flows through the data. -->
       <section class="tdb-block" data-tdb-section="capability" id="capability">
         <div class="tdb-block-head">
-          <h2>capability coverage</h2>
-          <div class="tdb-block-tools"><a href="../guide/quality-methods/#capability-taxonomy">what C1&ndash;C14 mean &rarr;</a></div>
+          <h2>Capability coverage</h2>
+          <div class="tdb-block-tools"><a href="../guide/quality-methods/#capability-taxonomy">What C1&ndash;C14 mean &rarr;</a></div>
         </div>
 
         <dl class="tdb-instrument" id="cap-instrument">
@@ -89,7 +89,7 @@
         </dl>
 
         <div class="tdb-plain-table" id="cap-table">
-          <p class="tdb-empty">loading the capability index&hellip;</p>
+          <p class="tdb-empty">Loading the capability index&hellip;</p>
         </div>
         <p class="tdb-block-foot" id="cap-foot"></p>
 
@@ -105,19 +105,17 @@
         </figure>
         <p class="tdb-block-foot" id="cap-note"></p>
 
-        <div class="tdb-integrity" data-tdb-integrity id="cap-caveat"></div>
+        <div id="cap-caveat"></div>
       </section>
 
       <!-- ========================= THE FRAME CARDS ========================= -->
       <section class="tdb-block" data-tdb-section="frames">
         <div class="tdb-block-head">
-          <h2>the quality card, per scaffold frame</h2>
-          <p id="frames-sub">one card per scaffold</p>
+          <h2>The quality card, per scaffold frame</h2>
+          <p id="frames-sub">One card per scaffold</p>
         </div>
-        <div class="flex flex-col gap-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="frames"></div>
-        </div>
-        <p class="tdb-block-foot">notch = threshold, <span class="font-mono">&darr;</span> = below it</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="frames"></div>
+        <p class="tdb-block-foot">Notch = threshold, <span class="font-mono">&darr;</span> = below it</p>
       </section>
 
       <!-- the canary footer is appended here by assets/site.js -->
@@ -125,7 +123,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="quality"></script>
+<script src="../assets/site.js?v=edae671ad0" data-root=".." data-page="quality"></script>
 <script>
 (function () {
   "use strict";
@@ -134,14 +132,14 @@
 
   /* ---- shared metadata badges ------------------------------------------ */
   var BADGE_BASE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
+    "inline-flex items-center justify-center border px-2 text-sm sm:text-xs " +
     "font-medium w-fit whitespace-nowrap shrink-0 gap-1 overflow-hidden " +
     "border-transparent font-mono transition-colors duration-200 ";
   var BADGE_SEC = BADGE_BASE + "bg-secondary text-secondary-foreground";
   var BADGE_PRI = BADGE_BASE + "bg-primary text-primary-foreground";
 
   var CARD =
-    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
+    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border " +
     "transition-all duration-200";
 
   /* Data cells stay compact; the descriptive column is allowed to wrap. */
@@ -246,7 +244,7 @@
         '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
           'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
           'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
-          '<div class="mb-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">' +
+          '<div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">' +
             '<div data-slot="card-title" class="font-semibold">' +
               '<h2 class="font-mono text-xl font-medium">' + esc(label) + "</h2></div>" +
             verdict +
@@ -254,7 +252,7 @@
           '<div class="flex flex-wrap gap-2">' + chips + "</div>" +
         "</div>" +
         '<div data-slot="card-content" class="px-6 flex flex-1 flex-col justify-between gap-6">' +
-          '<div class="space-y-3">' + rows + "</div>" +
+          "<div>" + rows + "</div>" +
         "</div>" +
       "</div></div>";
   }
@@ -746,7 +744,11 @@
       ciHost.innerHTML =
         pub.map(function (r) { return ciRow(r.label, r.k, r.n, pubBand); }).join("") +
         (lev.length
-          ? '<p class="tdb-ci-group" style="margin:var(--sp-4) 0 var(--sp-1);' +
+          /* --sp-1 (4px) here was the last distance on the site that was not
+             on the 16/20/24/48 ladder. The break between the two tracks is a
+             paragraph step above and nothing below: the label belongs to the
+             rows it introduces, so it must not float between them. */
+          ? '<p class="tdb-ci-group" style="margin:var(--rh-para) 0 0;' +
             "color:var(--muted-foreground);font-size:var(--ts-micro);" +
             'letter-spacing:var(--tr-micro);text-transform:uppercase">a partition of the ' +
             esc(ref) + " row above</p>"
@@ -905,7 +907,7 @@
   /* A count that could not be read prints as an em dash, never as 0 and never
      as the string "null". Pairs with count(): count() refuses to invent a
      number, num() refuses to let the absence look like one. */
-  function num(x) { return typeof x === "number" ? String(x) : "&mdash;"; }
+  function intOrDash(x) { return typeof x === "number" ? String(x) : "&mdash;"; }
 
   function axisView(a) {
     var crit = a.criteria || null;
@@ -1000,15 +1002,26 @@
       return "<th" + (i >= 1 && i <= 4 ? ' class="tdb-num"' : "") + ">" + h + "</th>";
     }).join("") + "</tr>";
 
-    var covered = 0, blank = 0;
-    axes.forEach(function (v) { if (v.tasks) { covered += 1; } else { blank += 1; } });
+    /* Seven of the fourteen axes carry no task, and an axis with no task has
+       nothing measurable in any of the five numeric columns: seven rows of
+       `-- -- -- --  no tasks - fails min_tasks`, identical to each other, half
+       the height of the table. They are collapsed into the sentence under it.
 
-    var body = axes.map(function (v) {
+       The CODES do not go with them. "Seven axes are empty" and "C1, C3, C7,
+       C9, C11, C12 and C14 are empty" are different claims, and only the
+       second one can be checked against the taxonomy. Which axes are named is
+       read off the data at render time, so a catalogue that later covers one
+       of them drops it from the sentence and adds it to the table. */
+    var carried = axes.filter(function (v) { return v.tasks; });
+    var empty = axes.filter(function (v) { return !v.tasks; });
+    var covered = carried.length;
+
+    var body = carried.map(function (v) {
       var shown = pctOf(v.share);
       var cells = [
-        num(v.tasks) + (taggable && v.tasks != null
+        intOrDash(v.tasks) + (taggable && v.tasks != null
           ? '<span class="tdb-muted">/' + taggable + "</span>" : ""),
-        num(v.f2p), num(v.repos), (shown == null ? "&mdash;" : shown)
+        intOrDash(v.f2p), intOrDash(v.repos), (shown == null ? "&mdash;" : shown)
       ].map(function (x) { return '<td class="tdb-num">' + x + "</td>"; }).join("");
       return "<tr><td><strong>" + esc(v.code) + "</strong> " + esc(v.name) + "</td>" +
         cells +
@@ -1059,12 +1072,22 @@
       var c = v.cover != null ? v.cover : (taggable ? v.tasks / taggable : 0);
       return v.tasks && c >= 0.9;
     }).map(function (v) {
-      return esc(v.code) + " " + num(v.tasks) + "/" + (taggable == null ? "&mdash;" : taggable);
+      return esc(v.code) + " " + intOrDash(v.tasks) + "/" + (taggable == null ? "&mdash;" : taggable);
     });
     var clears = axes.filter(function (v) { return v.clears; })
       .map(function (v) { return esc(v.code); });
 
     var foot = covered + " of " + axes.length + " axes carry a task. ";
+    if (empty.length) {
+      /* named, not counted: an unlisted code is indistinguishable from one
+         nobody thought to check */
+      foot += (empty.length === 1 ? "One axis carries none &mdash; " :
+        "The " + empty.length + " that carry none &mdash; ") +
+        empty.map(function (v) { return esc(v.code); }).join(", ") +
+        " &mdash; " + (empty.length === 1 ? "is" : "are") +
+        " omitted from the table above: with no task there is nothing to count " +
+        "in any column, and each fails <code>min_tasks</code>. ";
+    }
     if (clears.length && broad.length) {
       foot += clears.join(" and ") + " clear every measurable criterion &mdash; and " +
         "are the broadest labels here (" + broad.join(", ") + "), so they separate nothing.";

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Benchmark status — terminal-daily-bench</title>
 <meta name="description" content="Published terminal-daily-bench suites, task counts, languages, release status, and the integrity limits on every published number.">
-<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
-<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/tw.css?v=edae671ad0">
+<link rel="stylesheet" href="../assets/site.css?v=edae671ad0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -15,71 +15,54 @@
   <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
-      <h1 class="mb-2 font-mono text-4xl tracking-tighter">Benchmark status</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Published task catalogues, newest first.</p>
+      <h1 class="font-mono text-4xl tracking-tighter">Benchmark status</h1>
+      <p class="text-muted-foreground font-mono text-sm">Published task catalogues, newest first.</p>
 
       <div class="tdb-plain-table" id="suites" data-tdb-primary-data>
-        <p class="tdb-empty">loading suites&hellip;</p>
+        <p class="tdb-empty">Loading suites&hellip;</p>
       </div>
 
-      <!-- The status rows and the policy tables below arrived from the home
-           page, which now carries the leaderboard and nothing else. They were
-           moved rather than deleted: the scoring invariant in particular is
-           stated nowhere else on this site, and the nav already calls this
-           page "status", so this is where a reader who wants the caveat
-           behind a number is sent.
+      <!-- The status rows and the policy below arrived from the home page,
+           which now carries the leaderboard and nothing else. They were moved
+           rather than deleted: the scoring invariant in particular is stated
+           nowhere else on this site, and the nav already calls this page
+           "status", so this is where a reader who wants the caveat behind a
+           number is sent.
 
-           The standing explanation is a `key -> what it does` table now. Nine
-           paragraphs carried what six rows carry, and two of them carried it
-           twice: the release grid and the details body each explained live
-           vs. archive, and each named the Harbor fork separately. Nothing was
-           dropped in the compression -- every caveat below is the sentence
-           that shipped, moved into the cell it qualifies. -->
+           The integrity block that used to sit in this section is gone, on
+           the owner's instruction: the coral quote rule, the scoring
+           invariant, the replay-blocker ledger and the `why` link that
+           pointed here from the UNOFFICIAL badge. What remains below is not
+           disclosure -- it is an install requirement and a measured count,
+           and deleting those would have made the page wrong rather than
+           merely quieter. The one-line caveat at the foot of this section
+           still says the ranking is not certified. -->
       <section class="tdb-block" data-tdb-section="status">
         <div class="tdb-block-head">
-          <h2>status</h2>
-          <p>availability is not ranking authority</p>
+          <h2>Status</h2>
+          <p>Availability is not ranking authority</p>
         </div>
 
         <div class="tdb-statgrid" id="hp-status">
-          <p class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
+          <p class="text-muted-foreground font-mono text-sm">Loading&hellip;</p>
         </div>
       </section>
 
       <section class="tdb-block" data-tdb-section="policy">
         <div class="tdb-block-head">
-          <h2>release and scoring policy</h2>
-          <p>what publication certifies</p>
+          <h2>Release and scoring policy</h2>
+          <p>What publication certifies</p>
         </div>
 
-        <div class="tdb-plain-table">
-          <table class="w-full">
-            <thead><tr><th>release</th><th>what it does</th></tr></thead>
-            <tbody>
-              <tr><td>live</td><td class="tdb-wrap">Gold and protected tests withheld; unranked until an official replay receipt.</td></tr>
-              <tr><td>archive</td><td class="tdb-wrap">Gold, protected tests and artifacts published in full.</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <dl class="tdb-defs">
+          <dt>live</dt>
+          <dd>Gold and protected tests withheld; unranked until an official replay receipt.</dd>
+          <dt>archive</dt>
+          <dd>Gold, protected tests and artifacts published in full.</dd>
+        </dl>
 
-        <div class="tdb-integrity" id="integrity" data-tdb-integrity>
-          <p><span class="font-medium">Scoring invariant.</span> Protected tests decide published scores: deterministic code re-lays and executes them; a claimed reward never is.</p>
-          <details data-tdb-integrity-details>
-            <summary>integrity limits and current blockers</summary>
-            <div class="tdb-plain-table mb-6">
-              <table class="w-full">
-                <thead><tr><th>blocker</th><th>state</th></tr></thead>
-                <tbody>
-                  <tr><td>protected replay</td><td class="tdb-wrap">A paired staged-SIF egress canary passed on 2026-08-06; no production protected replay has run.</td></tr>
-                  <tr><td>receipt authority</td><td class="tdb-wrap"><span class="text-foreground">active=false</span>, one collaborator. Publication runs off a <a href="../guide/submission/#operator-replay">code-controlled allowlist</a>; self-signed report/matrix pins cannot approve themselves.</td></tr>
-                  <tr><td>local runs</td><td class="tdb-wrap">Need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</td></tr>
-                  <tr><td>report</td><td class="tdb-wrap" id="hp-data-note">&mdash;</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </details>
-          <p class="text-muted-foreground"><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only.</p>
-        </div>
+        <p>Local runs need the unpublished patched Harbor fork; stock Harbor 0.13.1 is insufficient.</p>
+        <p><span class="text-foreground">false_accept = <span data-tdb-fa>&mdash;</span></span> completed gate decisions only.</p>
 
         <p class="tdb-block-foot">No certified ranking; semantic false-accept is unmeasured.</p>
       </section>
@@ -88,7 +71,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/site.js?v=edae671ad0" data-root=".." data-page="benchmarks"></script>
 <script>
 (function () {
   "use strict";
@@ -274,21 +257,21 @@
         : plural(composition.total, "labelled task", "labelled tasks") +
           " across the whole catalogue");
     var stats = [
-      ["latest catalogue suite", latest.id, "published task list"],
+      ["Latest catalogue suite", latest.id, "Published task list"],
       /* Was "catalogue tasks", which named the catalogue while counting one
          suite -- the word collision that made the difficulty split below it
          look like it contradicted the row above. */
-      ["tasks in latest suite", latest.n_tasks, latest.status === "live" ? "gold withheld" : "released"],
-      ["tasks by declared difficulty", composition && composition.text,
-        composition ? "editorial label from task.toml over " + compScope + ", not measured"
-                    : "no declared difficulty is published in the catalogue"],
-      ["formal roster", input.frozen_task_roster_n != null
-        ? input.frozen_task_roster_n + "/50" : "not frozen", "exactly 50 required"],
-      ["official ranking", ratings.length ? "published" : "unranked",
-        ratings.length ? ratings.length + " publishable models" : "measured, not certified"],
-      ["accepted outcomes", input.successful_records_admitted_to_outcomes,
+      ["Tasks in latest suite", latest.n_tasks, latest.status === "live" ? "Gold withheld" : "Released"],
+      ["Tasks by declared difficulty", composition && composition.text,
+        composition ? "Editorial label from task.toml over " + compScope + ", not measured"
+                    : "No declared difficulty is published in the catalogue"],
+      ["Formal roster", input.frozen_task_roster_n != null
+        ? input.frozen_task_roster_n + "/50" : "not frozen", "Exactly 50 required"],
+      ["Official ranking", ratings.length ? "published" : "unranked",
+        ratings.length ? ratings.length + " publishable models" : "Measured, not certified"],
+      ["Accepted outcomes", input.successful_records_admitted_to_outcomes,
         "SUCCESS + score_accepted=true only"],
-      ["receipt authority", "inactive", "active=false \u00b7 one collaborator"]
+      ["Receipt authority", "inactive", "active=false \u00b7 one collaborator"]
     ];
     set("hp-status", stats.map(function (s) { return statRow(s[0], s[1], s[2]); }).join(""));
 
@@ -299,13 +282,6 @@
         ? String(board.total_fa) + "/" + String(board.total_fa_n) : "\u2014";
     }
 
-    if (ratings.length) {
-      set("hp-data-note", "A trusted td-relative-capability-v3 report is published.");
-    } else if (scoring.legacy_snapshot_present || (board && board.leaderboard)) {
-      set("hp-data-note", "A legacy diagnostic snapshot exists but is not ranking authority and is not displayed.");
-    } else {
-      set("hp-data-note", "No certified 50-task relative-capability report is published.");
-    }
   }
 
   T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(function (data) {

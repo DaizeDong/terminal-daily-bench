@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tasks — terminal-daily-bench</title>
 <meta name="description" content="Search the published terminal-daily-bench task catalogue. Catalogue membership is not a score.">
-<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
-<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/tw.css?v=edae671ad0">
+<link rel="stylesheet" href="../assets/site.css?v=edae671ad0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -26,68 +26,86 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><path d="m9 18 6-6-6-6"></path></svg>
           </li>
           <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5">
-            <span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">tasks</span>
+            <span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Tasks</span>
           </li>
         </ol>
       </nav>
 
-      <h1 class="mb-2 font-mono text-4xl tracking-tighter">Tasks</h1>
-      <p class="text-muted-foreground mb-6 font-mono text-sm">Search the published catalogue.</p>
+      <h1 class="text-4xl tracking-tighter">Tasks</h1>
+      <p class="tdb-lede">Search the published catalogue. Catalogue membership is not a score.</p>
 
-      <!-- catalogue summary in the Terminal Daily metric-card system -->
-      <div class="-mx-4 mb-6 flex flex-col sm:mx-0">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="tdb-stats"></div>
-      </div>
+      <!-- Seven bordered cards, 123px tall each, carried seven numbers and
+           seven qualifiers. The site already has a shape for exactly that --
+           label, value, qualifier, one line each -- and every task page uses
+           it. Same seven figures, same seven qualifiers, no boxes. -->
+      <div id="tdb-stats-host"><div class="tdb-statgrid" id="tdb-stats"></div></div>
 
-      <p class="text-muted-foreground mb-6 font-mono text-sm" data-tdb-integrity>
+      <p>
         <span class="text-foreground">live</span> withholds gold and protected tests,
         <span class="text-foreground">archive</span> publishes them; both need the <a class="hover:text-foreground underline underline-offset-4" href="../guide/">unpublished patched Harbor fork</a>.
       </p>
 
-      <!-- ==================== filterable table ==================== -->
-      <div class="-mx-4 flex flex-col md:mx-0" data-tdb-primary-data>
+      <!-- One column left this page and it was not deleted: LANGUAGE was
+           published on exactly the archive tasks and empty on exactly the live
+           ones, so as a column it drew a second copy of the status column
+           beside the status column. It is printed on every row inside
+           Publication. OFFICIAL SOLVES stays, dashes and all, with the
+           sentence that says what its dash means -- a column of dashes plus
+           that sentence is a disclosure; a missing column is not. -->
+      <p>Publication carries status and language on one line, as each task page
+        prints them. Language is published on the archive tasks and withheld on
+        the live ones, so it separates exactly what status already separates.
+        Difficulty is the author&rsquo;s editorial label in
+        <code>task.toml</code>, not a measurement.
+        Not a score: a dash under <span class="text-foreground">Official
+        solves</span> means awaiting formal coverage, not zero solves &mdash;
+        no official ranking has been computed, so the field is unpublished for
+        every task in the catalogue, which is not the same as zero.</p>
 
-        <div class="flex flex-col">
-          <div class="flex min-h-10 items-center justify-between px-4 py-1 md:px-0">
-            <p class="text-muted-foreground hidden font-mono text-sm sm:block" id="tdb-count">loading catalogue&hellip;</p>
-            <div class="flex min-w-0 flex-wrap-reverse items-center justify-end gap-1" id="tdb-quick"></div>
-          </div>
+      <!-- ==================== filterable table ====================
+           One instrument: a bar carrying the search and the count, a rail of
+           filters, the table. It was four stacked boxes, each with its own
+           border and its own bleed-past-the-gutter negative margin; the
+           search alone was a 57px-tall field styled like nothing else on the
+           site. The shell parts are the shipped hooks -- the stylesheet owns
+           every edge and every distance below. -->
+      <div class="tdb-shell" data-tdb-primary-data>
 
-          <div class="bg-card -mb-px border-y md:border-x">
-            <div class="relative flex h-[57px]">
-              <input type="text" data-slot="input" id="tdb-q"
-                     class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input flex py-1 transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 bg-card dark:bg-card h-full w-full min-w-0 rounded-none border-0 px-4 font-mono text-base shadow-none focus-visible:ring-0 sm:text-sm"
-                     placeholder="Search tasks by id, repo, title or PR number" autocomplete="off" spellcheck="false" value="">
-              <button data-slot="button" data-variant="ghost" data-size="icon" id="tdb-clear" type="button" aria-label="Clear search"
-                      class="shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 hover:bg-accent dark:hover:bg-accent/50 size-9 text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 h-full w-12 rounded-none shadow-none hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-              </button>
-            </div>
+        <div class="tdb-shell-bar">
+          <div class="tdb-shell-search relative">
+            <label class="sr-only" for="tdb-q">Search tasks</label>
+            <input type="text" data-slot="input" id="tdb-q"
+                   placeholder="Search id, repo, title, PR" autocomplete="off" spellcheck="false" value="">
+            <button data-slot="button" id="tdb-clear" type="button" aria-label="Clear search"
+                    class="absolute inset-y-0 items-center justify-center text-muted-foreground hover:text-foreground hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide size-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
           </div>
-
-          <div class="bg-card -mb-px border-y font-mono md:border-x" id="tdb-facet-box" hidden>
-            <div class="flex flex-wrap items-center gap-1 px-4 py-3" id="tdb-facets"></div>
-            <!-- The capability taxonomy gets its own row rather than being mixed
-                 into the flat rail above: it is a fourteen-axis map of the whole
-                 declared taxonomy, not another handful of values, and reading it
-                 as a map is the point. Its label and its chips are painted from
-                 ../data/capability.json; the row stays hidden when that file
-                 could not be read, because fourteen chips reading zero and a
-                 catalogue that covers nothing look identical. -->
-            <div class="flex flex-wrap items-center gap-1 border-t px-4 py-3" id="tdb-caps" hidden></div>
-            <div class="px-4 pb-3" id="tdb-facet-note"></div>
-          </div>
+          <p class="text-muted-foreground text-sm" id="tdb-count">Loading catalogue&hellip;</p>
         </div>
 
-        <div class="bg-card border-y font-mono md:border-x">
+        <div class="tdb-shell-rail" id="tdb-facet-box" hidden>
+          <div class="flex flex-wrap items-center gap-1 px-4 py-3" id="tdb-facets"></div>
+          <!-- The capability taxonomy gets its own row rather than being mixed
+               into the rail above: it is a fourteen-axis map of the whole
+               declared taxonomy, not another handful of values, and reading it
+               as a map is the point. Its label and its chips are painted from
+               ../data/capability.json; the row stays hidden when that file
+               could not be read, because fourteen chips reading zero and a
+               catalogue that covers nothing look identical. -->
+          <div class="flex flex-wrap items-center gap-1 px-4 py-3" id="tdb-caps" hidden></div>
+          <div class="px-4 pb-3" id="tdb-facet-note"></div>
+        </div>
+
+        <div class="tdb-shell-body">
           <div data-slot="table-container" class="relative w-full overflow-x-auto">
-            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b">
-                <tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent" id="tdb-head"></tr>
+            <table data-slot="table" class="w-full caption-bottom text-sm">
+              <thead data-slot="table-header">
+                <tr data-slot="table-row" id="tdb-head"></tr>
               </thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="tdb-rows">
-                <tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6">
-                  <td data-slot="table-cell" colspan="9" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
+              <tbody data-slot="table-body" id="tdb-rows">
+                <tr data-slot="table-row">
+                  <td data-slot="table-cell" colspan="8" class="p-2 align-middle py-4 text-base text-muted-foreground">loading&hellip;</td>
                 </tr>
               </tbody>
             </table>
@@ -97,13 +115,11 @@
         <div id="tdb-none" hidden></div>
       </div>
 
-      <p class="text-muted-foreground mt-6 font-mono text-sm">Not a score: a dash under <span class="text-foreground">Official solves</span> means awaiting formal coverage, not zero solves.</p>
-
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="registry"></script>
+<script src="../assets/site.js?v=edae671ad0" data-root=".." data-page="registry"></script>
 <script>
 (function () {
   "use strict";
@@ -116,39 +132,33 @@
   }
 
   /* Shared table primitives; Terminal Daily presentation lives in site.css. */
-  var TH = "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
-           "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
-  var TD = "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
-           "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
-  var TR = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6 cursor-pointer";
+  var TH = "text-foreground px-2 align-middle whitespace-nowrap py-3 text-base";
+  var TD = "p-2 align-middle whitespace-nowrap py-4 text-base";
+  var TR = "hover:bg-muted/50 transition-colors cursor-pointer";
 
-  var SORT_BTN = "inline-flex shrink-0 items-center justify-center font-medium whitespace-nowrap " +
-    "transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] " +
-    "focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 " +
-    "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 " +
-    "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 gap-1.5 " +
-    "rounded-md px-3 has-[>svg]:px-2.5 text-base";
-
-  var CHIP = "inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium " +
-    "whitespace-nowrap transition-all outline-none focus-visible:border-ring " +
-    "focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none " +
-    "disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 " +
-    "[&_svg:not([class*='size-'])]:size-4 border h-8 px-3 ";
-  var CHIP_OFF = CHIP + "bg-background text-muted-foreground hover:bg-accent " +
-    "hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50";
-  var CHIP_ON = CHIP + "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80";
-
-  var BADGE = "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden font-mono ";
-  var BADGE_PRIMARY   = BADGE + "border-transparent bg-primary text-primary-foreground";
-  var BADGE_SECONDARY = BADGE + "border-transparent bg-secondary text-secondary-foreground";
-  var BADGE_OUTLINE   = BADGE + "text-foreground";
+  /* ONE badge rule, and it draws no box. This page hydrated 302 bordered
+     chips carrying, between them, about six facts: `python` 37 times in a
+     catalogue whose own summary reads LANGUAGES 1, `archive` 37 times in a
+     column headed Status, an axis code per cell. The task pages already print
+     the same labels as plain uppercase text -- ARCHIVE PYTHON HARD -- so the
+     table prints them that way too: 61 spans for the publication line, and
+     axis codes set in the identifier face rather than dressed as badges.
+     Nothing below asks for a colour class; the stylesheet decides what a
+     label looks like. */
 
   var LINK = "hover:underline hover:underline-offset-4";
+
+  /* A chip is a rectangle you press, 32px tall like the search field beside
+     it. The selected state used to be `bg-secondary`, which the stylesheet
+     reads as a page-level button and gives min-height 3rem: measured, the
+     pressed chip stood 48px tall in a rail of 32px chips and the rail grew
+     16px on every click. Nothing here names a bg-* colour. The focus ring is
+     the site's one global button:focus-visible outline. */
+  var CHIP = "inline-flex shrink-0 items-center h-8 px-3 border text-sm " +
+    "whitespace-nowrap transition-colors disabled:pointer-events-none " +
+    "disabled:opacity-50 ";
+  var CHIP_OFF = CHIP + "text-muted-foreground hover:text-foreground";
+  var CHIP_ON  = CHIP + "text-foreground font-medium";
   var SVG_OPEN = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" ' +
     'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" class="lucide">';
@@ -159,27 +169,56 @@
 
   /* ---------------------------------------------------------------------
      columns
-     --------------------------------------------------------------------- */
+
+     Nine columns measured 2372px inside a 1214px container: two thirds of the
+     table was off-screen at 1440, and a reader had to scroll sideways to find
+     out that six of the nine said almost nothing.
+
+     STATUS AND LANGUAGE BECAME ONE COLUMN. Language is published on exactly
+     the 37 archive tasks and empty on exactly the 24 live ones -- so as a
+     column of its own it drew a second copy of the status column, beside the
+     status column. They are one cell now, printed the way every task page
+     prints them, and both values still appear on every row, which is what the
+     two facet groups filtering on them require. A withheld language is an em
+     dash: not published, not "no language".
+
+     WHAT IS NOT MERGED. Difficulty keeps its own column because the facet rail
+     filters on `declared_difficulty` and a filter for an attribute the table
+     never renders is a dead end. Official solves keeps its own column although
+     it is an em dash on all 61 rows -- `n_models` is 0 and `solved_by` null
+     while no official ranking is published -- because a column of dashes with
+     a sentence under the table saying what the dash means is a disclosure, and
+     a missing column is not. Both of those are pinned by
+     tests/test_leaderboard_frontend.py; do not "simplify" either away without
+     reading it.
+
+     THE REST OF THE 1158px. Nine columns measured 2372px inside a 1214px
+     container: two thirds of the table was off-screen at 1440. Most of it was
+     not columns at all -- an untruncated PR subject made the Task column 752px
+     on its own, every header button carried 24px of padding it then pulled
+     back out with a negative margin, and the first and last cells took a 24px
+     inset. None of that was data.
+
+     `right` is a claim about the data: F2P and official solves are counts and
+     are flush right in the header and in every row; the rest are names and
+     stay flush left. The header takes its side from this flag, so head and
+     body cannot disagree -- they did, on both numeric columns, whose buttons
+     centred their labels over right-aligned digits. */
   var COLS = [
-    { key: "id",       label: "Task",      align: "left"  },
-    { key: "repo",     label: "Repo",      align: "left"  },
-    { key: "language", label: "Language",  align: "left"  },
-    { key: "suite",    label: "Suite",     align: "left"  },
-    { key: "status",   label: "Status",    align: "left"  },
-    /* The facet rail filters on `declared_difficulty`; without a column for
-       it, clicking "hard 43" returned 43 rows in which nothing said "hard".
-       This is the EDITORIAL label from task.toml -- deliberately not the
-       measured `difficulty`, which is "" on every task while no official
-       ranking is published, and which gets its own column the day one is. */
-    { key: "declared", label: "Difficulty", align: "left"  },
+    { key: "id",         label: "Task",        right: false },
+    { key: "repo",       label: "Repo",        right: false },
+    { key: "suite",      label: "Suite",       right: false },
+    { key: "publication", label: "Publication", right: false },
+    { key: "declared",   label: "Difficulty",  right: false },
     /* The capability rail filters on a SET-valued label, so it gets a column
-       for the same reason `declared` did: a filter for an attribute the table
-       never renders is a dead end. The cell distinguishes three states that a
-       single dash would flatten -- axes matched, no axis matched, and not
-       taggable at all -- see `capCell`. */
-    { key: "capability", label: "Capability", align: "left"  },
-    { key: "f2p",      label: "F2P Tests", align: "right" },
-    { key: "solved",   label: "Official Solves", align: "right" }
+       for the same reason: the cell distinguishes three states that a single
+       dash would flatten -- axes matched, no axis matched, and not taggable
+       at all. */
+    { key: "capability", label: "Capability",  right: false },
+    /* "F2P", not "F2P tests": the header was the widest thing in its own
+       column. The expansion is on the summary line above the table. */
+    { key: "f2p",        label: "F2P",         right: true  },
+    { key: "solved",     label: "Official Solves", right: true }
   ];
 
   var rowsEl  = document.getElementById("tdb-rows");
@@ -187,7 +226,6 @@
   var countEl = document.getElementById("tdb-count");
   var noneEl  = document.getElementById("tdb-none");
   var statsEl = document.getElementById("tdb-stats");
-  var quickEl = document.getElementById("tdb-quick");
   var facetEl = document.getElementById("tdb-facets");
   var facetBox = document.getElementById("tdb-facet-box");
   var capEl    = document.getElementById("tdb-caps");
@@ -195,10 +233,10 @@
   var qEl     = document.getElementById("tdb-q");
   var clearEl = document.getElementById("tdb-clear");
 
-  /* A quiet empty-state panel; `edges` selects its boundary treatment. */
-  function emptyBlock(html, edges) {
-    return '<div class="tdb-panel bg-card ' + (edges || "border-b") + ' px-6 py-8 text-sm ' +
-      'text-muted-foreground md:border-x">' + html + "</div>";
+  /* A quiet empty state. It draws no box of its own: the shell it sits in
+     already owns the edges. */
+  function emptyBlock(html) {
+    return '<div class="px-4 py-6 text-sm text-muted-foreground">' + html + "</div>";
   }
 
   /* Two independent reads, each with its own banner. The capability label set
@@ -230,10 +268,8 @@
       document.querySelector("[data-slot=table-container]").parentNode.hidden = true;
       noneEl.hidden = false;
       noneEl.innerHTML = emptyBlock(
-        "<p>No task catalogue published yet.</p>" +
-        "<p>Run <span class=\"text-foreground\">tdb publish</span> " +
-        "to generate <span class=\"text-foreground\">site_data.json</span> at the site root.</p>",
-        "border-y");
+        "<p>No task catalogue published yet. Run <code>tdb publish</code> " +
+        "to generate <code>site_data.json</code> at the site root.</p>");
       statsEl.parentNode.hidden = true;
       return;
     }
@@ -321,9 +357,11 @@
     });
 
     /* ---- summary ---- */
-    var suiteSet = {}, langs = {}, diffs = {}, declared = {}, live = 0, f2p = 0, scoredTasks = 0;
+    var suiteSet = {}, langs = {}, diffs = {}, declared = {}, statuses = {};
+    var live = 0, f2p = 0, scoredTasks = 0;
     tasks.forEach(function (t) {
       T.taskSuites(t).forEach(function (sid) { suiteSet[sid] = 1; });
+      if (t.status) statuses[t.status] = (statuses[t.status] || 0) + 1;
       if (t.language) langs[t.language] = (langs[t.language] || 0) + 1;
       if (t.difficulty) diffs[t.difficulty] = (diffs[t.difficulty] || 0) + 1;
       /* EDITORIAL label from task.toml. Distinct from t.difficulty, which is
@@ -342,37 +380,29 @@
        withholds, that the f2p tests are re-laid rather than trusted from the
        workspace, and whether the coverage figure is bound to a formal matrix. */
     var stats = [
-      ["tasks",                tasks.length,                          "one merged PR each"],
-      ["suites",               Object.keys(suiteSet).length || 1,     "one sealed suite per day"],
-      ["languages",            Object.keys(langs).length || null,     "across the catalogue"],
-      ["live now",             live,                                  "gold withheld until replay"],
-      ["protected f2p tests",  f2p || null,                           "re-laid over the workspace"],
-      ["official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
-        scoredTasks ? "bound to the formal matrix" : "no official matrix published"]
+      ["Tasks",                tasks.length,                          "One merged PR each"],
+      ["Suites",               Object.keys(suiteSet).length || 1,     "One sealed suite per day"],
+      ["Languages",            Object.keys(langs).length || null,     "Across the catalogue"],
+      ["Live now",             live,                                  "Gold withheld until replay"],
+      ["Protected f2p tests",  f2p || null,           "Fail-to-pass, re-laid over the workspace"],
+      ["Official score coverage", scoredTasks ? scoredTasks + "/" + tasks.length : null,
+        scoredTasks ? "Bound to the formal matrix" : "No official matrix published"]
     ];
     /* Only when the label set was read. With `cap` null the honest statement
        is the banner at the top of the page, not a card reading 0/0. */
     if (cap && axes.length) {
-      stats.push(["capability axes", axesReDerived + "/" + axes.length,
-                  "re-derived on a published package"]);
+      stats.push(["Capability axes", axesReDerived + "/" + axes.length,
+                  "Re-derived on a published package"]);
     }
 
+    /* Label, figure, qualifier -- one line each, in the same three-column row
+       every task page uses for the same job. Seven cards of 123px became seven
+       lines in two columns; not one figure and not one qualifier was cut. */
     statsEl.innerHTML = stats.map(function (s) {
-      return '<div data-slot="card" class="tdb-card bg-card text-card-foreground flex flex-col gap-6 ' +
-        'border py-0 transition-all duration-200">' +
-        '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
-          '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
-            'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
-            'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
-            '<p class="text-muted-foreground font-mono text-sm sm:text-xs">' + esc(s[0]) + "</p>" +
-            '<p data-tdb-stat-value class="line-clamp-1 font-mono text-xl font-medium tabular-nums">' +
-              (s[1] == null ? "&mdash;" : esc(s[1])) + "</p>" +
-          "</div>" +
-          '<div data-slot="card-content" class="px-6">' +
-            '<p class="text-muted-foreground font-mono text-sm">' +
-              esc(s[2]) + "</p>" +
-          "</div>" +
-        "</div></div>";
+      return '<div class="tdb-statrow"><span class="tdb-statrow-k">' + esc(s[0]) +
+        '</span><p data-tdb-stat-value class="tdb-statrow-v">' +
+        (s[1] == null ? "&mdash;" : esc(s[1])) +
+        '</p><span class="tdb-statrow-n">' + esc(s[2]) + "</span></div>";
     }).join("");
 
     /* ---- filter state ---- */
@@ -380,7 +410,7 @@
        and the row predicate can never drift out of step. Adding `capability`
        by hand to four of those five places is exactly how a facet ends up
        filtering nothing while its chip still lights up. */
-    var GROUPS = ["language", "difficulty", "status", "declared", "capability"];
+    var GROUPS = ["status", "language", "difficulty", "declared", "capability"];
 
     function blankState() {
       var fresh = { q: "" };
@@ -476,31 +506,33 @@
       noteEl.innerHTML = html;
     }
 
+    /* One rail, one code path. The status chips used to live in a separate
+       strip above the search under their own id, painted by their own two
+       hand-written lines; they are a facet group like the other three and are
+       painted by the same loop now. Each group is announced by its name, so
+       nineteen buttons in a row read as four questions rather than as
+       nineteen unrelated controls. */
+    function group(name, label, values) {
+      if (!values.length) { return ""; }
+      var out = '<span class="tdb-facet-label">' + esc(label) + "</span>";
+      values.forEach(function (v) {
+        var n = looCount(name, v);
+        out += chip(name, v, v + " " + n, state[name] === v, { disabled: n === 0 });
+      });
+      return out;
+    }
+
     function paintFilters() {
-      var quick = chip("status", "live", "live " + looCount("status", "live"),
-                       state.status === "live") +
-                  chip("status", "archive", "archive " + looCount("status", "archive"),
-                       state.status === "archive");
+      var facets =
+        group("status", "status", byCount(statuses)) +
+        group("language", "language", byCount(langs)) +
+        group("difficulty", "measured difficulty", byCount(diffs)) +
+        group("declared", "declared difficulty", byCount(declared));
       var dirty = !!state.q || GROUPS.some(function (g) { return !!state[g]; });
       if (dirty) {
-        quick += '<button type="button" data-slot="button" id="tdb-reset" class="' +
+        facets += '<button type="button" data-slot="button" id="tdb-reset" class="' +
           CHIP_OFF + '">reset</button>';
       }
-      quickEl.innerHTML = quick;
-
-      var facets = "";
-      byCount(langs).forEach(function (l) {
-        facets += chip("language", l, l + " " + looCount("language", l),
-                       state.language === l);
-      });
-      byCount(diffs).forEach(function (d) {
-        facets += chip("difficulty", d, d + " " + looCount("difficulty", d),
-                       state.difficulty === d);
-      });
-      byCount(declared).forEach(function (d) {
-        facets += chip("declared", d, d + " " + looCount("declared", d),
-                       state.declared === d);
-      });
       facetEl.innerHTML = facets;
 
       /* Taxonomy order, not count order. This row is a coverage map of the
@@ -510,7 +542,7 @@
          visible. */
       var caps = "";
       if (cap && axes.length) {
-        caps = '<span class="text-muted-foreground shrink-0 text-sm">capability</span>';
+        caps = '<span class="tdb-facet-label">capability</span>';
         axes.forEach(function (a) {
           if (!a || !a.code) return;
           var n = looCount("capability", a.code);
@@ -549,9 +581,8 @@
         qEl.focus();
       }
     }
-    quickEl.addEventListener("click", onChipClick);
     facetEl.addEventListener("click", onChipClick);
-    /* The capability rail is a THIRD chip host. Without this line its chips
+    /* The capability rail is a SECOND chip host. Without this line its chips
        painted their counts, took their aria-pressed state and did nothing:
        every click left all 61 rows on screen. */
     capEl.addEventListener("click", onChipClick);
@@ -564,21 +595,24 @@
       qEl.value = ""; state.q = ""; render(); qEl.focus();
     });
 
-    /* ---- header ---- */
+    /* ---- header ----
+       The site's one sort control: an uppercase micro label with a direction
+       glyph, no box, no padding of its own, and no negative margin pulling it
+       back out of the padding it was given. It sits on the same side as the
+       data under it -- which is the fix for the two numeric columns whose
+       button centred its label over right-aligned digits. */
     function paintHead() {
       headEl.innerHTML = COLS.map(function (c) {
         var active = sort.key === c.key;
         var icon = !active ? I_UPDOWN : (sort.dir === "asc" ? I_UP : I_DOWN);
-        var wrap = c.align === "right" ? "flex justify-end" : "flex";
-        var btn = SORT_BTN + (c.align === "right" ? "" : " -ml-3");
         return '<th data-slot="table-head" class="' + TH + '" aria-sort="' +
           (active ? (sort.dir === "asc" ? "ascending" : "descending") : "none") + '">' +
-          '<div class="' + wrap + '">' +
-            '<button data-slot="button" data-variant="ghost" data-size="sm" type="button" ' +
-              'data-sort="' + c.key + '" aria-label="Sort ' + esc(c.label) + '" class="' + btn + '">' +
-              esc(c.label) + icon +
+          '<span class="tdb-sort-wrap" data-align="' + (c.right ? "right" : "left") + '">' +
+            '<button type="button" class="tdb-sort" data-sort="' + c.key + '"' +
+              (active ? ' data-active="true"' : "") +
+              ' aria-label="Sort by ' + esc(c.label) + '">' + esc(c.label) + icon +
             "</button>" +
-          "</div></th>";
+          "</span></th>";
       }).join("");
     }
     headEl.addEventListener("click", function (ev) {
@@ -594,6 +628,7 @@
     tasks.forEach(function (t) {
       t._f2p = (t.n_fail_to_pass == null) ? -1 : Number(t.n_fail_to_pass);
       t._solved = (typeof t.solved_by === "number") ? t.solved_by : -1;
+      t._pub = [t.status || "", t.language || ""].join(" ");
       /* Three states, never two. `rederived` means the tagger read this
          package's own oracle patch; its verdict is a fact about the package,
          and the empty verdict is one of the things it can say. `declared`
@@ -619,102 +654,146 @@
               (t.pr_number != null ? "#" + t.pr_number : "")].join(" ").toLowerCase();
     });
 
+    /* One accessor per COLUMN, not per field. `publication` carries three
+       labels, so it sorts on the three in the order they are printed --
+       status, then language, then declared difficulty -- which is the order a
+       reader scanning the column is already reading them in. */
     function sortVal(t, k) {
       if (k === "f2p") return t._f2p;
       if (k === "solved") return t._solved;
       if (k === "id") return String(t.id || "");
       if (k === "suite") return T.taskSuites(t).join(" ");
+      if (k === "publication") return t._pub;
       if (k === "declared") return String(t.declared_difficulty || "");
       if (k === "capability") return t._capSort;
       return String(t[k] || "");
     }
 
-    /* ---- one row ---- */
+    /* ---- one row ----
+       Nothing between a <td> and its value. Every cell used to hold a <p>
+       carrying the alignment and the colour -- nine per row, 549 of them on a
+       61-row catalogue, not one of them a paragraph and not one saying
+       anything the <td> could not say itself. The alignment lives on the cell
+       now, which is the element the header is aligned from, so a column cannot
+       be flush right in the body and centred in the head.
+
+       The eight cells are written out one by one rather than mapped from COLS.
+       That is deliberate: tests/test_leaderboard_frontend.py counts the <td>
+       literals here and compares the count with COLS, which is how a column
+       added to the header without a cell under it gets caught. */
     function row(t) {
       var href = "./" + encodeURIComponent(t.id) + "/";
-      var idCell = '<a class="' + LINK + '" href="' + esc(href) + '">' +
+      var idCell = '<a class="tdb-id ' + LINK + '" href="' + esc(href) + '">' +
         esc(t.id) + "</a>";
+      /* Bounded and clipped. Untruncated titles made this column 752px wide on
+         its own -- a third of the whole table -- and the full sentence is the
+         <h2> of the page this link opens. The bound is 13rem, which is just
+         under the width of the task id above it, so the column is sized by the
+         identifier rather than by whichever PR had the longest subject. */
       var title = t.title
-        ? '<span class="text-muted-foreground block text-sm">' + esc(t.title) + "</span>"
+        ? '<span class="text-muted-foreground block max-w-52 truncate text-sm" title="' +
+          esc(t.title) + '">' + esc(t.title) + "</span>"
         : "";
 
+      /* Bounded like the title above it, and for the same reason: six of the
+         45 upstream repositories are long enough to set this column's width
+         for the other 39. The full name is the link's own title, the link goes
+         to it, and each task page prints it in full under Source. */
       var repoUrl = t.repo ? "https://github.com/" + t.repo : null;
       var repo = repoUrl
-        ? '<a class="' + LINK + '" href="' + esc(repoUrl) + '" target="_blank" ' +
-          'rel="noopener noreferrer">' + esc(t.repo) + "</a>"
+        ? '<a class="block max-w-52 truncate ' + LINK + '" href="' + esc(repoUrl) +
+          '" target="_blank" rel="noopener noreferrer" title="' + esc(t.repo) + '">' +
+          esc(t.repo) + "</a>"
         : DASH;
+      /* The link IS the second line; it does not need a <span> around it to
+         become one. */
       var pr = (t.pr_number != null)
-        ? '<span class="text-muted-foreground block text-sm sm:text-xs">' + (repoUrl
-            ? '<a class="' + LINK + '" href="' + esc(repoUrl) + "/pull/" +
-              encodeURIComponent(t.pr_number) + '" target="_blank" rel="noopener noreferrer">PR #' +
-              esc(t.pr_number) + "</a>"
-            : "PR #" + esc(t.pr_number)) + "</span>"
+        ? (repoUrl
+            ? '<a class="text-muted-foreground block text-sm ' + LINK + '" href="' +
+              esc(repoUrl) + "/pull/" + encodeURIComponent(t.pr_number) +
+              '" target="_blank" rel="noopener noreferrer">PR #' + esc(t.pr_number) + "</a>"
+            : '<span class="text-muted-foreground block text-sm">PR #' +
+              esc(t.pr_number) + "</span>")
         : "";
 
-      var lang = t.language
-        ? '<span data-slot="badge" class="' + BADGE_OUTLINE + '">' + esc(t.language) + "</span>"
-        : DASH;
-
+      /* Stacked, not comma-joined. Four of the 61 tasks are in two suites, and
+         joining them put the widest cell in the catalogue -- "sample,
+         sample-live" -- in charge of a column the other 57 rows fill with one
+         date. The cell is already two lines tall wherever a task has a title. */
       var suiteIds = T.taskSuites(t);
       var suite = suiteIds.length ? suiteIds.map(function (sid) {
-        return '<a class="' + LINK + '" href="../benchmarks/' + encodeURIComponent(sid) +
+        return '<a class="block ' + LINK + '" href="../benchmarks/' + encodeURIComponent(sid) +
           '/">' + esc(sid) + "</a>";
-      }).join(", ") : DASH;
+      }).join("") : DASH;
 
-      var status = (t.status === "live")
-        ? '<span data-slot="badge" class="' + BADGE_PRIMARY + '">live</span>'
-        : '<span data-slot="badge" class="' + BADGE_SECONDARY + '">archive</span>';
-      /* Was `t.difficulty` appended into the Status cell -- the MEASURED
-         field, which is "" on all 61 tasks until an official ranking
-         publishes, so the badge was never emitted and the difficulty facet
-         filtered on a value the table never showed. */
-      var declared = t.declared_difficulty
-        ? '<span data-slot="badge" class="' + BADGE_OUTLINE + '" ' +
-          'title="declared by the task author in task.toml; not measured">' +
-          esc(t.declared_difficulty) + "</span>"
-        : DASH;
+      /* Status and language, the way each task page prints them, in one
+         cell. Status is the genuine state and takes the full ink; language
+         is a label and stays muted beside it -- which is the whole of what
+         the badge around them used to say. A withheld language is an em
+         dash -- a live package publishes none -- and that dash is the same
+         tri-state the rest of the site uses: not published, not "no
+         language". */
+      var pub = '<span class="font-medium">' + esc(t.status) + "</span> " +
+        '<span class="text-muted-foreground">' +
+        (t.language ? esc(t.language) : "&mdash;") + "</span>";
 
+      /* Plain text, not a chip: the word IS the column, which is headed
+         Difficulty, and a badge around it marked no state the column did not
+         already declare. The 122 chips left on this page after the capability
+         codes were plain-texted were these and the publication cell, 61 each.
+
+         The EDITORIAL label from task.toml, and never `t.difficulty`, which is
+         the MEASURED field: "" on all 61 tasks while no official ranking
+         publishes, so a cell rendered from it showed nothing while the facet
+         chip beside it filtered on something. */
+      var declared = t.declared_difficulty ? esc(t.declared_difficulty) : DASH;
+
+      /* On its own line. Beside the codes it was the widest thing in the
+         column and set the width for all 61 rows; under them it costs nothing,
+         because every row is already two lines tall. It stays VISIBLE either
+         way: it is the difference between an axis re-derived from a package
+         and an axis the task author merely claimed. */
       var capSuffix = (t._capState === "declared")
-        ? '<span class="text-muted-foreground text-sm">declared</span>' : "";
+        ? '<span class="block text-muted-foreground text-sm">declared</span>' : "";
       var caps;
       if (t._capState === "unread") {
         caps = DASH;
       } else if (t._caps.length) {
+        /* An axis code is an identifier, so it is set in the identifier face
+           and not dressed as a badge: 143 of this page's 302 badge elements
+           were codes restating a column already headed Capability. */
         caps = t._caps.map(function (code) {
-          return '<span data-slot="badge" class="' + BADGE_OUTLINE + '" title="' +
+          return '<span class="tdb-id" title="' +
             esc(capTitle(code)) + (t._capState === "declared"
               ? " (declared in task.toml by the task author; not re-derived, "
                 + "because this package withholds the oracle patch)"
               : " (re-derived from the oracle patch of this package)") +
             '">' + esc(code) + "</span>";
-        }).join("") + capSuffix;
+        }).join(" ") + capSuffix;
       } else {
         caps = '<span class="text-muted-foreground text-sm" title="the tagger ran ' +
           'and no axis in the taxonomy matched">no axis</span>';
       }
 
+      /* A dash, never a zero. `n_models` is 0 and `solved_by` null on every
+         published task while no official ranking exists, so the honest cell is
+         the one that says the field was not measured -- and the sentence under
+         the table says what the dash means, because 61 dashes on their own
+         read as 61 zeros. */
       var n = Number(t.n_models) || 0;
-      var solved = n && t._solved >= 0
-        ? '<span class="tabular-nums">' +
-          t._solved + "/" + n + "</span>"
-        : DASH;
+      var solved = (n && t._solved >= 0) ? (t._solved + "/" + n) : DASH;
 
-      return '<tr data-slot="table-row" class="' + TR + '" data-href="' + esc(href) +
-          '" data-state="false">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' +
-          idCell + title + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' +
-          repo + pr + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + lang + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + suite + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="flex items-center gap-1 text-left">' +
-          status + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-left">' + declared + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="flex items-center gap-1 text-left">' +
-          caps + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' +
-          (t._f2p < 0 ? DASH : t._f2p) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right">' + solved + "</p></td>" +
+      return '<tr data-slot="table-row" class="' + TR + '" data-href="' + esc(href) + '">' +
+        '<td data-slot="table-cell" class="' + TD + '">' + idCell + title + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' + repo + pr + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' + suite + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' + pub + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' + declared + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + '">' + caps + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + ' text-right tabular-nums">' +
+          (t._f2p < 0 ? DASH : t._f2p) + "</td>" +
+        '<td data-slot="table-cell" class="' + TD + ' text-right tabular-nums">' +
+          solved + "</td>" +
       "</tr>";
     }
 
@@ -725,8 +804,52 @@
       if (tr) window.location.href = tr.getAttribute("data-href");
     });
 
+    /* ---- the view is in the address bar ----
+       Search, sort and every facet chip are one view of 61 rows, and a view
+       is the thing a reader cites. Without this the URL stayed /registry/
+       through 61 -> 37 -> 1 rows, so a filtered reading could not be linked
+       to and did not survive a reload. Written with replaceState, matching
+       /leaderboard/: the back button here means the page you came from, and
+       one history entry per keystroke would bury it. */
+    var SORT_DEFAULT = { key: "suite", dir: "desc" };
+
+    function colKnown(k) {
+      for (var i = 0; i < COLS.length; i++) { if (COLS[i].key === k) return true; }
+      return false;
+    }
+
+    function writeUrl() {
+      try {
+        var u = new window.URL(window.location.href), sp = u.searchParams;
+        if (state.q) sp.set("q", state.q); else sp.delete("q");
+        GROUPS.forEach(function (g) {
+          if (state[g]) sp.set(g, state[g]); else sp.delete(g);
+        });
+        if (sort.key !== SORT_DEFAULT.key || sort.dir !== SORT_DEFAULT.dir) {
+          sp.set("sort", sort.key);
+          sp.set("dir", sort.dir);
+        } else { sp.delete("sort"); sp.delete("dir"); }
+        window.history.replaceState(window.history.state, "", u);
+      } catch (e) { /* file:// has no URL API for this; the table is unaffected */ }
+    }
+
+    function readUrl() {
+      try {
+        var sp = new window.URL(window.location.href).searchParams;
+        var k = sp.get("sort"), d = sp.get("dir");
+        if (k && colKnown(k)) {
+          sort.key = k;
+          sort.dir = (d === "asc") ? "asc" : "desc";
+        }
+        GROUPS.forEach(function (g) { state[g] = sp.get(g) || null; });
+        var q = sp.get("q");
+        if (q) { qEl.value = q; state.q = q.trim().toLowerCase(); }
+      } catch (e) { /* no URL API: the defaults above stand */ }
+    }
+
     /* ---- render ---- */
     function render() {
+      writeUrl();
       paintHead();
       paintFilters();
       clearEl.className = clearEl.className.replace(/ hidden$/, "");
@@ -759,6 +882,7 @@
       rowsEl.innerHTML = out.map(row).join("");
     }
 
+    readUrl();
     render();
   }
 })();

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>docs — terminal-daily-bench</title>
 <meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Four guides: quickstart, task format, submission, quality methods.">
-<link rel="stylesheet" href="../assets/tw.css?v=cf54a71b8f">
-<link rel="stylesheet" href="../assets/site.css?v=cf54a71b8f">
+<link rel="stylesheet" href="../assets/tw.css?v=edae671ad0">
+<link rel="stylesheet" href="../assets/site.css?v=edae671ad0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -17,9 +17,9 @@
 
   <!-- ===================== breadcrumb ===================== -->
   <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-    <a class="hover:text-foreground transition-colors" href="../">home</a>
+    <a class="hover:text-foreground transition-colors" href="../">Home</a>
     <span>/</span>
-    <span class="text-foreground">docs</span>
+    <span class="text-foreground">Docs</span>
   </nav>
 
   <!-- ===================== page head =====================
@@ -36,62 +36,60 @@
        execution dependency, archive vs. live, markdown-wins, the sole reward
        authority and the unmeasured semantic false-accept. -->
   <div class="w-full">
-    <h1 class="tdb-page-title" id="title">run the benchmark, read the score, submit a patch</h1>
+    <h1 class="tdb-page-title" id="title">Run the benchmark, read the score, submit a patch</h1>
     <p class="tdb-page-lede">A patch in, a test outcome out.</p>
     <nav class="tdb-navrow" aria-label="Docs shortcuts">
-      <a class="tdb-navlink" data-primary="true" href="quickstart/">quickstart</a>
-      <a class="tdb-navlink" href="../submit/">submit results</a>
-      <a class="tdb-navlink" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">source</a>
-      <a class="tdb-navlink" href="../leaderboard/">leaderboard</a>
-      <a class="tdb-navlink" href="../quality/#discrimination">what the suite separates</a>
+      <a class="tdb-navlink" data-primary="true" href="quickstart/">Quickstart</a>
+      <a class="tdb-navlink" href="../submit/">Submit results</a>
+      <a class="tdb-navlink" href="https://github.com/DaizeDong/terminal-daily-bench" rel="noreferrer noopener" target="_blank">Source</a>
+      <a class="tdb-navlink" href="../leaderboard/">Leaderboard</a>
+      <a class="tdb-navlink" href="../quality/#discrimination">What the suite separates</a>
     </nav>
   </div>
 
   <!-- ===================== guides ===================== -->
   <section class="tdb-block" data-tdb-section="docs">
     <div class="tdb-block-head">
-      <h2>guides</h2>
-      <p>four pages</p>
+      <h2>Guides</h2>
     </div>
 
     <nav class="tdb-doclist" aria-label="Guides">
       <a href="quickstart/">
-        <span class="tdb-doclist-n">quickstart</span>
+        <span class="tdb-doclist-n">Quickstart</span>
         <span class="tdb-doclist-d">Install, endpoint configuration, the oracle baseline, scoring one task.</span>
       </a>
       <a href="task-format/">
-        <span class="tdb-doclist-n">task format</span>
+        <span class="tdb-doclist-n">Task format</span>
         <span class="tdb-doclist-d">The on-disk package, archive vs. live, and how scoring re-lays the protected tests.</span>
       </a>
       <a href="submission/">
-        <span class="tdb-doclist-n">submission</span>
+        <span class="tdb-doclist-n">Submission</span>
         <span class="tdb-doclist-d">The submission schema, its validation rules, and the <code>HarnessAdapter</code> contract.</span>
       </a>
       <a href="quality-methods/">
-        <span class="tdb-doclist-n">quality methods</span>
+        <span class="tdb-doclist-n">Quality methods</span>
         <span class="tdb-doclist-d">Multi-angle Selection-Quality: discrimination, 2PL information, KR-20, readiness verdict.</span>
       </a>
     </nav>
 
-    <div class="bg-fd-secondary/50 mt-6 w-full border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
-      <strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
-      need the unpublished patched Harbor fork, not stock 0.13.1; the catalogue, quality card,
-      publisher and doctor do not.
-      <a class="underline-offset-4 hover:underline" href="quickstart/#requirements">Requirements</a>.
-    </div>
+        <p><strong>Execution dependency:</strong> <code>tdb run</code> and <code>tdb oracle</code>
+    need the unpublished patched Harbor fork, not stock 0.13.1; the catalogue, quality card,
+    publisher and doctor do not.
+    <a class="underline-offset-4 hover:underline" href="quickstart/#requirements">Requirements</a>.</p>
+  
   </section>
 
   <!-- ===================== the markdown sources ===================== -->
   <section class="tdb-block" data-tdb-section="repository">
     <div class="tdb-block-head">
-      <h2>the markdown sources</h2>
-      <p>the reference these pages summarise</p>
+      <h2>The Markdown sources</h2>
+      <p>The reference these pages summarise</p>
     </div>
 
     <nav class="tdb-doclist" aria-label="Markdown sources">
       <a href="../quickstart.md">
         <span class="tdb-doclist-n">quickstart.md</span>
-        <span class="tdb-doclist-d">When the two differ, the shipped markdown wins.</span>
+        <span class="tdb-doclist-d">When the two differ, the shipped Markdown wins.</span>
       </a>
       <a href="../task-format.md">
         <span class="tdb-doclist-n">task-format.md</span>
@@ -115,6 +113,6 @@
 </div>
 </main>
 
-<script src="../assets/site.js?v=cf54a71b8f" data-root=".." data-page="docs"></script>
+<script src="../assets/site.js?v=edae671ad0" data-root=".." data-page="docs"></script>
 </body>
 </html>

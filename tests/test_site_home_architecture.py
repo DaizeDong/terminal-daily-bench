@@ -33,10 +33,6 @@ import verify_site  # noqa: E402
 # pinning the full prose would forbid copy-editing, and the point is that the
 # STATEMENT survives, not that one wording does. Both fragments are lowercase
 # because the scan folds case.
-SCORING_INVARIANT_FRAGMENTS = (
-    "scoring invariant",
-    "protected tests decide published scores",
-)
 
 
 def _published_html(root: Path) -> str:
@@ -45,10 +41,6 @@ def _published_html(root: Path) -> str:
         page.read_text(encoding="utf-8", errors="replace").lower()
         for page in sorted(root.rglob("*.html"))
     )
-
-
-def _missing_invariant(root: Path) -> list[str]:
-    return [f for f in SCORING_INVARIANT_FRAGMENTS if f not in _published_html(root)]
 
 
 # --------------------------------------------------------------------------
@@ -141,74 +133,6 @@ def test_each_retired_phrase_is_genuinely_gone(phrase):
 
 
 # --------------------------------------------------------------------------
-# integrity caveats: relocated off home, not dropped
-# --------------------------------------------------------------------------
-
-def test_shipped_site_still_publishes_every_integrity_caveat():
-    assert verify_site.check_integrity_caveats(_published_html(verify_site.DOCS)) == []
-
-
-@pytest.mark.parametrize("phrase", verify_site.INTEGRITY_CAVEATS)
-def test_losing_any_integrity_caveat_fires(phrase):
-    haystack = _published_html(verify_site.DOCS).replace(phrase, "")
-    problems = verify_site.check_integrity_caveats(haystack)
-    assert any(phrase in p for p in problems)
-
-
-def test_integrity_caveat_list_did_not_shrink():
-    # The relocation moved these ten phrases from index.html to the whole
-    # site. Widening WHERE they may live is the change; dropping any of them
-    # is not, and would be invisible without this count.
-    assert len(verify_site.INTEGRITY_CAVEATS) == 10
-
-
-# --------------------------------------------------------------------------
-# the scoring invariant must survive somewhere
-# --------------------------------------------------------------------------
-
-def test_scoring_invariant_is_published_somewhere():
-    missing = _missing_invariant(verify_site.DOCS)
-    assert not missing, (
-        "the scoring invariant is published on no page under docs/: "
-        f"missing {missing}. Protected tests decide published scores; a "
-        "submitted reward is only a claim. This site's results are not "
-        "certified, so that disclosure is load-bearing. It may live on any "
-        "page -- it may not live on none."
-    )
-
-
-def test_scoring_invariant_check_fires_when_the_site_loses_it(tmp_path):
-    # Mutation: a whole site that never states the invariant.
-    (tmp_path / "index.html").write_text(
-        "<h1>Terminal Daily</h1><table></table>", encoding="utf-8")
-    assert _missing_invariant(tmp_path) == list(SCORING_INVARIANT_FRAGMENTS)
-
-
-def test_scoring_invariant_may_move_between_pages(tmp_path):
-    # Mutation in the other direction: home says nothing, a second page carries
-    # it, and the assertion still passes. Relocation is legal by construction.
-    (tmp_path / "index.html").write_text(
-        "<h1>Terminal Daily</h1><table></table>", encoding="utf-8")
-    deep = tmp_path / "benchmarks"
-    deep.mkdir()
-    (deep / "index.html").write_text(
-        "<p>Scoring invariant. Protected tests decide published scores: "
-        "deterministic code re-lays and executes them; a claimed reward "
-        "never is.</p>",
-        encoding="utf-8",
-    )
-    assert _missing_invariant(tmp_path) == []
-
-
-def test_partial_loss_of_the_invariant_fires(tmp_path):
-    # Keeping the heading while deleting the sentence would read as compliant
-    # to a one-fragment check.
-    (tmp_path / "index.html").write_text(
-        "<p>Scoring invariant.</p>", encoding="utf-8")
-    assert _missing_invariant(tmp_path) == ["protected tests decide published scores"]
-
-
-# --------------------------------------------------------------------------
 # the gates must still be WIRED
 # --------------------------------------------------------------------------
 #
@@ -232,11 +156,10 @@ def test_retired_copy_gate_is_wired(monkeypatch):
                for p in verify_site.check_public_frontend())
 
 
-def test_integrity_caveat_gate_is_wired(monkeypatch):
+def test_unofficial_marker_gate_is_wired(monkeypatch):
     monkeypatch.setattr(
-        verify_site, "INTEGRITY_CAVEATS",
-        ("a caveat no page under docs has ever published",))
-    assert any("integrity caveat lost from the whole site" in p
+        verify_site, "UNOFFICIAL_MARKER_PAGES", ("guide/index.html",))
+    assert any("the `unofficial` marker is gone" in p
                for p in verify_site.check_public_frontend())
 
 
@@ -322,18 +245,27 @@ def test_shipped_home_carries_no_retired_copy():
     assert verify_site.check_retired_home_copy(home) == []
 
 
-def test_the_invariant_is_stated_whole_on_a_single_page():
-    # `_missing_invariant` searches the site as one haystack, so fragments
-    # scattered across unrelated pages would satisfy it while leaving no page
-    # that actually states the disclosure a reader is sent to.
-    whole = [
-        page.relative_to(verify_site.DOCS).as_posix()
-        for page in sorted(verify_site.DOCS.rglob("*.html"))
-        if all(f in page.read_text(encoding="utf-8", errors="replace").lower()
-               for f in SCORING_INVARIANT_FRAGMENTS)
-    ]
-    assert whole, (
-        "the invariant's fragments survive on docs/ but no single page states "
-        "it; a reader following the UNOFFICIAL pill's `why` link finds half a "
-        "sentence"
-    )
+def test_the_unofficial_marker_survives_on_both_board_pages():
+    """The honesty the site still carries, now that the disclosure is gone.
+
+    The integrity disclosure was removed on the owner's instruction: the
+    quote-styled block on nine pages, the scoring invariant, the four replay
+    blockers, the `#integrity` anchor and the `why` link. This one word is what
+    is left, which makes it load-bearing in a way it never was while ten
+    sentences stood behind it.
+
+    Read from raw source, because both badges are built by JS string
+    concatenation and `markup_only()` blanks script bodies -- exactly how the
+    retired `why` link once pointed at a missing anchor with every gate green.
+    """
+    assert verify_site.check_unofficial_marker(
+        lambda rel: (verify_site.DOCS / rel).read_text(encoding="utf-8")) == []
+
+
+def test_losing_the_unofficial_marker_fires():
+    def blanked(rel):
+        raw = (verify_site.DOCS / rel).read_text(encoding="utf-8")
+        return raw.replace('data-official="false"', "").replace("unofficial", "")
+    assert len(verify_site.check_unofficial_marker(blanked)) == len(
+        verify_site.UNOFFICIAL_MARKER_PAGES)
+
