@@ -452,8 +452,11 @@ def test_generated_detail_pages_are_idempotent_and_include_all_suites(
     task_page = (docs / "registry" / "td-shared" / "index.html").read_text(
         encoding="utf-8"
     )
-    assert "suite 2026-08-05" in task_page
-    assert "suite 2026-08-06" in task_page
+    # "Suite <id>", capitalised: the label is English and the id is not, and
+    # gen_pages emits both halves. The id stays lowercase and is what this
+    # assertion is really about -- a task page must name every suite it is in.
+    assert "Suite 2026-08-05" in task_page
+    assert "Suite 2026-08-06" in task_page
     assert len(data["tasks"]) == 3
 
 

@@ -153,6 +153,48 @@
   --ts-sub:   1.75rem;
   --ts-title: clamp(2.25rem, 4.2vw, 3rem);
 
+  /* -- THE TEN SANCTIONED PAIRS -------------------------------------------
+     Five sizes and three weights do not make fifteen combinations; they make
+     the ten below, and a measurement that finds an eleventh has found a bug.
+     (Measured before this block existed: nineteen, over ten pages.) Each line
+     is family / size / weight and the job it is FOR. A pair that cannot
+     finish the sentence "this is for ..." is not a pair, it is drift.
+
+       sans 16/400   running prose, list items, definition bodies, table
+                     cells, links, breadcrumbs -- the default, inherited from
+                     <body> and never restated
+       sans 16/500   a MARK inside body-size text: <strong>, a <dt> term, a
+                     row head, the nav link for the page you are on
+       sans 14/400   an ANNOTATION hung off a value it does not name: a column
+                     note, an axis tick, a key hint, a position count
+       sans 14/500   a LABEL that names the thing beside or below it: every
+                     column head, badge, kicker, rail key, nav group, card
+                     label and figure caption. ONE treatment, and this is it
+       sans 20/400   the one-sentence LEDE under a page title, the document
+                     sub-head, and the day-step arrows
+       sans 20/600   the wordmark -- the only 600 that is not a heading
+       sans 28/600   h2 -- every section heading on the site
+       sans 48/600   h1 -- page titles only
+       mono 16/400   code, commands, identifiers, and numeric cells
+       mono 14/400   the same three inside a 14px frame: a path in a caption,
+                     a confidence interval, the copy control
+
+     Note what is NOT here. THE MONO HAS EXACTLY ONE WEIGHT. An identifier
+     cannot be emphasised into being more of an identifier, and one monospace
+     face at two weights inside one table is precisely the "second typeface"
+     effect the @font-face note above warns about -- so a <strong> that is
+     itself a numeric cell, and the status readout's value, both draw at 400
+     and are marked by ink and size instead. 600 appears at three sizes and
+     nowhere below 20px, which is the whole of "600 heads". There is no 14px
+     prose (see the --ts-micro floor rule) and no sixth size.
+
+     HOW TO CHECK THIS. Walk every text node on a page, take
+     getComputedStyle(node.parentElement) and count the distinct
+     (fontFamily, fontSize, fontWeight, textTransform, letterSpacing) tuples.
+     Ten pages must yield these ten and nothing else, textTransform must be
+     `none` on every one of them, and letterSpacing must be `normal` on every
+     row below 20px. */
+
   /* -- LINE HEIGHT --------------------------------------------------------
      Prose and data want opposite things: a paragraph wants air between lines,
      a table wants rows the eye can sweep. 1.75 at 16px is the one ratio here
@@ -163,15 +205,57 @@
   --lh-ui:    1.45;   /* table cells, controls, dense single-purpose data */
   --lh-prose: 1.75;   /* running text: p, li, dd, blockquote, figcaption */
 
-  /* -- WEIGHT: three. 400 reads, 500 marks, 600 heads. -------------------- */
+  /* -- WEIGHT: three, and the rule is a sentence. 400 READS -- prose, list
+     items, table cells, every number. 500 MARKS -- a term, a column head, a
+     label, a <strong>, the link you are on. 600 HEADS -- h1, h2 and the
+     wordmark, and nothing else. `<strong>` was 600 here, which put a
+     percentage inside a data cell at heading weight; a mark is not a head. */
   --fw-normal: 400;
   --fw-medium: 500;
   --fw-semi:   600;
 
-  /* -- TRACKING: three ---------------------------------------------------- */
-  --tr-head:  -0.04em;   /* the page title and the brand name */
-  --tr-body:  0;         /* everything read as a sentence or a number */
-  --tr-micro: 0.06em;    /* uppercase micro-labels only */
+  /* -- TRACKING: two, and BOTH ARE NEGATIVE. --------------------------------
+     Letter-spacing on this site does exactly one job: it closes the gaps a
+     large size opens, so a 48px line and a 16px line have the same colour.
+     That job only exists above 20px, so --tr-head is the only non-zero value
+     and --tr-body: 0 names the absence for everything else.
+
+     There WAS a third, --tr-micro: 0.06em, and it existed only because
+     fourteen rules set `text-transform: uppercase` -- tracking is what makes
+     uppercase legible, so the two always shipped together. Both are gone, for
+     the reason recorded under CASE below. Positive tracking on mixed-case
+     text has no job: it does not aid a reader, it just spreads a word until
+     it stops looking like one. A label that needs to separate itself from the
+     prose around it does so with SIZE, WEIGHT and COLOUR -- three signals
+     that survive being read aloud. */
+  --tr-head:  -0.04em;   /* 20px and up: the wordmark, h2, h1 */
+  --tr-body:  0;         /* every other line on the site */
+
+  /* -- CASE: THE STYLESHEET NEVER CHANGES CASE. ----------------------------
+     `text-transform: uppercase` appeared fourteen times -- on every column
+     head, badge, kicker, rail key, nav group, card label and figure caption
+     -- and it is the single largest reason this page read as a brochure
+     rather than as an instrument. Three separate arguments, any one of which
+     is sufficient:
+
+       1. IT REWRITES THE STRING. A column head, a <dt> and a caption on this
+          site routinely hold something a reader is meant to TYPE -- a field
+          name, a scaffold id, a path. `single_shot` drawn as SINGLE_SHOT is
+          a value that does not exist. The rest of this file is built on the
+          rule that a style may not decide what a thing IS; a transform that
+          edits the letters is that same defect at the glyph level.
+       2. IT DUPLICATES A JOB ALREADY DONE. Every one of those labels is
+          already 14px and already muted. Uppercase adds no third fact, and it
+          costs word-shape at the smallest size on the page.
+       3. IT WAS NEVER ONE TREATMENT. The uppercase labels shipped at two
+          weights (400 and 500), in two families (sans and mono) and at two
+          sizes (14 and 16) -- four registers doing one job, which is most of
+          what "several fonts" meant.
+
+     A capital letter on this site therefore comes from the CONTENT, and the
+     content is either prose or an identifier: prose is sentence case, an
+     identifier keeps whatever case it really has. Nothing in CSS may overrule
+     that, which is also why there is no `text-transform: capitalize` here. */
 
   /* == THE FOUR VERTICAL DISTANCES =======================================
      This is the whole vertical rhythm of the site, and it is applied BY
@@ -410,6 +494,45 @@ input:focus-visible {
 }
 
 /* ==========================================================================
+   THE UTILITIES THAT DECIDE TYPE ARE DISARMED, for the same reason
+   `.font-mono` is disarmed further down: a class that says how something
+   LOOKS must not decide what it IS. Two of the four decisions this file makes
+   about type -- tracking and case -- can be taken away from it by a class
+   name in the markup, and both had been.
+
+   TRACKING. tw.css ships four `.tracking-*` utilities at (0,1,0). Six
+   elements carry one. Measured: one <p> with `tracking-tight` rendered at
+   -0.5px, a fifth letter-spacing value that belongs to no role and describes
+   no job -- it is simply the value that utility happens to hold. Headings are
+   excluded from the selector rather than beaten by it, because they are the
+   one place where tracking IS a decision this file makes.
+
+   CASE. `.uppercase`, `.lowercase` and `.capitalize` are in tw.css. None is
+   used in the markup TODAY, which is exactly when to close the door: the
+   fourteen uppercase rules this file just deleted are the proof that the
+   treatment comes back the moment a label needs to look like a label. The
+   declaration below is `none`, so this file still changes no letter -- it
+   only stops a class from doing it. See CASE in the token block for why.
+   ========================================================================== */
+main :not(h1, h2, h3, h4, h5, h6)[class*="tracking-"] {
+  letter-spacing: var(--tr-body);
+}
+main [class~="uppercase"],
+main [class~="lowercase"],
+main [class~="capitalize"] {
+  text-transform: none;
+}
+/* And the third layer a transform can arrive through. One page builder still
+   writes `text-transform:uppercase` into a style attribute (a <p> on
+   /quality/ introducing a partition of CI rows), which no selector can
+   outrank -- an inline declaration beats every rule in this file that is not
+   !important. This is the only !important on case in the file, and it exists
+   because the alternative is a stylesheet whose stated invariant is true in
+   two layers out of three. The markup should stop emitting it; until it does,
+   the invariant holds anyway. */
+main [style*="uppercase"] { text-transform: none !important; }
+
+/* ==========================================================================
    MONO OPT-IN -- family declaration 2 of exactly 2, and the complete list of
    things on this site that are not sans. Three kinds of content earn it:
 
@@ -551,17 +674,31 @@ main :is(figure, pre) + :is(p, ul, ol, dl, blockquote, hr, table, figure, pre) {
   margin-top: var(--rh-fig);
 }
 
-/* A caption binds to the thing it names, at the same 16, and it is read as a
-   marker rather than as a sentence -- so it takes the micro step, uppercase,
-   in the muted ink, exactly like a table head. */
-main figcaption { margin-bottom: var(--rh-fig); }
+/* A caption binds to the thing it names, at the same 16, and it takes the one
+   LABEL treatment -- 14/500, muted -- exactly like a column head.
+
+   THE FAMILY IS DECLARED HERE, and that is the point of this rule. A caption
+   is prose: `install, then score` and `every task in the catalogue, one
+   square` are English sentences. But every one of these captions is a CHILD
+   of a container that opted into the mono -- `.tdb-cmd` is a command block,
+   `.tdb-strip` and `.tdb-ci` are figures of numbers -- so all 95 captions on
+   the site inherited the monospace face from the box they label, and then had
+   their letters rewritten to uppercase on top of it. English prose set in the
+   code face, in capitals, at the smallest size on the page: that combination
+   alone accounts for a good deal of what "several fonts" meant. A caption
+   names a thing, it is not part of it, so it sets the sans back explicitly.
+   Where the caption IS an identifier -- `environment/Dockerfile`,
+   `tasks/archive/<task-id>/` -- the identifier belongs in <code>, which is
+   the site-wide hook and takes the mono back at higher specificity below. */
+main figcaption { margin-bottom: var(--rh-fig); font-family: var(--td-font-sans); }
+main figcaption :is(code, kbd, samp, var) { font-family: var(--td-font-mono); }
 .tdb-strip > figcaption,
 .tdb-ci > figcaption,
 .tdb-cmd > figcaption {
   color: var(--muted-foreground);
+  font-family: var(--td-font-sans);
   font-size: var(--ts-micro) !important;
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
 }
 
 /* <hr> draws NOTHING. The site shipped 15 of them; a horizontal rule is a
@@ -760,8 +897,29 @@ main :is(code, kbd, samp) { font-size: inherit; }
    broken across lines is a command you cannot copy, and it has a scroller. */
 main :not(pre) > :is(code, kbd, samp) { overflow-wrap: anywhere; }
 /* <strong> is UA-700, and the site declares three weights. Emphasis is the
-   semibold every heading uses. */
-main :is(strong, b) { font-weight: var(--fw-semi); }
+   MARK weight, not the head weight: this element wraps a percentage inside a
+   data cell about as often as it wraps a word inside a sentence, and 600 in a
+   column of 400s reads as a heading that wandered into the table. 500 marks. */
+main :is(strong, b) { font-weight: var(--fw-medium); }
+/* ...and an identifier inside a mark takes no weight from it. A <code> inside
+   a <strong>, a <dt> or a <th> is the same string as a <code> in a sentence;
+   drawing it at 500 puts the one monospace face on the page at two weights,
+   which is how a second typeface arrives without a second @font-face. The
+   heading rule below is deliberately more specific and still wins. */
+main :is(strong, b, dt, th) :is(code, kbd, samp, var) { font-weight: var(--fw-normal); }
+/* Same rule from the other side: a <strong> that is ITSELF a numeric cell --
+   `<strong class="tabular-nums">30%</strong>`, the accuracy of a leaderboard
+   row -- resolves to the mono through the opt-in list, so marking it draws
+   the mono at 500. What separates that percentage from the CI beside it is
+   already SIZE (16 against 14); a second weight in the same face adds no
+   fact and costs the column its evenness. The mono draws at 400, everywhere,
+   full stop -- that is why there is no mono row above 400 in the pair list. */
+main :is(strong, b):is(
+  code, kbd, samp, var,
+  .tdb-cmd, .tabular-nums, .tdb-num, .tdb-acc, .tdb-acc-ci, .tdb-ci-v,
+  .tdb-cap-n, .tdb-col-note, .tdb-strip-n, .tdb-id,
+  [data-tdb-stat-value], [data-tdb-mono]
+) { font-weight: var(--fw-normal); }
 /* Code inside a heading or a lede takes that line's weight as well as its
    size: a 400 <code> inside a 600 <h2> is a fifth weight arriving by
    inheritance, and it reads as a mis-set word rather than as code. */
@@ -769,6 +927,18 @@ main :is(h1, h2, h3, h4, h5, h6, .tdb-page-lede) :is(code, kbd, samp) { font-wei
 /* A bare <th> is UA-700. A column head is set by the table rules below; this
    is the row head in a <tbody>, and it is a label, not a heading. */
 main th { font-weight: var(--fw-medium); text-align: left; }
+/* ONE FAMILY FOR EVERY COLUMN HEAD. `.tdb-num` and `.tabular-nums` are in the
+   mono opt-in because they mark a NUMERIC CELL -- but the generator puts them
+   on that column's <th> too, to inherit the right alignment, and a head is
+   never a number. Measured: fourteen heads on /quality/ -- `catalogue`,
+   `ceiling`, `discriminating`, `top repo` -- were English words set in the
+   monospace face, one table away from `Rank` and `Agent` set in the sans.
+   That is two faces spelling one role, which is the reported defect in its
+   purest form. A head is a label, so a head is sans; an identifier inside one
+   is <code>, which is the sanctioned hook and keeps the mono. */
+main th,
+main th[class] { font-family: var(--td-font-sans); }
+main th :is(code, kbd, samp, var) { font-family: var(--td-font-mono); }
 
 /* == DATA DENSITY ========================================================
    Prose sets on 1.75 so a paragraph reads like a paragraph. A table row is
@@ -841,7 +1011,7 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
 .tdb-limits dt {
   margin-top: var(--rh-para);
   color: var(--foreground);
-  font-weight: var(--fw-semi);
+  font-weight: var(--fw-medium);
 }
 .tdb-defs dt:first-child,
 .tdb-instrument dt:first-child,
@@ -870,9 +1040,7 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
   margin-top: 0;
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
-  font-weight: var(--fw-normal);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
 }
 .tdb-defs[data-inline] dd,
 .tdb-instrument dd {
@@ -971,8 +1139,6 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
   color: var(--td-muted);
   font-size: var(--ts-micro);
   font-weight: var(--fw-medium);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
 }
 
 /* WHICH PAGE YOU ARE ON, without a hue and without a fill. This was a coral
@@ -1033,7 +1199,7 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
   padding: var(--sp-5) 0;
   background: none;
 }
-#tdb-canary { font-size: var(--ts-micro) !important; letter-spacing: var(--tr-micro); }
+#tdb-canary { font-size: var(--ts-micro) !important; }
 #tdb-footer p[class] { line-height: var(--lh-prose) !important; }
 
 /* Stable semantic hooks emitted by the page generator. */
@@ -1086,12 +1252,16 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
 }
 [data-tdb-section="intro"].tdb-masthead::before,
 [data-tdb-section="intro"].tdb-masthead::after { content: none; }
+/* The line above the page title. It was 16px, TRACKED AND UPPERCASED -- the
+   one place on the site where a whole line of body-size text was spread into
+   capitals, and the first thing a reader meets. That is a magazine eyebrow,
+   and it is doing the work of prose: `living coding-agent benchmark` is a
+   phrase, not a label, so it is set as one. Muted ink is the whole
+   distinction it needs from the title beneath it. */
 [data-tdb-section="intro"].tdb-masthead > p:first-of-type {
   display: block;
   color: var(--muted-foreground);
   font-size: var(--ts-body);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
 }
 [data-tdb-section="intro"].tdb-masthead h1 {
   margin: 0;
@@ -1187,8 +1357,14 @@ button.bg-secondary:hover { background: var(--muted); }
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
   font-weight: var(--fw-medium);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  /* A LABEL IS NEVER TRACKED, and this is the one that has to say so out
+     loud: a badge sits inside an <h2>, so it inherits the heading's -0.04em
+     and draws it at 14px, where the same em value is nearly twice as tight
+     relative to the letterform. Measured: `unofficial` set at -1.12px beside
+     28px text set at -1.12px -- one number, two completely different
+     colours. Tracking belongs to a size, so it is re-zeroed at every size
+     change. */
+  letter-spacing: var(--tr-body);
 }
 [data-slot="badge"][class],
 body.tdb-generated-page [data-slot="badge"] {
@@ -1270,11 +1446,9 @@ main#nd-home-layout article.prose thead th {
   border-bottom: 1px solid var(--td-line);
   color: var(--muted-foreground);
   font-size: var(--ts-micro) !important;
-  font-weight: var(--fw-normal) !important;
-  letter-spacing: var(--tr-micro);
+  font-weight: var(--fw-medium) !important;
   line-height: var(--lh-ui) !important;
   text-align: left;
-  text-transform: uppercase;
 }
 [data-slot="table-cell"],
 .tdb-plain-table td,
@@ -1460,8 +1634,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
 .tdb-facet-label {
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
   margin-right: var(--sp-2);
   min-width: 3.5rem;
 }
@@ -1485,8 +1658,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   color: var(--muted-foreground);
   font: inherit;
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
 }
 .tdb-sort:hover,
 .tdb-sort[data-active="true"] { color: var(--foreground); }
@@ -1576,8 +1748,8 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   margin-top: var(--sp-1);
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
+  font-weight: var(--fw-normal);
   line-height: var(--lh-flat);
-  text-transform: none;
   white-space: nowrap;
 }
 .tdb-col-note[data-align="right"] { text-align: right; }
@@ -1679,11 +1851,17 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   overflow-wrap: anywhere;
 }
 /* A status value is data: same size as its label, tabular, just heavier. */
+/* The status readout's value. It was 600, which is the head weight, and it is
+   drawn in the MONO -- so `live`, `50` and `258` were the one monospace face
+   on the site appearing at a second weight, three rows above a table of the
+   same face at 400. What separates a value from its key here is already ink
+   against muted, and from its note already 16 against 14. Weight was carrying
+   nothing that colour and size were not carrying better. */
 .tdb-statrow .tdb-statrow-v[data-tdb-stat-value] {
   margin: 0;
   color: inherit;
   font-size: var(--ts-body) !important;
-  font-weight: var(--fw-semi) !important;
+  font-weight: var(--fw-normal) !important;
   letter-spacing: var(--tr-body) !important;
 }
 
@@ -1708,12 +1886,16 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
 .tdb-suiterail-k {
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
   margin-right: var(--sp-1);
 }
+/* The suite you are looking at, and the primary nav link. 600 is the head
+   weight and these are links inside a rail of links: full ink against muted
+   is the whole signal, and 500 is what marks it. At 600 the active suite was
+   set heavier than any body text on the page while being one of eight
+   sixteen-pixel words in a row -- a rail item shouting at h2 weight. */
 .tdb-suitelink[data-active="true"],
-.tdb-navlink[data-primary="true"] { color: var(--foreground); font-weight: var(--fw-semi); }
+.tdb-navlink[data-primary="true"] { color: var(--foreground); font-weight: var(--fw-medium); }
 
 /* --- day navigation: arrows step, the select jumps ---------------------- */
 .tdb-daynav {
@@ -1900,13 +2082,11 @@ body.tdb-generated-page .tdb-table-shell {
 [data-slot="card-header"] > p:first-child {
   color: var(--muted-foreground);
   font-size: var(--ts-micro) !important;
-  font-weight: var(--fw-normal);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
 }
 [data-slot="card"] [data-tdb-stat-value] {
   font-size: var(--ts-lead) !important;
-  font-weight: var(--fw-semi) !important;
+  font-weight: var(--fw-normal) !important;
   letter-spacing: var(--tr-body) !important;
 }
 
@@ -2123,8 +2303,7 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
   margin: 0 0 var(--sp-2) 0;
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
+  font-weight: var(--fw-medium);
 }
 .tdb-toc-list { display: flex; flex-direction: column; border-left: 1px solid var(--td-line); }
 /* Body size, not micro: these are section TITLES -- the same strings as the
@@ -2548,7 +2727,13 @@ main.tdb-docs {
   border-bottom: 1px solid var(--td-line);
   padding: 0 3.25rem 0 var(--sp-4);
   color: var(--td-muted);
-  font-family: var(--td-font-mono);
+  /* Sans, not mono. This rule carries a class, so it outranked `main
+     figcaption` and kept eight English captions -- "Install, then score",
+     "The abstract base and its result type" -- painting in the code face
+     while their capitalisation had already been fixed. A caption is prose
+     about the figure; an identifier inside one goes in <code>, which is the
+     site-wide hook and takes the mono back on its own element. */
+  font-family: var(--td-font-sans);
   font-size: var(--ts-micro);
   line-height: var(--lh-ui);
 }
@@ -2631,9 +2816,8 @@ main.tdb-docs {
   margin: var(--sp-5) 0 var(--sp-2);
   color: var(--td-muted);
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-ui);
-  text-transform: uppercase;
 }
 .tdb-docnav-g:first-child { margin-top: 0; }
 .tdb-docnav-l { display: flex; flex-direction: column; }
@@ -2669,9 +2853,8 @@ main.tdb-docs {
   margin: var(--sp-3) var(--sp-4) var(--sp-1);
   color: var(--td-muted);
   font-size: var(--ts-micro);
-  letter-spacing: var(--tr-micro);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-ui);
-  text-transform: uppercase;
 }
 
 /* -- the section rail, inside the shell ----------------------------------

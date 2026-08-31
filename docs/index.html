@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>terminal-daily-bench — measured solve rates</title>
 <meta name="description" content="Measured solve rates on the current terminal-daily-bench suite.">
-<link rel="stylesheet" href="./assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="./assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="./assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="./assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -32,7 +32,7 @@
            dropped: they live on /benchmarks/, the page the nav calls
            "status". -->
       <div class="tdb-masthead" data-tdb-section="intro">
-        <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
+        <p class="text-muted-foreground font-mono text-sm">Living coding-agent benchmark</p>
         <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance"><span>Terminal</span> <span>Daily</span></h1>
         <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks.</p>
         <div class="flex flex-wrap gap-3">
@@ -65,8 +65,8 @@
   </div>
 </main>
 
-<script src="./assets/site.js?v=11e80328f8" data-root="." data-page="home"></script>
-<script src="./assets/tdb-data.js?v=11e80328f8"></script>
+<script src="./assets/site.js?v=b518091f1a" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=b518091f1a"></script>
 <script>
 (function () {
   "use strict";
@@ -153,8 +153,8 @@
        to promote measured solve rates into a claimed ranking. */
     var ranked = formalModelRatings(relativeReport(day), (site && site.scoring) || {});
     return ranked.length
-      ? '<span class="tdb-badge" data-official="true">official</span>'
-      : '<span class="tdb-badge" data-official="false">unofficial</span>';
+      ? '<span class="tdb-badge" data-official="true">Official</span>'
+      : '<span class="tdb-badge" data-official="false">Unofficial</span>';
   }
 
   /* Every cell on this table used to carry a ~120-character utility chain and
@@ -179,8 +179,8 @@
       return;
     }
 
-    var head = '<tr><th class="tdb-num">rank</th><th>agent</th><th>model</th>' +
-      '<th class="tdb-num">accuracy</th><th class="tdb-num">solved</th></tr>';
+    var head = '<tr><th class="tdb-num">Rank</th><th>Agent</th><th>Model</th>' +
+      '<th class="tdb-num">Accuracy</th><th class="tdb-num">Solved</th></tr>';
     var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
       return "<tr>" +
         '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>" +
@@ -193,7 +193,7 @@
 
     set("hp-board", '<table class="w-full caption-bottom">' +
       "<thead>" + head + "</thead><tbody>" + body + "</tbody></table>");
-    set("hp-board-title", "terminal-daily@" + esc(day.date) + " " + officialBadge(day, site));
+    set("hp-board-title", "Suite terminal-daily@" + esc(day.date) + " " + officialBadge(day, site));
     set("hp-board-sub", esc(rows.length) + " entries \u00b7 " + esc(day.n_tasks) + " tasks");
     set("hp-board-foot", rows.length > BOARD_PREVIEW_LIMIT
       ? "Top " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " entries."

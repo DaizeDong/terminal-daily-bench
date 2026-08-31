@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>task format — terminal-daily-bench docs</title>
+<title>Task format — terminal-daily-bench docs</title>
 <meta name="description" content="What a terminal-daily-bench task package is, the two release modes it ships in, and what each mode withholds.">
-<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -39,7 +39,7 @@
       the code is <code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code> and
       <code>web/submit_result.py</code>.</p>
     <figure class="tdb-code">
-      <figcaption>tasks/archive/&lt;task-id&gt;/</figcaption>
+      <figcaption><code>tasks/archive/&lt;task-id&gt;/</code></figcaption>
       <pre><code>task.toml           environment.docker_image &middot; environment.allow_internet &middot; timeouts
 instruction.md      the natural-language task shown to the model (de-identified)
 tests/              test.sh (runner) &middot; test_outputs.py (protected assertions) &middot; test_patch.diff
@@ -56,7 +56,7 @@ record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p select
     <p>A task is archived two weeks after its source PR merged. Live withholding blocks memorization
       and test-editing; releasing archived tasks in full supports local reproduction.</p>
     <figure class="tdb-code">
-      <figcaption>tasks/publish_tasks.py::publish</figcaption>
+      <figcaption><code>tasks/publish_tasks.py::publish</code></figcaption>
       <pre><code><span class="text-muted-foreground"># ARCHIVE_WEEKS = 2</span>
 (today - merge_date).days &gt;= 14   -&gt;  archive
 (today - merge_date).days &lt;  14   -&gt;  live</code></pre>
@@ -67,9 +67,9 @@ record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p select
     <div class="tdb-plain-table">
       <table>
         <thead><tr>
-          <th>package path</th>
-          <th>shipped in archive</th>
-          <th>shipped in live</th>
+          <th>Package path</th>
+          <th>Shipped in archive</th>
+          <th>Shipped in live</th>
         </tr></thead>
         <tbody>
           <tr><th class="tdb-id">task.toml</th><td>yes (sanitized)</td><td>yes (sanitized)</td></tr>
@@ -89,10 +89,10 @@ record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p select
       </table>
     </div>
 
-    <h2 id="failing-tests"><a href="#failing-tests"><span class="tdb-id">FAILING_TESTS.json</span> (live only)</a></h2>
+    <h2 id="failing-tests"><a href="#failing-tests">Inside <span class="tdb-id">FAILING_TESTS.json</span> (live only)</a></h2>
     <p>Live submissions stay unranked until an official replay receipt exists.</p>
     <figure class="tdb-code">
-      <figcaption>the failing-test IDs only, from the F2P selectors (publish_tasks.py::_failing_test_ids)</figcaption>
+      <figcaption>The failing-test IDs only, from the F2P selectors (<code>publish_tasks.py::_failing_test_ids</code>)</figcaption>
       <pre><code>{
   "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
   "note": "protected assertions + gold solution withheld; pending official replay"
@@ -102,7 +102,7 @@ record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p select
   </article>
 </main>
 
-<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=b518091f1a" data-root="../.." data-page="docs"></script>
 <script>
 /* Fragments that moved when this page was split.
 
