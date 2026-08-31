@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>adding a scaffold — terminal-daily-bench docs</title>
+<title>Adding a scaffold — terminal-daily-bench docs</title>
 <meta name="description" content="The HarnessAdapter contract: the interface, the rules produce_patch must hold, the reference and stub adapters, and how a new one is registered.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -27,7 +27,7 @@
       <code>failing_test_ids</code> it receives. Live tasks ship those ids but withhold
       <code>solution/</code> and the protected <code>test_outputs.py</code> body.</p>
     <figure class="tdb-code">
-      <figcaption>terminal_daily_bench/adapters/base.py</figcaption>
+      <figcaption><code>terminal_daily_bench/adapters/base.py</code></figcaption>
       <pre><code>input  = (task dir, failing test ids, model id/endpoint)
 output = (unified diff, telemetry)</code></pre>
     </figure>
@@ -35,7 +35,7 @@ output = (unified diff, telemetry)</code></pre>
     <h2 id="interface"><a href="#interface">The interface</a></h2>
     <p>An adapter subclasses <code>HarnessAdapter</code> and implements <code>produce_patch</code>.</p>
     <figure class="tdb-code">
-      <figcaption>the abstract base and its result type</figcaption>
+      <figcaption>The abstract base and its result type</figcaption>
       <pre><code>from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -54,7 +54,7 @@ class HarnessAdapter(abc.ABC):
         ...</code></pre>
     </figure>
 
-    <h2 id="produce-patch"><a href="#produce-patch">produce_patch rules</a></h2>
+    <h2 id="produce-patch"><a href="#produce-patch">Rules for <span class="tdb-id">produce_patch</span></a></h2>
     <p>From the base-class docstring: an adapter <strong>MUST NOT</strong> read or write the
       protected tests or the gold solution, and <strong>MUST NOT</strong> compute a reward, because
       scoring is done afterward by the <a href="../#scoring">execution gate</a>. On failure it
@@ -85,13 +85,13 @@ class HarnessAdapter(abc.ABC):
       then set the <code>scaffold</code> field of your submission records to it. The leaderboard
       groups runs by <code>(submitter, model, scaffold)</code>.</p>
     <figure class="tdb-code">
-      <figcaption>terminal_daily_bench/adapters/__init__.py</figcaption>
+      <figcaption><code>terminal_daily_bench/adapters/__init__.py</code></figcaption>
       <pre><code>REGISTRY = {a.name: a for a in (SingleShotAdapter, TerminusAdapter)}</code></pre>
     </figure>
 
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

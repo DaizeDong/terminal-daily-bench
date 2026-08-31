@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>the measurement axes — terminal-daily-bench docs</title>
 <meta name="description" content="The three axes read straight off the graded matrix: discriminative yield, difficulty coverage and monotonicity.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -20,7 +20,7 @@
     <p>Each axis is <code>[0, 1]</code>, higher = better, and every one is reported <strong>separately</strong> so the composite never hides a collapsed axis.</p>
     <div class="tdb-plain-table">
       <table>
-        <thead><tr><th>axis</th><th>function</th><th>measures</th></tr></thead>
+        <thead><tr><th>Axis</th><th>Function</th><th>Measures</th></tr></thead>
         <tbody>
           <tr><th><a href="#D">D</a></th><td class="tdb-id">discriminative_yield</td><td>tasks that split the field</td></tr>
           <tr><th><a href="#C">C</a></th><td class="tdb-id">difficulty_coverage</td><td>spread across difficulty</td></tr>
@@ -33,20 +33,20 @@
       </table>
     </div>
 
-    <h2 id="D"><a href="#D">D &mdash; discriminative yield</a></h2>
+    <h2 id="D"><a href="#D">D &mdash; Discriminative yield</a></h2>
     <p>The fraction of tasks that <strong>split the field</strong>: only tasks some models solve and others miss carry information, and the rest are the blind spot. An all-pass or all-fail task therefore carries zero discrimination. With fewer than two models D is <code>None</code>, and its default composite weight is <code>0.5</code>.</p>
     <figure class="tdb-code"><pre><code>D = |{ tasks with 0 &lt; solvers &lt; n_models }| / n_tasks</code></pre></figure>
 
-    <h2 id="C"><a href="#C">C &mdash; difficulty coverage</a></h2>
+    <h2 id="C"><a href="#C">C &mdash; Difficulty coverage</a></h2>
     <p><strong>Normalized entropy</strong> of solve-rate bucket occupancy, over equal-width bins on <code>[0, 1]</code>. Tasks spread evenly give <code>C = 1</code>; tasks all clustered in one bucket give <code>C = 0</code>.</p>
     <figure class="tdb-code"><pre><code>C = ( -&#931; p_b &middot; log p_b ) / log(n_buckets)      p_b = fraction of tasks in bucket b</code></pre></figure>
 
-    <h2 id="M"><a href="#M">M &mdash; monotonicity</a></h2>
+    <h2 id="M"><a href="#M">M &mdash; Monotonicity</a></h2>
     <p>The fraction of tasks with <strong>no strong ability inversion</strong>. Compared pairs are those where <code>ability_i &gt; ability_j + ability_eps</code>, with <code>ability_eps</code> defaulting to <code>0.05</code>; a <strong>strong inversion</strong> is <code>solved_j and not solved_i</code> &mdash; noise, mislabel, or gameability &mdash; and a <strong>monotonic task</strong> is one with zero inversions. Ability defaults to each model&rsquo;s overall solve-rate; with no ability separation M is vacuously <code>1.0</code>.</p>
     <figure class="tdb-code"><pre><code>M = |{ monotonic tasks }| / n_tasks</code></pre></figure>
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

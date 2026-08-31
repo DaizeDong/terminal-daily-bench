@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>quality — terminal-daily-bench</title>
+<title>Selection quality — terminal-daily-bench</title>
 <meta name="description" content="Multi-angle Selection-Quality (MSQ): discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, and a readiness verdict.">
-<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -21,17 +21,17 @@
       <div class="w-full">
         <h1 class="tdb-page-title" id="title">Selection quality</h1>
         <p class="tdb-page-lede">MSQ measures whether a task set can separate models at all.
-          <a href="../guide/quality-methods/">quality methods &rarr;</a></p>
+          <a href="../guide/quality-methods/">Quality methods &rarr;</a></p>
 
         <!-- ===================== INSTRUMENT MASTHEAD =====================
              Every value here is written by discrimination() at load time.
              The markup states no scaffold name, no model count, no threshold. -->
         <dl class="tdb-instrument" id="instrument">
-          <dt>scaffold</dt><dd id="inst-scaffold">&mdash;</dd>
-          <dt>quality</dt><dd id="inst-grid">&mdash;</dd>
-          <dt>axes</dt><dd id="inst-axes">&mdash;</dd>
-          <dt>frames</dt><dd id="inst-frames">&mdash;</dd>
-          <dt>authority</dt><dd id="inst-auth">&mdash;</dd>
+          <dt>Scaffold</dt><dd id="inst-scaffold">&mdash;</dd>
+          <dt>Quality</dt><dd id="inst-grid">&mdash;</dd>
+          <dt>Axes</dt><dd id="inst-axes">&mdash;</dd>
+          <dt>Frames</dt><dd id="inst-frames">&mdash;</dd>
+          <dt>Authority</dt><dd id="inst-auth">&mdash;</dd>
         </dl>
       </div>
 
@@ -49,7 +49,7 @@
 
         <!-- (b) item strip: one square per catalogue task -->
         <figure class="tdb-strip" id="disc-strip">
-          <figcaption>every task in the catalogue, one square</figcaption>
+          <figcaption>Every task in the catalogue, one square</figcaption>
           <div class="tdb-strip-body"></div>
           <p class="tdb-legend" id="disc-legend"></p>
         </figure>
@@ -57,7 +57,7 @@
 
         <!-- (c) discrimination intervals, HTML/CSS -- no SVG -->
         <figure class="tdb-ci" id="disc-ci">
-          <figcaption>solved by &ge;1 model &middot; Wilson 95% interval &middot; n = tasks</figcaption>
+          <figcaption>Solved by &ge;1 model &middot; Wilson 95% interval &middot; n = tasks</figcaption>
           <div class="tdb-ci-axis" aria-hidden="true">
             <span style="left:0%">0%</span><span style="left:25%">25%</span>
             <span style="left:50%">50%</span><span style="left:75%">75%</span>
@@ -82,10 +82,10 @@
         </div>
 
         <dl class="tdb-instrument" id="cap-instrument">
-          <dt>taxonomy</dt><dd id="cap-src">&mdash;</dd>
-          <dt>corpus</dt><dd id="cap-corpus">&mdash;</dd>
-          <dt>gate</dt><dd id="cap-gate">&mdash;</dd>
-          <dt>re-derived</dt><dd id="cap-verify">&mdash;</dd>
+          <dt>Taxonomy</dt><dd id="cap-src">&mdash;</dd>
+          <dt>Corpus</dt><dd id="cap-corpus">&mdash;</dd>
+          <dt>Gate</dt><dd id="cap-gate">&mdash;</dd>
+          <dt>Re-derived</dt><dd id="cap-verify">&mdash;</dd>
         </dl>
 
         <div class="tdb-plain-table" id="cap-table">
@@ -99,7 +99,7 @@
              is a small centred dot on one ink, binary, and means "this package
              carries this label". No model outcome enters this figure. -->
         <figure class="tdb-strip" id="cap-strip">
-          <figcaption>label co-occurrence &mdash; one column per package, one row per axis</figcaption>
+          <figcaption>Label co-occurrence &mdash; one column per package, one row per axis</figcaption>
           <div class="tdb-strip-body"></div>
           <p class="tdb-legend" id="cap-legend"></p>
         </figure>
@@ -123,7 +123,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="quality"></script>
+<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="quality"></script>
 <script>
 (function () {
   "use strict";
@@ -202,15 +202,15 @@
   function frameCard(f, label, TH_) {
     var hw = (f.D_ci && f.D_ci.length === 2) ? (f.D_ci[1] - f.D_ci[0]) / 2 : null;
     var verdict = f.ready
-      ? '<span data-slot="badge" class="' + BADGE_PRI + '">ready</span>'
-      : '<span data-slot="badge" class="' + BADGE_SEC + '">not yet' +
+      ? '<span data-slot="badge" class="' + BADGE_PRI + '">Ready</span>'
+      : '<span data-slot="badge" class="' + BADGE_SEC + '">Not yet' +
         (f.required_n_D ? " &middot; ~" + f.required_n_D + " tasks" : "") + "</span>";
 
     var chips =
       '<span data-slot="badge" class="' + BADGE_SEC + '">' + f.n_tasks + " tasks</span>" +
       '<span data-slot="badge" class="' + BADGE_SEC + '">' + f.n_models + " models</span>" +
       (f.composite != null
-        ? '<span data-slot="badge" class="' + BADGE_SEC + '" title="D .5 / C .25 / M .25">composite ' +
+        ? '<span data-slot="badge" class="' + BADGE_SEC + '" title="D .5 / C .25 / M .25">Composite ' +
           num(f.composite) + "</span>" : "") +
       (hw == null
         ? ""
@@ -219,7 +219,7 @@
           num(TH_.max_d_halfwidth, 2) + '">D 95% [' + num(f.D_ci[0]) + ", " +
           num(f.D_ci[1]) + "]</span>") +
       (f.bottleneck
-        ? '<span data-slot="badge" class="' + BADGE_SEC + '">bottleneck: ' + esc(f.bottleneck) + "</span>"
+        ? '<span data-slot="badge" class="' + BADGE_SEC + '">Bottleneck: ' + esc(f.bottleneck) + "</span>"
         : "");
 
     var rows = [
@@ -284,7 +284,7 @@
     var FRAMES = Object.keys(q)
       .filter(function (k) { return k !== "thresholds" && q[k] && typeof q[k] === "object"; })
       .sort()
-      .map(function (k) { return [k, k + " frame", "under " + k]; });
+      .map(function (k) { return [k, "Frame " + k, "under " + k]; });
 
     if (!FRAMES.length) {
       frames.innerHTML = empty("No scaffold frame scored on this suite");
@@ -576,9 +576,9 @@
     });
     otherSuites.sort();
 
-    var HEAD = ["bucket", "catalogue", "in matrix",
-                (silent ? "not in matrix" : "other suites"),
-                "floor", "discriminating", "ceiling"];
+    var HEAD = ["Bucket", "Catalogue", "In matrix",
+                (silent ? "Not in matrix" : "Other suites"),
+                "Floor", "Discriminating", "Ceiling"];
     var thead = "<tr>" + HEAD.map(function (h, i) {
       return "<th" + (i ? ' class="tdb-num"' : "") + ">" + h + "</th>";
     }).join("") + "</tr>";
@@ -592,7 +592,7 @@
 
     var body = buckets.map(function (b) {
       return ledgerRow(b.label, tally(b.list), false);
-    }).join("") + ledgerRow("all", total, true);
+    }).join("") + ledgerRow("All", total, true);
 
     /* The consequence of these unrun cells -- "solved by none" is an upper
        bound -- is stated once, in the caveat block. Here it is a count. */
@@ -749,8 +749,7 @@
              paragraph step above and nothing below: the label belongs to the
              rows it introduces, so it must not float between them. */
           ? '<p class="tdb-ci-group" style="margin:var(--rh-para) 0 0;' +
-            "color:var(--muted-foreground);font-size:var(--ts-micro);" +
-            'letter-spacing:var(--tr-micro);text-transform:uppercase">a partition of the ' +
+            'color:var(--muted-foreground);font-size:var(--ts-micro)">A partition of the ' +
             esc(ref) + " row above</p>"
           : "") +
         lev.map(function (r) { return ciRow(r.label, r.k, r.n, levBand); }).join("");
@@ -830,9 +829,9 @@
         " &nbsp; IRT " + (qCard.irt_info == null ? "&mdash;" : num(qCard.irt_info, 2)) +
         " &nbsp; ready " + (qCard.ready ? "yes" : "no") +
         (qCard.bottleneck ? " &middot; bottleneck " + esc(qCard.bottleneck) : "")
-      : "no quality card published for this scaffold");
+      : "No quality card published for this scaffold");
 
-    put("inst-axes", "declared difficulty (editorial, <code>task.toml</code>) " +
+    put("inst-axes", "Declared difficulty (editorial, <code>task.toml</code>) " +
       (useLevels ? "&times; " : "&mdash; not recorded in the catalogue &mdash; ") +
       "publication mode (" + statuses.map(esc).join(" / ") + ")" +
       /* an unreadable task.toml costs one bucket, not the whole axis */
@@ -844,9 +843,9 @@
     if (scoring.anti_cheat_deployment_active !== true) why.push("receipt authority inactive");
     why.push("one collaborator");
     if (scoring.publication_bundle_approved !== true) why.push("no approved publication bundle");
-    put("inst-auth", (scoring.official_ranking === true ? "ranked" : "unranked") +
+    put("inst-auth", (scoring.official_ranking === true ? "Ranked" : "Unranked") +
       " &mdash; " + why.join(", ") +
-      ' &nbsp;<a href="../guide/quality-methods/#outcomes">why &rarr;</a>');
+      ' &nbsp;<a href="../guide/quality-methods/#outcomes">Why &rarr;</a>');
   }
 
   /* ====================================================================
@@ -997,7 +996,7 @@
        defined once, at quality-methods/#capability-codes, which the section
        head links. Restating a definition beside every count is what made this
        table twice as tall as the data in it. */
-    var HEAD = ["axis", "tasks", "F2P", "repos", "top repo", "gate"];
+    var HEAD = ["Axis", "Tasks", "F2P", "Repos", "Top repo", "Gate"];
     var thead = "<tr>" + HEAD.map(function (h, i) {
       return "<th" + (i >= 1 && i <= 4 ? ' class="tdb-num"' : "") + ">" + h + "</th>";
     }).join("") + "</tr>";
@@ -1037,7 +1036,7 @@
        masthead <dd> is a one-line slot. The path in full is on the methods
        page this section links to. */
     var where = String(pick(src.path, src.file) || "").split("/").pop();
-    put("cap-src", (src.symbol ? "<code>" + esc(String(src.symbol).split(" ")[0]) + "</code>" : "taxonomy") +
+    put("cap-src", (src.symbol ? "<code>" + esc(String(src.symbol).split(" ")[0]) + "</code>" : "Taxonomy") +
       (where ? " in <code>" + esc(where) + "</code>" : "") +
       (src.commit ? " &middot; " + esc(String(src.commit).slice(0, 7)) : "") +
       " &middot; rule-based, deterministic");
@@ -1056,13 +1055,13 @@
 
     var ver = cap.verification || {};
     put("cap-verify", ver.stored_labels_match_rederivation === true
-      ? "every stored label reproduced on " + (ver.checked_packages == null
+      ? "Every stored label reproduced on " + (ver.checked_packages == null
           ? "the re-derivable packages" : ver.checked_packages + " package" +
           one(ver.checked_packages))
       : ver.stored_labels_match_rederivation === false
-        ? "<strong>a stored label did not reproduce</strong> &mdash; the shipped labels " +
+        ? "<strong>A stored label did not reproduce</strong> &mdash; the shipped labels " +
           "and the tagger disagree"
-        : "no re-derivation receipt published");
+        : "No re-derivation receipt published");
 
     /* ---- the caption ---------------------------------------------------
        The lesson -- a label carried by nearly every task separates nothing --
@@ -1114,7 +1113,7 @@
         "here &mdash; live withholds the oracle diff, so every count above is over " +
         "the " + (taggable == null ? "re-derivable ones" : taggable) +
         ' that could be checked. <a href="../guide/quality-methods/#report-capability">' +
-        "why &rarr;</a></p>");
+        "Why &rarr;</a></p>");
     }
 
     put("cap-caveat", cparts.join(""));
@@ -1209,7 +1208,7 @@
       'style="display:inline-block;vertical-align:-1px;margin:0 var(--sp-2) 0 0" ' +
       'aria-hidden="true" shape-rendering="crispEdges">' +
       '<rect x="2" y="2" width="5" height="5" fill="currentColor"/></svg>' +
-      "package carries this label &middot; blank = does not &middot; " +
+      "Package carries this label &middot; blank = does not &middot; " +
       "presence only, never a degree");
 
     /* The column-order caveat and the C4/C5 reading were the same finding the

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>recording a submission — terminal-daily-bench docs</title>
+<title>Recording a submission — terminal-daily-bench docs</title>
 <meta name="description" content="The submit_result CLI, the eight required fields it validates, and the content id that makes one submission one immutable cell.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -26,7 +26,7 @@
     <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>, in the
       <a href="../#schema">shape the schema fixes</a>.</p>
     <figure class="tdb-code">
-      <figcaption>validate, record, rebuild</figcaption>
+      <figcaption><code>validate</code>, <code>record</code>, <code>rebuild</code></figcaption>
       <pre><code># 1. Validate structure (exit 0 = valid, 1 = errors)
 python web/submit_result.py validate &lt; submission.json
 
@@ -60,6 +60,6 @@ python web/submit_result.py rebuild --store community_submissions \
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

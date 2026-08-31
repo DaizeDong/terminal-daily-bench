@@ -612,8 +612,8 @@ def suite_page_body(suite: dict, suite_tasks: list) -> str:
     )
 
     head = [
-        breadcrumb([("Home", "../../"), ("Benchmarks", "../"), (f"suite {sid}", None)]),
-        _h2(f"suite {sid}"),
+        breadcrumb([("Home", "../../"), ("Benchmarks", "../"), (f"Suite {sid}", None)]),
+        _h2(f"Suite {sid}"),
         _lede(lede),
         tags(status_pill(suite.get("status", "")),
              *[pill(language, "outline") for language in langs]),
@@ -763,7 +763,7 @@ def task_page_body(task: dict, pkg: dict) -> str:
     buttons = []
     for sid in suites:
         if safe_id(sid):
-            buttons.append((f"suite {sid}", f"../../benchmarks/{sid}/", False))
+            buttons.append((f"Suite {sid}", f"../../benchmarks/{sid}/", False))
     buttons.append(("all tasks", "../", False))
     if repo and pr:
         buttons.append(("source pull request", f"https://github.com/{repo}/pull/{pr}", False))
@@ -943,7 +943,7 @@ def main(argv=None) -> int:
             sid = safe_id(s.get("id"))
             st = by_suite.get(s.get("id"), [])
             html = render_page(
-                title=f"suite {sid} — terminal-daily-bench",
+                title=f"Suite {sid} — terminal-daily-bench",
                 description=(
                     f"The {sid} daily suite: "
                     f"{s.get('n_tasks', len(st))} tasks mined from merged pull requests."

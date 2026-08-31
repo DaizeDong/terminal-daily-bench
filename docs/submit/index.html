@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>submit results — terminal-daily-bench</title>
+<title>Submit results — terminal-daily-bench</title>
 <meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -77,7 +77,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";
@@ -173,14 +173,14 @@
      and the table element itself are all inside the `rows.length` branch, so
      the page can never print a schema it has no data for. */
   var VERIFIED_HEAD = [
-    { label: "rank", num: true }, { label: "submitter" }, { label: "model" },
-    { label: "scaffold" }, { label: "verified rate", num: true },
-    { label: "samples", num: true }, { label: "status" },
-    { label: "false accepts", num: true }
+    { label: "Rank", num: true }, { label: "Submitter" }, { label: "Model" },
+    { label: "Scaffold" }, { label: "Verified rate", num: true },
+    { label: "Samples", num: true }, { label: "Status" },
+    { label: "False accepts", num: true }
   ];
   var PENDING_HEAD = [
-    { label: "submitter" }, { label: "model" }, { label: "scaffold" },
-    { label: "samples", num: true }, { label: "status" }
+    { label: "Submitter" }, { label: "Model" }, { label: "Scaffold" },
+    { label: "Samples", num: true }, { label: "Status" }
   ];
 
   function renderVerified(rows, legacy) {
@@ -205,9 +205,9 @@
     var total = rows.reduce(function (n, row) { return n + verifiedN(row); }, 0);
     var solved = rows.reduce(function (n, row) { return n + (row.solved || 0); }, 0);
     set("verified-strip", scalars([
-      ["ranked groups", rows.length],
-      ["verified samples", total],
-      ["verified solves", solved]
+      ["Ranked groups", rows.length],
+      ["Verified samples", total],
+      ["Verified solves", solved]
     ]));
     show("verified-strip", true);
 

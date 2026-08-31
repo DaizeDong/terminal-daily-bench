@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>package files — terminal-daily-bench docs</title>
+<title>Package files — terminal-daily-bench docs</title>
 <meta name="description" content="One section per file in a published terminal-daily-bench task package: instruction.md, task.toml, tests/, environment/Dockerfile, solution/, PROVENANCE.json, record.json.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -23,16 +23,16 @@
     <h1>Package files</h1>
     <p class="tdb-doc-sub">One section per file in a published task directory.</p>
 
-    <h2 id="instruction"><a href="#instruction"><span class="tdb-id">instruction.md</span></a></h2>
+    <h2 id="instruction"><a href="#instruction">Inside <span class="tdb-id">instruction.md</span></a></h2>
     <p><code>instruction.md</code> is de-identified: upstream provenance &mdash; origin remote,
       project name, commit ids &mdash; is stripped, so the task is solved from the tree and the
       description alone.</p>
 
-    <h2 id="task-toml"><a href="#task-toml"><span class="tdb-id">task.toml</span></a></h2>
+    <h2 id="task-toml"><a href="#task-toml">Inside <span class="tdb-id">task.toml</span></a></h2>
     <p>Harbor&rsquo;s descriptor. The framework reads only <code>[environment]</code>
       (<code>eval.py::load_task</code>).</p>
     <figure class="tdb-code">
-      <figcaption>task.toml</figcaption>
+      <figcaption><code>task.toml</code></figcaption>
       <pre><code>schema_version = "1.1"
 
 [task]
@@ -69,7 +69,7 @@ storage_mb = 16384</code></pre>
         during scoring.</dd>
     </dl>
 
-    <h2 id="tests"><a href="#tests"><span class="tdb-id">tests/</span></a></h2>
+    <h2 id="tests"><a href="#tests">Inside <span class="tdb-id">tests/</span></a></h2>
     <p>Re-laid from the trusted package after the patch is applied.</p>
     <dl class="tdb-defs">
       <dt class="tdb-id">test.sh</dt>
@@ -84,7 +84,7 @@ storage_mb = 16384</code></pre>
         the environment image.</dd>
     </dl>
     <figure class="tdb-code">
-      <figcaption>tests/test.sh</figcaption>
+      <figcaption><code>tests/test.sh</code></figcaption>
       <pre><code>install    pytest + the project&#39;s test extras
 harden     <span class="text-muted-foreground">remove stray conftest.py / sitecustomize.py &middot; unset PYTHONPATH &middot; pin PATH</span>
 run        pytest -q -rA /tests/test_outputs.py
@@ -94,6 +94,6 @@ reward     1 on all-pass, else 0  -&gt;  /logs/verifier/reward.txt</code></pre>
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

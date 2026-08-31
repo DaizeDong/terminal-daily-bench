@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>scoring a task — terminal-daily-bench docs</title>
+<title>Scoring a task — terminal-daily-bench docs</title>
 <meta name="description" content="How terminal-daily-bench re-lays the protected tests from the trusted package, what the execution gate proves, what it does not cover, and the per-run record it writes.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -25,7 +25,7 @@
     <h2 id="scoring"><a href="#scoring">How scoring re-lays the protected tests</a></h2>
     <p><strong>Execution-only</strong>: no LLM judge can turn a claim into a score.</p>
     <figure class="tdb-code">
-      <figcaption>terminal_daily_bench/eval.py &middot; terminal_daily_bench/harbor_score.py</figcaption>
+      <figcaption><code>terminal_daily_bench/eval.py</code> &middot; <code>terminal_daily_bench/harbor_score.py</code></figcaption>
       <pre><code>1  task package  -&gt;  run copy (.tdb_work/runs/...)   <span class="text-muted-foreground">the model never touches the trusted original</span>
 2  model  &lt;-  instruction + the source file(s) the reference solution touches
 3  model  -&gt;  one unified diff                       <span class="text-muted-foreground">eval.py::extract_diff</span>
@@ -63,7 +63,7 @@
     <h2 id="scoring-record"><a href="#scoring-record">Per-run result record</a></h2>
     <p>One JSON object per run, recording the reward and what the gate did and did not check.</p>
     <figure class="tdb-code">
-      <figcaption>result record</figcaption>
+      <figcaption>Result record</figcaption>
       <pre><code>{ "model": "...", "task": "td-fc90ea8b76d5f6b6", "scaffold": "single_shot_patch",
   "reward": 1.0, "solved": true, "patch_applied": true,
   "false_accept_check": { "gate": "harbor_protected_tests",
@@ -78,6 +78,6 @@
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

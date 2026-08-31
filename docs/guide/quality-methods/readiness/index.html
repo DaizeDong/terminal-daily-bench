@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>the readiness verdict — terminal-daily-bench docs</title>
 <meta name="description" content="What a bad value looks like on each of the seven axes, the three-constraint GO/NO-GO rule, and the fields the verdict carries.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <h2 id="axis-failure-modes"><a href="#axis-failure-modes">What a bad value looks like</a></h2>
     <div class="tdb-plain-table">
       <table>
-        <thead><tr><th>axis</th><th>what it asks</th><th>reads</th><th>what a bad value looks like</th></tr></thead>
+        <thead><tr><th>Axis</th><th>What it asks</th><th>Reads</th><th>What a bad value looks like</th></tr></thead>
         <tbody>
           <tr><th class="tdb-id">D</th><td class="tdb-wrap">Discriminative yield: tasks that split the field (<code>0 &lt; solvers &lt; n_models</code>).</td><td class="tdb-id">[0,1]</td><td class="tdb-wrap">Low D: mostly all-pass or all-fail rows. Below the <code>min_D</code> gate the day cannot rank anyone.</td></tr>
           <tr><th class="tdb-id">C</th><td class="tdb-wrap">Difficulty coverage: normalized entropy of the per-task solve-rate buckets.</td><td class="tdb-id">[0,1]</td><td class="tdb-wrap">C near 0: every task in one difficulty band. The set then measures one point on the ability curve.</td></tr>
@@ -47,12 +47,12 @@ D 95%-CI half-width &le; max_d_halfwidth   (default 0.15)</code></pre></figure>
       <dd>The failing constraint that demands the most tasks.</dd>
       <dt class="tdb-id">recommended_n</dt>
       <dd><code>max(precision-required-N, reliability-required-N)</code>.</dd>
-      <dt>status</dt>
+      <dt>Status</dt>
       <dd>Advisory only: it never gates an accept.</dd>
     </dl>
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

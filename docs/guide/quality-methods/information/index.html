@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IRT information and KR-20 — terminal-daily-bench docs</title>
 <meta name="description" content="2PL Fisher test information, its two item parameters, and KR-20 internal-consistency reliability.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -23,9 +23,9 @@ I_test(theta) = &#931;_items a&sup2; &middot; P &middot; (1 &minus; P)          
 
     <h2 id="I-params"><a href="#I-params">The two item parameters</a></h2>
     <dl class="tdb-defs">
-      <dt><code>b</code> &mdash; difficulty</dt>
+      <dt><code>b</code> &mdash; Difficulty</dt>
       <dd><code>logit(1 &minus; solve_rate)</code>; harder tasks (low solve-rate) get higher <code>b</code>.</dd>
-      <dt><code>a</code> &mdash; discrimination</dt>
+      <dt><code>a</code> &mdash; Discrimination</dt>
       <dd><code>max(0.2, |r_pb|&middot;2 + 0.2)</code>, where <code>r_pb</code> is the task&rsquo;s <strong>point-biserial</strong> correlation with the per-model total score. An all-pass, all-fail or non-correlating item floors to a small <code>a</code> &mdash; it discriminates nothing.</dd>
       <dt class="tdb-id">select_max_information</dt>
       <dd>The max-information subset is exactly the top-k items, so there is no greedy pass.</dd>
@@ -33,7 +33,7 @@ I_test(theta) = &#931;_items a&sup2; &middot; P &middot; (1 &minus; P)          
       <dd>That SE; <code>&infin;</code> with no information.</dd>
     </dl>
 
-    <h2 id="kr20"><a href="#kr20">KR-20 &mdash; reliability</a></h2>
+    <h2 id="kr20"><a href="#kr20">KR-20 &mdash; Reliability</a></h2>
     <p>Kuder-Richardson 20 &mdash; internal-consistency reliability for binary items.</p>
     <figure class="tdb-code"><pre><code>KR20 = ( k / (k&minus;1) ) &middot; ( 1 &minus; &#931; p_i&middot;q_i / &sigma;&sup2;_total )</code></pre></figure>
 
@@ -49,6 +49,6 @@ I_test(theta) = &#931;_items a&sup2; &middot; P &middot; (1 &minus; P)          
   </article>
 </main>
 
-<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+<script src="../../../assets/site.js?v=b518091f1a" data-root="../../.." data-page="docs"></script>
 </body>
 </html>

@@ -1471,7 +1471,12 @@ def check_public_frontend() -> list[str]:
             )
 
     shell = source("assets/site.js")
-    labels = ['["status"', '["leaderboard"', '["tasks"', '["docs"', '["submit"']
+    # Ordered by HREF, not by the display label. This matched '["status"' and
+    # friends, so capitalising the visible labels for a formal masthead broke a
+    # gate whose subject is the ORDER of the rows. The href is the stable half
+    # of a NAV entry -- it is what the row points at, it cannot be restyled,
+    # and it is what would actually have to change for the order to be wrong.
+    labels = ['"benchmarks/"', '"leaderboard/"', '"registry/"', '"guide/"', '"submit/"']
     positions = [shell.find(label) for label in labels]
     if any(pos < 0 for pos in positions) or positions != sorted(positions):
         bad.append("assets/site.js: navigation must order status, leaderboard, tasks, docs, submit")

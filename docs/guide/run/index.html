@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>run a task — terminal-daily-bench docs</title>
+<title>Run a task — terminal-daily-bench docs</title>
 <meta name="description" content="Build a task image, score a model on a task with the single_shot_patch scaffold, and prove the execution gate with the oracle baseline.">
-<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -79,7 +79,7 @@ tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.j
   </article>
 </main>
 
-<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="run"></script>
+<script src="../../assets/site.js?v=b518091f1a" data-root="../.." data-page="run"></script>
 <script>
 (async function () {
   var T = window.TDB;
@@ -118,8 +118,17 @@ tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.j
       status = "task";
       cmd = "tdb run &lt;MODEL&gt; tasks/&lt;archive|live&gt;/" + t.id;
     }
+    /* `live` and `archive` are the two values the `status` field takes, not
+       English words for them -- so they are marked <code>, the same hook the
+       rest of the site uses for a field value. The fallback branch has no
+       value to name (the leaderboard snapshot carries ids without a status),
+       so its "task" is a plain noun and stays plain: marking it would claim a
+       value that does not exist. */
+    var slot = (t.status === "live" || t.status === "archive")
+      ? "<code>" + status + "</code>"
+      : status;
     return "<dt><a href=\"" + T.ROOT + "/registry/" + encodeURIComponent(t.id) + "/\"><code>" +
-      t.id + "</code></a></dt><dd>" + status + " &middot; <code>" + cmd + "</code></dd>";
+      t.id + "</code></a></dt><dd>" + slot + " &middot; <code>" + cmd + "</code></dd>";
   }).join("") + "</dl>";
 })();
 </script>

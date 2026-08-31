@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard — terminal-daily-bench</title>
 <meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
-<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
-<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -66,8 +66,8 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="leaderboard"></script>
-<script src="../assets/tdb-data.js?v=11e80328f8"></script>
+<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=b518091f1a"></script>
 <script>
 (function () {
   "use strict";
@@ -708,7 +708,7 @@
      the day IS the version. Counts that were four cards are one line above the
      table, next to the entry count they belong with. */
   function heading(day) {
-    byId("title").textContent = "terminal-daily@" + day.date;
+    byId("title").textContent = "Suite terminal-daily@" + day.date;
     /* The command has to be one a reader can actually run. This block used to
        print `tdb run --suite <date> -a <agent> -m <model>`, invented by analogy
        with the reference site: `tdb run` takes a positional MODEL and TASK plus
@@ -786,8 +786,8 @@
   /* One badge, not a paragraph. */
   function officialBadge(day) {
     return formalAuthority(day)
-      ? '<span class="tdb-badge" data-official="true">official</span>'
-      : '<span class="tdb-badge" data-official="false">unofficial</span>';
+      ? '<span class="tdb-badge" data-official="true">Official</span>'
+      : '<span class="tdb-badge" data-official="false">Unofficial</span>';
   }
 
   /* ------------------------------------------------------------------ *

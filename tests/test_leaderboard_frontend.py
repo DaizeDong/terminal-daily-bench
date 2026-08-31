@@ -177,8 +177,13 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
     nav = _nav_table()
 
     # the pinned five, in the pinned order, with quality NOT among them
-    assert [row[0] for row in nav] == [
-        "status", "leaderboard", "tasks", "docs", "submit"
+    # Ordered by HREF. The display labels are prose and were capitalised for a
+    # formal masthead; the hrefs are what the rows point at and cannot be
+    # restyled, so they are what an order assertion should be made of. Keeping
+    # the label form here would have made every future copy edit a test
+    # failure, which is how a gate stops being read.
+    assert [row[1] for row in nav] == [
+        "benchmarks/", "leaderboard/", "registry/", "guide/", "submit/"
     ]
 
     # every key belongs to exactly one row, or two header items light at once
@@ -186,8 +191,8 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
     assert len(keys) == len(set(keys)), "a page key lights up two nav items"
 
     # landing on the report lights `docs`, which is the row that owns the key
-    owners = [row[0] for row in nav if "quality" in row[2]]
-    assert owners == ["docs"], owners
+    owners = [row[1] for row in nav if "quality" in row[2]]
+    assert owners == ["guide/"], owners
 
     quality_page = (ROOT / "docs" / "quality" / "index.html").read_text(
         encoding="utf-8")

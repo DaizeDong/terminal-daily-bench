@@ -184,13 +184,13 @@
      report, and /guide/ carries a card for it. A key belongs to exactly ONE
      row here: two rows claiming the same key would light two items at once. */
   var NAV = [
-    ["status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
-    ["leaderboard", "leaderboard/", ["leaderboard"]],
-    ["tasks",       "registry/",    ["tasks", "registry", "task"]],
-    ["docs",        "guide/",       ["run", "quickstart", "docs", "guide",
+    ["Status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
+    ["Leaderboard", "leaderboard/", ["leaderboard"]],
+    ["Tasks",       "registry/",    ["tasks", "registry", "task"]],
+    ["Docs",        "guide/",       ["run", "quickstart", "docs", "guide",
                                       "task-format", "submission",
                                       "quality-methods", "quality"]],
-    ["submit",      "submit/",      ["submit"]]
+    ["Submit",      "submit/",      ["submit"]]
   ];
 
   /* == DOCNAV -- the documentation index, and the only copy of it ==========
@@ -325,7 +325,7 @@
     }).join("");
     out += '<li class="list-none"><a href="' + GITHUB + '" rel="noreferrer noopener" ' +
       'target="_blank" class="' + LINK_CLS + (extraCls || '') +
-      '" data-active="false">github</a></li>';
+      '" data-active="false">GitHub</a></li>';
     return out;
   }
 
@@ -354,7 +354,7 @@
           (on ? ' aria-current="page"' : "") + ">" + esc(label) + "</a></li>";
       }
     });
-    return '<p class="tdb-menu-g">documentation</p>' +
+    return '<p class="tdb-menu-g">Documentation</p>' +
       '<ul class="flex flex-col">' + walked.html + "</ul>";
   }
 
@@ -366,7 +366,7 @@
             '<span class="tdb-brand-mark" aria-hidden="true"></span>' +
             '<span class="tdb-brand-copy">' +
               '<span class="tdb-brand-name">Terminal Daily</span>' +
-              '<span class="tdb-brand-kicker">living benchmark</span>' +
+              '<span class="tdb-brand-kicker">Living benchmark</span>' +
             "</span></a>" +
           /* max-lg, not max-sm: this <ul> does not wrap (no flex-wrap), so
              between 640px and 1023px it was rendering the full label row AND
@@ -973,7 +973,7 @@
     return '<button type="button" class="tdb-findbtn' + (extraCls || "") +
       '" data-tdb-find-open="" aria-label="Search the guide" ' +
       'aria-keyshortcuts="Control+K Meta+K">' + ICON_SEARCH +
-      '<span class="tdb-findbtn-t">search</span>' +
+      '<span class="tdb-findbtn-t">Search</span>' +
       '<kbd class="tdb-findbtn-k">' + searchKeyLabel() + "</kbd></button>";
   }
 
