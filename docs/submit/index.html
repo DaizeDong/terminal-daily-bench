@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>submit results — terminal-daily-bench</title>
 <meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -15,7 +15,7 @@
   <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
     <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
 
-      <nav aria-label="breadcrumb" data-slot="breadcrumb" class="mb-6 hidden font-mono sm:block">
+      <nav aria-label="breadcrumb" data-slot="breadcrumb" class="hidden font-mono sm:block">
         <ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5">
           <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><a class="hover:text-foreground transition-colors" href="../">Home</a></li>
           <li data-slot="breadcrumb-separator" aria-hidden="true">/</li>
@@ -24,85 +24,60 @@
       </nav>
 
       <h1 class="font-mono text-4xl tracking-tighter">Submit results</h1>
-      <p class="text-muted-foreground mt-4 max-w-4xl font-mono text-sm/relaxed">Recorded is not verified.</p>
+      <p class="text-muted-foreground max-w-4xl font-mono text-sm/relaxed">Recorded is not verified.</p>
 
-      <div class="bg-card mt-6 border-y px-6 py-6 font-mono text-sm/relaxed md:border-x" data-tdb-integrity>
-        <p>The public bundle does not run a replay worker: a submission stays <span class="text-foreground">pending</span> until an operator publishes an Ed25519-signed v2 receipt, and ranking needs complete frozen-roster coverage.</p>
-        <p class="mt-4">Pending rows never enter the verified ranking. <a class="text-foreground underline underline-offset-4" href="../guide/submission/#operator-replay">Replay authority</a>.</p>
-        <p class="text-muted-foreground mt-4">Local runs need the unpublished patched Harbor fork, not stock 0.13.1. <a class="text-foreground underline underline-offset-4" href="../guide/quickstart/#requirements">Requirements</a>.</p>
-      </div>
+      <!-- A four-row `gate -> state` table stood here. Its left column held
+           four nouns and its right column held the four sentences; deleting
+           the nouns costs nothing, because every sentence already names the
+           gate it is about. Each phrase the site contract pins is verbatim. -->
+            <p>The public bundle does not run a replay worker. A submission stays pending until an operator publishes an Ed25519-signed v2 receipt; pending rows never enter the verified ranking. <a href="../guide/submission/#operator-replay">Replay authority</a>.</p>
+      <p>Ranking needs complete frozen-roster coverage. Local runs need the unpublished patched Harbor fork, not stock 0.13.1. <a href="../guide/quickstart/#requirements">Requirements</a>.</p>
+    
 
       <section id="mechanic" class="tdb-block" data-tdb-section="mechanic">
         <div class="tdb-block-head">
-          <h2>submission state</h2>
+          <h2>Submission state</h2>
           <p>record → pending → replay receipt</p>
-          <div class="tdb-block-tools"><a href="../guide/submission/">format and validation &rarr;</a></div>
+          <div class="tdb-block-tools"><a href="../guide/submission/">Format and validation &rarr;</a></div>
         </div>
         <div class="bg-fd-secondary/50 border px-6 py-4 font-mono text-sm/relaxed">
           <code>python3 web/submit_result.py record --authenticated-submitter github:LOGIN &lt; submission.json</code>
-          <p class="text-muted-foreground mt-2">Labels are self-reported; a claimed reward is stored for audit, never scored.</p>
         </div>
+        <p class="text-muted-foreground">Labels are self-reported; a claimed reward is stored for audit, never scored.</p>
       </section>
 
       <section id="verified" class="tdb-block" data-tdb-section="verified" data-tdb-primary-data>
         <div class="tdb-block-head">
-          <h2>verified community results · replay authority</h2>
-          <p>signed receipts + full frozen roster</p>
+          <h2>Verified community results · replay authority</h2>
+          <p>Signed receipts + full frozen roster</p>
           <div class="tdb-block-tools"><p id="verified-count">0 entries</p></div>
         </div>
-        <div class="mb-6 grid grid-cols-2 md:grid-cols-3" id="verified-strip"></div>
-        <div class="bg-card border-y font-mono md:border-x">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto">
-            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b">
-                <tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">rank</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">submitter</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">model</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">scaffold</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base"><div class="flex justify-end">verified rate</div></th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base"><div class="flex justify-end">samples</div></th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">status</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base"><div class="flex justify-end">false accepts</div></th>
-                </tr>
-              </thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="verified-body"></tbody>
-            </table>
-          </div>
-          <div class="text-muted-foreground px-6 py-8 text-center font-mono text-sm" id="verified-empty">loading verified results&hellip;</div>
-        </div>
+        <!-- Thirteen column headers stood above zero rows on this page: eight
+             here and five under `pending`. A table with no rows states nothing
+             and asks the reader to parse a schema instead; the sentence below
+             states the fact. Both tables are built by JS only when there is a
+             row to put in one, so the empty state is a sentence and the header
+             row arrives with its data or not at all. -->
+        <dl class="tdb-defs" data-inline id="verified-strip"></dl>
+        <div class="tdb-plain-table" id="verified-table"></div>
+        <p class="tdb-empty" id="verified-empty">Loading verified results&hellip;</p>
       </section>
 
       <section id="pending" class="tdb-block" data-tdb-section="pending">
         <div class="tdb-block-head">
-          <h2>pending submissions</h2>
-          <p>listed for audit; excluded from ranking</p>
+          <h2>Pending submissions</h2>
+          <p>Listed for audit; excluded from ranking</p>
           <div class="tdb-block-tools"><p id="pending-count">0 entries</p></div>
         </div>
-        <div class="bg-card border-y font-mono md:border-x">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto">
-            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
-              <thead data-slot="table-header" class="[&amp;_tr]:border-b">
-                <tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">submitter</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">model</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">scaffold</th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base"><div class="flex justify-end">samples</div></th>
-                  <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap py-3 text-base">status</th>
-                </tr>
-              </thead>
-              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="pending-body"></tbody>
-            </table>
-          </div>
-          <div class="text-muted-foreground px-6 py-8 text-center font-mono text-sm" id="pending-empty">loading pending submissions&hellip;</div>
-        </div>
+        <div class="tdb-plain-table" id="pending-table"></div>
+        <p class="tdb-empty" id="pending-empty">Loading pending submissions&hellip;</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";
@@ -112,20 +87,33 @@
     return String(value == null ? "" : value).replace(/[&<>"]/g, function (c) { return ENT[c]; });
   }
   function byId(id) { return document.getElementById(id); }
-  function td(inner) {
-    return '<td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap py-4 text-base">' + inner + "</td>";
+  function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
+  function show(id, on) { var el = byId(id); if (el) el.style.display = on ? "" : "none"; }
+
+  /* A header row is part of the data, not part of the page furniture: it is
+     emitted here, beside the rows it labels, so it cannot outlive them. */
+  function table(head, body) {
+    return '<table class="w-full caption-bottom"><thead><tr>' +
+      head.map(function (h) {
+        return "<th" + (h.num ? ' class="tdb-num"' : "") + ">" + h.label + "</th>";
+      }).join("") + "</tr></thead><tbody>" + body + "</tbody></table>";
   }
-  var TR = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
-  var BADGE = "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 transition-[color,box-shadow] overflow-hidden border-transparent font-mono ";
-  function badge(text, verified) {
-    return '<span data-slot="badge" class="' + BADGE +
-      (verified ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground") +
-      '">' + esc(text) + "</span>";
+  function td(inner, num) {
+    return "<td" + (num ? ' class="tdb-num"' : "") + ">" + inner + "</td>";
   }
-  function statCard(label, value) {
-    return '<div class="bg-card -mb-px border px-6 py-6 font-mono">' +
-      '<p class="text-muted-foreground text-xs">' + esc(label) + "</p>" +
-      '<p class="mt-2 text-xl font-medium tabular-nums">' + esc(value) + "</p></div>";
+  /* A badge marks STATE. `scaffold` is a value, not a state, so it is printed
+     as the identifier it is; only the receipt status gets the marker. */
+  function state(text) {
+    return '<span data-slot="badge" data-state>' + esc(text) + "</span>";
+  }
+  function id(text) { return '<span class="tdb-id">' + esc(text) + "</span>"; }
+
+  /* Three bordered cards carried three integers. A measured scalar is a term
+     and its value on one line -- the same list the quality page uses. */
+  function scalars(pairs) {
+    return pairs.map(function (pair) {
+      return "<dt>" + esc(pair[0]) + "</dt><dd>" + esc(pair[1]) + "</dd>";
+    }).join("");
   }
   function verifiedN(row) {
     if (row.verified != null) return row.verified;
@@ -180,71 +168,106 @@
     };
   }
 
+  /* Both renderers take the same shape: NOTHING is drawn on an empty result
+     except the sentence that says it is empty. The header row, the scalars
+     and the table element itself are all inside the `rows.length` branch, so
+     the page can never print a schema it has no data for. */
+  var VERIFIED_HEAD = [
+    { label: "rank", num: true }, { label: "submitter" }, { label: "model" },
+    { label: "scaffold" }, { label: "verified rate", num: true },
+    { label: "samples", num: true }, { label: "status" },
+    { label: "false accepts", num: true }
+  ];
+  var PENDING_HEAD = [
+    { label: "submitter" }, { label: "model" }, { label: "scaffold" },
+    { label: "samples", num: true }, { label: "status" }
+  ];
+
   function renderVerified(rows, legacy) {
-    var body = byId("verified-body");
-    var empty = byId("verified-empty");
-    var total = rows.reduce(function (n, row) { return n + verifiedN(row); }, 0);
-    var solved = rows.reduce(function (n, row) { return n + (row.solved || 0); }, 0);
-    byId("verified-count").textContent = rows.length + (rows.length === 1 ? " entry" : " entries");
-    byId("verified-strip").innerHTML = [
-      statCard("ranked groups", rows.length),
-      statCard("verified samples", total),
-      statCard("verified solves", solved)
-    ].join("");
+    byId("verified-count").textContent =
+      rows.length + (rows.length === 1 ? " entry" : " entries");
+
     if (!rows.length) {
-      body.innerHTML = "";
-      empty.classList.remove("hidden");
-      empty.innerHTML = "No replay receipts have been published. The verified ranking is empty.";
+      set("verified-table", "");
+      set("verified-strip", "");
+      show("verified-strip", false);
+      /* "false accepts" is a column of em dashes when it does appear, and an
+         em dash means UNMEASURED. With no rows at all there is no column to
+         carry that, so the sentence carries it. */
+      set("verified-empty", "No replay receipts have been published, so the " +
+        "verified ranking is empty. Semantic verifier false-accept is unmeasured " +
+        "either way: an accepted replay proves execution, not that the tests " +
+        "reject a wrong answer.");
+      show("verified-empty", true);
       return;
     }
-    empty.classList.add("hidden");
-    var sorted = rows.slice().sort(function (a, b) {
+
+    var total = rows.reduce(function (n, row) { return n + verifiedN(row); }, 0);
+    var solved = rows.reduce(function (n, row) { return n + (row.solved || 0); }, 0);
+    set("verified-strip", scalars([
+      ["ranked groups", rows.length],
+      ["verified samples", total],
+      ["verified solves", solved]
+    ]));
+    show("verified-strip", true);
+
+    var body = rows.slice().sort(function (a, b) {
       var an = verifiedN(a), bn = verifiedN(b);
       var ar = an ? (a.solved || 0) / an : 0;
       var br = bn ? (b.solved || 0) / bn : 0;
       return br - ar || bn - an;
-    });
-    body.innerHTML = sorted.map(function (row, index) {
+    }).map(function (row, index) {
       var n = verifiedN(row);
       var receiptState = row.receipt_status || row.verify_status || "verified";
       var fa = row.false_accept == null ? "&mdash;" : esc(row.false_accept);
-      return '<tr data-slot="table-row" class="' + TR + '">' +
-        td('<p class="tabular-nums">' + (index + 1) + "</p>") +
+      return "<tr>" +
+        td(index + 1, true) +
         td(esc(row.submitter || "&mdash;")) +
-        td(esc(row.model || "&mdash;")) +
-        td(badge(row.scaffold || "unknown", false)) +
-        td(T.rateCell({ n: n, solved: row.solved || 0 })) +
-        td('<p class="text-right tabular-nums">' + n + "</p>") +
-        td(badge(receiptState, true)) +
-        td('<p class="text-right tabular-nums">' + fa + "</p>") +
+        td(id(row.model || "\u2014")) +
+        td(id(row.scaffold || "unknown")) +
+        td(T.rateCell({ n: n, solved: row.solved || 0 }), true) +
+        td(n, true) +
+        td(state(receiptState)) +
+        td(fa, true) +
         "</tr>";
     }).join("");
-    if (legacy) empty.innerHTML = "Compatibility view split from legacy community data.";
+    set("verified-table", table(VERIFIED_HEAD, body));
+
+    /* An em dash under `false accepts` is a tri-state null, not a zero. It is
+       said in words under the table it qualifies, every time that table is
+       drawn, because a dash on its own is silent. */
+    set("verified-empty", (legacy
+      ? "Compatibility view split from legacy community data. " : "") +
+      "An em dash under false accepts means unmeasured, not zero: semantic " +
+      "verifier false-accept is not measured on this catalogue.");
+    show("verified-empty", true);
   }
 
   function renderPending(rows) {
-    var body = byId("pending-body");
-    var empty = byId("pending-empty");
     var total = rows.reduce(function (n, row) { return n + pendingN(row); }, 0);
     byId("pending-count").textContent = total + (total === 1 ? " sample" : " samples");
+
     if (!rows.length) {
-      body.innerHTML = "";
-      empty.classList.remove("hidden");
-      empty.innerHTML = "No pending submissions are published.";
+      set("pending-table", "");
+      set("pending-empty", "No pending submissions are published.");
+      show("pending-empty", true);
       return;
     }
-    empty.classList.add("hidden");
-    body.innerHTML = rows.slice().sort(function (a, b) {
+
+    var body = rows.slice().sort(function (a, b) {
       return pendingN(b) - pendingN(a);
     }).map(function (row) {
-      return '<tr data-slot="table-row" class="' + TR + '">' +
+      return "<tr>" +
         td(esc(row.submitter || "&mdash;")) +
-        td(esc(row.model || "&mdash;")) +
-        td(badge(row.scaffold || "unknown", false)) +
-        td('<p class="text-right tabular-nums">' + pendingN(row) + "</p>") +
-        td(badge(pendingStatus(row), false)) +
+        td(id(row.model || "\u2014")) +
+        td(id(row.scaffold || "unknown")) +
+        td(pendingN(row), true) +
+        td(state(pendingStatus(row))) +
         "</tr>";
     }).join("");
+    set("pending-table", table(PENDING_HEAD, body));
+    set("pending-empty", "");
+    show("pending-empty", false);
   }
 
   T.getJSON("leaderboard_data.json").then(function (board) {

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the false-accept check — terminal-daily-bench docs</title>
+<meta name="description" content="What the false_accept_check block in every result record records about the execution boundary that produced the score, and what false_accept: 0 does not claim.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<!-- Split out of ../quickstart/ by way of ../result-record/. The record page
+     measured 2633px with this block on it, over the shell's 2500px bound, and
+     the bound is the reference's own argument: a page that has to be told
+     where it is, is a page carrying two topics. The record is one topic; what
+     the gate does and does not certify is the other.
+
+     ../quickstart/ forwards #fa-block here; #fa-replay and #fa-scope are new
+     ids over material that was already inside the old #fa-block section -- its
+     five-entry definition list, split where its meaning splits, and the scope
+     caveat that used to be the quickstart page's third lede paragraph. -->
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+
+    <h1>The false-accept check</h1>
+    <p class="tdb-doc-sub">Which boundary produced the score, and what that boundary does not certify.</p>
+
+    <h2 id="fa-block"><a href="#fa-block">The false_accept_check block</a></h2>
+    <p>Every result record carries this block. It records which deterministic execution boundary
+      produced the score.</p>
+    <dl class="tdb-defs">
+      <dt><code>gate: "harbor_protected_tests"</code></dt>
+      <dd>Scoring is the Harbor execution gate and nothing else.</dd>
+      <dt><code>reward_source</code></dt>
+      <dd>The reward is read from <code>result.json</code> with the same reader the admission gate
+        uses (<code>harbor_score.read_harbor_reward</code>).</dd>
+    </dl>
+
+    <h2 id="fa-replay"><a href="#fa-replay">Why a patch cannot score itself</a></h2>
+    <dl class="tdb-defs">
+      <dt><code>protected_tests_relaid_by_harbor: true</code></dt>
+      <dd>The trusted <code>tests/</code> are re-laid from the task package <em>after</em> the patch,
+        so a patch that edits tests only changes a discarded workspace.</dd>
+      <dt><code>model_is_judge: false</code></dt>
+      <dd>The model is the subject under test, never the judge.</dd>
+      <dt><code>model_patch_touched_tests</code></dt>
+      <dd>Flags whether the model&rsquo;s diff touched any <code>test</code>-named path;
+        informational, and it cannot affect the score.</dd>
+    </dl>
+
+    <h2 id="fa-scope"><a href="#fa-scope">What false_accept: 0 does not claim</a></h2>
+    <p><code>false_accept: 0</code> is a compatibility field scoped by <code>scope</code> to replay
+      integrity: no acceptance bypassed the protected test run. It does not by itself establish
+      semantic verifier quality, and it does not estimate semantic verifier false-accept, which
+      remains <code>null</code> pending an exploit corpus.</p>
+    <p>That covers claim bypass only; semantic verifier false-accept remains unmeasured.</p>
+    <p>Records aggregate into a <a href="../quality-card/">quality card</a>.</p>
+
+  </article>
+</main>
+
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
+</body>
+</html>

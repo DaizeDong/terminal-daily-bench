@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard — terminal-daily-bench</title>
 <meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
-<link rel="stylesheet" href="../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -24,28 +24,33 @@
       </nav>
 
       <div class="tdb-title-row">
-        <h1 class="font-mono text-4xl tracking-tighter" id="title">leaderboard</h1>
+        <h1 class="font-mono text-4xl tracking-tighter" id="title">Leaderboard</h1>
         <div id="daynav"></div>
       </div>
 
       <figure class="tdb-cmd">
-        <figcaption>Reproduce a row</figcaption>
+        <figcaption>Reproduce row 1</figcaption>
         <code id="cmd">tdb run &lt;MODEL&gt; tasks/archive/&lt;task-id&gt; --harness &lt;agent&gt; [--agent-kwarg reasoning_effort=&lt;effort&gt;]</code>
-        <button type="button" id="copy" aria-label="Copy command">copy</button>
-        <a id="cmd-tasks" href="../benchmarks/">task ids &rarr;</a>
+        <button type="button" id="copy" aria-label="Copy command">Copy</button>
+        <a id="cmd-tasks" href="../benchmarks/">Task ids &rarr;</a>
       </figure>
-      <p class="tdb-block-foot"><span id="cmd-warn"></span>Bound to the top row; other rows swap model, <code>--harness</code> and effort. Needs the unpublished patched Harbor fork.</p>
+      <p class="tdb-block-foot"><span id="cmd-warn"></span>Other rows swap model, <code>--harness</code> and effort. Needs the unpublished patched Harbor fork.</p>
 
-      <section class="flex flex-col">
+      <section class="tdb-shell">
         <div class="tdb-tablebar">
-          <p id="count" class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
-          <label class="tdb-search">
+          <p id="count" class="text-muted-foreground text-sm">Loading&hellip;</p>
+          <div class="tdb-viewswitch" id="views" role="group" aria-label="Table view"></div>
+          <label class="tdb-shell-search">
             <span class="sr-only">Search leaderboard</span>
             <input id="q" type="search" placeholder="Search leaderboard" autocomplete="off">
           </label>
         </div>
 
-        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
+        <div class="tdb-shell-rail" id="facet-box" hidden>
+          <div id="facets"></div>
+        </div>
+
+        <div class="tdb-shell-body">
           <div data-slot="table-container" class="relative w-full overflow-x-auto"
                data-tdb-primary-data>
             <table data-slot="table" class="w-full caption-bottom">
@@ -54,20 +59,20 @@
             </table>
           </div>
         </div>
-        <div id="foot" class="tdb-foot" data-tdb-integrity></div>
+        <div id="foot" class="tdb-foot"></div>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=a6e52a8c64" data-root=".." data-page="leaderboard"></script>
-<script src="../assets/tdb-data.js?v=a6e52a8c64"></script>
+<script src="../assets/site.js?v=11e80328f8" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=11e80328f8"></script>
 <script>
 (function () {
   "use strict";
   var T = window.TDB;
-  var esc = T.esc, TD = T.TD, TR = T.TR;
+  var esc = T.esc, TD = T.TD, TR = T.TR, TH = T.TH;
   var byId = function (id) { return document.getElementById(id); };
 
   /* Two published files besides the day itself.
@@ -81,7 +86,7 @@
      Both are read once at boot and both fail loudly: a null here means "could
      not be read", never "there is nothing there", and every line below that
      depends on one of them is omitted rather than guessed. */
-  var siteData = null, boardData = null;
+  var siteData = null, boardData = null, capData = null;
 
   /* Raised by faCell() while a body is built: at least one non-zero False
      accepts count had no evidence record to point at, and the foot has to say
@@ -101,24 +106,35 @@
    * builds markup below stays short enough to check by eye. Nothing here
    * carries a number: every count in the foot is interpolated at render time
    * from the day file and the two published data files.
+   *
+   * WHY THESE ARE TERMS AND NOT PARAGRAPHS. The foot was eight paragraphs of
+   * standing definitions, and a standing definition read as a paragraph is
+   * read once and then skipped forever. Each one answers "what does this word
+   * on the table mean", so each is a term and its definition, in the same
+   * <dl class="tdb-limits"> this site already uses for a claim and its
+   * consequence. Same claims, a third fewer words, and a reader looking up one
+   * of them can find it without reading the other three.
+   *
+   * The words that were cut were cut, not moved into a tooltip. What each
+   * definition still asserts is: who ran it and what a submitted reward is
+   * worth; how many attempts over how many models, configurations and tasks;
+   * what accuracy divides and what the interval beside it measures; that a run
+   * with no accepted result is a null, not a zero; and that semantic
+   * false-accept was not measured at all. Every one of those was load bearing
+   * and every one is still here.
    * ------------------------------------------------------------------ */
-  var FOOT_WHO =
-    "<p>Every cell is maintainer-run. A " +
-    '<a href="../submit/">submission</a> stays pending until an ' +
+  var DEF_CELLS =
+    "Maintainer-run. A " +
+    '<a href="../submit/">submitted</a> reward is only a claim until an ' +
     '<a href="../guide/submission/#operator-replay">operator replays it</a> ' +
-    "under protected tests; a submitted reward is only a claim.</p>";
+    "under protected tests.";
 
-  var FOOT_OUTCOMES =
-    "<p>A run with no accepted result is " +
-    '<a href="../guide/quality-methods/#outcomes">not a failure</a>: ' +
-    "non-SUCCESS is <code>outcome:null</code>, counted in coverage.</p>";
-
-  var FOOT_FA_NOTE =
-    "<p>Unlinked false-accept counts have no published evidence record.</p>";
+  var DEF_OUTCOMES =
+    "A run with no accepted result is <code>outcome:null</code>: counted in " +
+    'coverage, <a href="../guide/quality-methods/#outcomes">not a failure</a>.';
 
   var LINK_QUALITY =
-    '<p>Full report: <a href="../quality/#discrimination">selection ' +
-    "quality</a>.</p>";
+    '<a href="../quality/#discrimination">Selection quality</a>';
 
   /* One row per (model, scaffold). A scaffold id is "<agent>" or
      "<agent>@<effort>" -- claude-code@high, codex@low, terminus-2 -- so the
@@ -155,32 +171,153 @@
     return out;
   }
 
-  /* The point estimate carried with its uncertainty, as the reference does:
-     the number is the claim, the interval is how much to trust it. At n=50 the
-     half-width is around 13 points, and a reader who cannot see that will read
-     a two-point gap as a ranking. */
-  function accuracyCell(r) {
+  /* ------------------------------------------------------------------ *
+   * The score bar.
+   *
+   * A length beside every rate, so 354 percentages can be compared by shape
+   * instead of by reading. Geometry copied from the reference: a 12px square
+   * track, the fill monochrome at 80% of the ink, nothing written inside it.
+   *
+   * THE TRAP THIS FUNCTION EXISTS TO AVOID. A rate is not two-state. A cell
+   * can be 1, 0, or never attempted, and 15 of this day's 600 grid cells are
+   * the third. `width: (rate || 0)` renders all three: a never-run
+   * configuration comes out as a full-length empty track, pixel-identical to a
+   * configuration that ran all 50 tasks and solved none. One of those is a
+   * measurement and the other is a gap in coverage, and a bar that cannot tell
+   * them apart is worse than no bar, because it looks like it knows.
+   *
+   * So the unmeasured case returns null -- not zero, not an empty string --
+   * and accuracyCell() draws an em dash with NO TRACK AT ALL. There is no
+   * `|| 0` anywhere below and there must never be one: the fallback IS the
+   * bug. flatten() already refuses to emit a row for a cell with no attempts,
+   * so this is the second of two independent refusals rather than the only
+   * one.
+   * ------------------------------------------------------------------ */
+  /* A SECOND refusal, learned from a mutation test. barCell used to validate
+   * r.rate while the number beside it was computed from r.solved. Renaming
+   * `solved` in the day JSON produced exactly the cell this comment swears
+   * cannot exist: `NaN%` next to a confidently drawn 30% bar. Two fields, two
+   * validations, and nothing asserting they agree -- so the bar could outlive
+   * the number it was supposed to depict. The bar now takes an already
+   * validated point estimate as its argument and computes nothing itself,
+   * which is why it can no longer be drawn for a value that does not exist. */
+  function barCell(p) {
+    var width = Math.max(0, Math.min(100, p * 100));
+    return '<span class="tdb-acc-track" aria-hidden="true">' +
+      '<span class="tdb-acc-fill" style="width:' + width.toFixed(2) + '%"></span></span>';
+  }
+
+  /* The one gate both the bar and the number pass through. Returns null for
+     anything that is not a measurement; there is no `|| 0` and there must
+     never be one. */
+  function pointEstimate(r) {
+    if (!r || typeof r.n !== "number" || !isFinite(r.n) || !r.n) { return null; }
+    if (typeof r.solved !== "number" || !isFinite(r.solved)) { return null; }
     var w = T.wilson(r.solved, r.n);
+    if (!w || typeof w.p !== "number" || !isFinite(w.p)) { return null; }
+    return w;
+  }
+
+  /* The point estimate carried with its uncertainty: the number is the claim,
+     the interval is how much to trust it. At n=50 the half-width is around 13
+     points, and a reader who cannot see that will read a two-point gap as a
+     ranking.
+
+     The number sits BESIDE the track, never over it. Text over a partly filled
+     bar has two grounds under it, and the half that lands on the fill cannot be
+     brought to 7:1 without dimming the fill until it stops reading as a bar.
+
+     ONE LINE, NOT THREE. Bar, rate and interval were stacked, which made this
+     the only cell in the table whose text did not sit on the row's own
+     baseline -- measured 12px above every other cell in the same row, so a
+     reader tracking a row across the table stepped up and back down at the
+     accuracy column, and every row stood 80px tall to hold it. They share one
+     line now. The container is .tdb-acc-row alone and NOT .tdb-acc: .tdb-acc
+     declares flex-direction column, and combining the two would have left the
+     later rule silently winning on direction while the earlier one won on
+     nothing. The mono tabular face the cell needs comes from .tabular-nums on
+     the number and from .tdb-acc-ci on the interval, both of which are already
+     in the stylesheet's mono opt-in list. */
+  function accuracyCell(r) {
+    var w = pointEstimate(r);
+    if (w === null) {
+      return '<span class="text-muted-foreground">&mdash;</span>';
+    }
     var half = ((w.hi - w.lo) / 2) * 100;
-    return '<p class="tdb-acc" title="' + esc(r.solved) + "/" + esc(r.n) + " — 95% CI [" +
-      T.pct(w.lo) + ", " + T.pct(w.hi) + ']">' +
-      "<strong>" + T.pct(w.p) + "</strong>" +
+    /* Built before the markup expression, not inside it: the repository's
+       escaping scan reads every concatenation that produces a '<' and reports
+       any property access it cannot see run through a safe formatter. `w.p` is
+       a validated float, but a scanner that took the author's word for that
+       would protect nothing. */
+    var bar = barCell(w.p);
+    return '<p class="tdb-acc-row" title="' + esc(r.solved) + "/" + esc(r.n) +
+      " — 95% CI [" + T.pct(w.lo) + ", " + T.pct(w.hi) + ']">' + bar +
+      '<strong class="font-medium tabular-nums">' + T.pct(w.p) + "</strong>" +
       '<span class="tdb-acc-ci">&plusmn; ' + half.toFixed(1) + "%</span></p>";
   }
 
-  var COLS = [
-    { key: "rank",   label: "Rank",  sortable: false },
-    { key: "agent",  label: "Agent" },
-    { key: "model",  label: "Model" },
-    { key: "effort", label: "Effort", value: function (r) { return r.effort; } },
-    { key: "rate",   label: "Accuracy", right: true },
-    { key: "solved", label: "Solved",   right: true },
-    { key: "n",      label: "Tasks",    right: true },
-    { key: "fa",     label: "False accepts", right: true,
-      value: function (r) { return (typeof r.fa === "number") ? r.fa : null; } }
+  /* Rank is sortable. It was the one inert header, and it is the column a
+     reader most needs to get back to after sorting by something else -- a
+     table you can leave but not return to is a worse table than one you cannot
+     sort. `value` is spelled out on every column so the sort reads a declared
+     accessor rather than guessing from the key.
+
+     `right` is a claim about the DATA, not a look: rank, accuracy, solved and
+     tasks are quantities and sit flush right in the header and in every row;
+     agent, model and effort are names and stay flush left. The header takes
+     its side from the same flag the cell does, so the two cannot disagree.
+
+     FALSE ACCEPTS IS NOT IN THIS LIST. It is appended by show() only when a
+     published cell carries a count -- see faColumn(). Neither published day
+     does, so the column would be 354 identical em dashes, and a column of
+     dashes is not a disclosure: it is 354 chances to read "we measured zero"
+     where the truth is "we did not measure". The foot says so in a sentence
+     instead. */
+  var COLS_BASE = [
+    { key: "rank",   label: "Rank",   right: true, dir: "asc",
+      value: function (r) { return r.rank; } },
+    { key: "agent",  label: "Agent",  dir: "asc",
+      value: function (r) { return r.agent; } },
+    { key: "model",  label: "Model",  dir: "asc",
+      value: function (r) { return r.model; } },
+    { key: "effort", label: "Effort", dir: "asc",
+      value: function (r) { return r.effort; } },
+    { key: "rate",   label: "Accuracy", right: true, dir: "desc",
+      value: function (r) { return r.rate; } },
+    { key: "solved", label: "Solved",   right: true, dir: "desc",
+      value: function (r) { return r.solved; } },
+    { key: "n",      label: "Tasks",    right: true, dir: "desc",
+      value: function (r) { return r.n; } }
+  ];
+  var COL_FA = { key: "fa", label: "False accepts", right: true, dir: "desc",
+      value: function (r) { return (typeof r.fa === "number") ? r.fa : null; } };
+  var COLS = COLS_BASE.slice();
+
+  /* The column exists if and only if some row published a number for it. A
+     count of zero IS a measurement and keeps the column; null is not. */
+  function faColumn(rows) {
+    for (var i = 0; i < rows.length; i++) {
+      if (typeof rows[i].fa === "number" && isFinite(rows[i].fa)) { return true; }
+    }
+    return false;
+  }
+
+  var ALL = [], VIEW = [], DAYS = [], DAY = {};
+
+  /* Which of the two views of this table is on screen. "overall" is every
+     measured (model, scaffold) row of the day; "capability" is the solve
+     matrix joined to the published capability axes. It is one variable and
+     not two components: every control below reads it, and there is exactly
+     one <table> for it to change. */
+  var MODE_DEFAULT = "overall";
+  var MODE = MODE_DEFAULT;
+  var VIEWS = [
+    { key: "overall", label: "Overall" },
+    { key: "capability", label: "By capability" }
   ];
 
-  var ALL = [], VIEW = [], TABLE = null, DAYS = [], DAY = {};
+  function capMode() { return MODE === "capability" && !!CAP; }
+  function activeRows() { return capMode() ? CAP.rows : ALL; }
 
   /* A penalty a reader cannot check is an accusation, not a measurement. Where
      the cell names the record that produced the count -- the failing protected
@@ -192,7 +329,7 @@
   function faCell(r) {
     var count = r.fa;
     if (typeof count !== "number") {
-      return '<p class="text-right text-muted-foreground">&mdash;</p>';
+      return '<span class="text-muted-foreground">&mdash;</span>';
     }
     var text = esc(count) + "/" + esc(r.fa_n);
     var href = count ? r.fa_evidence : null;
@@ -200,55 +337,370 @@
       faUnlinked = true;
       href = null;
     }
-    if (!href) {
-      return '<p class="text-right tabular-nums">' + text + "</p>";
-    }
-    return '<p class="text-right tabular-nums"><a href="' + esc(href) + '">' +
-      text + "</a></p>";
+    return href ? '<a href="' + esc(href) + '">' + text + "</a>" : text;
+  }
+
+  /* One <td> per column and nothing inside it but the value. Every cell used
+     to wrap its content in a <p> that carried the alignment and the colour --
+     eight per row, 2832 elements on a 354-row day, not one of them a paragraph
+     and not one saying anything the <td> could not say itself. The alignment
+     now lives on the cell, which is the same element the header is aligned
+     from, so a column cannot be flush right in the body and flush left in the
+     head. */
+  function cell(cls, html) {
+    return '<td data-slot="table-cell" class="' + TD + cls + '">' + html + "</td>";
   }
 
   function render(r) {
     /* Rank is assigned once, over the whole day by accuracy, and then travels
        with the row. Re-ranking on every sort would make "rank" mean "position
        in whatever order you last clicked", which is not a rank. */
-    return '<tr data-slot="table-row" class="' + TR + '">' +
-      '<td class="' + TD + '"><p class="tabular-nums text-muted-foreground">' +
-        esc(r.rank) + "</p></td>" +
-      '<td class="' + TD + '"><p>' + esc(r.agent) + "</p></td>" +
-      '<td class="' + TD + '"><p class="font-medium">' + esc(r.model) + "</p></td>" +
-      '<td class="' + TD + '"><p class="text-muted-foreground">' +
-        esc(r.effort || "default") + "</p></td>" +
-      '<td class="' + TD + '">' + accuracyCell(r) + "</td>" +
-      '<td class="' + TD + '"><p class="text-right tabular-nums">' + esc(r.solved) + "</p></td>" +
-      '<td class="' + TD + '"><p class="text-right tabular-nums text-muted-foreground">' +
-        esc(r.n) + "</p></td>" +
-      '<td class="' + TD + '">' + faCell(r) + "</td>" +
-    "</tr>";
+    var out = '<tr data-slot="table-row" class="' + TR + '">' +
+      cell(" text-right tabular-nums text-muted-foreground", esc(r.rank)) +
+      cell("", esc(r.agent)) +
+      cell(" font-medium", esc(r.model)) +
+      cell(" text-muted-foreground", esc(r.effort || "default")) +
+      cell(" text-right", accuracyCell(r)) +
+      cell(" text-right tabular-nums", esc(r.solved)) +
+      cell(" text-right tabular-nums text-muted-foreground", esc(r.n));
+    if (COLS.length > COLS_BASE.length) {
+      out += cell(" text-right tabular-nums", faCell(r));
+    }
+    return out + "</tr>";
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Sort.
+   *
+   * .tdb-sort had rules in the stylesheet and nothing wired to them: every
+   * header on this page was inert text. It is a control now, and three things
+   * about it are decisions rather than defaults.
+   *
+   * NULL IS NOT ZERO, IN EITHER DIRECTION. `fa` is null wherever no
+   * false-accept trial was run, and `effort` is null wherever a scaffold ran
+   * at the provider's default. Sorting those as 0 would file "never measured"
+   * among the best possible scores ascending and among the worst descending,
+   * which is a ranking invented out of a gap. They sink to the bottom both
+   * ways, and the tie-break behind them is rank, so the unmeasured block stays
+   * in a stable, meaningful order rather than an arbitrary one.
+   *
+   * RANK IS THE DEFAULT AND IS ITSELF SORTABLE. Rank is assigned once over the
+   * whole day and travels with the row (see show()), so it is the way back
+   * from any other order.
+   *
+   * THE ORDER IS IN THE URL. A sorted, filtered view is a thing people paste
+   * to each other. It is written with replaceState rather than pushState: the
+   * back button on this page means "the previous DAY", and turning every
+   * header click into a history entry would bury that.
+   * ------------------------------------------------------------------ */
+  var SORT_KEY_DEFAULT = "rank", SORT_DIR_DEFAULT = "asc";
+  var sortKey = SORT_KEY_DEFAULT, sortDir = SORT_DIR_DEFAULT;
+
+  /* Lucide chevrons, drawn rather than typed. The site ships one self-hosted
+     family and a glyph-level coverage test; a caret written as a character
+     would be drawn by whatever face the reader's OS chose for it. Each is a
+     whole string literal, not a shared prefix plus a path, because a constant
+     assembled from another constant is not a constant this page's markup
+     audit can follow. */
+  var I_SORT_NONE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>';
+  var I_SORT_ASC = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg>';
+  var I_SORT_DESC = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>';
+
+  function colByKey(k) {
+    for (var i = 0; i < COLS.length; i++) {
+      if (COLS[i].key === k) { return COLS[i]; }
+    }
+    return null;
+  }
+
+  function isBlank(v) {
+    return v === null || v === undefined || v === "";
+  }
+
+  function sortRows(rows) {
+    var col = colByKey(sortKey) || COLS[0];
+    var get = col.value;
+    var asc = (sortDir === "asc");
+    return rows.slice().sort(function (a, b) {
+      var av = get(a), bv = get(b);
+      var an = isBlank(av), bn = isBlank(bv);
+      if (an !== bn) { return an ? 1 : -1; }   /* unmeasured sinks, both ways */
+      if (an && bn) { return a.rank - b.rank; }
+      if (typeof av === "number" && typeof bv === "number") {
+        if (av === bv) { return a.rank - b.rank; }
+        return asc ? av - bv : bv - av;
+      }
+      var c = String(av).localeCompare(String(bv));
+      if (c === 0) { return a.rank - b.rank; }
+      return asc ? c : -c;
+    });
+  }
+
+  /* A column that cannot order the table is not given a control that says it
+     can. `col.static` renders the label as text -- the stylesheet already
+     ships .tdb-sort[data-static="true"] for exactly this -- and the header
+     click handler ignores it, so the refusal is enforced by the code rather
+     than promised in a footnote.
+
+     `col.noteHtml` is the second line under a label: what the column is
+     measured on, and how wide its interval is. It belongs at the head and not
+     in every cell, because n is a property of the COLUMN -- fourteen copies of
+     the same interval down a column is noise, and one at the top is the
+     reading the whole column has to be taken under. */
+  function headCell(col) {
+    var key = col.key, label = col.label;
+    var stat = !!col.static;
+    var on = !stat && (key === sortKey);
+    var icon = !on ? I_SORT_NONE : (sortDir === "asc" ? I_SORT_ASC : I_SORT_DESC);
+    var aria = on ? (sortDir === "asc" ? "ascending" : "descending") : "none";
+    var side = col.right ? "right" : "left";
+    var control = stat
+      ? '<span class="tdb-sort" data-static="true">' + esc(label) + "</span>"
+      : '<button type="button" class="tdb-sort" data-key="' + esc(key) + '"' +
+        (on ? ' data-active="true"' : "") +
+        ' aria-label="Sort by ' + esc(label) + '">' + esc(label) + icon + "</button>";
+    var note = col.noteHtml
+      ? '<span class="tdb-col-note" data-align="' + side + '">' + col.noteHtml + "</span>"
+      : "";
+    return '<th data-slot="table-head" class="' + TH + '" aria-sort="' + aria + '">' +
+      '<span class="tdb-sort-wrap" data-align="' + side + '">' + control + "</span>" +
+      note + "</th>";
+  }
+
+  function headHtml() {
+    var out = "";
+    for (var i = 0; i < COLS.length; i++) {
+      out += headCell(COLS[i]);
+    }
+    return '<tr class="' + TR + '">' + out + "</tr>";
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Filter pills.
+   *
+   * The dimensions are the ones the row objects actually carry. flatten()
+   * splits a scaffold id into `agent` and `effort` -- claude-code@high becomes
+   * {agent: "claude-code", effort: "high"} -- and those two are the whole of
+   * the categorical structure here. `model` is 152 values and is what the
+   * search box is for; nothing else on a row is a facet, and none is invented.
+   *
+   * A pill's count is a leave-one-out count: what you would get if you clicked
+   * it, with the search box and the OTHER group's selection still applied but
+   * this group's ignored. A count computed over the unfiltered set would
+   * advertise 130 on a chip that returns 12.
+   *
+   * A pill matching nothing is disabled, not removed. The published
+   * configurations do not pair every agent with every effort, so a combination
+   * like single_shot + high is empty -- and an effort that silently vanishes
+   * from the rail reads as an effort nobody ran, which is a different claim.
+   * ------------------------------------------------------------------ */
+  /* A chip is a rectangle you press: one border, one height, and the only
+     thing that changes when you press it is the weight of the ink in it.
+
+     The selected state used to be `bg-secondary`, which the stylesheet reads
+     as a page-level button and gives `min-height: 3rem`. Measured, that made
+     the pressed chip 48px tall in a rail of 32px chips: the row grew by 16px
+     under the cursor on every click. Nothing here names a `bg-*` colour, so
+     nothing here can pick that rule up again. The focus ring is the site's
+     one global `button:focus-visible` outline; it needed no classes. */
+  var CHIP_BASE = "inline-flex shrink-0 items-center h-8 px-3 border text-sm " +
+    "whitespace-nowrap transition-colors disabled:pointer-events-none " +
+    "disabled:opacity-50 ";
+  var CHIP_IDLE = "text-muted-foreground hover:text-foreground";
+  var CHIP_SEL = "text-foreground font-medium";
+
+  function chipClass(on) {
+    return CHIP_BASE + (on ? CHIP_SEL : CHIP_IDLE);
+  }
+
+  var GROUPS = ["agent", "effort"];
+  var GROUP_LABEL = { agent: "Agent", effort: "Effort" };
+  var facet = { agent: null, effort: null };
+  var facetValues = { agent: [], effort: [] };
+
+  /* A row's value on a facet. An effort of null means the scaffold ran at the
+     provider's default -- a real, nameable state, and the pill says so rather
+     than leaving most of the board unreachable by any pill. */
+  function facetValue(r, group) {
+    return (group === "effort") ? (r.effort || "default") : r.agent;
+  }
+
+  function matchesOther(r, skip) {
+    for (var i = 0; i < GROUPS.length; i++) {
+      var g = GROUPS[i];
+      if (g === skip || !facet[g]) { continue; }
+      if (facetValue(r, g) !== facet[g]) { return false; }
+    }
+    return true;
+  }
+
+  /* A capability row has no agent and no effort -- the whole grid is one
+     scaffold -- so the haystack is the model name alone rather than the model
+     name plus two fields that are the same on every row. */
+  function matchesQuery(r, q) {
+    if (!q) { return true; }
+    var hay = capMode()
+      ? r.model
+      : (r.model + " " + r.agent + " " + (r.effort || "default"));
+    return hay.toLowerCase().indexOf(q) >= 0;
+  }
+
+  function looCount(group, value, q) {
+    var n = 0;
+    ALL.forEach(function (r) {
+      if (!matchesQuery(r, q)) { return; }
+      if (!matchesOther(r, group)) { return; }
+      if (facetValue(r, group) === value) { n += 1; }
+    });
+    return n;
+  }
+
+  function collectFacets(rows) {
+    var found = { agent: {}, effort: {} };
+    rows.forEach(function (r) {
+      GROUPS.forEach(function (g) { found[g][facetValue(r, g)] = 1; });
+    });
+    return {
+      agent: Object.keys(found.agent).sort(),
+      effort: Object.keys(found.effort).sort()
+    };
+  }
+
+  function chip(group, value, on, count) {
+    var attrs = 'type="button" data-group="' + esc(group) +
+      '" data-value="' + esc(value) + '" aria-pressed="' + (on ? "true" : "false") + '"';
+    if (!count && !on) { attrs += ' disabled aria-disabled="true"'; }
+    return "<button " + attrs + ' class="' + chipClass(on) + '">' +
+      esc(value) + " " + esc(count) + "</button>";
+  }
+
+  function paintFacets(q) {
+    var box = byId("facet-box"), rail = byId("facets");
+    if (!box || !rail) { return; }
+    /* Agent and effort are the only two facets this page has, and in the
+       capability view both are constant: one scaffold, one configuration.
+       Pills reading "claude-code 12 / default 12" would be two controls that
+       cannot change anything, so the rail is not painted rather than painted
+       inert. */
+    if (capMode()) { rail.innerHTML = ""; box.hidden = true; return; }
+    var html = "", painted = 0;
+    GROUPS.forEach(function (g) {
+      var values = facetValues[g] || [];
+      if (!values.length) { return; }
+      var label = GROUP_LABEL[g] || g;
+      var row = '<span class="tdb-facet-label">' + esc(label) + "</span>";
+      values.forEach(function (v) {
+        row += chip(g, v, facet[g] === v, looCount(g, v, q));
+      });
+      var top = painted ? " border-t" : "";
+      html += '<div class="flex flex-wrap items-center gap-1 px-4 py-3' + top +
+        '">' + row + "</div>";
+      painted += 1;
+    });
+    if (html && (facet.agent || facet.effort || q)) {
+      html += '<div class="flex flex-wrap items-center gap-1 border-t px-4 py-3">' +
+        '<button type="button" id="facet-reset" class="' + chipClass(false) +
+        '">reset</button></div>';
+    }
+    rail.innerHTML = html;
+    box.hidden = !html;
+  }
+
+  /* The switch between the two views. It is built from the same chip the
+     filter rail uses, because it does the same job -- it narrows what the one
+     table below is showing -- and a second control idiom for the same act
+     would read as a second table.
+
+     The capability chip is disabled, not hidden, when the join could not be
+     made. A control that vanishes says the view does not exist; a control
+     that is present and refuses says the data for it could not be read, which
+     is what actually happened. */
+  function paintViews() {
+    var rail = byId("views");
+    if (!rail) { return; }
+    var html = "";
+    VIEWS.forEach(function (v) {
+      var on = (MODE === v.key);
+      var off = (v.key === "capability") && !CAP;
+      var attrs = 'type="button" data-view="' + esc(v.key) +
+        '" aria-pressed="' + (on ? "true" : "false") + '"';
+      if (off) { attrs += ' disabled aria-disabled="true"'; }
+      html += "<button " + attrs + ' class="' + chipClass(on) + '">' +
+        esc(v.label) + "</button>";
+    });
+    rail.innerHTML = html;
+  }
+
+  /* The address bar is the only place a sorted, filtered view can be kept.
+     replaceState, not pushState -- see the sort note above. */
+  function writeUrl(q) {
+    try {
+      var u = new window.URL(window.location.href), sp = u.searchParams;
+      if (q) { sp.set("q", q); } else { sp.delete("q"); }
+      if (MODE !== MODE_DEFAULT) { sp.set("view", MODE); } else { sp.delete("view"); }
+      GROUPS.forEach(function (g) {
+        if (facet[g]) { sp.set(g, facet[g]); } else { sp.delete(g); }
+      });
+      if (sortKey !== SORT_KEY_DEFAULT || sortDir !== SORT_DIR_DEFAULT) {
+        sp.set("sort", sortKey);
+        sp.set("dir", sortDir);
+      } else {
+        sp.delete("sort");
+        sp.delete("dir");
+      }
+      window.history.replaceState(window.history.state, "", u);
+    } catch (e) { /* file:// has no URL API for this; the table is unaffected */ }
+  }
+
+  function readUrl() {
+    try {
+      var sp = new window.URL(window.location.href).searchParams;
+      var v = sp.get("view");
+      if (v === "capability") { MODE = v; }
+      var k = sp.get("sort"), d = sp.get("dir");
+      if (k && colByKey(k)) {
+        sortKey = k;
+        sortDir = (d === "asc") ? "asc" : "desc";
+      }
+      GROUPS.forEach(function (g) { facet[g] = sp.get(g) || null; });
+      var q = sp.get("q");
+      if (q && byId("q")) { byId("q").value = q; }
+    } catch (e) { /* no URL API: the defaults above stand */ }
+  }
+
+  /* The line above the table describes THIS view. In the capability view the
+     day's own totals are the wrong numbers -- 152 models and 50 tasks belong
+     to the board, while the grid under the line is 12 models of one scaffold
+     -- so the counts come from the grid the reader is looking at. The official
+     badge is a property of the DAY and stays either way. */
+  function countHtml(q) {
+    var rows = activeRows(), unit = capMode() ? " models" : " entries";
+    var shown = (VIEW.length === rows.length)
+      ? "Showing " + esc(rows.length) + unit
+      : "Showing " + esc(VIEW.length) + " of " + esc(rows.length) + unit;
+    var tasks = capMode() ? CAP.summary.nTasks : DAY.n_tasks;
+    var scope = capMode()
+      ? esc(CAP.summary.scaffold || "one scaffold")
+      : esc(DAY.n_models) + " models";
+    return shown +
+      '<span class="tdb-count-sep">&middot;</span>' + esc(tasks) + " tasks" +
+      '<span class="tdb-count-sep">&middot;</span>' + scope +
+      '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
   }
 
   function applyFilter() {
     var q = byId("q").value.trim().toLowerCase();
-    VIEW = !q ? ALL.slice() : ALL.filter(function (r) {
-      return (r.model + " " + r.agent + " " + (r.effort || "")).toLowerCase().indexOf(q) >= 0;
+    var rowHtml = capMode() ? renderCap : render;
+    COLS = capMode() ? CAP.cols : COLS;
+    VIEW = activeRows().filter(function (r) {
+      return matchesQuery(r, q) && (capMode() || matchesOther(r, null));
     });
-    byId("count").innerHTML =
-      (q ? "Showing " + VIEW.length + " of " + ALL.length + " entries"
-         : "Showing " + ALL.length + " entries") +
-      '<span class="tdb-count-sep">&middot;</span>' + esc(DAY.n_tasks) + " tasks" +
-      '<span class="tdb-count-sep">&middot;</span>' + esc(DAY.n_models) + " models" +
-      '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
-    if (TABLE) TABLE.redraw(VIEW);
-    /* The foot's count is patched in place rather than by re-rendering the
-       foot: renderFoot re-runs the digest and the Wilson widths on every
-       keystroke, and it re-reads `faUnlinked`, a flag set during row render and
-       cleared only in show() -- so the false-accept footnote would blink in and
-       out with the search box. The guard is load-bearing: applyFilter runs once
-       before renderFoot has ever written this node. */
-    var fc = document.querySelector(".tdb-foot-count");
-    if (fc) {
-      fc.textContent = "Displaying " + VIEW.length + " of " + ALL.length +
-        " available entries.";
-    }
+    byId("count").innerHTML = countHtml(q);
+    paintViews();
+    paintFacets(q);
+    byId("head").innerHTML = headHtml();
+    byId("body").innerHTML = sortRows(VIEW).map(rowHtml).join("");
+    writeUrl(q);
   }
 
   /* The reference names the benchmark version in the title -- "terminal-bench@2.1
@@ -335,10 +787,7 @@
   function officialBadge(day) {
     return formalAuthority(day)
       ? '<span class="tdb-badge" data-official="true">official</span>'
-      /* A caveat behind a title= attribute does not exist on a phone and is
-         easy to miss anywhere else. Print it, and link to what it means. */
-      : '<span class="tdb-badge" data-official="false">unofficial</span>' +
-        '<a class="tdb-badge-why" href="../benchmarks/#integrity">why</a>';
+      : '<span class="tdb-badge" data-official="false">unofficial</span>';
   }
 
   /* ------------------------------------------------------------------ *
@@ -506,9 +955,13 @@
     return out;
   }
 
+  /* The report link that used to close this block now sits in the definition
+     list above it, so the digest is one paragraph and the standing links are
+     all in one place. Nothing that could not be computed is printed: with no
+     digest this returns nothing at all rather than a lone "full report" line
+     hinting at a number the page could not produce. */
   function digestHtml(d) {
-    var link = LINK_QUALITY;
-    if (!d) { return link; }
+    if (!d) { return ""; }
     var disc = d.disc, floor = d.floor, ceiling = d.ceiling;
     /* The denominator is the tasks this scaffold actually ran, not every column
        in the grid. Where a task was never attempted it is named on its own
@@ -554,20 +1007,391 @@
         return esc(mode) + " " + esc(d.modes[mode].disc) + "/" + esc(d.modes[mode].n);
       }).join(", ");
       var clause = (known.length > 1)
-        ? " &mdash; what is withheld differs, not measured difficulty."
+        ? " &mdash; what is withheld differs, not difficulty."
         : ".";
       /* Name the convention. /quality/ prints an identically formatted
          "archive 12/28" meaning (discriminating + ceiling) over in-matrix
          tasks; this one is discriminating over measured. They agree only while
          no task is solved by every model, and a reader comparing the two pages
          has no way to see which is which. */
-      split = "<p>By publication mode (discriminating / measured): " +
+      split = "<p>By publication mode (discriminating/measured): " +
         counts + clause + "</p>";
     }
     return "<p><strong>Discrimination.</strong> " + esc(disc) + " of " + esc(measured) +
       " tasks separated any of the " + who + " on " + scope +
       " (D " + dval + "); " + esc(floor) + " solved by none, " + ceilTxt +
-      " by all." + gap + cover + "</p>" + split + link;
+      " by all." + gap + cover + "</p>" + split;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * THE CAPABILITY VIEW -- the same table, one axis at a time.
+   *
+   * The site publishes fourteen capability axes and a solve matrix, and until
+   * now nothing joined them: a reader could see WHICH tasks carry an axis and
+   * WHICH models solved which tasks, and had to do the join by hand. This does
+   * it -- rows are models, columns are axes, a cell is that model's solve rate
+   * on the tasks carrying that axis.
+   *
+   * IT IS A SECOND VIEW OF ONE TABLE, NOT A SECOND TABLE. Same <table>, same
+   * search box, same sort, same foot. A ranking belongs on the leaderboard,
+   * and a page that grows a parallel component every time a question is asked
+   * of it stops being an instrument.
+   *
+   * WHAT THE JOIN ACTUALLY SUPPORTS, which is most of what this view is for.
+   * Two axes carry nearly every labelled task, so ordering models on them
+   * reproduces the overall column instead of splitting it. Every other axis
+   * that carries anything carries a handful, where the 95% interval is wider
+   * than the whole spread between first place and last. And seven axes carry
+   * nothing at all. A view that showed only the rates would look like fourteen
+   * findings; what is true is two restatements, a few gestures and seven gaps,
+   * and the cells have to SAY that rather than leave it to a footnote.
+   *
+   * So three refusals, in the cells and in the controls:
+   *
+   *   * NO RATE WITHOUT ITS DENOMINATOR. Every cell that has a measurement
+   *     prints solved/n beside it. A rate whose n a reader cannot see is the
+   *     precise failure this view exists to expose, so it is not reachable
+   *     from here: one function produces both halves or produces neither.
+   *
+   *   * NO RANK BELOW THE PUBLISHED FLOOR. capability.json ships its own
+   *     publish gate, min_tasks. An axis under it shows counts and NO
+   *     percentage, and its header is inert -- the table cannot be sorted by a
+   *     column whose data cannot order it. That is the mechanism chosen over
+   *     greying the cell or printing an interval inside it: grey is a
+   *     decoration a reader can ignore, and a control that still works while
+   *     the page says not to trust it is an invitation. The floor is READ from
+   *     the file, never chosen here; a file publishing none leaves every axis
+   *     unranked, which is the fail-closed direction.
+   *
+   *   * NO AXIS DROPPED. The axes with no task are listed, named, and drawn as
+   *     an em dash. An axis missing from the table reads as an axis that does
+   *     not exist, which is a different and false claim.
+   *
+   * And nowhere in here is a null turned into a zero. A matrix cell is 1, 0 or
+   * null; a null is skipped out of the numerator AND the denominator, and a
+   * model with no measured cell on an axis gets an em dash, never 0%.
+   * ------------------------------------------------------------------ */
+  var CAP = null;
+
+  /* One model's tally over a set of matrix columns. The two counters move
+     together or not at all: a cell that was never run leaves both alone, so
+     `n` is what was measured and never what was scheduled. */
+  function axisTally(row, cols) {
+    var k = 0, n = 0, g = null;
+    for (var i = 0; i < cols.length; i++) {
+      g = (row && row.g) ? row.g[cols[i]] : null;
+      if (g === null || g === undefined) { continue; }
+      n += 1;
+      if (g) { k += 1; }
+    }
+    return { solved: k, n: n };
+  }
+
+  /* The widest 95% Wilson half-width a column of this length can produce, in
+     points. Taken at p = 0.5 because that is the maximum: quoting it at the
+     observed rate would make a column look sharper than the next model's rate
+     can be resolved to. */
+  function resolution(n) {
+    if (!n) { return null; }
+    var w = T.wilson(n / 2, n);
+    if (!w || typeof w.lo !== "number" || !isFinite(w.lo)) { return null; }
+    return ((w.hi - w.lo) / 2) * 100;
+  }
+
+  /* Every axis the catalogue publishes, joined to this matrix's roster --
+     including the ones the join leaves empty. `.map` and never `.filter`:
+     dropping an empty axis here is the one bug this view cannot survive. */
+  function capabilityAxes(board, cap) {
+    var matrix = board && board.matrix;
+    var ids = matrix && matrix.tasks;
+    var axes = cap && cap.axes;
+    if (!ids || !ids.length || !axes || !axes.length) { return null; }
+    var at = {};
+    ids.forEach(function (id, i) { at[id] = i; });
+    var gate = (cap && cap.publish_gate) || {};
+    var floor = (typeof gate.min_tasks === "number" && isFinite(gate.min_tasks))
+      ? gate.min_tasks : null;
+    return axes.map(function (a) {
+      var cols = [];
+      ((a && a.task_ids) || []).forEach(function (id) {
+        if (hasOwn(at, id)) { cols.push(at[id]); }
+      });
+      return {
+        code: String((a && a.code) || ""),
+        name: String((a && a.name) || ""),
+        cols: cols,
+        n: cols.length,
+        /* No published floor means no defensible ranking, not a default one. */
+        ranked: (floor !== null) && (cols.length >= floor),
+        half: resolution(cols.length)
+      };
+    });
+  }
+
+  function capabilityRows(board, axes) {
+    var matrix = board && board.matrix;
+    var rows = matrix && matrix.rows;
+    var ids = matrix && matrix.tasks;
+    if (!rows || !rows.length || !ids || !ids.length || !axes) { return null; }
+    var all = ids.map(function (id, i) { return i; });
+    var out = rows.map(function (row) {
+      var by = {};
+      axes.forEach(function (a) { by[a.code] = axisTally(row, a.cols); });
+      return {
+        model: String((row && row.model) || ""),
+        overall: axisTally(row, all),
+        axis: by
+      };
+    });
+    out.sort(function (a, b) {
+      var pa = overallPoint(a), pb = overallPoint(b);
+      if (pa === null || pb === null) { return (pa === null) ? 1 : -1; }
+      return pb - pa;
+    });
+    /* Rank is over the OVERALL column and travels with the row, exactly as on
+       the main table, so sorting by an axis and coming back is possible. A
+       model with nothing measured has no rank rather than the last one. */
+    var last = false, lastRank = 0;
+    out.forEach(function (r, i) {
+      var p = overallPoint(r);
+      if (p === null) { r.rank = null; return; }
+      if (last === false || p !== last) { lastRank = i + 1; last = p; }
+      r.rank = lastRank;
+    });
+    return out;
+  }
+
+  function overallPoint(r) {
+    return (r && r.overall && r.overall.n) ? (r.overall.solved / r.overall.n) : null;
+  }
+
+  /* An axis cell. Three outcomes and no fourth, and only the third prints a
+     percentage. */
+  function capCell(t, axis) {
+    if (!t || !t.n) {
+      return '<span class="text-muted-foreground">&mdash;</span>';
+    }
+    var counts = esc(t.solved) + "/" + esc(t.n);
+    if (!axis || !axis.ranked) {
+      return '<p class="tdb-cap-cell" data-ranked="false">' +
+        '<span class="tdb-cap-n">' + counts + "</span></p>";
+    }
+    var w = pointEstimate(t);
+    if (w === null) {
+      return '<span class="text-muted-foreground">&mdash;</span>';
+    }
+    var rate = T.pct(w.p);
+    return '<p class="tdb-cap-cell" data-ranked="true">' +
+      '<strong class="tabular-nums">' + rate + "</strong>" +
+      '<span class="tdb-cap-n">' + counts + "</span></p>";
+  }
+
+  /* The column head's second line. Not a sentence -- a reading: what this
+     column is measured on, how wide that measurement is, and whether it is
+     allowed to order the table. */
+  function axisNoteHtml(a) {
+    if (!a.n) { return "no task"; }
+    var tasks = esc(a.n) + " task" + (a.n === 1 ? "" : "s");
+    var band = (a.half === null) ? "" : " &plusmn;" + a.half.toFixed(0) + "%";
+    var verdict = a.ranked ? "" : " &middot; unranked";
+    return tasks + band + verdict;
+  }
+
+  function capColumns(axes, nTasks) {
+    var cols = [
+      { key: "rank", label: "Rank", right: true, dir: "asc",
+        value: function (r) { return r.rank; } },
+      { key: "model", label: "Model", dir: "asc",
+        value: function (r) { return r.model; } },
+      { key: "overall", label: "Overall", right: true, dir: "desc",
+        noteHtml: axisNoteHtml({ n: nTasks, half: resolution(nTasks), ranked: true }),
+        value: overallPoint }
+    ];
+    axes.forEach(function (a) {
+      cols.push({
+        key: "cap:" + a.code,
+        label: a.code + " " + a.name,
+        right: true, dir: "desc", axis: a,
+        static: !a.ranked,
+        noteHtml: axisNoteHtml(a),
+        /* An unranked axis reads as blank in both directions, which is what
+           sortRows already does with "never measured" -- so even a stale sort
+           key arriving in the URL cannot produce an order. */
+        value: function (r) {
+          if (!a.ranked) { return null; }
+          var t = r.axis[a.code];
+          return (t && t.n) ? (t.solved / t.n) : null;
+        }
+      });
+    });
+    return cols;
+  }
+
+  /* The overall column is always rankable: it is the column the rank is
+     assigned from. Named rather than written inline so capCell() takes the
+     same shape of argument from both of its call sites. */
+  var OVERALL_AXIS = { code: "overall", name: "overall", ranked: true };
+
+  function rankCell(r) {
+    return (r.rank === null || r.rank === undefined)
+      ? '<span class="text-muted-foreground">&mdash;</span>'
+      : esc(r.rank);
+  }
+
+  /* The overall column is drawn with the SAME cell as every axis, bar and all
+     -- meaning no bar. Two reasons, and the second is the important one.
+
+     It fits: the score bar is a 5rem track plus a 3.5rem number, and spending
+     nearly nine of a seventeen-column table's rems on the one column that is
+     already legible pushes four axes off the right edge on a 1440px screen.
+
+     And it compares. The whole claim this view makes about itself is that the
+     C4 and C5 columns ARE the overall column with a different heading. A
+     reader can only see that by reading the three columns against each other,
+     and three columns are only comparable when they are drawn the same way.
+     The interval the bar's neighbour used to carry has not been dropped: it is
+     in the column head, where it applies to the column rather than to one
+     cell. */
+  function renderCap(r) {
+    /* Built before the markup expression rather than inside it, for the same
+       reason accuracyCell() builds its bar first: the repository's escaping
+       scan reads every concatenation that produces a '<' and reports any
+       property access it cannot see run through a safe formatter. `r.overall`
+       is a validated tally and OVERALL_AXIS is a constant, but a scanner that
+       took the author's word for either would protect nothing. */
+    var overall = capCell(r.overall, OVERALL_AXIS);
+    var out = '<tr data-slot="table-row" class="' + TR + '">' +
+      cell(" text-right tabular-nums text-muted-foreground", rankCell(r)) +
+      cell(" font-medium", esc(r.model)) +
+      cell(" text-right", overall);
+    CAP.axes.forEach(function (a) {
+      out += cell(" text-right", capCell(r.axis[a.code], a));
+    });
+    return out + "</tr>";
+  }
+
+  /* Everything the foot has to be able to say, counted from the join rather
+     than written down. A number typed into a sentence stops being true the
+     first time either input file is regenerated. */
+  function capabilitySummary(board, axes, site) {
+    var matrix = board && board.matrix;
+    var ids = (matrix && matrix.tasks) || [];
+    var labelled = {}, carriers = [], gestures = 0, empty = 0;
+    axes.forEach(function (a) {
+      a.cols.forEach(function (j) { labelled[ids[j]] = 1; });
+    });
+    var nLabelled = Object.keys(labelled).length;
+    axes.forEach(function (a) {
+      if (!a.n) { empty += 1; return; }
+      /* A "carrier" is an axis covering four fifths or more of everything that
+         carries any label: at that share its column is the overall column with
+         a different heading, and saying so IS the finding. */
+      if (nLabelled && a.n >= nLabelled * 0.8) { carriers.push(a); }
+      else if (a.n > gestures) { gestures = a.n; }
+    });
+    /* Why the unlabelled tasks are unlabelled, taken from the catalogue's own
+       status field rather than assumed. */
+    var status = {};
+    ((site && site.tasks) || []).forEach(function (t) {
+      if (t && t.id) { status[t.id] = t.status || "unrecorded"; }
+    });
+    var unlabelled = 0, unlabelledLive = 0;
+    ids.forEach(function (id) {
+      if (hasOwn(labelled, id)) { return; }
+      unlabelled += 1;
+      if (status[id] === "live") { unlabelledLive += 1; }
+    });
+    return {
+      nTasks: ids.length, nLabelled: nLabelled, unlabelled: unlabelled,
+      unlabelledLive: unlabelledLive, carriers: carriers,
+      gestures: gestures, empty: empty,
+      models: ((matrix && matrix.rows) || []).length,
+      scaffold: (matrix && matrix.scaffold) || null,
+      date: (board && board.date) || null
+    };
+  }
+
+  function buildCapability(board, cap, site) {
+    var axes = capabilityAxes(board, cap);
+    if (!axes) { return null; }
+    var rows = capabilityRows(board, axes);
+    if (!rows) { return null; }
+    var gate = (cap && cap.publish_gate) || {};
+    return {
+      axes: axes,
+      rows: rows,
+      cols: capColumns(axes, ((board.matrix && board.matrix.tasks) || []).length),
+      floor: (typeof gate.min_tasks === "number" && isFinite(gate.min_tasks))
+        ? gate.min_tasks : null,
+      summary: capabilitySummary(board, axes, site)
+    };
+  }
+
+  /* The capability foot. It carries its OWN scope warning rather than
+     inheriting the main table's: the grid under it is one scaffold and twelve
+     models, the table it replaced is every model measured on the day under
+     every configuration, and the two are one click apart. A reader who takes
+     an axis column for a slice of the 152-row board has been misled by the
+     control, not by the data. */
+  function capFootHtml(day) {
+    if (!CAP) { return ""; }
+    var d = CAP.summary;
+    var scaffold = d.scaffold ? esc(d.scaffold) : "one scaffold";
+    var names = d.carriers.map(function (a) {
+      return esc(a.code) + " " + esc(a.name) + " carries " + esc(a.n);
+    }).join(" and ");
+    var floorTxt = (CAP.floor === null)
+      ? "The catalogue publishes no task floor, so no axis is ranked here."
+      : "An axis is ranked only where it carries at least " + esc(CAP.floor) +
+        " of this grid's tasks, which is the catalogue's own publish gate. " +
+        "Below it a cell shows counts and no rate, and the column head is " +
+        "inert: an order the data cannot support is refused rather than " +
+        "footnoted.";
+    var nScaf = Object.keys(day.pooled || {}).length;
+    var scopeTxt = "Rates are for " + esc(d.models) + " models under " + scaffold +
+      " on " + esc(d.date) + ", over " + esc(d.nTasks) + " tasks. The overall " +
+      "view ranks " + esc(day.n_models) + " models across " + esc(nScaf) +
+      " agent and effort configurations; the two are different measurements, " +
+      "and a cell here cannot be read against a row there.";
+    var coverTxt = esc(d.nLabelled) + " of " + esc(d.nTasks) +
+      " tasks in this grid carry a capability label. " +
+      ((d.unlabelled && d.unlabelled === d.unlabelledLive)
+        ? "All " + esc(d.unlabelled) + " of the rest are live"
+        : esc(d.unlabelledLive) + " of the other " + esc(d.unlabelled) +
+          " are live") +
+      ", and a live package withholds the oracle patch and the protected test " +
+      "diff that the tagger reads, so no axis can be derived for it.";
+    var spread = names
+      ? "<p><strong>What the axes separate.</strong> Of the " +
+        esc(d.nLabelled) + " labelled tasks in this grid, " + names +
+        ", so those columns reproduce the overall ranking rather than " +
+        "splitting it. Every other axis that " +
+        "carries anything carries " + esc(d.gestures) + " tasks or fewer, " +
+        "where the interval is wider than the spread between first place and " +
+        "last. The remaining " + esc(d.empty) + " axes carry no task at all " +
+        "and are drawn as an em dash rather than dropped, because an axis " +
+        "missing from a table reads as an axis that does not exist.</p>"
+      : "";
+    var angles = "<p><strong>The angles that are not here.</strong> " +
+      "<code>capability_profile()</code> decomposes a model into four " +
+      "conditional rates: builds the environment, starts the fix given a " +
+      "build, completes the fix given a start, and completes it without " +
+      "breaking an already-passing test. Those four are the truest " +
+      "multi-angle reading this benchmark has, and none of them can be " +
+      "computed from anything published here. They read graded gate states " +
+      "0&ndash;4, and every cell shipped in the matrix is 1, 0 or null.</p>";
+    return '<dl class="tdb-limits">' +
+        "<dt>Cells</dt><dd>A model's solve rate over the tasks carrying that " +
+          "axis, with solved/n beside it. An axis with no measured task is an " +
+          "em dash, never a zero.</dd>" +
+        "<dt>Ranking floor</dt><dd>" + floorTxt + "</dd>" +
+        "<dt>Resolution</dt><dd>Each column head carries the widest 95% Wilson " +
+          "half-width its task count admits, so a column is read at the " +
+          "precision it has rather than the precision its digits suggest.</dd>" +
+        "<dt>Coverage</dt><dd>" + coverTxt + "</dd>" +
+        "<dt>Scope</dt><dd>" + scopeTxt + "</dd>" +
+        "<dt>Report</dt><dd>" + LINK_QUALITY + "</dd>" +
+      "</dl>" + spread + angles;
   }
 
   /* Where the numbers came from, who produced them, how to add to them, and
@@ -578,9 +1402,40 @@
      subsets make two independent intervals indicative rather than exact. Both
      are true and neither changes what a reader does with the number, so the
      definition is one parenthetical now. The half-width is still COMPUTED for
-     this day's task count rather than quoted, because it moves with n. */
+     this day's task count rather than quoted, because it moves with n.
+
+     The closing "Displaying N of M available entries" is gone. It restated,
+     three screens lower, the "Showing N of M entries" that sits directly above
+     the table -- and being a second copy it needed its own live patch on every
+     keystroke, which is a whole mechanism existing to keep a duplicate true.
+     The line above the table is the one a reader filtering the table is
+     looking at. */
+  /* The column is gone; the state it reported is not. An em dash in that
+     column meant UNMEASURED, never zero, and a reader who never sees the
+     column has to be told the field exists and was not measured -- otherwise
+     dropping 354 dashes silently promotes "we do not know" to "we never
+     mentioned it". The count is interpolated so the sentence cannot outlive
+     the day it describes, and the moment any cell publishes a number the
+     column comes back and this term describes the evidence links instead. */
+  function faTerm(nRows) {
+    if (colByKey("fa")) {
+      return "<dt>False accepts</dt><dd>" + (faUnlinked
+        ? "Unlinked counts have no published evidence record."
+        : "Every non-zero count links the record that produced it.") + "</dd>";
+    }
+    return "<dt>False accepts</dt><dd>Semantic false-accept is unmeasured: no " +
+      "trial has been run for any of the " + esc(nRows) + " published rows, so " +
+      "the column is omitted rather than drawn as " + esc(nRows) +
+      " em dashes. Each task page reports the same field, also unmeasured.</dd>";
+  }
+
   function renderFoot(day) {
-    var faNote = faUnlinked ? FOOT_FA_NOTE : "";
+    if (capMode()) {
+      byId("foot").innerHTML = capFootHtml(day);
+      return;
+    }
+    var faNote = faTerm(ALL.length);
+    var defCells = DEF_CELLS, defOutcomes = DEF_OUTCOMES, defReport = LINK_QUALITY;
     var digest = digestHtml(discriminationDigest(boardData, siteData));
     var cells = esc(day.n_cells);
     var models = esc(day.n_models), tasks = esc(day.n_tasks);
@@ -603,15 +1458,17 @@
         tasks + " tasks";
     var h50 = halfWidth(0.5, day.n_tasks);
     byId("foot").innerHTML =
-      FOOT_WHO +
-      "<p>" + span + ".</p>" +
-      "<p>Accuracy is solved/tasks; &plusmn; is the 95% Wilson score interval " +
-      "half-width (about " + h50 + " points at 50% on " + tasks + " tasks).</p>" +
-      FOOT_OUTCOMES +
-      faNote +
-      digest +
-      '<p class="tdb-foot-count">Displaying ' + VIEW.length + " of " +
-      ALL.length + " available entries.</p>";
+      '<dl class="tdb-limits">' +
+        "<dt>Cells</dt><dd>" + defCells + "</dd>" +
+        "<dt>Coverage</dt><dd>" + span + ".</dd>" +
+        "<dt>Accuracy</dt><dd>Solved / Tasks; &plusmn; is the 95% Wilson " +
+          "half-width, about " + h50 + " points at 50% on " + tasks +
+          " tasks.</dd>" +
+        "<dt>Outcomes</dt><dd>" + defOutcomes + "</dd>" +
+        faNote +
+        "<dt>Report</dt><dd>" + defReport + "</dd>" +
+      "</dl>" +
+      digest;
   }
 
   function show(day) {
@@ -630,9 +1487,28 @@
       r.rank = lastRank;
     });
     VIEW = ALL.slice();
-    TABLE = T.sortTable({
-      head: byId("head"), body: byId("body"), cols: COLS,
-      rows: VIEW, render: render, sort: "rate", dir: "desc"
+    /* The columns are decided by the day too. If the sort key was carried in
+       from the URL and names the column this day does not have, it falls back
+       to the default rather than leaving every header reading `aria-sort=none`
+       over a table that is nonetheless in some order. */
+    /* The capability view is rebuilt from the matrix on every day change, so
+       a day whose matrix or catalogue could not be read has no capability
+       chip rather than a chip that opens an empty table. */
+    CAP = (boardData && capData) ? buildCapability(boardData, capData, siteData) : null;
+    if (MODE === "capability" && !CAP) { MODE = MODE_DEFAULT; }
+    COLS = capMode() ? CAP.cols
+      : (faColumn(ALL) ? COLS_BASE.concat([COL_FA]) : COLS_BASE.slice());
+    if (!colByKey(sortKey)) {
+      sortKey = SORT_KEY_DEFAULT;
+      sortDir = SORT_DIR_DEFAULT;
+    }
+    /* The pills are painted from the day that is loaded, never from a fixed
+       list: a scaffold that stops running has no pill the next day rather than
+       a pill reading zero for a dimension that no longer exists. A selection
+       carried in from the URL is kept only if this day actually has it. */
+    facetValues = collectFacets(ALL);
+    GROUPS.forEach(function (g) {
+      if (facet[g] && facetValues[g].indexOf(facet[g]) < 0) { facet[g] = null; }
     });
     applyFilter();
     bindReproduce(day);
@@ -649,6 +1525,53 @@
   }
 
   byId("q").addEventListener("input", applyFilter);
+  /* Delegated, because both the header row and the pill rail are rebuilt by
+     innerHTML on every keystroke; a listener bound to a button would be thrown
+     away with it and the control would work exactly once. */
+  byId("head").addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest
+      ? ev.target.closest("button[data-key]") : null;
+    if (!b) { return; }
+    var k = b.getAttribute("data-key"), col = colByKey(k);
+    if (!col || col.static) { return; }
+    if (k === sortKey) { sortDir = (sortDir === "asc") ? "desc" : "asc"; }
+    else { sortKey = k; sortDir = col.dir || "desc"; }
+    applyFilter();
+  });
+  byId("views").addEventListener("click", function (ev) {
+    var t = ev.target;
+    var b = (t && t.closest) ? t.closest("button[data-view]") : null;
+    if (!b || b.disabled) { return; }
+    var v = b.getAttribute("data-view");
+    if (v === MODE) { return; }
+    MODE = v;
+    /* Each view has its own columns, so a sort key carried over from the
+       other one names nothing here. Falling back to the default is the only
+       honest option: leaving it set would paint every header aria-sort="none"
+       over a table that is nonetheless in some order. */
+    sortKey = SORT_KEY_DEFAULT;
+    sortDir = SORT_DIR_DEFAULT;
+    COLS = capMode() ? CAP.cols
+      : (faColumn(ALL) ? COLS_BASE.concat([COL_FA]) : COLS_BASE.slice());
+    applyFilter();
+    renderFoot(DAY);
+  });
+  byId("facets").addEventListener("click", function (ev) {
+    var t = ev.target;
+    if (!t || !t.closest) { return; }
+    if (t.closest("#facet-reset")) {
+      GROUPS.forEach(function (g) { facet[g] = null; });
+      byId("q").value = "";
+      applyFilter();
+      return;
+    }
+    var b = t.closest("button[data-group]");
+    if (!b) { return; }
+    var g = b.getAttribute("data-group"), v = b.getAttribute("data-value");
+    facet[g] = (facet[g] === v) ? null : v;
+    applyFilter();
+  });
+  readUrl();
   byId("copy").addEventListener("click", function () {
     var b = byId("copy");
     navigator.clipboard.writeText(byId("cmd").textContent).then(function () {
@@ -668,17 +1591,19 @@
   Promise.all([
     T.dayIndex(),
     T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
-    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the solve matrix"))
+    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the solve matrix")),
+    T.getJSON("data/capability.json").catch(T.fetchFailed("the capability axes"))
   ]).then(function (loaded) {
     var idx = loaded[0];
     siteData = loaded[1];
     boardData = loaded[2];
+    capData = loaded[3];
     DAYS = idx.days;
     var want = T.dayFromUrl();
     var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;
     if (!active) {
       T.dayNav(byId("daynav"), { days: [], active: null, onChange: load });
-      byId("count").textContent = "no published days";
+      byId("count").textContent = "No published days";
       return;
     }
     load(active);

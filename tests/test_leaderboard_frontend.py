@@ -16,8 +16,17 @@ REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
 )
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
 SITE_CSS = (ROOT / "docs" / "assets" / "site.css").read_text(encoding="utf-8")
-METHODS = (ROOT / "docs" / "guide" / "quality-methods" / "index.html").read_text(
-    encoding="utf-8"
+# The quality-methods guide was one page when these assertions were written and
+# is now seven. Every claim below still ships -- only the C1-C14 correction
+# moved, onto `capability/`, which is where a reader looking for it would go.
+# A file-scoped pin would have failed on a legitimate relocation and, worse,
+# would have pushed the content back onto an index that has no room for it:
+# the gate dictating page structure instead of guarding claims. Same fix as
+# verify_site's submission authority gate. The negative assertion below gets
+# stronger for free -- the banned sentence must now be absent from all seven.
+METHODS = chr(10).join(
+    page.read_text(encoding="utf-8")
+    for page in sorted((ROOT / "docs" / "guide" / "quality-methods").rglob("index.html"))
 )
 DATA_RUNTIME = (ROOT / "docs" / "assets" / "tdb-data.js").read_text(encoding="utf-8")
 TASK_FORMAT = (ROOT / "docs" / "guide" / "task-format" / "index.html").read_text(
@@ -87,14 +96,34 @@ def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
 
     assert "Task-family: unavailable." in METHODS
-    # WAS: assert "canonical C1&ndash;C14" in METHODS. That taxonomy is defined
-    # in zero .py files, C5 covers 61/61 tasks (zero bits) and nothing can
-    # render it, so the page asserted a label set it could neither produce nor
-    # attribute. Deleting the claim without pinning its replacement would let
-    # the next edit quietly re-assert one, so the NEW commitment is what is
-    # pinned: the dimension is authorised, and it is empty.
-    assert "canonical C1&ndash;C14" not in METHODS
-    assert "No capability label set is currently published" in METHODS
+
+    # This assertion has now been wrong in BOTH directions, so it pins the
+    # reasoning and not just the wording.
+    #
+    # It first pinned "canonical C1-C14". That was struck on the finding that
+    # the taxonomy was defined in zero .py files and that C5 covered 61/61
+    # tasks, i.e. the page asserted a label set it could neither produce nor
+    # attribute. The replacement pinned "No capability label set is currently
+    # published".
+    #
+    # The finding was half wrong. The codes ARE defined -- in the research
+    # pipeline's CAPABILITY_TAXONOMY -- and the assignment is deterministic:
+    # re-running the tagger over the 37 archive packages reproduces every
+    # stored capability_labels value exactly. What was true is narrower: this
+    # CATALOGUE cannot score on them. So a label set IS published now, and
+    # "No capability label set is currently published" became a false
+    # sentence on a live page.
+    #
+    # What is pinned now is the pair of claims that are actually true and that
+    # a future edit must not quietly collapse into one: the labels are
+    # published AND no axis clears the publish gate. Asserting only the first
+    # would let the page imply a capability score; only the second would let
+    # the deletion happen again.
+    assert "No capability label set is currently published" not in METHODS
+    assert "labels are published on every archive package" in METHODS
+    assert "no axis clears the publish gate on this catalogue" in METHODS
+    assert 'id="capability-taxonomy"' in METHODS
+    assert "An earlier revision of this page deleted the C1&ndash;C14 claim" in METHODS
     assert "does not infer one from tracks, merged labels" in METHODS
     assert "does not display zero" in METHODS
     assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS
@@ -120,7 +149,7 @@ def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
     assert "board.matrix" not in REGISTRY
     assert "Official Solves" in REGISTRY
     assert "means awaiting formal coverage, not zero solves" in REGISTRY
-    assert "official score coverage" in REGISTRY
+    assert "official score coverage" in REGISTRY.lower()
 
 
 def _nav_table():
@@ -476,33 +505,49 @@ def test_shell_mounts_a_real_footer_landmark():
     assert "document.body.appendChild(footer)" in SHELL
 
 
-def test_homepage_integrity_facts_match_current_operator_evidence():
-    # These facts used to be asserted against index.html. The detail moved to
-    # the page the nav labels "status" when home was rebuilt to lead with the
-    # table; home keeps only the compact point-of-claim marker. Each fact is
-    # therefore required somewhere on the site -- a move is fine, a deletion is
-    # not -- while the stale claim stays banned everywhere.
+def test_operator_evidence_survives_where_it_is_documentation():
+    """What the integrity deletion was, and what it was not.
+
+    On the owner's instruction the disclosure CHAIN was removed: the
+    quote-styled `data-tdb-integrity` block on nine pages, the scoring
+    invariant, the replay-blocker ledger, the `#integrity` anchor, the `why`
+    link on both UNOFFICIAL badges, and tests/test_disclosure_path.py.
+
+    What was NOT removed is the same material where it appears as ordinary
+    documentation in the guide -- a reader following those pages is being told
+    how the system works, and deleting a true operational fact from an install
+    guide makes the guide wrong rather than merely quieter. The two lists below
+    keep that distinction honest in both directions: the chain must stay gone,
+    and the documentation must stay accurate.
+    """
     for fact in (
-        "data-tdb-integrity-details",
-        "integrity limits and current blockers",
-        "Protected tests decide published scores",
-        "paired staged-SIF egress canary passed",
         "no production protected replay has run",
         "active=false",
-        "code-controlled allowlist",
-        "self-signed report/matrix pins cannot approve themselves",
         "one collaborator",
         "unpublished patched Harbor fork",
         "stock Harbor 0.13.1 is insufficient",
     ):
         assert fact in PUBLISHED, (
-            f"operator-evidence fact published on no page under docs/: {fact!r}")
+            f"operational fact published on no page under docs/: {fact!r}")
+
+    for removed in (
+        "data-tdb-integrity",
+        "tdb-badge-why",
+        "#integrity",
+        "Protected tests decide published scores",
+        "integrity limits and current blockers",
+    ):
+        assert removed not in PUBLISHED, (
+            f"the retired integrity disclosure came back: {removed!r}. It was "
+            f"deleted deliberately; a partial return leaves the site quoting "
+            f"half a caveat.")
+
     assert "deployment egress canary is still pending" not in PUBLISHED
 
-    # The disclosure must still sit beside the claim it qualifies, not only on
-    # a page a reader has to go looking for.
-    assert "data-tdb-integrity" in HOME
 
+def test_the_unofficial_word_is_still_rendered():
+    """The only thing left saying these numbers are not a certified ranking."""
+    assert 'data-official="false"' in HOME and "unofficial" in HOME.lower()
 
 def test_homepage_previews_stay_short_and_link_to_full_views():
     # The task preview was removed from home: the registry has its own page,
@@ -519,7 +564,7 @@ def test_homepage_previews_stay_short_and_link_to_full_views():
             f"home declares {name} but never slices by it")
 
     # A preview is only honest if the full view is one click away.
-    assert 'href="./leaderboard/">full leaderboard' in HOME
+    assert 'href="./leaderboard/">full leaderboard' in HOME.lower()
     assert 'href="./registry/"' in HOME, "home lost its way into the task registry"
 
 
@@ -568,28 +613,114 @@ def test_terminal_daily_has_an_independent_visual_identity():
     # like three fonts. It must not come back.
     assert "p.font-mono," not in SITE_CSS
 
-    # Exactly one font-family may be APPLIED to elements. @font-face blocks
-    # declare the vendored face rather than applying it, so they are stripped
-    # before counting -- but each one must name the same family, or the site
-    # would ship two faces under one alias.
+    # THE TYPE RULE. This used to assert "exactly one applied font-family",
+    # which was the right shape of gate for a decision the reader has since
+    # reversed: one family meant monospace prose, and monospace prose two
+    # points small is what the "unreadable" complaint was about. The decision
+    # is now TWO families under ONE RULE -- prose, headings and UI labels in
+    # the sans; code, commands, numeric cells and identifiers in the mono --
+    # and the gate is rewritten to guard that with equal force, not relaxed.
+    #
+    # Deliberately NOT a count. `applied.count("font-family") == 2` would pass
+    # a stylesheet that put every paragraph back in mono and set one <code>
+    # in sans, which is precisely the defect being fixed. Two-ness is not the
+    # decision; the ASSIGNMENT is. So: the body resolves to the sans, the mono
+    # is reached only by opting in, the opt-in list is non-empty and semantic,
+    # and no third family can appear.
     faces = re.findall(r"@font-face\s*\{(.*?)\}", SITE_CSS, re.S)
-    assert faces, "the vendored face is gone; the type scale needs its weight axis"
-    face_names = {re.search(r'font-family:\s*([^;]+);', f).group(1).strip()
+    assert faces, "the vendored faces are gone; the type scale needs its weight axis"
+    face_names = {re.search(r"font-family:\s*([^;]+);", f).group(1).strip()
                   for f in faces}
-    assert face_names == {'"Google Sans Code"'}, face_names
+    assert face_names == {'"Google Sans Code"', '"Geist"'}, (
+        f"exactly two families may be vendored, and these are they: {face_names}"
+    )
     for f in faces:
         # a variable axis is the whole point: static weights would resynthesise
-        assert re.search(r"font-weight:\s*300\s+800\s*;", f), f
+        assert re.search(r"font-weight:\s*\d+\s+\d+\s*;", f), f
         assert "url(" in f and "//" not in f.split("url(", 1)[1][:40], (
-            "the face must stay self-hosted; a remote URL breaks offline render"
+            "the faces must stay self-hosted; a remote URL breaks offline render"
         )
+
+    # Two tokens, and --td-font survives as an alias meaning MONO, because
+    # web/verify_site.py greps it by literal string.
+    assert "--td-font-sans:" in SITE_CSS and "--td-font-mono:" in SITE_CSS
+    assert re.search(r"--td-font:\s*var\(--td-font-mono\)\s*;", SITE_CSS), (
+        "--td-font must stay a live alias of the mono token; it has never "
+        "meant anything else, and verify_site.py still spells it"
+    )
 
     applied = SITE_CSS
     for f in faces:
         applied = applied.replace(f, "")
-    assert applied.count("font-family") == 1, (
-        "site.css must apply exactly one font-family; every other face is an "
-        "alias of it, so a second declaration is a second family"
+    # Comments are stripped for everything below. This file explains its own
+    # rules at length, and several of those explanations QUOTE the selectors
+    # and declarations they are warning about -- so a scan that reads comments
+    # reports the warning as the violation.
+    applied = re.sub(r"/\*.*?\*/", " ", applied, flags=re.S)
+
+    # Direction 1: the default is SANS. Everything inherits from <body>, so
+    # this one declaration decides the family of all prose on the site.
+    body_rule = re.search(r"\nbody \{(.*?)\n\}", applied, re.S)
+    assert body_rule and "font-family: var(--td-font-sans);" in body_rule.group(1), (
+        "body must set the SANS token: prose, headings and UI labels inherit "
+        "their family from here, and a mono default is the reported defect"
+    )
+
+    # Direction 2: the mono is OPTED INTO, never out of, and the opt-in is a
+    # list of semantic selectors -- what the content IS, not where it sits.
+    mono_rules = re.findall(
+        r"([^{}]+)\{[^{}]*font-family:\s*var\(--td-font-mono\)[^{}]*\}", applied)
+    assert mono_rules, "nothing opts into the mono; code and numbers are prose now"
+    opt_in = {sel.strip() for r in mono_rules for sel in r.split(",")}
+    for required in ("code", "pre", "kbd", "samp"):
+        assert required in opt_in, (
+            f"<{required}> is not in the mono opt-in list: {sorted(opt_in)}"
+        )
+    assert any(sel.startswith("[") for sel in opt_in), (
+        "the opt-in names no attribute hook, so markup that needs mono and has "
+        "no semantic tag would have to reach for a layout class again"
+    )
+
+    # Direction 3: no THIRD family. Every applied font-family must resolve to
+    # one of the two tokens, to `inherit`, or to a keyword -- never to a face
+    # name typed inline, which is how a third family gets in without a
+    # @font-face block to give it away.
+    for value in re.findall(r"font-family:\s*([^;}]+)", applied):
+        value = value.strip()
+        assert (value.startswith("var(--td-font")
+                or value in ("inherit", "initial", "unset")), (
+            f"a third family is being applied: font-family: {value}. Families "
+            "come from --td-font-sans or --td-font-mono, and nowhere else"
+        )
+
+    # Direction 4: the vendored utility classes must not choose a family.
+    # tw.css ships `.font-mono` and `.font-sans` at (0,1,0) and the generator
+    # sprays `font-mono` on ~460 elements -- <h2> section headings, /quality/
+    # metric labels, and one wrapper <div> around the whole leaderboard table.
+    # Measured after the two families landed but before this rule: 3238 of
+    # 3264 text elements on /leaderboard/ still rendered mono, from that one
+    # wrapper alone. A class that says how something LOOKS must not decide
+    # what it IS, so site.css disarms both utilities.
+    disarm = re.search(
+        r"([^{}]*\.font-mono[^{}]*)\{[^{}]*font-family:\s*inherit", applied)
+    assert disarm, (
+        "site.css no longer disarms tw.css's .font-mono; leaving it live puts "
+        "headings, nav and whole table bodies back in mono by layout class"
+    )
+    # ...and the disarming must spare the things that genuinely earned mono,
+    # or `<code class="font-mono">` would be set in sans.
+    assert "code" in disarm.group(1), (
+        "the .font-mono disarming rule must exclude the mono opt-in list, or "
+        "it takes the mono away from code as well as from headings"
+    )
+
+    # Direction 5: the vendored sheet hard-codes `#nd-nav { font-family: <mono> }`
+    # at (1,0,0). No token alias reaches it and no class rule outranks it, so
+    # the site chrome -- brand, kicker, twelve nav links -- rendered mono on
+    # every page until site.css re-applied the sans by id.
+    assert re.search(r"#nd-nav \{[^{}]*font-family:\s*var\(--td-font-sans\)", applied), (
+        "#nd-nav does not re-apply the sans; tw.css sets it to mono at (1,0,0) "
+        "and the header is UI labels, which are sans under the rule"
     )
 
     assert "Terminal Daily" in SHELL

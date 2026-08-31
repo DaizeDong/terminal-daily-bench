@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scope, estimands and limits — terminal-daily-bench docs</title>
+<meta name="description" content="What terminal_daily_bench.quality is and is not, the three effects it keeps as separate estimands, and the readings its card does not license.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Scope, estimands and limits</h1>
+    <p class="tdb-doc-sub">What the module is, which effects it keeps apart, and what none of its numbers licenses.</p>
+
+    <h2 id="scope"><a href="#scope">Scope and limits</a></h2>
+    <dl class="tdb-defs">
+      <dt>Module</dt>
+      <dd><code>terminal_daily_bench.quality</code></dd>
+      <dt>Pure</dt>
+      <dd>Pure functions over plain lists; they neither read nor change reward decisions.</dd>
+      <dt>Blind to</dt>
+      <dd>Semantic verifier false-accept &mdash; MSQ cannot measure it.</dd>
+      <dt>Deterministic</dt>
+      <dd>Randomized routines are <strong>seeded</strong>; a resume reproduces the interval.</dd>
+      <dt>Advisory</dt>
+      <dd>No MSQ number and no readiness verdict ever gates an accept.</dd>
+      <dt>Undefined</dt>
+      <dd>An axis without a population returns <code>None</code>, never a fabricated number.</dd>
+    </dl>
+
+    <h2 id="estimands"><a href="#estimands">Separate estimands</a></h2>
+    <p>Model, harness, and complete-configuration effects stay separate estimands: a harness effect is never read as a model effect, and a configuration score is never relabelled as model-only performance.</p>
+
+    <h2 id="limits"><a href="#limits">What the card does not license</a></h2>
+    <p>What it does catch is a collapsed set: all-pass or all-fail rows, a negatively correlating item, a missing difficulty band. What it does not license is any of the following.</p>
+    <dl class="tdb-defs">
+      <dt>A ranking is not a result.</dt>
+      <dd>At this N one model&rsquo;s Wilson interval covers most of the others.</dd>
+      <dt>D is coarse at small N.</dt>
+      <dd>One task flipping moves it a step.</dd>
+      <dt>Not yet one instrument.</dt>
+      <dd>Below the KR-20 bar the total is not a skill estimate.</dd>
+      <dt>A vacuous high is not a win.</dt>
+      <dd>M reaches 1.0 when no separation is left to violate.</dd>
+      <dt>Required-N is an order of magnitude.</dt>
+      <dd>It assumes the next tasks are drawn like today&rsquo;s; it is today&rsquo;s bootstrap SE extrapolated at <code>1/&radic;N</code>.</dd>
+      <dt>Readiness is advisory.</dt>
+      <dd>It never gates an accept or touches the reward path.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

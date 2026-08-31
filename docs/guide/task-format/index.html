@@ -4,453 +4,141 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>task format — terminal-daily-bench docs</title>
-<meta name="description" content="The on-disk schema of a terminal-daily-bench task package: task.toml, instruction.md, tests/, environment/, solution/, PROVENANCE.json, record.json — plus archive vs. live and how scoring re-lays the protected tests.">
-<link rel="stylesheet" href="../../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../../assets/site.css?v=a6e52a8c64">
+<meta name="description" content="What a terminal-daily-bench task package is, the two release modes it ships in, and what each mode withholds.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-<div class="flex flex-1 flex-col items-center px-4 py-6">
-<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
+<!-- This page was one of four monoliths: 20 h2 and 10257px. It is now five
+     pages of four to seven sections each, in the shell's unit -- h2, one to
+     three sentences, at most one code figure.
 
-  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
+     THREE IDS MAY NOT LEAVE THIS FILE. #archive-vs-live is written into
+     generated output by web/gen_pages.py and appears on four benchmark day
+     pages, /guide/, /guide/quickstart/ and /guide/submission/; #layout and
+     #shipped are named as deep-link targets. They stay here; everything else
+     moved, and the sidebar (DOCNAV in assets/site.js) is the way to the rest. -->
 
-    <!-- ===================== the prose column ===================== -->
-    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <!-- `wrap-anywhere` is load-bearing, not decorative: unbreakable identifiers
+       in body copy are wider than a 390px content box, and body{overflow-x:
+       hidden} clips the tail with no scrollbar rather than scrolling. Code
+       figures are unaffected -- white-space:pre suppresses wrapping outright. -->
+  <article class="tdb-doc prose-no-margin wrap-anywhere">
 
-      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-        <a class="hover:text-foreground transition-colors" href="../../">home</a>
-        <span>/</span>
-        <a class="hover:text-foreground transition-colors" href="../">docs</a>
-        <span>/</span>
-        <span class="text-foreground">task format</span>
-      </nav>
+    <h1>Task format</h1>
+    <p class="tdb-doc-sub">Self-contained, harbor-native packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>.</p>
 
-      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
-        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">task format</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Self-contained,
-          <strong>harbor-native</strong> packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">Everything here
-          reflects the code in this bundle; no APIs are invented.</p>
-      </header>
+    <h2 id="layout"><a href="#layout">Package layout</a></h2>
+    <p>Everything here reflects the code in this bundle; no APIs are invented. Task ids look like
+      <code>td-fc90ea8b76d5f6b6</code>.</p>
+    <p>The canonical short schema is
+      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>;
+      the code is <code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code> and
+      <code>web/submit_result.py</code>.</p>
+    <figure class="tdb-code">
+      <figcaption>tasks/archive/&lt;task-id&gt;/</figcaption>
+      <pre><code>task.toml           environment.docker_image &middot; environment.allow_internet &middot; timeouts
+instruction.md      the natural-language task shown to the model (de-identified)
+tests/              test.sh (runner) &middot; test_outputs.py (protected assertions) &middot; test_patch.diff
+environment/        Dockerfile (build recipe: base image + repo @ base_sha + deps)
+solution/           solve.sh (git apply driver) &middot; oracle.patch (the gold fix)
+PROVENANCE.json     source_repo &middot; source_ref &middot; source_license_spdx
+record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p selectors)</code></pre>
+    </figure>
+    <p>The schema above is the whole contract &mdash; a task directory is valid on its own. Published
+      task directories are listed in the <a href="../../registry/">task registry</a>, one row per task
+      id, with its release mode and its failing-test count.</p>
 
-      <!-- wrap-anywhere (overflow-wrap:anywhere, inherited) so unbreakable
-           identifiers in body copy -- terminal_daily_bench/adapters/base.py::HarnessAdapter
-           at 440px, conftest.py/sitecustomize.py in the tests list -- break instead
-           of pushing the document to 456px inside a 390px viewport, where
-           body{overflow-x:hidden} silently CLIPS the tail with no scrollbar.
-           It cannot loosen the code blocks: every <pre> here sits in a .not-prose
-           wrapper and is white-space:pre, which suppresses wrapping outright, so
-           their deliberate horizontal scroll is untouched. -->
-
-      <!-- RESTRUCTURE NOTE (prose -> structure, not deletion). This page carried
-           6006 characters of body prose across 37 paragraphs; the reference docs
-           it is measured against carry ~700. Nothing was dropped: procedures
-           became listing/command blocks, reference material became two-column
-           tables, and the "why it was built this way" sentences moved into
-           comments like this one. Every H2/H3 keeps a stable id because the
-           "on this page" rail is built from those ids at runtime -- renaming an
-           id silently drops a row from the rail and breaks inbound deep links
-           (docs/benchmarks/*/index.html link to #archive-vs-live). -->
-      <article class="prose prose-no-margin wrap-anywhere">
-
-        <h2 id="layout" class="scroll-m-28 font-mono">Package layout</h2>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks/archive/&lt;task-id&gt;/
-  task.toml           environment.docker_image &middot; environment.allow_internet &middot; timeouts
-  instruction.md      the natural-language task shown to the model (de-identified)
-  tests/              test.sh (runner) &middot; test_outputs.py (protected assertions) &middot; test_patch.diff
-  environment/        Dockerfile (build recipe: base image + repo @ base_sha + deps)
-  solution/           solve.sh (git apply driver) &middot; oracle.patch (the gold fix)
-  PROVENANCE.json     source_repo &middot; source_ref &middot; source_license_spdx
-  record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p selectors)</pre></div>
-        <p>Task ids look like <code>td-fc90ea8b76d5f6b6</code>.</p>
-        <p>Canonical short schema:
-          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</p>
-        <p>Code: <code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code>,
-          <code>web/submit_result.py</code>.</p>
-
-        <h3 id="task-toml" class="scroll-m-28 font-mono"><code>task.toml</code></h3>
-        <p>Harbor's descriptor. The framework reads only <code>[environment]</code>
-          (<code>eval.py::load_task</code>):</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">schema_version = "1.1"
-
-[task]
-name = "terminal-daily/td-fc90ea8b76d5f6b6"
-description = "Validate format string keys in logger.add() for early error feedback"
-keywords = ["C5", "C4"]                 <span class="text-muted-foreground"># capability labels</span>
-
-[metadata]
-source_repo = "Delgan/loguru"
-pr_number = 1451
-base_sha  = "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e"
-merge_sha = "b782e56fcf07fecf9545ff6ee2350baacb0968ce"
-oracle_patch_sha256 = "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8"
-difficulty = "medium"
-network_profile = "build-online/run-offline"
-
-[environment]
-docker_image  = "environment/Dockerfile"   <span class="text-muted-foreground"># portable ref: build from the task Dockerfile</span>
-allow_internet = false                      <span class="text-muted-foreground"># run-offline -&gt; egress cut at scoring time</span>
-cpus = 1
-memory_mb = 4096
-storage_mb = 16384</pre></div>
-        <div class="overflow-x-auto">
-          <table>
-            <thead><tr><th class="whitespace-nowrap"><code>[environment]</code> key</th><th>what it does</th></tr></thead>
-            <tbody>
-              <tr><th class="whitespace-nowrap"><code>docker_image</code></th>
-                  <td>Rewritten to the portable <code>"environment/Dockerfile"</code> on publish
-                    (<code>publish_tasks.py::_sanitize_task_toml</code>). The host-specific absolute
-                    <code>.sif</code> path is never shipped &mdash; you build the image from the task's
-                    own <code>environment/Dockerfile</code>.</td></tr>
-              <tr><th class="whitespace-nowrap"><code>allow_internet</code></th>
-                  <td>Drives the runtime network cut. When <code>false</code>, the singularity backend
-                    gets the no-network <code>--ek</code> switch injected automatically
-                    (<code>harbor_score.py::maybe_inject_offline_eks</code>), physically cutting egress
-                    during scoring.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="instruction" class="scroll-m-28 font-mono"><code>instruction.md</code></h3>
-        <p>Upstream provenance (origin remote, project name, commit ids) is stripped.</p>
-        <p>Solve from the tree and the description alone.</p>
-
-        <h3 id="tests" class="scroll-m-28 font-mono"><code>tests/</code></h3>
-        <p>Re-laid from the trusted package <strong>after</strong> the patch is applied.</p>
-        <div class="overflow-x-auto">
-          <table>
-            <thead><tr><th class="whitespace-nowrap">file</th><th>role</th></tr></thead>
-            <tbody>
-              <tr><th class="whitespace-nowrap"><code>test.sh</code></th>
-                  <td>The runner; writes the reward. Steps below.</td></tr>
-              <tr><th class="whitespace-nowrap"><code>test_outputs.py</code></th>
-                  <td>The protected assertions. Carries the <code>FAIL_TO_PASS</code> /
-                    <code>PASS_TO_PASS</code> selectors, lands the PR's <code>test_patch.diff</code> onto
-                    the tree (<code>_ensure_tests_applied</code>), then runs the fail-to-pass tests.
-                    <strong>Archive only</strong> &mdash; the body is withheld for live tasks.</td></tr>
-              <tr><th class="whitespace-nowrap"><code>test_patch.diff</code></th>
-                  <td>The PR's test diff, applied at verify time so the test signal is never baked into
-                    the environment image.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tests/test.sh
-  install    pytest + the project's test extras
-  harden     <span class="text-muted-foreground">remove stray conftest.py / sitecustomize.py &middot; unset PYTHONPATH &middot; pin PATH</span>
-  run        pytest -q -rA /tests/test_outputs.py
-  reward     1 on all-pass, else 0  -&gt;  /logs/verifier/reward.txt</pre></div>
-
-        <h3 id="environment" class="scroll-m-28 font-mono"><code>environment/Dockerfile</code></h3>
-        <p>Parity/audit artifact: the recipe the image is built from.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">base image
-repo @ REPO_BASE_SHA    <span class="text-muted-foreground">.git re-initialized to a single `baseline` commit</span>
-deps by search          pip install -e .  -&gt;  pip install .  -&gt;  pip install -r requirements.txt
-                        <span class="text-muted-foreground">first that builds wins; hard-fails if none</span></pre></div>
-
-        <h3 id="solution" class="scroll-m-28 font-mono"><code>solution/</code> (archive only)</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">solve.sh       <span class="text-muted-foreground">the git-apply driver</span>
-  git apply --check oracle.patch
-  git apply --3way oracle.patch      <span class="text-muted-foreground">falls back to plain `git apply`</span>
-  already-applied tree               <span class="text-muted-foreground">idempotent no-op</span>
-  genuinely inapplicable patch       <span class="text-muted-foreground">FAILS LOUDLY -- never pretends success on an unpatched tree</span>
-  patch touches native/build inputs  <span class="text-muted-foreground">rebuilds the extension offline</span>
-
-oracle.patch   <span class="text-muted-foreground">the gold fix from the merged PR</span>
-  sha256                             <span class="text-muted-foreground">recorded as oracle_patch_sha256 in task.toml / record.json</span></pre></div>
-
-        <h3 id="provenance" class="scroll-m-28 font-mono"><code>PROVENANCE.json</code></h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
-  "source_repo": "Delgan/loguru",
-  "source_ref": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
-  "source_license_spdx": ""
-}</pre></div>
-        <p>Tasks derive only from permissively-licensed repositories.</p>
-
-        <h3 id="record" class="scroll-m-28 font-mono"><code>record.json</code> (archive only)</h3>
-        <p>Host-specific and internal build fields are stripped on publish
-          (<code>publish_tasks.py::_sanitize_record</code>), leaving:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># stripped: image_ref &middot; image_build &middot; generator &middot; repro &middot; netns_available &middot; needs_network</span>
-{
-  "task_id": "td-fc90ea8b76d5f6b6",
-  "repo": "Delgan/loguru",
-  "pr_number": 1451,
-  "base_sha": "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e",
-  "merge_sha": "b782e56fcf07fecf9545ff6ee2350baacb0968ce",
-  "oracle_patch_sha256": "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8",
-  "test_files": ["tests/test_add_option_format.py"],
-  "fail_to_pass": ["tests/test_add_option_format.py::test_invalid_format_key_...", "..."],
-  "pass_to_pass": [],
-  "capability_labels": ["C5", "C4"]
-}</pre></div>
-
-        <h2 id="archive-vs-live" class="scroll-m-28 font-mono">Archive vs. live</h2>
-
-        <h3 id="cutoff" class="scroll-m-28 font-mono">The two-week cutoff</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># tasks/publish_tasks.py::publish &middot; ARCHIVE_WEEKS = 2</span>
+    <h2 id="archive-vs-live"><a href="#archive-vs-live">Archive vs. live</a></h2>
+    <p>A task is archived two weeks after its source PR merged. Live withholding blocks memorization
+      and test-editing; releasing archived tasks in full supports local reproduction.</p>
+    <figure class="tdb-code">
+      <figcaption>tasks/publish_tasks.py::publish</figcaption>
+      <pre><code><span class="text-muted-foreground"># ARCHIVE_WEEKS = 2</span>
 (today - merge_date).days &gt;= 14   -&gt;  archive
-(today - merge_date).days &lt;  14   -&gt;  live</pre></div>
-        <p>Live withholding blocks memorization and test-editing.</p>
-        <p>Releasing archived tasks in full supports local reproduction.</p>
+(today - merge_date).days &lt;  14   -&gt;  live</code></pre>
+    </figure>
 
-        <h3 id="shipped" class="scroll-m-28 font-mono">What ships in each mode</h3>
-        <div class="overflow-x-auto">
-          <table>
-            <thead><tr>
-              <th></th>
-              <th>shipped in <strong>archive</strong></th>
-              <th>shipped in <strong>live</strong></th>
-            </tr></thead>
-            <tbody>
-              <tr><th><code>task.toml</code></th><td>yes (sanitized)</td><td>yes (sanitized)</td></tr>
-              <tr><th><code>instruction.md</code></th><td>yes</td><td>yes</td></tr>
-              <tr><th><code>PROVENANCE.json</code></th><td>yes</td><td>yes</td></tr>
-              <tr><th><code>environment/</code></th><td>yes</td><td>yes</td></tr>
-              <tr><th><code>tests/test.sh</code></th><td>yes</td><td>yes</td></tr>
-              <tr><th><code>tests/test_outputs.py</code> (protected body)</th>
-                  <td><span class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">yes</span></td>
-                  <td><span class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">withheld</span></td></tr>
-              <tr><th><code>tests/test_patch.diff</code></th>
-                  <td>yes</td><td><span class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">withheld</span></td></tr>
-              <tr><th><code>solution/</code> (<code>solve.sh</code>, <code>oracle.patch</code>)</th>
-                  <td><span class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90 font-mono">yes</span></td>
-                  <td><span class="inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 font-mono">withheld</span></td></tr>
-              <tr><th><code>record.json</code></th><td>yes (sanitized)</td>
-                  <td>replaced by <code>FAILING_TESTS.json</code></td></tr>
-            </tbody>
-          </table>
-        </div>
+    <h2 id="shipped"><a href="#shipped">What ships in each mode</a></h2>
+    <p>Every row is one path in the package; the two columns are the two release modes.</p>
+    <div class="tdb-plain-table">
+      <table>
+        <thead><tr>
+          <th>package path</th>
+          <th>shipped in archive</th>
+          <th>shipped in live</th>
+        </tr></thead>
+        <tbody>
+          <tr><th class="tdb-id">task.toml</th><td>yes (sanitized)</td><td>yes (sanitized)</td></tr>
+          <tr><th class="tdb-id">instruction.md</th><td>yes</td><td>yes</td></tr>
+          <tr><th class="tdb-id">PROVENANCE.json</th><td>yes</td><td>yes</td></tr>
+          <tr><th class="tdb-id">environment/</th><td>yes</td><td>yes</td></tr>
+          <tr><th class="tdb-id">tests/test.sh</th><td>yes</td><td>yes</td></tr>
+          <tr><th><span class="tdb-id">tests/test_outputs.py</span> (protected body)</th>
+              <td>yes</td><td>withheld</td></tr>
+          <tr><th class="tdb-id">tests/test_patch.diff</th>
+              <td>yes</td><td>withheld</td></tr>
+          <tr><th><span class="tdb-id">solution/ (solve.sh, oracle.patch)</span></th>
+              <td>yes</td><td>withheld</td></tr>
+          <tr><th class="tdb-id">record.json</th><td>yes (sanitized)</td>
+              <td>replaced by <span class="tdb-id">FAILING_TESTS.json</span></td></tr>
+        </tbody>
+      </table>
+    </div>
 
-        <h3 id="failing-tests" class="scroll-m-28 font-mono"><code>FAILING_TESTS.json</code> (live only)</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># the failing-test IDs only, from the F2P selectors (publish_tasks.py::_failing_test_ids)</span>
-{
+    <h2 id="failing-tests"><a href="#failing-tests"><span class="tdb-id">FAILING_TESTS.json</span> (live only)</a></h2>
+    <p>Live submissions stay unranked until an official replay receipt exists.</p>
+    <figure class="tdb-code">
+      <figcaption>the failing-test IDs only, from the F2P selectors (publish_tasks.py::_failing_test_ids)</figcaption>
+      <pre><code>{
   "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
   "note": "protected assertions + gold solution withheld; pending official replay"
-}</pre></div>
-        <p>Live submissions stay unranked until an <strong>official replay receipt</strong> exists.</p>
+}</code></pre>
+    </figure>
 
-        <h2 id="scoring" class="scroll-m-28 font-mono">How scoring re-lays the protected tests</h2>
-        <p><strong>Execution-only</strong>: no LLM judge can turn a claim into a score.</p>
-
-        <h3 id="scoring-flow" class="scroll-m-28 font-mono">Flow</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># terminal_daily_bench/eval.py &middot; terminal_daily_bench/harbor_score.py</span>
-1  task package  -&gt;  run copy (.tdb_work/runs/...)   <span class="text-muted-foreground">the model never touches the trusted original</span>
-2  model  &lt;-  instruction + the source file(s) the reference solution touches
-3  model  -&gt;  one unified diff                       <span class="text-muted-foreground">eval.py::extract_diff</span>
-              -&gt;  run copy solution/oracle.patch
-4  harbor run -p &lt;run_task&gt; -a oracle -e singularity ...   <span class="text-muted-foreground">eval.py::run_harbor_oracle</span>
-     solution/solve.sh  -&gt;  git apply                <span class="text-muted-foreground">the now model-authored patch, in the task container</span>
-5  harbor RE-LAYS tests/ FROM THE TRUSTED PACKAGE, runs them under a network cut
-     <span class="text-muted-foreground">on a face the agent never touched</span>
-6  result.json  -&gt;  harbor_score.read_harbor_reward
-              -&gt;  reward &gt;= 0.999  -&gt;  solved: true</pre></div>
-
-        <h3 id="scoring-guarantees" class="scroll-m-28 font-mono">What the gate does and does not cover</h3>
-        <div class="overflow-x-auto">
-          <table>
-            <thead><tr><th class="whitespace-nowrap">property</th><th>what it means</th></tr></thead>
-            <tbody>
-              <tr><th class="whitespace-nowrap">scope</th>
-                  <td>Proves replay integrity, <strong>not</strong> semantic verifier completeness.</td></tr>
-              <tr><th class="whitespace-nowrap">test edits</th>
-                  <td>A patch that edits <code>tests/</code> only changes the discarded run-copy workspace
-                    &mdash; the protected tests come from the trusted package, not the patch.</td></tr>
-              <tr><th class="whitespace-nowrap">reward source</th>
-                  <td><code>harbor_score.read_harbor_reward</code>, the same reader the private admission
-                    gate uses.</td></tr>
-              <tr><th class="whitespace-nowrap">BAD-safe</th>
-                  <td>No patch, a failed apply, a hung trial or an unparseable result yield
-                    <code>reward 0.0</code> / <code>solved: false</code>, cause recorded &mdash; never a
-                    positive score on a crash.</td></tr>
-              <tr><th class="whitespace-nowrap">offline cut</th>
-                  <td>Offline tasks get the no-network switch from
-                    <code>harbor_score.maybe_inject_offline_eks</code> (singularity-gated, task-driven,
-                    idempotent).</td></tr>
-              <tr><th class="whitespace-nowrap">host hygiene</th>
-                  <td><code>harbor_score.clean_subprocess_env</code> scrubs host conda/venv
-                    pollution.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="scoring-record" class="scroll-m-28 font-mono">Per-run result record</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{ "model": "...", "task": "td-fc90ea8b76d5f6b6", "scaffold": "single_shot_patch",
-  "reward": 1.0, "solved": true, "patch_applied": true,
-  "false_accept_check": { "gate": "harbor_protected_tests",
-    "reward_source": "result.json via harbor_score.read_harbor_reward",
-    "protected_tests_relaid_by_harbor": true, "model_is_judge": false,
-    "model_patch_touched_tests": false,
-    "scope": "protected_test_replay_integrity",
-    "claim_acceptance_without_replay": false,
-    "semantic_false_accept": null, "false_accept": 0 } }</pre></div>
-
-        <h2 id="examples" class="scroll-m-28 font-mono">Runnable examples</h2>
-        <p>Needs an apptainer/singularity host.</p>
-
-        <h3 id="install" class="scroll-m-28 font-mono">Install and point at a model</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .
-export OPENAI_BASE_URL=...          <span class="text-muted-foreground"># OpenAI / OpenRouter / vLLM / LiteLLM / local</span>
-export OPENAI_API_KEY=...</pre></div>
-
-        <h3 id="score-a-task" class="scroll-m-28 font-mono">Score a task</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># baseline: the task's own oracle.patch -&gt; reward 1.0 (no model call, archive only)</span>
-tdb oracle tasks/archive/td-fc90ea8b76d5f6b6
-
-<span class="text-muted-foreground"># score a model with the single_shot_patch scaffold</span>
-tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6
-
-<span class="text-muted-foreground"># multi-angle quality card (needs &gt;=1 task and &gt;=2 models in the results file)</span>
-tdb quality results.jsonl
-
-<span class="text-muted-foreground"># result JSON lands under $TDB_WORK (default ./.tdb_work), or at --out PATH</span></pre></div>
-        <p>Both wrap <code>terminal_daily_bench.eval</code>, which accepts
-          <code>--max-tokens</code>, <code>--call-timeout</code> and
-          <code>--harbor-timeout</code>.</p>
-
-        <h3 id="read-a-live-task" class="scroll-m-28 font-mono">Read a live task</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">cat tasks/live/td-fc90ea8b76d5f6b6/instruction.md
-cat tasks/live/td-fc90ea8b76d5f6b6/FAILING_TESTS.json     <span class="text-muted-foreground"># only the failing-test IDs</span></pre></div>
-
-        <h3 id="publish" class="scroll-m-28 font-mono">Publish a task directory</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># publish_tasks.py &lt;src_task_dir&gt; &lt;merge_date&gt; &lt;today&gt; &lt;out_root&gt;</span>
-<span class="text-muted-foreground"># idempotent; archive vs. live is picked from the dates</span>
-python tasks/publish_tasks.py ./src/td-fc90ea8b76d5f6b6 2026-03-25 2026-07-22 ./tasks
-<span class="text-muted-foreground"># -&gt; {"task": "td-...", "mode": "archive", "shipped_solution": true, "dest": "tasks/archive/td-..."}</span></pre></div>
-
-        <h3 id="submit" class="scroll-m-28 font-mono">Submit a result</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># validate the submission JSON, then record it as pending re-verification</span>
-python web/submit_result.py validate &lt; submission.json
-python web/submit_result.py record   &lt; submission.json \
-  --store community_submissions --authenticated-submitter github:YOUR_LOGIN</pre></div>
-        <p>Recorded as pending: the public bundle does not run a replay worker (see
-          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>).</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># one JSON object per (model, task) cell; every key below is required</span>
-{ "date": "...", "submitter": "...", "model": "...", "model_build": "...",
-  "scaffold": "...", "harness_version": "...", "task": "td-...", "patch": "..." }
-<span class="text-muted-foreground"># the auth layer supplies the authenticated submitter; reward_claimed is advisory</span></pre></div>
-        <p>Complete frozen-roster signed replay coverage is required for
-          <strong>community</strong> ranking.</p>
-        <p><a href="../submission/#schema">Validation rules &rarr;</a></p>
-
-        <h2 id="scaffold" class="scroll-m-28 font-mono">Plugging in your own scaffold</h2>
-        <p>Built-in: <code>single_shot_patch</code>, one localized shot at a diff.</p>
-        <p>Multi-turn agents plug in via the adapter contract, over any OpenAI-compatible endpoint:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed"><span class="text-muted-foreground"># terminal_daily_bench/adapters/base.py::HarnessAdapter</span>
-input  = (task dir, failing test ids, model id/endpoint)
-output = AdapterResult(patch: str, telemetry: dict, error: str | None)
-
-<span class="text-muted-foreground"># produce_patch(...) must NOT read or write the protected tests or the gold</span>
-<span class="text-muted-foreground"># solution, and must not compute a reward.</span>
-<span class="text-muted-foreground"># The execution gate stays the sole reward authority as harnesses are added.</span>
-<span class="text-muted-foreground"># Semantic false-accept still requires labeled exploit trials.</span></pre></div>
-
-      </article>
-
-      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">next:
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../submission/">submission</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quality-methods/">quality methods</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quickstart/">quickstart</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../task-format.md">markdown source</a></p>
-    </div>
-
-    <!-- ===================== on this page ===================== -->
-    <aside id="toc" class="sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem" aria-label="On this page"></aside>
-
-  </div>
-
-  <!-- ===================== packages in the wild ===================== -->
-  <section class="tdb-block" data-tdb-section="next">
-    <div class="tdb-block-head">
-      <h2>packages in the wild</h2>
-      <p>published task directories</p>
-      <div class="tdb-block-tools"><a href="../../registry/">task registry &rarr;</a></div>
-    </div>
-
-    <div id="pkgs" class="w-full"></div>
-  </section>
-
-</div>
-</div>
+  </article>
 </main>
 
-<script src="../../assets/site.js?v=a6e52a8c64" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="docs"></script>
 <script>
-/* the "on this page" rail — built from the section ids already in the prose,
-   so the navigation can never drift from the text. */
-(function buildToc() {
-  var toc = document.getElementById("toc");
-  if (!toc) return;
-  var hs = document.querySelectorAll(".prose h2[id], .prose h3[id]");
-  if (!hs.length) { toc.style.display = "none"; return; }
-  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
-             '<div class="flex flex-col border-l">'];
-  for (var i = 0; i < hs.length; i++) {
-    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
-    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
-    var pad = hs[i].tagName === "H3" ? "ps-6" : "pl-4";
-    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 ' + pad +
-      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
-      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
-  }
-  out.push("</div>");
-  toc.innerHTML = out.join("");
-})();
+/* Fragments that moved when this page was split.
 
-(async function () {
-  var T = window.TDB;
-  var el = document.getElementById("pkgs");
+   Nothing under docs/, web/ or tests/ links any of the ids below -- they were
+   checked -- but a reader's bookmark is a referrer nobody can grep for, so the
+   old URL still has to land on the content instead of on a page that silently
+   ignores its own fragment. Two sibling pages already shipped this and two did
+   not; one treatment survives a bookmark and the other does not, so the site
+   now does the same thing in all four places.
 
-  /* Shared metadata badge; the caller appends the semantic colour pair. */
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden border-transparent ";
-  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
-  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
-  var NOTE =
-    "tdb-panel bg-card text-card-foreground -mx-4 border px-6 py-6 " +
-    "text-sm/relaxed text-muted-foreground sm:mx-0";
-
-  var site = await T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue"));
-
-  if (!site || !site.tasks || !site.tasks.length) {
-    el.innerHTML = '<div class="' + NOTE + '">No task catalogue published yet ' +
-      '(<code>site_data.json</code> is missing), so there is nothing to list here. The schema ' +
-      'above is the whole contract &mdash; a task directory is valid on its own.</div>';
-    return;
-  }
-
-  var rows = site.tasks.slice(0, 8).map(function (t) {
-    var live = t.status === "live";
-    var dir = "tasks/" + (live ? "live" : "archive") + "/" + t.id;
-    return '<tr class="border-b">' +
-      '<th class="px-4 py-3 text-left font-medium"><a class="underline-offset-4 hover:underline" href="' +
-        T.ROOT + "/registry/" + encodeURIComponent(t.id) + '/">' + t.id + "</a></th>" +
-      '<td class="px-4 py-3">' + (live
-        ? '<span class="' + BADGE + SECONDARY + '">live</span>'
-        : '<span class="' + BADGE + PRIMARY + '">archive</span>') + "</td>" +
-      '<td class="text-muted-foreground px-4 py-3">' + dir + "</td>" +
-      '<td class="text-muted-foreground px-4 py-3">' +
-        (live ? "FAILING_TESTS.json" : "record.json + solution/") + "</td>" +
-      '<td class="px-4 py-3 text-right tabular-nums">' +
-        (t.n_fail_to_pass != null ? t.n_fail_to_pass : "&mdash;") + "</td></tr>";
-  }).join("");
-
-  el.innerHTML =
-    '<div class="bg-card text-card-foreground -mx-4 overflow-x-auto border rounded-none ' +
-      'border-x-0 font-mono text-sm sm:mx-0 sm:border-x">' +
-    '<table class="w-full"><thead class="text-muted-foreground"><tr class="border-b">' +
-      '<th class="px-4 py-3 text-left font-medium">task id</th>' +
-      '<th class="px-4 py-3 text-left font-medium">release</th>' +
-      '<th class="px-4 py-3 text-left font-medium">directory</th>' +
-      '<th class="px-4 py-3 text-left font-medium">metadata shipped</th>' +
-      '<th class="px-4 py-3 text-right font-medium">f2p</th>' +
-    "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "environment": "./build/",
+    "examples": "./examples/",
+    "instruction": "./files/",
+    "provenance": "./build/",
+    "publish": "./examples/",
+    "read-a-live-task": "./examples/",
+    "record": "./build/",
+    "scaffold": "./scaffold/",
+    "scaffold-limits": "./scaffold/",
+    "score-a-task": "./examples/",
+    "scoring": "./scoring/",
+    "scoring-guarantees": "./scoring/",
+    "scoring-record": "./scoring/",
+    "solution": "./build/",
+    "submit": "./examples/",
+    "task-toml": "./files/",
+    "tests": "./files/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
 })();
 </script>
 </body>

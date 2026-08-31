@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>reading the discrimination report — terminal-daily-bench docs</title>
+<meta name="description" content="Standing methodology for the selection-quality report: what its numbers are, and which of its rows may be compared with which.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Reading the discrimination report</h1>
+    <p class="tdb-doc-sub">Standing methodology for the <a href="../../../quality/">selection-quality report</a>, so it does not have to sit beside every figure.</p>
+
+    <h2 id="report-discrimination"><a href="#report-discrimination">What the numbers on that page are</a></h2>
+    <dl class="tdb-defs">
+      <dt>Provisional readings</dt>
+      <dd>Provisional readings, not properties &mdash; every number on that page is recomputed from the published matrix at page load.</dd>
+      <dt>Scaffold scope</dt>
+      <dd>The solve matrix is <strong>one scaffold</strong>, one model family, one day. It is never the whole model suite, and its cells are not independent trials.</dd>
+      <dt>Hollow squares</dt>
+      <dd>A hollow square is a task <strong>from another suite</strong>, not a skipped run. Where a run really was skipped under the reported scaffold, the note on the figure says so instead and names the count.</dd>
+      <dt>Overlapping intervals</dt>
+      <dd>Overlapping Wilson intervals are <strong>not a significance test</strong>. Where a figure paints a shaded band, that band marks the range every count in that group still allows.</dd>
+    </dl>
+
+    <h2 id="report-comparisons"><a href="#report-comparisons">Which rows may be compared with which</a></h2>
+    <dl class="tdb-defs">
+      <dt>The level rows</dt>
+      <dd>The difficulty rows are a <strong>partition</strong> of the publication-mode row above them, not peer groups. They are compared inside one publication mode only: pooling the modes puts structurally-zero tasks into the comparison and the result is an artifact of pooling.</dd>
+      <dt>Publication mode</dt>
+      <dd><strong>Live vs archive is a difference in what is withheld, not measured difficulty.</strong> Live withholds gold patches, protected test bodies and merge provenance; archive publishes them. Harder, newer and measured differently cannot be told apart. Any other publication mode likewise differs in what the task package publishes, so those rows are coverage facts, not difficulty findings.</dd>
+      <dt>Declared difficulty</dt>
+      <dd><strong>Declared difficulty is editorial</strong> &mdash; the <code>task.toml</code> label, never measured.</dd>
+      <dt>Authority</dt>
+      <dd>Nothing on that page is ranked or certified: no publication bundle is approved, no matrix digest is trusted, and receipt authority is inactive &mdash; which is why the registry&rsquo;s <strong>Official solves</strong> column is a dash.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

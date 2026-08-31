@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>capability taxonomy (C1-C14) — terminal-daily-bench docs</title>
+<meta name="description" content="Where the C1-C14 capability codes are declared, what the deterministic tagger reads, and the fourteen codes themselves.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>The capability taxonomy</h1>
+    <p class="tdb-doc-sub">Where C1&ndash;C14 are declared, and what the fourteen codes are.</p>
+
+    <h2 id="capability-taxonomy"><a href="#capability-taxonomy">The capability taxonomy (C1&ndash;C14)</a></h2>
+    <p><strong>Correction.</strong> An earlier revision of this page deleted the C1&ndash;C14 claim, on the grounds that nothing defined the codes. That was wrong, and it is restored here rather than re-added silently: the codes are defined in one place and the assignment is deterministic.</p>
+    <dl class="tdb-defs">
+      <dt>Source of truth</dt>
+      <dd><code>CAPABILITY_TAXONOMY</code> in <code>td_pipeline/selection.py</code>; code, name, scope and tagging rules are declared once, per code.</dd>
+      <dt>Tagger</dt>
+      <dd><code>label_capabilities(candidate)</code> &mdash; static path rules and patch-token rules. No model, no heuristic scoring, no human pass.</dd>
+      <dt>Inputs</dt>
+      <dd>Three, all from the package: the changed-file list, the oracle diff, the test diff. The <code>task.toml</code> prose is not read.</dd>
+      <dt>Determinism</dt>
+      <dd>Same inputs, same labels. Re-running the tagger reproduces each package&rsquo;s shipped <code>capability_labels</code> exactly.</dd>
+      <dt>Multi-label</dt>
+      <dd>A task carries every code its diff triggers, not one. The counts per code do not sum to the task count.</dd>
+      <dt>Live packages</dt>
+      <dd><strong>Not taggable.</strong> Live withholds <code>solution/oracle.patch</code>, so the tagger has no oracle diff to read.</dd>
+      <dt>In the registry</dt>
+      <dd>A capability chip selects both kinds of evidence &mdash; re-derived and declared-only. The <code>Capability</code> column is what says which kind a given row has.</dd>
+      <dt>Not a difficulty</dt>
+      <dd>A label says what the fix touches. It never says how hard the task is.</dd>
+    </dl>
+
+    <h2 id="capability-codes"><a href="#capability-codes">The fourteen codes</a></h2>
+    <div class="tdb-plain-table">
+      <table>
+        <thead><tr><th>code</th><th>name</th><th>scope</th></tr></thead>
+        <tbody>
+          <tr><th class="tdb-id">C1</th><td>filesystem</td><td>filesystem / data wrangling</td></tr>
+          <tr><th class="tdb-id">C2</th><td>build</td><td>build &amp; compile</td></tr>
+          <tr><th class="tdb-id">C3</th><td>debug</td><td>debugging / fault localization</td></tr>
+          <tr><th class="tdb-id">C4</th><td>impl</td><td>code implementation / refactor</td></tr>
+          <tr><th class="tdb-id">C5</th><td>test</td><td>test authoring &amp; verification</td></tr>
+          <tr><th class="tdb-id">C6</th><td>data</td><td>data processing / ETL / scientific</td></tr>
+          <tr><th class="tdb-id">C7</th><td>net</td><td>networking &amp; protocols</td></tr>
+          <tr><th class="tdb-id">C8</th><td>sec</td><td>crypto &amp; security</td></tr>
+          <tr><th class="tdb-id">C9</th><td>ops</td><td>system config &amp; ops</td></tr>
+          <tr><th class="tdb-id">C10</th><td>vcs</td><td>version control operations</td></tr>
+          <tr><th class="tdb-id">C11</th><td>perf</td><td>performance optimization</td></tr>
+          <tr><th class="tdb-id">C12</th><td>reverse</td><td>reverse engineering / low-level</td></tr>
+          <tr><th class="tdb-id">C13</th><td>ml</td><td>ML / data-science engineering</td></tr>
+          <tr><th class="tdb-id">C14</th><td>orch</td><td>environment / tool orchestration</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

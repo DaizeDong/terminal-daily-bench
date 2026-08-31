@@ -5,15 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>terminal-daily-bench — measured solve rates</title>
 <meta name="description" content="Measured solve rates on the current terminal-daily-bench suite.">
-<link rel="stylesheet" href="./assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="./assets/site.css?v=a6e52a8c64">
+<link rel="stylesheet" href="./assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="./assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
+<!-- The two inner `flex-1` are gone. Only `main` needs it (verify_site.py
+     pins that class string), and nothing inside a single-column page was ever
+     going to grow to fill it: three nested stretch declarations for one
+     column. Measured identical at 390/768/1440 x 768/900/1600.
+
+     This page carries 940px of content and the leaderboard-to-footer step is
+     88px, the same on all 13 screens. The residual stretch that opens under
+     it on a window taller than ~1030px is `mt-auto` on the footer that
+     assets/site.js injects as a child of <body>, not markup on this page. -->
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-  <div class="flex flex-1 flex-col items-center px-4 py-6">
-    <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
+  <div class="flex flex-col items-center px-4 py-6">
+    <div class="flex w-full max-w-7xl flex-col" data-tdb-canary-host>
 
       <!-- The whole page above the table is a title, a line, and two ways in.
            What used to sit between them - a seven-row status grid, an
@@ -26,9 +35,9 @@
         <p class="text-muted-foreground font-mono text-sm">living coding-agent benchmark</p>
         <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance"><span>Terminal</span> <span>Daily</span></h1>
         <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks.</p>
-        <div class="flex flex-wrap gap-3 mt-2">
-          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline bg-primary text-primary-foreground" href="./guide/quickstart/">run the benchmark</a>
-          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline hover:bg-muted" href="./benchmarks/">status &amp; limits</a>
+        <div class="flex flex-wrap gap-3">
+          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline bg-primary text-primary-foreground" href="./guide/quickstart/">Run the benchmark</a>
+          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline hover:bg-muted" href="./benchmarks/">Status &amp; limits</a>
         </div>
       </div>
 
@@ -38,26 +47,26 @@
                heading by officialBadge(). That pill is the disclosure,
                printed at the point where the claim is made, which is the
                only place a qualifier is read. -->
-          <h2 id="hp-board-title">leaderboard</h2>
+          <h2 id="hp-board-title">Leaderboard</h2>
           <p id="hp-board-sub">&mdash;</p>
           <div class="tdb-block-tools">
             <div id="daynav"></div>
-            <a href="./leaderboard/">full leaderboard &rarr;</a>
-            <a href="./registry/">browse tasks &rarr;</a>
+            <a href="./leaderboard/">Full leaderboard &rarr;</a>
+            <a href="./registry/">Browse tasks &rarr;</a>
           </div>
         </div>
-        <div data-slot="table-container" class="tdb-plain-table" id="hp-board">
-          <p class="text-muted-foreground font-mono text-sm">loading&hellip;</p>
+        <div class="tdb-plain-table" id="hp-board">
+          <p class="tdb-empty">Loading&hellip;</p>
         </div>
-        <p class="tdb-block-foot tdb-foot" id="hp-board-foot" data-tdb-integrity>Only publishable rows can appear here.</p>
+        <p class="tdb-block-foot tdb-foot" id="hp-board-foot">Only publishable rows can appear here.</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="./assets/site.js?v=a6e52a8c64" data-root="." data-page="home"></script>
-<script src="./assets/tdb-data.js?v=a6e52a8c64"></script>
+<script src="./assets/site.js?v=11e80328f8" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=11e80328f8"></script>
 <script>
 (function () {
   "use strict";
@@ -69,14 +78,6 @@
   }
   function byId(id) { return document.getElementById(id); }
   function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
-
-  var TH =
-    "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap " +
-    "[&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] py-3 text-base";
-  var TD =
-    "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 " +
-    "[&>[role=checkbox]]:translate-y-[2px] py-4 text-base";
-  var TR = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6";
 
   function relativeReport(board) {
     var candidates = [board, board && board.relative_capability,
@@ -153,12 +154,14 @@
     var ranked = formalModelRatings(relativeReport(day), (site && site.scoring) || {});
     return ranked.length
       ? '<span class="tdb-badge" data-official="true">official</span>'
-      /* A caveat behind a title= attribute does not exist on a phone and is
-         easy to miss anywhere else. Print it, and link to what it means. */
-      : '<span class="tdb-badge" data-official="false">unofficial</span>' +
-        '<a class="tdb-badge-why" href="./benchmarks/#integrity">why</a>';
+      : '<span class="tdb-badge" data-official="false">unofficial</span>';
   }
 
+  /* Every cell on this table used to carry a ~120-character utility chain and
+     wrap its one value in a <p>: five columns x five rows = 30 wrappers and 30
+     class chains around 25 short strings. `.tdb-plain-table` (the host div
+     already had the class) styles bare <th>/<td>; `.tdb-num` right-aligns and
+     sets the numeric face. Same table, same numbers, no wrappers. */
   function renderBoard(day, site) {
     var rows = flattenDay(day);
     rows.sort(function (a, b) { return b.rate - a.rate; });
@@ -176,21 +179,15 @@
       return;
     }
 
-    var head = '<tr data-slot="table-row" class="data-[state=selected]:bg-muted border-b transition-colors px-6 hover:bg-transparent">' +
-      '<th data-slot="table-head" class="' + TH + '">rank</th>' +
-      '<th data-slot="table-head" class="' + TH + '">agent</th>' +
-      '<th data-slot="table-head" class="' + TH + '">model</th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">accuracy</div></th>' +
-      '<th data-slot="table-head" class="' + TH + '"><div class="flex justify-end">solved</div></th>' +
-      "</tr>";
+    var head = '<tr><th class="tdb-num">rank</th><th>agent</th><th>model</th>' +
+      '<th class="tdb-num">accuracy</th><th class="tdb-num">solved</th></tr>';
     var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
-      return '<tr data-slot="table-row" class="' + TR + '">' +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="tabular-nums text-muted-foreground">' + esc(r.rank) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-muted-foreground">' + esc(r.agent) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="font-medium">' + esc(r.model) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums">' + esc(T.pct(r.rate)) + "</p></td>" +
-        '<td data-slot="table-cell" class="' + TD + '"><p class="text-right tabular-nums text-muted-foreground">' +
-          esc(r.solved) + "/" + esc(r.n) + "</p></td>" +
+      return "<tr>" +
+        '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>" +
+        '<td class="tdb-muted">' + esc(r.agent) + "</td>" +
+        '<td><span class="tdb-id">' + esc(r.model) + "</span></td>" +
+        '<td class="tdb-num">' + esc(T.pct(r.rate)) + "</td>" +
+        '<td class="tdb-num tdb-muted">' + esc(r.solved) + "/" + esc(r.n) + "</td>" +
         "</tr>";
     }).join("");
 

@@ -4,547 +4,123 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>quickstart — terminal-daily-bench docs</title>
-<meta name="description" content="Install terminal-daily-bench, point it at an OpenAI-compatible endpoint, score a model on a task, run the oracle baseline, and read the quality card.">
-<link rel="stylesheet" href="../../assets/tw.css?v=a6e52a8c64">
-<link rel="stylesheet" href="../../assets/site.css?v=a6e52a8c64">
+<meta name="description" content="What terminal-daily-bench needs on your host, how to install it, how to point it at an OpenAI-compatible endpoint, and how to check the host before spending a model call.">
+<link rel="stylesheet" href="../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../assets/site.css?v=11e80328f8">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
 
-<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-<div class="flex flex-1 flex-col items-center px-4 py-6">
-<div class="flex w-full max-w-7xl flex-1 flex-col items-center">
+<!-- ONE TOPIC PER PAGE. This file used to carry 22 <h2>: requirements,
+     install, configure, run, the result record, the quality card, submitting,
+     and a six-card task-id grid, all under one title. It is now the SETUP
+     page and nothing else, and the four topics that were living here have
+     their own pages:
 
-  <div class="flex w-full flex-1 flex-col items-start gap-12 lg:flex-row">
+       ../run/            #image #score #score-scaffold #oracle #task-ids
+       ../result-record/  #record #record-bad-safe
+       ../false-accept/   #fa-block
+       ../quality-card/   #quality #quality-output #submitting
 
-    <!-- ===================== the prose column ===================== -->
-    <div class="flex w-full min-w-0 max-w-3xl flex-1 flex-col pt-6 pb-6">
+     #requirements STAYS HERE. It is deep-linked from docs/index.html,
+     docs/guide/index.html, docs/submit/index.html, docs/benchmarks/sample/
+     and from every archived suite/task page web/gen_pages.py writes, and
+     web/verify_site.py pins the execution-dependency caveat to this file by
+     path. The moved ids are forwarded by the script at the foot of this page,
+     so a bookmark on #oracle still lands on the oracle.
 
-      <nav class="text-muted-foreground flex w-full items-center gap-2 font-mono text-xs" aria-label="Breadcrumb">
-        <a class="hover:text-foreground transition-colors" href="../../">home</a>
-        <span>/</span>
-        <a class="hover:text-foreground transition-colors" href="../">docs</a>
-        <span>/</span>
-        <span class="text-foreground">quickstart</span>
-      </nav>
+     THE UNIT IS: h2 -> one to three sentences -> at most one code figure.
+     No <h3> (the site has zero and keeps zero), no table (article.tdb-doc is
+     not .prose, so a <table> here would ship unstyled -- and the three-row
+     requirements grid reads as three definitions anyway), no <hr>. -->
 
-      <header class="mt-8 mb-8 flex flex-col gap-6 border-b pb-6">
-        <h1 class="font-mono text-3xl/tight font-medium tracking-tighter text-balance">quickstart</h1>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed"><strong>terminal-daily-bench</strong> is a living, execution-graded
-          coding-agent benchmark.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">The reward is the test outcome, never a model&rsquo;s opinion.</p>
-        <p class="text-fd-muted-foreground font-mono tracking-tight text-balance text-base/relaxed">That covers claim bypass only; semantic verifier false-accept remains
-          unmeasured.</p>
-      </header>
+<main id="nd-home-layout" class="tdb-docs" data-page="quickstart">
+  <article class="tdb-doc">
 
-      <!-- Every h2/h3 below carries a stable id: the "on this page" rail at the bottom of
-           this file is BUILT from these ids, so a heading without one silently drops out
-           of the navigation. Reference material (fields, env vars, cache behaviour) lives
-           in tables rather than paragraphs; procedure lives in short lines that end in a
-           runnable command. Do not re-inflate a table row back into a sentence. -->
-      <article class="prose prose-no-margin">
+    <h1>Quickstart</h1>
+    <p class="tdb-doc-sub"><strong>terminal-daily-bench</strong> is a living, execution-graded coding-agent benchmark.</p>
 
-        <h2 id="how-scoring-works" class="scroll-m-28 font-mono">How a run is scored</h2>
-        <ul>
-          <li>The model sees the task instruction and produces a patch.</li>
-          <li>Harbor re-lays a protected test suite the model never sees.</li>
-          <li>The suite runs under a network cut; the reward is its outcome.</li>
-        </ul>
+    <h2 id="how-scoring-works"><a href="#how-scoring-works">How a run is scored</a></h2>
+    <p>The model sees the task instruction and produces a patch. Harbor re-lays a protected test
+      suite the model never sees. The suite runs under a network cut; the reward is its outcome.</p>
+    <p>The reward is the test outcome, never a model&rsquo;s opinion.</p>
 
-        <h2 id="requirements" class="scroll-m-28 font-mono">Requirements</h2>
-        <table>
-          <thead><tr><th>Component</th><th>Needed by</th><th>Note</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>Python <strong>&ge; 3.11</strong></td>
-              <td>everything</td>
-              <td>the scoring core is pure stdlib; there are no runtime dependencies</td>
-            </tr>
-            <tr>
-              <td><strong>apptainer/singularity</strong> host</td>
-              <td><code>tdb run</code>, <code>tdb oracle</code></td>
-              <td>both invoke <code>harbor run ... -e singularity</code>, which executes each task&rsquo;s SIF image</td>
-            </tr>
-            <tr>
-              <td><strong>OpenAI-compatible endpoint</strong></td>
-              <td><code>tdb run</code> with a real model</td>
-              <td><code>tdb oracle</code> needs no model</td>
-            </tr>
-            <tr>
-              <td>&mdash;</td>
-              <td><code>tdb quality</code></td>
-              <td>needs neither harbor nor a model</td>
-            </tr>
-          </tbody>
-        </table>
+    <h2 id="requirements"><a href="#requirements">Requirements</a></h2>
+    <p>Three pieces, and <code>tdb quality</code> is the exception that needs none of them: it needs
+      neither Harbor nor a model.</p>
+    <dl class="tdb-defs">
+      <dt>Python <strong>&ge; 3.11</strong></dt>
+      <dd>Needed by everything. The scoring core is pure stdlib; there are no runtime
+        dependencies.</dd>
+      <dt>An <strong>apptainer/singularity</strong> host</dt>
+      <dd>Needed by <code>tdb run</code> and <code>tdb oracle</code>. Both invoke
+        <code>harbor run ... -e singularity</code>, which executes each task&rsquo;s SIF image.</dd>
+      <dt>An <strong>OpenAI-compatible endpoint</strong></dt>
+      <dd>Needed by <code>tdb run</code> with a real model. <code>tdb oracle</code> needs no
+        model.</dd>
+    </dl>
 
-        <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed" data-tdb-integrity>
-          <strong>Current availability:</strong> our scored runs use a private, locally patched Harbor
-          0.13.1 fork. Stock upstream Harbor rejects this bundle&rsquo;s singularity backend options, so a
-          third party cannot currently run <code>tdb run</code> or <code>tdb oracle</code> end to end.
-          The task packages, <code>tdb doctor</code>, <code>tdb quality</code> and <code>tdb publish</code>
-          remain usable without that fork. No publication date is promised.
-        </div>
+    <h2 id="availability"><a href="#availability">Current availability</a></h2>
+    <p>Our scored runs use a private, locally patched Harbor 0.13.1 fork. Stock upstream Harbor
+      rejects this bundle&rsquo;s singularity backend options, so a third party cannot currently run
+      <code>tdb run</code> or <code>tdb oracle</code> end to end.</p>
+    <p>The task packages, <code>tdb doctor</code>, <code>tdb quality</code> and
+      <code>tdb publish</code> remain usable without that fork. No publication date is promised.</p>
 
-        <h2 id="install" class="scroll-m-28 font-mono">Install</h2>
+    <h2 id="install"><a href="#install">Install</a></h2>
+    <p>Either route installs the <code>tdb</code> console script
+      (<code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>).</p>
+    <figure class="tdb-code"><pre><code>uv tool install terminal-daily-bench   # with uv
+pip install -e .                       # from a checkout of the release bundle
 
-        <!-- Two ways to install, one block. The static markup below is the
-             WHOLE documentation: both panels open, each under its own caption.
-             The tab strip ships hidden and is revealed by the script at the
-             foot of the page, which is the only thing that can drive it. A
-             reader with JS off sees the two commands stacked, exactly as they
-             read before this was a tab set; a tab set that needs a script to
-             show its content would have deleted half the page for them. -->
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border" data-tdb-tabs>
-          <div class="flex border-b" role="tablist" aria-label="Install method" data-tdb-tablist hidden>
-            <button type="button" id="install-uv-tab" role="tab" aria-selected="true"
-              aria-controls="install-uv" data-tdb-tab
-              class="bg-card text-foreground border-r cursor-pointer px-4 py-2 font-mono text-xs transition-colors hover:text-foreground">uv</button>
-            <button type="button" id="install-bundle-tab" role="tab" aria-selected="false"
-              aria-controls="install-bundle" tabindex="-1" data-tdb-tab
-              class="text-muted-foreground cursor-pointer px-4 py-2 font-mono text-xs transition-colors hover:text-foreground">pip</button>
-          </div>
-          <div id="install-uv" role="tabpanel" aria-labelledby="install-uv-tab" data-tdb-tabpanel>
-            <p class="text-muted-foreground border-b px-4 py-2 font-mono text-xs">With uv</p>
-            <pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">uv tool install terminal-daily-bench</pre>
-          </div>
-          <div id="install-bundle" role="tabpanel" aria-labelledby="install-bundle-tab" data-tdb-tabpanel class="border-t">
-            <p class="text-muted-foreground border-b px-4 py-2 font-mono text-xs">From a checkout of the release bundle</p>
-            <pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">pip install -e .</pre>
-          </div>
-        </div>
+tdb --version                          # -&gt; terminal-daily-bench 0.1.0</code></pre></figure>
 
-        <h3 id="install-verify" class="scroll-m-28 font-mono">Verify</h3>
-        <p>Both install the <code>tdb</code> console script
-          (<code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>).</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb --version          <span class="text-muted-foreground"># -&gt; terminal-daily-bench 0.1.0</span></pre></div>
+    <h2 id="endpoint"><a href="#endpoint">Configure the model endpoint</a></h2>
+    <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint: OpenAI,
+      OpenRouter, vLLM, LiteLLM, or a local server.</p>
+    <figure class="tdb-code"><pre><code>export OPENAI_BASE_URL=https://api.openai.com/v1   # the default; any OpenAI-compatible endpoint
+export OPENAI_API_KEY=sk-...                       # bearer key, read from env, never stored</code></pre></figure>
+    <p>Requests go to <code>&lt;base&gt;/chat/completions</code>. There is no default key. If the
+      upstream rejects <code>max_tokens</code>, the client automatically retries with
+      <code>max_completion_tokens</code>.</p>
 
-        <h2 id="endpoint" class="scroll-m-28 font-mono">Configure the model endpoint</h2>
-        <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint: OpenAI,
-          OpenRouter, vLLM, LiteLLM, or a local server.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">export OPENAI_BASE_URL=https://api.openai.com/v1   <span class="text-muted-foreground"># any OpenAI-compatible endpoint</span>
-export OPENAI_API_KEY=sk-...                        <span class="text-muted-foreground"># bearer key, read from env, never stored</span></pre></div>
-        <table>
-          <thead><tr><th>Variable</th><th>Default</th><th>Note</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><code>OPENAI_BASE_URL</code></td>
-              <td><code>https://api.openai.com/v1</code></td>
-              <td>requests go to <code>&lt;base&gt;/chat/completions</code></td>
-            </tr>
-            <tr>
-              <td><code>OPENAI_API_KEY</code></td>
-              <td>none</td>
-              <td>bearer key, read from env, never stored</td>
-            </tr>
-          </tbody>
-        </table>
+    <h2 id="doctor"><a href="#doctor">Run tdb doctor first</a></h2>
+    <p>It reports which of the pieces above your host is missing, before you spend a model call
+      finding out.</p>
+    <figure class="tdb-code"><pre><code>tdb doctor tasks/archive/td-fc90ea8b76d5f6b6</code></pre></figure>
+    <p>With the host answering, <a href="../run/">run a task</a>.</p>
 
-        <h3 id="endpoint-retry" class="scroll-m-28 font-mono">Reasoning-model fallback</h3>
-        <p>If the upstream rejects <code>max_tokens</code>, the client automatically retries with
-          <code>max_completion_tokens</code>.</p>
-
-        <h2 id="doctor" class="scroll-m-28 font-mono">Run <code>tdb doctor</code> first</h2>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb doctor tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
-        <p>It reports which of the pieces below your host is missing, before you spend a model call
-          finding out.</p>
-
-        <h2 id="image" class="scroll-m-28 font-mono">Build the task image</h2>
-        <p>A published task ships no image: <code>docker_image</code> is the portable string
-          <code>environment/Dockerfile</code>.</p>
-        <p>The producer&rsquo;s host-specific <code>.sif</code> path is stripped on publish, so
-          nothing executes that as-is.</p>
-        <p>Build the task&rsquo;s own Dockerfile once, then point <code>docker_image</code> at the
-          result.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">IMG=$(scripts/build_task_image.sh tasks/archive/td-fc90ea8b76d5f6b6)
-sed -i "s|^docker_image .*|docker_image = \"$IMG\"|" \
-    tasks/archive/td-fc90ea8b76d5f6b6/task.toml</pre></div>
-
-        <h3 id="image-cache" class="scroll-m-28 font-mono">Rebuilds and network</h3>
-        <table>
-          <thead><tr><th>Behaviour</th><th>Detail</th></tr></thead>
-          <tbody>
-            <tr><td>cache key</td><td>task id + Dockerfile hash, so a second run is a no-op</td></tr>
-            <tr><td><code>--force</code></td><td>rebuilds</td></tr>
-            <tr><td>network</td><td>the <strong>build</strong> stage needs internet; the scored run does not</td></tr>
-          </tbody>
-        </table>
-        <p>See <a class="hover:text-foreground underline underline-offset-4" href="../task-format/">the task format</a>.</p>
-
-        <h2 id="score" class="scroll-m-28 font-mono">Score a model on a task</h2>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb run &lt;MODEL&gt; tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
-        <p><code>&lt;MODEL&gt;</code> is any model id your endpoint accepts, e.g.
-          <code>gpt-4o-mini</code>.</p>
-
-        <h3 id="score-scaffold" class="scroll-m-28 font-mono">What <code>single_shot_patch</code> does</h3>
-        <ul>
-          <li>Shows the model the task instruction plus the source file(s) the reference solution
-            touches.</li>
-          <li>Asks for a <code>git apply</code>-ready unified diff.</li>
-          <li>Applies that diff inside the task container.</li>
-          <li>Harbor re-lays the protected <code>tests/</code>, and the reward is written to
-            <code>result.json</code>.</li>
-        </ul>
-
-        <h3 id="score-out" class="scroll-m-28 font-mono">Where the record goes</h3>
-        <table>
-          <thead><tr><th>Destination</th><th>How</th></tr></thead>
-          <tbody>
-            <tr><td><code>./.tdb_work/results/</code></td><td>the default</td></tr>
-            <tr><td>another work root</td><td>set <code>TDB_WORK</code></td></tr>
-            <tr><td>an explicit path</td><td><code>--out</code></td></tr>
-            <tr><td>stdout</td><td>the record is always printed there too</td></tr>
-          </tbody>
-        </table>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb run gpt-4o-mini tasks/archive/td-fc90ea8b76d5f6b6 --out results/gpt4o-mini.json</pre></div>
-
-        <h2 id="oracle" class="scroll-m-28 font-mono">Run the oracle baseline</h2>
-        <p>The <code>oracle</code> model id runs the task&rsquo;s real
-          <code>solution/oracle.patch</code>; no model is called.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tdb oracle tasks/archive/td-fc90ea8b76d5f6b6</pre></div>
-        <p>It proves the execution gate returns <strong>reward 1.0</strong> on a correct patch.</p>
-
-        <h3 id="oracle-first" class="scroll-m-28 font-mono">Run it before spending model calls</h3>
-        <p>If <code>oracle</code> does not yield <code>reward = 1.0</code>, the environment, not the
-          model, is the problem.</p>
-        <div class="bg-fd-secondary/50 my-6 border px-6 py-4 font-mono text-sm/relaxed">Only <strong>archived</strong> tasks (&ge; 2 weeks old) ship
-          <code>solution/</code>. <strong>Live</strong> tasks withhold the gold patch and the protected
-          test bodies; submitted patches stay unranked until official replay.
-          <a href="../task-format/#archive-vs-live">Archive vs. live</a> &middot;
-          <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>.</div>
-
-        <h2 id="record" class="scroll-m-28 font-mono">The result record</h2>
-        <p>Each run writes one JSON record. A solved run looks like:</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">{
-  "model": "gpt-4o-mini",
-  "task": "td-fc90ea8b76d5f6b6",
-  "task_dir": "/abs/path/tasks/archive/td-fc90ea8b76d5f6b6",
-  "scaffold": "single_shot_patch",
-  "reward": 1.0,
-  "solved": true,
-  "patch_applied": true,
-  "error": null,
-  "model_endpoint": "https://api.openai.com/v1/chat/completions",
-  "runtime_sec": 142.7,
-  "false_accept_check": {
-    "gate": "harbor_protected_tests",
-    "reward_source": "result.json via harbor_score.read_harbor_reward",
-    "protected_tests_relaid_by_harbor": true,
-    "model_is_judge": false,
-    "model_patch_touched_tests": false,
-    "scope": "protected_test_replay_integrity",
-    "claim_acceptance_without_replay": false,
-    "semantic_false_accept": null,
-    "false_accept": 0
-  }
-}</pre></div>
-
-        <h3 id="record-fields" class="scroll-m-28 font-mono">Fields</h3>
-        <table>
-          <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><code>scaffold</code></td>
-              <td><code>single_shot_patch</code> for a model run, <code>oracle_baseline</code> for <code>tdb oracle</code></td>
-            </tr>
-            <tr>
-              <td><code>reward</code></td>
-              <td>the protected-test outcome</td>
-            </tr>
-            <tr>
-              <td><code>solved</code></td>
-              <td><code>reward &gt;= 0.999</code></td>
-            </tr>
-            <tr>
-              <td><code>patch_applied</code></td>
-              <td><code>true</code> once a reward is parsed, <code>false</code> if the patch failed to apply, <code>null</code> if the gate never reached the apply step</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3 id="record-bad-safe" class="scroll-m-28 font-mono">Failure never scores</h3>
-        <ul>
-          <li>Runs are BAD-safe: any failure yields <code>reward = 0.0</code> /
-            <code>solved = false</code>, with the cause in <code>error</code>.</li>
-          <li>Covered: no diff, patch does not apply, hung trial, unparseable result.</li>
-          <li>Never a positive score on a crash.</li>
-        </ul>
-
-        <h3 id="fa-block" class="scroll-m-28 font-mono">The <code>false_accept_check</code> block</h3>
-        <p>This block records which deterministic execution boundary produced the score.</p>
-        <p>It does not by itself establish semantic verifier quality.</p>
-        <table>
-          <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><code>gate: "harbor_protected_tests"</code></td>
-              <td>scoring is the harbor execution gate and nothing else</td>
-            </tr>
-            <tr>
-              <td><code>reward_source</code></td>
-              <td>the reward is read from <code>result.json</code> with the same reader the admission gate uses (<code>harbor_score.read_harbor_reward</code>)</td>
-            </tr>
-            <tr>
-              <td><code>protected_tests_relaid_by_harbor: true</code></td>
-              <td>the trusted <code>tests/</code> are re-laid from the task package <em>after</em> the patch, so a patch that edits tests only changes a discarded workspace</td>
-            </tr>
-            <tr>
-              <td><code>model_is_judge: false</code></td>
-              <td>the model is the subject under test, never the judge</td>
-            </tr>
-            <tr>
-              <td><code>model_patch_touched_tests</code></td>
-              <td>flags whether the model&rsquo;s diff touched any <code>test</code>-named path (informational; it cannot affect the score)</td>
-            </tr>
-            <tr>
-              <td><code>false_accept: 0</code></td>
-              <td>a compatibility field scoped by <code>scope</code> to replay integrity; it means no acceptance bypassed the protected test run</td>
-            </tr>
-          </tbody>
-        </table>
-        <p><code>false_accept: 0</code> does not estimate semantic verifier false-accept, which
-          remains <code>null</code> pending an exploit corpus.</p>
-
-        <h2 id="quality" class="scroll-m-28 font-mono">Aggregate a quality card</h2>
-        <p>Collect result records into one file &mdash; JSON Lines (one record per line), or a JSON
-          array.</p>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">cat results/*.json | jq -c . &gt; results.jsonl
-tdb quality results.jsonl</pre></div>
-
-        <h3 id="quality-input" class="scroll-m-28 font-mono">Input requirements</h3>
-        <ul>
-          <li><code>tdb quality</code> builds a (task &times; model) solved matrix.</li>
-          <li>It needs <strong>&ge; 1 task and &ge; 2 models</strong>.</li>
-          <li>Records with <code>model: "oracle"</code> are excluded from the matrix.</li>
-        </ul>
-
-        <h3 id="quality-output" class="scroll-m-28 font-mono">Example output</h3>
-        <div class="not-prose bg-fd-secondary/50 my-6 overflow-hidden border"><pre class="overflow-x-auto px-4 py-3 font-mono text-sm/relaxed">tasks=40 models=6
-  D(discrimination)=0.517  C(coverage)=0.750  M(monotonicity)=0.912
-  IRT test-information=8.431  KR-20 reliability=0.78
-  D 95% CI=[0.402, 0.631]
-  readiness: NOT-ready (bottleneck=discrimination, need ~64 tasks)</pre></div>
-        <p>The final line of stdout is the full card as JSON (<code>msq</code>, <code>irt</code>,
-          <code>reliability</code>, <code>readiness</code>) for machine consumption.</p>
-
-        <h3 id="quality-metrics" class="scroll-m-28 font-mono">What the card reports</h3>
-        <p>Every metric comes from <code>terminal_daily_bench.quality</code>.</p>
-        <table>
-          <thead><tr><th>Symbol</th><th>Metric</th></tr></thead>
-          <tbody>
-            <tr><td><code>D</code></td><td>discrimination</td></tr>
-            <tr><td><code>C</code></td><td>difficulty coverage</td></tr>
-            <tr><td><code>M</code></td><td>monotonicity</td></tr>
-            <tr><td>IRT test-information</td><td>2PL IRT test-information</td></tr>
-            <tr><td>KR-20</td><td>reliability</td></tr>
-            <tr><td><code>D</code> 95% CI</td><td>a bootstrap CI on <code>D</code></td></tr>
-            <tr><td>readiness</td><td>a verdict with the bottleneck axis and a recommended task count</td></tr>
-          </tbody>
-        </table>
-
-        <h2 id="submitting" class="scroll-m-28 font-mono">Submitting results</h2>
-        <ul>
-          <li>Every submission is recorded as <strong>pending</strong> and its claimed reward is
-            ignored.</li>
-          <li>The public bundle does not run a replay worker.</li>
-          <li>Only an operator-published gate receipt can enter the verified ranking.</li>
-        </ul>
-        <p>See <a class="hover:text-foreground underline underline-offset-4" href="../submission/">submission</a> and
-          <a class="hover:text-foreground underline underline-offset-4" href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>../CONTRIBUTING.md</code></a>.</p>
-
-      </article>
-
-      <p class="text-muted-foreground mt-8 border-t pt-6 font-mono text-sm">next:
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../task-format/">task format</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../submission/">submission</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../quality-methods/">quality methods</a> &middot;
-        <a class="hover:text-foreground underline underline-offset-4 transition-colors" href="../../quickstart.md">markdown source</a></p>
-    </div>
-
-    <!-- ===================== on this page ===================== -->
-    <aside id="toc" class="sticky top-(--fd-sidebar-top) w-52 shrink-0 pt-6 max-lg:hidden" style="--fd-sidebar-top:5rem" aria-label="On this page"></aside>
-
-  </div>
-
-  <!-- ===================== a task id you can paste ===================== -->
-  <section class="tdb-block" data-tdb-section="next">
-    <div class="tdb-block-head">
-      <h2>a task id you can paste</h2>
-      <p>from the published catalogue</p>
-      <div class="tdb-block-tools"><a href="../../registry/">all tasks &rarr;</a></div>
-    </div>
-
-    <div id="task-ids" class="w-full"></div>
-  </section>
-
-</div>
-</div>
+  </article>
 </main>
 
-<script src="../../assets/site.js?v=a6e52a8c64" data-root="../.." data-page="docs"></script>
+<script src="../../assets/site.js?v=11e80328f8" data-root="../.." data-page="quickstart"></script>
 <script>
-/* the "on this page" rail — built from the section ids already in the prose,
-   so the navigation can never drift from the text. */
-(function buildToc() {
-  var toc = document.getElementById("toc");
-  if (!toc) return;
-  var hs = document.querySelectorAll(".prose h2[id], .prose h3[id]");
-  if (!hs.length) { toc.style.display = "none"; return; }
-  var out = ['<p class="text-muted-foreground mb-4 font-mono text-xs">on this page</p>',
-             '<div class="flex flex-col border-l">'];
-  for (var i = 0; i < hs.length; i++) {
-    var full = (hs[i].textContent || "").replace(/\s+/g, " ").trim();
-    var label = full.length > 32 ? full.slice(0, 31).trim() + "…" : full;
-    var pad = hs[i].tagName === "H3" ? "ps-6" : "pl-4";
-    out.push('<a class="text-muted-foreground hover:text-foreground py-1.5 ' + pad +
-      ' font-mono text-xs transition-colors" href="#' + hs[i].id +
-      '" title="' + full.replace(/"/g, "&quot;") + '">' + label + "</a>");
-  }
-  out.push("</div>");
-  toc.innerHTML = out.join("");
-})();
+/* Eleven section ids moved off this page when it was split. Nothing on the
+   site links to them -- only #requirements was ever deep-linked, and it did
+   not move -- but a reader's bookmark is a referrer nobody can grep for, so
+   the old URL still has to land on the content rather than on a page that
+   silently ignores its own fragment.
 
-/* the install block's uv | pip chooser.
-
-   The markup ships both panels open and the tab strip hidden, so the page is
-   complete without this script. Everything here is the enhancement and only
-   the enhancement: reveal the strip, then keep exactly one panel visible.
-   The inactive panel is HIDDEN, not removed, so it comes straight back on a
-   click with no re-render. Note that `hidden` does NOT keep it findable: the
-   browser's find-in-page skips hidden subtrees, and only `hidden="until-found"`
-   would change that. The no-script fallback below, not this, is what
-   guarantees a reader can always reach both commands.
-
-   The panels carry a border-t in the static markup to rule off the second
-   command from the first while both are stacked; once only one shows at a
-   time that hairline would double the tab strip's own, so it is dropped here
-   rather than written into a state the no-script reader never reaches. */
-(function installTabs() {
-  var root = document.querySelector("[data-tdb-tabs]");
-  if (!root) return;
-  var list = root.querySelector("[data-tdb-tablist]");
-  var tabs = root.querySelectorAll("[data-tdb-tab]");
-  var panels = root.querySelectorAll("[data-tdb-tabpanel]");
-  /* One tab per panel or the pairing below is a guess. Leaving the markup
-     untouched in that case is the correct failure: both commands stay on
-     screen, which is what the page said before the tabs existed. */
-  if (!list || !tabs.length || tabs.length !== panels.length) return;
-
-  var BASE = "cursor-pointer px-4 py-2 font-mono text-xs transition-colors hover:text-foreground";
-  var ACTIVE = "bg-card text-foreground ";
-  var IDLE = "text-muted-foreground ";
-
-  function select(index, moveFocus) {
-    for (var i = 0; i < tabs.length; i++) {
-      var on = i === index;
-      var edge = i < tabs.length - 1 ? "border-r " : "";
-      tabs[i].className = (on ? ACTIVE : IDLE) + edge + BASE;
-      tabs[i].setAttribute("aria-selected", on ? "true" : "false");
-      tabs[i].tabIndex = on ? 0 : -1;
-      panels[i].className = "";
-      panels[i].hidden = !on;
-    }
-    if (moveFocus) tabs[index].focus();
-  }
-
-  function step(from, delta) {
-    return (from + delta + tabs.length) % tabs.length;
-  }
-
-  for (var i = 0; i < tabs.length; i++) {
-    (function bind(index) {
-      tabs[index].addEventListener("click", function () { select(index, false); });
-      tabs[index].addEventListener("keydown", function (event) {
-        var key = event.key;
-        var to = -1;
-        if (key === "ArrowRight" || key === "ArrowDown") to = step(index, 1);
-        else if (key === "ArrowLeft" || key === "ArrowUp") to = step(index, -1);
-        else if (key === "Home") to = 0;
-        else if (key === "End") to = tabs.length - 1;
-        if (to < 0) return;
-        event.preventDefault();
-        select(to, true);
-      });
-    })(i);
-  }
-
-  list.hidden = false;
-  select(0, false);
-})();
-
-(async function () {
-  var T = window.TDB;
-  var el = document.getElementById("task-ids");
-
-  var CARD =
-    "tdb-card bg-card text-card-foreground flex flex-col gap-6 border py-0 " +
-    "transition-all duration-200";
-  /* Shared metadata badge; the caller appends the semantic colour pair. */
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden border-transparent ";
-  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
-  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
-  var NOTE =
-    "tdb-panel bg-card text-card-foreground -mx-4 border px-6 py-6 " +
-    "text-sm/relaxed text-muted-foreground sm:mx-0";
-
-  var results = await Promise.all([
-    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
-    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"))
-  ]);
-  var site = results[0];
-  var board = results[1];
-
-  var ids = [];
-  if (site && site.tasks && site.tasks.length) {
-    ids = site.tasks.slice(0, 6).map(function (t) { return { id: t.id, status: t.status }; });
-  } else if (board && board.tasks && board.tasks.length) {
-    ids = board.tasks.slice(0, 6).map(function (id) { return { id: id, status: null }; });
-  }
-
-  if (!ids.length) {
-    el.innerHTML = '<div class="' + NOTE + '">No task catalogue published yet. The commands on this ' +
-      'page work against any task directory you have locally; run <code>tdb publish</code> to ' +
-      'generate <code>site_data.json</code>.</div>';
-    return;
-  }
-
-  el.innerHTML =
-    '<div class="-mx-4 grid grid-cols-1 sm:mx-0 md:grid-cols-2 lg:grid-cols-3">' +
-    ids.map(function (t) {
-      var pill, cmd;
-      if (t.status === "live") {
-        pill = '<span class="' + BADGE + SECONDARY + '">live</span>';
-        cmd = "tdb run &lt;MODEL&gt; tasks/live/" + t.id;
-      } else if (t.status === "archive") {
-        pill = '<span class="' + BADGE + PRIMARY + '">archive</span>';
-        cmd = "tdb oracle tasks/archive/" + t.id;
-      } else {
-        pill = '<span class="' + BADGE + SECONDARY + '">task</span>';
-        cmd = "tdb run &lt;MODEL&gt; tasks/&lt;archive|live&gt;/" + t.id;
-      }
-      return '<div data-slot="card" class="' + CARD + '">' +
-        '<a class="flex flex-1" href="' + T.ROOT + "/registry/" + encodeURIComponent(t.id) + '/">' +
-          '<div class="flex flex-1 flex-col justify-between gap-6 py-6">' +
-            '<div data-slot="card-header" class="@container/card-header grid auto-rows-min ' +
-              'grid-rows-[auto_auto] items-start gap-1.5 px-6 ' +
-              'has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">' +
-              '<div class="mb-2 flex items-center gap-2">' +
-                '<div data-slot="card-title" class="font-semibold">' +
-                  '<h2 class="font-mono text-sm font-medium">' + t.id + "</h2></div></div>" +
-              '<div class="flex gap-2">' + pill + "</div>" +
-            "</div>" +
-            '<div data-slot="card-content" class="px-6">' +
-              '<p class="text-muted-foreground font-mono text-sm wrap-anywhere">' + cmd + "</p>" +
-            "</div>" +
-          "</div>" +
-        "</a></div>";
-    }).join("") + "</div>";
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "image": "../run/",
+    "score": "../run/",
+    "score-scaffold": "../run/",
+    "oracle": "../run/",
+    "task-ids": "../run/",
+    "record": "../result-record/",
+    "record-bad-safe": "../result-record/",
+    "fa-block": "../false-accept/",
+    "quality": "../quality-card/",
+    "quality-output": "../quality-card/",
+    "submitting": "../quality-card/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
 })();
 </script>
 </body>

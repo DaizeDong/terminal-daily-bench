@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRT information and KR-20 — terminal-daily-bench docs</title>
+<meta name="description" content="2PL Fisher test information, its two item parameters, and KR-20 internal-consistency reliability.">
+<link rel="stylesheet" href="../../../assets/tw.css?v=11e80328f8">
+<link rel="stylesheet" href="../../../assets/site.css?v=11e80328f8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+</head>
+<body>
+
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+  <article class="tdb-doc">
+    <h1>Information and reliability</h1>
+    <p class="tdb-doc-sub">What each item contributes to the measurement, and whether the set is one instrument yet.</p>
+
+    <h2 id="I"><a href="#I">I &mdash; IRT test information</a></h2>
+    <p><code>irt_item_stats</code> fits the binary matrix to the <strong>2-parameter logistic</strong> model, and information is <strong>additive</strong> across items (conditionally independent), so it sums over the test.</p>
+    <figure class="tdb-code"><pre><code>I_item(theta) = a&sup2; &middot; P &middot; (1 &minus; P)        P = 1 / (1 + e^{&minus;a(theta &minus; b)})
+I_test(theta) = &#931;_items a&sup2; &middot; P &middot; (1 &minus; P)          SE(theta) = 1 / &radic;I_test</code></pre></figure>
+
+    <h2 id="I-params"><a href="#I-params">The two item parameters</a></h2>
+    <dl class="tdb-defs">
+      <dt><code>b</code> &mdash; difficulty</dt>
+      <dd><code>logit(1 &minus; solve_rate)</code>; harder tasks (low solve-rate) get higher <code>b</code>.</dd>
+      <dt><code>a</code> &mdash; discrimination</dt>
+      <dd><code>max(0.2, |r_pb|&middot;2 + 0.2)</code>, where <code>r_pb</code> is the task&rsquo;s <strong>point-biserial</strong> correlation with the per-model total score. An all-pass, all-fail or non-correlating item floors to a small <code>a</code> &mdash; it discriminates nothing.</dd>
+      <dt class="tdb-id">select_max_information</dt>
+      <dd>The max-information subset is exactly the top-k items, so there is no greedy pass.</dd>
+      <dt class="tdb-id">information_se(info)</dt>
+      <dd>That SE; <code>&infin;</code> with no information.</dd>
+    </dl>
+
+    <h2 id="kr20"><a href="#kr20">KR-20 &mdash; reliability</a></h2>
+    <p>Kuder-Richardson 20 &mdash; internal-consistency reliability for binary items.</p>
+    <figure class="tdb-code"><pre><code>KR20 = ( k / (k&minus;1) ) &middot; ( 1 &minus; &#931; p_i&middot;q_i / &sigma;&sup2;_total )</code></pre></figure>
+
+    <h2 id="kr20-terms"><a href="#kr20-terms">Reading KR-20</a></h2>
+    <dl class="tdb-defs">
+      <dt><code>k</code>, <code>p_i</code>, <code>q_i</code>, <code>&sigma;&sup2;_total</code></dt>
+      <dd>Tasks; the pass rate of task <code>i</code>; <code>1 &minus; p_i</code>; the per-model total-score variance.</dd>
+      <dt>Undefined</dt>
+      <dd><code>None</code> when <code>k &lt; 2</code>, or when that variance is <code>0</code>.</dd>
+      <dt>Rule of thumb</dt>
+      <dd><code>&gt; 0.7</code> acceptable, <code>&gt; 0.8</code> good; a <strong>negative</strong> value means the items are mutually inconsistent.</dd>
+    </dl>
+  </article>
+</main>
+
+<script src="../../../assets/site.js?v=11e80328f8" data-root="../../.." data-page="docs"></script>
+</body>
+</html>

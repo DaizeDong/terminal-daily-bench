@@ -1,0 +1,991 @@
+{
+ "schema_version": "tdb-capability-v1",
+ "generated": "2026-08-27T20:04:09Z",
+ "generator": "web/gen_capability_data.py",
+ "rules_source": {
+  "repo": "terminal-daily (research pipeline, separate checkout)",
+  "path": "experiments/src/td_pipeline/selection.py",
+  "symbol": "CAPABILITY_TAXONOMY / label_capabilities",
+  "commit": "3538604962867b9671fc585ee2449169abc7de3d",
+  "file_sha256": "97835d37bb95ffbfc18234dc27106a97cd5a73c3d7cbb391654d9c774067b359",
+  "vendored_on": "2026-08-27",
+  "why_vendored": "the research repo is not present at publish time; the re-derivation check against every package is what keeps this copy from drifting"
+ },
+ "gate_source": {
+  "path": "experiments/src/td_pipeline/unit_test_scoring.py",
+  "symbol": "score_subtests",
+  "commit": "3538604962867b9671fc585ee2449169abc7de3d"
+ },
+ "publish_gate": {
+  "min_tasks": 5,
+  "min_admitted_subtests": 10,
+  "max_single_repo_share": 0.4
+ },
+ "publish_gate_computable": [
+  "min_tasks",
+  "max_single_repo_share"
+ ],
+ "publish_gate_unmeasured": [
+  "min_admitted_subtests"
+ ],
+ "publish_gate_unmeasured_reason": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist",
+ "unit_test_validity_reference": {
+  "path": "experiments/reports/unit-test-validity-r001/SUMMARY.json",
+  "schema": "terminal-daily-unit-test-validity-summary-v1",
+  "release_commit": "b3fc3e620677215217be3525b86717fce9da7702",
+  "generated_at": "2026-08-13T17:37:00Z",
+  "file_sha256": "a775f22f7b2a3b2aeeff51073c2b1e0eacc9e69b48960f594619819b024f53ef",
+  "applies_to_this_catalogue": false,
+  "reason": "measured a different corpus at a different release commit; its per-axis counts describe that corpus, so they are not copied here and min_admitted_subtests stays unmeasured for this catalogue"
+ },
+ "verification": {
+  "stored_labels_match_rederivation": true,
+  "checked_packages": 37,
+  "sources_checked": [
+   "record.json:capability_labels",
+   "task.toml:keywords"
+  ]
+ },
+ "catalogue": {
+  "n_packages_scanned": 63,
+  "n_tasks": 61,
+  "n_tasks_verifiable": 37,
+  "n_tasks_unverifiable": 24,
+  "unverifiable_reason": "live packages withhold solution/oracle.patch and tests/test_patch.diff -- the tagger's only inputs -- so their task.toml keywords are reported as declared, never re-derived",
+  "unverifiable_task_ids": [
+   "td-0980962a477fa0f5",
+   "td-1429f4968efb8658",
+   "td-1976e0af7536d92d",
+   "td-2fbc804f19e8dad7",
+   "td-43934e7a811c9e83",
+   "td-5842c10237b17bb4",
+   "td-5ffd97c260c02dfb",
+   "td-646a8a15f64a3c90",
+   "td-6a824a1ab9be8b9c",
+   "td-707da56342332cbc",
+   "td-70f94d2c6c42cc1d",
+   "td-85e626bf1f08c74f",
+   "td-8e256eb038e80765",
+   "td-8e9ce87e4fecd3ab",
+   "td-9eda34d10676231e",
+   "td-b3cf1cd66d5c95bd",
+   "td-b6bf2798b6b9bed5",
+   "td-cc0e5465a3dbd9e4",
+   "td-d0fe8274878b8840",
+   "td-dc3e10ec215c5100",
+   "td-e39d5a4a11cfc645",
+   "td-e85ca08bd7aceb52",
+   "td-eae154905e07a86b",
+   "td-f7231dfff7039690"
+  ],
+  "n_fail_to_pass_verifiable": 137,
+  "n_axes": 14,
+  "n_axes_with_tasks": 7,
+  "n_axes_gate_blocked_only_by_unmeasured": 2,
+  "max_axis_coverage_share": 1.0
+ },
+ "axes": [
+  {
+   "code": "C1",
+   "name": "filesystem",
+   "description": "filesystem / data wrangling",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C2",
+   "name": "build",
+   "description": "build & compile",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 6,
+   "coverage_share": 0.16216216216216217,
+   "n_fail_to_pass": 14,
+   "n_repos": 4,
+   "repos": [
+    "2captcha/2captcha-python",
+    "aligfellow/xyzrender",
+    "google-research/timesfm",
+    "yaml/pyyaml"
+   ],
+   "top_repo": "2captcha/2captcha-python",
+   "top_repo_share": 0.5,
+   "task_ids": [
+    "td-23116647bb846dae",
+    "td-3f82c2e5c91b7c6e",
+    "td-40063b5d3aa6ab4b",
+    "td-4165a4fb9c0acddb",
+    "td-73f42b67c97eae89",
+    "td-f187e1f16b1da3fc"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 6,
+     "measured": true,
+     "met": true
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.5,
+     "measured": true,
+     "met": false
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "max_single_repo_share"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 3,
+    "task_ids": [
+     "td-8e256eb038e80765",
+     "td-8e9ce87e4fecd3ab",
+     "td-b3cf1cd66d5c95bd"
+    ]
+   }
+  },
+  {
+   "code": "C3",
+   "name": "debug",
+   "description": "debugging / fault localization",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C4",
+   "name": "impl",
+   "description": "code implementation / refactor",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 36,
+   "coverage_share": 0.972972972972973,
+   "n_fail_to_pass": 135,
+   "n_repos": 27,
+   "repos": [
+    "2captcha/2captcha-python",
+    "Delgan/loguru",
+    "agittins/bermuda",
+    "aiming-lab/AutoResearchClaw",
+    "aligfellow/xyzrender",
+    "anyoptimization/pymoo",
+    "apeworx/ape",
+    "araffin/sbx",
+    "cft0808/edict",
+    "cornellius-gp/gpytorch",
+    "cpburnz/python-pathspec",
+    "dwzhu-pku/PaperBanana",
+    "getzep/graphiti",
+    "google-research/timesfm",
+    "hukkin/tomli",
+    "jazzband/docopt-ng",
+    "keleshev/schema",
+    "kislyuk/argcomplete",
+    "mahmoud/boltons",
+    "pdfminer/pdfminer.six",
+    "petl-developers/petl",
+    "psf/cachecontrol",
+    "python-attrs/cattrs",
+    "python-validators/validators",
+    "sdispater/pendulum",
+    "skorokithakis/shortuuid",
+    "yaml/pyyaml"
+   ],
+   "top_repo": "2captcha/2captcha-python",
+   "top_repo_share": 0.08333333333333333,
+   "task_ids": [
+    "td-0263cd1c168cbeb6",
+    "td-06b850f0ba89c481",
+    "td-1112e680c9d5f642",
+    "td-123b3c8d9c22a9a3",
+    "td-23116647bb846dae",
+    "td-353d3a1ca1556d1b",
+    "td-3e581ba3eb25fbfd",
+    "td-3f82c2e5c91b7c6e",
+    "td-40063b5d3aa6ab4b",
+    "td-4165a4fb9c0acddb",
+    "td-428e3784c727ef72",
+    "td-48f89934de58e0e3",
+    "td-5cf14361c19fc401",
+    "td-5f952ce374849a64",
+    "td-626b33ab47f3a6eb",
+    "td-6750abf1ab84864c",
+    "td-6c1b1fcb31cdc49f",
+    "td-6fedde17c75ca4cb",
+    "td-73f42b67c97eae89",
+    "td-7b63d1d1e6234ec4",
+    "td-819f2ac85eeead88",
+    "td-8563a99b0ed0fb3d",
+    "td-8d79b8a28f8063d8",
+    "td-a311428baf682598",
+    "td-a59538ed3ac418d3",
+    "td-a6fc21dbafde8991",
+    "td-bca62cbd0a787fef",
+    "td-cade083deed931ce",
+    "td-d1fece63f49d45a5",
+    "td-d7e4208726a4b85b",
+    "td-e48d3444c4c946d6",
+    "td-ea49f2bb7b9d832c",
+    "td-ec2a4fa6a1834389",
+    "td-f187e1f16b1da3fc",
+    "td-fc90ea8b76d5f6b6",
+    "td-ff79081914cd3936"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 36,
+     "measured": true,
+     "met": true
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.08333333333333333,
+     "measured": true,
+     "met": true
+    }
+   },
+   "gate_verdict": "blocked-unmeasured",
+   "gate_blockers": [],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 23,
+    "task_ids": [
+     "td-0980962a477fa0f5",
+     "td-1429f4968efb8658",
+     "td-1976e0af7536d92d",
+     "td-2fbc804f19e8dad7",
+     "td-43934e7a811c9e83",
+     "td-5842c10237b17bb4",
+     "td-5ffd97c260c02dfb",
+     "td-646a8a15f64a3c90",
+     "td-6a824a1ab9be8b9c",
+     "td-707da56342332cbc",
+     "td-70f94d2c6c42cc1d",
+     "td-8e256eb038e80765",
+     "td-8e9ce87e4fecd3ab",
+     "td-9eda34d10676231e",
+     "td-b3cf1cd66d5c95bd",
+     "td-b6bf2798b6b9bed5",
+     "td-cc0e5465a3dbd9e4",
+     "td-d0fe8274878b8840",
+     "td-dc3e10ec215c5100",
+     "td-e39d5a4a11cfc645",
+     "td-e85ca08bd7aceb52",
+     "td-eae154905e07a86b",
+     "td-f7231dfff7039690"
+    ]
+   }
+  },
+  {
+   "code": "C5",
+   "name": "test",
+   "description": "test authoring & verification",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 37,
+   "coverage_share": 1.0,
+   "n_fail_to_pass": 137,
+   "n_repos": 28,
+   "repos": [
+    "2captcha/2captcha-python",
+    "Delgan/loguru",
+    "agittins/bermuda",
+    "aiming-lab/AutoResearchClaw",
+    "aligfellow/xyzrender",
+    "anyoptimization/pymoo",
+    "apeworx/ape",
+    "araffin/sbx",
+    "cft0808/edict",
+    "cornellius-gp/gpytorch",
+    "cpburnz/python-pathspec",
+    "dwzhu-pku/PaperBanana",
+    "getzep/graphiti",
+    "google-research/timesfm",
+    "hukkin/tomli",
+    "jazzband/docopt-ng",
+    "keleshev/schema",
+    "kislyuk/argcomplete",
+    "liuzhao1225/YouDub-webui",
+    "mahmoud/boltons",
+    "pdfminer/pdfminer.six",
+    "petl-developers/petl",
+    "psf/cachecontrol",
+    "python-attrs/cattrs",
+    "python-validators/validators",
+    "sdispater/pendulum",
+    "skorokithakis/shortuuid",
+    "yaml/pyyaml"
+   ],
+   "top_repo": "2captcha/2captcha-python",
+   "top_repo_share": 0.08108108108108109,
+   "task_ids": [
+    "td-0263cd1c168cbeb6",
+    "td-06b850f0ba89c481",
+    "td-1112e680c9d5f642",
+    "td-123b3c8d9c22a9a3",
+    "td-23116647bb846dae",
+    "td-353d3a1ca1556d1b",
+    "td-3e581ba3eb25fbfd",
+    "td-3f82c2e5c91b7c6e",
+    "td-40063b5d3aa6ab4b",
+    "td-4165a4fb9c0acddb",
+    "td-428e3784c727ef72",
+    "td-48f89934de58e0e3",
+    "td-5cf14361c19fc401",
+    "td-5f952ce374849a64",
+    "td-626b33ab47f3a6eb",
+    "td-6750abf1ab84864c",
+    "td-6c1b1fcb31cdc49f",
+    "td-6fedde17c75ca4cb",
+    "td-73f42b67c97eae89",
+    "td-7b63d1d1e6234ec4",
+    "td-819f2ac85eeead88",
+    "td-8563a99b0ed0fb3d",
+    "td-8d79b8a28f8063d8",
+    "td-a2c11ef966f5d11d",
+    "td-a311428baf682598",
+    "td-a59538ed3ac418d3",
+    "td-a6fc21dbafde8991",
+    "td-bca62cbd0a787fef",
+    "td-cade083deed931ce",
+    "td-d1fece63f49d45a5",
+    "td-d7e4208726a4b85b",
+    "td-e48d3444c4c946d6",
+    "td-ea49f2bb7b9d832c",
+    "td-ec2a4fa6a1834389",
+    "td-f187e1f16b1da3fc",
+    "td-fc90ea8b76d5f6b6",
+    "td-ff79081914cd3936"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 37,
+     "measured": true,
+     "met": true
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.08108108108108109,
+     "measured": true,
+     "met": true
+    }
+   },
+   "gate_verdict": "blocked-unmeasured",
+   "gate_blockers": [],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 24,
+    "task_ids": [
+     "td-0980962a477fa0f5",
+     "td-1429f4968efb8658",
+     "td-1976e0af7536d92d",
+     "td-2fbc804f19e8dad7",
+     "td-43934e7a811c9e83",
+     "td-5842c10237b17bb4",
+     "td-5ffd97c260c02dfb",
+     "td-646a8a15f64a3c90",
+     "td-6a824a1ab9be8b9c",
+     "td-707da56342332cbc",
+     "td-70f94d2c6c42cc1d",
+     "td-85e626bf1f08c74f",
+     "td-8e256eb038e80765",
+     "td-8e9ce87e4fecd3ab",
+     "td-9eda34d10676231e",
+     "td-b3cf1cd66d5c95bd",
+     "td-b6bf2798b6b9bed5",
+     "td-cc0e5465a3dbd9e4",
+     "td-d0fe8274878b8840",
+     "td-dc3e10ec215c5100",
+     "td-e39d5a4a11cfc645",
+     "td-e85ca08bd7aceb52",
+     "td-eae154905e07a86b",
+     "td-f7231dfff7039690"
+    ]
+   }
+  },
+  {
+   "code": "C6",
+   "name": "data",
+   "description": "data processing / ETL / scientific",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 4,
+   "coverage_share": 0.10810810810810811,
+   "n_fail_to_pass": 10,
+   "n_repos": 3,
+   "repos": [
+    "aiming-lab/AutoResearchClaw",
+    "anyoptimization/pymoo",
+    "google-research/timesfm"
+   ],
+   "top_repo": "google-research/timesfm",
+   "top_repo_share": 0.5,
+   "task_ids": [
+    "td-73f42b67c97eae89",
+    "td-bca62cbd0a787fef",
+    "td-d1fece63f49d45a5",
+    "td-ff79081914cd3936"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 4,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.5,
+     "measured": true,
+     "met": false
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks",
+    "max_single_repo_share"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 1,
+    "task_ids": [
+     "td-70f94d2c6c42cc1d"
+    ]
+   }
+  },
+  {
+   "code": "C7",
+   "name": "net",
+   "description": "networking & protocols",
+   "frontier": true,
+   "risky_env": true,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C8",
+   "name": "sec",
+   "description": "crypto & security",
+   "frontier": true,
+   "risky_env": false,
+   "n_tasks": 2,
+   "coverage_share": 0.05405405405405406,
+   "n_fail_to_pass": 33,
+   "n_repos": 2,
+   "repos": [
+    "2captcha/2captcha-python",
+    "dwzhu-pku/PaperBanana"
+   ],
+   "top_repo": "2captcha/2captcha-python",
+   "top_repo_share": 0.5,
+   "task_ids": [
+    "td-23116647bb846dae",
+    "td-a311428baf682598"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 2,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.5,
+     "measured": true,
+     "met": false
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks",
+    "max_single_repo_share"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C9",
+   "name": "ops",
+   "description": "system config & ops",
+   "frontier": false,
+   "risky_env": true,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C10",
+   "name": "vcs",
+   "description": "version control operations",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 1,
+   "coverage_share": 0.02702702702702703,
+   "n_fail_to_pass": 4,
+   "n_repos": 1,
+   "repos": [
+    "yaml/pyyaml"
+   ],
+   "top_repo": "yaml/pyyaml",
+   "top_repo_share": 1.0,
+   "task_ids": [
+    "td-4165a4fb9c0acddb"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 1,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 1.0,
+     "measured": true,
+     "met": false
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks",
+    "max_single_repo_share"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C11",
+   "name": "perf",
+   "description": "performance optimization",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C12",
+   "name": "reverse",
+   "description": "reverse engineering / low-level",
+   "frontier": true,
+   "risky_env": false,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 0,
+    "task_ids": []
+   }
+  },
+  {
+   "code": "C13",
+   "name": "ml",
+   "description": "ML / data-science engineering",
+   "frontier": false,
+   "risky_env": true,
+   "n_tasks": 4,
+   "coverage_share": 0.10810810810810811,
+   "n_fail_to_pass": 6,
+   "n_repos": 2,
+   "repos": [
+    "cornellius-gp/gpytorch",
+    "google-research/timesfm"
+   ],
+   "top_repo": "google-research/timesfm",
+   "top_repo_share": 0.75,
+   "task_ids": [
+    "td-1112e680c9d5f642",
+    "td-73f42b67c97eae89",
+    "td-8563a99b0ed0fb3d",
+    "td-bca62cbd0a787fef"
+   ],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 4,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": 0.75,
+     "measured": true,
+     "met": false
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks",
+    "max_single_repo_share"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests"
+   ],
+   "declared_unverified": {
+    "n_tasks": 1,
+    "task_ids": [
+     "td-70f94d2c6c42cc1d"
+    ]
+   }
+  },
+  {
+   "code": "C14",
+   "name": "orch",
+   "description": "environment / tool orchestration",
+   "frontier": false,
+   "risky_env": false,
+   "n_tasks": 0,
+   "coverage_share": 0.0,
+   "n_fail_to_pass": 0,
+   "n_repos": 0,
+   "repos": [],
+   "top_repo": "",
+   "top_repo_share": null,
+   "task_ids": [],
+   "criteria": {
+    "min_tasks": {
+     "threshold": 5,
+     "observed": 0,
+     "measured": true,
+     "met": false
+    },
+    "min_admitted_subtests": {
+     "threshold": 10,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no unit-test-validity audit has classified this catalogue's F2P subtests high/medium/low confidence, so the admitted-subtest count does not exist"
+    },
+    "max_single_repo_share": {
+     "threshold": 0.4,
+     "observed": null,
+     "measured": false,
+     "met": null,
+     "note": "no task carries this label, so there is no repo distribution to measure; the axis already fails on min_tasks"
+    }
+   },
+   "gate_verdict": "fail",
+   "gate_blockers": [
+    "min_tasks"
+   ],
+   "gate_unmeasured": [
+    "min_admitted_subtests",
+    "max_single_repo_share"
+   ],
+   "declared_unverified": {
+    "n_tasks": 1,
+    "task_ids": [
+     "td-eae154905e07a86b"
+    ]
+   }
+  }
+ ]
+}
