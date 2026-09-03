@@ -1,0 +1,28 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_compressed_macro_matched_by_macro_id",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_uncompressed_macro",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_macro_id_selects_the_right_diagram",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_positional_fallback_without_macro_id",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_positional_cursor_advances_on_macro_id_match",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_cursor_is_not_rewound_by_a_later_macro_id_match",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_more_placeholders_than_stored_macros_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_malformed_macro_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_foreign_macro_id_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_unknown_macro_id_falls_back_when_storage_has_no_ids",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_unknown_macro_id_falls_back_when_storage_ids_are_partial",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_absent_compressed_parameter_means_uncompressed",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_nested_parameters_are_ignored",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_line_wrapped_base64_is_decoded",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_literal_percent_is_preserved",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_percent_encoded_uncompressed_payload_is_decoded",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_corrupt_data_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_truncated_payload_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_oversized_payload_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_missing_storage_emits_comment",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_convert_div_dispatches_plantumlcloud",
+    "tests/unit/test_plantumlcloud_conversion.py::TestPlantUMLCloudConversion::test_both_macro_flavours_on_one_page"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

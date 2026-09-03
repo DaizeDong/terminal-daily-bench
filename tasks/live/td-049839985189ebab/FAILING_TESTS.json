@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_multiline_strings.py::test_load_multiline_yaml",
+    "tests/test_multiline_strings.py::test_get_multiline_indicator",
+    "tests/test_multiline_strings.py::test_render_static_template_with_multiline_values",
+    "tests/test_multiline_strings.py::test_render_collection_template_with_multiline_values"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

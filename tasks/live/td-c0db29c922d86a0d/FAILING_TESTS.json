@@ -1,0 +1,31 @@
+{
+  "failing_test_ids": [
+    "tests/test_imap_quickstart.py::test_imap_auth_failure_shows_setup_hint",
+    "tests/test_imap_quickstart.py::test_imap_auth_failure_does_not_show_auth_hint",
+    "tests/test_imap_quickstart.py::test_imap_auth_success_shows_account",
+    "tests/test_imap_quickstart.py::test_imap_shows_email_count",
+    "tests/test_imap_quickstart.py::test_imap_shows_best_action",
+    "tests/test_imap_quickstart.py::test_imap_shows_undo_hint",
+    "tests/test_imap_quickstart.py::test_imap_clean_inbox",
+    "tests/test_imap_quickstart.py::test_get_provider_called_not_get_client",
+    "tests/test_imap_quickstart.py::test_imap_provider_supports_returns_false",
+    "tests/test_imap_quickstart.py::test_gmail_provider_supports_returns_true",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_empty_ids_returns_zero",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_no_trash_folder_returns_zero",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_move_succeeds_returns_count",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_move_not_supported_falls_back_to_copy_delete",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_select_failure_returns_zero",
+    "tests/test_imap_undo.py::TestIMAPBatchUntrash::test_both_move_and_copy_fail_returns_zero",
+    "tests/test_imap_undo.py::test_gmail_batch_untrash_calls_untrash_per_id",
+    "tests/test_imap_undo.py::test_gmail_batch_untrash_empty_returns_zero",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_list_shows_recent_operations",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_restore_calls_batch_untrash",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_restore_shows_success_message",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_partial_restore_shows_warning",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_unsupported_operation_exits_with_message",
+    "tests/test_imap_undo.py::TestUndoIMAP::test_missing_imap_user_exits",
+    "tests/test_imap_undo.py::test_purge_domain_mode_creates_undo_log"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

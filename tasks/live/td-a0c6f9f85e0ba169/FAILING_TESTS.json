@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_controller.py::test_clarify_split_seals_old_and_creates_new",
+    "tests/test_controller.py::test_clarify_split_no_card_skips_seal",
+    "tests/test_controller.py::test_clarify_split_create_failure_continues_on_old_card",
+    "tests/test_controller.py::test_clarify_split_seal_failure_still_switches_card",
+    "tests/test_controller.py::test_on_clarify_enter_only_pauses_not_seals",
+    "tests/test_controller.py::test_on_clarify_enter_skips_non_streaming_session",
+    "tests/test_controller.py::test_on_clarify_exit_sets_pending_flag_and_resumes",
+    "tests/test_controller.py::test_on_clarify_exit_skips_non_clarify_paused_session",
+    "tests/test_controller.py::test_clarify_split_triggered_on_tool_completed",
+    "tests/test_controller.py::test_clarify_tool_completed_without_pending_does_not_split",
+    "tests/test_controller.py::test_clarify_pending_requires_exact_tool_name"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

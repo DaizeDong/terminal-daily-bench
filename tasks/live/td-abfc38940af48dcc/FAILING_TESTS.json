@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/types/test_recur.py::test_recur_extra_fields_preservation",
+    "tests/types/test_recur_byparts.py::test_by_part_is_applied",
+    "tests/types/test_recur_byparts.py::test_byhour_moves_the_time_off_dtstart",
+    "tests/types/test_recur_byparts.py::test_byyearday_moves_the_date_off_dtstart",
+    "tests/types/test_recur_byparts.py::test_the_part_survives_serialisation",
+    "tests/types/test_recur_byparts.py::test_a_rule_without_these_parts_is_unchanged",
+    "tests/types/test_recur_byparts.py::test_negative_byyearday_counts_from_the_end",
+    "tests/types/test_recur_byparts.py::test_out_of_range_is_rejected_at_parse_time",
+    "tests/types/test_recur_byparts.py::test_a_leap_second_is_accepted"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

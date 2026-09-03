@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "test_autogalaxy/operate/test_deflections.py::test__hessian_from__adaptive_step__compact_sis_near_centre",
+    "test_autogalaxy/operate/test_deflections.py::test__hessian_from__adaptive_step__smooth_field_unchanged",
+    "test_autogalaxy/operate/test_deflections.py::test__hessian_from__unconverged_points_warn"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

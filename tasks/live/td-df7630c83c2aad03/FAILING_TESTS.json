@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheSharedWalkOrderIsPinnedAbsolutely::test_walk_is_top_down_and_sorted",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheSharedWalkOrderIsPinnedAbsolutely::test_filenames_within_a_directory_are_ascending",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheQnMapWalksInIndexerOrder::test_nested_directories_are_visited_in_the_same_order",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheQnMapWalksInIndexerOrder::test_order_matches_under_exclude",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheQnMapWalksInIndexerOrder::test_order_matches_under_unignore",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheBaseModuleQnIsSharedNotMirrored::test_a_plain_file_keeps_its_stem",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheBaseModuleQnIsSharedNotMirrored::test_a_package_init_names_its_parent",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestTheBaseModuleQnIsSharedNotMirrored::test_only_the_final_suffix_is_stripped",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestOneUnignorePatternIsEnoughToRescue::test_an_unrelated_second_pattern_does_not_defeat_the_rescue",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestOneUnignorePatternIsEnoughToRescue::test_the_rescue_still_needs_a_pattern_that_matches",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestARepoPathEndingInASeparator::test_the_helper_keeps_the_full_child_name_at_the_root",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestARepoPathEndingInASeparator::test_the_helper_still_strips_a_non_root_prefix",
+    "codebase_rag/tests/test_qn_walk_order_parity.py::TestARepoPathEndingInASeparator::test_an_ordinary_repo_path_walks_correctly_end_to_end"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

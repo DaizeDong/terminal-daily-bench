@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "messages/tests/test_rcs_models.py::test_create_rcs_card_message_with_optional_params",
+    "messages/tests/test_rcs_models.py::test_create_rcs_card_message_card_orientation_vertical_without_media_height",
+    "messages/tests/test_rcs_models.py::test_create_rcs_options_card_card_orientation_horizontal_without_image_alignment",
+    "messages/tests/test_sms_models.py::test_create_sms_ttl_too_short",
+    "messages/tests/test_sms_models.py::test_create_sms_ttl_too_long"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

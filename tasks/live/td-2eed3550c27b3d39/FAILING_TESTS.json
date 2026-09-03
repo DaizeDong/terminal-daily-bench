@@ -1,0 +1,20 @@
+{
+  "failing_test_ids": [
+    "tests/test_evidence.py::test_serialize_entry_exposes_only_normalized_request_metadata",
+    "tests/test_evidence.py::test_serialize_entry_normalizes_query_and_exception",
+    "tests/test_evidence.py::test_serialize_entry_preserves_unknowns_as_none",
+    "tests/test_evidence.py::test_serialize_entry_bounds_strings_and_unknown_types",
+    "tests/test_evidence.py::test_serialize_entry_bounds_public_scalar_identifiers",
+    "tests/test_evidence.py::test_read_family_evidence_returns_deterministic_bounded_envelope",
+    "tests/test_evidence.py::test_read_family_evidence_rejects_invalid_inputs",
+    "tests/test_evidence.py::test_read_family_evidence_reports_not_found",
+    "tests/test_evidence.py::test_read_family_evidence_fails_silently_when_storage_is_unavailable",
+    "tests/test_evidence.py::test_read_family_evidence_fails_silently_on_database_error",
+    "tests/test_evidence.py::test_read_family_evidence_marks_missing_metadata_as_partial",
+    "tests/test_evidence.py::test_read_family_evidence_marks_unsupported_types_as_partial",
+    "tests/test_evidence.py::test_read_family_evidence_routes_maximum_truncation_to_incident_bundle",
+    "tests/test_evidence.py::test_read_family_evidence_uses_storage_alias_and_disables_cache"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

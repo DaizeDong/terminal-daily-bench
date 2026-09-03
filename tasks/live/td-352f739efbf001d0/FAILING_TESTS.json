@@ -1,0 +1,29 @@
+{
+  "failing_test_ids": [
+    "tests/test_playback_routes.py::test_clear_resumable_session_route_stops_and_clears_state",
+    "tests/test_queue_history_routes.py::test_queue_routes_publish_only_after_releasing_queue_lock",
+    "tests/test_settings_routes.py::test_settings_normalize_jellyfin_server_type",
+    "tests/test_smoke.py::test_play_item_attempts_cec_takeover_without_probe_gate",
+    "tests/test_smoke.py::test_clear_now_playing_returns_to_idle_without_preserving_current",
+    "tests/test_smoke.py::test_play_item_reuses_fresh_resolved_stream_without_ytdlp",
+    "tests/test_state_publication.py::test_an_older_snapshot_cannot_replace_a_newer_one",
+    "tests/test_state_publication.py::test_writes_still_apply_in_forward_order",
+    "tests/test_state_publication.py::test_concurrent_publishers_leave_the_newest_on_disk",
+    "tests/test_state_publication.py::test_queue_and_history_do_not_share_a_version_line",
+    "tests/test_state_publication.py::test_concurrent_settings_updates_leave_the_latest_on_disk",
+    "tests/test_state_publication.py::test_stale_queue_payload_cannot_replace_current_queue",
+    "tests/test_state_publication.py::test_composite_session_change_persists_once",
+    "tests/test_state_publication.py::test_no_intermediate_combination_is_ever_written",
+    "tests/test_state_publication.py::test_individual_setters_still_work",
+    "tests/test_state_publication.py::test_update_session_can_skip_persistence",
+    "tests/test_state_publication.py::test_write_failure_is_reported_not_swallowed",
+    "tests/test_state_publication.py::test_update_settings_does_not_report_success_when_disk_write_fails",
+    "tests/test_state_publication.py::test_health_recovers_after_a_successful_write",
+    "tests/test_state_publication.py::test_health_is_clean_by_default",
+    "tests/test_state_publication.py::test_persist_helpers_report_success",
+    "tests/test_state_publication.py::test_queue_lock_is_not_held_while_writing",
+    "tests/test_state_publication.py::test_status_reports_a_failing_disk"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

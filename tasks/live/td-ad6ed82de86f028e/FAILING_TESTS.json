@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/test_arrays.py::test_uids_operators",
+    "tests/test_arrays.py::test_uids_construction",
+    "tests/test_arrays.py::test_uids_array_wrap",
+    "tests/test_distributions.py::test_dtype_consistency",
+    "tests/test_distributions.py::test_hist_plotting",
+    "tests/test_randomness.py::test_multi_random_length",
+    "tests/test_samples.py::test_samples_no_identifier",
+    "tests/test_samples.py::test_samples",
+    "tests/test_samples.py::test_dataset",
+    "tests/test_samples.py::test_verbose",
+    "tests/test_samples.py::test_seed_result",
+    "tests/test_samples.py::test_samples_bytesio"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

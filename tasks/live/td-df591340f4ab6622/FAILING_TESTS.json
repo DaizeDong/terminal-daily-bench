@@ -1,0 +1,30 @@
+{
+  "failing_test_ids": [
+    "tests/test_battleship.py::test_battleship_from_metadata",
+    "tests/test_bricks.py::test_bricks_from_metadata",
+    "tests/test_castle_wall.py::test_castle_wall_from_metadata",
+    "tests/test_cave.py::test_cave_from_metadata",
+    "tests/test_creek.py::test_creek_from_metadata",
+    "tests/test_dotchi_loop.py::test_dotchi_loop_from_metadata",
+    "tests/test_juosan.py::test_juosan_from_metadata",
+    "tests/test_kakkuru.py::test_kakkuru_from_metadata",
+    "tests/test_ken_ken.py::test_ken_ken_from_metadata",
+    "tests/test_koburin.py::test_koburin_from_metadata",
+    "tests/test_lits.py::test_lits_from_metadata",
+    "tests/test_makaro.py::test_makaro_from_metadata",
+    "tests/test_mathrax.py::test_mathrax_from_metadata",
+    "tests/test_moon_sun.py::test_moon_sun_from_metadata",
+    "tests/test_nawabari.py::test_nawabari_from_metadata",
+    "tests/test_paint_area.py::test_paint_area_from_metadata",
+    "tests/test_putteria.py::test_putteria_from_metadata",
+    "tests/test_regional_yajilin.py::test_regional_yajilin_from_metadata",
+    "tests/test_shingoki.py::test_shingoki_from_metadata",
+    "tests/test_skyscraper.py::test_skyscraper_from_metadata",
+    "tests/test_stitches.py::test_stitches_from_metadata",
+    "tests/test_trinairo.py::test_trinairo_from_metadata",
+    "tests/test_yajikabe.py::test_yajikabe_from_metadata",
+    "tests/test_yin_yang.py::test_yin_yang_from_metadata"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

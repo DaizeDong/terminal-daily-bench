@@ -1,0 +1,22 @@
+{
+  "failing_test_ids": [
+    "tests/test_datasets.py::TestTrainingForwardsMatchTime::test_match_time_is_forwarded_for_every_outcome",
+    "tests/test_datasets.py::TestTrainingForwardsMatchTime::test_rows_without_a_timestamp_still_train",
+    "tests/test_datasets.py::TestTrainingForwardsMatchTime::test_whr_builds_one_rating_per_playing_day",
+    "tests/test_evaluation.py::TestGroupByPeriod::test_groups_by_iso_week_in_order",
+    "tests/test_evaluation.py::TestGroupByPeriod::test_custom_key",
+    "tests/test_evaluation.py::TestGroupByPeriod::test_rows_without_timestamps_form_one_leading_period",
+    "tests/test_evaluation.py::TestWalkForward::test_learns_a_separable_schedule",
+    "tests/test_evaluation.py::TestWalkForward::test_first_period_is_never_scored_when_warmed_up",
+    "tests/test_evaluation.py::TestWalkForward::test_no_lookahead_within_a_period",
+    "tests/test_evaluation.py::TestWalkForward::test_draws_are_excluded_and_counted",
+    "tests/test_evaluation.py::TestWalkForward::test_unseen_competitors_are_skipped_not_invented",
+    "tests/test_evaluation.py::TestWalkForward::test_competitor_params_are_restored_afterwards",
+    "tests/test_evaluation.py::TestWalkForward::test_rejects_a_warmup_that_leaves_nothing_to_score",
+    "tests/test_evaluation.py::TestTune::test_orders_results_by_metric",
+    "tests/test_evaluation.py::TestTune::test_accuracy_cannot_separate_the_pythagorean_exponent",
+    "tests/test_evaluation.py::TestTune::test_rejects_unknown_metric_and_empty_grid"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

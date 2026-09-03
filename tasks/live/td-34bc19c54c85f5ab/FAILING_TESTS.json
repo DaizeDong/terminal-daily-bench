@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "tests/test_dashboard_process.py::test_dashboard_timeout_keeps_url_and_registers_cleanup",
+    "tests/test_dashboard_process.py::test_dashboard_process_exit_before_bind_returns_no_url",
+    "tests/test_dashboard_process.py::test_strict_port_never_falls_back",
+    "tests/test_dashboard_process.py::test_strict_port_rejects_initial_bind_race",
+    "tests/test_dashboard_process.py::test_standalone_dashboard_still_falls_back"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_MetaDetective.py::TestHtmlExportEscaping::test_display_all_escapes_payloads",
+    "tests/test_MetaDetective.py::TestHtmlExportEscaping::test_display_singular_escapes_payloads",
+    "tests/test_MetaDetective.py::TestHtmlExportEscaping::test_map_link_still_rendered_as_anchor",
+    "tests/test_MetaDetective.py::TestHtmlExportEscaping::test_safe_gps_links_escapes_address",
+    "tests/test_MetaDetective.py::TestGeocodeOptOut::test_no_geocode_short_circuits_network",
+    "tests/test_MetaDetective.py::TestLooksLikeUrl::test_http_and_https_are_urls",
+    "tests/test_MetaDetective.py::TestLooksLikeUrl::test_paths_are_not_urls"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

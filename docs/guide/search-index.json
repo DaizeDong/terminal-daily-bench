@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-30T03:51:11Z",
+ "generated": "2026-09-03T18:43:54Z",
  "schema_version": "td-docs-search-index-v1",
  "pages": [
   {
@@ -248,7 +248,7 @@
   {
    "url": "guide/quality-methods/advisory/",
    "page": "The two advisory axes",
-   "heading": "A \u2014 angle coverage",
+   "heading": "A \u2014 Angle coverage",
    "id": "A",
    "level": 2,
    "text": "capability_profile decomposes the gate-states 0..4 into four conditional rates. build_rate Can produce a building env \u2014 P(state \u2265 1) . partial_given_build Can start fixing, some F2P \u2014 P(state \u2265 2 | \u2265 1)\u2026"
@@ -264,7 +264,7 @@
   {
    "url": "guide/quality-methods/advisory/",
    "page": "The two advisory axes",
-   "heading": "R \u2014 diversity",
+   "heading": "R \u2014 Diversity",
    "id": "R",
    "level": 2,
    "text": "R scores task signatures ( {repo, files, f2p} ), not the response matrix. task_similarity(a, b) 0.0 for different repos (definitionally diverse); for the same repo, the mean of the changed-file Jaccard and the\u2026"
@@ -291,12 +291,12 @@
    "heading": "The seven axes",
    "id": "axes",
    "level": 2,
-   "text": "Each axis is [0, 1] , higher = better, and every one is reported separately so the composite never hides a collapsed axis. axis function measures D discriminative_yield tasks that split the field C difficulty_coverage\u2026"
+   "text": "Each axis is [0, 1] , higher = better, and every one is reported separately so the composite never hides a collapsed axis. Axis Function Measures D discriminative_yield tasks that split the field C difficulty_coverage\u2026"
   },
   {
    "url": "guide/quality-methods/axes/",
    "page": "The measurement axes",
-   "heading": "D \u2014 discriminative yield",
+   "heading": "D \u2014 Discriminative yield",
    "id": "D",
    "level": 2,
    "text": "The fraction of tasks that split the field : only tasks some models solve and others miss carry information, and the rest are the blind spot. An all-pass or all-fail task therefore carries zero discrimination. With\u2026"
@@ -304,7 +304,7 @@
   {
    "url": "guide/quality-methods/axes/",
    "page": "The measurement axes",
-   "heading": "C \u2014 difficulty coverage",
+   "heading": "C \u2014 Difficulty coverage",
    "id": "C",
    "level": 2,
    "text": "Normalized entropy of solve-rate bucket occupancy, over equal-width bins on [0, 1] . Tasks spread evenly give C = 1 ; tasks all clustered in one bucket give C = 0 ."
@@ -312,7 +312,7 @@
   {
    "url": "guide/quality-methods/axes/",
    "page": "The measurement axes",
-   "heading": "M \u2014 monotonicity",
+   "heading": "M \u2014 Monotonicity",
    "id": "M",
    "level": 2,
    "text": "The fraction of tasks with no strong ability inversion . Compared pairs are those where ability_i > ability_j + ability_eps , with ability_eps defaulting to 0.05 ; a strong inversion is solved_j and not solved_i \u2014\u2026"
@@ -331,7 +331,7 @@
    "heading": "The fourteen codes",
    "id": "capability-codes",
    "level": 2,
-   "text": "code name scope C1 filesystem filesystem / data wrangling C2 build build & compile C3 debug debugging / fault localization C4 impl code implementation / refactor C5 test test authoring & verification C6 data data\u2026"
+   "text": "Code Name Scope C1 filesystem filesystem / data wrangling C2 build build & compile C3 debug debugging / fault localization C4 impl code implementation / refactor C5 test test authoring & verification C6 data data\u2026"
   },
   {
    "url": "guide/quality-methods/cli/",
@@ -411,12 +411,12 @@
    "heading": "The two item parameters",
    "id": "I-params",
    "level": 2,
-   "text": "b \u2014 difficulty logit(1 \u2212 solve_rate) ; harder tasks (low solve-rate) get higher b . a \u2014 discrimination max(0.2, |r_pb|\u00b72 + 0.2) , where r_pb is the task\u2019s point-biserial correlation with the per-model total score. An\u2026"
+   "text": "b \u2014 Difficulty logit(1 \u2212 solve_rate) ; harder tasks (low solve-rate) get higher b . a \u2014 Discrimination max(0.2, |r_pb|\u00b72 + 0.2) , where r_pb is the task\u2019s point-biserial correlation with the per-model total score. An\u2026"
   },
   {
    "url": "guide/quality-methods/information/",
    "page": "Information and reliability",
-   "heading": "KR-20 \u2014 reliability",
+   "heading": "KR-20 \u2014 Reliability",
    "id": "kr20",
    "level": 2,
    "text": "Kuder-Richardson 20 \u2014 internal-consistency reliability for binary items."
@@ -483,7 +483,7 @@
    "heading": "What a bad value looks like",
    "id": "axis-failure-modes",
    "level": 2,
-   "text": "axis what it asks reads what a bad value looks like D Discriminative yield: tasks that split the field ( 0 < solvers < n_models ). [0,1] Low D: mostly all-pass or all-fail rows. Below the min_D gate the day cannot rank\u2026"
+   "text": "Axis What it asks Reads What a bad value looks like D Discriminative yield: tasks that split the field ( 0 < solvers < n_models ). [0,1] Low D: mostly all-pass or all-fail rows. Below the min_D gate the day cannot rank\u2026"
   },
   {
    "url": "guide/quality-methods/readiness/",
@@ -667,12 +667,12 @@
    "heading": "The interface",
    "id": "interface",
    "level": 2,
-   "text": "An adapter subclasses HarnessAdapter and implements produce_patch . the abstract base and its result type"
+   "text": "An adapter subclasses HarnessAdapter and implements produce_patch . The abstract base and its result type"
   },
   {
    "url": "guide/submission/adapters/",
    "page": "Adding a scaffold",
-   "heading": "produce_patch rules",
+   "heading": "Rules for produce_patch",
    "id": "produce-patch",
    "level": 2,
    "text": "From the base-class docstring: an adapter MUST NOT read or write the protected tests or the gold solution, and MUST NOT compute a reward, because scoring is done afterward by the execution gate . On failure it returns\u2026"
@@ -755,7 +755,7 @@
    "heading": "The recording CLI",
    "id": "cli",
    "level": 2,
-   "text": "web/submit_result.py reads a submission JSON from stdin , in the shape the schema fixes . validate, record, rebuild"
+   "text": "web/submit_result.py reads a submission JSON from stdin , in the shape the schema fixes . validate , record , rebuild"
   },
   {
    "url": "guide/submission/recording/",
@@ -835,7 +835,7 @@
    "heading": "Run a model on a task",
    "id": "run",
    "level": 2,
-   "text": "tdb is the console script, defined by terminal_daily_bench/cli.py . install, then score"
+   "text": "tdb is the console script, defined by terminal_daily_bench/cli.py . Install, then score"
   },
   {
    "url": "guide/submission/running/",
@@ -851,7 +851,7 @@
    "heading": "The result record",
    "id": "record",
    "level": 2,
-   "text": "One JSON record per run, written by terminal_daily_bench/eval.py . lands in --out, default $TDB_WORK/results/"
+   "text": "One JSON record per run, written by terminal_daily_bench/eval.py . Lands in --out , default $TDB_WORK/results/"
   },
   {
    "url": "guide/submission/running/",
@@ -872,7 +872,7 @@
   {
    "url": "guide/task-format/build/",
    "page": "Build and audit trail",
-   "heading": "environment/Dockerfile",
+   "heading": "Inside environment/Dockerfile",
    "id": "environment",
    "level": 2,
    "text": "A parity and audit artifact: the recipe the image is built from. environment/Dockerfile"
@@ -880,7 +880,7 @@
   {
    "url": "guide/task-format/build/",
    "page": "Build and audit trail",
-   "heading": "solution/ (archive only)",
+   "heading": "Inside solution/ (archive only)",
    "id": "solution",
    "level": 2,
    "text": "The gold fix from the merged PR, and the driver that applies it. solution/"
@@ -888,7 +888,7 @@
   {
    "url": "guide/task-format/build/",
    "page": "Build and audit trail",
-   "heading": "PROVENANCE.json",
+   "heading": "Inside PROVENANCE.json",
    "id": "provenance",
    "level": 2,
    "text": "Tasks derive only from permissively-licensed repositories. PROVENANCE.json"
@@ -896,7 +896,7 @@
   {
    "url": "guide/task-format/build/",
    "page": "Build and audit trail",
-   "heading": "record.json (archive only)",
+   "heading": "Inside record.json (archive only)",
    "id": "record",
    "level": 2,
    "text": "Host-specific and internal build fields are stripped on publish ( publish_tasks.py::_sanitize_record ), leaving: record.json"
@@ -907,7 +907,7 @@
    "heading": "Install and point at a model",
    "id": "examples",
    "level": 2,
-   "text": "The runnable examples below need an apptainer/singularity host. install"
+   "text": "The runnable examples below need an apptainer/singularity host. Install"
   },
   {
    "url": "guide/task-format/examples/",
@@ -915,7 +915,7 @@
    "heading": "Score a task",
    "id": "score-a-task",
    "level": 2,
-   "text": "tdb run and tdb oracle both wrap terminal_daily_bench.eval , which accepts --max-tokens , --call-timeout and --harbor-timeout . score"
+   "text": "tdb run and tdb oracle both wrap terminal_daily_bench.eval , which accepts --max-tokens , --call-timeout and --harbor-timeout . Score"
   },
   {
    "url": "guide/task-format/examples/",
@@ -923,7 +923,7 @@
    "heading": "Read a live task",
    "id": "read-a-live-task",
    "level": 2,
-   "text": "A live package ships the instruction and the failing-test IDs; the protected assertions and the gold solution are withheld. read"
+   "text": "A live package ships the instruction and the failing-test IDs; the protected assertions and the gold solution are withheld. Read"
   },
   {
    "url": "guide/task-format/examples/",
@@ -931,7 +931,7 @@
    "heading": "Publish a task directory",
    "id": "publish",
    "level": 2,
-   "text": "One source directory in, one published task directory out. publish"
+   "text": "One source directory in, one published task directory out. Publish"
   },
   {
    "url": "guide/task-format/examples/",
@@ -939,12 +939,12 @@
    "heading": "Submit a result",
    "id": "submit",
    "level": 2,
-   "text": "A submission is recorded as pending: the public bundle does not run a replay worker (see CONTRIBUTING.md ), and complete frozen-roster signed replay coverage is required for community ranking. Validation rules \u2192 submit"
+   "text": "A submission is recorded as pending: the public bundle does not run a replay worker (see CONTRIBUTING.md ), and complete frozen-roster signed replay coverage is required for community ranking. Validation rules \u2192 Submit"
   },
   {
    "url": "guide/task-format/files/",
    "page": "Package files",
-   "heading": "instruction.md",
+   "heading": "Inside instruction.md",
    "id": "instruction",
    "level": 2,
    "text": "instruction.md is de-identified: upstream provenance \u2014 origin remote, project name, commit ids \u2014 is stripped, so the task is solved from the tree and the description alone."
@@ -952,7 +952,7 @@
   {
    "url": "guide/task-format/files/",
    "page": "Package files",
-   "heading": "task.toml",
+   "heading": "Inside task.toml",
    "id": "task-toml",
    "level": 2,
    "text": "Harbor\u2019s descriptor. The framework reads only [environment] ( eval.py::load_task ). task.toml docker_image Rewritten to the portable \"environment/Dockerfile\" on publish ( publish_tasks.py::_sanitize_task_toml ). The\u2026"
@@ -960,7 +960,7 @@
   {
    "url": "guide/task-format/files/",
    "page": "Package files",
-   "heading": "tests/",
+   "heading": "Inside tests/",
    "id": "tests",
    "level": 2,
    "text": "Re-laid from the trusted package after the patch is applied. test.sh The runner; it writes the reward. test_outputs.py The protected assertions. Carries the FAIL_TO_PASS / PASS_TO_PASS selectors, lands the PR\u2019s\u2026"
@@ -987,15 +987,15 @@
    "heading": "What ships in each mode",
    "id": "shipped",
    "level": 2,
-   "text": "Every row is one path in the package; the two columns are the two release modes. package path shipped in archive shipped in live task.toml yes (sanitized) yes (sanitized) instruction.md yes yes PROVENANCE.json yes yes\u2026"
+   "text": "Every row is one path in the package; the two columns are the two release modes. Package path Shipped in archive Shipped in live task.toml yes (sanitized) yes (sanitized) instruction.md yes yes PROVENANCE.json yes yes\u2026"
   },
   {
    "url": "guide/task-format/",
    "page": "Task format",
-   "heading": "FAILING_TESTS.json (live only)",
+   "heading": "Inside FAILING_TESTS.json (live only)",
    "id": "failing-tests",
    "level": 2,
-   "text": "Live submissions stay unranked until an official replay receipt exists. the failing-test IDs only, from the F2P selectors (publish_tasks.py::_failing_test_ids)"
+   "text": "Live submissions stay unranked until an official replay receipt exists. The failing-test IDs only, from the F2P selectors ( publish_tasks.py::_failing_test_ids )"
   },
   {
    "url": "guide/task-format/scaffold/",
@@ -1035,7 +1035,7 @@
    "heading": "Per-run result record",
    "id": "scoring-record",
    "level": 2,
-   "text": "One JSON object per run, recording the reward and what the gate did and did not check. result record"
+   "text": "One JSON object per run, recording the reward and what the gate did and did not check. Result record"
   }
  ]
 }

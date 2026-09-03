@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_discovers_only_account_dirs",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_scan_summarizes_macos_layout",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_duplicate_detection_uses_content_hash",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_scan_reports_progress_events",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_dashboard_is_self_contained",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_symlink_view_does_not_copy_originals",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_cleanup_plan_uses_candidate_buckets_and_trash_callback",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_cleanup_plan_can_permanently_delete_when_requested",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_cleanup_plan_matches_original_type_and_age_controls",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_cleanup_plan_respects_whitelist_and_expanded_cache_roots",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_discovers_accounts_from_multiple_roots",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_discovers_wxwork_accounts",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_scan_history_and_incremental_diff",
+    "tests/test_macos_wechat.py::MacOSWeChatTest::test_launch_agent_write_and_remove",
+    "tests/test_select_version_macos.py::SelectVersionMacOSTest::test_detects_macos_xwechat_account_root",
+    "tests/test_select_version_macos.py::SelectVersionMacOSTest::test_detects_macos_wxwork_users_root",
+    "tests/test_select_version_macos.py::SelectVersionMacOSTest::test_find_all_wechat_paths_includes_macos_candidates"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

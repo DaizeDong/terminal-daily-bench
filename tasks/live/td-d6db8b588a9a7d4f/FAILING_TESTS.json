@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_pipeline_tracks_semantics_lineage_and_history",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_manifest_round_trip_has_a_stable_fingerprint",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_required_history_follows_transform_lineage",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_static_features_are_validated",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_categorical_encoder_reuses_training_codes_and_handles_unknowns",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_categorical_encoder_reserves_configured_unknown_code",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_manifest_contract_values_are_immutable",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_selection_is_resolved_against_model_inputs",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_registered_model_resolves_features_without_model_name_branches",
+    "tests/test_features/test_feature_pipeline.py::FeaturePipelineTest::test_deep_ar_rejects_unsupported_static_real_and_multivariate_targets",
+    "tests/test_features/test_feature_pipeline.py::MaterializerTest::test_same_windows_materialize_to_2d_and_3d",
+    "tests/test_features/test_feature_pipeline.py::MaterializerTest::test_future_targets_cannot_change_model_inputs",
+    "tests/test_features/test_feature_pipeline.py::MaterializerTest::test_prediction_requires_future_rows_only_for_known_features",
+    "tests/test_features/test_feature_pipeline.py::MaterializerTest::test_tf_dataset_retains_teacher_forcing_values_for_deep_ar",
+    "tests/test_models/test_tft.py::test_materialized_mixed_categorical_roles_use_asymmetric_embeddings"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

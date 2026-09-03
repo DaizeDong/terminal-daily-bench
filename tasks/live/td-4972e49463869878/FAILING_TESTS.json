@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "tests/test_assignment_reports.py::TestGetAssignablePeople::test_uses_report_endpoint_and_aggregates_pages",
+    "tests/test_assignment_reports.py::TestGetPersonAssignments::test_single_page_returns_report_object",
+    "tests/test_assignment_reports.py::TestGetPersonAssignments::test_group_by_is_passed_as_query_parameter",
+    "tests/test_assignment_reports.py::TestGetPersonAssignments::test_paginated_todos_are_merged_into_one_report",
+    "tests/test_assignment_reports.py::TestGetPersonAssignments::test_error_status_raises",
+    "tests/test_assignment_reports.py::TestGetPersonAssignments::test_persistent_next_page_hits_page_cap",
+    "tests/test_assignment_reports.py::TestGetOverdueTodos::test_returns_lateness_groups",
+    "tests/test_assignment_reports.py::TestGetOverdueTodos::test_error_status_raises",
+    "tests/test_cli_server.py::test_report_tools_registered_in_tools_list",
+    "tests/test_cli_server.py::test_dispatch_get_assignable_people",
+    "tests/test_cli_server.py::test_dispatch_get_person_assignments",
+    "tests/test_cli_server.py::test_dispatch_get_person_assignments_without_group_by",
+    "tests/test_cli_server.py::test_dispatch_get_overdue_todos"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

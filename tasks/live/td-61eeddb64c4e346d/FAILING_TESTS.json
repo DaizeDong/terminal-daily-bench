@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "tests/test_eval_orchestration.py::test_eval_observes_parked_once_before_grading",
+    "tests/test_eval_orchestration.py::test_eval_does_not_observe_parked_without_a_grader",
+    "tests/test_eval_orchestration.py::test_eval_does_not_observe_parked_after_operator_judgement",
+    "tests/test_eval_orchestration.py::test_eval_does_not_observe_parked_after_definitive_termination",
+    "tests/test_eval_orchestration.py::test_eval_degrades_when_observe_parked_raises",
+    "tests/test_eval_orchestration.py::test_eval_halts_when_observe_parked_raises_a_halt_error",
+    "tests/test_eval_orchestration.py::test_eval_accepts_observe_parked_declining_without_warning",
+    "tests/test_eval_orchestration.py::test_eval_rejects_non_observation_parked_result",
+    "tests/test_eval_orchestration.py::test_eval_ignores_non_callable_observe_parked",
+    "tests/test_vlm_grader.py::test_trial_record_parked_observation_defaults_to_none",
+    "tests/test_vlm_grader.py::test_vlm_grader_prefers_parked_frames_and_records_provenance",
+    "tests/test_vlm_grader.py::test_vlm_grader_sorts_and_caps_parked_cameras",
+    "tests/test_vlm_grader.py::test_vlm_grader_falls_back_when_parked_frames_are_absent",
+    "tests/test_vlm_grader.py::test_vlm_grader_grades_zero_step_trial_from_parked_frames",
+    "tests/test_vlm_grader.py::test_vlm_grader_leaves_no_marker_when_grading_degrades"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

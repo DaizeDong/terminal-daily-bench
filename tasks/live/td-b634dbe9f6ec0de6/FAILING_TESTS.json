@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_upload_containment.py::test_invalid_ids_are_rejected",
+    "tests/test_upload_containment.py::test_generated_ids_are_valid",
+    "tests/test_upload_containment.py::test_derived_paths_are_empty_not_relative",
+    "tests/test_upload_containment.py::test_valid_id_still_resolves_every_path",
+    "tests/test_upload_containment.py::test_encoded_traversal_does_not_survive_url_parsing",
+    "tests/test_upload_containment.py::test_valid_upload_url_still_resolves",
+    "tests/test_upload_containment.py::test_traversal_cannot_read_a_file_outside_the_root",
+    "tests/test_upload_containment.py::test_delete_upload_never_rmtrees_an_unvalidated_path",
+    "tests/test_upload_containment.py::test_delete_upload_still_removes_a_real_upload",
+    "tests/test_upload_containment.py::test_media_route_rejects_a_traversal_id",
+    "tests/test_upload_containment.py::test_media_route_still_serves_a_real_upload"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

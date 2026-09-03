@@ -1,0 +1,20 @@
+{
+  "failing_test_ids": [
+    "cicd/tests/test_checkpoint.py::test_checkpoint_round_trip_publishes_manifest_after_complete_state",
+    "cicd/tests/test_checkpoint.py::test_checkpoint_cadence_uses_monotonic_seconds_and_retains_two_generations",
+    "cicd/tests/test_checkpoint.py::test_checksum_mismatch_fails_closed_before_deserialization",
+    "cicd/tests/test_checkpoint.py::test_interrupted_state_write_preserves_previous_commit",
+    "cicd/tests/test_checkpoint.py::test_interrupted_manifest_publication_preserves_previous_commit",
+    "cicd/tests/test_checkpoint.py::test_missing_manifest_with_state_file_is_incomplete_checkpoint",
+    "cicd/tests/test_checkpoint.py::test_malformed_manifest_fails_before_state_lookup",
+    "cicd/tests/test_checkpoint.py::test_missing_state_file_and_unsupported_schema_fail_clearly",
+    "cicd/tests/test_checkpoint.py::test_checkpoint_directory_has_one_writer_for_whole_run",
+    "cicd/tests/test_checkpoint.py::test_checkpoint_cadence_rejects_invalid_seconds",
+    "cicd/tests/test_checkpoint.py::test_local_automatic_resume_matches_uninterrupted_random_stream",
+    "cicd/tests/test_checkpoint.py::test_run_single_iteration_automatically_loads_and_advances_checkpoint",
+    "cicd/tests/test_checkpoint.py::test_complete_distributed_pending_state_round_trips_without_task_loss",
+    "cicd/tests/test_distributed_runtime.py::test_real_pool_runs_scalar_vmap_retries_and_cli_lifecycle"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,14 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_proxy_utils.py::test_stream_responses_websocket_preserves_agent_outputs_before_wire_namespace_strip",
+    "tests/unit/test_proxy_utils.py::test_slim_response_create_preserves_only_namespaced_agent_control_outputs",
+    "tests/unit/test_proxy_utils.py::test_slim_response_create_preserves_only_namespaced_agent_control_custom_outputs",
+    "tests/unit/test_proxy_utils.py::test_slim_response_create_keeps_agent_control_protocols_separate_for_reused_call_id",
+    "tests/unit/test_proxy_utils.py::test_slim_response_create_pairs_same_protocol_reused_call_id_by_occurrence",
+    "tests/unit/test_proxy_utils.py::test_slim_response_create_orphan_output_does_not_consume_namespaced_pairing",
+    "tests/unit/test_proxy_utils.py::test_prepare_response_bridge_pairs_same_protocol_reused_call_id_by_occurrence",
+    "tests/unit/test_proxy_utils.py::test_prepare_response_bridge_preserves_namespaced_custom_outputs_before_wire_namespace_strip"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

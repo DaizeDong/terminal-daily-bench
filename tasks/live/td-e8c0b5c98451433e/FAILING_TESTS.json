@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "agent/tests/test_binance_shadow_evidence.py::test_complete_evidence_is_deterministic_and_never_claims_engine_validation",
+    "agent/tests/test_binance_shadow_evidence.py::test_drift_evidence_preserves_numeric_structural_and_symbol_findings",
+    "agent/tests/test_binance_shadow_evidence.py::test_complete_isolated_evidence_includes_position_collateral",
+    "agent/tests/test_binance_shadow_evidence.py::test_complete_snapshot_with_unsupported_provenance_is_rejected",
+    "agent/tests/test_binance_shadow_evidence.py::test_unsupported_provenance_rejection_can_be_persisted",
+    "agent/tests/test_binance_shadow_evidence.py::test_rejected_observation_still_produces_fail_closed_evidence",
+    "agent/tests/test_binance_shadow_evidence.py::test_summary_is_concise_and_machine_readable",
+    "agent/tests/test_binance_shadow_evidence.py::test_writer_appends_jsonl_and_replaces_latest_summary",
+    "agent/tests/test_binance_shadow_evidence.py::test_writer_rejects_non_finite_evidence_without_partial_artifact",
+    "agent/tests/test_binance_shadow_evidence.py::test_writer_rejects_tampered_scope_or_validation_claim",
+    "agent/tests/test_binance_shadow_evidence.py::test_writer_rejects_missing_or_contradictory_evidence",
+    "agent/tests/test_binance_shadow_evidence.py::test_evidence_path_is_read_only_and_cannot_import_live_connectors"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

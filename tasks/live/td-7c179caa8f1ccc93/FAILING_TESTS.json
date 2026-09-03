@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_kernel_auth_bridge.py::test_m2m_forwards_token_url",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_full_kwargs_route_to_oauth_m2m_jwt",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_minimal_kwargs_omit_optionals",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_normalizes_space_delimited_scopes",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_takes_precedence_over_pat",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_missing_client_id_raises_programming_error",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_missing_kid_raises_programming_error",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_jwt_plus_client_secret_is_rejected",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_jwt_plus_credentials_provider_is_rejected",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_jwt_plus_databricks_oauth_auth_type_is_rejected",
+    "tests/unit/test_kernel_auth_bridge.py::TestKernelOAuthM2MJwt::test_federation_client_id_forwarded"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

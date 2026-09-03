@@ -1,0 +1,46 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-b162f85c912db462"
+description = "Recognize MATERIALIZED as a keyword (issue752)"
+keywords = ["refactoring", "software-engineering", "testing"]
+[[task.authors]]
+name = "terminal-daily"
+email = "terminal-daily@localhost.invalid"
+
+[metadata]
+author_name = "terminal-daily"
+author_email = "terminal-daily@localhost.invalid"
+category = "software-engineering"
+tags = ["refactoring", "software-engineering", "testing"]
+expert_time_estimate_min = 180.0
+junior_time_estimate_min = 480.0
+capability_labels = ["C4", "C5"]
+source_repo = "andialbrecht/sqlparse"
+created_at = "2026-06-16T06:50:09Z"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 3600.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+network_mode = "no-network"
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

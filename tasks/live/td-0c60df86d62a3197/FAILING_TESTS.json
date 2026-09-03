@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "cayleypy/algo/beam_search_test.py::test_expand_layer_keeps_provenance",
+    "cayleypy/algo/beam_search_test.py::test_expand_layer_empty_frontier",
+    "cayleypy/algo/beam_search_test.py::test_beam_search_simple_child_scores_same_as_default",
+    "cayleypy/algo/beam_search_test.py::test_beam_search_simple_child_scores_same_as_default_when_path_not_found",
+    "cayleypy/algo/beam_search_test.py::test_beam_search_simple_child_scores_q_model_parity",
+    "cayleypy/algo/beam_search_test.py::test_beam_search_simple_child_scores_wrong_number_of_outputs",
+    "cayleypy/algo/beam_search_test.py::test_beam_search_child_scores_not_supported_in_advanced_mode"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

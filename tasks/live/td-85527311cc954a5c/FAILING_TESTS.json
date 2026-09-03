@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "test_autogalaxy/analysis/analysis/test_analysis_dataset.py::test__save_results__galaxies_failure_never_kills_the_fit",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_there_are_profiles_to_check",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_every_elliptical_profile_declares_the_ball",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_the_radius_is_the_clamp_not_the_validity_boundary",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_pyautofit_resolves_the_declaration_to_a_parameter_pair",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_a_spherical_profile_contributes_no_pair",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestBallDeclaration::test_the_joint_clipper_projects_a_real_lens_model",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestGuardIsUntouched::test_it_still_rejects_a_magnitude_of_one_on_construction",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestGuardIsUntouched::test_it_still_rejects_the_corner_the_box_permits",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestGuardIsUntouched::test_it_still_accepts_the_saturating_annulus",
+    "test_autogalaxy/profiles/test_model_constraint.py::TestGuardIsUntouched::test_it_still_returns_early_for_a_non_concrete_magnitude"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

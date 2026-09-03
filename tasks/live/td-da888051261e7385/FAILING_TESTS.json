@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_renders_nested_list",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_depth_limits_nesting",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_no_descendants_returns_empty",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_root_home_resolves_via_homepage",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_root_home_without_homepage_returns_empty",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_unresolvable_title_root_returns_empty",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_cross_space_root_uses_space_key",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_title_mismatch_returns_empty",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_dispatched_via_convert_div",
+    "tests/unit/test_pagetree_conversion.py::test_content_tree_plaintext_root_falls_back_to_text",
+    "tests/unit/test_pagetree_conversion.py::test_children_macro_defaults_to_direct_children",
+    "tests/unit/test_pagetree_conversion.py::test_children_macro_all_true_renders_full_tree",
+    "tests/unit/test_pagetree_conversion.py::test_children_macro_explicit_depth_overrides_default",
+    "tests/unit/test_pagetree_conversion.py::test_unmatched_macro_id_warns_and_falls_back",
+    "tests/unit/test_pagetree_conversion.py::test_descendant_with_zero_id_is_skipped"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

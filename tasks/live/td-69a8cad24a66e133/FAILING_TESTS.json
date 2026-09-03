@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_fixture_z5_113",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_replay_residues",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_collision_classes",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_empty_sequence",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_single_element",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_total_positions",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_large_modulus",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_zero_modulus_not_applicable",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_result_preserves_modulus",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_native_admission_rejects_nonpositive_modulus",
+    "tests/math/combinatorics/additive/cyclic_prefix_sum/test_cyclic_prefix_sum.py::test_native_admission_rejects_noncanonical_sequence"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

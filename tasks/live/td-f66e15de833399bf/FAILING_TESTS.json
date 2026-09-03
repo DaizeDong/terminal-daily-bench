@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_bounding_dimensions_completeness.py::test_defaults_to_complete",
+    "tests/test_bounding_dimensions_completeness.py::test_incomplete_annotations_carry_a_reason",
+    "tests/test_bounding_dimensions_completeness.py::test_fields_round_trip_through_json",
+    "tests/test_bounding_dimensions_completeness.py::test_backwards_compatible_with_payloads_lacking_the_fields"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/parsing/test_custom_function_namespace_isolation.py::test_with_namespace_returns_a_copy",
+    "tests/parsing/test_custom_function_namespace_isolation.py::test_argument_addresses_match_the_import_depth",
+    "tests/parsing/test_custom_function_namespace_isolation.py::test_concurrent_parses_match_a_sequential_parse",
+    "tests/parsing/test_custom_function_namespace_isolation.py::test_custom_function_resolves_through_nested_aliases"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

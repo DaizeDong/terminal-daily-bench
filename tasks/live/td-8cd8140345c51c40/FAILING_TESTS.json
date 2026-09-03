@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "dashboard_utils/test_event_emitter.py::test_emit_epoch_uses_new_contract_keys",
+    "dashboard_utils/test_event_emitter.py::test_emit_epoch_drops_old_flat_fields",
+    "dashboard_utils/test_event_emitter.py::test_emit_epoch_omits_pb_scores_when_absent",
+    "dashboard_utils/test_event_emitter.py::test_emit_epoch_includes_pb_scores_in_p_phase",
+    "dashboard_utils/test_event_emitter.py::test_true_epoch_never_decreases_across_rollback",
+    "dashboard_utils/test_event_emitter.py::test_reset_zeros_true_epoch_counter",
+    "dashboard_utils/test_event_emitter.py::test_emit_switch_uses_new_contract_keys",
+    "dashboard_utils/test_event_emitter.py::test_emit_switch_omits_unknown_switch_type",
+    "dashboard_utils/test_event_emitter.py::test_emit_dendrite_added_uses_new_contract_keys",
+    "dashboard_utils/test_event_emitter.py::test_emit_run_end_sends_stored_best_values",
+    "dashboard_utils/test_event_emitter.py::test_emit_run_start_payload_unchanged"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

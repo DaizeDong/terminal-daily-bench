@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_project.py::test_well_formed_engine_virtual_paths_are_not_outside",
+    "tests/test_project.py::test_a_res_dotdot_escape_is_outside",
+    "tests/test_project.py::test_a_backslash_spelled_res_escape_is_outside",
+    "tests/test_project.py::test_a_backslash_in_a_filesystem_path_is_not_a_separator_on_posix",
+    "tests/test_project.py::test_a_res_path_that_collapses_back_inside_is_not_outside",
+    "tests/test_project.py::test_a_res_path_starting_with_two_dots_is_not_an_escape",
+    "tests/test_project.py::test_user_and_uid_paths_stay_inside_even_with_a_dotdot",
+    "tests/test_script_commands.py::test_script_validate_refuses_a_res_dotdot_escape_the_same_as_the_absolute_spelling",
+    "tests/test_script_commands.py::test_script_validate_does_not_refuse_a_res_path",
+    "tests/test_script_error_parser.py::test_a_failure_naming_another_script_is_not_the_entry_verdict",
+    "tests/test_script_run_operation.py::test_trailing_unicode_spaces_that_godot_preserves_are_accepted"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

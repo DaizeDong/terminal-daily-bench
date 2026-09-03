@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "tests/test_diff_neighbors.py::test_diff_neighbors",
+    "tests/test_hakoiri.py::test_hakoiri_sudoku",
+    "tests/test_hidoku.py::test_snake",
+    "tests/test_kuromasu.py::test_kuromasu_solve_from_string",
+    "tests/test_number_cross.py::test_snake",
+    "tests/test_snake.py::test_snake"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

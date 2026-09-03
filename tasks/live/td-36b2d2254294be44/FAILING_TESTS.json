@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_chemdiagrams.py::TestNumpyCompatibility::test_draw_path_with_numpy_arrays",
+    "tests/test_chemdiagrams.py::TestNumpyCompatibility::test_draw_path_with_numpy_scalars",
+    "tests/test_chemdiagrams.py::TestNumpyCompatibility::test_set_xlabels_with_numpy_array_labelplaces",
+    "tests/test_chemdiagrams.py::TestNumpyCompatibility::test_add_numbers_naive_with_numpy_array_x_min_max"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

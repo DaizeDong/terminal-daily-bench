@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "tests/test_v151_validation.py::test_package_version_is_1_5_1",
+    "tests/test_v151_validation.py::test_logger_default_level_is_warning",
+    "tests/test_v151_validation.py::test_exporters_module_lazy_loading",
+    "tests/test_v151_validation.py::test_cloud_exporter_user_agent_contains_package_version",
+    "tests/test_v151_validation.py::test_cloud_exporter_export_payload_structure",
+    "tests/test_v151_validation.py::test_multiple_exporters_receive_dispatched_metrics",
+    "tests/test_v151_validation.py::test_exporter_signatures_accept_kwargs",
+    "tests/test_v151_validation.py::test_carbon_equivalence_formatting",
+    "tests/test_v151_validation.py::test_compare_utility",
+    "tests/test_v151_validation.py::test_validate_region_code_handling",
+    "tests/test_v151_validation.py::test_carbon_budget_enforcement_and_callbacks",
+    "tests/test_v151_validation.py::test_nested_track_block_execution",
+    "tests/test_v151_validation.py::test_ecotrace_ml_snapshot_and_epoch_logging"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

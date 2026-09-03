@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/analysis/test_automatic_azimuth_sets.py::test_smallest_covering_axial_range_known_cases",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_perfect_clusters",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_length_weighting_changes_center",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_axial_wraparound_cluster",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_returns_centers_and_ranges",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_trim_azimuth_set_ranges_creates_background_points",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_trim_azimuth_set_ranges_wraparound",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_trim_azimuth_set_ranges_known_cases",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_smallest_covering_axial_range_contains_all_input_azimuths",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_is_invariant_under_adding_180_degrees",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_automatic_azimuth_sets_invalid_inputs",
+    "tests/analysis/test_automatic_azimuth_sets.py::test_trim_azimuth_set_ranges_invalid_inputs"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

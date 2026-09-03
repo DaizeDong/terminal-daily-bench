@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/test_mineru_error_hints.py::test_pagechars_failure_is_recognized",
+    "tests/test_mineru_error_hints.py::test_diagnosis_accepts_a_plain_string",
+    "tests/test_mineru_error_hints.py::test_unknown_failures_produce_no_hint",
+    "tests/test_mineru_error_hints.py::test_execution_error_message_includes_hint",
+    "tests/test_mineru_error_hints.py::test_execution_error_without_known_signature_has_no_hint",
+    "tests/test_mineru_error_hints.py::test_execution_error_keeps_positional_signature",
+    "tests/test_mineru_error_hints.py::test_explicit_hint_overrides_diagnosis",
+    "tests/test_mineru_error_hints.py::test_hint_survives_the_real_stderr_capture_path",
+    "tests/test_mineru_error_hints.py::test_unrelated_stderr_still_raises_without_a_hint"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_placeholder_is_replaced_with_report_table",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_nested_report_reaches_markdown_output",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_html_without_app_macro_is_unchanged",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_app_macro_with_rendered_body_is_left_alone",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_unknown_macro_id_does_not_crash",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_cql_absent_from_export_view_does_not_crash",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_missing_storage_does_not_crash",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_spliced_report_supports_dataview_format",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_unresolvable_report_is_warned_about",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_warning_does_not_contain_raw_cql",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_app_macro_without_a_report_logs_only_at_debug",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_same_report_in_two_placeholders_is_emitted_twice",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_nested_app_macro_placeholders_do_not_crash",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_two_reports_in_one_wrapper_are_both_emitted_in_order",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_cql_quotes_survive_xml_undefined_entities_in_storage",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_cql_whitespace_differences_still_match",
+    "tests/unit/test_confluence.py::TestAppMacroNestedPagePropertiesReport::test_markdown_property_applies_the_preprocessing"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

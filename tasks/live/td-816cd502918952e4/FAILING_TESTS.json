@@ -1,0 +1,24 @@
+{
+  "failing_test_ids": [
+    "test/plugins/test_ntfy_custom_headers.py::test_parses_a_single_header",
+    "test/plugins/test_ntfy_custom_headers.py::test_parses_multiple_headers",
+    "test/plugins/test_ntfy_custom_headers.py::test_trims_surrounding_whitespace",
+    "test/plugins/test_ntfy_custom_headers.py::test_keeps_colons_inside_the_value",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_entries_without_a_separator",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_entries_missing_a_name_or_value",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_names_that_collide_with_a_built_in_header",
+    "test/plugins/test_ntfy_custom_headers.py::test_collision_check_ignores_case",
+    "test/plugins/test_ntfy_custom_headers.py::test_keeps_the_first_of_a_repeated_name",
+    "test/plugins/test_ntfy_custom_headers.py::test_a_bad_entry_does_not_discard_the_good_ones",
+    "test/plugins/test_ntfy_custom_headers.py::test_no_entries_produces_no_headers",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_values_containing_a_newline",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_values_containing_a_carriage_return",
+    "test/plugins/test_ntfy_custom_headers.py::test_skips_non_ascii_names_and_values",
+    "test/plugins/test_ntfy_custom_headers.py::test_an_unsendable_entry_does_not_discard_the_good_ones",
+    "test/plugins/test_ntfy_custom_headers.py::test_send_passes_accepted_custom_headers_to_requests",
+    "test/plugins/test_ntfy_custom_headers.py::test_send_keeps_plugin_managed_headers_intact",
+    "test/plugins/test_ntfy_custom_headers.py::test_send_drops_an_unsendable_custom_header_but_still_posts"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

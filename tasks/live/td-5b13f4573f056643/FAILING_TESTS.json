@@ -1,0 +1,16 @@
+{
+  "failing_test_ids": [
+    "tests/test_discovery.py::test_tokenize_splits_on_underscore",
+    "tests/test_discovery.py::test_rare_token_outweighs_common_one",
+    "tests/test_discovery.py::test_long_document_does_not_win_on_length_alone",
+    "tests/test_discovery.py::test_prefix_expansion_keeps_substring_search_working",
+    "tests/test_discovery.py::test_exact_match_outranks_prefix_match",
+    "tests/test_discovery.py::test_empty_corpus_does_not_produce_nan_scores",
+    "tests/test_discovery.py::test_rank_scores_candidates_using_full_catalog_idf",
+    "tests/test_discovery.py::test_rank_keeps_every_candidate_even_when_unscored",
+    "tests/test_discovery.py::test_search_punctuation_only_query_falls_back_to_substring",
+    "tests/test_discovery.py::test_field_boost_uses_the_same_matching_as_scoring"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

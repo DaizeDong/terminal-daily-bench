@@ -1,0 +1,46 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-8b5aac24794a8b67"
+description = "fix(guard): repair Core sidecar Mach-O headers after manifest rewrite"
+keywords = ["automation", "cryptography", "refactoring", "security", "software-engineering", "testing", "tooling"]
+[[task.authors]]
+name = "terminal-daily"
+email = "terminal-daily@localhost.invalid"
+
+[metadata]
+author_name = "terminal-daily"
+author_email = "terminal-daily@localhost.invalid"
+category = "security"
+tags = ["automation", "cryptography", "refactoring", "security", "software-engineering", "testing", "tooling"]
+expert_time_estimate_min = 180.0
+junior_time_estimate_min = 480.0
+capability_labels = ["C4", "C5", "C8", "C14"]
+source_repo = "hashgraph-online/hol-guard"
+created_at = "2026-08-28T22:16:14Z"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 3600.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+network_mode = "no-network"
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

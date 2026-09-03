@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "tests/logging_test.py::test_import_is_silent_without_log_level_env_var",
+    "tests/logging_test.py::test_unset_or_empty_log_level_leaves_the_library_silent",
+    "tests/logging_test.py::test_invalid_log_level_fails_loudly",
+    "tests/logging_test.py::test_log_level_env_var_adds_torchquads_own_sink",
+    "tests/logging_test.py::test_torchquad_sink_honors_the_configured_level",
+    "tests/logging_test.py::test_records_still_reach_handlers_torchquad_does_not_own"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

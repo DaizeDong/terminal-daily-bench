@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_utils.py::test_run_llm_uses_explicit_config_for_provider_selection",
+    "tests/test_utils.py::test_run_llm_uses_explicit_skills_only_endpoint",
+    "tests/test_utils.py::test_run_llm_uses_explicit_rl_endpoint",
+    "tests/test_utils.py::test_handle_request_falls_back_to_raw_system_prompt"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

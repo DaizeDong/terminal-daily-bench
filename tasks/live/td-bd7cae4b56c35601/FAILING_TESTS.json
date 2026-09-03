@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_scoring.py::RiskBandTests::test_low_band_below_q75",
+    "tests/test_scoring.py::RiskBandTests::test_medium_band_between_thresholds",
+    "tests/test_scoring.py::RiskBandTests::test_high_band_above_q95",
+    "tests/test_scoring.py::RiskBandTests::test_distance_is_mean_absolute_zscore",
+    "tests/test_scoring.py::IntervalTests::test_uses_metadata_half_width",
+    "tests/test_scoring.py::IntervalTests::test_falls_back_to_scaled_mae",
+    "tests/test_training.py::<class>::test_training_writes_artifacts_and_beats_baseline"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

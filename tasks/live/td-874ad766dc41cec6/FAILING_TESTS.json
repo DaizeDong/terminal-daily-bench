@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_differentiable.py::TestPerEquationInterpMode::test_equation_overrides_operator",
+    "tests/test_differentiable.py::TestPerEquationInterpMode::test_mode_survives_a_wrapper",
+    "tests/test_differentiable.py::TestSymmetricPlacement::test_node_coefficient_does_not_block_it",
+    "tests/test_differentiable.py::TestSymmetricPlacement::test_a_derivative_on_the_target_is_left_alone",
+    "tests/test_differentiable.py::TestSymmetricPlacement::test_degenerate_interpolation_of_a_sum",
+    "tests/test_tensors.py::test_diag_sympified_zeros",
+    "tests/test_tensors.py::test_non_expr_components"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

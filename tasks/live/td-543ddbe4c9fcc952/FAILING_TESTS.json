@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "danus/strategy/tests/test_claude_api_transport.py::test_claude_api_transport_rejects_ultra",
+    "danus/strategy/tests/test_claude_code_transport.py::test_claude_code_transport_rejects_ultra",
+    "danus/strategy/tests/test_strategy.py::test_api_transport_completed",
+    "danus/strategy/tests/test_strategy.py::test_api_transport_recovers_text_from_stream_deltas",
+    "danus/strategy/tests/test_strategy.py::test_api_transport_forwards_max_effort",
+    "danus/strategy/tests/test_strategy.py::test_unsupported_gateway_params_retry_without_dropping_max",
+    "danus/strategy/tests/test_strategy.py::test_background_store_requirement_retries_without_dropping_max",
+    "danus/strategy/tests/test_strategy.py::test_max_effort_is_never_silently_removed_on_400",
+    "danus/strategy/tests/test_strategy.py::test_cli_accepts_max_effort"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

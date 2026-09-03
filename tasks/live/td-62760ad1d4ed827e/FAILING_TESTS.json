@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "tests/test_composite.py::test_stack_nested",
+    "tests/test_composite.py::test_stack_nested_thrice",
+    "tests/test_composite.py::test_stack_leaves_input_boards_alone",
+    "tests/test_composite.py::test_stack_after_render",
+    "tests/test_composite.py::test_stack_save_before_render",
+    "tests/test_composite.py::test_stack_empty_boards",
+    "tests/test_composite.py::test_stack_keeps_per_board_legends",
+    "tests/test_composite.py::test_stack_of_composites",
+    "tests/test_composite.py::test_stack_mixed_children",
+    "tests/test_composite.py::test_stack_composite_keeps_own_legend",
+    "tests/test_composite.py::test_stack_inside_composite_is_refused",
+    "tests/test_composite.py::test_stack_legend_inside_figure",
+    "tests/test_composite.py::test_stack_center_align_asymmetric"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

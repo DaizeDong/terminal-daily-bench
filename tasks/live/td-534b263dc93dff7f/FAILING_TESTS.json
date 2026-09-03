@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_issue_696_hdbscan_logsanitize.py::test_hdbscan_declared_as_extra",
+    "tests/test_issue_696_hdbscan_logsanitize.py::test_safe_log_strips_control_chars",
+    "tests/test_issue_696_hdbscan_logsanitize.py::test_safe_log_handles_non_str",
+    "tests/test_issue_696_hdbscan_logsanitize.py::test_pipeline_log_calls_use_safe_log",
+    "tests/test_issue_697_docs_packaging.py::test_docs_report_correct_tool_count",
+    "tests/test_issue_697_docs_packaging.py::test_python_api_doc_metadata_not_reserved",
+    "tests/test_issue_697_docs_packaging.py::test_sdist_excludes_tests"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

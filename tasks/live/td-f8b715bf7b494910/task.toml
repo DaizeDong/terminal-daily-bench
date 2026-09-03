@@ -1,0 +1,46 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-f8b715bf7b494910"
+description = "add unquote_user option"
+keywords = ["refactoring", "software-engineering", "testing"]
+[[task.authors]]
+name = "terminal-daily"
+email = "terminal-daily@localhost.invalid"
+
+[metadata]
+author_name = "terminal-daily"
+author_email = "terminal-daily@localhost.invalid"
+category = "software-engineering"
+tags = ["refactoring", "software-engineering", "testing"]
+expert_time_estimate_min = 60.0
+junior_time_estimate_min = 180.0
+capability_labels = ["C4", "C5"]
+source_repo = "coleifer/peewee"
+created_at = "2025-02-20T18:36:33Z"
+source_license_spdx = ""
+difficulty = "medium"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 1800.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+network_mode = "no-network"
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/integration_tests/basket_models/test_aleacarta_on_tripdataset.py::test_no_intercept",
+    "tests/integration_tests/basket_models/test_aleacarta_on_tripdataset.py::test_untied_embeddings",
+    "tests/unit_tests/basket_models/test_alea.py::test_instantiation",
+    "tests/unit_tests/basket_models/test_alea.py::test_compute_basket_utility"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

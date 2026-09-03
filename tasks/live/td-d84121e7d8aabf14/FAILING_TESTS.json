@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "test_autofit/non_linear/plot/test_samples_plotters.py::test__effective_sample_size__uniform_and_degenerate_weights",
+    "test_autofit/non_linear/plot/test_samples_plotters.py::test__corner_cornerpy__weight_degenerate_sample_is_skipped_not_plotted",
+    "test_autofit/non_linear/plot/test_samples_plotters.py::test__corner_cornerpy__healthy_weights_still_plot"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

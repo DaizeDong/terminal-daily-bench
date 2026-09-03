@@ -1,0 +1,16 @@
+{
+  "failing_test_ids": [
+    "tests/test_websocket_audio.py::test_playback_timeout_clears_published_state",
+    "tests/test_websocket_audio.py::test_interrupted_percentage_starts_at_scheduled_play_time",
+    "tests/test_websocket_audio.py::test_close_releases_port_for_next_backend",
+    "tests/test_websocket_audio.py::test_speaker_acknowledgement_completes_track",
+    "tests/test_websocket_audio.py::test_startup_propagates_non_oserror",
+    "tests/test_websocket_audio.py::test_microphone_queue_drops_oldest_chunk",
+    "tests/test_websocket_audio.py::test_microphone_queue_size_must_be_positive",
+    "tests/test_websocket_audio.py::test_malformed_microphone_frame_is_ignored",
+    "tests/test_websocket_audio.py::test_default_mode_accepts_only_one_microphone",
+    "tests/test_websocket_audio.py::test_stop_start_releases_idle_microphone_owner"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

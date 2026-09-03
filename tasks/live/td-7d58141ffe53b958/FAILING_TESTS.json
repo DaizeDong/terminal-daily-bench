@@ -1,0 +1,24 @@
+{
+  "failing_test_ids": [
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_maps_exactly_the_three_audited_signals",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_absent_signals_emit_no_observation",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_a_null_signal_is_an_explicit_unavailable_reading",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_string_encoded_booleans_are_coerced",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_a_non_boolean_locked_emits_no_observation",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_a_partial_door_state_only_reports_trunk_front_when_present",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_a_malformed_door_state_is_ignored_rather_than_guessed",
+    "tests/test_funnel_stream.py::TestSignalTranslation::test_unaudited_signals_are_never_routed",
+    "tests/test_funnel_stream.py::TestSuppliedUpdateFunnelling::test_a_supplied_update_reaches_listeners",
+    "tests/test_funnel_stream.py::TestSuppliedUpdateFunnelling::test_a_repeated_update_is_not_re_dispatched",
+    "tests/test_funnel_stream.py::TestSuppliedUpdateFunnelling::test_a_partial_update_leaves_other_fields_untouched",
+    "tests/test_funnel_stream.py::TestSuppliedUpdateFunnelling::test_activation_subscribes_a_passive_source_to_nothing",
+    "tests/test_funnel_stream.py::TestSuppliedUpdateFunnelling::test_publishing_before_attach_translates_but_reaches_no_listener",
+    "tests/test_funnel_stream.py::TestPublisherCannotRequestData::test_it_exposes_no_coroutine_and_no_awaitable_member",
+    "tests/test_funnel_stream.py::TestPublisherCannotRequestData::test_it_holds_no_client_session_or_fetch_callable",
+    "tests/test_funnel_stream.py::TestPublisherCannotRequestData::test_it_yields_nothing_when_no_update_is_supplied",
+    "tests/test_funnel_stream.py::TestPublisherCannotRequestData::test_an_object_that_could_fetch_is_never_called",
+    "tests/test_funnel_stream.py::TestRegressionWalkthrough::test_streaming_and_bluetooth_both_reach_the_same_listeners"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

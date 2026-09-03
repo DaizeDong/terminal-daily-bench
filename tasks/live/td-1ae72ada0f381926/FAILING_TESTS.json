@@ -1,0 +1,22 @@
+{
+  "failing_test_ids": [
+    "tests/test_roc_features.py::test_rocplot_statistical_options_are_keyword_only",
+    "tests/test_roc_features.py::test_rocplot_defaults_remain_unchanged",
+    "tests/test_roc_features.py::test_bootstrap_roc_band_is_deterministic_and_rng_isolated",
+    "tests/test_roc_features.py::test_rocplot_draws_one_matching_band_per_curve",
+    "tests/test_roc_features.py::test_fast_delong_matches_tie_aware_reference",
+    "tests/test_roc_features.py::test_delong_handles_zero_variance_comparisons",
+    "tests/test_roc_features.py::test_delong_handles_floating_point_covariance_noise",
+    "tests/test_roc_features.py::test_delong_rejects_negative_contrast_variance",
+    "tests/test_roc_features.py::test_rocplot_runs_requested_delong_comparison",
+    "tests/test_roc_features.py::test_rocplot_resolves_all_pairs_and_applies_correction",
+    "tests/test_roc_features.py::test_rocplot_validates_comparison_pairs",
+    "tests/test_roc_features.py::test_rocplot_accepts_an_empty_pair_list",
+    "tests/test_roc_features.py::test_rocplot_validates_prediction_scores",
+    "tests/test_roc_features.py::test_rocplot_rejects_null_true_labels",
+    "tests/test_roc_features.py::test_rocplot_requires_two_observations_per_class_for_delong",
+    "tests/test_roc_features.py::test_rocplot_rejects_unknown_pvalue_correction"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

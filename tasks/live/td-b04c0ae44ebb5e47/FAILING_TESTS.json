@@ -1,0 +1,20 @@
+{
+  "failing_test_ids": [
+    "test/test_neutral_venue.py::test_omitted_none_and_zeros_fit_identically",
+    "test/test_neutral_venue.py::test_neutral_venue_changes_the_loss",
+    "test/test_neutral_venue.py::test_neutral_matches_contribute_zero_home_advantage_gradient",
+    "test/test_neutral_venue.py::test_all_neutral_fit_converges",
+    "test/test_neutral_venue.py::test_neutral_venue_length_mismatch_raises",
+    "test/test_neutral_venue.py::test_neutral_venue_non_binary_value_raises",
+    "test/test_neutral_venue.py::test_bayesian_logprob_responds_to_neutral_venue",
+    "test/test_neutral_venue.py::test_bayesian_omitted_none_and_zeros_equivalent",
+    "test/test_neutral_venue.py::test_bayesian_all_neutral_fit_converges",
+    "test/test_neutral_venue.py::test_predict_neutral_venue_drops_home_advantage",
+    "test/test_neutral_venue.py::test_predict_many_applies_per_fixture_neutral_venue",
+    "test/test_neutral_venue.py::test_all_neutral_fit_pins_home_advantage_to_zero",
+    "test/test_neutral_venue.py::test_bayesian_predict_neutral_venue_drops_home_advantage",
+    "test/test_neutral_venue.py::test_bayesian_all_neutral_prediction_ignores_home_advantage"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

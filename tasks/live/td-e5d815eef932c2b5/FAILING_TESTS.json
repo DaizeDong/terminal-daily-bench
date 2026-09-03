@@ -1,0 +1,30 @@
+{
+  "failing_test_ids": [
+    "tests/test_provider_resolution.py::TestProviderFallback::test_empty_cli_and_empty_settings_returns_gmail",
+    "tests/test_provider_resolution.py::TestProviderFallback::test_cli_flag_wins_over_settings",
+    "tests/test_provider_resolution.py::TestProviderFallback::test_persisted_gmail_returns_gmail",
+    "tests/test_provider_resolution.py::TestProviderFallback::test_persisted_imap_returns_imap",
+    "tests/test_provider_resolution.py::TestGmailIsolation::test_stale_imap_user_zeroed_for_gmail",
+    "tests/test_provider_resolution.py::TestGmailIsolation::test_imap_cli_flags_ignored_when_gmail_provider",
+    "tests/test_provider_resolution.py::TestGmailIsolation::test_no_imap_password_prompt_possible_when_gmail",
+    "tests/test_provider_resolution.py::TestImapResolution::test_imap_server_from_settings",
+    "tests/test_provider_resolution.py::TestImapResolution::test_cli_flag_overrides_persisted_server",
+    "tests/test_provider_resolution.py::TestImapResolution::test_custom_port_from_settings",
+    "tests/test_provider_resolution.py::TestImapResolution::test_cli_port_overrides_settings_when_nondefault",
+    "tests/test_provider_resolution.py::TestImapResolution::test_custom_folder_from_settings",
+    "tests/test_provider_resolution.py::TestProviderSwitching::test_switch_imap_to_gmail_clears_imap_user",
+    "tests/test_provider_resolution.py::TestProviderSwitching::test_switch_gmail_to_imap_returns_imap",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_gmail_shows_provider_gmail",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_gmail_no_imap_detail",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_imap_shows_provider_imap",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_imap_shows_server_name",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_imap_no_server_omits_server_detail",
+    "tests/test_provider_resolution.py::TestProviderIndicatorOutput::test_output_is_single_line",
+    "tests/test_provider_resolution.py::TestProviderIndicatorInCommands::test_stats_shows_gmail_provider_line",
+    "tests/test_provider_resolution.py::TestProviderIndicatorInCommands::test_stats_shows_imap_provider_line",
+    "tests/test_provider_resolution.py::TestProviderIndicatorInCommands::test_purge_shows_gmail_provider_line",
+    "tests/test_provider_resolution.py::TestProviderIndicatorInCommands::test_quickstart_shows_gmail_provider_line"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

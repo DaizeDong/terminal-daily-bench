@@ -1,0 +1,31 @@
+{
+  "failing_test_ids": [
+    "tests/coverage/test_core_multimodal_coverage.py::test_image_url_to_base64_does_not_cache_payloads",
+    "tests/coverage/test_openai_support_coverage.py::test_openai_multimodal_encoders_cover_response_and_error_paths",
+    "tests/v2/test_genai_multimodal_runtime.py::test_image_to_genai_fetches_url_bytes",
+    "tests/v2/test_genai_multimodal_runtime.py::test_pdf_to_genai_handles_remote_and_inline_data",
+    "tests/v2/test_remote_fetch.py::test_rejects_loopback_before_connecting",
+    "tests/v2/test_remote_fetch.py::test_rejects_hostname_resolving_to_private_address",
+    "tests/v2/test_remote_fetch.py::test_rejects_redirect_to_private_address",
+    "tests/v2/test_remote_fetch.py::test_rejects_private_connected_peer_after_public_dns",
+    "tests/v2/test_remote_fetch.py::test_rejects_unverifiable_connected_peer",
+    "tests/v2/test_remote_fetch.py::test_rejects_oversized_declared_length",
+    "tests/v2/test_remote_fetch.py::test_rejects_oversized_streamed_body",
+    "tests/v2/test_remote_fetch.py::test_returns_bounded_content_and_normalized_media_type",
+    "tests/v2/test_remote_fetch.py::test_session_ignores_ambient_proxy_and_credentials",
+    "tests/v2/test_remote_fetch.py::test_rejects_malformed_or_credentialed_urls",
+    "tests/v2/test_remote_fetch.py::test_accepts_public_literal_address",
+    "tests/v2/test_remote_fetch.py::test_rejects_invalid_address_value",
+    "tests/v2/test_remote_fetch.py::test_rejects_unresolvable_hostname",
+    "tests/v2/test_remote_fetch.py::test_follows_safe_redirect_and_closes_intermediate_response",
+    "tests/v2/test_remote_fetch.py::test_rejects_redirect_without_location",
+    "tests/v2/test_remote_fetch.py::test_rejects_too_many_redirects",
+    "tests/v2/test_remote_fetch.py::test_probes_content_type_and_closes_resources",
+    "tests/v2/test_remote_fetch.py::test_probe_closes_session_when_url_validation_fails",
+    "tests/v2/test_remote_fetch.py::test_rejects_invalid_declared_length",
+    "tests/v2/test_remote_fetch.py::test_ignores_empty_stream_chunks_and_missing_content_type",
+    "tests/v2/test_remote_fetch.py::test_rejects_nonpositive_download_limit"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
