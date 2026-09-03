@@ -2,7 +2,7 @@
  "date": "2026-09-03",
  "n_tasks": 385,
  "n_models": 32,
- "n_cells": 24890,
+ "n_cells": 25241,
  "total_fa": null,
  "total_fa_n": 0,
  "cost_measured": false,
@@ -399,20 +399,20 @@
    "solved": 1622
   },
   "single_shot@high": {
-   "n": 3655,
-   "solved": 747
+   "n": 3760,
+   "solved": 770
   },
   "single_shot@low": {
    "n": 4052,
    "solved": 748
   },
   "single_shot@medium": {
-   "n": 3917,
-   "solved": 774
+   "n": 3969,
+   "solved": 779
   },
   "single_shot@xhigh": {
-   "n": 1982,
-   "solved": 425
+   "n": 2176,
+   "solved": 461
   }
  },
  "leaderboard": [
@@ -426,23 +426,23 @@
     "fa_n": 0
    },
    "single_shot@medium": {
-    "n": 288,
-    "solved": 71,
-    "rate": 0.247,
+    "n": 329,
+    "solved": 76,
+    "rate": 0.231,
     "fa": null,
     "fa_n": 0
    },
    "single_shot@high": {
-    "n": 100,
-    "solved": 41,
-    "rate": 0.41,
+    "n": 189,
+    "solved": 64,
+    "rate": 0.339,
     "fa": null,
     "fa_n": 0
    },
    "single_shot@xhigh": {
-    "n": 29,
-    "solved": 15,
-    "rate": 0.517,
+    "n": 82,
+    "solved": 41,
+    "rate": 0.5,
     "fa": null,
     "fa_n": 0
    },
@@ -479,47 +479,9 @@
     "fa_n": 0
    },
    "single_shot@xhigh": {
-    "n": 207,
-    "solved": 66,
-    "rate": 0.319,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "gpt-5.5",
-   "single_shot": {
-    "n": 364,
-    "solved": 74,
-    "rate": 0.203,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@low": {
-    "n": 372,
-    "solved": 70,
-    "rate": 0.188,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@medium": {
-    "n": 372,
-    "solved": 71,
-    "rate": 0.191,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@high": {
-    "n": 372,
-    "solved": 74,
-    "rate": 0.199,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@xhigh": {
-    "n": 306,
-    "solved": 80,
-    "rate": 0.261,
+    "n": 281,
+    "solved": 72,
+    "rate": 0.256,
     "fa": null,
     "fa_n": 0
    }
@@ -530,6 +492,26 @@
     "n": 364,
     "solved": 93,
     "rate": 0.255,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Sonnet-5",
+   "single_shot": {
+    "n": 364,
+    "solved": 88,
+    "rate": 0.242,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.8",
+   "single_shot": {
+    "n": 364,
+    "solved": 86,
+    "rate": 0.236,
     "fa": null,
     "fa_n": 0
    }
@@ -551,35 +533,15 @@
     "fa_n": 0
    },
    "single_shot@medium": {
-    "n": 295,
+    "n": 306,
     "solved": 68,
-    "rate": 0.231,
+    "rate": 0.222,
     "fa": null,
     "fa_n": 0
    },
    "single_shot@high": {
-    "n": 247,
+    "n": 263,
     "solved": 62,
-    "rate": 0.251,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "Claude-Sonnet-5",
-   "single_shot": {
-    "n": 364,
-    "solved": 88,
-    "rate": 0.242,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "Claude-Opus-4.8",
-   "single_shot": {
-    "n": 364,
-    "solved": 86,
     "rate": 0.236,
     "fa": null,
     "fa_n": 0
@@ -619,6 +581,44 @@
     "n": 362,
     "solved": 80,
     "rate": 0.221,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.5",
+   "single_shot": {
+    "n": 364,
+    "solved": 74,
+    "rate": 0.203,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@low": {
+    "n": 372,
+    "solved": 70,
+    "rate": 0.188,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@medium": {
+    "n": 372,
+    "solved": 71,
+    "rate": 0.191,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@high": {
+    "n": 372,
+    "solved": 74,
+    "rate": 0.199,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@xhigh": {
+    "n": 356,
+    "solved": 82,
+    "rate": 0.23,
     "fa": null,
     "fa_n": 0
    }
@@ -733,6 +733,37 @@
    }
   },
   {
+   "model": "gpt-5",
+   "single_shot": {
+    "n": 364,
+    "solved": 67,
+    "rate": 0.184,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@low": {
+    "n": 372,
+    "solved": 72,
+    "rate": 0.194,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@medium": {
+    "n": 372,
+    "solved": 73,
+    "rate": 0.196,
+    "fa": null,
+    "fa_n": 0
+   },
+   "single_shot@high": {
+    "n": 364,
+    "solved": 70,
+    "rate": 0.192,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
    "model": "gpt-5.6-luna",
    "single_shot": {
     "n": 364,
@@ -763,40 +794,9 @@
     "fa_n": 0
    },
    "single_shot@xhigh": {
-    "n": 352,
-    "solved": 70,
-    "rate": 0.199,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "gpt-5",
-   "single_shot": {
-    "n": 364,
-    "solved": 67,
-    "rate": 0.184,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@low": {
-    "n": 372,
+    "n": 368,
     "solved": 72,
-    "rate": 0.194,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@medium": {
-    "n": 372,
-    "solved": 73,
     "rate": 0.196,
-    "fa": null,
-    "fa_n": 0
-   },
-   "single_shot@high": {
-    "n": 364,
-    "solved": 70,
-    "rate": 0.192,
     "fa": null,
     "fa_n": 0
    }
@@ -883,7 +883,7 @@
     "fa_n": 0
    },
    "single_shot@xhigh": {
-    "n": 371,
+    "n": 372,
     "solved": 35,
     "rate": 0.094,
     "fa": null,
@@ -12861,7 +12861,7 @@
    "bottleneck": "discrimination",
    "required_n_D": 364,
    "complete_case": {
-    "unattempted_cells": 437,
+    "unattempted_cells": 332,
     "tasks_dropped": 0,
     "models_dropped": 7
    }
@@ -12905,7 +12905,7 @@
    "bottleneck": "discrimination",
    "required_n_D": 171,
    "complete_case": {
-    "unattempted_cells": 175,
+    "unattempted_cells": 123,
     "tasks_dropped": 0,
     "models_dropped": 5
    }
