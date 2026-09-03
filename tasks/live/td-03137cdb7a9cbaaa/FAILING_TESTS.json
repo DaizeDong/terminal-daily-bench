@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/tests_no_backend.py::BenchToolTests::test_percentile_nearest_rank",
+    "tests/tests_no_backend.py::BenchToolTests::test_time_callable_runs_warmup_plus_iterations",
+    "tests/tests_no_backend.py::BenchToolTests::test_time_callable_rejects_out_of_range_counts",
+    "tests/tests_no_backend.py::BenchToolTests::test_top_service_scenario_materialises_topvalues",
+    "tests/tests_no_backend.py::BenchToolTests::test_detect_backend_normalises_scheme",
+    "tests/tests_no_backend.py::BenchToolTests::test_list_prints_scenarios",
+    "tests/tests_no_backend.py::BenchToolTests::test_unknown_scenario_is_rejected",
+    "tests/tests_no_backend.py::BenchToolTests::test_non_positive_iterations_rejected",
+    "tests/tests_no_backend.py::BenchToolTests::test_main_emits_json_report"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

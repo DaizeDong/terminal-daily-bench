@@ -1,0 +1,16 @@
+{
+  "failing_test_ids": [
+    "tests/test_errors.py::test_find_stack_level_stops_as_soon_as_it_leaves_marsilea",
+    "tests/test_errors.py::test_a_sibling_package_is_not_marsilea",
+    "tests/test_errors.py::test_a_warning_blames_the_line_that_asked_for_it",
+    "tests/test_sources.py::test_a_zero_board_binds_a_source_like_any_other",
+    "tests/test_sources.py::test_a_zero_cluster_board_takes_a_ref_as_its_cluster_data",
+    "tests/test_sources.py::test_a_zero_board_resolves_refs_on_its_side_plots",
+    "tests/test_stats_annotation.py::test_padding_is_not_an_observation",
+    "tests/test_stats_annotation.py::test_a_group_with_nothing_in_it_is_reported",
+    "tests/test_stats_annotation.py::test_a_label_left_blank_on_purpose_is_not_a_missing_p_value",
+    "tests/test_stats_annotation.py::test_ordinary_data_reports_nothing"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

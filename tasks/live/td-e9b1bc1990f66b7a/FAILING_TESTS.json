@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "tests/integration/test_audit_hardening.py::TestVerificationQueries::test_check_blocked_ip_uses_structured_filters",
+    "tests/integration/test_audit_hardening.py::TestVerificationQueries::test_check_process_queries_specific_pid",
+    "tests/integration/test_audit_hardening.py::TestVerificationQueries::test_check_file_quarantine_no_substring_false_positive",
+    "tests/integration/test_audit_hardening.py::TestScaScore::test_na_checks_excluded_from_denominator",
+    "tests/integration/test_audit_hardening.py::TestThreatScoreRanking::test_targeted_high_severity_outranks_chatty_low"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

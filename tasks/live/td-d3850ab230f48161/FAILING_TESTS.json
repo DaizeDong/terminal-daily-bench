@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "deeptutor/learning/tests/test_mastery_choices.py::test_readable_choice_answer_requires_selection_intent_not_a_label_mention",
+    "deeptutor/learning/tests/test_mastery_tools.py::test_grade_recovers_unreadable_choice_answer",
+    "tests/capabilities/test_mastery_capability.py::test_choice_clarifying_composer_text_does_not_commit_answer",
+    "tests/capabilities/test_mastery_capability.py::test_choice_composer_option_label_still_commits"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

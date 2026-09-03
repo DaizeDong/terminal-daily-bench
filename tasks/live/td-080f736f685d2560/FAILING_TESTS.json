@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "tests/test_rc_llm.py::test_retry_reraises_original_http_error_when_exhausted",
+    "tests/test_rc_llm.py::test_preflight_reports_rate_limit_through_retry_path",
+    "tests/test_rc_llm.py::test_retry_does_not_sleep_after_final_attempt",
+    "tests/test_rc_llm.py::test_retry_backoff_is_capped_for_os_errors",
+    "tests/test_rc_llm.py::test_retry_reraises_original_url_error_when_exhausted"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

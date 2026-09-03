@@ -1,0 +1,25 @@
+{
+  "failing_test_ids": [
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_rejects_a_log_likelihood_above_the_ceiling",
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_passes_a_log_likelihood_below_the_ceiling",
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_still_rejects_non_finite_log_likelihoods",
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_sentinel_maps_to_itself",
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_with_the_ceiling_disabled_passes_any_finite_value",
+    "test_autofit/non_linear/search/nest/nss/test_log_likelihood_ceiling.py::test_nss_closure_defaults_to_the_configured_ceiling",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_ceiling_defaults_to_the_configured_value",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_rejects_log_likelihoods_above_the_ceiling",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_passes_log_likelihoods_below_the_ceiling",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_ceiling_disabled_passes_any_finite_value",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_ceiling_leaves_the_nan_and_inf_guards_intact",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_fitness_ceiling_is_idempotent_against_a_finite_resample_sentinel",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_get_log_likelihood_ceiling_reads_the_config",
+    "test_autofit/non_linear/test_fitness_assertions.py::test_get_log_likelihood_ceiling_falls_back_when_the_key_is_absent",
+    "test_autofit/non_linear/test_fitness_ceiling_jax.py::test_jit_path_rejects_a_log_likelihood_above_the_ceiling",
+    "test_autofit/non_linear/test_fitness_ceiling_jax.py::test_jit_path_passes_a_log_likelihood_below_the_ceiling",
+    "test_autofit/non_linear/test_fitness_ceiling_jax.py::test_vmap_path_rejects_a_log_likelihood_above_the_ceiling",
+    "test_autofit/non_linear/test_fitness_ceiling_jax.py::test_vmap_path_passes_a_log_likelihood_below_the_ceiling",
+    "test_autofit/non_linear/test_fitness_ceiling_jax.py::test_disabled_ceiling_traces_and_passes_any_finite_value"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

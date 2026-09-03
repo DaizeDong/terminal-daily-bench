@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "cayleypy/models/models_test.py::test_build_mlp_model",
+    "cayleypy/models/models_test.py::test_build_mlp_model_with_multiple_outputs",
+    "cayleypy/models/models_test.py::test_mlp_state_dict_is_backward_compatible",
+    "cayleypy/models/models_test.py::test_build_resmlp_model",
+    "cayleypy/models/models_test.py::test_build_resmlp_model_with_multiple_outputs",
+    "cayleypy/models/models_test.py::test_resmlp_has_skip_connections",
+    "cayleypy/models/models_test.py::test_models_are_invariant_to_batch_size",
+    "cayleypy/models/models_test.py::test_checkpoint_round_trip",
+    "cayleypy/models/models_test.py::test_build_model_with_non_positive_n_outputs",
+    "cayleypy/models/models_test.py::test_build_resmlp_model_without_blocks",
+    "cayleypy/predictor_test.py::test_score_children_uses_q_model",
+    "cayleypy/predictor_test.py::test_score_children_by_q_model_with_batching",
+    "cayleypy/predictor_test.py::test_score_children_rejects_wrong_number_of_outputs",
+    "cayleypy/predictor_test.py::test_score_children_with_q_model_from_config",
+    "cayleypy/predictor_test.py::test_score_children_rejects_wrong_output_shape"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

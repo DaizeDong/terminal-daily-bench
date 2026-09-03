@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/test_python/integration/test_pygame_integration.py::test_sync_ignores_sprites_that_are_not_group_members",
+    "tests/test_python/integration/test_pygame_integration.py::test_inferred_bounds_growth_set_bounds_rebuild_and_query",
+    "tests/test_python/integration/test_pygame_integration.py::test_group_exposes_sprite_spatial_query_api",
+    "tests/test_python/integration/test_pygame_integration.py::test_query_rect_warns_for_3_0_deprecation",
+    "tests/test_python/integration/test_pygame_integration.py::test_integer_dtype_inferred_and_expanded_bounds_stay_integer",
+    "tests/test_python/integration/test_pygame_integration.py::test_invalid_constructor_and_query_inputs_are_handled",
+    "tests/test_python/integration/test_pygame_integration.py::test_internal_edge_paths_keep_public_behavior_stable",
+    "tests/test_python/rects/test_rect_quadtree_core.py::test_contains_robust",
+    "tests/test_python/rects_objects/test_rect_quadtree_objects_core.py::test_contains_robust"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

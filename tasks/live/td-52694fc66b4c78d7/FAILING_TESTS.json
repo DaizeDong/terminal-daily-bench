@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/test_fit.py::test_fit_gp_regression",
+    "tests/test_fit.py::test_fit_lbfgs_gp_regression",
+    "tests/test_fit.py::test_fitters_hold_frozen_parameter_constant",
+    "tests/test_fit.py::test_fit_batch",
+    "tests/test_fit.py::test_fit_natgrads_holds_frozen_hyperparameter_constant",
+    "tests/test_fit.py::test_fit_freeze_kernel_variance",
+    "tests/test_fit.py::test_fit_zero_mean_function_is_frozen_by_default",
+    "tests/test_fit.py::test_fit_constant_mean_function_with_parameter",
+    "tests/test_fit.py::test_fit_constant_mean_function_frozen_with_non_trainable",
+    "tests/test_fit.py::test_fit_freeze_by_non_trainable",
+    "tests/test_gps.py::test_frozen_parameter_predicts_without_explicit_unwrap",
+    "tests/test_parameters.py::test_val_unwraps_nested_wrappers"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

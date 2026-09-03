@@ -1,0 +1,22 @@
+{
+  "failing_test_ids": [
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__no_arguments__returns_none",
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__vmin_vmax__returns_linear_norm",
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__use_log10__returns_log_norm_with_explicit_limits",
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__use_log10__vmax_derived_from_array",
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__use_log10__degenerate_range_is_widened",
+    "test_autogalaxy/gui/test_plot_norm.py::TestNormFrom::test__use_log10__all_nan_array_still_yields_finite_limits",
+    "test_autogalaxy/gui/test_plot_norm.py::TestPublicNamespace::test__gui_classes_are_exported_once",
+    "test_autogalaxy/gui/test_plot_norm.py::TestPublicNamespace::test__scribbler_accepts_flat_colour_arguments",
+    "test_autogalaxy/gui/test_plot_norm.py::TestPublicNamespace::test__cmap_is_absent_from_every_public_plot_namespace",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestMaskEdge::test__none_returns_none",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestMaskEdge::test__fully_unmasked_returns_none",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestMaskEdge::test__mask2d_returns_edge_coordinates",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestMaskEdge::test__raw_coordinates_pass_through",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestPlotArrayMaskOverlay::test__unmasked_array_derives_no_overlay",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestPlotArrayMaskOverlay::test__explicit_mask_changes_the_rendered_figure",
+    "test_autogalaxy/plot/test_plot_array_mask.py::TestPlotArrayMaskOverlay::test__mask_is_optional"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

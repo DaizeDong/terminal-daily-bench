@@ -1,0 +1,8 @@
+{
+  "failing_test_ids": [
+    "tests/test_mcp_mirror.py::test_withhold_fires_on_observe_mode_result_injection",
+    "tests/test_mcp_mirror.py::test_withheld_result_does_not_echo_the_injection_evidence"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

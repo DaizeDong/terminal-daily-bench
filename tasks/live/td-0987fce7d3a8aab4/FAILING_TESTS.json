@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/unit/test_proxy_http_bridge.py::test_http_bridge_precreated_usage_limit_defers_keyed_health_until_settlement",
+    "tests/unit/test_proxy_http_bridge.py::test_http_bridge_model_capacity_retry_defers_keyed_health",
+    "tests/unit/test_proxy_http_bridge.py::test_release_reservation_drains_deferred_keyed_health_after_release",
+    "tests/unit/test_proxy_http_bridge.py::test_release_reservation_leaves_deferred_health_unapplied_when_release_fails",
+    "tests/unit/test_proxy_http_bridge.py::test_release_reservation_drains_deferred_health_when_backoff_drain_fails",
+    "tests/unit/test_proxy_http_bridge.py::test_drain_deferred_keyed_health_drains_full_queue_under_cancellation",
+    "tests/unit/test_proxy_http_bridge.py::test_drain_deferred_keyed_health_drops_failed_write_and_continues",
+    "tests/unit/test_proxy_http_bridge.py::test_finalize_waits_for_settlement_when_keyed_health_penalties_are_queued",
+    "tests/unit/test_proxy_http_bridge.py::test_concurrent_drains_apply_each_deferred_penalty_exactly_once"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

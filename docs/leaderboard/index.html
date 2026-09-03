@@ -52,6 +52,22 @@
         </div>
       </section>
 
+      <section class="flex flex-col py-12" id="daily-history-section" hidden>
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <p class="font-mono text-sm">daily suite history</p>
+          <p class="text-muted-foreground font-mono text-xs">one immutable file per published day; a day is a measurement unless it says otherwise</p>
+        </div>
+        <div class="bg-card -mx-4 border-y font-mono md:mx-0 md:border-x">
+          <div data-slot="table-container" class="relative w-full overflow-x-auto">
+            <table data-slot="table" class="w-full caption-bottom text-sm [&amp;_tr>td:first-child]:pl-6 [&amp;_tr>td:last-child]:pr-6 [&amp;_tr>th:first-child]:pl-6 [&amp;_tr>th:last-child]:pr-6">
+              <thead data-slot="table-header" class="[&amp;_tr]:border-b" id="history-head"></thead>
+              <tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0" id="history-body"></tbody>
+            </table>
+          </div>
+          <div class="text-muted-foreground border-t px-6 py-4 text-center font-mono text-sm" id="history-foot"></div>
+        </div>
+      </section>
+
       <section class="flex flex-col py-12">
         <div class="mb-4 flex flex-col items-center gap-2">
           <p class="font-mono text-sm">coverage and status audit</p>
@@ -252,6 +268,75 @@
     }).join("");
   }
 
+  // ---- daily history -----------------------------------------------------
+  // `td board` writes one sealed file per day under docs/data/days/ plus an
+  // index derived from that directory. Until now nothing on the site read
+  // either of them, so a benchmark whose whole premise is a daily rotation
+  // published its history to a path with no reader. This renders it, and stays
+  // silent (section hidden) when no day has been published yet -- an empty
+  // table announcing a feature nobody has data for is worse than no table.
+  function pct(n, d) {
+    if (!d) { return "&ndash;"; }
+    return (100 * n / d).toFixed(1) + "%";
+  }
+
+  function renderHistory(index, days) {
+    var rows = days.filter(Boolean);
+    if (!rows.length) { return; }
+    document.getElementById("daily-history-section").removeAttribute("hidden");
+    document.getElementById("history-head").innerHTML =
+      '<tr data-slot="table-row" class="border-b">' +
+      ["date", "suite", "tasks", "models", "cells", "solved", "standing"].map(function (h, i) {
+        return '<th data-slot="table-head" class="text-muted-foreground h-10 px-2 py-2 font-normal' +
+          (i >= 2 && i <= 5 ? " text-right" : "") + '">' + h + "</th>";
+      }).join("") + "</tr>";
+
+    var body = document.getElementById("history-body");
+    body.innerHTML = "";
+    rows.forEach(function (day) {
+      var pooled = day.pooled || {};
+      var n = 0, solved = 0;
+      Object.keys(pooled).forEach(function (scaffold) {
+        var p = pooled[scaffold] || {};
+        n += p.n || 0;
+        solved += p.solved || 0;
+      });
+      var suiteId = (day.suite && day.suite.id) || day.date;
+      var tr = document.createElement("tr");
+      tr.setAttribute("data-slot", "table-row");
+      tr.className = "border-b";
+      var cells = [
+        '<p class="font-mono">' + day.date + "</p>",
+        '<p class="font-mono"><a class="underline" href="../benchmarks/' +
+          encodeURIComponent(suiteId) + '/">' + suiteId + "</a></p>",
+        '<p class="text-right tabular-nums">' + (day.n_tasks || 0) + "</p>",
+        '<p class="text-right tabular-nums">' + (day.n_models || 0) + "</p>",
+        '<p class="text-right tabular-nums">' + (day.n_cells || 0) + "</p>",
+        '<p class="text-right tabular-nums">' + pct(solved, n) + "</p>",
+        day.official_ranking
+          ? '<span data-slot="badge">official ranking</span>'
+          : '<span data-slot="badge" data-variant="outline">measurement</span>'
+      ];
+      tr.innerHTML = cells.map(function (c) {
+        return '<td data-slot="table-cell" class="p-2 align-middle">' + c + "</td>";
+      }).join("");
+      body.appendChild(tr);
+    });
+
+    var total = (index && index.days && index.days.length) || rows.length;
+    document.getElementById("history-foot").textContent =
+      "showing " + rows.length + " of " + total + " published day(s); newest first";
+  }
+
+  function loadHistory() {
+    return T.getJSON("../data/index.json").then(function (index) {
+      var days = ((index && index.days) || []).slice(0, 14);
+      return Promise.all(days.map(function (d) {
+        return T.getJSON("../data/days/" + d + ".json").catch(function () { return null; });
+      })).then(function (loaded) { renderHistory(index, loaded); });
+    }).catch(function () { /* no history published yet -- section stays hidden */ });
+  }
+
   Promise.all([
     T.getJSON("../site_data.json").catch(function () { return null; }),
     T.getJSON("../leaderboard_data.json").catch(function () { return null; })
@@ -262,6 +347,7 @@
     renderRatings(report, documentData, (site && site.scoring) || {});
     renderAudit(report);
   });
+  loadHistory();
 })();
 </script>
 </body>

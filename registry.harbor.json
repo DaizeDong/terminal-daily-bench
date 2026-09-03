@@ -1,0 +1,20 @@
+[
+  {
+    "name": "terminal-daily-bench",
+    "version": "2026-09-03",
+    "description": "terminal-daily 2026-09-03 suite (live); 2 task(s). Task paths are relative to the directory containing this file.",
+    "tasks": [
+      {
+        "name": "td-b51974b086ab9ae5",
+        "path": "tasks/live/td-b51974b086ab9ae5",
+        "digest": "sha256:4fa77e5ec7a123aa087b6dfd301a77358dcd12f3af585d115a7aedc163b5b027"
+      },
+      {
+        "name": "td-fc90ea8b76d5f6b6",
+        "path": "tasks/archive/td-fc90ea8b76d5f6b6",
+        "digest": "sha256:1f8500ea70929f76aa1633218d9e054bafc73a59eb7a1366c56907fa488273e9"
+      }
+    ],
+    "metrics": []
+  }
+]

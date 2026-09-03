@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_calendar.py::test_get_events_fetches_comments_and_images_from_one_activity_request",
+    "tests/test_calendar.py::test_download_image_uses_timeout_and_warns_on_timeout",
+    "tests/test_main.py::test_exporter_writes_event_images_and_manifest",
+    "tests/test_main.py::test_exporter_skips_existing_event_images",
+    "tests/test_main.py::test_image_path_escapes_windows_separators",
+    "tests/test_main.py::test_image_path_escapes_windows_reserved_names_and_characters",
+    "tests/test_main.py::test_image_path_still_rejects_forward_slash_traversal"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

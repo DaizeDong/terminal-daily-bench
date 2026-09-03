@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_enterprise_simulation.py::TestDictSchemaOutcomeCurves::test_absolute_curve_hits_targets_exactly",
+    "tests/test_enterprise_simulation.py::TestDictSchemaOutcomeCurves::test_invalid_curve_fails_at_compile_time",
+    "tests/test_enterprise_simulation.py::TestDictSchemaOutcomeCurves::test_directive_keys_are_not_tables"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,46 @@
+schema_version = "1.1"
+artifacts = []
+
+[task]
+name = "terminal-daily/td-721c47ae86f458ad"
+description = "Fix code for symmetries augmentation"
+keywords = ["build-tools", "compilation", "data-processing", "machine-learning", "refactoring", "software-engineering", "testing"]
+[[task.authors]]
+name = "terminal-daily"
+email = "terminal-daily@localhost.invalid"
+
+[metadata]
+author_name = "terminal-daily"
+author_email = "terminal-daily@localhost.invalid"
+category = "machine-learning"
+tags = ["build-tools", "compilation", "data-processing", "machine-learning", "refactoring", "software-engineering", "testing"]
+expert_time_estimate_min = 180.0
+junior_time_estimate_min = 480.0
+capability_labels = ["C2", "C4", "C5", "C6", "C13"]
+source_repo = "gbionics/amp-rsl-rl"
+created_at = "2026-05-25T08:49:50Z"
+source_license_spdx = ""
+difficulty = "hard"
+track = "merged"
+network_profile = "build-online/run-offline"
+
+[verifier]
+timeout_sec = 900.0
+
+[agent]
+timeout_sec = 3600.0
+
+[environment]
+build_timeout_sec = 1200.0
+docker_image = "environment/Dockerfile"  # build from the task Dockerfile
+cpus = 1
+memory_mb = 4096
+storage_mb = 16384
+gpus = 0
+network_mode = "no-network"
+allow_internet = false
+mcp_servers = []
+
+[verifier.env]
+[environment.env]
+[solution.env]

@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_customization_parameters_are_keyword_only",
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_uses_configurable_overlap",
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_overlays_observed_hues_and_forwards_fill_kwargs",
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_fill_kwargs_override_default_color",
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_rejects_invalid_overlap_before_kde",
+    "tests/test_ridgeplot_defects.py::test_ridgeplot_rejects_invalid_hue_groups_before_kde"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_categories.py::test_load_categories_probes_undeclared_provider",
+    "tests/test_categories.py::test_load_categories_translates_http_error",
+    "tests/test_categories.py::test_catalog_agency_falls_back_to_wildcard"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

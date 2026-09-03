@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "test_autofit/non_linear/result/test_result.py::TestResultInstanceRejectedBestPoint::test__summary_still_raises_on_a_rejected_best_point",
+    "test_autofit/non_linear/result/test_result.py::TestResultInstanceRejectedBestPoint::test__result_instance__falls_back_to_the_best_valid_sample",
+    "test_autofit/non_linear/result/test_result.py::TestResultInstanceRejectedBestPoint::test__result_instance__is_none_when_there_are_no_samples_to_recover_from",
+    "test_autofit/non_linear/result/test_result.py::TestResultInstanceRejectedBestPoint::test__result_instance__recovered_instance_is_computed_once",
+    "test_autofit/non_linear/search/test_updater.py::test__save_samples__persists_samples_when_the_best_point_is_rejected",
+    "test_autofit/non_linear/search/test_updater.py::test__save_samples__weight_threshold_prune_runs_when_the_best_point_is_rejected",
+    "test_autofit/non_linear/search/test_updater.py::test__save_samples__writes_samples_csv_when_the_best_point_is_rejected"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

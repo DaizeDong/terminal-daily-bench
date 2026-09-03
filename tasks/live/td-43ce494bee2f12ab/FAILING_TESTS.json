@@ -1,0 +1,28 @@
+{
+  "failing_test_ids": [
+    "test/test_params_api.py::TestParamsArrayProperty::test_params_array_returns_copy",
+    "test/test_params_api.py::TestParamsArrayProperty::test_params_array_modification_does_not_affect_model",
+    "test/test_params_api.py::TestParamsArrayProperty::test_params_array_raises_when_not_fitted",
+    "test/test_params_api.py::TestParamsArrayProperty::test_params_array_length_matches_n_params",
+    "test/test_params_api.py::TestParamIndicesMethod::test_param_indices_contains_attack_defense_slices",
+    "test/test_params_api.py::TestParamIndicesMethod::test_param_indices_slices_are_correct",
+    "test/test_params_api.py::TestParamIndicesMethod::test_param_indices_raises_when_not_fitted",
+    "test/test_params_api.py::TestPoissonParamIndices::test_poisson_tail_indices",
+    "test/test_params_api.py::TestDixonColesParamIndices::test_dixon_coles_tail_indices",
+    "test/test_params_api.py::TestNegativeBinomialParamIndices::test_negative_binomial_tail_indices",
+    "test/test_params_api.py::TestZeroInflatedPoissonParamIndices::test_zip_tail_indices",
+    "test/test_params_api.py::TestBivariateParamIndices::test_bivariate_tail_indices",
+    "test/test_params_api.py::TestWeibullCopulaParamIndices::test_weibull_copula_tail_indices",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_poisson_indices_match_param_names",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_dixon_coles_indices_match_param_names",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_negative_binomial_indices_match_param_names",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_zip_indices_match_param_names",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_bivariate_indices_match_param_names",
+    "test/test_params_api.py::TestParamIndicesConsistency::test_weibull_copula_indices_match_param_names",
+    "test/test_params_api.py::TestParamsArrayIntegration::test_extract_team_parameters_with_indices",
+    "test/test_params_api.py::TestParamsArrayIntegration::test_apply_factor_to_parameters",
+    "test/test_params_api.py::TestParamsArrayIntegration::test_consistent_indices_across_fits"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

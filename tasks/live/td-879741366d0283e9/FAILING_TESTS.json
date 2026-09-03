@@ -1,0 +1,16 @@
+{
+  "failing_test_ids": [
+    "tests/math/combinatorics/test_difference_set_models.py::test_singleton_sidon_has_empty_complete_ledger",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_admits_complete_profile_for_first_69_squares",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_byte_formula_matches_compact_json_for_a_false_decision",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_parser_ceiling_is_derived_from_minimum_payload_per_cardinality",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_translated_interval_reaches_result_sensitive_admission",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_nonnegative_interval_at_the_ceiling_is_rejected_by_bytes",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_zero_through_256_reaches_result_sensitive_admission",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_kernel_reuses_admitted_difference_wires",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_rejects_profile_exceeding_canonical_output_bound",
+    "tests/math/combinatorics/test_difference_set_models.py::test_sidon_result_rejects_forged_difference_and_decision"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

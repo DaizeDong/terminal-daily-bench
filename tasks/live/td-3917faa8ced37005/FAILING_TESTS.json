@@ -1,0 +1,13 @@
+{
+  "failing_test_ids": [
+    "tests/test_bytes_acc_accounting.py::test_sub_write_buffer_transfer_counts_each_byte_once",
+    "tests/test_bytes_acc_accounting.py::test_multi_buffer_transfer_counts_each_byte_once",
+    "tests/test_bytes_acc_accounting.py::test_exact_multiple_of_write_buffer_leaves_no_tail",
+    "tests/test_bytes_acc_accounting.py::test_one_entry_per_received_chunk",
+    "tests/test_bytes_acc_accounting.py::test_entry_timestamps_stay_within_the_transfer",
+    "tests/test_bytes_acc_accounting.py::test_aborted_transfer_records_only_what_it_received",
+    "tests/test_bytes_acc_accounting.py::test_small_transfers_are_never_double_counted"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

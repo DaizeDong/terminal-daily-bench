@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_pytest_plugin.py::test_pytest_ignore_collect_abstains_on_non_vcs_path",
+    "tests/test_pytest_plugin.py::test_pytest_ignore_collect_ignores_missing_vcs",
+    "tests/test_pytest_plugin.py::test_pytest_ignore_collect_abstains_when_binaries_present"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

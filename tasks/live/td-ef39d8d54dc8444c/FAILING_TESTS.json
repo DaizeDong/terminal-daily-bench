@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "test/activation_based/test_learning.py::test_stdp_learner_matches_functional_update",
+    "test/activation_based/test_learning.py::test_learners_validate_monitor_record_counts",
+    "test/activation_based/test_learning.py::test_mstdp_learners_return_detached_delta_w",
+    "test/activation_based/test_monitor.py::test_monitor_context_closes_hooks_and_preserves_records",
+    "test/activation_based/test_monitor.py::test_input_monitor_records_before_forward",
+    "test/activation_based/test_monitor.py::test_gpu_monitor_stop_interrupts_interval",
+    "test/activation_based/test_monitor.py::test_gpu_monitor_writes_scalars_and_closes_writer",
+    "test/activation_based/test_monitor.py::test_gpu_monitor_stops_on_error",
+    "test/activation_based/test_monitor.py::test_gpu_monitor_validates_configuration_and_stopped_start"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

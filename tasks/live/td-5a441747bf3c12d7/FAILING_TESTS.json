@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "tests/test_binary_operations.py::WordBasedDecimalTestCase::test_word_decimal_with_multiplication",
+    "tests/test_binary_operations.py::WordBasedDecimalTestCase::test_word_decimal_simple",
+    "tests/test_binary_operations.py::WordBasedDecimalTestCase::test_word_decimal_with_addition",
+    "tests/test_binary_operations.py::WordBasedDecimalTestCase::test_word_decimal_with_division",
+    "tests/test_binary_operations.py::WordBasedDecimalTestCase::test_word_decimal_multi_digit_fractional"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

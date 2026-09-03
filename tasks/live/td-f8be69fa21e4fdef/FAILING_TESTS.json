@@ -1,0 +1,11 @@
+{
+  "failing_test_ids": [
+    "tests/test_ci/test_plan_ci.py::test_root_readmes_select_release_packaging_contract",
+    "tests/test_ci/test_plan_ci.py::test_root_readme_content_changes_release_packaging_execution_digest",
+    "tests/test_ci/test_plan_ci.py::test_release_packaging_inputs_cover_root_readmes",
+    "tests/test_release_consistency.py::test_readme_release_install_uses_versioned_assets_and_pinned_wheel",
+    "tests/test_release_consistency.py::test_readmes_point_to_canonical_release_notes"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

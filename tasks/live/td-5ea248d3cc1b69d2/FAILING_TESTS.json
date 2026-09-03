@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/core/arena/test_agent_access.py::test_scan_reads_evidence_in_bounded_chunks_not_one_whole_file_read",
+    "tests/core/arena/test_agent_access.py::test_scan_detects_credential_straddling_a_chunk_boundary",
+    "tests/core/arena/test_agent_access.py::test_contaminated_staging_is_purged_when_first_deletion_is_denied",
+    "tests/core/arena/test_agent_access.py::test_unpurgeable_contaminated_staging_is_named_without_publishing",
+    "tests/core/arena/test_agent_access.py::test_permission_repair_never_chmods_through_a_swapped_symlink",
+    "tests/core/arena/test_agent_access.py::test_permission_repair_enqueue_is_bounded_by_the_entry_budget",
+    "tests/core/arena/test_agent_access.py::test_cleanup_marker_is_credential_free_even_when_store_path_carries_secret",
+    "tests/core/arena/test_agent_access.py::test_purge_reraises_the_original_deletion_error_not_the_final_retry",
+    "tests/core/arena/test_agent_access.py::test_marker_write_failure_never_masks_the_primary_purge_error",
+    "tests/core/arena/test_box.py::test_completed_warmup_refuses_ambiguous_or_lookalike_identity_without_guessing",
+    "tests/core/arena/test_box.py::test_completed_warmup_refuses_non_ascii_fused_separator_by_design",
+    "tests/core/arena/test_box.py::test_completed_warmup_accepts_exact_repeated_identity"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

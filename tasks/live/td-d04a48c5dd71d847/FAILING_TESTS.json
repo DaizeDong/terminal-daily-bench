@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_cross_decoder_context_path_shapes_and_gradients",
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_cross_decoder_feature_map_mixer_path_uses_feature_maps",
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_crossmae_reconstructs_only_kept_mask_subset_and_targets_match",
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_crossmae_default_feature_map_path_backpropagates",
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_crossmae_eval_returns_embedding_without_reconstruction",
+    "stable_pretraining/tests/unit/test_cross_mae.py::test_crossmae_rejects_invalid_mask_ratios"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

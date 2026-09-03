@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/test_combine.py::test_transcriptome_basic_match",
+    "tests/test_combine.py::test_reverse_complement_dropped_with_reference_kmer",
+    "tests/test_combine.py::test_reverse_complement_kept_with_model_kmer",
+    "tests/test_combine.py::test_direct_match_with_model_kmer",
+    "tests/test_combine.py::test_no_match_returns_none",
+    "tests/test_combine.py::test_norm_mean_is_length_weighted_ref_kmer",
+    "tests/test_combine.py::test_norm_mean_is_length_weighted_model_kmer",
+    "tests/test_load_data.py::test_over_max_count_truncates_not_drops",
+    "tests/test_load_data.py::test_run_below_min_count_dropped_site_survives",
+    "tests/test_load_data.py::test_basic_two_condition_shapes",
+    "tests/test_load_data.py::test_pooling_over_cap_round_robin",
+    "tests/test_load_data.py::test_single_condition_site_skipped",
+    "tests/test_preprocess_tx.py::test_per_site_readcount_max_caps_reads",
+    "tests/test_preprocess_tx.py::test_readcount_max_none_keeps_all_reads",
+    "tests/test_preprocess_tx.py::test_model_kmer_mode_keeps_both_orientations",
+    "tests/test_xpore_v2_1_back_compatibility.py::test_combine_transcriptome_matches_v2_1",
+    "tests/test_xpore_v2_1_back_compatibility.py::test_preprocess_tx_data_json_matches_v2_1"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

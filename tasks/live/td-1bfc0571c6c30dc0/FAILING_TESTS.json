@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_mcp_guard.py::McpBridgeStatusTests::test_missing_status_is_offline",
+    "tests/test_mcp_guard.py::McpBridgeStatusTests::test_stale_heartbeat_is_offline",
+    "tests/test_mcp_guard.py::McpBridgeStatusTests::test_dead_process_is_offline",
+    "tests/test_mcp_guard.py::McpBridgeStatusTests::test_fresh_heartbeat_and_process_are_online",
+    "tests/test_mcp_guard.py::McpBridgeStatusTests::test_future_heartbeat_is_rejected",
+    "tests/test_mcp_guard.py::McpGuardSenderTests::test_offline_bridge_returns_immediately",
+    "tests/test_mcp_guard.py::McpGuardSenderTests::test_online_bridge_forwards_original_arguments",
+    "tests/test_mcp_guard.py::McpGuardSetupTests::test_unmanaged_guard_file_is_not_overwritten",
+    "tests/test_mcp_guard.py::McpGuardSetupTests::test_existing_registration_is_unchanged_without_repair",
+    "tests/test_mcp_guard.py::McpGuardSetupTests::test_repair_replaces_registration_with_guard",
+    "tests/test_mcp_guard.py::McpDoctorModeTests::test_offline_bridge_disables_smart_mode"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

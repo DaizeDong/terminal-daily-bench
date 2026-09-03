@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    ".github/scripts/tests/test_post_review_comments.py::test_one_unescaped_quote_does_not_destroy_the_whole_review",
+    ".github/scripts/tests/test_post_review_comments.py::test_a_block_that_salvages_nothing_is_still_a_ci_fault",
+    ".github/scripts/tests/test_post_review_comments.py::test_every_finding_malformed_still_yields_a_review",
+    ".github/scripts/tests/test_post_review_comments.py::test_a_bracket_after_a_stray_quote_is_not_a_value_end",
+    ".github/scripts/tests/test_post_review_comments.py::test_repair_leaves_a_field_it_cannot_delimit_alone",
+    ".github/scripts/tests/test_post_review_comments.py::test_escaping_a_value_is_idempotent",
+    ".github/scripts/tests/test_post_review_comments.py::test_repair_refuses_a_window_that_quotes_findings_shaped_source",
+    ".github/scripts/tests/test_post_review_comments.py::test_repair_declines_rather_than_guessing_past_its_budget",
+    ".github/scripts/tests/test_post_review_comments.py::test_a_runaway_block_does_not_blow_the_stack",
+    ".github/scripts/tests/test_post_review_comments.py::test_a_runaway_block_is_bounded_in_time",
+    ".github/scripts/tests/test_post_review_comments.py::test_a_runaway_block_still_reaches_salvage"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

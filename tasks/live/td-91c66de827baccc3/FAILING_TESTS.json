@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "MultiTrain/test/exhaustive_test.py::test_classifier_fit_covers_gpu_conversion_and_failed_train_prediction",
+    "MultiTrain/test/exhaustive_test.py::test_regressor_fit_handles_failed_train_prediction",
+    "MultiTrain/test/feature_artifacts_test.py::test_classifier_retains_models_predictions_probabilities_and_results",
+    "MultiTrain/test/feature_artifacts_test.py::test_regressor_retains_predictions_without_inventing_probabilities",
+    "MultiTrain/test/feature_artifacts_test.py::test_named_estimator_dictionary_is_cloned_and_keeps_the_custom_name",
+    "MultiTrain/test/feature_artifacts_test.py::test_custom_estimators_survive_process_based_model_parallelism",
+    "MultiTrain/test/feature_artifacts_test.py::test_warnings_and_failures_are_attributed_to_the_responsible_model",
+    "MultiTrain/test/feature_artifacts_test.py::test_artifacts_are_cleared_before_a_new_invalid_fit_attempt",
+    "MultiTrain/test/feature_artifacts_test.py::test_custom_estimator_configuration_rejects_invalid_combinations"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "tests/test_use_notebook_remote_rtc_version.py::test_warns_when_document_server_collaboration_is_older",
+    "tests/test_use_notebook_remote_rtc_version.py::test_silent_when_document_server_collaboration_is_current",
+    "tests/test_use_notebook_remote_rtc_version.py::test_silent_when_extensions_endpoint_is_unavailable",
+    "tests/test_use_notebook_remote_rtc_version.py::test_silent_when_collaboration_extension_is_absent",
+    "tests/test_use_notebook_remote_rtc_version.py::test_extension_list_is_fetched_once_per_server",
+    "tests/test_use_notebook_remote_rtc_version.py::test_failed_probe_is_retried_rather_than_cached"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

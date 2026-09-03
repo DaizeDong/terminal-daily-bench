@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/test_cursor_hooks.py::test_cursor_hook_script_source_includes_daemon_fast_path",
+    "tests/test_desktop_core_alpha_feed_macos_signing.py::test_signing_identity_is_imported_before_pyinstaller_build",
+    "tests/test_desktop_core_alpha_feed_macos_signing.py::test_final_verification_checks_reused_and_new_embedded_team_identity",
+    "tests/test_desktop_core_alpha_feed_macos_signing.py::test_reused_core_assets_skip_native_runtime_verifier",
+    "tests/test_desktop_core_alpha_feed_security.py::test_frozen_sidecar_stages_attested_native_runtime",
+    "tests/test_guard_native_runtime.py::test_bundled_runtime_restores_owner_execute",
+    "tests/test_guard_native_runtime.py::test_bundled_runtime_skips_world_writable_execute_restore",
+    "tests/test_guard_review_event_outbox_delivery.py::test_terminal_continuation_projects_as_a_distinct_authenticated_event",
+    "tests/test_stage_native_runtime_for_desktop_core.py::test_stage_from_wheel_extracts_sealed_runtime",
+    "tests/test_stage_native_runtime_for_desktop_core.py::test_stage_from_wheel_rejects_path_escape",
+    "tests/test_stage_native_runtime_for_desktop_core.py::test_stage_from_wheel_rejects_version_mismatch",
+    "tests/test_stage_native_runtime_for_desktop_core.py::test_stage_from_wheel_rejects_digest_mismatch",
+    "tests/test_stage_native_runtime_for_desktop_core.py::test_refresh_identity_rewrites_signed_digest",
+    "tests/test_verify_pyinstaller_native_runtime.py::test_verifier_accepts_sealed_native_data_entry",
+    "tests/test_verify_pyinstaller_native_runtime.py::test_verifier_rejects_missing_native_runtime",
+    "tests/test_verify_pyinstaller_native_runtime.py::test_verifier_rejects_manifest_digest_mismatch",
+    "tests/test_verify_pyinstaller_native_runtime.py::test_native_verifier_reuses_signing_team_id"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

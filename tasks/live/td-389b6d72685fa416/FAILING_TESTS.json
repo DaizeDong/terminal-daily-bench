@@ -1,0 +1,19 @@
+{
+  "failing_test_ids": [
+    "tests/test_state_space/test_kernels.py::test_to_sde_rejects_genuinely_unsupported_product_kernels",
+    "tests/test_state_space/test_kernels.py::test_to_sde_periodic_times_matern_returns_product_sde_with_expected_state_dim",
+    "tests/test_state_space/test_kernels.py::test_to_sde_periodic_times_matern_kernel_value_matches_dense_product",
+    "tests/test_state_space/test_prediction.py::test_state_space_posterior_predict_smoothed_matches_dense_gp_for_quasi_periodic_product",
+    "tests/test_state_space/test_sde.py::test_product_sde_state_dim_is_product_of_component_state_dims",
+    "tests/test_state_space/test_sde.py::test_product_sde_lyapunov_identity",
+    "tests/test_state_space/test_sde.py::test_product_sde_A_equals_kron_of_component_transitions",
+    "tests/test_state_space/test_sde.py::test_product_sde_A_matches_matrix_exponential_of_kronecker_sum_drift",
+    "tests/test_state_space/test_sde.py::test_product_sde_Q_equals_stationary_identity",
+    "tests/test_state_space/test_sde.py::test_product_sde_zero_dt_returns_identity_and_zero_noise",
+    "tests/test_state_space/test_sde.py::test_product_sde_observation_matrix_is_kron_of_components",
+    "tests/test_state_space/test_sde.py::test_product_sde_is_jittable_and_vmap_compatible",
+    "tests/test_state_space/test_sde.py::test_product_sde_gradient_through_matern_lengthscale"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

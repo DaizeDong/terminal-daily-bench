@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "tests/test_data.py::test_rejects_empty_hard_types_and_missing_type_column",
+    "tests/test_data.py::test_load_cot_csv_validates_columns",
+    "tests/test_formatting.py::test_build_record_drops_unusable_cot",
+    "tests/test_lora.py::test_default_target_modules_constant",
+    "tests/test_masking.py::test_render_supports_system_and_user_prompt",
+    "tests/test_masking.py::test_render_rejects_unsafe_conversation_shape",
+    "tests/test_masking.py::test_offset_masking_supervises_only_completion",
+    "tests/test_masking.py::test_boundary_merging_token_is_masked_for_slow_tokenizer",
+    "tests/test_masking.py::test_truncation_that_removes_completion_returns_none",
+    "tests/test_masking.py::test_invalid_length_and_empty_completion_are_rejected",
+    "tests/test_run.py::test_unknown_phase_key_rejected",
+    "tests/test_run.py::test_dry_run_summary_needs_no_training_stack",
+    "tests/test_sampling.py::test_batches_are_type_balanced",
+    "tests/test_training.py::test_prompt_masked_collator_preserves_labels_and_masks_padding",
+    "tests/test_training.py::test_prompt_masked_collator_rejects_empty_batch"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

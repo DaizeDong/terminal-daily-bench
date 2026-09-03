@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "webui/components/test_subtitle_settings_unittest.py::SubtitleSettingsPreviewOrientationTests::test_normalize_subtitle_preview_orientation_accepts_canonical_values",
+    "webui/components/test_subtitle_settings_unittest.py::SubtitleSettingsPreviewOrientationTests::test_normalize_subtitle_preview_orientation_migrates_legacy_labels",
+    "webui/components/test_subtitle_settings_unittest.py::SubtitleSettingsPreviewOrientationTests::test_normalize_subtitle_preview_orientation_falls_back_to_portrait"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

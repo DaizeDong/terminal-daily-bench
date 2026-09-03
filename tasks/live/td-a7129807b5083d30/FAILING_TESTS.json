@@ -1,0 +1,24 @@
+{
+  "failing_test_ids": [
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_config_path_macos",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_config_path_windows",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_config_path_linux",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_load_config_structure",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_load_config_preserves_servers",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_save_config_structure",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_save_config_preserves_inputs",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_save_config_adds_inputs_if_missing",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_list_servers",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_get_server",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_add_server",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_to_client_format",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_remove_server",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_from_client_format",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_empty_config",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_load_invalid_config",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_load_config_without_file",
+    "tests/test_clients/test_vscode.py::TestVSCodeManager::test_config_migration_compatibility"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

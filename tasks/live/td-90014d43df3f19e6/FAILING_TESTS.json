@@ -1,0 +1,17 @@
+{
+  "failing_test_ids": [
+    "tests/test_speaker_boundaries.py::test_sortformer_final_frame_covers_the_complete_chunk",
+    "tests/test_speaker_boundaries.py::test_speaker_turn_splits_unpunctuated_transcript_without_losing_tokens",
+    "tests/test_speaker_boundaries.py::test_text_waits_for_diarization_then_moves_to_the_new_speaker_once",
+    "tests/test_speaker_boundaries.py::test_retrograde_timestamp_after_buffer_start_preserves_text_order",
+    "tests/test_speaker_boundaries.py::test_translation_spanning_speaker_turn_is_attached_once_and_stays_stable",
+    "tests/test_speaker_boundaries.py::test_point_translation_at_final_endpoint_is_not_lost",
+    "tests/test_speaker_boundaries.py::test_zero_duration_token_uses_the_containing_speaker_segment",
+    "tests/test_speaker_boundaries.py::test_zero_duration_punctuation_at_turn_closes_the_previous_speaker",
+    "tests/test_speaker_boundaries.py::test_missing_diarization_keeps_existing_default_speaker_behavior",
+    "tests/test_speaker_boundaries.py::test_speaker_resolution_uses_a_chronological_cursor",
+    "tests/test_speaker_boundaries.py::test_speaker_boundaries_preserve_explicit_silence_and_stable_refreshes"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

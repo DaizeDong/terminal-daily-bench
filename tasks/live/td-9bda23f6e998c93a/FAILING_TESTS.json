@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/test_deepseek_evidence_judge.py::test_adapter_sends_one_fixed_endpoint_request_without_leaking_key",
+    "tests/test_deepseek_evidence_judge.py::test_model_identity_mismatch_is_terminal_and_never_retried",
+    "tests/test_openalex_evidence_set_development.py::test_full_execution_persists_each_call_and_case_before_the_next",
+    "tests/test_openalex_evidence_set_development.py::test_manifest_and_model_boundary_exclude_baseline_urls_and_human_bytes",
+    "tests/test_openalex_evidence_set_development.py::test_response_identity_drift_is_persisted_and_no_retry_occurs",
+    "tests/test_openalex_evidence_set_development.py::test_adapter_failure_is_one_attempt_and_not_a_silent_pass",
+    "tests/test_openalex_evidence_set_development.py::test_failed_identity_call_preserves_safe_usage_at_execution_boundary",
+    "tests/test_token_usage.py::test_deepseek_v4_flash_uses_conservative_peak_rates_and_own_date",
+    "tests/test_token_usage.py::test_deepseek_v4_flash_cost_uses_openai_cache_shape"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

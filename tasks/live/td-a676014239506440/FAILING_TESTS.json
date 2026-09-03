@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_video_search_client.py::test_keyword_search_sends_sensitive_contents_plural",
+    "tests/test_video_search_client.py::test_keyword_search_sends_select_content_type",
+    "tests/test_video_search_client.py::test_search_omits_unset_optional_params"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

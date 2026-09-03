@@ -1,0 +1,10 @@
+{
+  "failing_test_ids": [
+    "tests/test_detection_report.py::test_scale_accepts_thousands_separators",
+    "tests/test_detection_report.py::test_scale_accepts_decimal_suffix_numbers",
+    "tests/test_enterprise_simulation.py::TestDictSchemaTextPassthrough::test_pattern_reaches_engine",
+    "tests/test_enterprise_simulation.py::TestDictSchemaTextPassthrough::test_explicit_text_type_overrides_name_inference"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

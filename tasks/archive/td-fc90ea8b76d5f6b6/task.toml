@@ -4,9 +4,19 @@ artifacts = []
 [task]
 name = "terminal-daily/td-fc90ea8b76d5f6b6"
 description = "Validate format string keys in logger.add() for early error feedback"
-keywords = ["C5", "C4"]
+keywords = ["refactoring", "software-engineering", "testing"]
+[[task.authors]]
+name = "terminal-daily"
+email = "terminal-daily@localhost.invalid"
 
 [metadata]
+author_name = "terminal-daily"
+author_email = "terminal-daily@localhost.invalid"
+category = "software-engineering"
+tags = ["refactoring", "software-engineering", "testing"]
+expert_time_estimate_min = 60.0
+junior_time_estimate_min = 180.0
+capability_labels = ["C4", "C5"]
 source_repo = "Delgan/loguru"
 pr_number = 1451
 base_sha = "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e"
@@ -22,7 +32,7 @@ network_profile = "build-online/run-offline"
 timeout_sec = 900.0
 
 [agent]
-timeout_sec = 900.0
+timeout_sec = 1800.0
 
 [environment]
 build_timeout_sec = 1200.0
@@ -31,6 +41,7 @@ cpus = 1
 memory_mb = 4096
 storage_mb = 16384
 gpus = 0
+network_mode = "no-network"
 allow_internet = false
 mcp_servers = []
 

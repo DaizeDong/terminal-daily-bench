@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_unset_is_disabled",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_blank_is_disabled",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_value_is_trimmed",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_multiline_value_is_rejected",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_oversized_value_is_rejected",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_non_label_punctuation_is_rejected",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_unset_preserves_prompt",
+    "tests/nodes/test_llm_analyzer_base.py::TestOutputLanguage::test_instruction_localizes_only_human_readable_fields",
+    "tests/nodes/test_llm_analyzer_base.py::<class>::test_chunk_offset_preserved",
+    "tests/nodes/test_llm_analyzer_base.py::test_configured_output_language_is_included",
+    "tests/nodes/test_llm_analyzer_base.py::<class>::test_prompt_has_critical_instructions",
+    "tests/test_mcp_tool_poisoning.py::TestTP4Fallbacks::test_configured_output_language_is_included"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

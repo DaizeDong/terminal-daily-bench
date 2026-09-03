@@ -1,0 +1,12 @@
+{
+  "failing_test_ids": [
+    "tests/formats/test_cross_format.py::TestCrossFormatPenpaPuzzlink::test_cross_penpa_puzzlink",
+    "tests/formats/test_roundtrip.py::TestPuzzlelinkRoundTrip::test_self_roundtrip",
+    "tests/formats/test_roundtrip.py::TestPuzzlelinkRoundTrip::test_yajilin_roundtrip",
+    "tests/formats/test_roundtrip.py::TestPuzzlelinkRoundTrip::test_yajilin_roundtrip_with_shading_config",
+    "tests/formats/test_roundtrip.py::TestPuzzlelinkRoundTrip::test_puzzlink_alternate_hosts_and_bare_path",
+    "tests/formats/test_roundtrip.py::TestPenpaTrip::test_self_roundtrip"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
