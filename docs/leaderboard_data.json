@@ -2,7 +2,7 @@
  "date": "2026-09-03",
  "n_tasks": 385,
  "n_models": 32,
- "n_cells": 24812,
+ "n_cells": 24890,
  "total_fa": null,
  "total_fa_n": 0,
  "cost_measured": false,
@@ -395,20 +395,20 @@
  ],
  "pooled": {
   "single_shot": {
-   "n": 11253,
-   "solved": 1621
+   "n": 11284,
+   "solved": 1622
   },
   "single_shot@high": {
-   "n": 3646,
-   "solved": 744
+   "n": 3655,
+   "solved": 747
   },
   "single_shot@low": {
    "n": 4052,
    "solved": 748
   },
   "single_shot@medium": {
-   "n": 3879,
-   "solved": 771
+   "n": 3917,
+   "solved": 774
   },
   "single_shot@xhigh": {
    "n": 1982,
@@ -426,16 +426,16 @@
     "fa_n": 0
    },
    "single_shot@medium": {
-    "n": 259,
-    "solved": 68,
-    "rate": 0.263,
+    "n": 288,
+    "solved": 71,
+    "rate": 0.247,
     "fa": null,
     "fa_n": 0
    },
    "single_shot@high": {
-    "n": 93,
-    "solved": 39,
-    "rate": 0.419,
+    "n": 100,
+    "solved": 41,
+    "rate": 0.41,
     "fa": null,
     "fa_n": 0
    },
@@ -451,9 +451,9 @@
   {
    "model": "gpt-5.4",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 62,
-    "rate": 0.171,
+    "rate": 0.17,
     "fa": null,
     "fa_n": 0
    },
@@ -489,9 +489,9 @@
   {
    "model": "gpt-5.5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 74,
-    "rate": 0.204,
+    "rate": 0.203,
     "fa": null,
     "fa_n": 0
    },
@@ -527,9 +527,9 @@
   {
    "model": "Claude-Opus-4.7",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 93,
-    "rate": 0.256,
+    "rate": 0.255,
     "fa": null,
     "fa_n": 0
    }
@@ -537,7 +537,7 @@
   {
    "model": "gpt-5.3-codex",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 61,
     "rate": 0.168,
     "fa": null,
@@ -551,16 +551,16 @@
     "fa_n": 0
    },
    "single_shot@medium": {
-    "n": 286,
+    "n": 295,
     "solved": 68,
-    "rate": 0.238,
+    "rate": 0.231,
     "fa": null,
     "fa_n": 0
    },
    "single_shot@high": {
-    "n": 245,
-    "solved": 61,
-    "rate": 0.249,
+    "n": 247,
+    "solved": 62,
+    "rate": 0.251,
     "fa": null,
     "fa_n": 0
    }
@@ -568,7 +568,7 @@
   {
    "model": "Claude-Sonnet-5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 88,
     "rate": 0.242,
     "fa": null,
@@ -578,9 +578,9 @@
   {
    "model": "Claude-Opus-4.8",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 86,
-    "rate": 0.237,
+    "rate": 0.236,
     "fa": null,
     "fa_n": 0
    }
@@ -588,9 +588,9 @@
   {
    "model": "gpt-5.6-sol",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 82,
-    "rate": 0.226,
+    "rate": 0.225,
     "fa": null,
     "fa_n": 0
    },
@@ -626,7 +626,7 @@
   {
    "model": "gpt-5-mini",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 73,
     "rate": 0.201,
     "fa": null,
@@ -657,9 +657,9 @@
   {
    "model": "gpt-5.6-terra",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 71,
-    "rate": 0.196,
+    "rate": 0.195,
     "fa": null,
     "fa_n": 0
    },
@@ -695,9 +695,9 @@
   {
    "model": "Claude-Opus-5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 79,
-    "rate": 0.218,
+    "rate": 0.217,
     "fa": null,
     "fa_n": 0
    }
@@ -705,19 +705,9 @@
   {
    "model": "Claude-Opus-4.6",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 74,
-    "rate": 0.204,
-    "fa": null,
-    "fa_n": 0
-   }
-  },
-  {
-   "model": "Claude-Opus-4.5",
-   "single_shot": {
-    "n": 363,
-    "solved": 73,
-    "rate": 0.201,
+    "rate": 0.203,
     "fa": null,
     "fa_n": 0
    }
@@ -725,7 +715,17 @@
   {
    "model": "Kimi-K2.6",
    "single_shot": {
-    "n": 363,
+    "n": 364,
+    "solved": 74,
+    "rate": 0.203,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.5",
+   "single_shot": {
+    "n": 364,
     "solved": 73,
     "rate": 0.201,
     "fa": null,
@@ -735,7 +735,7 @@
   {
    "model": "gpt-5.6-luna",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 69,
     "rate": 0.19,
     "fa": null,
@@ -773,9 +773,9 @@
   {
    "model": "gpt-5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 67,
-    "rate": 0.185,
+    "rate": 0.184,
     "fa": null,
     "fa_n": 0
    },
@@ -804,9 +804,9 @@
   {
    "model": "Claude-Sonnet-4.6",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 66,
-    "rate": 0.182,
+    "rate": 0.181,
     "fa": null,
     "fa_n": 0
    }
@@ -814,7 +814,7 @@
   {
    "model": "Claude-Sonnet-4.5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 65,
     "rate": 0.179,
     "fa": null,
@@ -824,9 +824,9 @@
   {
    "model": "gpt-5.1-codex",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 55,
-    "rate": 0.152,
+    "rate": 0.151,
     "fa": null,
     "fa_n": 0
    },
@@ -855,7 +855,7 @@
   {
    "model": "o3-mini",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 44,
     "rate": 0.121,
     "fa": null,
@@ -893,9 +893,9 @@
   {
    "model": "Claude-Haiku-4.5",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 58,
-    "rate": 0.16,
+    "rate": 0.159,
     "fa": null,
     "fa_n": 0
    }
@@ -903,7 +903,7 @@
   {
    "model": "DeepSeek-V4-Pro",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 57,
     "rate": 0.157,
     "fa": null,
@@ -913,9 +913,9 @@
   {
    "model": "DeepSeek-V4-Flash",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 54,
-    "rate": 0.149,
+    "rate": 0.148,
     "fa": null,
     "fa_n": 0
    }
@@ -923,7 +923,7 @@
   {
    "model": "GPT-oss-120B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 28,
     "rate": 0.077,
     "fa": null,
@@ -933,9 +933,9 @@
   {
    "model": "Llama-4-Maverick-17B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 22,
-    "rate": 0.061,
+    "rate": 0.06,
     "fa": null,
     "fa_n": 0
    }
@@ -943,9 +943,9 @@
   {
    "model": "DeepSeek-R1-Distill-Llama-8B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 18,
-    "rate": 0.05,
+    "rate": 0.049,
     "fa": null,
     "fa_n": 0
    }
@@ -953,7 +953,7 @@
   {
    "model": "GPT-oss-20B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 11,
     "rate": 0.03,
     "fa": null,
@@ -963,7 +963,7 @@
   {
    "model": "Phi-4",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 9,
     "rate": 0.025,
     "fa": null,
@@ -973,7 +973,7 @@
   {
    "model": "Phi-4-reasoning",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 8,
     "rate": 0.022,
     "fa": null,
@@ -983,7 +983,7 @@
   {
    "model": "Llama-4-Scout-17B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 1,
     "rate": 0.003,
     "fa": null,
@@ -993,7 +993,7 @@
   {
    "model": "DeepSeek-Coder-6.7B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1003,7 +1003,7 @@
   {
    "model": "Llama-Guard-4-12B",
    "single_shot": {
-    "n": 363,
+    "n": 364,
     "solved": 0,
     "rate": 0.0,
     "fa": null,
@@ -1205,6 +1205,7 @@
    "td-85c32f1f83a10854",
    "td-87320e1f66890322",
    "td-874ad766dc41cec6",
+   "td-875886701b098a09",
    "td-87973214ffbc956b",
    "td-879741366d0283e9",
    "td-87ce1ba357e33d17",
@@ -1563,6 +1564,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -1946,6 +1948,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -2302,6 +2305,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -2683,6 +2687,7 @@
      0,
      0,
      0,
+     0,
      1,
      1,
      0,
@@ -3038,6 +3043,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -3418,6 +3424,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -3786,6 +3793,7 @@
      0,
      0,
      0,
+     0,
      1,
      1,
      1,
@@ -4139,6 +4147,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -4522,6 +4531,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      1,
@@ -4694,6 +4704,7 @@
    {
     "model": "DeepSeek-Coder-6.7B",
     "g": [
+     0,
      0,
      0,
      0,
@@ -5293,6 +5304,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -5614,6 +5626,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -5994,6 +6007,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -6316,6 +6330,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -6747,6 +6762,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -6954,7 +6970,7 @@
      1,
      0,
      0,
-     0,
+     1,
      0,
      0,
      0,
@@ -7086,6 +7102,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -7468,6 +7485,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -7638,6 +7656,7 @@
    {
     "model": "Llama-4-Scout-17B",
     "g": [
+     0,
      0,
      0,
      0,
@@ -8368,6 +8387,7 @@
      0,
      0,
      0,
+     0,
      0
     ]
    },
@@ -8446,6 +8466,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -8949,6 +8970,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -9317,6 +9339,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -9647,6 +9670,7 @@
      1,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -10042,6 +10066,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -10398,6 +10423,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -10779,6 +10805,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -11146,6 +11173,7 @@
      0,
      0,
      0,
+     0,
      1,
      1,
      0,
@@ -11494,6 +11522,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -11878,6 +11907,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -12238,6 +12268,7 @@
      0,
      0,
      1,
+     0,
      0,
      0,
      0,
@@ -12619,6 +12650,7 @@
      0,
      0,
      0,
+     0,
      1,
      0,
      0,
@@ -12791,21 +12823,21 @@
  },
  "quality": {
   "single_shot": {
-   "D": 0.36363636363636365,
-   "C": 0.5582535056661215,
-   "M": 0.71900826446281,
-   "composite": 0.5011336243504148,
-   "irt_info": 39.04676944072205,
-   "kr20": 0.9755225848709231,
+   "D": 0.3626373626373626,
+   "C": 0.5572476970745384,
+   "M": 0.7197802197802198,
+   "composite": 0.5005756605323708,
+   "irt_info": 39.07654649358289,
+   "kr20": 0.9755248441330068,
    "D_ci": [
-    0.3140495867768595,
-    0.40771349862258954
+    0.3131868131868132,
+    0.40934065934065933
    ],
-   "n_tasks": 363,
+   "n_tasks": 364,
    "n_models": 31,
    "ready": false,
    "bottleneck": "discrimination",
-   "required_n_D": 36,
+   "required_n_D": 41,
    "complete_case": {
     "unattempted_cells": 0,
     "tasks_dropped": 0,
@@ -12829,7 +12861,7 @@
    "bottleneck": "discrimination",
    "required_n_D": 364,
    "complete_case": {
-    "unattempted_cells": 446,
+    "unattempted_cells": 437,
     "tasks_dropped": 0,
     "models_dropped": 7
    }
@@ -12873,7 +12905,7 @@
    "bottleneck": "discrimination",
    "required_n_D": 171,
    "complete_case": {
-    "unattempted_cells": 213,
+    "unattempted_cells": 175,
     "tasks_dropped": 0,
     "models_dropped": 5
    }
