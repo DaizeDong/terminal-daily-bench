@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-825a7aceb42df15d"
 description = "Enable Sentry Logging - Opt in Mode"
-keywords = ["automation", "build-tools", "compilation", "debugging", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C2", "C3", "C4", "C5", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

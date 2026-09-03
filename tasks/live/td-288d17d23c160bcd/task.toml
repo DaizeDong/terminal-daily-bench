@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-288d17d23c160bcd"
 description = "fix(granularity): guard division when subsampling collapses an axis"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-4eb7aa52cf577648"
 description = "add evaluate() for offline experiments and persist by default"
-keywords = ["build-tools", "compilation", "debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C2", "C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

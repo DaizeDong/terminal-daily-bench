@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-830e2cb7ef48c7d0"
 description = "fix(module): accept functools.partial as forward in spawn workers (#417)"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C13", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

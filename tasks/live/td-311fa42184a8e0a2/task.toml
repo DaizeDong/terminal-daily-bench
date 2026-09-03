@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-311fa42184a8e0a2"
 description = "fix: atomic writes for adapter configs, recall cache, and pre-migration backup (#691)"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C1", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

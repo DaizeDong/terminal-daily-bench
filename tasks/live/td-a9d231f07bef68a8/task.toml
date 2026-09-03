@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a9d231f07bef68a8"
 description = "fix(voice): anchor SiliconFlow subtitle timeline end to full audio duration"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

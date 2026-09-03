@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-5ea248d3cc1b69d2"
 description = "fix(arena): credential custody scanning/cleanup + strict lease identity (H2/H3)"
-keywords = ["cryptography", "debugging", "file-operations", "filesystem", "refactoring", "security", "software-engineering", "testing"]
+keywords = ["C1", "C3", "C4", "C5", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-abfc38940af48dcc"
 description = "fix(recur): apply BYHOUR, BYMINUTE, BYSECOND, BYYEARDAY and BYWEEKNO"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

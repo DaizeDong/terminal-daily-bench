@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e690981a5b0cd851"
 description = "fix: route insert-runner thread safety through a client capability"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

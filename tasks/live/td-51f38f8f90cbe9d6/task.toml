@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-51f38f8f90cbe9d6"
 description = "Fix millisecond timeout parsing in link checker"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-8b5aac24794a8b67"
 description = "fix(guard): repair Core sidecar Mach-O headers after manifest rewrite"
-keywords = ["automation", "cryptography", "refactoring", "security", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C8", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

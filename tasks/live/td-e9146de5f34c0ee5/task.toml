@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e9146de5f34c0ee5"
 description = "Ensure a write inside a failing Datasette task never becomes visible, plus execute_write(transaction=False) option"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C6", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-14e232e3b26f152e"
 description = "Probe `tabulate` version for `preserve_whitespace`"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

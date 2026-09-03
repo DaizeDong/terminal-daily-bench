@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-c6ac4c9269f92b6e"
 description = "Fix caching for empty dotenv files"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

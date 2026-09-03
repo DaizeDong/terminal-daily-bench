@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-b0f80251c4fef56b"
 description = "Add `excluded_urls` to `OpenTelemetryMiddleware`"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

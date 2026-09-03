@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-81a07fa06dea82eb"
 description = "fix(deps): make h5py a core dependency; BrainCollection.fit() requires it"
-keywords = ["build-tools", "compilation", "software-engineering", "testing"]
+keywords = ["C5", "C2"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

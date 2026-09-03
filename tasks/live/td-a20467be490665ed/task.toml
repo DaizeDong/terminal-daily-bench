@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a20467be490665ed"
 description = "Fix TypeError when calling decorated methods with positional arguments"
-keywords = ["software-engineering", "testing"]
+keywords = ["C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

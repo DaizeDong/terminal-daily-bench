@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-3db516c35ed296e7"
 description = "Expose catalog operations as direct MCP tools"
-keywords = ["automation", "cryptography", "file-operations", "filesystem", "optimization", "performance", "refactoring", "security", "software-engineering", "testing", "tooling"]
+keywords = ["C11", "C5", "C1", "C4", "C8", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

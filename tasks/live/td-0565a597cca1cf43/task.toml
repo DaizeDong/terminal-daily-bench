@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-0565a597cca1cf43"
 description = "Fix key for loaded/consumed to avoid cross-app collisions"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-dad378d82920d5c0"
 description = "Optimize conversion from Weierstrass invariants to half-periods"
-keywords = ["optimization", "performance", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-0f2878cf111c8d16"
 description = "feat(env): read .env in the framework, and drop python-dotenv"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing", "version-control"]
+keywords = ["C5", "C2", "C4", "C10"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

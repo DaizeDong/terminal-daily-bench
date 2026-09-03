@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a9ebb4f4fb30105a"
 description = "Fix relative refs in handler-loaded schemas"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

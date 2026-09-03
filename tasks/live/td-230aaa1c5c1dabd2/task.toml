@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-230aaa1c5c1dabd2"
 description = "Release 2.4.0: expose pygame sprite spatial queries"
-keywords = ["build-tools", "compilation", "optimization", "performance", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

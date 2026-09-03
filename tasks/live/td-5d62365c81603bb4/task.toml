@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-5d62365c81603bb4"
 description = "Speed up ignored path traversal in watch mode"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C1", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

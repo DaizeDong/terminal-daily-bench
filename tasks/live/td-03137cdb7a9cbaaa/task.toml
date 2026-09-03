@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-03137cdb7a9cbaaa"
 description = "feat(bench): add the ivre bench backend benchmark harness (bootstrap)"
-keywords = ["automation", "cryptography", "refactoring", "security", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C8", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

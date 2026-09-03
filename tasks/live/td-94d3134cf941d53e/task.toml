@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-94d3134cf941d53e"
 description = "fix(models): handle zero masked patch count in random_inverse_block_mask (#2025)"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-172882a1d04a497b"
 description = "fix: default RK ASR finalization to synchronous"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

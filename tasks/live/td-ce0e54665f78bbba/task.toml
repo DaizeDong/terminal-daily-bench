@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ce0e54665f78bbba"
 description = "Fix webhook URL validation and empty follower notifications"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-2b6d90dbdf14202e"
 description = "feat(dataset): Add path field readers"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C6", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

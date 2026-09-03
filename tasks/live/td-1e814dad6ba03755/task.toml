@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-1e814dad6ba03755"
 description = "Fix divide-by-zero in rase() for zero-mean reference images"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

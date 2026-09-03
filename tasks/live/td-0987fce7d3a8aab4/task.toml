@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-0987fce7d3a8aab4"
 description = "fix(proxy): defer keyed pre-created retry health writes until settlement"
-keywords = ["networking", "protocols", "refactoring", "software-engineering", "system-administration", "testing"]
+keywords = ["C5", "C7", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

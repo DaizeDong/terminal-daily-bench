@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-89e5d9486ac5302e"
 description = "feat(exceptions): add __str__ method to HTTPError"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

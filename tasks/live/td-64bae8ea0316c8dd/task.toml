@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-64bae8ea0316c8dd"
 description = "pghoard: enable systemd-journal logging for correct priority mapping"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

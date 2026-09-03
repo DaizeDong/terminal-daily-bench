@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-d3fd0713d0b48200"
 description = "fix: export page properties report nested in third-party app macros"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

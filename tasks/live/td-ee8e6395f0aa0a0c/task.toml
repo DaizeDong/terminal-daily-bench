@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ee8e6395f0aa0a0c"
 description = "fix: Messages API Validations -- May 2026"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C13", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e0c95e8e7b6db9f0"
 description = "Fix Box.sample never returning values near signed integer dtype limits"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

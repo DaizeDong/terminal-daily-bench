@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-1c0e0f84b86e794e"
 description = "fix: report which half of a JAX first call is stalled"
-keywords = ["data-processing", "optimization", "performance", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C6", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

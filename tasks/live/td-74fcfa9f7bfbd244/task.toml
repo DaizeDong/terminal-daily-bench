@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-74fcfa9f7bfbd244"
 description = "fix: Revert UUID validator to loose check for nginx/OTEL compatibility"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

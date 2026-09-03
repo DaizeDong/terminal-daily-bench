@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-5118db1c7e676f2d"
 description = "feat: update HackerNews extraction to avoid API timeout and use HTML parsing"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

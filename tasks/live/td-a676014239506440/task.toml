@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a676014239506440"
 description = "fix: 検索の sensitiveContents 修正 と ショート動画の絞り込み対応"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

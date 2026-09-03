@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-9b9b343dca7c73d8"
 description = "fix(ci): recognize Actions policy status identity"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

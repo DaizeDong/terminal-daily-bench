@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-30f08c1e9e822109"
 description = "fix(guard): bundle native runtime in Desktop Core sidecars"
-keywords = ["automation", "cryptography", "refactoring", "security", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C8", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

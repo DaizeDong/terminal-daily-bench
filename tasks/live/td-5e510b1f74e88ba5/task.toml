@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-5e510b1f74e88ba5"
 description = "Fix SGDW foreach path applying weight decay once per (device, dtype) group"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

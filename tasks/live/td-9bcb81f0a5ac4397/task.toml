@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-9bcb81f0a5ac4397"
 description = "Release v1.3.2: forward dataset timestamps, add walk-forward evaluation"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C6", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-afe16b050c7c0503"
 description = "fix(ci): read a reviewer's findings when it forgets to escape a quote"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

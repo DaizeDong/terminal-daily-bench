@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e462289d62e5142f"
 description = "Add Novita AI as LLM provider"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

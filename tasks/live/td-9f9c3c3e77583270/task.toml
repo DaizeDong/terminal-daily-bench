@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-9f9c3c3e77583270"
 description = "fix: recognize list[UploadFile] as a multiple file field"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-c98abb3ccb18d1a5"
 description = "Enable ffmpeg-bins2 manifest: full-feature 8.1.2 for macOS/Linux (Windows/musl fall back to legacy)"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

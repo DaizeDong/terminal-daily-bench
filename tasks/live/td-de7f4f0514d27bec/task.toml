@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-de7f4f0514d27bec"
 description = "feat: --add-fillers / --remove-fillers to tweak the default word list"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

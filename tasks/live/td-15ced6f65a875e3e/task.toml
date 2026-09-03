@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-15ced6f65a875e3e"
 description = "fix: support non-float32 inputs in SIGReg"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

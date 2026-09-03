@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-78ce543722ea2671"
 description = "gateway: withhold poisoned tool results by default (was inert) + stop echoing the payload"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

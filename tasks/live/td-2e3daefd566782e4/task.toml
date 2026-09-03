@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-2e3daefd566782e4"
 description = "feat: add multi-tenant session isolation"
-keywords = ["automation", "cryptography", "file-operations", "filesystem", "optimization", "performance", "refactoring", "security", "software-engineering", "testing", "tooling"]
+keywords = ["C1", "C4", "C5", "C8", "C11", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

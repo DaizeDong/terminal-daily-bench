@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-f66e15de833399bf"
 description = "Flag incomplete annotations on BoundingDimensions"
-keywords = ["build-tools", "compilation", "machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C2", "C4", "C5", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

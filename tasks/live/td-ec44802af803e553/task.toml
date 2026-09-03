@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ec44802af803e553"
 description = "(feat) add Discord cache category to junk cleaner"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-79e4ef873e5ebae2"
 description = "Sanitize control characters in backup filenames"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

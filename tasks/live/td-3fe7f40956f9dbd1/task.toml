@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-3fe7f40956f9dbd1"
 description = "Load URDFs with a floating base, a reused name, or an unnamed actuator"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

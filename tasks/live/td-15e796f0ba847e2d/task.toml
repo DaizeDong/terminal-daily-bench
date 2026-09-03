@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-15e796f0ba847e2d"
 description = "fix: resume checkpoints across JobSet whole-set restarts in clustered tasks"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

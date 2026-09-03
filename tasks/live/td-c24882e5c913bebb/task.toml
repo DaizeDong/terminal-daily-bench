@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-c24882e5c913bebb"
 description = "Do not apply type parameters to bare fields"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

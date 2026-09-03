@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-387b0882dad45c60"
 description = "fix(guard): accept Linux desktop terminal enrollment"
-keywords = ["automation", "file-operations", "filesystem", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C1", "C4", "C5", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

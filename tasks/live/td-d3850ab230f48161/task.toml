@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-d3850ab230f48161"
 description = "fix(mastery): don't freeze choice gates on clarifying composer text"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

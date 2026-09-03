@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ea7284aef28ff935"
 description = "[PERF] reduce peak memory in _build_indexer_reorder_contents"
-keywords = ["data-processing", "optimization", "performance", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C6", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

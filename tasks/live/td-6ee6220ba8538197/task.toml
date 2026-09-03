@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-6ee6220ba8538197"
 description = "ratint: Remove obsolete composite=False from ratint_logpart and speed up integration"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

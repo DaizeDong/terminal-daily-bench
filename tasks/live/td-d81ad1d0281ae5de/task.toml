@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-d81ad1d0281ae5de"
 description = "[BUG] multidimensional time crop"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

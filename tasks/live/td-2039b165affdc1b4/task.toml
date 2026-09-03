@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-2039b165affdc1b4"
 description = "The `fully_commutes_with_sum` property was incorrectly using `sum()` on the flattened commuting structure, which does not yield a boolean. Changed to use `all()` to ensure the property returns True only if all sub-encoders fully commute with sum. Added type assertions in tests to verify the return type is boolean."
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

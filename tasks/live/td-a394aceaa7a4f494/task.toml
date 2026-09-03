@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a394aceaa7a4f494"
 description = "[codex] Add agent installer support"
-keywords = ["automation", "file-operations", "filesystem", "testing", "tooling"]
+keywords = ["C5", "C1", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

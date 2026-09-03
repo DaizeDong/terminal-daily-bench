@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-4e5b76c7a70f53c2"
 description = "Fix stored XSS in HTML report; add geocoding privacy controls & positional CLI"
-keywords = ["automation", "networking", "protocols", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C7", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

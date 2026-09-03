@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e75813c215b9528f"
 description = "fix(terraform): CKV_AZURE_190 override singular get_expected_value"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

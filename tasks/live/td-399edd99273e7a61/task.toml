@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-399edd99273e7a61"
 description = "fix: hide Eurostat $DV_ bookmarks from the catalogue (#54 part 1)"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

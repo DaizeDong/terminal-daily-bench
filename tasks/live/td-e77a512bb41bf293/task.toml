@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e77a512bb41bf293"
 description = "Fail with a clear error when device monitor stdin is not a TTY"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

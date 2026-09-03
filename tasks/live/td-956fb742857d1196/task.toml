@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-956fb742857d1196"
 description = "Add biology_singlecell benchmarks (PBMC3k/68k) to benchmark knowledge base"
-keywords = ["data-processing", "testing"]
+keywords = ["C5", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

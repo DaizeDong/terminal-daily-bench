@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e36e93ff05021b8c"
 description = "Fix FileNotFoundError in bot_auth when session file doesn't exist"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C1", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-17400aa343ff3056"
 description = "stamp traccia.prompt.id on compile for metrics joins"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

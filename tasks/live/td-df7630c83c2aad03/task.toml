@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-df7630c83c2aad03"
 description = "refactor: share one repository walk so the C++ qn map cannot drift from the indexer"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C1", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

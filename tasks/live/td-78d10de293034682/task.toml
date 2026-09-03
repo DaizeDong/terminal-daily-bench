@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-78d10de293034682"
 description = "Make page classification less expensive during crawls"
-keywords = ["build-tools", "compilation", "data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

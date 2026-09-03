@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-c0fb0b8f95e1dcc6"
 description = "Fix DropPath sampling on Gaudi lazy mode"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

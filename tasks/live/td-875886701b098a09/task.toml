@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-875886701b098a09"
 description = "fix(security): harden remote media fetching"
-keywords = ["build-tools", "compilation", "cryptography", "data-processing", "networking", "protocols", "refactoring", "security", "software-engineering", "testing"]
+keywords = ["C5", "C7", "C2", "C4", "C6", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

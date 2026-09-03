@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-af816d5955468550"
 description = "Add round() when loading NIfTI for atlas building"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

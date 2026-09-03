@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a17899d8344280cb"
 description = "feat: support structured types (by treating as JSON without their element types)"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

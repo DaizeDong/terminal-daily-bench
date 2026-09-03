@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a3142cfcc86776ef"
 description = "fix: close pbar and file handle on exception in download() (#472)"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C1", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

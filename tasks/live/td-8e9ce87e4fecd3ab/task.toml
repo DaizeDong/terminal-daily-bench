@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-8e9ce87e4fecd3ab"
 description = "Fix installation under Pyodide 314 (matplotlib 3.10)"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

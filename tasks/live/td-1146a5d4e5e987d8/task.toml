@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-1146a5d4e5e987d8"
 description = "Fix function grouping skipped for lowercase 'as' in CREATE TABLE AS SELECT"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

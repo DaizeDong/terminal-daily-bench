@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-1bfc0571c6c30dc0"
 description = "fix: 避免 Abaqus MCP 离线时持续等待"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

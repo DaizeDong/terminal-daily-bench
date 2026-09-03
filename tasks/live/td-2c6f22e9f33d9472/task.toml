@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-2c6f22e9f33d9472"
 description = "Add Dreamer integration test for Pendulum-v1 and CI wiring"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C13", "C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

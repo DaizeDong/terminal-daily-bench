@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-543ddbe4c9fcc952"
 description = "strategy: support max effort on strict Responses-compatible gateways"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

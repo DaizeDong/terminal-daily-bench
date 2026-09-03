@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-6e160b3b79439907"
 description = "Fix referer token leak in server logs when the request causes a 500"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

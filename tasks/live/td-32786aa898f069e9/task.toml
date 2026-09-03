@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-32786aa898f069e9"
 description = "feat: add completed/status filters to get_todos"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

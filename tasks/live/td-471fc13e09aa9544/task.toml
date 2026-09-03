@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-471fc13e09aa9544"
 description = "Clarify equal opportunity warning message"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

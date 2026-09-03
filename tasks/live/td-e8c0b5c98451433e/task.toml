@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-e8c0b5c98451433e"
 description = "feat(backtest): add Binance USD-M drift evidence artifacts"
-keywords = ["automation", "data-processing", "testing", "tooling"]
+keywords = ["C5", "C6", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

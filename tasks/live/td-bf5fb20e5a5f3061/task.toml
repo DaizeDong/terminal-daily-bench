@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-bf5fb20e5a5f3061"
 description = "Add audit logging and fix type annotations"
-keywords = ["cryptography", "refactoring", "security", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

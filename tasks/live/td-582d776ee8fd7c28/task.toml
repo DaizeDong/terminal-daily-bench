@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-582d776ee8fd7c28"
 description = "fix: build_summaries uses #649 SAVEPOINT transaction hygiene (#692)"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

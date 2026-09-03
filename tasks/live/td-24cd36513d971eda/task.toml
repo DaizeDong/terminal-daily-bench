@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-24cd36513d971eda"
 description = "fix(gda): close the res://../ containment bypass in path_outside_project"
-keywords = ["debugging", "file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C1", "C3", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

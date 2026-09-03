@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-51e60428e25087f9"
 description = "fix(groq): include usage in streamed chat completions"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

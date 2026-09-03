@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-dd752a30a6221a62"
 description = "🐛 Inherit panel label fonts"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

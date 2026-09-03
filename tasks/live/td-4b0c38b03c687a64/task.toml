@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-4b0c38b03c687a64"
 description = "Keep the event scheduler off while restoring a backup"
-keywords = ["automation", "refactoring", "software-engineering", "system-administration", "testing", "tooling"]
+keywords = ["C5", "C4", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

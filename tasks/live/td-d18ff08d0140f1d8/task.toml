@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-d18ff08d0140f1d8"
 description = "Update dt_update to use ISO 8601 Date Format"
-keywords = ["build-tools", "compilation", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

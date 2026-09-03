@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-b33b984045ec5238"
 description = "Avoid cutting molecules across periodic boundaries"
-keywords = ["optimization", "performance", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

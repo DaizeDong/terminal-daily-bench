@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-8d5e2a2f6742546f"
 description = "fix(llm): suppress spurious \"trying again\" warning on the final retry attempt"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

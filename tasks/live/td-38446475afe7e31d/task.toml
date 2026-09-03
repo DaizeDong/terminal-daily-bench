@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-38446475afe7e31d"
 description = "Canonicalize inverse Klein j-invariant"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

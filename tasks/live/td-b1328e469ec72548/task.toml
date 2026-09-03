@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-b1328e469ec72548"
 description = "Check for empty patternProperties"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

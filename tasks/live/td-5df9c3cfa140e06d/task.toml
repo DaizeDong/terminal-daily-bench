@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-5df9c3cfa140e06d"
 description = "fix: probe /categoryscheme on providers passed as a URL"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

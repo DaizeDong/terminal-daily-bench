@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-c3e886de7101382e"
 description = "Install bundled Agent Skill"
-keywords = ["automation", "build-tools", "compilation", "file-operations", "filesystem", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C1", "C2", "C4", "C5", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

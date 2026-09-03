@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-43ce494bee2f12ab"
 description = "Feat(models): add public params_array and param_indices API"
-keywords = ["data-processing", "machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C13", "C5", "C4", "C6"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

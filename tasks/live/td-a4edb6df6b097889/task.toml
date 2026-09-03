@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a4edb6df6b097889"
 description = "Fix get_real_name for names with more than two dotted parts (#332)"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

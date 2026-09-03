@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-879741366d0283e9"
 description = "Admit larger bounded integer Sidon profiles"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

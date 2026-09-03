@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-625db5b8361e8185"
 description = "fix(isbn, iban, mac_address): raise ValidationError for non-string input"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

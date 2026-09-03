@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-58db3aac4e1612d0"
 description = "Add automatic durable run checkpoints"
-keywords = ["automation", "cryptography", "data-processing", "file-operations", "filesystem", "optimization", "performance", "refactoring", "security", "software-engineering", "testing", "tooling", "version-control"]
+keywords = ["C5", "C11", "C1", "C4", "C6", "C8", "C10", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

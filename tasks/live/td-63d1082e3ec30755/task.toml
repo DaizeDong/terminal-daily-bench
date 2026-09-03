@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-63d1082e3ec30755"
 description = "fix(build): include pypr-client when installing from source (#236)"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

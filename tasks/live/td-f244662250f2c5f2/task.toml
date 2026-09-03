@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-f244662250f2c5f2"
 description = "fix(risk-xray): honor bars_per_year=None in cross-market annualization"
-keywords = ["cryptography", "security", "testing"]
+keywords = ["C5", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

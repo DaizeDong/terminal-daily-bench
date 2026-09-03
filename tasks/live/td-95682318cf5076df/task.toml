@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-95682318cf5076df"
 description = "fix: utf-8 reads, cost-only csv/jsonl rows, cross-file copilot dedup"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

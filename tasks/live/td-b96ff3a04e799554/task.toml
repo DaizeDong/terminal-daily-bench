@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-b96ff3a04e799554"
 description = "[Bug] Custom function imports: namespace to a copy, never in place"
-keywords = ["build-tools", "compilation", "machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C2", "C4", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-26e6f707af4b6d52"
 description = "Validate the resolved chunk_overlap for float values in TokenChunker"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

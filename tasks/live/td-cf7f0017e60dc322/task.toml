@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-cf7f0017e60dc322"
 description = "Fix cplot points rounding (#379)"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

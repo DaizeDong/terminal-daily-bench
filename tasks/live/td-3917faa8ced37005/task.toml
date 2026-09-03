@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-3917faa8ced37005"
 description = "fix(download): stop counting the final write buffer twice in bytes_acc"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

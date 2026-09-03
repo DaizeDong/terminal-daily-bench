@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-aff6aeafeb0c1762"
 description = "fix: point the Chunk error at group_cols, which exists"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C3", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

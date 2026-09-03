@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-230b9679c632f9cd"
 description = "fix: match the DELETE in a MERGE regardless of case"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

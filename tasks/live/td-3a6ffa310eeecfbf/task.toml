@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-3a6ffa310eeecfbf"
 description = "fix: treat None cells as non-matching in capture"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

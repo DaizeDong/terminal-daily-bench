@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-babc61454b159031"
 description = "Fix argument order in scale_size_datetime.__post_init__"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

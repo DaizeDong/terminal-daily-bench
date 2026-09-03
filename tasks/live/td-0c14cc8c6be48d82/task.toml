@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-0c14cc8c6be48d82"
 description = "fix: jail extract_archive members to the destination"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C1", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

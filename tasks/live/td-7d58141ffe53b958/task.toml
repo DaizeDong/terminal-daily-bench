@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-7d58141ffe53b958"
 description = "feat(funnel): add Teslemetry stream publisher"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-13eb0948b38e2315"
 description = "Send anonymous consent_declined events to Sentry Logs."
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C3", "C4", "C5"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

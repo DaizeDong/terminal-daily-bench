@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-759df575203ef9a3"
 description = "ci(bench): wire bench-check into all-tests poe sequence"
-keywords = ["build-tools", "compilation", "optimization", "performance", "testing"]
+keywords = ["C2", "C5", "C11"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

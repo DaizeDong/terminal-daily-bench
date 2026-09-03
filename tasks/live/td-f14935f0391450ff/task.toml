@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-f14935f0391450ff"
 description = "Allow to pass non-rectangular grids to the polynomial fitting"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

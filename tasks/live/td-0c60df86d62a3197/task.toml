@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-0c60df86d62a3197"
 description = "Score children of beam states through their parents"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

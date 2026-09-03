@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-f25372f793be0a54"
 description = "Add dense prism_omdm/oqdq/osds/oydy sample triangles"
-keywords = ["data-processing", "refactoring", "software-engineering", "testing"]
+keywords = ["C6", "C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

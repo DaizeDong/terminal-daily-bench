@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-90882f4ffb755d10"
 description = "Follow KLayout's order for Path transformations"
-keywords = ["file-operations", "filesystem", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C1", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

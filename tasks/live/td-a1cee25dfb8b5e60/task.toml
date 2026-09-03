@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-a1cee25dfb8b5e60"
 description = "chore: menambahkan fungsi dari angka katalan"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

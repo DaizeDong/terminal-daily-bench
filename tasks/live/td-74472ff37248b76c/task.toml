@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-74472ff37248b76c"
 description = "feat(confluence): export plantumlcloud macro as a code block"
-keywords = ["cryptography", "refactoring", "security", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

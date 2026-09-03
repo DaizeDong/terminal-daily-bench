@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-69a8cad24a66e133"
 description = "Add additive.cyclic_prefix_sum.residue_profile.compute operation"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

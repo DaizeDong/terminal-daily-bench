@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ffec7335d833adde"
 description = "fix: explain HyperEVM HyperCore read failures and unlist two wrongly blacklisted vaults"
-keywords = ["debugging", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C3", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

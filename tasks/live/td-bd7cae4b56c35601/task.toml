@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-bd7cae4b56c35601"
 description = "feat: add split-conformal prediction intervals"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C13", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-9fc9572b9157bd59"
 description = "[ckpt, fsdp] fix: FSDP model merger concatenates replicated buffers"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

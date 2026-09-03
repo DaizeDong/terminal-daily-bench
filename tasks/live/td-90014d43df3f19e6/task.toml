@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-90014d43df3f19e6"
 description = "fix: split diarized transcripts at speaker turns"
-keywords = ["machine-learning", "refactoring", "software-engineering", "testing"]
+keywords = ["C4", "C5", "C13"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

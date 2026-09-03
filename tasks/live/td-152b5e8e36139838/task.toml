@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-152b5e8e36139838"
 description = "Keep BlockCache and BackgroundBlockCache usable after pickling"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-54b769dc3d661e39"
 description = "Fix AttributeError when accessing sh.SignalException_SIGUSR1 / SIGUSR2"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

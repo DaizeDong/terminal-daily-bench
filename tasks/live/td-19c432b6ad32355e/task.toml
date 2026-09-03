@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-19c432b6ad32355e"
 description = "Harden checkpoint writes and restore Python 3.9 typing compatibility in legacy trainer"
-keywords = ["automation", "file-operations", "filesystem", "machine-learning", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C5", "C13", "C1", "C4", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-ed22c24f331c8805"
 description = "Fix stale keep-alive connection reuse; unpin werkzeug (closes #645)"
-keywords = ["build-tools", "compilation", "networking", "protocols", "refactoring", "software-engineering", "system-administration", "testing"]
+keywords = ["C5", "C2", "C4", "C7"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

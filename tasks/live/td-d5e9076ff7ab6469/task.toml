@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-d5e9076ff7ab6469"
 description = "fix: list every artifact, not just json files"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

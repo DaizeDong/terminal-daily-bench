@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-389b6d72685fa416"
 description = "feat(state-space): support quasi-periodic Periodic x Matern product SDEs"
-keywords = ["refactoring", "software-engineering", "testing"]
+keywords = ["C5", "C4"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

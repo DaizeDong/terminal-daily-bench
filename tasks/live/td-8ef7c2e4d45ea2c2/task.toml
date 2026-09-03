@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-8ef7c2e4d45ea2c2"
 description = "Rewrite the release checklist and make TORCHQUAD_LOG_LEVEL work"
-keywords = ["automation", "machine-learning", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C13", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

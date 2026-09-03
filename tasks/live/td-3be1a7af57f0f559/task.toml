@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-3be1a7af57f0f559"
 description = "fix(parser): diagnose MinerU/pdftext PageChars incompatibility"
-keywords = ["automation", "refactoring", "software-engineering", "testing", "tooling"]
+keywords = ["C4", "C5", "C14"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"

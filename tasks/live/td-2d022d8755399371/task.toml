@@ -4,7 +4,7 @@ artifacts = []
 [task]
 name = "terminal-daily/td-2d022d8755399371"
 description = "Recover transient post-action failures without rerunning completed work"
-keywords = ["cryptography", "debugging", "refactoring", "security", "software-engineering", "testing"]
+keywords = ["C5", "C3", "C4", "C8"]
 [[task.authors]]
 name = "terminal-daily"
 email = "terminal-daily@localhost.invalid"
