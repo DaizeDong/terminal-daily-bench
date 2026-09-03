@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/test_adapter_result_redaction.py::test_the_specimen_is_actually_redactable",
+    "tests/test_adapter_result_redaction.py::test_helper_walks_containers_and_objects",
+    "tests/test_adapter_result_redaction.py::test_helper_never_raises_and_never_fails_closed",
+    "tests/test_adapter_result_redaction.py::test_helper_terminates_on_a_self_referencing_result",
+    "tests/test_adapter_result_redaction.py::test_langchain_redacts_the_result",
+    "tests/test_adapter_result_redaction.py::test_langchain_redacts_an_async_result",
+    "tests/test_adapter_result_redaction.py::test_crewai_redacts_the_result",
+    "tests/test_adapter_result_redaction.py::test_openai_agents_redacts_a_plain_callable",
+    "tests/test_adapter_result_redaction.py::test_openai_agents_redacts_a_function_tool",
+    "tests/test_adapter_result_redaction.py::test_agno_redacts_the_result",
+    "tests/test_adapter_result_redaction.py::test_browser_use_redacts_the_action_result",
+    "tests/test_adapter_result_redaction.py::test_google_adk_after_callback_substitutes_a_masked_response",
+    "tests/test_adapter_result_redaction.py::test_redaction_does_not_disturb_a_clean_result",
+    "tests/test_adapter_result_redaction.py::test_a_denied_call_still_returns_the_denial_not_a_result",
+    "tests/test_adapter_result_redaction.py::test_pre_action_only_adapters_say_so",
+    "tests/test_surface_conformance.py::test_surface_registry_is_wellformed",
+    "tests/test_surface_conformance.py::test_every_result_carrying_surface_masks_the_same_secret"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

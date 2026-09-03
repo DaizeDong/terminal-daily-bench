@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "tests/test_openalex_scope_link_live.py::test_protocol_dry_run_locks_eight_cases_without_live_authority",
+    "tests/test_openalex_scope_link_live.py::test_complete_run_reaches_decision_and_artifact_seams",
+    "tests/test_openalex_scope_link_live.py::test_request_latency_reaches_journal_csv_and_provider_summary",
+    "tests/test_openalex_scope_link_live.py::test_every_provider_row_and_decision_reaches_csv_boundary",
+    "tests/test_openalex_scope_link_live.py::test_invalid_authorization_fails_before_adapter_and_output",
+    "tests/test_openalex_scope_link_live.py::test_configured_key_fails_before_adapter_and_output",
+    "tests/test_openalex_scope_link_live.py::test_existing_output_fails_before_adapter_construction",
+    "tests/test_openalex_scope_link_live.py::test_implementation_hash_drift_fails_before_factory_and_output",
+    "tests/test_openalex_scope_link_live.py::test_soft_stop_commits_first_case_before_stopping",
+    "tests/test_openalex_scope_link_live.py::test_provider_failure_remains_an_inspectable_partial_result",
+    "tests/test_openalex_scope_link_live.py::test_invalid_response_is_not_reported_as_a_provider_pass",
+    "tests/test_openalex_scope_link_live.py::test_identity_mismatch_preserves_response_but_blocks_evaluation",
+    "tests/test_openalex_scope_link_live.py::test_completed_mechanical_failure_is_not_a_source_value_pass",
+    "tests/test_openalex_scope_link_live.py::test_artifacts_expose_no_key_or_unrelated_process_secret",
+    "tests/test_openalex_scope_link_live.py::test_production_worker_does_not_import_scope_link_live_components"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

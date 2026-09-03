@@ -1,0 +1,20 @@
+{
+  "failing_test_ids": [
+    "tests/test_email_provider_store.py::test_provider_schema_and_defaults",
+    "tests/test_email_provider_store.py::test_inbucket_requires_base_and_domain",
+    "tests/test_email_provider_store.py::test_cloudflare_admin_create_does_not_probe_mailbox_domains",
+    "tests/test_inbucket.py::test_normalize_base",
+    "tests/test_inbucket.py::test_create_address_requires_domain",
+    "tests/test_inbucket.py::test_parse_domains_and_levels",
+    "tests/test_inbucket.py::test_random_email_domain_rotation_and_levels",
+    "tests/test_inbucket.py::test_create_address_uses_random_levels",
+    "tests/test_inbucket.py::test_wait_for_code_detail_body_and_cleanup",
+    "tests/test_inbucket.py::test_wait_for_code_subject_short_circuit",
+    "tests/test_inbucket.py::test_wait_for_code_timeout_purges",
+    "tests/test_inbucket.py::test_wait_for_code_requires_base",
+    "tests/test_inbucket.py::test_list_messages_raises_on_http_error",
+    "tests/test_inbucket.py::test_connectivity_probe"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

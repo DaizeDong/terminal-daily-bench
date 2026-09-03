@@ -396,6 +396,17 @@
   }
  },
  {
+  "task": "td-1743dd631cb18b27",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-03",
+   "age_days": 0,
+   "source_ledger": "2026-09-03/accepted.json",
+   "selected_ledger_date": "2026-09-03"
+  }
+ },
+ {
   "task": "td-19c432b6ad32355e",
   "mode": "live",
   "suite_window": {
@@ -639,6 +650,17 @@
  },
  {
   "task": "td-2778cf78af9a69e5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-03",
+   "age_days": 0,
+   "source_ledger": "2026-09-03/accepted.json",
+   "selected_ledger_date": "2026-09-03"
+  }
+ },
+ {
+  "task": "td-2851abf600a493e5",
   "mode": "live",
   "suite_window": {
    "origin": "fresh",
@@ -1661,6 +1683,17 @@
   }
  },
  {
+  "task": "td-61e8a47aab776300",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-03",
+   "age_days": 0,
+   "source_ledger": "2026-09-03/accepted.json",
+   "selected_ledger_date": "2026-09-03"
+  }
+ },
+ {
   "task": "td-61eeddb64c4e346d",
   "mode": "live",
   "suite_window": {
@@ -1750,6 +1783,17 @@
  },
  {
   "task": "td-67724a588b70ee5c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-03",
+   "age_days": 0,
+   "source_ledger": "2026-09-03/accepted.json",
+   "selected_ledger_date": "2026-09-03"
+  }
+ },
+ {
+  "task": "td-699c8637e7c1e14f",
   "mode": "live",
   "suite_window": {
    "origin": "fresh",
@@ -3708,6 +3752,17 @@
  },
  {
   "task": "td-df7630c83c2aad03",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-03",
+   "age_days": 0,
+   "source_ledger": "2026-09-03/accepted.json",
+   "selected_ledger_date": "2026-09-03"
+  }
+ },
+ {
+  "task": "td-dffd8b0ed57c22b7",
   "mode": "live",
   "suite_window": {
    "origin": "fresh",
