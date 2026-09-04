@@ -1,0 +1,4281 @@
+[
+ {
+  "task": "td-00ef11f5119f8a79",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0176ff59ad1bb441",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0263cd1c168cbeb6",
+  "mode": "archive",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-03137cdb7a9cbaaa",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0394876511090fba",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-048a5ff7be96681e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-049839985189ebab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0565a597cca1cf43",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-06b7b75b9a916207",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-06b850f0ba89c481",
+  "mode": "archive",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-06f75e6d76a29ddc",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-07a54c4e684f2fc7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-07a9c3e377139778",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-07f6292be0cb0bff",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-080f736f685d2560",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0822994c56aa9aed",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0987fce7d3a8aab4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-09abb8690a2dc7a4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0bc205db2e08e70f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0c14cc8c6be48d82",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0c60df86d62a3197",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0f2878cf111c8d16",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-0f76fe4aa9928943",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-105e4dee15a31679",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1146a5d4e5e987d8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-13eb0948b38e2315",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-14227cc59b6e7d6d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-14d34f6a3408efbf",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-14e232e3b26f152e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-150cc24fe18ca0bf",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-152b5e8e36139838",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-15ced6f65a875e3e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-15e796f0ba847e2d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-15f749f1a9de3073",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-172882a1d04a497b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-17400aa343ff3056",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1743dd631cb18b27",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-19c432b6ad32355e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1a9ac291f60512de",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1bba65ed477c9e29",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1bfc0571c6c30dc0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1c0e0f84b86e794e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1c4fe4ee0dce381e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1d71182a2df2b64d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1e814dad6ba03755",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-1f780bedacdcb6de",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2039b165affdc1b4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-20eafaac20cbf4f8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-21c4c7ba73da2ad6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-224f71aa33f5b06f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-230aaa1c5c1dabd2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-230b9679c632f9cd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-24cd36513d971eda",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-25198976d4e3cc28",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-26dcf1ddfc6cd8d2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-26e6f707af4b6d52",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-27215bb023cab249",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2778cf78af9a69e5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2851abf600a493e5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-288d17d23c160bcd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2a2150b8e1dd2372",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2b6d90dbdf14202e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2c6f22e9f33d9472",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2d022d8755399371",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2e3daefd566782e4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2eed3550c27b3d39",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-2fb46c50881a0d73",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-30f08c1e9e822109",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-311fa42184a8e0a2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-32333eabb38ced69",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-32786aa898f069e9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-334cd88fbbab8fce",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-33634ae87ab2c78b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-33ffc1bdbd73167b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-34bc19c54c85f5ab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-352f739efbf001d0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-353d3a1ca1556d1b",
+  "mode": "archive",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-358ac0fdef9266ac",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-36ae31b683b95793",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-36b2d2254294be44",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-373d99a89e89d443",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-38446475afe7e31d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-387b0882dad45c60",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-389b6d72685fa416",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3917faa8ced37005",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-394d1de1a5fcb0f5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-399edd99273e7a61",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-39c299153c88f866",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3a66181dbba62f77",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3a6ffa310eeecfbf",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3b066bf93e5446c0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3b88c35e1033b47f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3be1a7af57f0f559",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3cbae1d0039f93bb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3db516c35ed296e7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3f82c2e5c91b7c6e",
+  "mode": "archive",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-3fe7f40956f9dbd1",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-40e0a8fdf306d4c7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-40fc393f566a672b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-41208e9bb575e61f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-430816a36f6f7749",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4314f1556f080648",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4369ed3a387d11e8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-43ce494bee2f12ab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-43d3f430db891b33",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-44955d091b1fe394",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-471fc13e09aa9544",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-47590e33b7ff6e17",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4769f3f9e2a4ae4a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-49258d4b396257a7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4972e49463869878",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4a3ec98af511ae72",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4a5a61372d1b0d20",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4b0c38b03c687a64",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4b0e67660dabca0c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4df6c6d83bb4e6db",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4e5b76c7a70f53c2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-4eb7aa52cf577648",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-50a25ba01fca8380",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5118db1c7e676f2d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-516ccca020c3e757",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-51b5e6ef9cc54c19",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-51e60428e25087f9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-51f38f8f90cbe9d6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-52694fc66b4c78d7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-534b263dc93dff7f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5395dde02cc33322",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-543ddbe4c9fcc952",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-54b769dc3d661e39",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-55800f501aec33e4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-559b4b2bee7d964b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-55cb78b3af004049",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-56a45b1551b882f6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-57aba808ba464747",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-582d776ee8fd7c28",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-58db3aac4e1612d0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5a441747bf3c12d7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5af44f6afff6bd11",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5b13f4573f056643",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5b2b7e16b5d0a3b6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5b45b6e9b413d312",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5b9782699a22be02",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5cf73dbf59c9890c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5d62365c81603bb4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5d9aa5151dd271d8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5df559d6373c4047",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5df9c3cfa140e06d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5e510b1f74e88ba5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5ea248d3cc1b69d2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5ef7d8897760e636",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-5ff817d8ba376d97",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-601b9b9fe1a248c6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6025f2641895f71c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-61e8a47aab776300",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-61eeddb64c4e346d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-625055c3e86304e4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-625db5b8361e8185",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-62760ad1d4ed827e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-63d1082e3ec30755",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-64bae8ea0316c8dd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-65baed5c1cd731c6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-66d01cba2ad0adc2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-67724a588b70ee5c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-68ef492b6fb3956e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-699c8637e7c1e14f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-69a8cad24a66e133",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-69ec1d16aa21e614",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6c681c335b468cb1",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6c9b088335feb746",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6d34cb72772b435c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6e160b3b79439907",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6e360ec3a6df9553",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6ee6220ba8538197",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-6fa49c99635bde28",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-71076ad73f0a70ef",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-721c47ae86f458ad",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-72e890e35e617758",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7343e19254595198",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-742707b9dfa97ee6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-74472ff37248b76c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-74f5e5be783138f5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-74fcfa9f7bfbd244",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-752955c23836a7cd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-759df575203ef9a3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-78ce543722ea2671",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-78d10de293034682",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-79e4ef873e5ebae2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7c179caa8f1ccc93",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7d4a08c4a21ff9bd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7d58141ffe53b958",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7e0f5df483af83b0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7e5287e8e7409f1a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7e7575ebf9223a97",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-7f900bc124db1992",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-813e0e2e831c5f4e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-816cd502918952e4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-81a07fa06dea82eb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-82552e3193df6b28",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-825a7aceb42df15d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-830e2cb7ef48c7d0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8338f63dfc06f594",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-84211402e52b7db8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8428efb3f4cf1808",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-84585d197069ae10",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-85527311cc954a5c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-85c32f1f83a10854",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-87320e1f66890322",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-874ad766dc41cec6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-875886701b098a09",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-87973214ffbc956b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-879741366d0283e9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-87ce1ba357e33d17",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-88670ed2736eaf7d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-895bbe3250273a27",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-89607c9dc42e489d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-89c724b066223878",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-89e5d9486ac5302e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8a28b19587a651d7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8a8eb962478238ec",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8b5aac24794a8b67",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8cd8140345c51c40",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8d5e2a2f6742546f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8dab2f1a4ab85370",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8e9ce87e4fecd3ab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8ef7c2e4d45ea2c2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8f9410894b2f593f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-8f9cf9573d08743d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-90014d43df3f19e6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-90882f4ffb755d10",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-915fb015393896c3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-91c66de827baccc3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-922170bc16461832",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-948087ebc5fe96b7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9482e2d648b0ae23",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-94d3134cf941d53e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-94e31e8cbbc1603a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-95682318cf5076df",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-956fb742857d1196",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-95cde8aeb800cab3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-97a730c73d00d562",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9938369bcadeee2a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-99cb6a44316ab7c0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9b9b343dca7c73d8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9bcb81f0a5ac4397",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9bda23f6e998c93a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9c449dd516f2d287",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9cf114a0dddae8e3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9d2e0cd9e7c36ba2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9e23dcf705073f54",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9f9c3c3e77583270",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-9fc9572b9157bd59",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a064f23d667f6f40",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a0c6f9f85e0ba169",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a17899d8344280cb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a1cee25dfb8b5e60",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a20467be490665ed",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a29f440dfa2644da",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a2bb9a31ec960314",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a3142cfcc86776ef",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a387d2c0ce265868",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a394aceaa7a4f494",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a3ca085f88f6d7c6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a4b052da16adcb12",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a4bfa0cafaaf28a7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a4edb6df6b097889",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a571170c80fc6c68",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a594018f6d2ff61e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a676014239506440",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a7129807b5083d30",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a861a1ce58ae89f6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a9d231f07bef68a8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-a9ebb4f4fb30105a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ab5b287955cfaa6a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-abfc38940af48dcc",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-accbe3cdf9578ba9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ad6ed82de86f028e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-af816d5955468550",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-afe16b050c7c0503",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-aff6aeafeb0c1762",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b04c0ae44ebb5e47",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b0f80251c4fef56b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b1328e469ec72548",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b144565a4cba8cdb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b162f85c912db462",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b36e5ea0a40ec451",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b4bab058bf16714d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b4bb27e8a40a8fa6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b634dbe9f6ec0de6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b96ff3a04e799554",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-b99ceee1499ba72c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-babc61454b159031",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-bb1cd513dd91bbc8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-bd7cae4b56c35601",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-bdb456d897f1000c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-bf5fb20e5a5f3061",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c0db29c922d86a0d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c0fb0b8f95e1dcc6",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c24882e5c913bebb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c2a09778d4aab45c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c35dc55ec67c2d66",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c3af68e049cc844b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c3e886de7101382e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c6ac4c9269f92b6e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c7e10d87a81d9fca",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-c98abb3ccb18d1a5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ca8a25a1f47574ea",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ca9e708618205f75",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-cab898df07b97cee",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-cb5468b6db009ea8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-cca0100b543d14b5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ce0e54665f78bbba",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ce0f95925f05b574",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-cf7f0017e60dc322",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d04a48c5dd71d847",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d1612ab4c98910b9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d16cb503c8850e5b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d18e8d3844cbebd4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d18ff08d0140f1d8",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d1fece63f49d45a5",
+  "mode": "archive",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d31ca8c9e38dc5ab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d357c1710c0e42ee",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d3850ab230f48161",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d3ea7ea77fed3f2e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d3fd0713d0b48200",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d40a4be39c0b73be",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d4c43dd0a998e46b",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d59fc46e2c0f7464",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d5e9076ff7ab6469",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d6db8b588a9a7d4f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d81ad1d0281ae5de",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d84121e7d8aabf14",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d893f2c32c24c6c9",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d906fffddc9ef368",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d9e1fe16038cb01e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-d9f9f406476c2c20",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-da6470549459cbd5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-da888051261e7385",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-dad378d82920d5c0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-dc4268d1a8ded576",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-dd752a30a6221a62",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-de7f4f0514d27bec",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-de9dff166e2f0c6e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-df591340f4ab6622",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-df7630c83c2aad03",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-dffd8b0ed57c22b7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e0c95e8e7b6db9f0",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e1fa8b54aa8048fb",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e36e93ff05021b8c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e3cca77cd6d3fb34",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e462289d62e5142f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e5d815eef932c2b5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e690981a5b0cd851",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e6adaed1000d0dc4",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e745d06132dd2551",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e75813c215b9528f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e77a512bb41bf293",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e7f480c8c0064b1a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e8c0b5c98451433e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e9146de5f34c0ee5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-e9b1bc1990f66b7a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ea7284aef28ff935",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ead8b5e21966f497",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ec44802af803e553",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ed1f2e0d64f9c73e",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ed22c24f331c8805",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ed59ce9a37ee6506",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ee8e6395f0aa0a0c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ef26de2e44d9d21f",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ef39d8d54dc8444c",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ef472f7a4e151ae5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ef931f2221401cab",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-efd94829c22a15dd",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f0df5b722c1c5433",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f14935f0391450ff",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f244662250f2c5f2",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f25372f793be0a54",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f2ba778740a2154a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f4356efef9ec7349",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f54b06ee209f82d3",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f66e15de833399bf",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f859914df0ceb48d",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f8b715bf7b494910",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-f8be69fa21e4fdef",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-fc9e75463c4a61ea",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-fded9799d8e5d1ce",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-fe3a30736af5cc49",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-feca3099b61e90b7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ffec7335d833adde",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-fff2af2450b12f27",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ }
+]

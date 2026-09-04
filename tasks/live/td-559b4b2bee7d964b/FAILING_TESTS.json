@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "multiversx_sdk_cli/tests/test_cli_shared.py::test_parse_proxy_headers_accepts_valid_headers",
+    "multiversx_sdk_cli/tests/test_cli_shared.py::test_parse_proxy_headers_rejects_empty_key",
+    "multiversx_sdk_cli/tests/test_cli_shared.py::test_parse_proxy_headers_rejects_whitespace_only_key",
+    "multiversx_sdk_cli/tests/test_config_env.py::test_get_proxy_headers_supports_json_object_values_with_spaces",
+    "multiversx_sdk_cli/tests/test_config_env.py::test_get_proxy_headers_supports_legacy_space_separated_format",
+    "multiversx_sdk_cli/tests/test_config_env.py::test_prepare_proxy_headers_value_stores_json_object",
+    "multiversx_sdk_cli/tests/test_config_env.py::test_prepare_proxy_headers_value_rejects_invalid_json_object",
+    "multiversx_sdk_cli/tests/test_proxy.py::test_proxy_extra_headers",
+    "multiversx_sdk_cli/tests/test_proxy.py::test_env_proxy_headers_are_applied_when_cli_headers_missing"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,23 @@
+{
+  "failing_test_ids": [
+    "tests/unit/clients/test_local_fs_client.py::<class>::test_scan_dir",
+    "tests/unit/credentials/test_injection.py::test_similarities",
+    "tests/unit/databases/test_api.py::test_authenticate_db",
+    "tests/unit/fs/test_api.py::test_authenticate_scandir",
+    "tests/unit/fs/test_api.py::test_authenticate_listdir",
+    "tests/unit/fs/test_api.py::test_authenticate_walk",
+    "tests/unit/streams/test_base_stream.py::test_mode",
+    "tests/unit/streams/test_base_stream.py::test_mode_matches_wrapped_writer",
+    "tests/unit/streams/test_base_stream.py::TestStringToBytesClientReader::test_mode",
+    "tests/unit/streams/test_base_stream.py::TestStringToBytesClientWriter::test_mode",
+    "tests/unit/streams/test_file_handler.py::test_file_empty_scheme",
+    "tests/unit/streams/test_file_handler.py::test_file_scheme",
+    "tests/unit/streams/test_stream_handler.py::test_open_reader_for_string",
+    "tests/unit/streams/test_stream_handler.py::test_open_reader_for_bytes",
+    "tests/unit/streams/test_stream_handler.py::test_open_writer_for_string",
+    "tests/unit/streams/test_stream_handler.py::test_open_writer_for_string_supports_pandas_to_csv",
+    "tests/unit/streams/test_stream_handler.py::test_open_writer_for_bytes"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

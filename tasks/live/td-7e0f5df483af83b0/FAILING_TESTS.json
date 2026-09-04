@@ -1,0 +1,21 @@
+{
+  "failing_test_ids": [
+    "test_blocklist_import.py::<class>::test_defaults",
+    "test_blocklist_import.py::test_heartbeat_interval",
+    "test_blocklist_import.py::TestCrowdSecLAPIUserAgent::test_lapi_user_agent_includes_version",
+    "test_blocklist_import.py::TestCrowdSecLAPIUserAgent::test_lapi_headers_use_version_user_agent",
+    "test_blocklist_import.py::TestCrowdSecLAPIUserAgent::test_runtime_os_metadata_uses_os_release",
+    "test_blocklist_import.py::TestCrowdSecLAPIHeartbeat::test_heartbeat_success",
+    "test_blocklist_import.py::TestCrowdSecLAPIHeartbeat::test_heartbeat_without_machine_auth_returns_false",
+    "test_blocklist_import.py::TestCrowdSecLAPIHeartbeat::test_heartbeat_non_200_returns_false",
+    "test_blocklist_import.py::TestCrowdSecLAPIUsageMetrics::test_send_usage_metrics_success",
+    "test_blocklist_import.py::TestCrowdSecLAPIUsageMetrics::test_send_usage_metrics_without_machine_auth_returns_false",
+    "test_blocklist_import.py::TestCrowdSecLAPIUsageMetrics::test_send_usage_metrics_non_success_returns_false",
+    "test_blocklist_import.py::<class>::test_signal_handler_sets_shutdown",
+    "test_blocklist_import.py::<class>::test_run_on_start_false_skips_first_run",
+    "test_blocklist_import.py::test_heartbeat_loop_sends_heartbeat_until_stopped",
+    "test_blocklist_import.py::test_heartbeat_loop_disabled_by_zero_interval"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
