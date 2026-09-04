@@ -1,6 +1,6 @@
 {
  "schema_version": "tdb-capability-v1",
- "generated": "2026-09-04T16:15:56Z",
+ "generated": "2026-09-04T17:25:12Z",
  "generator": "web/gen_capability_data.py",
  "rules_source": {
   "repo": "terminal-daily (research pipeline, separate checkout)",
@@ -47,10 +47,10 @@
   ]
  },
  "catalogue": {
-  "n_packages_scanned": 455,
-  "n_tasks": 448,
+  "n_packages_scanned": 456,
+  "n_tasks": 449,
   "n_tasks_verifiable": 37,
-  "n_tasks_unverifiable": 411,
+  "n_tasks_unverifiable": 412,
   "unverifiable_reason": "live packages withhold solution/oracle.patch and tests/test_patch.diff -- the tagger's only inputs -- so their task.toml keywords are reported as declared, never re-derived",
   "unverifiable_task_ids": [
    "td-00ef11f5119f8a79",
@@ -382,6 +382,7 @@
    "td-cca0100b543d14b5",
    "td-ce0e54665f78bbba",
    "td-ce0f95925f05b574",
+   "td-cf77df8b2872b979",
    "td-cf7f0017e60dc322",
    "td-d04a48c5dd71d847",
    "td-d0fe8274878b8840",

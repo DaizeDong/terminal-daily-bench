@@ -3432,6 +3432,17 @@
   }
  },
  {
+  "task": "td-cf77df8b2872b979",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
   "task": "td-cf7f0017e60dc322",
   "mode": "live",
   "suite_window": {

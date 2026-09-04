@@ -1,0 +1,18 @@
+{
+  "failing_test_ids": [
+    "tests/tensor/rewriting/linalg/test_summary.py::test_slogdet_specialization",
+    "tests/tensor/rewriting/linalg/test_summary.py::test_local_log_prod_to_sum_log_unknown_sign",
+    "tests/tensor/rewriting/test_math.py::test_log_sqrt",
+    "tests/tensor/rewriting/test_math.py::test_log_sqrt_integer_input",
+    "tests/tensor/rewriting/test_math.py::test_log_sqr",
+    "tests/tensor/rewriting/test_math.py::test_log_sqr_extreme_magnitudes",
+    "tests/tensor/rewriting/test_math.py::test_useless_abs",
+    "tests/tensor/rewriting/test_math.py::test_useless_abs_keeps_signed_zero",
+    "tests/tensor/rewriting/test_math.py::test_useless_abs_signed_integer_overflow",
+    "tests/tensor/rewriting/test_math.py::test_sqr_rewrites_skip_complex",
+    "tests/tensor/test_subtensor.py::<class>::test_constant_data_respects_strictness",
+    "tests/tensor/test_subtensor.py::<class>::test_proves_non_negative_but_not_strict_positive"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
