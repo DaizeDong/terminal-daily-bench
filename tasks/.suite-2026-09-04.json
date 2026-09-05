@@ -264,6 +264,17 @@
   }
  },
  {
+  "task": "td-10d13616da715aca",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
   "task": "td-1146a5d4e5e987d8",
   "mode": "live",
   "suite_window": {
@@ -628,6 +639,17 @@
  },
  {
   "task": "td-2778cf78af9a69e5",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-27b4877df50c6836",
   "mode": "live",
   "suite_window": {
    "origin": "fresh",

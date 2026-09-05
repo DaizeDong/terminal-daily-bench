@@ -1,0 +1,28 @@
+{
+  "failing_test_ids": [
+    "tests/test_remote_url.py::TestIsRemoteUrl::test_is_remote_url",
+    "tests/test_remote_url.py::TestIsRemoteUrl::test_remote_url_protocols_tuple",
+    "tests/test_remote_url.py::TestValidateRemoteUrl::test_non_http_protocol_returns_true",
+    "tests/test_remote_url.py::TestValidateRemoteUrl::test_head_request_success",
+    "tests/test_remote_url.py::TestValidateRemoteUrl::test_url_not_accessible",
+    "tests/test_remote_url.py::TestNpySavename::test_local_path",
+    "tests/test_remote_url.py::TestNpySavename::test_remote_url_with_filename",
+    "tests/test_remote_url.py::TestNpySavename::test_remote_url_without_filename",
+    "tests/test_remote_url.py::TestVideoSpeechTransformerParams::test_default_params",
+    "tests/test_remote_url.py::TestVideoSpeechTransformerParams::test_extract_audio_first_param",
+    "tests/test_remote_url.py::TestVideoSpeechTransformerParams::test_max_duration_seconds_param",
+    "tests/test_remote_url.py::TestSpeechTransformersIsRemoteUrl::test_is_remote_url_imported",
+    "tests/test_remote_url.py::TestRemoteUrlIntegration::test_url_detection_and_savename_consistency",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_compute_weighted_median_offset_basic",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_compute_weighted_median_offset_filters_low_scores",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_compute_weighted_median_offset_no_valid_segments",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_video_speech_transformer_multi_segment_params",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_calculate_segment_positions",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_calculate_segment_positions_with_skip_intro_outro",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_calculate_segment_positions_short_video",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_calculate_segment_positions_margins_exceed_duration",
+    "tests/test_remote_url.py::TestMultiSegmentSync::test_calculate_segment_positions_boundary_checks"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
