@@ -1,0 +1,27 @@
+{
+  "failing_test_ids": [
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_algebraic_block",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_statespace_block_is_exact",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_integrator_is_exact",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_to_statespace_is_a_pure_query",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_linearize_returns_the_model",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_non_linearizable_block_raises",
+    "tests/pathsim/optim/test_linearization.py::TestBlockToStateSpace::test_non_linearizable_block_raises_from_simulation",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_cascade",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_labels_are_consistent_across_categories",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_negative_feedback",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_mimo_roundtrip",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_algebraic_loop_is_resolved",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_ill_posed_loop_raises",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_to_statespace_is_a_pure_query",
+    "tests/pathsim/optim/test_linearization.py::TestSimulationToStateSpace::test_small_signal_response_matches_the_nonlinear_system",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_state_is_recursive",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_state_setter_distributes",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_derivative_is_recursive",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_interface_defines_the_model",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_subsystem_composes_in_system_assembly",
+    "tests/pathsim/optim/test_linearization.py::TestSubsystemToStateSpace::test_nested_subsystems"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

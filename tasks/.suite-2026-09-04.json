@@ -176,6 +176,17 @@
   }
  },
  {
+  "task": "td-084cf6f831d9eb3a",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
   "task": "td-0987fce7d3a8aab4",
   "mode": "live",
   "suite_window": {
@@ -2211,6 +2222,17 @@
   }
  },
  {
+  "task": "td-826087bc81783afe",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
   "task": "td-830e2cb7ef48c7d0",
   "mode": "live",
   "suite_window": {
@@ -3366,6 +3388,17 @@
   }
  },
  {
+  "task": "td-c934d1b87afe0889",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
   "task": "td-c98abb3ccb18d1a5",
   "mode": "live",
   "suite_window": {
@@ -4280,6 +4313,17 @@
  },
  {
   "task": "td-feca3099b61e90b7",
+  "mode": "live",
+  "suite_window": {
+   "origin": "fresh",
+   "certified_date": "2026-09-04",
+   "age_days": 0,
+   "source_ledger": "2026-09-04/accepted.json",
+   "selected_ledger_date": "2026-09-04"
+  }
+ },
+ {
+  "task": "td-ff462bd65910d047",
   "mode": "live",
   "suite_window": {
    "origin": "fresh",

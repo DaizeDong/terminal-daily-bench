@@ -1,0 +1,28 @@
+{
+  "failing_test_ids": [
+    "tests/ir/analysis/test_facts.py::test_a_delete_is_a_write_and_is_told_apart",
+    "tests/ir/analysis/test_facts.py::test_a_template_construction_names_a_positional_argument",
+    "tests/ir/analysis/test_facts.py::test_a_keyword_only_construction_names_no_positional_template",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_the_rule_is_active",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_unwritten_field_flagged_by_name",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_written_fields_not_flagged",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_attribute_write_sources_only_written_fields",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_externally_populated_projection_opts_out",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_no_observable_writes_flags_nothing",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_dynamic_construction_flags_nothing",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_identity_field_never_flagged",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_coverage_is_the_union_across_projectors",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_fully_sourced_projection_flags_nothing",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_write_on_a_handler_parameter_is_not_evidence",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_delete_is_not_evidence",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_bulk_update_is_neither_evidence_nor_a_disabler",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_helper_parameter_write_is_evidence",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_write_on_an_unrelated_object_is_not_evidence",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_helper_write_on_its_own_receiver_is_not_evidence",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_static_helper_has_no_receiver_to_drop",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_a_positional_template_construction_flags_nothing",
+    "tests/ir/diagnostics/test_unsourced_projection_field.py::TestUnsourcedProjectionField::test_an_unresolvable_projector_fails_open"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

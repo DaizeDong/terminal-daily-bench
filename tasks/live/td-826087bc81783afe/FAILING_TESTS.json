@@ -1,0 +1,15 @@
+{
+  "failing_test_ids": [
+    "tests/test_max_rank.py::test_hevd_truncation_branches",
+    "tests/test_operator.py::test_is_semidefinite",
+    "tests/test_operator.py::test_is_semidefinite_implications",
+    "tests/test_operator.py::test_semidefinite_tag_propagation",
+    "tests/test_solve.py::test_cholesky_semidefinite_tag_dynamic_sign",
+    "tests/test_solve.py::test_cg_semidefinite_tag_dynamic_sign",
+    "tests/test_solve.py::test_cg_is_indifferent_to_the_operator_sign",
+    "tests/test_solve.py::test_cg_singular_semidefinite_consistent_rhs",
+    "tests/test_solve.py::test_semidefinite_tag_dynamic_sign_batched"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

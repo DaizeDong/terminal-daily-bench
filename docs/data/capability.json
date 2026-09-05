@@ -1,6 +1,6 @@
 {
  "schema_version": "tdb-capability-v1",
- "generated": "2026-09-05T03:28:07Z",
+ "generated": "2026-09-05T04:54:23Z",
  "generator": "web/gen_capability_data.py",
  "rules_source": {
   "repo": "terminal-daily (research pipeline, separate checkout)",
@@ -47,10 +47,10 @@
   ]
  },
  "catalogue": {
-  "n_packages_scanned": 457,
-  "n_tasks": 450,
+  "n_packages_scanned": 461,
+  "n_tasks": 454,
   "n_tasks_verifiable": 37,
-  "n_tasks_unverifiable": 413,
+  "n_tasks_unverifiable": 417,
   "unverifiable_reason": "live packages withhold solution/oracle.patch and tests/test_patch.diff -- the tagger's only inputs -- so their task.toml keywords are reported as declared, never re-derived",
   "unverifiable_task_ids": [
    "td-00ef11f5119f8a79",
@@ -67,6 +67,7 @@
    "td-07f6292be0cb0bff",
    "td-080f736f685d2560",
    "td-0822994c56aa9aed",
+   "td-084cf6f831d9eb3a",
    "td-0980962a477fa0f5",
    "td-0987fce7d3a8aab4",
    "td-09abb8690a2dc7a4",
@@ -263,6 +264,7 @@
    "td-81a07fa06dea82eb",
    "td-82552e3193df6b28",
    "td-825a7aceb42df15d",
+   "td-826087bc81783afe",
    "td-830e2cb7ef48c7d0",
    "td-8338f63dfc06f594",
    "td-84211402e52b7db8",
@@ -374,6 +376,7 @@
    "td-c3e886de7101382e",
    "td-c6ac4c9269f92b6e",
    "td-c7e10d87a81d9fca",
+   "td-c934d1b87afe0889",
    "td-c98abb3ccb18d1a5",
    "td-ca8a25a1f47574ea",
    "td-ca9e708618205f75",
@@ -464,6 +467,7 @@
    "td-fded9799d8e5d1ce",
    "td-fe3a30736af5cc49",
    "td-feca3099b61e90b7",
+   "td-ff462bd65910d047",
    "td-ffec7335d833adde",
    "td-fff2af2450b12f27"
   ],
