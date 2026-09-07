@@ -1,0 +1,45 @@
+diff --git a/pyquery/pyquery.py b/pyquery/pyquery.py
+index 53aeaac..be7b4e3 100644
+--- a/pyquery/pyquery.py
++++ b/pyquery/pyquery.py
+@@ -344,6 +344,15 @@ def remove_namespaces(self):
+                     el.tag = el.tag.split('}', 1)[1]
+         return self
+ 
++    def _serialize_nodes(self, dumps, method):
++        # Text nodes from contents() cannot go through tostring.
++        has_text_nodes = any(isinstance(e, str) for e in self)
++        return ''.join(
++            e if isinstance(e, str) else dumps(
++                e, encoding=str, method=method, with_tail=not has_text_nodes)
++            for e in self
++        )
++
+     def __str__(self):
+         """xml representation of current nodes::
+ 
+@@ -353,12 +362,11 @@ def __str__(self):
+             <script>&lt;![[CDATA[ ]&gt;</script>
+ 
+         """
+-        return ''.join([etree.tostring(e, encoding=str) for e in self])
++        return self._serialize_nodes(etree.tostring, method='xml')
+ 
+     def __unicode__(self):
+         """xml representation of current nodes"""
+-        return u''.join([etree.tostring(e, encoding=str)
+-                         for e in self])
++        return self._serialize_nodes(etree.tostring, method='xml')
+ 
+     def __html__(self):
+         """html representation of current nodes::
+@@ -369,8 +377,7 @@ def __html__(self):
+             <script><![[CDATA[ ]></script>
+ 
+         """
+-        return u''.join([lxml.html.tostring(e, encoding=str)
+-                         for e in self])
++        return self._serialize_nodes(lxml.html.tostring, method='html')
+ 
+     def __repr__(self):
+         r = []

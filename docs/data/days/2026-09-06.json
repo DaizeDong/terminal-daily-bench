@@ -1,0 +1,49 @@
+{
+ "schema": "tdb-day-v1",
+ "date": "2026-09-06",
+ "generated": "2026-09-06T05:03:58Z",
+ "source": "td board",
+ "source_files": 54,
+ "source_digest": "eaf346606729275c",
+ "suite": {
+  "id": "2026-09-06"
+ },
+ "official_ranking": false,
+ "n_tasks": 2,
+ "n_models": 1,
+ "n_cells": 4,
+ "leaderboard": [
+  {
+   "model": "oracle-agent",
+   "nop": {
+    "n": 2,
+    "solved": 0,
+    "rate": 0.0,
+    "fa": null,
+    "fa_n": 0
+   },
+   "oracle": {
+    "n": 2,
+    "solved": 2,
+    "rate": 1.0,
+    "fa": null,
+    "fa_n": 0
+   }
+  }
+ ],
+ "pooled": {
+  "nop": {
+   "n": 2,
+   "solved": 0
+  },
+  "oracle": {
+   "n": 2,
+   "solved": 2
+  }
+ },
+ "skipped": {
+  "no model": 161,
+  "no harness/scaffold": 48,
+  "no task": 2
+ }
+}

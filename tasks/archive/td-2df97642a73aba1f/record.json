@@ -1,0 +1,39 @@
+{
+  "task_id": "td-2df97642a73aba1f",
+  "repo": "gawel/pyquery",
+  "pr_number": 262,
+  "base_sha": "ce3ad507fd89c581bdd7aa086e96590e1f124277",
+  "merge_sha": "de087c79abae09a3162a22c7453b19616d125a55",
+  "merged_at": "2026-07-19T22:12:36Z",
+  "track": "merged",
+  "source_license_spdx": "",
+  "oracle_patch_sha256": "1279161b990b7b7f31769fa862e79fe765da3b8c017a8b505d59eb346a91d8e1",
+  "test_files": [
+    "tests/test_pyquery.py"
+  ],
+  "fail_to_pass": [
+    "tests/test_pyquery.py::TestContentsStr::test_str_contents_with_text_nodes",
+    "tests/test_pyquery.py::TestContentsStr::test_str_contents_text_only"
+  ],
+  "async_unsafe": [],
+  "pass_to_pass": [],
+  "allow_internet": false,
+  "network_profile": "build-online/run-offline",
+  "capability_labels": [
+    "C4"
+  ],
+  "verify": {
+    "verdict": "ACCEPT",
+    "reject_reason": null,
+    "cert_complete": true,
+    "probe_signals": {
+      "egress": "GOOD",
+      "oracle_nop": "GOOD",
+      "rerun": "GOOD",
+      "env_arbiter": "GOOD",
+      "spec_gap": "UNKNOWN",
+      "mutant_kill": "GOOD"
+    },
+    "mutant_kill": "GOOD"
+  }
+}

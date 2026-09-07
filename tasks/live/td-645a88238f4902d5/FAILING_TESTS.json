@@ -1,0 +1,9 @@
+{
+  "failing_test_ids": [
+    "tests/test_thread_safety.py::test_detect_language_does_not_leave_narrowed_detector_on_instance",
+    "tests/test_thread_safety.py::test_concurrent_search_dates_does_not_share_language_detector",
+    "tests/test_thread_safety.py::test_concurrent_search_dates_does_not_share_locale_slot"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit and the source repository's build-arg values are withheld while this task is live. The task instruction is still derived from the upstream change, so a determined party with network access can search for it; gold recovery is made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "task": "td-2df97642a73aba1f",
+    "mode": "archive",
+    "suite_window": {
+      "origin": "fresh",
+      "certified_date": "2026-09-06",
+      "age_days": 0,
+      "source_ledger": "2026-09-06/accepted.json",
+      "selected_ledger_date": "2026-09-06"
+    }
+  },
+  {
+    "task": "td-645a88238f4902d5",
+    "mode": "live",
+    "suite_window": {
+      "origin": "fresh",
+      "certified_date": "2026-09-06",
+      "age_days": 0,
+      "source_ledger": "2026-09-06/accepted.json",
+      "selected_ledger_date": "2026-09-06"
+    }
+  }
+]

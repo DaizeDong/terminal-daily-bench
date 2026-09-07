@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-05T07:49:57Z",
+ "generated": "2026-09-06T05:04:00Z",
  "scoring": {
   "schema_version": "td-public-scoring-status-v1",
   "relative_schema": "td-relative-capability-v3",
@@ -1286,6 +1286,26 @@
    ],
    "catalogued_tasks": 346,
    "fresh_tasks": 346,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 0
+  },
+  {
+   "id": "2026-09-06",
+   "status": "live",
+   "n_tasks": 2,
+   "note": "2 certified task(s): 2 fresh + 0 carried + 0 unknown-origin; gold withheld while live",
+   "languages": [
+    "python"
+   ],
+   "task_ids": [
+    "td-2df97642a73aba1f",
+    "td-645a88238f4902d5"
+   ],
+   "target_tasks": 50,
+   "complete": false,
+   "publish_shortfall": 48,
+   "catalogued_tasks": 2,
+   "fresh_tasks": 2,
    "carried_tasks": 0,
    "unknown_origin_tasks": 0
   },
@@ -22884,6 +22904,70 @@
    "n_models": null,
    "difficulty": "",
    "declared_difficulty": "medium",
+   "also_in": []
+  },
+  {
+   "id": "td-2df97642a73aba1f",
+   "suite": "2026-09-06",
+   "status": "archive",
+   "suites": [
+    "2026-09-06"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-06",
+     "mode": "archive",
+     "origin": "fresh",
+     "certified_date": "2026-09-06",
+     "age_days": 0,
+     "source_ledger": "2026-09-06/accepted.json",
+     "selected_ledger_date": "2026-09-06"
+    }
+   ],
+   "repo": "gawel/pyquery",
+   "pr_number": 262,
+   "base_sha": "ce3ad507fd89c581bdd7aa086e96590e1f124277",
+   "merge_sha": "de087c79abae09a3162a22c7453b19616d125a55",
+   "license": "",
+   "language": "python",
+   "title": "fix: serialize text nodes in [redacted-repo] str/html",
+   "n_fail_to_pass": 2,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "declared_difficulty": "medium",
+   "also_in": []
+  },
+  {
+   "id": "td-645a88238f4902d5",
+   "suite": "2026-09-06",
+   "status": "live",
+   "suites": [
+    "2026-09-06"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-06",
+     "mode": "live",
+     "origin": "fresh",
+     "certified_date": "2026-09-06",
+     "age_days": 0,
+     "source_ledger": "2026-09-06/accepted.json",
+     "selected_ledger_date": "2026-09-06"
+    }
+   ],
+   "repo": "scrapinghub/dateparser",
+   "pr_number": null,
+   "base_sha": "",
+   "merge_sha": "",
+   "license": "",
+   "language": "",
+   "title": "Avoid shared language_detector and locale cache in search_dates",
+   "n_fail_to_pass": 3,
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "declared_difficulty": "hard",
    "also_in": []
   },
   {
