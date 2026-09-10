@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/Joshuaalbert/jaxns.git
-ARG REPO_BASE_SHA=a80495dea010f9cab70455725496e66a4e0f93ce
+ARG REPO_URL  # value withheld while this task is live; pass --build-arg
+ARG REPO_BASE_SHA  # value withheld while this task is live; pass --build-arg
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \
     && rm -rf .git \

@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/suharvest/rkvoice-stream.git
-ARG REPO_BASE_SHA=d9c6c990f5a88b45bf3369c6ac1444005dd6a687
+ARG REPO_URL  # value withheld while this task is live; pass --build-arg
+ARG REPO_BASE_SHA  # value withheld while this task is live; pass --build-arg
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \
     && rm -rf .git \

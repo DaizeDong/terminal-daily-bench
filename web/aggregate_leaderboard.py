@@ -224,9 +224,19 @@ def build_payload(rows, date):
     # someone has to keep in sync.
     primary = max(scaffolds, key=lambda s_: sum(
         1 for r in rows if r.get("scaffold") == s_), default="") if scaffolds else ""
+    # 头条三元组必须描述**读者看到的主榜**，不是跨 scaffold 的并集。
+    # 并集会写出"34 entries · 345 tasks"，而点进去每个模型的分母是 342，
+    # 且那 34 个里有一个在主榜根本不存在——数字自己打自己。
+    _prim_rows = [r for r in rows if r.get("scaffold") == primary] or rows
+    _prim_tasks = {r["task"] for r in _prim_rows}
+    _prim_models = {r["model"] for r in _prim_rows}
     payload = {
         "date": date,
-        "n_tasks": len(tasks), "n_models": len(models), "n_cells": len(rows),
+        "n_tasks": len(_prim_tasks), "n_models": len(_prim_models),
+        "n_cells": len(_prim_rows),
+        # 全站并集单独留一份，供需要跨 scaffold 汇总的消费者使用
+        "union_n_tasks": len(tasks), "union_n_models": len(models),
+        "union_n_cells": len(rows),
         "total_fa": (sum(int(r["fa"]) for r in rows if r["fa"] is not None)
                      if any(r["fa"] is not None for r in rows) else None),
         "total_fa_n": sum(1 for r in rows if r["fa"] is not None),

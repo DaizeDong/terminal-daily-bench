@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/jameschapman19/cca_zoo.git
-ARG REPO_BASE_SHA=e8a4c69a344e7561177cd54ad947782db5efc962
+ARG REPO_URL  # value withheld while this task is live; pass --build-arg
+ARG REPO_BASE_SHA  # value withheld while this task is live; pass --build-arg
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \
     && rm -rf .git \

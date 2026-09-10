@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/mpmath/mpmath.git
-ARG REPO_BASE_SHA=255d98ff988d3b215990f14d55fe0366b0579bca
+ARG REPO_URL  # value withheld while this task is live; pass --build-arg
+ARG REPO_BASE_SHA  # value withheld while this task is live; pass --build-arg
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \
     && rm -rf .git \

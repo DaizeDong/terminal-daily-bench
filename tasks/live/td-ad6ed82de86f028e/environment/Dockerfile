@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---- L2 env: repo @ base_sha + deps (same repo/many PRs share) ----
-ARG REPO_URL=https://github.com/starsimhub/starsim.git
-ARG REPO_BASE_SHA=8e7868a3f161f2df44b1777eca08243324c1dd41
+ARG REPO_URL  # value withheld while this task is live; pass --build-arg
+ARG REPO_BASE_SHA  # value withheld while this task is live; pass --build-arg
 RUN git clone "$REPO_URL" repo && cd repo && git checkout "$REPO_BASE_SHA"
 RUN cd repo \
     && rm -rf .git \

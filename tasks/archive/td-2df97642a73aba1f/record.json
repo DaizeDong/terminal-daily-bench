@@ -20,6 +20,7 @@
   "allow_internet": false,
   "network_profile": "build-online/run-offline",
   "capability_labels": [
+    "C5",
     "C4"
   ],
   "verify": {

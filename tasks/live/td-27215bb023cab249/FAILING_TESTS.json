@@ -11,5 +11,5 @@
     "tests/visualization_test.py::test_get_incumbent_objective_over_iterations_no_feasible"
   ],
   "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
-  "retrievability": "The upstream commit is redacted while this task is live, but environment/Dockerfile must name the source repo and base commit for the task to be buildable, and the merged PR is a descendant of that commit in a public repository. Gold recovery is therefore made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+  "retrievability": "The upstream commit and the source repository's build-arg values are withheld while this task is live. The task instruction is still derived from the upstream change, so a determined party with network access can search for it; gold recovery is made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
 }

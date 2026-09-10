@@ -54,12 +54,12 @@ _LIVE_REDACT_KEYS = ("pr_number", "base_sha", "merge_sha", "source_ref",
 # The defensible number is the one produced under severed egress, which is what
 # server-side scoring runs.
 RETRIEVABILITY_NOTE = (
-    "The upstream commit is redacted while this task is live, but environment/"
-    "Dockerfile must name the source repo and base commit for the task to be "
-    "buildable, and the merged PR is a descendant of that commit in a public "
-    "repository. Gold recovery is therefore made expensive, not impossible. Treat any "
-    "score obtained with network access as an UPPER BOUND; scores we publish are "
-    "produced under severed egress."
+    "The upstream commit and the source repository's build-arg values are withheld "
+    "while this task is live. The task instruction is still derived from the upstream "
+    "change, so a determined party with network access can search for it; gold "
+    "recovery is made expensive, not impossible. Treat any score obtained with "
+    "network access as an UPPER BOUND; scores we publish are produced under severed "
+    "egress."
 )
 
 
@@ -75,6 +75,45 @@ def _sanitize_task_toml(text: str, *, live: bool = False) -> str:
     if live:
         for key in _LIVE_REDACT_KEYS:
             text = re.sub(rf'(?m)^\s*{re.escape(key)}\s*=.*$\n?', "", text)
+    return text
+
+
+def _sanitize_dockerfile(text: str, *, live: bool) -> str:
+    """Strip the DEFAULT VALUES of the upstream build args on LIVE packages.
+
+    ``_LIVE_REDACT_KEYS`` removes base_sha from task.toml and PROVENANCE.json, but
+    environment/ used to be copied verbatim, so ``ARG REPO_BASE_SHA=<40 hex>`` and
+    ``ARG REPO_URL=https://github.com/<owner>/<repo>.git`` shipped the same two
+    coordinates in the clear -- measured at 419/419 published live tasks. That made
+    the redaction ineffective in a specific, mechanical way:
+
+      * base_sha is a free VERIFICATION ORACLE. A candidate PR found by any means is
+        accepted iff ``PR.base.sha == REPO_BASE_SHA``, so recovery needs no human
+        adjudication and runs unattended.
+      * base_sha is also the ``since=`` anchor for walking the repo's commits on the
+        failing test's path straight to the merge commit.
+
+    Measured end to end before this change: the full published suite was recoverable
+    in ~15 minutes at ~4 requests/task, well inside one rate-limit window.
+
+    The ARG DECLARATIONS are kept, so the recipe still documents its own contract and
+    `docker build --build-arg REPO_URL=... --build-arg REPO_BASE_SHA=...` still works
+    for anyone who legitimately holds the coordinates. What no longer ships is the
+    VALUES. Archive packages are unaffected -- their gold is published anyway.
+
+    This does not make gold recovery impossible; instruction.md still carries the
+    upstream PR title, which is a single global search away from the PR. It removes
+    the unattended path.
+    """
+    if not live:
+        return text
+    import re
+    text = re.sub(r'(?m)^(\s*ARG\s+REPO_URL\s*)=.*$',
+                  r'\1  # value withheld while this task is live; pass --build-arg',
+                  text)
+    text = re.sub(r'(?m)^(\s*ARG\s+REPO_BASE_SHA\s*)=.*$',
+                  r'\1  # value withheld while this task is live; pass --build-arg',
+                  text)
     return text
 
 
@@ -155,6 +194,11 @@ def publish(src: Path, merge_date: str, today: str, out_root: Path) -> dict:
             _sanitize_provenance((src / "PROVENANCE.json").read_text(), live=not archive))
     if (src / "environment").is_dir():
         shutil.copytree(src / "environment", dest / "environment")
+        # environment/ was the one tree that shipped verbatim, which defeated the
+        # task.toml/PROVENANCE redaction above. Sanitize the recipe in place.
+        df = dest / "environment" / "Dockerfile"
+        if df.exists():
+            df.write_text(_sanitize_dockerfile(df.read_text(), live=not archive))
 
     if archive:
         # FULL: solution/ + tests/ + record.json (record SANITIZED of host paths) ship

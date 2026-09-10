@@ -242,7 +242,10 @@ fi
 # variables, and %post runs under `set -e` so any failing step aborts the build --
 # never a silently half-built environment.
 write_def() {   # write_def <dockerfile> <out.def> <server_deps 0|1>
-    awk -v SERVER_DEPS="$3" -v CTX="$(dirname "$1")" '
+    # TDB_BASE_SIF: a pre-warmed local base image. When set, the generated def
+    # bootstraps from it instead of from the registry (see the BASE_SIF branch
+    # below). Empty = unchanged behaviour.
+    awk -v SERVER_DEPS="$3" -v CTX="$(dirname "$1")" -v BASE_SIF="${TDB_BASE_SIF:-}" '
     function fail(msg) { printf "TRANSLATE_ERROR: %s\n", msg > "/dev/stderr"; exit_code = 1; exit 1 }
     function emit_post(line) { post[++np] = line }
     BEGIN { wd = "/"; nfrom = 0; np = 0; nenv = 0; nfiles = 0 }
@@ -347,8 +350,23 @@ write_def() {   # write_def <dockerfile> <out.def> <server_deps 0|1>
         if (cont) { printf "TRANSLATE_ERROR: Dockerfile ends with a dangling line continuation\n" > "/dev/stderr"; exit 1 }
         if (nfrom == 0) { printf "TRANSLATE_ERROR: Dockerfile has no FROM instruction\n" > "/dev/stderr"; exit 1 }
 
-        print "Bootstrap: docker"
-        print "From: " base
+        # BASE_SIF short-circuits the registry. `Bootstrap: docker` performs a
+        # manifest GET on EVERY build even when the layers are already in
+        # APPTAINER_CACHEDIR, so N concurrent builds are N registry requests and a
+        # batch run walks straight into the Docker Hub anonymous pull limit
+        # (~100/6h): measured here as 36 of 95 builds dying on
+        # "TOOMANYREQUESTS ... unauthenticated pull rate limit" after the first
+        # ~59 succeeded. Warming the base into a local .sif once and pointing
+        # every def at it makes the build stage touch no registry at all -- the
+        # same thing the producer does via warm_base_sif + a localimage bootstrap
+        # (see terminal-daily-clean/docs/guides/daily_operation.md).
+        if (BASE_SIF != "") {
+            print "Bootstrap: localimage"
+            print "From: " BASE_SIF
+        } else {
+            print "Bootstrap: docker"
+            print "From: " base
+        }
         print ""
         if (nfiles) {
             print "%files"

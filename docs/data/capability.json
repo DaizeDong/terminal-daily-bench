@@ -1,6 +1,6 @@
 {
  "schema_version": "tdb-capability-v1",
- "generated": "2026-09-05T04:54:23Z",
+ "generated": "2026-09-10T06:08:00Z",
  "generator": "web/gen_capability_data.py",
  "rules_source": {
   "repo": "terminal-daily (research pipeline, separate checkout)",
@@ -40,17 +40,17 @@
  },
  "verification": {
   "stored_labels_match_rederivation": true,
-  "checked_packages": 37,
+  "checked_packages": 38,
   "sources_checked": [
    "record.json:capability_labels",
    "task.toml:keywords"
   ]
  },
  "catalogue": {
-  "n_packages_scanned": 461,
-  "n_tasks": 454,
-  "n_tasks_verifiable": 37,
-  "n_tasks_unverifiable": 417,
+  "n_packages_scanned": 463,
+  "n_tasks": 459,
+  "n_tasks_verifiable": 38,
+  "n_tasks_unverifiable": 421,
   "unverifiable_reason": "live packages withhold solution/oracle.patch and tests/test_patch.diff -- the tagger's only inputs -- so their task.toml keywords are reported as declared, never re-derived",
   "unverifiable_task_ids": [
    "td-00ef11f5119f8a79",
@@ -165,6 +165,7 @@
    "td-43ce494bee2f12ab",
    "td-43d3f430db891b33",
    "td-44955d091b1fe394",
+   "td-45722f8afb3aa527",
    "td-471fc13e09aa9544",
    "td-47590e33b7ff6e17",
    "td-4769f3f9e2a4ae4a",
@@ -220,6 +221,7 @@
    "td-625db5b8361e8185",
    "td-62760ad1d4ed827e",
    "td-63d1082e3ec30755",
+   "td-645a88238f4902d5",
    "td-646a8a15f64a3c90",
    "td-64bae8ea0316c8dd",
    "td-65baed5c1cd731c6",
@@ -358,6 +360,7 @@
    "td-b3cf1cd66d5c95bd",
    "td-b4bab058bf16714d",
    "td-b4bb27e8a40a8fa6",
+   "td-b602a92b838b0463",
    "td-b634dbe9f6ec0de6",
    "td-b6bf2798b6b9bed5",
    "td-b96ff3a04e799554",
@@ -437,6 +440,7 @@
    "td-e85ca08bd7aceb52",
    "td-e8c0b5c98451433e",
    "td-e9146de5f34c0ee5",
+   "td-e9267c049b073d9f",
    "td-e9b1bc1990f66b7a",
    "td-ea7284aef28ff935",
    "td-ead8b5e21966f497",
@@ -471,7 +475,7 @@
    "td-ffec7335d833adde",
    "td-fff2af2450b12f27"
   ],
-  "n_fail_to_pass_verifiable": 137,
+  "n_fail_to_pass_verifiable": 139,
   "n_axes": 14,
   "n_axes_with_tasks": 7,
   "n_axes_gate_blocked_only_by_unmeasured": 2,
@@ -556,7 +560,7 @@
    "frontier": false,
    "risky_env": false,
    "n_tasks": 6,
-   "coverage_share": 0.16216216216216217,
+   "coverage_share": 0.15789473684210525,
    "n_fail_to_pass": 14,
    "n_repos": 4,
    "repos": [
@@ -749,10 +753,10 @@
    "description": "code implementation / refactor",
    "frontier": false,
    "risky_env": false,
-   "n_tasks": 36,
-   "coverage_share": 0.972972972972973,
-   "n_fail_to_pass": 135,
-   "n_repos": 27,
+   "n_tasks": 37,
+   "coverage_share": 0.9736842105263158,
+   "n_fail_to_pass": 137,
+   "n_repos": 28,
    "repos": [
     "2captcha/2captcha-python",
     "Delgan/loguru",
@@ -766,6 +770,7 @@
     "cornellius-gp/gpytorch",
     "cpburnz/python-pathspec",
     "dwzhu-pku/PaperBanana",
+    "gawel/pyquery",
     "getzep/graphiti",
     "google-research/timesfm",
     "hukkin/tomli",
@@ -783,13 +788,14 @@
     "yaml/pyyaml"
    ],
    "top_repo": "2captcha/2captcha-python",
-   "top_repo_share": 0.08333333333333333,
+   "top_repo_share": 0.08108108108108109,
    "task_ids": [
     "td-0263cd1c168cbeb6",
     "td-06b850f0ba89c481",
     "td-1112e680c9d5f642",
     "td-123b3c8d9c22a9a3",
     "td-23116647bb846dae",
+    "td-2df97642a73aba1f",
     "td-353d3a1ca1556d1b",
     "td-3e581ba3eb25fbfd",
     "td-3f82c2e5c91b7c6e",
@@ -825,7 +831,7 @@
    "criteria": {
     "min_tasks": {
      "threshold": 5,
-     "observed": 36,
+     "observed": 37,
      "measured": true,
      "met": true
     },
@@ -838,7 +844,7 @@
     },
     "max_single_repo_share": {
      "threshold": 0.4,
-     "observed": 0.08333333333333333,
+     "observed": 0.08108108108108109,
      "measured": true,
      "met": true
     }
@@ -1248,10 +1254,10 @@
    "description": "test authoring & verification",
    "frontier": false,
    "risky_env": false,
-   "n_tasks": 37,
+   "n_tasks": 38,
    "coverage_share": 1.0,
-   "n_fail_to_pass": 137,
-   "n_repos": 28,
+   "n_fail_to_pass": 139,
+   "n_repos": 29,
    "repos": [
     "2captcha/2captcha-python",
     "Delgan/loguru",
@@ -1265,6 +1271,7 @@
     "cornellius-gp/gpytorch",
     "cpburnz/python-pathspec",
     "dwzhu-pku/PaperBanana",
+    "gawel/pyquery",
     "getzep/graphiti",
     "google-research/timesfm",
     "hukkin/tomli",
@@ -1283,13 +1290,14 @@
     "yaml/pyyaml"
    ],
    "top_repo": "2captcha/2captcha-python",
-   "top_repo_share": 0.08108108108108109,
+   "top_repo_share": 0.07894736842105263,
    "task_ids": [
     "td-0263cd1c168cbeb6",
     "td-06b850f0ba89c481",
     "td-1112e680c9d5f642",
     "td-123b3c8d9c22a9a3",
     "td-23116647bb846dae",
+    "td-2df97642a73aba1f",
     "td-353d3a1ca1556d1b",
     "td-3e581ba3eb25fbfd",
     "td-3f82c2e5c91b7c6e",
@@ -1326,7 +1334,7 @@
    "criteria": {
     "min_tasks": {
      "threshold": 5,
-     "observed": 37,
+     "observed": 38,
      "measured": true,
      "met": true
     },
@@ -1339,7 +1347,7 @@
     },
     "max_single_repo_share": {
      "threshold": 0.4,
-     "observed": 0.08108108108108109,
+     "observed": 0.07894736842105263,
      "measured": true,
      "met": true
     }
@@ -1760,7 +1768,7 @@
    "frontier": false,
    "risky_env": false,
    "n_tasks": 4,
-   "coverage_share": 0.10810810810810811,
+   "coverage_share": 0.10526315789473684,
    "n_fail_to_pass": 10,
    "n_repos": 3,
    "repos": [
@@ -1954,7 +1962,7 @@
    "frontier": true,
    "risky_env": false,
    "n_tasks": 2,
-   "coverage_share": 0.05405405405405406,
+   "coverage_share": 0.05263157894736842,
    "n_fail_to_pass": 33,
    "n_repos": 2,
    "repos": [
@@ -2078,7 +2086,7 @@
    "frontier": false,
    "risky_env": false,
    "n_tasks": 1,
-   "coverage_share": 0.02702702702702703,
+   "coverage_share": 0.02631578947368421,
    "n_fail_to_pass": 4,
    "n_repos": 1,
    "repos": [
@@ -2259,7 +2267,7 @@
    "frontier": false,
    "risky_env": true,
    "n_tasks": 4,
-   "coverage_share": 0.10810810810810811,
+   "coverage_share": 0.10526315789473684,
    "n_fail_to_pass": 6,
    "n_repos": 2,
    "repos": [

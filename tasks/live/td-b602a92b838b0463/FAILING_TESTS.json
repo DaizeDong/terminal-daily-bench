@@ -1,0 +1,24 @@
+{
+  "failing_test_ids": [
+    "tests/integration/linear/test_direct_linear_outcomes.py::test_rational_linear_program_returns_a_source_bound_optimum",
+    "tests/integration/linear/test_direct_linear_outcomes.py::test_rational_linear_program_handles_multiple_equalities",
+    "tests/integration/linear/test_models.py::test_linear_system_requires_exact_matching_dimensions",
+    "tests/integration/linear/test_models.py::test_inline_results_keep_only_mathematical_values",
+    "tests/integration/linear/test_models.py::test_inline_results_preserve_completed_no_candidate_outcomes",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_rational_matrix_round_trips_through_its_dense_owner",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_solution_result_replays_against_the_source",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_inconsistent_result_replays_witness_relations",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_diagonal_system_scales_beyond_the_dense_32_axis",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_kernel_agrees_with_dense_sympy_on_the_overlap",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_result_sensitive_admission_keeps_a_wide_one_row_system",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_coefficients_reject_noncanonical_storage",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_work_budget_rejects_large_fill_envelope",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_result_deserialization_does_not_repeat_semantic_admission",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_sparse_result_height_rejects_before_backend_expansion",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_solution_admission_excludes_dual_witness_height",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_inconsistency_admission_still_enforces_witness_height",
+    "tests/math/matrices/test_rational_linear_source_binding.py::test_witness_admission_excludes_primal_solution_height"
+  ],
+  "note": "protected assertions + gold solution withheld; submit a patch, pending official replay",
+  "retrievability": "The upstream commit and the source repository's build-arg values are withheld while this task is live. The task instruction is still derived from the upstream change, so a determined party with network access can search for it; gold recovery is made expensive, not impossible. Treat any score obtained with network access as an UPPER BOUND; scores we publish are produced under severed egress."
+}
