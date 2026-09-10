@@ -179,10 +179,26 @@
      a pinned decision that also fixes this list at five items in one order.
      (That check is a raw substring scan, so naming the banned literal here
      would trip it. Do not write it out.)
-     The entrances are in the pages instead: the home masthead links straight
-     to ./quality/#discrimination, the leaderboard foot links to the full
-     report, and /guide/ carries a card for it. A key belongs to exactly ONE
-     row here: two rows claiming the same key would light two items at once. */
+     The entrances are in the pages instead. There are TWO written into page
+     prose, and this comment used to claim three: it also named "the home masthead links
+     straight to ./quality/#discrimination", which docs/index.html has not
+     carried for some time -- its masthead is two buttons, ./guide/quickstart/
+     and ./benchmarks/, and the whole file contains no ./quality/ reference at
+     all. That two-button masthead is a deliberate, documented decision (see
+     the comment at the top of docs/index.html), so the comment was corrected
+     to the entrances that exist rather than the masthead being reopened to
+     restore a third. Both remaining ones were re-checked against the files:
+
+       - /leaderboard/ foot: `<a href="../quality/#discrimination">Selection
+         quality</a>`, in the foot line this file's caller builds.
+       - /guide/ index: the "Method" section ends with "The report itself is
+         at <a href="../quality/#discrimination">selection quality</a>".
+       - and, below, DOCNAV's Method group carries ["Discrimination report",
+         "quality/"], which is the one entrance that is generated from this
+         file and therefore cannot silently rot the way the prose ones can.
+
+     A key belongs to exactly ONE row here: two rows claiming the same key
+     would light two items at once. */
   var NAV = [
     ["Status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
     ["Leaderboard", "leaderboard/", ["leaderboard"]],
@@ -1034,6 +1050,27 @@
     return scored.slice(0, SEARCH_MAX).map(function (s) { return s.row; });
   }
 
+  /* How many distinct pages the loaded index covers. The file also ships a
+     `pages` array, and today the two agree at 29, but the sections number
+     this sits next to is `searchRows.length` -- the entries -- so counting
+     the entries' own urls keeps both halves of that sentence answerable from
+     one array. Rows with no url are not skipped: they fall into one bucket
+     of their own and so add exactly 1 to the count, which is visible as an
+     off-by-one against the index's `pages` array. Skipping them would make a
+     malformed index read as a smaller correct one. The "u:" prefix keeps a
+     url that happens to spell a name on Object.prototype out of the way. */
+  function searchPageCount() {
+    var seen = {}, n = 0, i, key;
+    for (i = 0; i < searchRows.length; i++) {
+      key = "u:" + String(searchRows[i] && searchRows[i].url);
+      if (!Object.prototype.hasOwnProperty.call(seen, key)) {
+        seen[key] = true;
+        n++;
+      }
+    }
+    return n;
+  }
+
   function searchMsg(kind, head, detail, note) {
     return '<div class="tdb-find-msg' + (kind ? " " + kind : "") + '" role="status">' +
       '<p class="tdb-find-msg-h">' + esc(head) + "</p>" +
@@ -1067,9 +1104,27 @@
       return;
     }
     if (!searchHits.length) {
+      /* Both halves of this sentence are counted off the same array, for the
+         same reason the section count is: it is the only statement of scope
+         the reader gets, and it is printed at the exact moment they have
+         found nothing, when the question in their head is "did I search the
+         wrong thing, or is the thing I want simply not indexed?". A wrong
+         scope answers that question wrongly.
+
+         "the four guide pages" was a literal, written when the guide was
+         four pages. The index is now 111 entries over 29 distinct urls, so
+         the page said "111 sections across the four guide pages are
+         indexed." -- a real number and a stale one in the same breath, which
+         is worse than either alone, because the reader has no way to tell
+         which half to trust. Counting distinct row.url means the two numbers
+         are derived from one source and cannot drift apart again. */
+      var nSections = searchRows.length;
+      var nPages = searchPageCount();
       searchList.innerHTML = searchMsg(
         "", "No section matches that.", "",
-        searchRows.length + " sections across the four guide pages are indexed.");
+        nSections + (nSections === 1 ? " section" : " sections") +
+        " across " + nPages + (nPages === 1 ? " guide page" : " guide pages") +
+        (nSections === 1 ? " is" : " are") + " indexed.");
       return;
     }
 

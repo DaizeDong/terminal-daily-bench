@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>terminal-daily-bench — measured solve rates</title>
 <meta name="description" content="Measured solve rates on the current terminal-daily-bench suite.">
-<link rel="stylesheet" href="./assets/tw.css?v=b518091f1a">
-<link rel="stylesheet" href="./assets/site.css?v=b518091f1a">
+<link rel="stylesheet" href="./assets/tw.css?v=b1d8696d89">
+<link rel="stylesheet" href="./assets/site.css?v=b1d8696d89">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -65,8 +65,8 @@
   </div>
 </main>
 
-<script src="./assets/site.js?v=b518091f1a" data-root="." data-page="home"></script>
-<script src="./assets/tdb-data.js?v=b518091f1a"></script>
+<script src="./assets/site.js?v=b1d8696d89" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=b1d8696d89"></script>
 <script>
 (function () {
   "use strict";
@@ -128,6 +128,22 @@
   var BOARD_PREVIEW_LIMIT = 5;
   var DAYS = [];
 
+  /* One row per scaffold cell. A cell key is either a scaffold on its own
+     ("single_shot", "codex", "terminus-2", "oracle") or that scaffold at one
+     reasoning effort ("single_shot@xhigh"). Both shapes are kept; what
+     changed is that the effort is no longer thrown away.
+
+     It used to be `agent: at < 0 ? key : key.slice(0, at)`, which printed
+     "single_shot" for the mainline cell AND for all four of its effort
+     sweeps. On 2026-09-10 that put gpt-5.6-sol on the preview twice under
+     byte-identical labels, once at 103/342 and once at 103/293 -- two rows
+     that differ only in a denominator the reader has no way to attribute.
+     That is precisely the confusion the rest of this site is built to
+     refuse, so `agent` is now the full key and the effort survives to the
+     screen. `effort` is null only for a scaffold's own mainline cell; that
+     null is a real distinction (no effort sweep was requested), not a
+     missing value, and renderBoard partitions on it rather than defaulting
+     it to anything. */
   function flattenDay(day) {
     var out = [];
     (day.leaderboard || []).forEach(function (entry) {
@@ -138,7 +154,9 @@
         var at = key.indexOf("@");
         out.push({
           model: entry.model,
-          agent: at < 0 ? key : key.slice(0, at),
+          agent: key,
+          scaffold: at < 0 ? key : key.slice(0, at),
+          effort: at < 0 ? null : key.slice(at + 1),
           solved: cell.solved, n: cell.n,
           rate: cell.solved / cell.n
         });
@@ -147,10 +165,59 @@
     return out;
   }
 
+  /* How many distinct models are in `rows`. Used only to say, in the foot,
+     how many models the preview's own filter excluded -- a model that was
+     measured under an effort sweep and never at the scaffold's default
+     effort has no mainline row, and dropping it without saying so would be
+     exactly the silent-empty-row failure this site exists to prevent.
+     (2026-09-03 through 2026-09-10 each have one: gpt-5.2-codex.) */
+  function countModels(rows) {
+    var seen = {}, n = 0;
+    rows.forEach(function (r) {
+      if (!Object.prototype.hasOwnProperty.call(seen, r.model)) {
+        seen[r.model] = true;
+        n++;
+      }
+    });
+    return n;
+  }
+
   function officialBadge(day, site) {
-    /* Same conjunction as the leaderboard page. A day is a ranking only when
-       every independent condition holds; one mis-set boolean must not be able
-       to promote measured solve rates into a claimed ranking. */
+    /* THE OFFICIAL/UNOFFICIAL CONTRACT. This badge and the identically named
+       one on /leaderboard/ must be the same predicate evaluated over the same
+       bytes, or the two pages will disagree the first time one flag flips and
+       a reader will be shown a ranking on one page and a disclaimer on the
+       other. The contract, in full, is:
+
+         1. site_data.json's "scoring" object -- and ONLY that object -- is
+            where the five gate booleans come from. The per-day files under
+            data/days/ carry no "scoring" key at all (not one of the seven
+            has one), so reading day.scoring yields undefined and every
+            `=== true` against it is false for a reason that has nothing to
+            do with whether the day is certified. This page has always read
+            site.scoring; the leaderboard was moved onto it.
+         2. codeApproved(): official_ranking, publication_bundle_approved,
+            relative_report_digest_matches and anti_cheat_deployment_active
+            all exactly true, and publication_registry_mode exactly
+            "code-controlled-allowlist".
+         3. The v3 relative-capability report must be PRESENT on the day
+            (relativeReport), with input.frozen_task_roster_n === 50 and both
+            input.task_roster_digest_trusted and
+            input.cell_manifest_digest_trusted exactly true.
+         4. At least one publishable rating on the overall/overall axis --
+            a rating with publishable === true, a numeric relative_score and
+            a real interval. This clause is part of the gate on BOTH pages:
+            a certified pipeline that produced nothing publishable is not a
+            ranking either, and an empty ratings table must not read as an
+            approval.
+
+       Conditions 2-4 are the conjunction implemented by codeApproved() and
+       formalModelRatings() above; ranked.length is condition 4. Today every
+       one of the five booleans in condition 2 is false or null and no v3
+       report is present, so both pages say Unofficial -- which is correct,
+       and is the state this code is meant to keep them agreeing about.
+       If you change any clause here, change it on /leaderboard/ in the same
+       commit; there is no shared module to hold them together. */
     var ranked = formalModelRatings(relativeReport(day), (site && site.scoring) || {});
     return ranked.length
       ? '<span class="tdb-badge" data-official="true">Official</span>'
@@ -164,12 +231,6 @@
      sets the numeric face. Same table, same numbers, no wrappers. */
   function renderBoard(day, site) {
     var rows = flattenDay(day);
-    rows.sort(function (a, b) { return b.rate - a.rate; });
-    var last = null, lastRank = 0;
-    rows.forEach(function (r, i) {
-      if (last === null || r.rate !== last) { lastRank = i + 1; last = r.rate; }
-      r.rank = lastRank;
-    });
 
     if (!rows.length) {
       set("hp-board", '<p class="tdb-empty">No measured cells on ' +
@@ -179,9 +240,63 @@
       return;
     }
 
+    /* WHAT THE PREVIEW RANKS, AND WHY IT IS NOT EVERYTHING.
+       This sorted five rows out of every flattened cell on the day, mainline
+       and effort sweep together, on solved/n alone. Effort sweeps are run
+       over a smaller slice of the roster than the mainline pass, so they sit
+       at a smaller denominator, and a rate at a smaller denominator wins a
+       naive sort without having measured more. Measured on 2026-09-10: 70
+       flattened rows at four different denominators (293, 322, 324, 342);
+       all five preview rows were @xhigh at n=293, and the actual mainline
+       leader, Claude-Opus-4.7 at 104/342 = 0.304, was not on the page at
+       all. On 2026-09-05 the top row was gpt-5.2-codex@xhigh at 45/82 =
+       0.549 -- a 82-task sweep printed above every 338-task result on the
+       day. A five-row teaser cannot carry the caveat that would make those
+       comparable, so it must not make them.
+
+       So the preview ranks the mainline cells only -- the cells whose key
+       carries no @effort, one per scaffold per model -- and the effort
+       sweeps stay reachable on /leaderboard/, which shows every row with its
+       own denominator and has the room to say what a sweep is. They are NOT
+       dropped quietly: the foot below counts them and says where they went,
+       and it separately counts the models that have no mainline cell at all
+       (gpt-5.2-codex on every day since 2026-09-03) so that a model vanishing
+       from this preview is a stated fact rather than an absence.
+
+       Note this does not make the preview's rows mutually comparable in
+       general: on 2026-08-19 the mainline denominators themselves run from
+       24 to 50, because models entered the suite on different days. The
+       denominator is printed on every row for that reason and must stay. */
+    var main = [];
+    var i;
+    for (i = 0; i < rows.length; i++) {
+      if (rows[i].effort === null) main.push(rows[i]);
+    }
+    var swept = rows.length - main.length;
+    var hiddenModels = countModels(rows) - countModels(main);
+
+    /* A day can in principle be all sweep and no mainline (nothing in the
+       schema forbids it). Blanking the preview then would render a scored
+       day exactly like an unscored one, so rank the sweeps instead and say
+       so -- every row prints its effort and its denominator either way. */
+    var sweepsOnly = false;
+    if (!main.length) {
+      main = rows;
+      sweepsOnly = true;
+      swept = 0;
+      hiddenModels = 0;
+    }
+
+    main.sort(function (a, b) { return b.rate - a.rate; });
+    var last = null, lastRank = 0;
+    main.forEach(function (r, k) {
+      if (last === null || r.rate !== last) { lastRank = k + 1; last = r.rate; }
+      r.rank = lastRank;
+    });
+
     var head = '<tr><th class="tdb-num">Rank</th><th>Agent</th><th>Model</th>' +
       '<th class="tdb-num">Accuracy</th><th class="tdb-num">Solved</th></tr>';
-    var body = rows.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
+    var body = main.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
       return "<tr>" +
         '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>" +
         '<td class="tdb-muted">' + esc(r.agent) + "</td>" +
@@ -195,9 +310,33 @@
       "<thead>" + head + "</thead><tbody>" + body + "</tbody></table>");
     set("hp-board-title", "Suite terminal-daily@" + esc(day.date) + " " + officialBadge(day, site));
     set("hp-board-sub", esc(rows.length) + " entries \u00b7 " + esc(day.n_tasks) + " tasks");
-    set("hp-board-foot", rows.length > BOARD_PREVIEW_LIMIT
-      ? "Top " + BOARD_PREVIEW_LIMIT + " of " + rows.length + " entries."
-      : rows.length + (rows.length === 1 ? " entry." : " entries."));
+
+    /* The foot has to account for every flattened row on the day, including
+       the ones this table did not show. "Top 5 of 33" alone would leave the
+       reader believing the day had 33 measured cells when it had 70. */
+    var foot = main.length > BOARD_PREVIEW_LIMIT
+      ? "Top " + BOARD_PREVIEW_LIMIT + " of " + main.length
+      : String(main.length);
+    if (sweepsOnly) {
+      foot += (main.length === 1 ? " entry" : " entries") +
+        ", all of them effort sweeps: no cell on this day was run at a " +
+        "scaffold's default effort. Each row prints its own effort and " +
+        "denominator; the full leaderboard has the rest.";
+    } else {
+      foot += (main.length === 1 ? " mainline entry." : " mainline entries.");
+      if (swept) {
+        foot += " " + swept + (swept === 1 ? " effort-sweep row is"
+                                           : " effort-sweep rows are") +
+          " measured over a smaller task slice and ranked separately on the " +
+          "full leaderboard.";
+      }
+      if (hiddenModels) {
+        foot += " " + hiddenModels +
+          (hiddenModels === 1 ? " model has" : " models have") +
+          " no mainline cell on this day and so cannot appear here at all.";
+      }
+    }
+    set("hp-board-foot", foot);
   }
 
   /* Boot.

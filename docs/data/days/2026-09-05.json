@@ -38,8 +38,7 @@
     "rate": 0.549,
     "fa": null,
     "fa_n": 0
-   },
-   "lead": true
+   }
   },
   {
    "model": "gpt-5.4",

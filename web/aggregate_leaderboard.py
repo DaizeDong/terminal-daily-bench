@@ -209,8 +209,28 @@ def build_payload(rows, date):
     leaderboard.sort(key=lambda r: (-max((v.get("rate", 0.0) for v in r.values()
                                           if isinstance(v, dict)), default=0.0),
                                     r["model"]))
-    if leaderboard:
-        leaderboard[0]["lead"] = True
+    # NO `lead` FLAG IS EMITTED. `leaderboard[0]["lead"] = True` stood here and
+    # marked the first array element, which is not the same claim as "this model
+    # leads". The sort above ranks by the best rate a model reached under ANY
+    # scaffold, so the bit landed on whoever won a comparison across columns that
+    # do not share a denominator: on 2026-09-04 it went to gpt-5.2-codex for
+    # 45/82 at single_shot@xhigh, while the mainline single_shot board was led by
+    # Claude-Opus-4.7 and gpt-5.6-sol at 94/338 each -- and gpt-5.2-codex has no
+    # single_shot cell at all, so the flagged model was not on the board it
+    # appeared to lead. In the shipped 2026-09-10 payload it sat on gpt-5.6-sol
+    # at 103/342 while Claude-Opus-4.7 had 104/342 on the identical denominator.
+    #
+    # Re-pointing it at the primary scaffold's best row would not rescue it. A
+    # single boolean cannot say 94/338 TIED with 94/338 -- it would have to break
+    # that tie alphabetically and publish an invented winner -- and the days with
+    # no primary grid (2026-07-23, 2026-08-19 carry no `matrix`) have no mainline
+    # board to be best on, so their flag would simply vanish, leaving "no leader
+    # computable" looking exactly like "nobody led".
+    #
+    # A leader is a comparison, and this file's rule is that a rate never travels
+    # without its denominator. The rows already carry n / solved / rate per
+    # scaffold and the array is already ordered; a consumer that wants a leader
+    # picks the scaffold it means and reads the denominators it is comparing.
 
     # SUPERSEDED by the per-day layout under docs/data/, which adds one file
     # per day instead of overwriting this one. Kept working only so the legacy

@@ -404,8 +404,7 @@
     "rate": 0.352,
     "fa": null,
     "fa_n": 0
-   },
-   "lead": true
+   }
   },
   {
    "model": "gpt-5.6-terra",

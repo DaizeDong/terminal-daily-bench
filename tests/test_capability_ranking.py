@@ -48,7 +48,8 @@ NODE = shutil.which("node")
 # Lifted from the page, in the order they have to be declared.
 PAGE_FUNCS = (
     "hasOwn", "pointEstimate", "axisTally", "resolution", "overallPoint",
-    "capabilityAxes", "capabilityRows", "capCell", "axisNoteHtml",
+    "capabilityAxes", "capabilityRows", "provenanceWord", "capCell",
+    "axisNoteHtml",
     "capColumns", "rankCell", "capabilitySummary", "buildCapability",
 )
 
@@ -226,8 +227,23 @@ def test_an_axis_with_no_task_is_listed_named_and_at_zero():
     assert len(out["colKeys"]) == len(published) + 3
 
     # And the head SAYS zero rather than leaving the column blank.
+    #
+    # An axis's task set is the UNION of the catalogue's two lists: the labels
+    # the generator re-derived from a package's own oracle patch (`task_ids`)
+    # and the ones a live package only declares in its task.toml, which the
+    # generator cannot re-derive because the patch is withheld
+    # (`declared_unverified.task_ids`). This loop used to read `task_ids`
+    # alone, which was the same set only while the board was archive tasks. On
+    # a live board it is nearly empty -- 9 of 342 columns join through it on
+    # 2026-09-10 -- so every axis looked empty here and the assertion demanded
+    # "no task" from column heads that carry hundreds. What the assertion is
+    # for is unchanged: an axis nothing measures must say so rather than
+    # render blank. Only the definition of "nothing measures it" follows the
+    # join the view actually performs.
     for axis, note in zip(CAPABILITY["axes"], out["notes"]):
-        if not [t for t in axis["task_ids"] if t in BOARD["matrix"]["tasks"]]:
+        joined = set(axis["task_ids"]) | set(
+            (axis.get("declared_unverified") or {}).get("task_ids") or [])
+        if not [t for t in joined if t in BOARD["matrix"]["tasks"]]:
             assert note == "no task", (
                 f"{axis['code']} carries no task and its column head does not "
                 f"say so: {note!r}")

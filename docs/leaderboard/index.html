@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard — terminal-daily-bench</title>
 <meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
-<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
-<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
+<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -66,8 +66,8 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="leaderboard"></script>
-<script src="../assets/tdb-data.js?v=b518091f1a"></script>
+<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=b1d8696d89"></script>
 <script>
 (function () {
   "use strict";
@@ -97,6 +97,13 @@
      falls back to a template that is obviously a template -- never to a
      half-substituted command. */
   var cmdPlaceholder = byId("cmd") ? byId("cmd").textContent : "";
+
+  /* The shipped label of the task-ids link, kept for the same reason: heading()
+     rewrites this element on every day change, in both directions, and a label
+     it had to spell out itself would be a second copy of a string the markup
+     already owns. Read as textContent, so "&rarr;" arrives here as the arrow it
+     renders as rather than as its source. */
+  var tasksLabel = byId("cmd-tasks") ? byId("cmd-tasks").textContent : "";
 
   /* ------------------------------------------------------------------ *
    * The provenance block, as copy.
@@ -163,7 +170,19 @@
         out.push({
           model: entry.model, agent: s.agent, effort: s.effort, scaffold: k,
           n: cell.n, solved: cell.solved,
-          rate: (typeof cell.rate === "number") ? cell.rate : (cell.solved / cell.n),
+          /* solved/n, at full precision, and NEVER the day file's own `rate`.
+             That field is rounded to three decimals before it is published, and
+             show() ranks with a tie-skipping loop that treats equal rates as one
+             rank -- so two rows that are distinct at full precision (17/50 and
+             0.34 arrived at from a different denominator, or 173/500 against
+             346/1000) were being handed the same rank by the rounding alone, and
+             the rank that followed them skipped as though a real tie had
+             happened. It also disagreed with this page's own Accuracy column,
+             which never reads `rate`: accuracyCell goes through pointEstimate ->
+             T.wilson(r.solved, r.n). One page cannot rank on one quantity and
+             print another beside it. The home page ranks on solved/n with the
+             same loop, so this is also what makes the two orders agree. */
+          rate: cell.solved / cell.n,
           fa: cell.fa, fa_n: cell.fa_n, fa_evidence: cell.fa_evidence
         });
       });
@@ -668,6 +687,51 @@
     } catch (e) { /* no URL API: the defaults above stand */ }
   }
 
+  /* ------------------------------------------------------------------ *
+   * The two counters, taken from the rows the page is drawing.
+   *
+   * The day file publishes `n_models` and `n_cells` as headline fields, and
+   * this page printed them straight above and below a table it builds from the
+   * `leaderboard` array. On 2026-09-10 those fields say 33 models and 11286
+   * model x scaffold x task attempts, while the same file's leaderboard array
+   * holds 34 distinct model names over 70 measured cells whose `n` sums to
+   * 23068. So the line above the table read "33 models" over a table listing
+   * 34 of them, and the foot understated the attempt count by 11782 -- inside
+   * the very block that invites a reader to check the arithmetic.
+   *
+   * A headline field is a claim about a pipeline run; the array is the thing on
+   * screen. When the two disagree only one of them can be checked by the person
+   * reading, and a counter that a table under it refutes discredits the table
+   * rather than the field. So both counters are counted here, from flatten()'s
+   * output. The capability view already works this way -- capabilitySummary()
+   * counts matrix.rows rather than trusting a published total -- and these two
+   * follow that precedent rather than inventing a second one.
+   *
+   * Counted over ALL and never over VIEW: this is the population the search box
+   * and the pills narrow, and countHtml prints "showing N of M" against it.
+   * Both refuse the `|| 0` shape: a row whose `n` is not a finite number is not
+   * a zero-attempt row, it is a row flatten() would never have emitted, and
+   * neither counter has any way to fabricate one.
+   * ------------------------------------------------------------------ */
+  function distinctModels(rows) {
+    var seen = {}, n = 0;
+    rows.forEach(function (r) {
+      var m = r && r.model;
+      if (typeof m !== "string" || hasOwn(seen, m)) { return; }
+      seen[m] = 1;
+      n += 1;
+    });
+    return n;
+  }
+
+  function totalAttempts(rows) {
+    var n = 0;
+    rows.forEach(function (r) {
+      if (r && typeof r.n === "number" && isFinite(r.n)) { n += r.n; }
+    });
+    return n;
+  }
+
   /* The line above the table describes THIS view. In the capability view the
      day's own totals are the wrong numbers -- 152 models and 50 tasks belong
      to the board, while the grid under the line is 12 models of one scaffold
@@ -681,7 +745,7 @@
     var tasks = capMode() ? CAP.summary.nTasks : DAY.n_tasks;
     var scope = capMode()
       ? esc(CAP.summary.scaffold || "one scaffold")
-      : esc(DAY.n_models) + " models";
+      : esc(distinctModels(rows)) + " models";
     return shown +
       '<span class="tdb-count-sep">&middot;</span>' + esc(tasks) + " tasks" +
       '<span class="tdb-count-sep">&middot;</span>' + scope +
@@ -715,8 +779,54 @@
        `--harness`, and none of those three flags exist. It sat behind a copy
        button, which is the worst place on the site to be wrong. The Agent
        column IS the --harness value, so a row maps onto the real command. */
+    /* The task-ids link is only a link where the suite page it names exists.
+       This pointed at ../benchmarks/<date>/ for whatever day was loaded, and
+       docs/data/index.json publishes seven selectable days while the catalogue
+       publishes suites for six of them: 2026-07-23 is selectable in the day nav
+       and has no suite directory, so the one link next to the reproduce command
+       404'd on it. A dead link beside a runnable command is the same failure the
+       command block itself was fixed for -- the reader cannot tell a page that
+       is missing from a page they mistyped their way out of.
+
+       The guard is the catalogue's `suites`, which is the same source
+       reproduce() already consults before it will name an archive task, so the
+       two controls in this block cannot come to different conclusions about
+       whether this suite is published.
+
+       Absent is SAID, not hidden. Dropping the element would leave a reader who
+       knows the link is normally here unable to tell whether the suite is
+       unpublished or the page is broken, and the same sentence for both is the
+       thing this site refuses everywhere else. So the anchor stays, loses its
+       href -- an <a> with no href is not a link and cannot be followed -- and
+       names what is missing, in the muted ink the rest of the page uses for
+       "there is no measurement here". */
     var t = byId("cmd-tasks");
-    if (t) t.setAttribute("href", "../benchmarks/" + encodeURIComponent(day.date) + "/");
+    if (t) {
+      if (suitePublished(siteData, day.date)) {
+        t.setAttribute("href", "../benchmarks/" + encodeURIComponent(day.date) + "/");
+        t.removeAttribute("aria-disabled");
+        t.className = "";
+        t.textContent = tasksLabel;
+      } else {
+        t.removeAttribute("href");
+        t.setAttribute("aria-disabled", "true");
+        t.className = "text-muted-foreground";
+        t.textContent = "No task list is published for this suite";
+      }
+    }
+  }
+
+  /* Whether the catalogue publishes a suite for this day, which is what decides
+     whether ../benchmarks/<date>/ exists. A null catalogue -- it could not be
+     fetched -- answers no, so the page offers no link rather than one it has no
+     evidence for; T.fetchFailed has already said on the page that the catalogue
+     could not be read, so the absence is explained rather than mysterious. */
+  function suitePublished(site, date) {
+    var suites = (site && site.suites) || [];
+    for (var i = 0; i < suites.length; i++) {
+      if (suites[i] && String(suites[i].id) === String(date)) { return true; }
+    }
+    return false;
   }
 
   /* ------------------------------------------------------------------ *
@@ -724,9 +834,17 @@
    *
    * "official" is a claim about provenance, not a field a publisher gets to
    * assert. Every condition below is independent and ALL must hold; any one
-   * missing, of the wrong type, or absent from the day file leaves the day
-   * unofficial. The failure this prevents is a single mis-set boolean turning
-   * measured solve rates into a claimed ranking.
+   * missing, of the wrong type, or absent from the published files leaves the
+   * day unofficial. The failure this prevents is a single mis-set boolean
+   * turning measured solve rates into a claimed ranking.
+   *
+   * The conditions come from two files and neither is optional. The publication
+   * state -- who approved the bundle, which registry mode it was published
+   * under, whether the anti-cheat deployment was live -- is one thing for the
+   * whole site and is read from site_data.json's `scoring` block, the same
+   * block and the same conjunction the home page reads, so the badge cannot
+   * differ between the two pages. What the day itself carries is the v3
+   * relative-capability report, and that is read from the day.
    *
    * Where the caveat text went: it is documentation, so it lives in the
    * documentation (guide/quality-methods/). What lives HERE is the code that
@@ -746,9 +864,28 @@
     return null;
   }
 
-  function formalAuthority(day) {
+  /* The flag half of the gate: the publication state, plus the three fields of
+     the v3 report that say what it was computed over.
+
+     WHERE THE FLAGS ARE READ FROM, AND WHY THAT WAS THE BUG. This read
+     `(day && day.scoring) || {}`. No day file has a `scoring` key -- none of
+     the seven in docs/data/days/ does -- so every one of the five tests below
+     was `undefined === true` and the gate was closed by an accident of shape
+     rather than by the state it is supposed to be reading. It happened to
+     render the right badge today, because today the real flags are false too;
+     the day the operator sets official_ranking this page would still have said
+     Unofficial while the home page, which reads the flags from the catalogue,
+     said Official. Two pages disagreeing about whether a number is a ranking is
+     worse than either answer.
+
+     The publication state lives in site_data.json's `scoring` block, which is
+     already loaded into siteData at boot, and that is now the ONE source both
+     pages read. Fail-closed is unchanged and load bearing: siteData null (the
+     catalogue could not be fetched), the block absent, or any single field
+     missing or of the wrong type all leave the day unofficial. */
+  function gateFlags(day) {
     var report = relativeReport(day);
-    var scoring = (day && day.scoring) || {};
+    var scoring = (siteData && siteData.scoring) || {};
     var input = (report && report.input) || {};
     return !!report &&
       scoring.official_ranking === true &&
@@ -766,7 +903,10 @@
      Kept live so a v3 document dropped in later cannot bypass it. */
   function publishableRatings(day) {
     var report = relativeReport(day);
-    if (!formalAuthority(day)) return [];
+    /* gateFlags, not formalAuthority: formalAuthority is a CONSUMER of this
+       function, and a gate that called the thing that calls it could not be
+       read in either direction. The flag half is the part this needs. */
+    if (!gateFlags(day)) return [];
     var rows = [];
     (report.axes || []).forEach(function (axis) {
       if (!axis || !ALLOWED_DIMENSIONS[axis.dimension]) return;
@@ -775,12 +915,32 @@
         ((table && table.ratings) || []).forEach(function (rating) {
           if (rating && rating.publishable === true &&
               typeof rating.relative_score === "number" && Array.isArray(rating.ci)) {
-            rows.push({ axis: axis.axis, kind: kind, rating: rating });
+            rows.push({ axis: axis.axis, dimension: axis.dimension,
+                        kind: kind, rating: rating });
           }
         });
       });
     });
     return rows;
+  }
+
+  /* The whole gate: the flags, and then a rating that may actually be shown.
+     The second half is not a formality. Every flag can be set and the report
+     can still carry no model rating that survives its own publish test, and a
+     day with nothing publishable on it is not a ranking of anything -- the
+     catalogue says as much in its own words today (publishable_overall_models
+     is 0). The home page has required this since it was written and this page
+     did not, which is the second way the two gates could have disagreed while
+     both looked correct. The axis is named exactly: axis "overall" on dimension
+     "overall", model entities. A rating publishable on some narrower axis is
+     not authority to call the whole day's ordering official. */
+  function formalAuthority(day) {
+    if (!gateFlags(day)) return false;
+    var ranked = publishableRatings(day).filter(function (row) {
+      return row.axis === "overall" && row.dimension === "overall" &&
+        row.kind === "model";
+    });
+    return ranked.length > 0;
   }
 
   /* One badge, not a paragraph. */
@@ -1040,13 +1200,25 @@
    * WHAT THE JOIN ACTUALLY SUPPORTS, which is most of what this view is for.
    * Two axes carry nearly every labelled task, so ordering models on them
    * reproduces the overall column instead of splitting it. Every other axis
-   * that carries anything carries a handful, where the 95% interval is wider
-   * than the whole spread between first place and last. And seven axes carry
-   * nothing at all. A view that showed only the rates would look like fourteen
-   * findings; what is true is two restatements, a few gestures and seven gaps,
-   * and the cells have to SAY that rather than leave it to a footnote.
+   * that carries anything carries a fraction of the grid, where the 95%
+   * interval is wide relative to the spread between first place and last. And
+   * an axis can still carry nothing at all. A view that showed only the rates
+   * would look like fourteen findings; what is true is two restatements, some
+   * partial views and at least one gap, and the cells have to SAY that rather
+   * than leave it to a footnote. Every one of those shapes is counted from the
+   * join at render time, never written down here, so this paragraph describes
+   * the mechanism and the foot describes the day.
    *
-   * So three refusals, in the cells and in the controls:
+   * AND ALMOST NONE OF THESE LABELS WERE RE-DERIVED. See capabilityAxes(): the
+   * columns are the union of the catalogue's re-derived list and its
+   * declared-but-unchecked list, because on a live board the first is nearly
+   * empty -- four columns on C4, four on C5, one on C6, nothing anywhere else.
+   * A rate computed over declared labels is a real measurement of the models
+   * over a task set the site did not verify the membership of, which is a
+   * weaker object than the one this view used to promise, and the difference
+   * has to be on screen and not in a commit message.
+   *
+   * So four refusals, in the cells and in the controls:
    *
    *   * NO RATE WITHOUT ITS DENOMINATOR. Every cell that has a measurement
    *     prints solved/n beside it. A rate whose n a reader cannot see is the
@@ -1066,6 +1238,29 @@
    *   * NO AXIS DROPPED. The axes with no task are listed, named, and drawn as
    *     an em dash. An axis missing from the table reads as an axis that does
    *     not exist, which is a different and false claim.
+   *
+   *   * NO RATE WITHOUT ITS PROVENANCE. This is the same refusal as the first
+   *     one, applied to the other half of the denominator: a reader who cannot
+   *     see WHICH tasks a rate was taken over cannot read it, and "the tasks
+   *     the catalogue re-derived this label for" and "the tasks that claim this
+   *     label about themselves" are not the same set. So provenance is printed
+   *     in both places, for the two different things they can each say. The
+   *     column head carries the exact split -- how many of the column's tasks
+   *     were re-derived and how many are declared -- because that split is a
+   *     property of the COLUMN, the same argument that puts the interval there
+   *     rather than in fourteen copies down the column. And the cell carries
+   *     the word "declared" beside its counts whenever ANY task in the column
+   *     came from the declared list, because the cell is what gets read on a
+   *     narrow screen with the head scrolled off, screenshotted, and quoted.
+   *     The cell does not attempt the split: it fails closed, saying declared
+   *     for a column that is four parts checked and 313 parts claimed, since
+   *     an unchecked task in the denominator taints the rate whatever its
+   *     share. `data-provenance` on the cell says the same thing to a scraper.
+   *     What the site will NOT do is print the catalogue's coverage_share
+   *     beside any of this: that field is computed over the 38 verifiable
+   *     packages -- C5 reads 1.000 there -- and describes a corpus that is not
+   *     the grid on screen. Any share this view shows is recomputed from the
+   *     join under it or is not shown.
    *
    * And nowhere in here is a null turned into a zero. A matrix cell is 1, 0 or
    * null; a null is skipped out of the numerator AND the denominator, and a
@@ -1100,7 +1295,31 @@
 
   /* Every axis the catalogue publishes, joined to this matrix's roster --
      including the ones the join leaves empty. `.map` and never `.filter`:
-     dropping an empty axis here is the one bug this view cannot survive. */
+     dropping an empty axis here is the one bug this view cannot survive.
+
+     THE JOIN IS OVER TWO TASK LISTS, NOT ONE, AND THAT IS WHY THIS VIEW HAS
+     ANYTHING IN IT. `a.task_ids` is the catalogue's re-derived list: labels the
+     generator recomputed from the package's own oracle patch and protected test
+     diff and asserted against both stored copies. Only 38 of the 459 packages
+     ship those inputs, so on the 2026-09-10 board -- 342 live tasks -- that
+     list alone put NINE columns on any axis in total (C4 4, C5 4, C6 1, the
+     other eleven axes 0). Not one axis reached min_tasks=5, so every column
+     rendered as counts-without-a-rate or an em dash and the view showed
+     nothing at all. `a.declared_unverified.task_ids` is the other list: the
+     tasks whose own task.toml DECLARES the label but which withhold the oracle
+     patch, so the generator could not re-derive it and refused to publish it as
+     derived. Joining the union puts 19/49/21/317/326/68/7/14/1/9/16/0/36/35 on
+     C1..C14 and clears the floor on twelve of the fourteen.
+
+     The union is taken HERE and not in web/gen_capability_data.py. That
+     generator's header promises that everything in `task_ids` was re-derived
+     and checked against both stored copies; folding declared labels into it
+     would make the promise false for every consumer of the file, including the
+     ones that are not this page. The view is where a label can be joined AND
+     carried with its provenance, so this is where it is done -- and the two
+     counts stay apart on the axis object (nVerified, nDeclared) all the way to
+     the cell, because the moment they are added into one number nothing
+     downstream can tell a checked label from a claimed one. */
   function capabilityAxes(board, cap) {
     var matrix = board && board.matrix;
     var ids = matrix && matrix.tasks;
@@ -1112,15 +1331,29 @@
     var floor = (typeof gate.min_tasks === "number" && isFinite(gate.min_tasks))
       ? gate.min_tasks : null;
     return axes.map(function (a) {
-      var cols = [];
+      /* `seen` is what keeps the union a union. A task carrying the label in
+         both lists -- which the catalogue does not currently emit, but nothing
+         in its schema forbids -- would otherwise be counted twice in the
+         denominator and scored twice in the numerator, inflating n past the
+         number of tasks that exist. The re-derived list goes in first so that
+         a task present in both is attributed to the stronger evidence. */
+      var seen = {}, cols = [], nVerified = 0, nDeclared = 0;
       ((a && a.task_ids) || []).forEach(function (id) {
-        if (hasOwn(at, id)) { cols.push(at[id]); }
+        if (!hasOwn(at, id) || hasOwn(seen, id)) { return; }
+        seen[id] = 1; cols.push(at[id]); nVerified += 1;
+      });
+      var dec = (a && a.declared_unverified) || {};
+      ((dec && dec.task_ids) || []).forEach(function (id) {
+        if (!hasOwn(at, id) || hasOwn(seen, id)) { return; }
+        seen[id] = 1; cols.push(at[id]); nDeclared += 1;
       });
       return {
         code: String((a && a.code) || ""),
         name: String((a && a.name) || ""),
         cols: cols,
         n: cols.length,
+        nVerified: nVerified,
+        nDeclared: nDeclared,
         /* No published floor means no defensible ranking, not a default one. */
         ranked: (floor !== null) && (cols.length >= floor),
         half: resolution(cols.length)
@@ -1165,15 +1398,33 @@
     return (r && r.overall && r.overall.n) ? (r.overall.solved / r.overall.n) : null;
   }
 
+  /* Whether a column's task set is fully re-derived, and the word the cell
+     prints if it is not. A single declared task is enough to make the answer
+     "declared": the reader is being told what the WEAKEST evidence in the
+     denominator is, not the average of it, and an axis whose nDeclared the
+     join left at zero says nothing rather than saying "re-derived" -- a badge
+     of quality is not this function's job, only the warning is. The overall
+     column and any caller passing a bare {ranked:true} axis therefore fall
+     through to "" with no property access that could throw. */
+  function provenanceWord(axis) {
+    return (axis && axis.nDeclared) ? "declared" : "";
+  }
+
   /* An axis cell. Three outcomes and no fourth, and only the third prints a
-     percentage. */
+     percentage. The provenance word rides in the same span as the counts and
+     is produced by the same call that produces them, for the reason the counts
+     themselves are: a rate that can be lifted out of this function without its
+     denominator or without its provenance is the failure the view exists to
+     expose, so there is no code path here that emits one alone. */
   function capCell(t, axis) {
     if (!t || !t.n) {
       return '<span class="text-muted-foreground">&mdash;</span>';
     }
-    var counts = esc(t.solved) + "/" + esc(t.n);
+    var word = provenanceWord(axis);
+    var counts = esc(t.solved) + "/" + esc(t.n) + (word ? " " + word : "");
+    var prov = ' data-provenance="' + (word ? "declared" : "rederived") + '"';
     if (!axis || !axis.ranked) {
-      return '<p class="tdb-cap-cell" data-ranked="false">' +
+      return '<p class="tdb-cap-cell" data-ranked="false"' + prov + '>' +
         '<span class="tdb-cap-n">' + counts + "</span></p>";
     }
     var w = pointEstimate(t);
@@ -1181,20 +1432,36 @@
       return '<span class="text-muted-foreground">&mdash;</span>';
     }
     var rate = T.pct(w.p);
-    return '<p class="tdb-cap-cell" data-ranked="true">' +
+    return '<p class="tdb-cap-cell" data-ranked="true"' + prov + '>' +
       '<strong class="tabular-nums">' + rate + "</strong>" +
       '<span class="tdb-cap-n">' + counts + "</span></p>";
   }
 
   /* The column head's second line. Not a sentence -- a reading: what this
-     column is measured on, how wide that measurement is, and whether it is
-     allowed to order the table. */
+     column is measured on, where those labels came from, how wide the
+     measurement is, and whether it is allowed to order the table.
+
+     The provenance term is the exact split and not the cell's one word,
+     because this is the only place on screen with room to say "4 re-derived,
+     313 declared" -- and that ratio is the difference between a column the
+     catalogue checked and a column that describes itself. A column with no
+     declared task says nothing extra; the note is a warning, and a column
+     that has earned no warning does not need a certificate. An axis carrying
+     nothing has no provenance to state, so "no task" is still the whole
+     line. */
   function axisNoteHtml(a) {
     if (!a.n) { return "no task"; }
     var tasks = esc(a.n) + " task" + (a.n === 1 ? "" : "s");
     var band = (a.half === null) ? "" : " &plusmn;" + a.half.toFixed(0) + "%";
+    var prov = "";
+    if (a.nDeclared) {
+      prov = a.nVerified
+        ? " &middot; " + esc(a.nVerified) + " re-derived, " +
+          esc(a.nDeclared) + " declared"
+        : " &middot; all declared";
+    }
     var verdict = a.ranked ? "" : " &middot; unranked";
-    return tasks + band + verdict;
+    return tasks + band + prov + verdict;
   }
 
   function capColumns(axes, nTasks) {
@@ -1277,10 +1544,24 @@
     var matrix = board && board.matrix;
     var ids = (matrix && matrix.tasks) || [];
     var labelled = {}, carriers = [], gestures = 0, empty = 0;
+    /* Two task sets, counted apart for the same reason the axis keeps two
+       counts: `labelled` is every task the view drew a column over, `derived`
+       is the subset whose label the catalogue actually re-derived. The
+       difference between the two sizes is the whole caveat this view carries,
+       and it is counted here so the foot cannot quote a stale one. cols is
+       built verified-first by capabilityAxes(), so the first nVerified entries
+       are exactly the re-derived ones. */
+    var derived = {};
     axes.forEach(function (a) {
-      a.cols.forEach(function (j) { labelled[ids[j]] = 1; });
+      a.cols.forEach(function (j, k) {
+        labelled[ids[j]] = 1;
+        if (k < a.nVerified) { derived[ids[j]] = 1; }
+      });
     });
     var nLabelled = Object.keys(labelled).length;
+    var nDerived = Object.keys(derived).length;
+    var axesDeclared = 0;
+    axes.forEach(function (a) { if (a.nDeclared) { axesDeclared += 1; } });
     axes.forEach(function (a) {
       if (!a.n) { empty += 1; return; }
       /* A "carrier" is an axis covering four fifths or more of everything that
@@ -1302,7 +1583,9 @@
       if (status[id] === "live") { unlabelledLive += 1; }
     });
     return {
-      nTasks: ids.length, nLabelled: nLabelled, unlabelled: unlabelled,
+      nTasks: ids.length, nLabelled: nLabelled, nDerived: nDerived,
+      axesDeclared: axesDeclared, nAxes: axes.length,
+      unlabelled: unlabelled,
       unlabelledLive: unlabelledLive, carriers: carriers,
       gestures: gestures, empty: empty,
       models: ((matrix && matrix.rows) || []).length,
@@ -1348,29 +1631,78 @@
         "inert: an order the data cannot support is refused rather than " +
         "footnoted.";
     var nScaf = Object.keys(day.pooled || {}).length;
+    /* The second half of this sentence describes the OTHER view, one click
+       away, so it is counted from that view's rows for the same reason
+       countHtml is: a reader can switch back and count the models. The day
+       file's n_models stood here and disagreed with the table it named. */
     var scopeTxt = "Rates are for " + esc(d.models) + " models under " + scaffold +
       " on " + esc(d.date) + ", over " + esc(d.nTasks) + " tasks. The overall " +
-      "view ranks " + esc(day.n_models) + " models across " + esc(nScaf) +
+      "view ranks " + esc(distinctModels(ALL)) + " models across " + esc(nScaf) +
       " agent and effort configurations; the two are different measurements, " +
       "and a cell here cannot be read against a row there.";
+    /* Both fractions are recomputed from the join drawn above -- the labelled
+       share AND the re-derived share. The catalogue publishes a coverage_share
+       per axis, but it is taken over the 38 packages that ship an oracle patch
+       (C5 reads 1.000 there), so it describes a corpus of 38 and not the grid
+       of this size on screen. Printing it here would be a rate borrowed from
+       another denominator, which is the one thing this page refuses hardest. */
     var coverTxt = esc(d.nLabelled) + " of " + esc(d.nTasks) +
-      " tasks in this grid carry a capability label. " +
+      " tasks in this grid carry a capability label, and " + esc(d.nDerived) +
+      " of those " + esc(d.nLabelled) + " had that label re-derived from the " +
+      "package. " +
       ((d.unlabelled && d.unlabelled === d.unlabelledLive)
         ? "All " + esc(d.unlabelled) + " of the rest are live"
         : esc(d.unlabelledLive) + " of the other " + esc(d.unlabelled) +
           " are live") +
-      ", and a live package withholds the oracle patch and the protected test " +
-      "diff that the tagger reads, so no axis can be derived for it.";
+      ", and none of the unlabelled tasks names a capability code in its " +
+      "task.toml, so nothing places them on an axis by either route -- not a " +
+      "withheld measurement but an absent declaration. " +
+      "The shares here are counted from the join in " +
+      "this table; the catalogue's own coverage_share is measured over the " +
+      "packages that ship an oracle patch and does not describe this grid.";
+    /* The provenance term is reader-facing copy and deliberately says the
+       uncomfortable half first. It names the mechanism -- the tagger's only
+       inputs are the oracle patch and the protected test diff, and a live
+       package ships neither -- because "declared" without the reason reads as
+       sloppiness rather than as the deliberate withholding that it is. */
+    var provTxt = esc(d.axesDeclared) + " of the " + esc(d.nAxes) +
+      " axes are built partly or wholly from labels DECLARED by the task " +
+      "package -- the axis code sits in its task.toml keywords -- and never " +
+      "re-derived by this site. Only " +
+      esc(d.nDerived) + " of the " + esc(d.nTasks) + " tasks in this grid " +
+      "could be checked: the tagger reads a package's oracle patch and " +
+      "protected test diff, a live package withholds both, and the catalogue " +
+      "publishes a re-derived label only where it could recompute one and " +
+      "match it against both stored copies. Every cell over a column with any " +
+      "declared task is marked <em>declared</em> beside its counts, and each " +
+      "column head gives the split. A declared label is a claim by the task, " +
+      "not a measurement by the benchmark; the solve counts either side of it " +
+      "are measured either way.";
+    /* The empty-axis sentence is conditional now because the join can leave
+       none: with the declared labels folded in, thirteen of the fourteen axes
+       carry something on this board and "The remaining 0 axes carry no task at
+       all" is a sentence about nothing. The clause is also singular-safe -- it
+       used to be able to print "1 axes", and a foot that cannot count to one
+       is not a foot a reader should believe about 342. The refusal it
+       describes is unchanged: the empty axis is still drawn, still an em dash,
+       still not dropped. */
+    var emptyTxt = d.empty
+      ? " The remaining " + esc(d.empty) + " " +
+        (d.empty === 1 ? "axis carries" : "axes carry") + " no task at all " +
+        "and " + (d.empty === 1 ? "is" : "are") + " drawn as an em dash " +
+        "rather than dropped, because an axis missing from a table reads as " +
+        "an axis that does not exist."
+      : " Every axis the catalogue publishes carries at least one task in " +
+        "this grid, and an axis that carried none would still be drawn, as " +
+        "an em dash rather than dropped.";
     var spread = names
       ? "<p><strong>What the axes separate.</strong> Of the " +
         esc(d.nLabelled) + " labelled tasks in this grid, " + names +
         ", so those columns reproduce the overall ranking rather than " +
         "splitting it. Every other axis that " +
         "carries anything carries " + esc(d.gestures) + " tasks or fewer, " +
-        "where the interval is wider than the spread between first place and " +
-        "last. The remaining " + esc(d.empty) + " axes carry no task at all " +
-        "and are drawn as an em dash rather than dropped, because an axis " +
-        "missing from a table reads as an axis that does not exist.</p>"
+        "and has to be read at the interval its own column head quotes " +
+        "rather than at the precision its digits suggest." + emptyTxt + "</p>"
       : "";
     var angles = "<p><strong>The angles that are not here.</strong> " +
       "<code>capability_profile()</code> decomposes a model into four " +
@@ -1382,8 +1714,10 @@
       "0&ndash;4, and every cell shipped in the matrix is 1, 0 or null.</p>";
     return '<dl class="tdb-limits">' +
         "<dt>Cells</dt><dd>A model's solve rate over the tasks carrying that " +
-          "axis, with solved/n beside it. An axis with no measured task is an " +
-          "em dash, never a zero.</dd>" +
+          "axis, with solved/n beside it, and the word <em>declared</em> where " +
+          "the label placing those tasks on the axis was not re-derived. An " +
+          "axis with no measured task is an em dash, never a zero.</dd>" +
+        "<dt>Provenance</dt><dd>" + provTxt + "</dd>" +
         "<dt>Ranking floor</dt><dd>" + floorTxt + "</dd>" +
         "<dt>Resolution</dt><dd>Each column head carries the widest 95% Wilson " +
           "half-width its task count admits, so a column is read at the " +
@@ -1437,9 +1771,15 @@
     var faNote = faTerm(ALL.length);
     var defCells = DEF_CELLS, defOutcomes = DEF_OUTCOMES, defReport = LINK_QUALITY;
     var digest = digestHtml(discriminationDigest(boardData, siteData));
-    var cells = esc(day.n_cells);
-    var models = esc(day.n_models), tasks = esc(day.n_tasks);
-    /* n_cells counts (model x scaffold x task) attempts. Describing it as
+    /* Both counted from ALL -- the rows this page drew -- and not from the day
+       file's n_cells / n_models headline fields; see distinctModels() above for
+       what those two fields claimed on 2026-09-10 and what the table under them
+       actually held. `tasks` is still the day's own n_tasks: it is the size of
+       the suite, which is a property of the DAY and not something a row can be
+       counted up to. */
+    var cells = esc(totalAttempts(ALL));
+    var models = esc(distinctModels(ALL)), tasks = esc(day.n_tasks);
+    /* The attempt count is a sum over (model x scaffold x task). Describing it as
        "across <models> models on <tasks> tasks" claimed 16387 attempts over a
        152 x 50 grid that has 7600 intersections -- an impossible decomposition
        printed inside the block that invites the reader to check the
@@ -1575,8 +1915,12 @@
   byId("copy").addEventListener("click", function () {
     var b = byId("copy");
     navigator.clipboard.writeText(byId("cmd").textContent).then(function () {
-      b.textContent = "copied";
-      setTimeout(function () { b.textContent = "copy"; }, 1200);
+      /* Restored to "Copy", which is what the markup ships. It restored a
+         lowercase "copy", so the label was correct exactly once: the first
+         click renamed the button permanently, and the button that told you it
+         had worked was the evidence that something had not. */
+      b.textContent = "Copied";
+      setTimeout(function () { b.textContent = "Copy"; }, 1200);
     });
   });
   window.addEventListener("popstate", function () {

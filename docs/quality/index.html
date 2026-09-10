@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Selection quality — terminal-daily-bench</title>
 <meta name="description" content="Multi-angle Selection-Quality (MSQ): discrimination, difficulty coverage, monotonicity, IRT information, KR-20 reliability, and a readiness verdict.">
-<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
-<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
+<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -123,7 +123,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="quality"></script>
+<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="quality"></script>
 <script>
 (function () {
   "use strict";
@@ -295,13 +295,34 @@
        This was a band of six metric cards. Every number in it is still here,
        on one line, beside the scaffold and axis lines it belongs with: the
        suite date, the frame count, how many are ready, the D gate and the
-       false-accept count. The task count is already on the scaffold line. */
+       false-accept count over the decisions it was counted on. The task count
+       is already on the scaffold line. */
     var readyCount = FRAMES.filter(function (f) { return q[f[0]].ready; }).length;
-    var fa = board.total_fa != null ? board.total_fa : 0;
+    /* `total_fa` is the COUNT of gate decisions that accepted a wrong answer;
+       `total_fa_n` is how many completed gate decisions that count was taken
+       over. The published board carries total_fa = null over total_fa_n = 0:
+       no semantic false-accept audit has been run, so there is no numerator
+       and nothing to divide it by. This line used to read
+       `board.total_fa != null ? board.total_fa : 0` and so printed
+       "0 false-accepts" -- which a reader can only understand as "we looked
+       and found none", the one claim the rest of this site explicitly refuses
+       to make: submit/ tells the reader an em dash under false accepts means
+       unmeasured and not zero, and benchmarks/ prints the same quantity as an
+       em dash and states outright that semantic false-accept is unmeasured. A
+       never-measured quantity must not render the way a measured zero renders.
+       So both fields must be numbers and the denominator must be greater than
+       zero before any count appears, and when it does appear it appears over
+       that denominator rather than bare -- a false-accept count without the
+       number of decisions it was counted on is not interpretable either. */
+    var faText = (typeof board.total_fa === "number" &&
+        typeof board.total_fa_n === "number" && board.total_fa_n > 0)
+      ? board.total_fa + "/" + board.total_fa_n + " false-accept" +
+        (board.total_fa === 1 ? "" : "s")
+      : "false accepts " + dash() + " unmeasured";
     put("inst-frames", (board.date ? esc(board.date) + " &middot; " : "") +
       FRAMES.length + " scaffold frame" + (FRAMES.length === 1 ? "" : "s") +
       " &middot; " + readyCount + " ready &middot; gate D &ge; " + num(TH_.min_D, 2) +
-      " &middot; " + fa + " false-accept" + (fa === 1 ? "" : "s"));
+      " &middot; " + faText);
 
     var sub = document.getElementById("frames-sub");
     if (sub) {

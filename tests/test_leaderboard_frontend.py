@@ -561,7 +561,14 @@ def test_homepage_previews_stay_short_and_link_to_full_views():
     # home actually renders -- every declared *_PREVIEW_LIMIT must be used to
     # slice, so a limit cannot be declared and quietly ignored.
     assert "var BOARD_PREVIEW_LIMIT = 5;" in HOME
-    assert "rows.slice(0, BOARD_PREVIEW_LIMIT)" in HOME
+    # The name of the array being sliced is deliberately NOT pinned. It was
+    # `rows.slice(0, BOARD_PREVIEW_LIMIT)` while the preview ranked every
+    # flattened cell together; it is now sliced from the mainline partition,
+    # because ranking a 293-task effort sweep above a 342-task mainline score
+    # is not a ranking. Pinning the variable name asserted an implementation
+    # detail that the rule below already covers properly: the loop requires
+    # EVERY declared limit to be used in a slice, whatever it slices, so a
+    # limit still cannot be declared and quietly ignored.
     limits = re.findall(r"var (\w*PREVIEW_LIMIT) = \d+;", HOME)
     assert "BOARD_PREVIEW_LIMIT" in limits
     for name in limits:

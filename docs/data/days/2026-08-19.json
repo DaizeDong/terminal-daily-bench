@@ -31,7 +31,6 @@
     "rate": 0.16,
     "solved": 8
    },
-   "lead": true,
    "model": "gpt-5.6-sol",
    "single_shot": {
     "fa": null,

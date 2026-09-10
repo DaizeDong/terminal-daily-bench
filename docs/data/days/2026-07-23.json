@@ -3,7 +3,6 @@
  "generated": "2026-08-25T22:51:16Z",
  "leaderboard": [
   {
-   "lead": true,
    "model": "Claude-Opus-4.8",
    "single_shot": {
     "fa": null,

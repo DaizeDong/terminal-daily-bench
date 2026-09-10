@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tasks — terminal-daily-bench</title>
 <meta name="description" content="Search the published terminal-daily-bench task catalogue. Catalogue membership is not a score.">
-<link rel="stylesheet" href="../assets/tw.css?v=b518091f1a">
-<link rel="stylesheet" href="../assets/site.css?v=b518091f1a">
+<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
+<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
 </head>
 <body>
@@ -119,7 +119,7 @@
   </div>
 </main>
 
-<script src="../assets/site.js?v=b518091f1a" data-root=".." data-page="registry"></script>
+<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="registry"></script>
 <script>
 (function () {
   "use strict";
@@ -136,13 +136,19 @@
   var TD = "p-2 align-middle whitespace-nowrap py-4 text-base";
   var TR = "hover:bg-muted/50 transition-colors cursor-pointer";
 
-  /* ONE badge rule, and it draws no box. This page hydrated 302 bordered
-     chips carrying, between them, about six facts: `python` 37 times in a
-     catalogue whose own summary reads LANGUAGES 1, `archive` 37 times in a
-     column headed Status, an axis code per cell. The task pages already print
-     the same labels as plain uppercase text -- ARCHIVE PYTHON HARD -- so the
-     table prints them that way too: 61 spans for the publication line, and
-     axis codes set in the identifier face rather than dressed as badges.
+  /* ONE badge rule, and it draws no box. This page used to hydrate a bordered
+     chip into every status, language and axis cell, and between them all of
+     those chips carried about six distinct facts: `python` once per archive
+     task in a catalogue whose own summary reads LANGUAGES 1, `archive` once
+     per archive task in a column already headed Status, an axis code per cell.
+     The task pages already print the same labels as plain uppercase text --
+     ARCHIVE PYTHON HARD -- so the table prints them that way too: one span per
+     row for the publication line, and axis codes set in the identifier face
+     rather than dressed as badges. How many chips that removed is a function
+     of how many rows the catalogue happens to hold, so no chip census is
+     written down here -- an earlier revision of this comment froze one and it
+     was wrong by an order of magnitude within a few regenerations. The rule is
+     the durable part: no cell gets a box.
      Nothing below asks for a colour class; the stylesheet decides what a
      label looks like. */
 
@@ -175,9 +181,14 @@
      out that six of the nine said almost nothing.
 
      STATUS AND LANGUAGE BECAME ONE COLUMN. Language is published on exactly
-     the 37 archive tasks and empty on exactly the 24 live ones -- so as a
-     column of its own it drew a second copy of the status column, beside the
-     status column. They are one cell now, printed the way every task page
+     the archive tasks and empty on exactly the live ones -- so as a column of
+     its own it drew a second copy of the status column, beside the status
+     column. The split is exact rather than merely correlated, which is why the
+     merge is safe: re-derived 2026-09-10 from docs/site_data.json (generated
+     2026-09-10T06:11:46Z), every one of the 38 archive rows carries `python`
+     and every one of the 421 live rows carries none. Those two counts are a
+     census of one regeneration and will move with the next one; the exactness
+     of the split is the property this column depends on. They are one cell now, printed the way every task page
      prints them, and both values still appear on every row, which is what the
      two facet groups filtering on them require. A withheld language is an em
      dash: not published, not "no language".
@@ -185,8 +196,9 @@
      WHAT IS NOT MERGED. Difficulty keeps its own column because the facet rail
      filters on `declared_difficulty` and a filter for an attribute the table
      never renders is a dead end. Official solves keeps its own column although
-     it is an em dash on all 61 rows -- `n_models` is 0 and `solved_by` null
-     while no official ranking is published -- because a column of dashes with
+     it is an em dash on every row -- `n_models` is absent and `solved_by`
+     null on all 459 rows of the 2026-09-10 catalogue, because no official
+     ranking is published -- because a column of dashes with
      a sentence under the table saying what the dash means is a disclosure, and
      a missing column is not. Both of those are pinned by
      tests/test_leaderboard_frontend.py; do not "simplify" either away without
@@ -584,7 +596,7 @@
     facetEl.addEventListener("click", onChipClick);
     /* The capability rail is a SECOND chip host. Without this line its chips
        painted their counts, took their aria-pressed state and did nothing:
-       every click left all 61 rows on screen. */
+       every click left the whole catalogue on screen. */
     capEl.addEventListener("click", onChipClick);
 
     qEl.addEventListener("input", function () {
@@ -671,8 +683,8 @@
 
     /* ---- one row ----
        Nothing between a <td> and its value. Every cell used to hold a <p>
-       carrying the alignment and the colour -- nine per row, 549 of them on a
-       61-row catalogue, not one of them a paragraph and not one saying
+       carrying the alignment and the colour -- nine per row, so one per cell
+       across the whole catalogue, not one of them a paragraph and not one saying
        anything the <td> could not say itself. The alignment lives on the cell
        now, which is the element the header is aligned from, so a column cannot
        be flush right in the body and centred in the head.
@@ -716,10 +728,12 @@
               esc(t.pr_number) + "</span>")
         : "";
 
-      /* Stacked, not comma-joined. Four of the 61 tasks are in two suites, and
-         joining them put the widest cell in the catalogue -- "sample,
-         sample-live" -- in charge of a column the other 57 rows fill with one
-         date. The cell is already two lines tall wherever a task has a title. */
+      /* Stacked, not comma-joined. Multi-suite membership is the common case,
+         not the exception: in the 2026-09-10 catalogue 397 of 459 tasks carry
+         more than one membership and 329 carry four. Comma-joining them puts
+         the widest cell in the catalogue in charge of a column that the
+         single-membership rows fill with one short id. The cell is already two
+         lines tall wherever a task has a title, so stacking costs nothing. */
       var suiteIds = T.taskSuites(t);
       var suite = suiteIds.length ? suiteIds.map(function (sid) {
         return '<a class="block ' + LINK + '" href="../benchmarks/' + encodeURIComponent(sid) +
@@ -739,17 +753,20 @@
 
       /* Plain text, not a chip: the word IS the column, which is headed
          Difficulty, and a badge around it marked no state the column did not
-         already declare. The 122 chips left on this page after the capability
-         codes were plain-texted were these and the publication cell, 61 each.
+         already declare. After the capability codes were plain-texted the only
+         chips left on this page were these and the publication cell, one of
+         each per row -- so the count scaled with the catalogue and is not
+         quoted here.
 
          The EDITORIAL label from task.toml, and never `t.difficulty`, which is
-         the MEASURED field: "" on all 61 tasks while no official ranking
-         publishes, so a cell rendered from it showed nothing while the facet
-         chip beside it filtered on something. */
+         the MEASURED field: still empty on every task while no official
+         ranking publishes ("" on all 459 rows of the 2026-09-10 catalogue), so
+         a cell rendered from it showed nothing while the facet chip beside it
+         filtered on something. */
       var declared = t.declared_difficulty ? esc(t.declared_difficulty) : DASH;
 
       /* On its own line. Beside the codes it was the widest thing in the
-         column and set the width for all 61 rows; under them it costs nothing,
+         column and set the width for every row; under them it costs nothing,
          because every row is already two lines tall. It stays VISIBLE either
          way: it is the difference between an axis re-derived from a package
          and an axis the task author merely claimed. */
@@ -760,8 +777,9 @@
         caps = DASH;
       } else if (t._caps.length) {
         /* An axis code is an identifier, so it is set in the identifier face
-           and not dressed as a badge: 143 of this page's 302 badge elements
-           were codes restating a column already headed Capability. */
+           and not dressed as a badge: close to half of the badge elements
+           this page used to hydrate were codes restating a column already
+           headed Capability, one per axis per row. */
         caps = t._caps.map(function (code) {
           return '<span class="tdb-id" title="' +
             esc(capTitle(code)) + (t._capState === "declared"
@@ -775,11 +793,19 @@
           'and no axis in the taxonomy matched">no axis</span>';
       }
 
-      /* A dash, never a zero. `n_models` is 0 and `solved_by` null on every
-         published task while no official ranking exists, so the honest cell is
-         the one that says the field was not measured -- and the sentence under
-         the table says what the dash means, because 61 dashes on their own
-         read as 61 zeros. */
+      /* A dash, never a zero. `n_models` is absent and `solved_by` null on
+         every published task while no official ranking exists -- re-checked
+         2026-09-10 against docs/site_data.json, where that holds on all 459
+         rows -- so the honest cell is the one that says the field was not
+         measured, and the sentence under the table says what the dash means,
+         because a whole column of dashes with nothing to explain it reads as a
+         whole column of zeros.
+
+         The `|| 0` below is not a null-to-zero on a measured quantity: absent,
+         zero and non-numeric all mean the same thing here -- there is no model
+         count to divide by -- and the only cell any of them may produce is the
+         dash. A real ranking sets a positive `n_models` and takes the other
+         branch, which prints the solves OVER that count and never bare. */
       var n = Number(t.n_models) || 0;
       var solved = (n && t._solved >= 0) ? (t._solved + "/" + n) : DASH;
 
@@ -805,9 +831,10 @@
     });
 
     /* ---- the view is in the address bar ----
-       Search, sort and every facet chip are one view of 61 rows, and a view
-       is the thing a reader cites. Without this the URL stayed /registry/
-       through 61 -> 37 -> 1 rows, so a filtered reading could not be linked
+       Search, sort and every facet chip are one view of the catalogue, and a
+       view is the thing a reader cites. Without this the URL stayed /registry/
+       from the full catalogue down to a single row, so a filtered reading
+       could not be linked
        to and did not survive a reload. Written with replaceState, matching
        /leaderboard/: the back button here means the page you came from, and
        one history entry per keystroke would bury it. */
