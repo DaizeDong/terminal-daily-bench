@@ -196,13 +196,16 @@
      WHAT IS NOT MERGED. Difficulty keeps its own column because the facet rail
      filters on `declared_difficulty` and a filter for an attribute the table
      never renders is a dead end. Official solves keeps its own column although
-     it is an em dash on every row -- `n_models` is absent and `solved_by`
-     null on all 459 rows of the 2026-09-10 catalogue, because no official
-     ranking is published -- because a column of dashes with
-     a sentence under the table saying what the dash means is a disclosure, and
-     a missing column is not. Both of those are pinned by
-     tests/test_leaderboard_frontend.py; do not "simplify" either away without
-     reading it.
+     it is an em dash on every row -- `n_models` and `solved_by` are both
+     PRESENT and both explicitly null on all 459 rows of the 2026-09-10
+     catalogue, because no official ranking is published. This comment used to
+     say `n_models` was ABSENT, which was true of no row at all; the shape is
+     an explicit null, and on a page whose argument is that absent, null and
+     zero are three different claims that is not a word to get wrong. The
+     column stays because a column of dashes with a sentence under the table
+     saying what the dash means is a disclosure, and a missing column is not.
+     Both of those are pinned by tests/test_leaderboard_frontend.py; do not
+     "simplify" either away without reading it.
 
      THE REST OF THE 1158px. Nine columns measured 2372px inside a 1214px
      container: two thirds of the table was off-screen at 1440. Most of it was
@@ -707,10 +710,17 @@
           esc(t.title) + '">' + esc(t.title) + "</span>"
         : "";
 
-      /* Bounded like the title above it, and for the same reason: six of the
-         45 upstream repositories are long enough to set this column's width
-         for the other 39. The full name is the link's own title, the link goes
-         to it, and each task page prints it in full under Source. */
+      /* Bounded like the title above it, and for the same reason: unbounded,
+         the longest repository name in the catalogue sets this column's width
+         for every other row. This comment used to quantify that as "six of the
+         45 upstream repositories ... for the other 39", a census of a far
+         smaller catalogue than the one published: re-derived 2026-09-10 from
+         docs/site_data.json (generated 2026-09-10T06:11:46Z), all 459 rows
+         carry a repo and they name 318 DISTINCT upstream repositories, running
+         from 9 to 51 characters. Those counts are a census of one regeneration
+         and will move with the next one; the bound is the durable part. The
+         full name is the link's own title, the link goes to it, and each task
+         page prints it in full under Source. */
       var repoUrl = t.repo ? "https://github.com/" + t.repo : null;
       var repo = repoUrl
         ? '<a class="block max-w-52 truncate ' + LINK + '" href="' + esc(repoUrl) +
@@ -793,19 +803,34 @@
           'and no axis in the taxonomy matched">no axis</span>';
       }
 
-      /* A dash, never a zero. `n_models` is absent and `solved_by` null on
-         every published task while no official ranking exists -- re-checked
-         2026-09-10 against docs/site_data.json, where that holds on all 459
-         rows -- so the honest cell is the one that says the field was not
-         measured, and the sentence under the table says what the dash means,
-         because a whole column of dashes with nothing to explain it reads as a
-         whole column of zeros.
+      /* A dash, never a zero. `n_models` and `solved_by` are both PRESENT and
+         both explicitly null on every published task while no official ranking
+         exists -- re-checked 2026-09-10 against docs/site_data.json (generated
+         2026-09-10T06:11:46Z, the file this page itself fetches): 459 tasks,
+         the number of rows carrying no `n_models` key is 0, and the value is
+         null on 459 of 459. The previous version of this comment said the key
+         was ABSENT, which was true of no row at all, and the word mattered
+         because the paragraph below defends the `|| 0` by enumerating the
+         cases it covers and the enumeration omitted null -- the only one of
+         them that actually occurs -- on a page whose whole argument is that
+         absent, null and zero are three different claims. Nothing rendered
+         wrong while that stood, and this was checked rather than assumed:
+         Number(null) is 0, 0 is falsy, so `0 || 0` is 0, the `(n && ...)`
+         guard below fails and the dash is printed -- no null has ever been
+         rendered as a zero here.
+         This is a correction to a dated receipt, not to behaviour.
 
-         The `|| 0` below is not a null-to-zero on a measured quantity: absent,
-         zero and non-numeric all mean the same thing here -- there is no model
-         count to divide by -- and the only cell any of them may produce is the
-         dash. A real ranking sets a positive `n_models` and takes the other
-         branch, which prints the solves OVER that count and never bare. */
+         So the honest cell is the one that says the field was not measured,
+         and the sentence under the table says what the dash means, because a
+         whole column of dashes with nothing to explain it reads as a whole
+         column of zeros.
+
+         The `|| 0` below is not a null-to-zero on a measured quantity: null --
+         the shape actually published today -- and absent, zero and non-numeric
+         with it all mean the same thing here: there is no model count to
+         divide by, and the only cell any of them may produce is the dash. A
+         real ranking sets a positive `n_models` and takes the other branch,
+         which prints the solves OVER that count and never bare. */
       var n = Number(t.n_models) || 0;
       var solved = (n && t._solved >= 0) ? (t._solved + "/" + n) : DASH;
 

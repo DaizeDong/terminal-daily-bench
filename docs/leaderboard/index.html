@@ -46,6 +46,16 @@
           </label>
         </div>
 
+        <!-- Why the capability chip beside it refuses. A disabled control says
+             "not now" and nothing else; on a day whose file carries no solve
+             matrix the reader needs the sentence, and a reader who arrived with
+             ?view=capability needs to be told that the table under this strip is
+             NOT the view they asked for. Empty and [hidden] on every day the
+             view is available, so it costs nothing when there is nothing to
+             say. -->
+        <div class="tdb-shell-rail text-muted-foreground text-sm px-4 py-3"
+             id="view-note" role="status" hidden></div>
+
         <div class="tdb-shell-rail" id="facet-box" hidden>
           <div id="facets"></div>
         </div>
@@ -75,18 +85,38 @@
   var esc = T.esc, TD = T.TD, TR = T.TR, TH = T.TH;
   var byId = function (id) { return document.getElementById(id); };
 
-  /* Two published files besides the day itself.
+  /* Two published files besides the day itself, and BOTH of them are
+     day-independent by construction.
 
      site_data.json is the task catalogue: it is what makes the reproduce
      command name a task a reader may actually run, and it carries the
-     publication mode every task was measured under. leaderboard_data.json
-     carries the per-cell solve matrix, which is the only thing on the site
-     that can say what this suite SEPARATES rather than how a model scored.
+     publication mode every task was measured under. data/capability.json is
+     the axis catalogue: fourteen axis codes, their names, the task ids that
+     carry them and the publish gate. Neither file holds a measurement, so
+     neither goes stale when the day picker moves.
 
-     Both are read once at boot and both fail loudly: a null here means "could
-     not be read", never "there is nothing there", and every line below that
-     depends on one of them is omitted rather than guessed. */
-  var siteData = null, boardData = null, capData = null;
+     WHAT USED TO BE HERE, AND WHY IT IS GONE. A third global, boardData, held
+     leaderboard_data.json -- the whole-site snapshot whose own `date` field is
+     fixed at 2026-09-10. It was read once at boot and never again, and two
+     things on this page were built from it: the capability view and the
+     discrimination digest. Both are per-day quantities computed from a solve
+     matrix, and every day file publishes its own `matrix` in exactly the shape
+     leaderboard_data.json publishes it. So on six of the seven selectable days
+     the page printed 2026-09-10's numbers under another day's header: the "By
+     capability" table read 342 tasks x 33 models while the header above it said
+     338 x 33 (2026-09-05, 2026-09-04) or 366 x 31 (2026-09-03), and on the
+     three days whose file carries NO matrix at all -- 2026-09-06, 2026-08-19,
+     2026-07-23 -- a full, confident capability table of a different suite sat
+     under a header for a day that measured nothing of the kind. Both call
+     sites now take the day that show() was handed, so there is nothing left
+     that reads the global snapshot and the fetch is gone with it. If a future
+     line genuinely needs a cross-day figure it must say which day it describes
+     in its own sentence; it cannot borrow this page's day picker.
+
+     Both files are read once at boot and both fail loudly: a null here means
+     "could not be read", never "there is nothing there", and every line below
+     that depends on one of them is omitted rather than guessed. */
+  var siteData = null, capData = null;
 
   /* Raised by faCell() while a body is built: at least one non-zero False
      accepts count had no evidence record to point at, and the foot has to say
@@ -650,6 +680,80 @@
     rail.innerHTML = html;
   }
 
+  /* ------------------------------------------------------------------ *
+   * The sentence that goes with the refusal.
+   *
+   * The disabled chip above is necessary and not sufficient. It reports that
+   * something is unavailable; it cannot say WHAT, and a reader who arrived on
+   * a matrix-less day through a ?view=capability link is shown the board view
+   * under a URL that asked for the other one, with a greyed-out chip as the
+   * only trace. That is a failure rendering as an absence -- the reader's
+   * most likely reading is that the capability view simply has nothing to
+   * show today, when the truth is that this day's file carries no per-cell
+   * grid to compute one from.
+   *
+   * So: name the day, name the missing input, and say what the day DOES
+   * publish, so the absence is bounded. Three causes are distinguished
+   * because the reader can act on two of them -- a failed catalogue fetch is
+   * a site problem to report, a matrix-less day is a property of that day and
+   * another day will have one -- and conflating them would make both
+   * unactionable. The count of published per-model rows is printed with its
+   * denominator-bearing noun ("of the day's N leaderboard rows") rather than
+   * bare, for the same reason every other number on this page is.
+   * ------------------------------------------------------------------ */
+  function capNoteHtml(day, refused) {
+    if (CAP) { return ""; }
+    var matrix = day && day.matrix;
+    var ids = (matrix && matrix.tasks) || [];
+    var rows = (matrix && matrix.rows) || [];
+    var nLb = ((day && day.leaderboard) || []).length;
+    /* Built as a *Html local rather than inlined so the branch a reader is
+       being shown can be read in one place, the way the foot's copy is. */
+    var whyHtml;
+    if (!capData) {
+      whyHtml = "the capability axis catalogue could not be read, so there is " +
+        "no axis to join this day's tasks onto";
+    } else if (!ids.length || !rows.length) {
+      /* 2026-09-06 publishes a single leaderboard row, so the plural is
+         conditional rather than assumed: "1 rows" in the sentence that is
+         explaining a data limitation reads as a second, smaller one. */
+      whyHtml = "the published file for " + esc((day && day.date) || "this day") +
+        " carries no per-cell solve matrix. The board above it is built from " +
+        "that day's " + esc(nLb) + " per-model leaderboard row" +
+        (nLb === 1 ? ", which gives " : "s, which give ") +
+        "one rate per model and cannot " +
+        "say which task separated which model";
+    } else {
+      whyHtml = "the capability catalogue publishes no axis, so the join has " +
+        "no columns to draw";
+    }
+    /* The leading clause exists only for the reader who asked. Shown to
+       everyone it would read as an error on a day where nothing went wrong.
+
+       It does NOT say "the view you linked to". `refused` is true for two
+       different arrivals -- a ?view=capability URL, and a reader who was
+       already in the capability view and moved the day picker onto a day that
+       cannot build it -- and only the first followed a link. Naming a link the
+       second reader never used is a small false statement inside a paragraph
+       whose entire job is to explain, accurately, why something is missing.
+       What both readers have in common is the only thing worth saying: they
+       asked for this view and are not getting it. */
+    var leadHtml = refused
+      ? "<strong>The capability view is not available on this day.</strong> " +
+        "You are looking at the overall board instead. "
+      : "<strong>The capability view is unavailable on this day.</strong> ";
+    return "<p>" + leadHtml + "It is unavailable because " + whyHtml +
+      ". No capability figures are shown rather than another day's.</p>";
+  }
+
+  function paintCapNote(day, refused) {
+    var box = byId("view-note");
+    if (!box) { return; }
+    var html = capNoteHtml(day, refused);
+    box.innerHTML = html;
+    box.hidden = !html;
+  }
+
   /* The address bar is the only place a sorted, filtered view can be kept.
      replaceState, not pushState -- see the sort note above. */
   function writeUrl(q) {
@@ -732,6 +836,54 @@
     return n;
   }
 
+  /* WHAT `day.n_tasks` IS, AND WHAT IT IS NOT. It is not the size of the
+     suite. The comment that used to stand in renderFoot() said it was, and
+     that sentence is what let this page print "346 tasks" for 2026-09-04
+     while /benchmarks/2026-09-04/ printed "396 tasks" for the same day, with
+     nothing on either page saying the two counted different things.
+
+     web/aggregate_leaderboard.py:255 writes `"n_tasks": len(_prim_tasks)`,
+     where `_prim_tasks` is the distinct task set of the PRIMARY SCAFFOLD's
+     rows -- the best-covered scaffold's reduced grid, the thing the table
+     below actually ranks models on. The same builder emits `union_n_tasks`
+     for the cross-scaffold union, and web/build_day_data.py:180 forwards only
+     `n_tasks` into the day file, so a day file has the primary-grid figure
+     and no union at all. The suite roster is a different field again:
+     build_day_data.py:183 copies the catalogue's own suite record into
+     `day.suite`, and `day.suite.n_tasks` is the number of tasks the published
+     suite contains -- which is what /benchmarks/<date>/ counts.
+
+     Checked on all seven published days rather than on one, because the
+     relationship between the two figures is not constant and a comment that
+     generalises from a single day is how this defect was written in the first
+     place. 2026-08-19 (50/50) and 2026-09-03 (385/385) agree; 2026-09-04
+     (346/396) and 2026-09-10 (342/345) do not; and 2026-07-23, 2026-09-05 and
+     2026-09-06 carry no `suite.n_tasks` to compare against -- 2026-07-23 and
+     2026-09-05 because the day file has no suite record at all, 2026-09-06
+     because its record has an id and nothing else. So the sentence cannot be
+     written once at build time: which of the three cases holds is computed
+     here, per day, and only the case that is true of the day on screen is
+     printed. A missing roster figure is SAID to be missing by omitting the
+     comparison, never by printing the board figure twice.
+
+     `n_tasks` absent or non-finite would mean the builder published no count;
+     that is not zero tasks, so it is named rather than rendered as a number. */
+  function suiteTaskCount(day) {
+    var s = day && day.suite, n = s && s.n_tasks;
+    return (typeof n === "number" && isFinite(n)) ? n : null;
+  }
+
+  function boardTaskScope(day) {
+    var n = day && day.n_tasks;
+    if (typeof n !== "number" || !isFinite(n)) {
+      return "task count unpublished";
+    }
+    var s = suiteTaskCount(day);
+    if (s === null) { return esc(n) + " board tasks"; }
+    if (s === n) { return esc(n) + " board tasks, the whole suite"; }
+    return esc(n) + " board tasks of " + esc(s) + " in the suite";
+  }
+
   /* The line above the table describes THIS view. In the capability view the
      day's own totals are the wrong numbers -- 152 models and 50 tasks belong
      to the board, while the grid under the line is 12 models of one scaffold
@@ -742,12 +894,14 @@
     var shown = (VIEW.length === rows.length)
       ? "Showing " + esc(rows.length) + unit
       : "Showing " + esc(VIEW.length) + " of " + esc(rows.length) + unit;
-    var tasks = capMode() ? CAP.summary.nTasks : DAY.n_tasks;
+    var tasks = capMode()
+      ? esc(CAP.summary.nTasks) + " tasks in this grid"
+      : boardTaskScope(DAY);
     var scope = capMode()
       ? esc(CAP.summary.scaffold || "one scaffold")
       : esc(distinctModels(rows)) + " models";
     return shown +
-      '<span class="tdb-count-sep">&middot;</span>' + esc(tasks) + " tasks" +
+      '<span class="tdb-count-sep">&middot;</span>' + tasks +
       '<span class="tdb-count-sep">&middot;</span>' + scope +
       '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
   }
@@ -1039,10 +1193,23 @@
   /* ------------------------------------------------------------------ *
    * The discrimination digest.
    *
-   * What the suite separates, decomposed from the published solve matrix and
-   * the task catalogue at page load. Every number is recomputed here rather
-   * than copied out of the /quality/ report, so regenerating either file
-   * UPDATES this digest instead of falsifying it.
+   * What the suite separates, decomposed from the solve matrix of THE DAY ON
+   * SCREEN and the task catalogue. Every number is recomputed here rather than
+   * copied out of the /quality/ report, so regenerating either file UPDATES
+   * this digest instead of falsifying it.
+   *
+   * THIS IS A PER-DAY QUANTITY, and it was being drawn from a global. Read the
+   * function: every figure it returns -- the task count, the three bands, the
+   * per-cell coverage, the roster size, the scaffold name -- comes out of
+   * `board.matrix` and `board.leaderboard`, and it even carries `board.date`
+   * out with it because digestHtml has to name the grid it describes. Nothing
+   * in it aggregates over days. It was nonetheless called with the fixed
+   * 2026-09-10 snapshot on every day, so the paragraph under the 2026-09-03
+   * table counted 342 columns for a day whose matrix has 366, and under the
+   * three matrix-less days it counted them for a day with no matrix on screen
+   * at all. It now takes the day, which means it renders nothing at all on
+   * those three days -- a digest that cannot be computed is absent, and the
+   * table above it is what tells the reader the day is thin.
    *
    * A cell that was never run is null, not a failure: it is dropped from a
    * task's denominator rather than counted as a zero. A task no model solved
@@ -1422,7 +1589,23 @@
     }
     var word = provenanceWord(axis);
     var counts = esc(t.solved) + "/" + esc(t.n) + (word ? " " + word : "");
-    var prov = ' data-provenance="' + (word ? "declared" : "rederived") + '"';
+    /* The machine-readable attribute is read off the axis's OWN provenance
+       counts, not off whether the human-readable word came back empty. It
+       used to be `word ? "declared" : "rederived"`, which asserted
+       re-derivation for every cell that simply had nothing to warn about --
+       and the worst case was the whole Overall column, which is drawn through
+       this function with OVERALL_AXIS, an axis carrying neither nDeclared nor
+       nVerified because it is not built from capability labels at all. Every
+       Overall cell therefore shipped data-provenance="rederived" while, on
+       2026-09-10, only 4 of the 342 tasks under it carry a re-derived label
+       (5 of 366 on 2026-09-03, 4 of 338 on 2026-09-04 and on 2026-09-05, and
+       the other three published days have no matrix and so no capability view
+       at all). An absent provenance is now absent: no attribute is emitted,
+       because a scraper reading one is entitled to have it mean something,
+       and "I was not told" must not be spelled the same way as "checked". */
+    var prov = "";
+    if (axis && axis.nDeclared) { prov = ' data-provenance="declared"'; }
+    else if (axis && axis.nVerified) { prov = ' data-provenance="rederived"'; }
     if (!axis || !axis.ranked) {
       return '<p class="tdb-cap-cell" data-ranked="false"' + prov + '>' +
         '<span class="tdb-cap-n">' + counts + "</span></p>";
@@ -1646,17 +1829,46 @@
        (C5 reads 1.000 there), so it describes a corpus of 38 and not the grid
        of this size on screen. Printing it here would be a rate borrowed from
        another denominator, which is the one thing this page refuses hardest. */
+    /* The remainder clause, counted three ways because the remainder is not
+       always plural and is not always non-empty. It read "All " + n + " of
+       the rest are live" for every day where the unlabelled tasks are all
+       live, and on 2026-09-03 exactly one task in the grid is unlabelled, so
+       the site published "All 1 of the rest are live" -- a foot that cannot
+       count to one, sitting above 326 counts a reader is being asked to
+       trust. Checked across every day that HAS a capability view: the
+       unlabelled remainder is 1 on 2026-09-03, 15 on 2026-09-04 and
+       2026-09-05, 16 on 2026-09-10, and on all four every unlabelled task is
+       live; 2026-07-23, 2026-08-19 and 2026-09-06 publish no matrix, so this
+       foot never renders on them. The empty case has not been seen on any
+       published day, but it is written out anyway rather than left to print
+       "All 0 of the rest are live, and none of the unlabelled tasks names a
+       capability code" -- two clauses about a set with no members. The
+       not-all-live branch stays for the same reason: it is reachable the day
+       a task in the grid stops being live, and it must not need a rewrite to
+       be correct when it first renders. */
+    var restTxt;
+    if (!d.unlabelled) {
+      restTxt = "Every task in this grid carries a label, so there is no " +
+        "unlabelled remainder to account for. ";
+    } else {
+      restTxt = ((d.unlabelled === 1)
+        ? ((d.unlabelledLive === 1)
+            ? "The one remaining task is live, and it does not name"
+            : "The one remaining task is not live, and it does not name")
+        : ((d.unlabelled === d.unlabelledLive)
+            ? "All " + esc(d.unlabelled) + " of the rest are live, and none " +
+              "of the unlabelled tasks names"
+            : esc(d.unlabelledLive) + " of the other " + esc(d.unlabelled) +
+              " are live, and none of the unlabelled tasks names")) +
+        " a capability code in its task.toml, so nothing places " +
+        ((d.unlabelled === 1) ? "it" : "them") +
+        " on an axis by either route -- not a withheld measurement but an " +
+        "absent declaration. ";
+    }
     var coverTxt = esc(d.nLabelled) + " of " + esc(d.nTasks) +
       " tasks in this grid carry a capability label, and " + esc(d.nDerived) +
       " of those " + esc(d.nLabelled) + " had that label re-derived from the " +
-      "package. " +
-      ((d.unlabelled && d.unlabelled === d.unlabelledLive)
-        ? "All " + esc(d.unlabelled) + " of the rest are live"
-        : esc(d.unlabelledLive) + " of the other " + esc(d.unlabelled) +
-          " are live") +
-      ", and none of the unlabelled tasks names a capability code in its " +
-      "task.toml, so nothing places them on an axis by either route -- not a " +
-      "withheld measurement but an absent declaration. " +
+      "package. " + restTxt +
       "The shares here are counted from the join in " +
       "this table; the catalogue's own coverage_share is measured over the " +
       "packages that ship an oracle patch and does not describe this grid.";
@@ -1770,15 +1982,24 @@
     }
     var faNote = faTerm(ALL.length);
     var defCells = DEF_CELLS, defOutcomes = DEF_OUTCOMES, defReport = LINK_QUALITY;
-    var digest = digestHtml(discriminationDigest(boardData, siteData));
+    /* `day`, not the global snapshot. The digest describes one solve matrix,
+       and the matrix a reader is entitled to read under this header is the one
+       in the file the day picker just loaded. On a day that publishes no
+       matrix discriminationDigest returns null and digestHtml returns the
+       empty string, so the paragraph is absent rather than borrowed. */
+    var digest = digestHtml(discriminationDigest(day, siteData));
     /* Both counted from ALL -- the rows this page drew -- and not from the day
        file's n_cells / n_models headline fields; see distinctModels() above for
        what those two fields claimed on 2026-09-10 and what the table under them
-       actually held. `tasks` is still the day's own n_tasks: it is the size of
-       the suite, which is a property of the DAY and not something a row can be
-       counted up to. */
+       actually held. `tasks` is still the day's own n_tasks, which is NOT the
+       size of the suite: it is the primary scaffold's reduced grid, and the
+       suite roster is `day.suite.n_tasks`. See boardTaskScope() above for
+       where each of the two comes from and for the four days on which they
+       disagree or cannot be compared; the phrase printed here is built there
+       so that this page and /benchmarks/<date>/ cannot show two different
+       numbers that both read as "tasks". */
     var cells = esc(totalAttempts(ALL));
-    var models = esc(distinctModels(ALL)), tasks = esc(day.n_tasks);
+    var models = esc(distinctModels(ALL)), tasks = boardTaskScope(day);
     /* The attempt count is a sum over (model x scaffold x task). Describing it as
        "across <models> models on <tasks> tasks" claimed 16387 attempts over a
        152 x 50 grid that has 7600 intersections -- an impossible decomposition
@@ -1793,17 +2014,34 @@
     var span = nScaf
       ? cells + " model &times; scaffold &times; task attempts: " + models +
         " models, " + esc(nScaf) + " agent/effort configuration" +
-        (nScaf === 1 ? "" : "s") + ", " + tasks + " tasks"
-      : cells + " model &times; task attempts: " + models + " models, " +
-        tasks + " tasks";
+        (nScaf === 1 ? "" : "s") + ", " + tasks
+      : cells + " model &times; task attempts: " + models + " models, " + tasks;
+    /* One sentence saying which of the three cases boardTaskScope() found, so
+       a reader holding this page next to /benchmarks/<date>/ is told why the
+       two totals differ instead of discovering it. Computed per day: the day
+       on screen decides which sentence is true, and a day whose suite record
+       publishes no roster size gets the sentence that says so rather than a
+       comparison invented out of the board figure. */
+    var suiteN = suiteTaskCount(day);
+    var scopeNote = (suiteN === null)
+      ? "A board task is one the day's primary scaffold ran. This day's " +
+        "catalogue record publishes no roster size, so there is no suite " +
+        "total to set beside it here."
+      : (suiteN === day.n_tasks)
+        ? "A board task is one the day's primary scaffold ran, and on this " +
+          "day that is every task in the published suite, so the total on " +
+          "the suite page is the same number."
+        : "A board task is one the day's primary scaffold ran; the suite " +
+          "page counts the published roster instead, which is why it says " +
+          esc(suiteN) + " where this line says " + esc(day.n_tasks) + ".";
     var h50 = halfWidth(0.5, day.n_tasks);
     byId("foot").innerHTML =
       '<dl class="tdb-limits">' +
         "<dt>Cells</dt><dd>" + defCells + "</dd>" +
-        "<dt>Coverage</dt><dd>" + span + ".</dd>" +
+        "<dt>Coverage</dt><dd>" + span + ". " + scopeNote + "</dd>" +
         "<dt>Accuracy</dt><dd>Solved / Tasks; &plusmn; is the 95% Wilson " +
-          "half-width, about " + h50 + " points at 50% on " + tasks +
-          " tasks.</dd>" +
+          "half-width, about " + h50 + " points at 50% on " +
+          esc(day.n_tasks) + " board tasks.</dd>" +
         "<dt>Outcomes</dt><dd>" + defOutcomes + "</dd>" +
         faNote +
         "<dt>Report</dt><dd>" + defReport + "</dd>" +
@@ -1831,11 +2069,34 @@
        from the URL and names the column this day does not have, it falls back
        to the default rather than leaving every header reading `aria-sort=none`
        over a table that is nonetheless in some order. */
-    /* The capability view is rebuilt from the matrix on every day change, so
-       a day whose matrix or catalogue could not be read has no capability
-       chip rather than a chip that opens an empty table. */
-    CAP = (boardData && capData) ? buildCapability(boardData, capData, siteData) : null;
-    if (MODE === "capability" && !CAP) { MODE = MODE_DEFAULT; }
+    /* The capability view is rebuilt from THIS DAY'S matrix on every day
+       change, so a day whose matrix or catalogue could not be read has no
+       capability chip rather than a chip that opens another day's table.
+       `day` is the whole day file and buildCapability is handed it unchanged:
+       it reads `matrix.tasks`, `matrix.rows`, `matrix.scaffold` and `date`,
+       and the day file publishes all four under exactly those names --
+       checked, not assumed, against all seven published day files. Nothing in
+       buildCapability, capabilityAxes, capabilityRows or capabilitySummary
+       reaches for a board-level field that only the whole-site snapshot has.
+
+       This line used to read buildCapability(boardData, ...) -- the fixed
+       2026-09-10 snapshot -- on every day, and the comment that stood here
+       described the behaviour below as if it already followed the day. It did
+       not: the capability table was 342 tasks x 33 models under all seven
+       headers. The comment was right about the intent and wrong about the
+       code, which is the worst of the two ways to be wrong, because it is the
+       one that stops the next reader from looking. */
+    CAP = capData ? buildCapability(day, capData, siteData) : null;
+    /* A refused view has to SAY it was refused. Falling silently back to the
+       board view hands a reader who followed a ?view=capability link a
+       different table under the URL they clicked, with nothing on screen to
+       distinguish "this day has no capability view" from "this is the
+       capability view and it is empty". capNoteHtml() writes the sentence;
+       the flag is what separates a reader who ASKED for the view from one who
+       merely landed on a day where the chip is disabled. */
+    var capWasRequested = (MODE === "capability");
+    if (capWasRequested && !CAP) { MODE = MODE_DEFAULT; }
+    paintCapNote(day, capWasRequested && !CAP);
     COLS = capMode() ? CAP.cols
       : (faColumn(ALL) ? COLS_BASE.concat([COL_FA]) : COLS_BASE.slice());
     if (!colByKey(sortKey)) {
@@ -1927,21 +2188,27 @@
     var d = T.dayFromUrl(); if (d) load(d);
   });
 
-  /* The catalogue and the solve matrix are fetched alongside the day index, so
-     the first table this page draws already carries a runnable command and a
-     discrimination digest. Either may fail on its own; T.fetchFailed says so
-     on the page and hands back null, and the lines that needed it are omitted
-     rather than filled with a guess. */
+  /* The two catalogues are fetched alongside the day index, so the first table
+     this page draws already carries a runnable command and a capability chip
+     that knows whether it can open. Either may fail on its own; T.fetchFailed
+     says so on the page and hands back null, and the lines that needed it are
+     omitted rather than filled with a guess.
+
+     leaderboard_data.json is NOT fetched here any more. It was the third entry
+     in this list and it fed exactly two things, the capability view and the
+     discrimination digest, both of which are now computed from the day file
+     show() was handed; see the declaration of siteData/capData at the top of
+     this script for what the fixed-date snapshot was printing under six of the
+     seven day headers. Fetching a file nothing reads would keep a stale global
+     one edit away from being used again. */
   Promise.all([
     T.dayIndex(),
     T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
-    T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the solve matrix")),
     T.getJSON("data/capability.json").catch(T.fetchFailed("the capability axes"))
   ]).then(function (loaded) {
     var idx = loaded[0];
     siteData = loaded[1];
-    boardData = loaded[2];
-    capData = loaded[3];
+    capData = loaded[2];
     DAYS = idx.days;
     var want = T.dayFromUrl();
     var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;

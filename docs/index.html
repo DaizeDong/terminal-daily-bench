@@ -170,7 +170,17 @@
      measured under an effort sweep and never at the scaffold's default
      effort has no mainline row, and dropping it without saying so would be
      exactly the silent-empty-row failure this site exists to prevent.
-     (2026-09-03 through 2026-09-10 each have one: gpt-5.2-codex.) */
+
+     Counted over all seven published days, not one: 2026-09-03, 2026-09-04,
+     2026-09-05 and 2026-09-10 each hide exactly one model, gpt-5.2-codex,
+     which on those days was measured only under single_shot@xhigh/@high and
+     never at single_shot's default effort. The other three days hide none --
+     2026-07-23 and 2026-08-19 carry no effort sweeps at all, and 2026-09-06
+     is a two-task day whose only model (oracle-agent) has mainline cells --
+     so the difference is 0 there and the foot clause never prints. An
+     earlier version of this comment said "2026-09-03 through 2026-09-10 each
+     have one", which swept 2026-09-06 into a range it does not belong to;
+     the range was written after looking at one day and assuming the rest. */
   function countModels(rows) {
     var seen = {}, n = 0;
     rows.forEach(function (r) {
@@ -247,26 +257,70 @@
        at a smaller denominator, and a rate at a smaller denominator wins a
        naive sort without having measured more. Measured on 2026-09-10: 70
        flattened rows at four different denominators (293, 322, 324, 342);
-       all five preview rows were @xhigh at n=293, and the actual mainline
-       leader, Claude-Opus-4.7 at 104/342 = 0.304, was not on the page at
-       all. On 2026-09-05 the top row was gpt-5.2-codex@xhigh at 45/82 =
-       0.549 -- a 82-task sweep printed above every 338-task result on the
-       day. A five-row teaser cannot carry the caveat that would make those
-       comparable, so it must not make them.
+       four of the five preview rows were @xhigh at n=293 and the fifth, in
+       fourth place, was gpt-5.6-sol single_shot@high at 105/322 = 0.326 --
+       an earlier version of this comment said "all five were @xhigh at
+       n=293", which is wrong and was never recomputed after the sort changed
+       -- and the actual mainline leader, Claude-Opus-4.7 at 104/342 = 0.304,
+       was not on the page at all. On 2026-09-05 the top row was
+       gpt-5.2-codex@xhigh at 45/82 = 0.549 -- an 82-task sweep printed above
+       every 338-task result on the day. A five-row teaser cannot carry the
+       caveat that would make those comparable, so it must not make them.
 
-       So the preview ranks the mainline cells only -- the cells whose key
+       So the preview shows the mainline cells only -- the cells whose key
        carries no @effort, one per scaffold per model -- and the effort
        sweeps stay reachable on /leaderboard/, which shows every row with its
-       own denominator and has the room to say what a sweep is. They are NOT
-       dropped quietly: the foot below counts them and says where they went,
-       and it separately counts the models that have no mainline cell at all
-       (gpt-5.2-codex on every day since 2026-09-03) so that a model vanishing
-       from this preview is a stated fact rather than an absence.
+       own denominator and effort and has the room to say what a sweep is.
+       They are NOT dropped quietly: the foot below counts them and says
+       where they went, and it separately counts the models that have no
+       mainline cell at all (see countModels above for the per-day census)
+       so that a model vanishing from this preview is a stated fact rather
+       than an absence.
 
-       Note this does not make the preview's rows mutually comparable in
-       general: on 2026-08-19 the mainline denominators themselves run from
-       24 to 50, because models entered the suite on different days. The
-       denominator is printed on every row for that reason and must stay. */
+       WHAT THE FOOT MAY NOT SAY ABOUT THE SWEEPS. It used to say the
+       excluded rows "are measured over a smaller task slice". That is a
+       causal justification, it was checked on 2026-09-10 and 2026-09-05
+       only, and it is false on two of the seven days. On 2026-08-19, 144 of
+       the 151 excluded sweep rows sit at an n at least as large as their own
+       model+scaffold mainline n -- gpt-5.6-sol codex@low/@medium/@high are
+       all n=50 against a codex mainline of n=37 -- and the highest rate on
+       the whole day, gpt-5.6-sol codex@low at 15/50 = 0.300, is an excluded
+       row with the identical denominator and the identical rate as
+       openai/gpt-5.5 terminus-2 15/50, which the preview shows. On
+       2026-09-03, 24 of the 40 excluded sweeps are at n=372 against a
+       mainline denominator of 366 -- a LARGER slice, under a foot saying
+       "smaller". No n comparison was ever performed in this function, so the
+       sentence was an assumption printed as a fact.
+       The clause is therefore gone rather than recomputed: a per-day
+       n-relationship sentence would be four different sentences (all smaller
+       / some larger / mixed / equal), and the honest statement needs none of
+       them. The rows are not ranked here and they are listed in full, with
+       their own denominators, one click away; that is true on all seven
+       days and is all the foot now claims.
+
+       WHY THE SHOWN ROWS CAN STILL FAIL TO BE A RANKING. Partitioning to
+       mainline does not make what is left mutually comparable. On 2026-08-19
+       the mainline denominators run 24..50, because models entered the suite
+       on different days, and the rank loop below printed gpt-5.4 codex 9/37
+       = 24.32% above openai/gemini-3.1-pro-preview terminus-2 12/50 =
+       24.00%; on 2026-07-23 the mainline n is 4 or 6 and DeepSeek-V4-Flash
+       2/4 and Claude-Opus-4.8 3/6 both printed rank 1. The previous round
+       admitted this in a comment, which no reader of the page can see -- an
+       admission only the next editor gets is not a disclosure.
+       So the refusal applied to the sweeps is applied to the shown rows too:
+       `comparable` below is computed on the day being rendered, and when the
+       shown denominators are not all equal the Rank column is WITHHELD --
+       not merely annotated -- and the foot says so and names the actual
+       range on that day. Withholding beats a caveat because the rank number
+       is the comparison: a reader who sees "1, 2, 3" has already been told
+       these are ordered by the same measurement, and no sentence underneath
+       unsays it, whereas a table with no rank column and rows in rate order
+       is a list, which is what the day supports. The rows stay sorted by
+       rate so the order is deterministic and the strongest rows are the ones
+       previewed; the denominator is printed on every row and must stay.
+       Only 2026-07-23 (n 4,6) and 2026-08-19 (n 24..50) trip this; the four
+       matrix days and 2026-09-06 have a single mainline denominator each
+       (366 / 338 / 338 / 342 / 2), so on them the table is unchanged. */
     var main = [];
     var i;
     for (i = 0; i < rows.length; i++) {
@@ -288,17 +342,41 @@
     }
 
     main.sort(function (a, b) { return b.rate - a.rate; });
-    var last = null, lastRank = 0;
-    main.forEach(function (r, k) {
-      if (last === null || r.rate !== last) { lastRank = k + 1; last = r.rate; }
-      r.rank = lastRank;
-    });
 
-    var head = '<tr><th class="tdb-num">Rank</th><th>Agent</th><th>Model</th>' +
+    /* Are the rows this table is about to show measured over the same number
+       of tasks? This is computed over the rows actually shown -- `main`,
+       which is the mainline partition, or every row on a sweeps-only day --
+       because it is those rows a Rank column would be making a claim about,
+       not the day as a whole. `main` is non-empty here: the empty-day case
+       returned above and the sweeps-only fallback refilled it. */
+    var nMin = main[0].n, nMax = main[0].n;
+    for (i = 1; i < main.length; i++) {
+      if (main[i].n < nMin) nMin = main[i].n;
+      if (main[i].n > nMax) nMax = main[i].n;
+    }
+    var comparable = nMin === nMax;
+
+    /* Ranks are assigned only when a rank means something. The tie-skipping
+       is the ordinary competition rule (two rows at the same rate share a
+       rank and the next row takes the position it actually occupies), and it
+       is reached only on days whose shown denominators are uniform. */
+    if (comparable) {
+      var last = null, lastRank = 0;
+      main.forEach(function (r, k) {
+        if (last === null || r.rate !== last) { lastRank = k + 1; last = r.rate; }
+        r.rank = lastRank;
+      });
+    }
+
+    var head = "<tr>" +
+      (comparable ? '<th class="tdb-num">Rank</th>' : "") +
+      '<th>Agent</th><th>Model</th>' +
       '<th class="tdb-num">Accuracy</th><th class="tdb-num">Solved</th></tr>';
     var body = main.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
       return "<tr>" +
-        '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>" +
+        (comparable
+          ? '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>"
+          : "") +
         '<td class="tdb-muted">' + esc(r.agent) + "</td>" +
         '<td><span class="tdb-id">' + esc(r.model) + "</span></td>" +
         '<td class="tdb-num">' + esc(T.pct(r.rate)) + "</td>" +
@@ -325,16 +403,34 @@
     } else {
       foot += (main.length === 1 ? " mainline entry." : " mainline entries.");
       if (swept) {
+        /* States the exclusion and its destination, and nothing about WHY
+           the sweeps are different -- see the long note in this function for
+           the two days on which the old "smaller task slice" claim is false.
+           Both halves of what is left are checkable on all seven days: the
+           rows are excluded from this table, and /leaderboard/ lists every
+           flattened cell with its own effort and its own solved/n. */
         foot += " " + swept + (swept === 1 ? " effort-sweep row is"
                                            : " effort-sweep rows are") +
-          " measured over a smaller task slice and ranked separately on the " +
-          "full leaderboard.";
+          " not ranked here; the full leaderboard lists each one with its " +
+          "own effort and its own denominator.";
       }
       if (hiddenModels) {
         foot += " " + hiddenModels +
           (hiddenModels === 1 ? " model has" : " models have") +
           " no mainline cell on this day and so cannot appear here at all.";
       }
+    }
+    /* The reader is told, on the day it is true, that the table above is a
+       list and not a ranking -- with the actual span of denominators on that
+       day, because "denominators differ" without the numbers is a caveat the
+       reader cannot check against the n printed on each row. This is the
+       visible half of withholding the Rank column; a missing column with no
+       explanation would read as an oversight. */
+    if (!comparable) {
+      foot += " No rank is shown: these rows were not measured over the same" +
+        " number of tasks (n runs from " + nMin + " to " + nMax +
+        " here), so they are listed in rate order and each rate has to be" +
+        " read against the denominator beside it.";
     }
     set("hp-board-foot", foot);
   }

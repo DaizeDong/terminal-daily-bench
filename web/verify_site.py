@@ -1503,6 +1503,82 @@ def check_public_frontend() -> list[str]:
     return bad
 
 
+def check_day_suite_matches_catalogue() -> list[str]:
+    """A day file's `suite` block must equal site_data.json's entry for that id.
+
+    Both describe the same published suite and both are read by the site, so a
+    disagreement between them is a disagreement the reader can see: the day file
+    feeds /leaderboard/ and the home board, site_data.json feeds
+    /benchmarks/<date>/ and the registry. They drifted, and nothing noticed --
+    2026-09-04 shipped suite.n_tasks 392 with 392 task ids against a catalogue
+    entry of 396, so the suite page said 396 tasks and the day file said 392 for
+    the same suite, and every page check still passed because no check crossed
+    the two files.
+
+    This is a FAILURE rather than a warning, unlike check_data_consistency's
+    legacy-snapshot notes below. Those describe a file the v3 frontend
+    deliberately ignores; this describes two files it actively renders, and the
+    numbers are published either way.
+
+    A day with no `suite` block is not an error -- the early days carry none --
+    and neither is a suite id the catalogue does not list. What is checked is
+    the agreement of the fields that exist in both.
+    """
+    try:
+        site = json.loads((DOCS / "site_data.json").read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    catalogue = {s.get("id"): s for s in site.get("suites") or [] if s.get("id")}
+    if not catalogue:
+        return []
+
+    out = []
+    for path in sorted((DOCS / "data" / "days").glob("*.json")):
+        try:
+            day = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            out.append(f"data/days/{path.name} is not readable JSON: {exc}")
+            continue
+        suite = day.get("suite")
+        if not isinstance(suite, dict):
+            continue
+        entry = catalogue.get(suite.get("id"))
+        if entry is None:
+            continue
+
+        for field in ("n_tasks", "catalogued_tasks", "fresh_tasks", "carried_tasks",
+                      "unknown_origin_tasks", "status", "note"):
+            if field not in suite or field not in entry:
+                continue
+            if suite[field] != entry[field]:
+                shown = field in ("status",)
+                a, b = suite[field], entry[field]
+                if not shown and isinstance(a, str) and len(str(a)) > 60:
+                    a, b = str(a)[:57] + "…", str(b)[:57] + "…"
+                out.append(
+                    f"data/days/{path.name} suite.{field} is {a!r} but "
+                    f"site_data.json's suite {suite['id']!r} says {b!r} -- the two "
+                    "describe one published suite and both are rendered")
+
+        ids_day = suite.get("task_ids")
+        ids_cat = entry.get("task_ids")
+        if isinstance(ids_day, list) and isinstance(ids_cat, list):
+            only_day = sorted(set(ids_day) - set(ids_cat))
+            only_cat = sorted(set(ids_cat) - set(ids_day))
+            if only_day or only_cat:
+                out.append(
+                    f"data/days/{path.name} suite.task_ids and site_data.json's suite "
+                    f"{suite['id']!r} differ: {len(only_day)} only in the day file "
+                    f"({', '.join(only_day[:3])}{' …' if len(only_day) > 3 else ''}), "
+                    f"{len(only_cat)} only in the catalogue "
+                    f"({', '.join(only_cat[:3])}{' …' if len(only_cat) > 3 else ''})")
+            if isinstance(suite.get("n_tasks"), int) and len(ids_day) != suite["n_tasks"]:
+                out.append(
+                    f"data/days/{path.name} suite.n_tasks is {suite['n_tasks']} but "
+                    f"suite.task_ids holds {len(ids_day)} ids")
+    return out
+
+
 def check_data_consistency() -> list[str]:
     """Cross-check the two published JSON files. WARNINGS, not failures.
 
@@ -1557,7 +1633,8 @@ def main() -> int:
                   check_published_days(),
                   check_js_definitions(pages),
                   check_no_external(pages), check_site_css(),
-                  check_public_frontend(), check_suite_membership()):
+                  check_public_frontend(), check_suite_membership(),
+                  check_day_suite_matches_catalogue()):
         for e in group:
             failures += 1
             print("FAIL " + e)
