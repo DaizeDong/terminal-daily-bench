@@ -1,0 +1,785 @@
+{
+ "schema": "tdb-day-v1",
+ "date": "2026-09-17",
+ "generated": "2026-09-18T23:03:28Z",
+ "source": "td board",
+ "source_files": 1,
+ "source_digest": "099bdf3c92324e57",
+ "suite": {
+  "id": "2026-09-17"
+ },
+ "official_ranking": false,
+ "n_tasks": 65,
+ "n_models": 17,
+ "n_cells": 6370,
+ "leaderboard": [
+  {
+   "model": "Claude-Opus-4.6",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 38,
+    "rate": 0.584615,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-4.8",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Opus-5",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 44,
+    "rate": 0.676923,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Sonnet-4.6",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 38,
+    "rate": 0.584615,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 38,
+    "rate": 0.584615,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 38,
+    "rate": 0.584615,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 39,
+    "rate": 0.6,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Claude-Sonnet-5",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "DeepSeek-V4-Flash",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 40,
+    "rate": 0.615385,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 37,
+    "rate": 0.569231,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "DeepSeek-V4-Pro",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 39,
+    "rate": 0.6,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 43,
+    "rate": 0.661538,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 43,
+    "rate": 0.661538,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 43,
+    "rate": 0.661538,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Grok-4.3",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 34,
+    "rate": 0.523077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 32,
+    "rate": 0.492308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 33,
+    "rate": 0.507692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 31,
+    "rate": 0.476923,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 33,
+    "rate": 0.507692,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Grok-4.6",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "Kimi-K2.7-Code",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.7-flash",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 44,
+    "rate": 0.676923,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gemini-3.8-flash",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 49,
+    "rate": 0.753846,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@max": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@minimal": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.5",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 40,
+    "rate": 0.615385,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 44,
+    "rate": 0.676923,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-luna",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 47,
+    "rate": 0.723077,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 41,
+    "rate": 0.630769,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 39,
+    "rate": 0.6,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-sol",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 48,
+    "rate": 0.738462,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 44,
+    "rate": 0.676923,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 51,
+    "rate": 0.784615,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-5.6-terra",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 45,
+    "rate": 0.692308,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@none": {
+    "n": 65,
+    "solved": 42,
+    "rate": 0.646154,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 46,
+    "rate": 0.707692,
+    "fa": null,
+    "fa_n": 0
+   }
+  },
+  {
+   "model": "gpt-6-astra",
+   "terminus-2@high": {
+    "n": 65,
+    "solved": 51,
+    "rate": 0.784615,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@low": {
+    "n": 65,
+    "solved": 52,
+    "rate": 0.8,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@medium": {
+    "n": 65,
+    "solved": 52,
+    "rate": 0.8,
+    "fa": null,
+    "fa_n": 0
+   },
+   "terminus-2@xhigh": {
+    "n": 65,
+    "solved": 52,
+    "rate": 0.8,
+    "fa": null,
+    "fa_n": 0
+   }
+  }
+ ],
+ "pooled": {
+  "terminus-2@high": {
+   "n": 1105,
+   "solved": 759
+  },
+  "terminus-2@low": {
+   "n": 1105,
+   "solved": 729
+  },
+  "terminus-2@max": {
+   "n": 585,
+   "solved": 385
+  },
+  "terminus-2@medium": {
+   "n": 1105,
+   "solved": 742
+  },
+  "terminus-2@minimal": {
+   "n": 715,
+   "solved": 461
+  },
+  "terminus-2@none": {
+   "n": 975,
+   "solved": 647
+  },
+  "terminus-2@xhigh": {
+   "n": 780,
+   "solved": 552
+  }
+ },
+ "skipped": {}
+}
