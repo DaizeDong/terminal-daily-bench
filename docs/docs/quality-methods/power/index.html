@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Uncertainty and sample size · Terminal-Daily</title>
+<meta name="description" content="Estimate how much the conclusion might change with a different task sample.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Uncertainty and sample size</h1>
+<p class="tdb-doc-sub">Estimate how much the conclusion might change with a different task sample.</p>
+</header>
+
+<h2 id="bootstrap"><a href="#bootstrap">Confidence intervals</a></h2>
+<p>The analysis repeatedly samples tasks from the observed set and recomputes each measure. The resulting interval summarizes sensitivity to the task sample. Small task sets often produce wide intervals.</p><p>These intervals do not account for every source of uncertainty, such as a different model configuration or repeated-run variation.</p>
+
+<h2 id="power"><a href="#power">Tasks needed for greater precision</a></h2>
+<p>The report estimates how many similar tasks would narrow an interval to a chosen target. The approximation assumes uncertainty decreases with the square root of the number of tasks.</p><p>Treat the estimate as planning guidance. Adding different or highly repetitive tasks may not produce the predicted improvement.</p>
+
+<h2 id="reliability-power"><a href="#reliability-power">Tasks needed for greater reliability</a></h2>
+<p>A second estimate projects the task count needed to reach a target reliability, assuming new tasks behave like the current ones. It is unavailable when the current reliability cannot support that projection.</p><p>More tasks can help with precision, but cannot by themselves repair biased coverage or invalid tests.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

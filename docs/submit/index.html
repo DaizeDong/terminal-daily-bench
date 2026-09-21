@@ -3,53 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Submit results — terminal-daily-bench</title>
-<meta name="description" content="Submission format and separate verified and pending community result views for terminal-daily-bench.">
-<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<title>Submit results · Terminal-Daily</title>
+<meta name="description" content="Learn how to contribute a model evaluation and follow community submissions through independent checking.">
+<link rel="stylesheet" href="../assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="../assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
 </head>
-<body>
+<body class="tdb-report">
 
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
   <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
-    <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
+    <div class="tdb-page-container tdb-report-frame flex w-full flex-1 flex-col" data-tdb-canary-host>
 
-      <nav aria-label="breadcrumb" data-slot="breadcrumb" class="hidden font-mono sm:block">
-        <ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5">
-          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><a class="hover:text-foreground transition-colors" href="../">Home</a></li>
-          <li data-slot="breadcrumb-separator" aria-hidden="true">/</li>
-          <li data-slot="breadcrumb-item" class="text-foreground">Submit</li>
-        </ol>
-      </nav>
-
-      <h1 class="font-mono text-4xl tracking-tighter">Submit results</h1>
-      <p class="text-muted-foreground max-w-4xl font-mono text-sm/relaxed">Recorded is not verified.</p>
-
-      <!-- A four-row `gate -> state` table stood here. Its left column held
-           four nouns and its right column held the four sentences; deleting
-           the nouns costs nothing, because every sentence already names the
-           gate it is about. Each phrase the site contract pins is verbatim. -->
-            <p>The public bundle does not run a replay worker. A submission stays pending until an operator publishes an Ed25519-signed v2 receipt; pending rows never enter the verified ranking. <a href="../guide/submission/#operator-replay">Replay authority</a>.</p>
-      <p>Ranking needs complete frozen-roster coverage. Local runs need the unpublished patched Harbor fork, not stock 0.13.1. <a href="../guide/quickstart/#requirements">Requirements</a>.</p>
-    
+      <header class="tdb-page-heading tdb-report-heading">
+        <h1 class="tdb-page-title">Submit results</h1>
+        <p class="tdb-page-lede">Submit an evaluation for independent review.</p>
+        <p class="tdb-block-foot">The evaluation environment is not yet public. <a href="../guide/quickstart/#requirements">Requirements</a></p>
+      </header>
 
       <section id="mechanic" class="tdb-block" data-tdb-section="mechanic">
         <div class="tdb-block-head">
-          <h2>Submission state</h2>
-          <p>record → pending → replay receipt</p>
-          <div class="tdb-block-tools"><a href="../guide/submission/">Format and validation &rarr;</a></div>
+          <h2>How to contribute</h2>
+          <div class="tdb-block-tools"><a href="../guide/submission/">Submission guide</a></div>
         </div>
-        <div class="bg-fd-secondary/50 border px-6 py-4 font-mono text-sm/relaxed">
-          <code>python3 web/submit_result.py record --authenticated-submitter github:LOGIN &lt; submission.json</code>
-        </div>
-        <p class="text-muted-foreground">Labels are self-reported; a claimed reward is stored for audit, never scored.</p>
+        <ol>
+          <li><a href="../guide/quickstart/">Set up</a> and run the full task set.</li>
+          <li>Submit your model, settings, and <a href="../guide/submission/recording/">run records</a>.</li>
+          <li>Results awaiting review do not count toward the leaderboard.</li>
+        </ol>
       </section>
 
       <section id="verified" class="tdb-block" data-tdb-section="verified" data-tdb-primary-data>
         <div class="tdb-block-head">
-          <h2>Verified community results · replay authority</h2>
-          <p>Signed receipts + full frozen roster</p>
+          <h2>Reviewed results</h2>
           <div class="tdb-block-tools"><p id="verified-count">0 entries</p></div>
         </div>
         <!-- Thirteen column headers stood above zero rows on this page: eight
@@ -60,24 +46,23 @@
              row arrives with its data or not at all. -->
         <dl class="tdb-defs" data-inline id="verified-strip"></dl>
         <div class="tdb-plain-table" id="verified-table"></div>
-        <p class="tdb-empty" id="verified-empty">Loading verified results&hellip;</p>
+        <p class="tdb-empty" id="verified-empty">Loading checked results&hellip;</p>
       </section>
 
       <section id="pending" class="tdb-block" data-tdb-section="pending">
         <div class="tdb-block-head">
-          <h2>Pending submissions</h2>
-          <p>Listed for audit; excluded from ranking</p>
+          <h2>Awaiting review</h2>
           <div class="tdb-block-tools"><p id="pending-count">0 entries</p></div>
         </div>
         <div class="tdb-plain-table" id="pending-table"></div>
-        <p class="tdb-empty" id="pending-empty">Loading pending submissions&hellip;</p>
+        <p class="tdb-empty" id="pending-empty">Loading submissions&hellip;</p>
       </section>
 
     </div>
   </div>
 </main>
 
-<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="submit"></script>
+<script src="../assets/site.js?v=7d2e76d680" data-root=".." data-page="submit"></script>
 <script>
 (function () {
   "use strict";
@@ -101,12 +86,10 @@
   function td(inner, num) {
     return "<td" + (num ? ' class="tdb-num"' : "") + ">" + inner + "</td>";
   }
-  /* A badge marks STATE. `scaffold` is a value, not a state, so it is printed
-     as the identifier it is; only the receipt status gets the marker. */
+  /* Review status uses the shared badge; model names use normal text. */
   function state(text) {
     return '<span data-slot="badge" data-state>' + esc(text) + "</span>";
   }
-  function id(text) { return '<span class="tdb-id">' + esc(text) + "</span>"; }
 
   /* Three bordered cards carried three integers. A measured scalar is a term
      and its value on one line -- the same list the quality page uses. */
@@ -133,12 +116,18 @@
   }
   function pendingStatus(row) {
     var states = ["pending", "running", "error", "rejected"];
+    var labels = { pending: "awaiting review", running: "being checked",
+      error: "needing attention", rejected: "not accepted" };
     var parts = states.reduce(function (items, state) {
       var count = Math.max(0, Number(row[state]) || 0);
-      if (count) items.push(count + " " + state);
+      if (count) items.push(count + " " + labels[state]);
       return items;
     }, []);
-    return parts.join(" · ") || row.verify_status || row.status || "awaiting replay";
+    return parts.join(" · ") || labels[row.verify_status || row.status] || "Awaiting review";
+  }
+  function setupName(value) {
+    return String(value || "Not specified").replace(/single_shot/g, "Single response")
+      .replace(/terminus-2/g, "Terminus 2").replace(/_/g, " ").replace(/@/g, " · ");
   }
 
   function splitCommunity(board) {
@@ -173,14 +162,14 @@
      and the table element itself are all inside the `rows.length` branch, so
      the page can never print a schema it has no data for. */
   var VERIFIED_HEAD = [
-    { label: "Rank", num: true }, { label: "Submitter" }, { label: "Model" },
-    { label: "Scaffold" }, { label: "Verified rate", num: true },
-    { label: "Samples", num: true }, { label: "Status" },
-    { label: "False accepts", num: true }
+    { label: "Rank", num: true }, { label: "Contributor" }, { label: "Model" },
+    { label: "Agent setup" }, { label: "Success rate", num: true },
+    { label: "Runs", num: true }, { label: "Review" },
+    { label: "Wrong answers accepted", num: true }
   ];
   var PENDING_HEAD = [
-    { label: "Submitter" }, { label: "Model" }, { label: "Scaffold" },
-    { label: "Samples", num: true }, { label: "Status" }
+    { label: "Contributor" }, { label: "Model" }, { label: "Agent setup" },
+    { label: "Runs", num: true }, { label: "Review" }
   ];
 
   function renderVerified(rows, legacy) {
@@ -194,10 +183,7 @@
       /* "false accepts" is a column of em dashes when it does appear, and an
          em dash means UNMEASURED. With no rows at all there is no column to
          carry that, so the sentence carries it. */
-      set("verified-empty", "No replay receipts have been published, so the " +
-        "verified ranking is empty. Semantic verifier false-accept is unmeasured " +
-        "either way: an accepted replay proves execution, not that the tests " +
-        "reject a wrong answer.");
+      set("verified-empty", "No reviewed results yet.");
       show("verified-empty", true);
       return;
     }
@@ -205,9 +191,9 @@
     var total = rows.reduce(function (n, row) { return n + verifiedN(row); }, 0);
     var solved = rows.reduce(function (n, row) { return n + (row.solved || 0); }, 0);
     set("verified-strip", scalars([
-      ["Ranked groups", rows.length],
-      ["Verified samples", total],
-      ["Verified solves", solved]
+      ["Entries", rows.length],
+      ["Checked runs", total],
+      ["Successful runs", solved]
     ]));
     show("verified-strip", true);
 
@@ -218,13 +204,13 @@
       return br - ar || bn - an;
     }).map(function (row, index) {
       var n = verifiedN(row);
-      var receiptState = row.receipt_status || row.verify_status || "verified";
+      var receiptState = "Checked";
       var fa = row.false_accept == null ? "&mdash;" : esc(row.false_accept);
       return "<tr>" +
         td(index + 1, true) +
-        td(esc(row.submitter || "&mdash;")) +
-        td(id(row.model || "\u2014")) +
-        td(id(row.scaffold || "unknown")) +
+        td(esc(row.submitter || "\u2014")) +
+        td(esc(row.model || "\u2014")) +
+        td(esc(setupName(row.scaffold))) +
         td(T.rateCell({ n: n, solved: row.solved || 0 }), true) +
         td(n, true) +
         td(state(receiptState)) +
@@ -237,19 +223,18 @@
        said in words under the table it qualifies, every time that table is
        drawn, because a dash on its own is silent. */
     set("verified-empty", (legacy
-      ? "Compatibility view split from legacy community data. " : "") +
-      "An em dash under false accepts means unmeasured, not zero: semantic " +
-      "verifier false-accept is not measured on this catalogue.");
+      ? "These entries come from an earlier results release. " : "") +
+      "A dash means the number of incorrect solutions accepted by the tests has not been measured.");
     show("verified-empty", true);
   }
 
   function renderPending(rows) {
     var total = rows.reduce(function (n, row) { return n + pendingN(row); }, 0);
-    byId("pending-count").textContent = total + (total === 1 ? " sample" : " samples");
+    byId("pending-count").textContent = total + (total === 1 ? " run" : " runs");
 
     if (!rows.length) {
       set("pending-table", "");
-      set("pending-empty", "No pending submissions are published.");
+      set("pending-empty", "No pending submissions.");
       show("pending-empty", true);
       return;
     }
@@ -258,9 +243,9 @@
       return pendingN(b) - pendingN(a);
     }).map(function (row) {
       return "<tr>" +
-        td(esc(row.submitter || "&mdash;")) +
-        td(id(row.model || "\u2014")) +
-        td(id(row.scaffold || "unknown")) +
+        td(esc(row.submitter || "\u2014")) +
+        td(esc(row.model || "\u2014")) +
+        td(esc(setupName(row.scaffold))) +
         td(pendingN(row), true) +
         td(state(pendingStatus(row))) +
         "</tr>";
@@ -277,6 +262,10 @@
   }, function () {
     renderVerified([], false);
     renderPending([]);
+    byId("verified-count").textContent = "Unavailable";
+    byId("pending-count").textContent = "Unavailable";
+    set("verified-empty", "Community results could not be loaded. Please try again later.");
+    set("pending-empty", "Submission progress could not be loaded. Please try again later.");
   });
 })();
 </script>

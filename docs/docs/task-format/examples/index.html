@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Examples · Terminal-Daily</title>
+<meta name="description" content="Common commands for inspecting tasks and working with results.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Examples</h1>
+<p class="tdb-doc-sub">Common commands for inspecting tasks and working with results.</p>
+</header>
+
+<h2 id="examples"><a href="#examples">Install and check</a></h2>
+<p>From a project checkout, install the tools and check a task directory. Replace the example path with your local task.</p><figure class="tdb-code"><figcaption>Install and check a task</figcaption><pre><code>pip install -e .
+tdb doctor path/to/task</code></pre></figure>
+
+<h2 id="score-a-task"><a href="#score-a-task">Run an archived task</a></h2>
+<p>Scoring requires the <a href="../../quickstart/#availability">unpublished evaluation environment</a>. With it available, check the reference solution, then evaluate your model.</p><figure class="tdb-code"><figcaption>Evaluate one task</figcaption><pre><code>tdb oracle path/to/archived-task
+tdb run MODEL path/to/archived-task --out results/run.json</code></pre></figure>
+
+<h2 id="read-a-live-task"><a href="#read-a-live-task">Inspect a live task</a></h2>
+<p>You can read a live task without running the evaluator. The test names are public; the assertions and reference solution are withheld.</p><figure class="tdb-code"><figcaption>Read the task</figcaption><pre><code>cat path/to/live-task/instruction.md
+cat path/to/live-task/FAILING_TESTS.json</code></pre></figure>
+
+<h2 id="publish"><a href="#publish">Prepare a task for publication</a></h2>
+<p>Task authors can export a package with the appropriate live or archived contents. See the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md">package reference</a> for publication instructions.</p>
+
+<h2 id="submit"><a href="#submit">Contribute a result</a></h2>
+<p>Prepare the model and agent details with the patch, then follow <a href="../../submission/">Submit results</a>. Submitted scores remain pending until operators have evaluated the patch.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

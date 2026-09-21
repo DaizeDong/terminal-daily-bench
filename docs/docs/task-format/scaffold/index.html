@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Agent integration · Terminal-Daily</title>
+<meta name="description" content="Connect your agent while keeping evaluation consistent.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Agent integration</h1>
+<p class="tdb-doc-sub">Connect your agent while keeping evaluation consistent.</p>
+</header>
+
+<h2 id="scaffold"><a href="#scaffold">What an agent provides</a></h2>
+<p>An integration receives a task, model connection settings, and available failing-test names. It returns a proposed code patch and basic run information. The built-in baseline requests one patch; other agents may use multiple steps.</p><p>See <a href="../../submission/adapters/">Connect an agent</a> for implementation guidance.</p>
+
+<h2 id="scaffold-limits"><a href="#scaffold-limits">Keep evaluation separate</a></h2>
+<p>An agent must not read or modify the protected tests or reference solution, and it must not assign its own score. The evaluator runs the tests after the agent finishes. Use the same agent configuration when comparing models.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Analyze results in Python · Terminal-Daily</title>
+<meta name="description" content="Use Python when you need to inspect or extend the quality analysis.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Analyze results in Python</h1>
+<p class="tdb-doc-sub">Use Python when you need to inspect or extend the quality analysis.</p>
+</header>
+
+<h2 id="card"><a href="#card">Compute a summary</a></h2>
+<p>Prepare a complete rectangular JSON array, with one row per task and the same models in the same column order on every row. Include only tasks with an evaluated outcome for every model. Exclude incomplete tasks and report those exclusions. Use one for a pass and zero for a failure.</p><figure class="tdb-code"><figcaption>Analyze a task-by-model array</figcaption><pre><code>import json
+from terminal_daily_bench import quality
+
+with open(&quot;matrix.json&quot;) as source:
+    matrix = json.load(source)
+report = quality.benchmark_quality_report(matrix, deep=True)</code></pre></figure><p>Use at least one task and two models. For ordinary run files, the <a href="../cli/">command-line analysis</a> handles the input format for you.</p>
+
+<h2 id="helpers"><a href="#helpers">Explore task subsets</a></h2>
+<p>The Python tools can select subsets by discrimination, difficulty coverage, information, or diversity. Use them to study task-set design, and report how selection was performed. Selecting and evaluating on the same outcomes can make a comparison look stronger than it generalizes.</p><p>Exact arguments and return values are in the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/terminal_daily_bench/quality.py">Python reference</a>.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

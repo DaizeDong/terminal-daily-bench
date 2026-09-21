@@ -180,7 +180,7 @@ def main() -> int:
     out = Path(a.out) if a.out else docs / "guide" / "search-index.json"
     data = retain_generated_timestamp(_read_json(out), collect(docs))
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    out.write_text(json.dumps(data, indent=1), encoding="utf-8", newline="\n")
     print(f"docs search index: {len(data['pages'])} guide pages, "
           f"{len(data['entries'])} sections -> {out}")
     return 0

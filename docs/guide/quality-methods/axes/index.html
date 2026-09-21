@@ -1,52 +1,37 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>the measurement axes — terminal-daily-bench docs</title>
-<meta name="description" content="The three axes read straight off the graded matrix: discriminative yield, difficulty coverage and monotonicity.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>What the measures mean · Terminal-Daily</title>
+<meta name="description" content="Read task-set quality as several complementary measures.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../../docs/quality-methods/axes/">
 </head>
 <body>
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
-    <h1>The measurement axes</h1>
-    <p class="tdb-doc-sub">Seven axes on <code>[0, 1]</code>, higher = better, every one reported separately so the composite never hides a collapsed axis.</p>
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>What the measures mean</h1>
+<p class="tdb-doc-sub">Read task-set quality as several complementary measures.</p>
+</header>
 
-    <h2 id="axes"><a href="#axes">The seven axes</a></h2>
-    <p>Each axis is <code>[0, 1]</code>, higher = better, and every one is reported <strong>separately</strong> so the composite never hides a collapsed axis.</p>
-    <div class="tdb-plain-table">
-      <table>
-        <thead><tr><th>Axis</th><th>Function</th><th>Measures</th></tr></thead>
-        <tbody>
-          <tr><th><a href="#D">D</a></th><td class="tdb-id">discriminative_yield</td><td>tasks that split the field</td></tr>
-          <tr><th><a href="#C">C</a></th><td class="tdb-id">difficulty_coverage</td><td>spread across difficulty</td></tr>
-          <tr><th><a href="#M">M</a></th><td class="tdb-id">monotonicity</td><td>absence of ability inversions</td></tr>
-          <tr><th><a href="../advisory/#A">A</a></th><td class="tdb-id">angle_coverage</td><td>which capability stages are observable</td></tr>
-          <tr><th><a href="../advisory/#R">R</a></th><td class="tdb-id">diversity</td><td>absence of near-duplicate tasks</td></tr>
-          <tr><th><a href="../information/#I">I</a></th><td class="tdb-id">total_information_2pl</td><td>2PL Fisher test information</td></tr>
-          <tr><th><a href="../information/#kr20">KR-20</a></th><td class="tdb-id">reliability_kr20</td><td>internal consistency</td></tr>
-        </tbody>
-      </table>
-    </div>
+<h2 id="axes"><a href="#axes">Read the measures together</a></h2>
+<p>A useful comparison needs tasks that separate models, cover a range of difficulty, and produce interpretable outcomes. No single measure establishes all three. <a href="../information/">Information and reliability</a> and <a href="../advisory/">task diversity</a> add further context.</p>
 
-    <h2 id="D"><a href="#D">D &mdash; Discriminative yield</a></h2>
-    <p>The fraction of tasks that <strong>split the field</strong>: only tasks some models solve and others miss carry information, and the rest are the blind spot. An all-pass or all-fail task therefore carries zero discrimination. With fewer than two models D is <code>None</code>, and its default composite weight is <code>0.5</code>.</p>
-    <figure class="tdb-code"><pre><code>D = |{ tasks with 0 &lt; solvers &lt; n_models }| / n_tasks</code></pre></figure>
+<h2 id="D"><a href="#D">Discrimination</a></h2>
+<p>Discrimination is the fraction of tasks that some models pass and others fail. A task passed by every model, or by none, does not distinguish the evaluated models. A high value means the set separates this group of models; it is not a model score.</p>
 
-    <h2 id="C"><a href="#C">C &mdash; Difficulty coverage</a></h2>
-    <p><strong>Normalized entropy</strong> of solve-rate bucket occupancy, over equal-width bins on <code>[0, 1]</code>. Tasks spread evenly give <code>C = 1</code>; tasks all clustered in one bucket give <code>C = 0</code>.</p>
-    <figure class="tdb-code"><pre><code>C = ( -&#931; p_b &middot; log p_b ) / log(n_buckets)      p_b = fraction of tasks in bucket b</code></pre></figure>
+<h2 id="C"><a href="#C">Difficulty coverage</a></h2>
+<p>Coverage describes how widely task success rates span easy to hard. It is high when tasks occupy several difficulty bands and low when most tasks fall into one band. Difficulty here is measured from the evaluated models, not from an author’s label.</p>
 
-    <h2 id="M"><a href="#M">M &mdash; Monotonicity</a></h2>
-    <p>The fraction of tasks with <strong>no strong ability inversion</strong>. Compared pairs are those where <code>ability_i &gt; ability_j + ability_eps</code>, with <code>ability_eps</code> defaulting to <code>0.05</code>; a <strong>strong inversion</strong> is <code>solved_j and not solved_i</code> &mdash; noise, mislabel, or gameability &mdash; and a <strong>monotonic task</strong> is one with zero inversions. Ability defaults to each model&rsquo;s overall solve-rate; with no ability separation M is vacuously <code>1.0</code>.</p>
-    <figure class="tdb-code"><pre><code>M = |{ monotonic tasks }| / n_tasks</code></pre></figure>
-  </article>
+<h2 id="M"><a href="#M">Consistency of model ordering</a></h2>
+<p>This measure asks how often a model with a clearly higher overall success rate also succeeds on tasks passed by a lower-scoring model. Reversals can motivate closer inspection, but may reflect different strengths rather than a faulty task.</p><p>The measure can be high simply because the models are too similar to separate. Read it alongside discrimination and uncertainty.</p>
+</article>
 </main>
 
-<script src="../../../assets/site.js?v=b1d8696d89" data-root="../../.." data-page="docs"></script>
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

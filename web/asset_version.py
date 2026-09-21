@@ -32,7 +32,8 @@ ASSETS = DOCS / "assets"
 
 # The files a page links with ?v=. Anything not listed here would change without
 # busting the cache, so this list is the check's coverage: keep it complete.
-TRACKED = ("tw.css", "site.css", "site.js", "tdb-data.js")
+TRACKED = ("tw.css", "site.css", "site.js", "tdb-data.js", "tdb-explorer.js",
+           "tdb-insights.js", "tdb-releases.js", "tdb-share.js", "tdb-runs.js")
 
 _STAMP = re.compile(r'(assets/(?:' + "|".join(re.escape(n) for n in TRACKED) + r'))\?v=[A-Za-z0-9]+')
 

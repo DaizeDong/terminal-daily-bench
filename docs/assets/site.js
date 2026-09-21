@@ -39,7 +39,67 @@
     });
   }
 
-  function url(p) { return ROOT + "/" + p; }
+  var QUERY_ALIASES = { d: "date", q: "query", cap: "capability", capColor: "color",
+    dir: "order", suite: "release", lang: "language", repo: "project" };
+  var SITE_BASE = new URL(ROOT + "/", document.baseURI);
+
+  function publicPath(path) {
+    return path.replace(/^(registry|benchmarks|guide)(?=\/|$)/, function (part) {
+      return { registry: "tasks", benchmarks: "releases", guide: "docs" }[part];
+    });
+  }
+
+  function canonicalUrl(value) {
+    var u = new URL(value, document.baseURI);
+    if (u.origin !== SITE_BASE.origin || u.pathname.indexOf(SITE_BASE.pathname) !== 0) return u;
+    u.pathname = SITE_BASE.pathname + publicPath(u.pathname.slice(SITE_BASE.pathname.length));
+    u.pathname = u.pathname.replace(/\/index\.html$/, "/");
+    Object.keys(QUERY_ALIASES).forEach(function (old) {
+      var name = QUERY_ALIASES[old];
+      if (u.searchParams.has(old) && !u.searchParams.has(name)) {
+        u.searchParams.set(name, u.searchParams.get(old));
+      }
+      u.searchParams.delete(old);
+    });
+    u.searchParams.sort();
+    return u;
+  }
+
+  function routeUrl(path) { return canonicalUrl(ROOT + "/" + path).href; }
+  function url(p) { return routeUrl(p); }
+
+  var redirecting = typeof location !== "undefined" && location.protocol !== "file:" &&
+    canonicalUrl(location.href).pathname !== location.pathname;
+  if (redirecting) location.replace(canonicalUrl(location.href).href);
+
+  function readerLinks(node) {
+    var links = node.querySelectorAll ? Array.from(node.querySelectorAll("a[href]")) : [];
+    if (node.matches && node.matches("a[href]")) links.unshift(node);
+    links.forEach(function (a) {
+      var href = a.getAttribute("href");
+      if (!href || href[0] === "#" || /^(?:mailto:|tel:|javascript:|data:|blob:)/i.test(href)) return;
+      try {
+        var old = new URL(href, document.baseURI), next = canonicalUrl(old.href);
+        if (old.href !== next.href) a.setAttribute("href", next.href);
+      } catch (ignore) { /* Invalid source links remain visible to the link validator. */ }
+    });
+  }
+
+  function mountRoutes() {
+    if (location.protocol !== "file:") {
+      var next = canonicalUrl(location.href);
+      if (next.pathname !== location.pathname) location.replace(next.href);
+      else if (next.href !== location.href) history.replaceState(history.state, "", next);
+    }
+    readerLinks(document);
+    new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        record.addedNodes.forEach(function (node) {
+          if (node.nodeType === 1) readerLinks(node);
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
 
   /* Our canary. It exists so this page is detectable in any scraped training
      corpus. It is OURS — never anybody else's GUID. */
@@ -153,9 +213,7 @@
   var TOGGLE_ON = "size-6.5 rounded-full p-1.5 bg-fd-accent text-fd-accent-foreground";
 
   function paintToggle(pref) {
-    var box = document.querySelector("[data-theme-toggle]");
-    if (!box) return;
-    var btns = box.querySelectorAll("button[data-theme-value]");
+    var btns = document.querySelectorAll("[data-theme-toggle] button[data-theme-value]");
     for (var i = 0; i < btns.length; i++) {
       var on = btns[i].getAttribute("data-theme-value") === pref;
       btns[i].className = on ? TOGGLE_ON : TOGGLE_BASE;
@@ -193,16 +251,16 @@
          quality</a>`, in the foot line this file's caller builds.
        - /guide/ index: the "Method" section ends with "The report itself is
          at <a href="../quality/#discrimination">selection quality</a>".
-       - and, below, DOCNAV's Method group carries ["Discrimination report",
+       - and, below, DOCNAV's Method group carries ["Selection quality",
          "quality/"], which is the one entrance that is generated from this
          file and therefore cannot silently rot the way the prose ones can.
 
      A key belongs to exactly ONE row here: two rows claiming the same key
      would light two items at once. */
   var NAV = [
-    ["Status",      "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
     ["Leaderboard", "leaderboard/", ["leaderboard"]],
     ["Tasks",       "registry/",    ["tasks", "registry", "task"]],
+    ["Releases",    "benchmarks/",  ["benchmarks", "benchmark", "suite"]],
     ["Docs",        "guide/",       ["run", "quickstart", "docs", "guide",
                                       "task-format", "submission",
                                       "quality-methods", "quality"]],
@@ -247,38 +305,38 @@
     ["", [
       ["Overview", "guide/"]
     ]],
-    ["Running it", [
-      ["Quickstart",        "guide/quickstart/"],
-      ["Run a task",        "guide/run/"],
-      ["The result record", "guide/result-record/"],
-      ["The false-accept check", "guide/false-accept/"],
-      ["The quality card",  "guide/quality-card/"],
-      ["Task format",       "guide/task-format/"],
-      ["Package files",     "guide/task-format/files/"],
-      ["Build and audit",   "guide/task-format/build/"],
-      ["Scoring a task",    "guide/task-format/scoring/"],
-      ["Runnable examples", "guide/task-format/examples/"],
-      ["Scaffold adapters", "guide/task-format/scaffold/"],
-      ["Submission",        "guide/submission/"],
-      ["Running a model",   "guide/submission/running/"],
-      ["Recording a patch", "guide/submission/recording/"],
-      ["Replay integrity",  "guide/submission/replay-integrity/"],
-      ["Scaffolds",         "guide/submission/adapters/"]
+    ["Usage", [
+      ["Quickstart", "guide/quickstart/"],
+      ["Run a task", "guide/run/"],
+      ["Read a result", "guide/result-record/"],
+      ["Scoring limits", "guide/false-accept/"],
+      ["Quality summary", "guide/quality-card/"],
+      ["Task packages", "guide/task-format/"],
+      ["Read a task package", "guide/task-format/files/"],
+      ["Task environments and sources", "guide/task-format/build/"],
+      ["How scoring works", "guide/task-format/scoring/"],
+      ["Examples", "guide/task-format/examples/"],
+      ["Agent integration", "guide/task-format/scaffold/"],
+      ["Submit results", "guide/submission/"],
+      ["Evaluate a model", "guide/submission/running/"],
+      ["Prepare a submission", "guide/submission/recording/"],
+      ["How submissions are checked", "guide/submission/replay-integrity/"],
+      ["Connect an agent", "guide/submission/adapters/"]
     ]],
     ["Method", [
-      ["Quality methods",           "guide/quality-methods/"],
-      ["Scope and limits",          "guide/quality-methods/scope/"],
-      ["Capability taxonomy",       "guide/quality-methods/capability/"],
-      ["Labelling and coverage",    "guide/quality-methods/labels/"],
-      ["Measurement axes",          "guide/quality-methods/axes/"],
-      ["Advisory axes",             "guide/quality-methods/advisory/"],
-      ["Information & reliability", "guide/quality-methods/information/"],
-      ["Uncertainty and power",     "guide/quality-methods/power/"],
-      ["Readiness verdict",         "guide/quality-methods/readiness/"],
-      ["Reading the report",        "guide/quality-methods/reports/"],
-      ["The quality API",           "guide/quality-methods/api/"],
-      ["Quality card CLI",          "guide/quality-methods/cli/"],
-      ["Discrimination report",     "quality/"]
+      ["Evaluation methods", "guide/quality-methods/"],
+      ["Scope and limits", "guide/quality-methods/scope/"],
+      ["Capability categories", "guide/quality-methods/capability/"],
+      ["How tasks are labeled", "guide/quality-methods/labels/"],
+      ["What the measures mean", "guide/quality-methods/axes/"],
+      ["Task coverage and diversity", "guide/quality-methods/advisory/"],
+      ["Information and reliability", "guide/quality-methods/information/"],
+      ["Uncertainty and sample size", "guide/quality-methods/power/"],
+      ["Assess a task set", "guide/quality-methods/readiness/"],
+      ["Read the quality report", "guide/quality-methods/reports/"],
+      ["Analyze results in Python", "guide/quality-methods/api/"],
+      ["Analyze a results file", "guide/quality-methods/cli/"],
+      ["Benchmark quality",         "quality/"]
     ]]
   ];
 
@@ -333,15 +391,17 @@
     "focus-visible:outline-none hover:bg-fd-accent hover:text-fd-accent-foreground " +
     "p-1.5 [&_svg]:size-5";
 
-  function navLinks(extraCls) {
+  function navLinks(extraCls, includeGitHub) {
     var out = NAV.map(function (n) {
       var active = n[2].indexOf(PAGE) >= 0 ? "true" : "false";
       return '<li class="list-none"><a class="' + LINK_CLS + (extraCls || '') +
         '" data-active="' + active + '" href="' + url(n[1]) + '">' + n[0] + "</a></li>";
     }).join("");
-    out += '<li class="list-none"><a href="' + GITHUB + '" rel="noreferrer noopener" ' +
-      'target="_blank" class="' + LINK_CLS + (extraCls || '') +
-      '" data-active="false">GitHub</a></li>';
+    if (includeGitHub) {
+      out += '<li class="list-none"><a href="' + GITHUB + '" rel="noreferrer noopener" ' +
+        'target="_blank" class="' + LINK_CLS + (extraCls || '') +
+        '" data-active="false">GitHub</a></li>';
+    }
     return out;
   }
 
@@ -377,13 +437,11 @@
   function headerHTML() {
     return '' +
       '<div style="position:relative">' +
-        '<nav class="flex w-full items-center px-4">' +
-          '<a class="tdb-brand inline-flex items-center gap-2.5 font-semibold" href="' + url("") + '" aria-label="Terminal Daily home">' +
-            '<span class="tdb-brand-mark" aria-hidden="true"></span>' +
-            '<span class="tdb-brand-copy">' +
-              '<span class="tdb-brand-name">Terminal Daily</span>' +
-              '<span class="tdb-brand-kicker">Living benchmark</span>' +
-            "</span></a>" +
+        '<nav aria-label="Primary" class="flex w-full items-center px-4">' +
+          '<a class="tdb-brand inline-flex items-center font-semibold" href="' + url("") + '" aria-label="Terminal Daily home">' +
+            '<svg class="tdb-brand-mark" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">' +
+              '<rect x="2" y="3" width="20" height="18"/><path d="M6 8l4 4-4 4 M13 16h5"/></svg>' +
+            '<span class="tdb-brand-name">Terminal-Daily</span></a>' +
           /* max-lg, not max-sm: this <ul> does not wrap (no flex-wrap), so
              between 640px and 1023px it was rendering the full label row AND
              the hamburger that duplicates it, wider than the viewport. The
@@ -400,9 +458,9 @@
                shortcut. site.css drops its label and key cap instead. */
             searchButtonHTML("") +
             '<div class="tdb-theme-switch inline-flex items-center rounded-full border p-1 max-lg:hidden" data-theme-toggle="">' +
-              '<button type="button" aria-label="light" data-theme-value="light" class="' + TOGGLE_BASE + '">' + ICON_SUN + "</button>" +
-              '<button type="button" aria-label="dark" data-theme-value="dark" class="' + TOGGLE_BASE + '">' + ICON_MOON + "</button>" +
-              '<button type="button" aria-label="system" data-theme-value="system" class="' + TOGGLE_BASE + '">' + ICON_MONITOR + "</button>" +
+              '<button type="button" aria-label="Light theme" data-theme-value="light" class="' + TOGGLE_BASE + '">' + ICON_SUN + "</button>" +
+              '<button type="button" aria-label="Dark theme" data-theme-value="dark" class="' + TOGGLE_BASE + '">' + ICON_MOON + "</button>" +
+              '<button type="button" aria-label="Use system theme" data-theme-value="system" class="' + TOGGLE_BASE + '">' + ICON_MONITOR + "</button>" +
             "</div>" +
           "</div>" +
           '<ul class="flex flex-row items-center">' +
@@ -417,7 +475,13 @@
       '<div class="flex w-full justify-center">' +
         '<div id="tdb-menu" aria-hidden="true" class="tdb-mobile-menu hidden w-full flex-col border-t ' +
           'bg-fd-background px-4 py-3 lg:hidden">' +
-          '<ul class="flex flex-col">' + navLinks(" w-full") + "</ul>" +
+          '<ul class="flex flex-col">' + navLinks(" w-full", true) + "</ul>" +
+          '<div class="tdb-menu-tools"><span>Appearance</span>' +
+            '<div class="tdb-theme-switch inline-flex items-center border p-1" data-theme-toggle="">' +
+              '<button type="button" aria-label="Light theme" data-theme-value="light" class="' + TOGGLE_BASE + '">' + ICON_SUN + '</button>' +
+              '<button type="button" aria-label="Dark theme" data-theme-value="dark" class="' + TOGGLE_BASE + '">' + ICON_MOON + '</button>' +
+              '<button type="button" aria-label="Use system theme" data-theme-value="system" class="' + TOGGLE_BASE + '">' + ICON_MONITOR + '</button>' +
+            '</div></div>' +
           docnavMenuHTML() +
         "</div>" +
       "</div>";
@@ -433,9 +497,7 @@
 
     var head = document.createElement("header");
     head.id = "nd-nav";
-    head.className =
-      "fixed top-(--fd-banner-height) z-40 left-0 border-b " +
-      "transition-colors *:mx-auto *:max-w-fd-container bg-fd-background";
+    head.className = "fixed z-40";
     head.setAttribute("style", "right:var(--removed-body-scroll-bar-size, 0px)");
     head.setAttribute("aria-label", "Main");
     head.innerHTML = headerHTML();
@@ -446,8 +508,7 @@
     else b.insertBefore(head, b.firstChild);
 
     /* theme switcher */
-    var box = head.querySelector("[data-theme-toggle]");
-    box.addEventListener("click", function (ev) {
+    head.addEventListener("click", function (ev) {
       var btn = ev.target && ev.target.closest ? ev.target.closest("button[data-theme-value]") : null;
       if (btn) setTheme(btn.getAttribute("data-theme-value"));
     });
@@ -489,6 +550,16 @@
     trig.addEventListener("click", function () {
       setMenuOpen(trig.getAttribute("data-state") !== "open");
     });
+    window.addEventListener("resize", function () {
+      requestAnimationFrame(function () {
+        if (trig.getAttribute("data-state") === "open") setMenuOpen(true);
+      });
+    });
+    if (window.ResizeObserver) {
+      new ResizeObserver(function () {
+        if (trig.getAttribute("data-state") === "open") setMenuOpen(true);
+      }).observe(head);
+    }
     document.addEventListener("keydown", function (ev) {
       if (ev.key === "Escape" && trig.getAttribute("data-state") === "open") {
         setMenuOpen(false);
@@ -536,7 +607,7 @@
     if (main.querySelector(".tdb-doc-shell")) return;   /* already mounted */
 
     var shell = document.createElement("div");
-    shell.className = "tdb-doc-shell";
+    shell.className = "tdb-page-container tdb-doc-shell";
     art.parentNode.insertBefore(shell, art);
 
     var nav = document.createElement("nav");
@@ -653,16 +724,22 @@
      ====================================================================== */
 
   function mountFooter() {
-    if (document.getElementById("tdb-canary")) return;
+    if (document.getElementById("tdb-footer")) return;
+    var marker = document.createElement("meta");
+    marker.id = "tdb-canary";
+    marker.name = "benchmark-contamination-marker";
+    marker.content = CANARY;
+    document.head.appendChild(marker);
     var footer = document.createElement("footer");
     footer.id = "tdb-footer";
     footer.className = "mt-auto flex w-full justify-center border-t px-4 py-4";
     footer.setAttribute("aria-label", "Site footer");
     footer.innerHTML =
-      '<div class="tdb-footer-inner flex w-full max-w-7xl flex-col">' +
-        '<p id="tdb-canary" class="text-muted-foreground font-mono text-xs">' +
-          CANARY +
-        "</p>" +
+      '<div class="tdb-footer-inner">' +
+        '<p>Terminal-Daily <span>Real software tasks. Measurable progress.</span></p>' +
+        '<nav aria-label="Footer"><a href="' + url('leaderboard/') + '">Leaderboard</a>' +
+        '<a href="' + url('guide/') + '">Docs</a>' +
+        '<a href="' + GITHUB + '">GitHub</a></nav>' +
       "</div>";
     document.body.appendChild(footer);
   }
@@ -711,45 +788,182 @@
 
   function pct(x) { return (x * 100).toFixed(1).replace(/\.0$/, "") + "%"; }
 
-  /* the accuracy cell: the point estimate, with the Wilson half-width set
-     smaller and muted underneath it */
+  /* Submission summaries do not infer repeat variation from task counts. */
   function rateCell(o) {
     if (!o || !o.n) return '<p class="text-right text-muted-foreground">&mdash;</p>';
     var solved = (o.solved != null) ? o.solved : Math.round(o.rate * o.n);
-    var w = wilson(solved, o.n);
-    var half = ((w.hi - w.lo) / 2) * 100;
-    return '<p class="text-right" title="' + solved + "/" + o.n + "  " + pct(w.p) +
-      "  95% CI [" + pct(w.lo) + ", " + pct(w.hi) + ']">' +
-      '<span class="inline-flex flex-col items-end gap-0.5 tabular-nums">' +
-        '<strong class="font-medium leading-none">' + pct(w.p) + "</strong>" +
-        '<span class="text-muted-foreground text-xs leading-none">&plusmn; ' +
-          half.toFixed(1) + "%</span>" +
-      "</span></p>";
+    if (window.TDB.scoreCell) return window.TDB.scoreCell(solved, o.n, o.repeat);
+    return '<span class="tabular-nums" title="' + solved + '/' + o.n + ' tasks solved">' + pct(solved / o.n) + '</span>';
   }
 
-  /* the day rail: suites are date-versioned, because the benchmark is living */
-  /* The suite switcher: one line of links, not a strip of cards.
-
-     It used to render a bordered window with one bordered card per suite,
-     each carrying an id and a task count. Four suites therefore cost a panel,
-     five borders and a badge to say what a sentence says. The current suite is
-     marked, the rest are links, and the whole control is one line high. */
+  /* Date navigation stays compact as the release history grows. */
   function dayRail(el, suites, activeId) {
     if (!el) return;
-    if (!suites || !suites.length) { el.innerHTML = ""; return; }
-    var cells = suites.map(function (s) {
-      var on = (s.id === activeId);
-      var n = (s.n_tasks != null) ? " (" + s.n_tasks + ")" : "";
-      if (on) {
-        return '<span class="tdb-suitelink" data-active="true">' + esc(s.id) + esc(n) + "</span>";
-      }
-      return '<a class="tdb-suitelink" href="' +
-        url("benchmarks/" + encodeURIComponent(s.id) + "/") + '">' + esc(s.id) + esc(n) + "</a>";
-    }).join("");
+    var dates = Array.from(new Set((suites || []).map(function (suite) {
+      return suite && String(suite.id || "");
+    }).filter(function (id) { return /^\d{4}-\d{2}-\d{2}$/.test(id); }))).sort();
+    var current = dates.indexOf(activeId);
+    if (current < 0) {
+      el.innerHTML = '<nav class="tdb-release-navigation" aria-label="Release navigation">' +
+        '<a href="' + esc(url("benchmarks/")) + '">All releases</a></nav>';
+      return;
+    }
+    function step(id, label, arrow) {
+      var attrs = ' class="tdb-release-step"';
+      if (!id) return '<span' + attrs + ' role="link" aria-label="' + label +
+        '" aria-disabled="true">' + arrow + '</span>';
+      return '<a' + attrs + ' aria-label="' + label + '" href="' +
+        esc(url("benchmarks/" + encodeURIComponent(id) + "/")) + '">' + arrow + '</a>';
+    }
     el.innerHTML =
-      '<nav class="tdb-suiterail" aria-label="Published suites">' +
-        '<span class="tdb-suiterail-k">suites</span>' + cells +
-      "</nav>";
+      '<nav class="tdb-release-navigation" aria-label="Release navigation">' +
+        step(dates[current - 1], "Previous release", "&larr;") +
+        '<select aria-label="Release date">' + dates.map(function (id) {
+          return '<option value="' + esc(id) + '"' + (id === activeId ? ' selected' : '') +
+            '>' + esc(id) + '</option>';
+        }).join("") + '</select>' +
+        step(dates[current + 1], "Next release", "&rarr;") + '</nav>';
+    var select = el.querySelector("select");
+    select.onchange = function () {
+      if (select.value !== activeId && dates.indexOf(select.value) >= 0) {
+        window.location.assign(url("benchmarks/" + encodeURIComponent(select.value) + "/"));
+      }
+    };
+  }
+
+  /* Keep every task in the source document; enhance only suite task tables. */
+  function mountSuiteTable(host, index) {
+    if (host.getAttribute("data-tdb-paged")) return;
+    var table = host.querySelector("table"), body = table && table.tBodies[0];
+    if (!body) return;
+    var rows = Array.from(body.rows);
+    if (!rows.length) return;
+    var texts = rows.map(function (row) {
+      var task = row.querySelector("[data-task-id]");
+      return (Array.from(row.cells).map(function (cell) { return cell.textContent; })
+        .join(" ") + " " + (task ? task.getAttribute("data-task-id") : ""))
+        .replace(/\s+/g, " ").toLowerCase();
+    });
+    var prefix = "suite-tasks-" + index, route = window.location.pathname;
+    table.id = table.id || prefix + "-table";
+    if (!table.hasAttribute("tabindex")) table.setAttribute("tabindex", "-1");
+    var controls = ' aria-controls="' + esc(table.id) + '"';
+    var toolbar = document.createElement("div");
+    toolbar.className = "tdb-detail-toolbar";
+    toolbar.innerHTML = '<label class="tdb-detail-search" for="' + prefix + '-search"><span>Search</span>' +
+      '<input id="' + prefix + '-search" type="search" placeholder="Search tasks or projects" ' +
+      'autocomplete="off" aria-label="Search release tasks"' + controls + '></label>' +
+      '<button type="button" data-detail-reset hidden>Reset</button>';
+    var pagination = document.createElement("nav");
+    pagination.className = "tdb-detail-pagination";
+    pagination.setAttribute("aria-label", "Release task pages");
+    pagination.innerHTML = '<p id="' + prefix + '-range" role="status" aria-live="polite" aria-atomic="true"></p>' +
+      '<div class="tdb-page-controls"><label class="tdb-page-size"><span class="sr-only">Tasks per page</span>' +
+      '<select data-detail-size aria-label="Tasks per page"' + controls + '>' +
+      '<option value="25">25 rows</option><option value="50">50 rows</option><option value="100">100 rows</option>' +
+      '</select></label><button type="button" data-detail-prev aria-label="Previous page" title="Previous page"' + controls + '>&larr;</button>' +
+      '<label class="tdb-page-number">Page <input data-detail-page type="number" min="1" value="1" aria-label="Page number"' + controls + '> ' +
+      '<span data-detail-pages></span></label><button type="button" data-detail-next aria-label="Next page" title="Next page"' + controls + '>&rarr;</button></div>';
+    host.insertBefore(pagination, host.firstChild);
+    host.insertBefore(toolbar, pagination);
+    var bottom = document.createElement("nav");
+    bottom.className = "tdb-detail-pagination tdb-pagination-bottom";
+    bottom.setAttribute("aria-label", "Release task pages at end of results");
+    bottom.hidden = true;
+    bottom.innerHTML = '<div class="tdb-page-controls">' +
+      '<button type="button" data-detail-bottom-prev aria-label="Previous task page"' + controls + '>&larr; Previous</button>' +
+      '<span data-detail-bottom-page></span>' +
+      '<button type="button" data-detail-bottom-next aria-label="Next task page"' + controls + '>Next &rarr;</button></div>';
+    host.appendChild(bottom);
+    var search = toolbar.querySelector("input"), reset = toolbar.querySelector("button");
+    var count = pagination.querySelector('[role="status"]');
+    var size = pagination.querySelector("select"), page = pagination.querySelector("input");
+    var pages = pagination.querySelector("[data-detail-pages]");
+    var previous = pagination.querySelector("[data-detail-prev]"), next = pagination.querySelector("[data-detail-next]");
+    var bottomPage = bottom.querySelector("[data-detail-bottom-page]");
+    var bottomPrevious = bottom.querySelector("[data-detail-bottom-prev]"), bottomNext = bottom.querySelector("[data-detail-bottom-next]");
+    var empty = document.createElement("tr"), cell = document.createElement("td");
+    cell.colSpan = rows[0].cells.length;
+    cell.textContent = "No matching tasks. Clear the search to show all tasks.";
+    empty.className = "tdb-detail-empty";
+    empty.hidden = true;
+    empty.appendChild(cell);
+    body.appendChild(empty);
+
+    function readState() {
+      var params = new URLSearchParams(window.location.search);
+      var requestedPage = Number(params.get("page")), requestedSize = Number(params.get("size"));
+      return { q: params.get("query") || params.get("q") || "",
+        page: Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+        size: [25, 50, 100].indexOf(requestedSize) >= 0 ? requestedSize : 25 };
+    }
+    var state = readState();
+    function render(push) {
+      var query = state.q.trim().replace(/\s+/g, " ").toLowerCase();
+      var matches = rows.filter(function (_, i) { return !query || texts[i].indexOf(query) >= 0; });
+      var totalPages = Math.max(1, Math.ceil(matches.length / state.size));
+      state.page = Number.isInteger(state.page) ? Math.max(1, Math.min(state.page, totalPages)) : 1;
+      var offset = (state.page - 1) * state.size;
+      rows.forEach(function (row) { row.hidden = true; });
+      matches.slice(offset, offset + state.size).forEach(function (row) { row.hidden = false; });
+      empty.hidden = matches.length !== 0;
+      count.textContent = matches.length ? (offset + 1).toLocaleString() + "\u2013" +
+        Math.min(offset + state.size, matches.length).toLocaleString() + " of " + matches.length.toLocaleString() +
+        (matches.length === 1 ? " task" : " tasks") : "0 tasks";
+      search.value = state.q;
+      reset.hidden = !state.q;
+      size.value = state.size;
+      page.value = state.page;
+      page.max = totalPages;
+      page.disabled = totalPages === 1;
+      pages.textContent = "of " + totalPages;
+      previous.disabled = state.page === 1;
+      next.disabled = state.page === totalPages;
+      bottom.hidden = totalPages <= 1;
+      bottomPage.textContent = "Page " + state.page + " of " + totalPages;
+      bottomPrevious.disabled = previous.disabled;
+      bottomNext.disabled = next.disabled;
+      var target = new URL(window.location.href);
+      target.searchParams.delete("q");
+      [["query", state.q, ""], ["page", state.page, 1], ["size", state.size, 25]].forEach(function (entry) {
+        if (entry[1] === entry[2]) target.searchParams.delete(entry[0]);
+        else target.searchParams.set(entry[0], entry[1]);
+      });
+      target = canonicalUrl(target.href);
+      if (target.href !== window.location.href) window.history[push ? "pushState" : "replaceState"](null, "", target);
+    }
+    search.addEventListener("input", function () { state.q = search.value; state.page = 1; render(false); });
+    reset.addEventListener("click", function () { state.q = ""; state.page = 1; render(true); search.focus(); });
+    size.addEventListener("change", function () { state.size = Number(size.value); state.page = 1; render(true); });
+    previous.addEventListener("click", function () { state.page -= 1; render(true); });
+    next.addEventListener("click", function () { state.page += 1; render(true); });
+    [[bottomPrevious, -1], [bottomNext, 1]].forEach(function (entry) {
+      entry[0].addEventListener("click", function () {
+        state.page += entry[1];
+        render(true);
+        var masthead = document.getElementById("nd-nav");
+        window.scrollTo({ top: pagination.getBoundingClientRect().top + window.scrollY -
+          (masthead ? masthead.getBoundingClientRect().height : 56) - 16, behavior: "instant" });
+        table.focus({ preventScroll: true });
+      });
+    });
+    function goToPage() { state.page = Number(page.value); render(true); }
+    page.addEventListener("change", goToPage);
+    page.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") { event.preventDefault(); goToPage(); }
+    });
+    window.addEventListener("popstate", function () {
+      if (!host.isConnected) return;
+      if (window.location.pathname !== route) return;
+      state = readState();
+      render(false);
+    });
+    host.setAttribute("data-tdb-paged", "true");
+    render(false);
+  }
+
+  function mountSuiteTables() {
+    Array.from(document.querySelectorAll("[data-tdb-suite-tasks]")).forEach(mountSuiteTable);
   }
 
   /* A catch handler that keeps the page working and still tells the truth.
@@ -773,14 +987,10 @@
       var h = document.createElement("p");
       h.className = "font-medium";
       h.textContent = "Could not load " + what + ".";
-      var d = document.createElement("p");
-      d.className = "text-muted-foreground mt-2 font-mono text-sm";
-      d.textContent = String(err);
       var n = document.createElement("p");
       n.className = "text-muted-foreground mt-2 text-sm";
-      n.textContent = "This is a failure to read the data, not an empty result. " +
-        "Anything below may be missing rather than absent.";
-      box.appendChild(h); box.appendChild(d); box.appendChild(n);
+      n.textContent = "Some information is unavailable. Reload the page to try again.";
+      box.appendChild(h); box.appendChild(n);
       host.insertBefore(box, host.firstChild);
       return null;
     };
@@ -987,7 +1197,7 @@
 
   function searchButtonHTML(extraCls) {
     return '<button type="button" class="tdb-findbtn' + (extraCls || "") +
-      '" data-tdb-find-open="" aria-label="Search the guide" ' +
+      '" data-tdb-find-open="" aria-label="Search docs" ' +
       'aria-keyshortcuts="Control+K Meta+K">' + ICON_SEARCH +
       '<span class="tdb-findbtn-t">Search</span>' +
       '<kbd class="tdb-findbtn-k">' + searchKeyLabel() + "</kbd></button>";
@@ -995,12 +1205,12 @@
 
   function searchPanelHTML() {
     return '<div class="tdb-find-panel" role="dialog" aria-modal="true" ' +
-        'aria-label="Search the guide">' +
+        'aria-label="Search docs">' +
       '<div class="tdb-find-head">' +
         '<span class="tdb-find-k" aria-hidden="true">' + ICON_SEARCH + "</span>" +
         '<input id="tdb-find-input" class="tdb-find-input" type="text" ' +
           'autocomplete="off" autocapitalize="off" spellcheck="false" ' +
-          'placeholder="Search the guide" aria-label="Search the guide" ' +
+          'placeholder="Search docs" aria-label="Search docs" ' +
           'role="combobox" aria-expanded="true" aria-autocomplete="list" ' +
           'aria-controls="tdb-find-list">' +
         '<button type="button" class="tdb-find-x" data-tdb-find-close="" ' +
@@ -1010,7 +1220,7 @@
         'aria-label="Search results"></div>' +
       '<p class="tdb-find-foot"><span>&uarr;&darr; move</span>' +
         "<span>&crarr; open</span><span>esc close</span>" +
-        '<span class="tdb-find-foot-n">the four guide pages</span></p>' +
+        '<span class="tdb-find-foot-n">Documentation</span></p>' +
     "</div>";
   }
 
@@ -1277,6 +1487,10 @@
 
   window.TDB = {
     ROOT: ROOT,
+    redirecting: redirecting,
+    routeUrl: routeUrl,
+    canonicalUrl: canonicalUrl,
+    mountSuiteTables: mountSuiteTables,
     getJSON: getJSON,
     taskSuites: taskSuites,
     taskInSuite: taskInSuite,
@@ -1301,8 +1515,11 @@
     mountToc();
     mountCopy();
     mountSearch();
+    mountSuiteTables();
+    mountRoutes();
   }
 
+  if (redirecting) return;
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mount);
   } else { mount(); }

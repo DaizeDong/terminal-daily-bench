@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Connect an agent · Terminal-Daily</title>
+<meta name="description" content="An agent integration produces a patch; the evaluator tests it separately.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Connect an agent</h1>
+<p class="tdb-doc-sub">An agent integration produces a patch; the evaluator tests it separately.</p>
+</header>
+
+<h2 id="adapter"><a href="#adapter">Inputs and output</a></h2>
+<p>Your integration receives a task directory, model connection settings, and the available names of failing tests. It returns a code patch and information about the run.</p><p id="failing-ids">Live tasks provide test names while withholding the reference solution and protected test bodies.</p>
+
+<h2 id="interface"><a href="#interface">Start with an existing integration</a></h2>
+<p>Use the project’s <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/terminal_daily_bench/adapters/base.py">adapter interface</a> and <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/terminal_daily_bench/adapters/single_shot.py">single-request example</a> as the implementation reference.</p>
+
+<h2 id="produce-patch"><a href="#produce-patch">Respect the evaluation boundary</a></h2>
+<p>The agent must not read or modify protected tests or the reference solution, and must not assign a score. If it cannot produce a patch, report the failure.</p>
+
+<h2 id="reference"><a href="#reference">Built-in baseline</a></h2>
+<p>The baseline asks for one patch using the task description and relevant source files selected from the reference repair. It measures performance with those files supplied, not an agent’s ability to find them independently.</p>
+
+<h2 id="terminus"><a href="#terminus">Agents with multiple steps</a></h2>
+<p>The project includes an unfinished integration for agents that take multiple steps. It must be connected to your agent before use; its presence does not mean the agent is supported out of the box.</p>
+
+<h2 id="registering"><a href="#registering">Make the configuration identifiable</a></h2>
+<p>Give the integration a distinct name and version, and register it with the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/terminal_daily_bench/adapters/__init__.py">adapter registry</a>. Report the same configuration details with every result.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

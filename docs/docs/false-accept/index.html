@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Scoring limits · Terminal-Daily</title>
+<meta name="description" content="Passing the tests supports a result, but does not prove that every solution is correct.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Scoring limits</h1>
+<p class="tdb-doc-sub">Passing the tests supports a result, but does not prove that every solution is correct.</p>
+</header>
+
+<h2 id="fa-block"><a href="#fa-block">What is checked</a></h2>
+<p>The evaluator records whether a result came from running the protected task tests. A submitted score or a model’s claim of success is insufficient.</p>
+
+<h2 id="fa-replay"><a href="#fa-replay">Who decides the outcome</a></h2>
+<p>The model proposes a patch. The evaluator restores the trusted tests before running them, so edits to the model’s copy of the tests do not determine the result. <a href="../submission/">Submitted patches</a> are checked by the operators before entering verified results.</p>
+
+<h2 id="fa-scope"><a href="#fa-scope">What remains unknown</a></h2>
+<p>Protected tests may still miss an incorrect or deliberately misleading solution. The rate at which such solutions pass has not yet been measured. Checks that a run followed the evaluation procedure cannot establish that the tests cover every failure mode.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

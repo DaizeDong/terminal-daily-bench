@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Move the animation pipeline and MCP server onto a Grok-backed core · Terminal-Daily</title>
+<meta name="description" content="Move the animation pipeline and MCP server onto a Grok-backed core. A software maintenance task from a public code change.">
+<link rel="stylesheet" href="../../assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="../../assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body class="tdb-generated-page">
+
+<main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+  <!-- the fixed header is injected here by assets/site.js -->
+  <div class="tdb-page-frame">
+    <div class="tdb-page-container tdb-detail-frame" data-tdb-canary-host>
+<header class="tdb-page-heading tdb-detail-heading" data-task-id="td-5e2d24c2bda82748"><div class="tdb-heading-main"><h1 class="tdb-page-title">Move the animation pipeline and MCP server onto a Grok-backed core</h1></div><div class="tdb-heading-actions"><div class="tdb-heading-links"><a class="tdb-navlink" data-primary="false" href="https://github.com/HarleyCoops/Math-To-Manim/pull/72">Original change</a><a class="tdb-navlink" data-primary="false" href="../../submit/">Submit results</a></div></div></header>
+<section class="tdb-block tdb-content-section"><div class="tdb-block-head tdb-section-head"><h2>About this task</h2></div><p class="tdb-task-summary">Move animation jobs and the MCP server onto a Grok-backed service while preserving legacy entry points. Offline jobs must produce valid artifacts and camera-compatible scenes; job inspection, scene lookup, CLI help, and MCP model defaults must follow the new service.</p><p class="tdb-task-success"><strong>Success criterion:</strong> Pass the 10 target regression tests without editing the test files.</p><div class="tdb-task-facts mb-6 flex flex-col"><div class="tdb-table-shell bg-card border-y md:border-x"><div data-slot="table-container" class="relative w-full overflow-x-auto"><table data-slot="table" class="tdb-table w-full caption-bottom text-sm [&amp;_tr&gt;td:first-child]:pl-6 [&amp;_tr&gt;td:last-child]:pr-6 [&amp;_tr&gt;th:first-child]:pl-6 [&amp;_tr&gt;th:last-child]:pr-6 tdb-facts-table" aria-label="About this task"><tbody data-slot="table-body" class="[&amp;_tr:last-child]:border-0"><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"><th scope="row" data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">Project</th><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base "><p class="text-left"><a class="hover:underline hover:underline-offset-4" href="https://github.com/HarleyCoops/Math-To-Manim/pull/72" target="_blank" rel="noopener noreferrer">Math-To-Manim #72</a></p></td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"><th scope="row" data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">Estimated difficulty</th><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base "><p class="text-left">hard</p></td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"><th scope="row" data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">Target tests</th><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base "><p class="text-left">10</p></td></tr><tr data-slot="table-row" class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors px-6"><th scope="row" data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-3 text-base">Releases</th><td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] py-4 text-base "><p class="text-left"><span class="tdb-task-releases"><a class="hover:underline hover:underline-offset-4" href="../../releases/2026-09-17/">2026-09-17</a></span></p></td></tr></tbody></table></div></div></div></section>
+<section class="tdb-run-details" id="model-outcomes" data-task-runs="td-5e2d24c2bda82748"></section>
+<details class="tdb-methods tdb-evaluation-note"><summary>Run an evaluation</summary><p class="tdb-detail-note text-muted-foreground text-sm/relaxed">Official evaluation is not open yet; submissions do not receive an official score. <a class="hover:text-foreground underline underline-offset-4" href="../../docs/quickstart/">How to evaluate a model &rarr;</a></p></details>
+    </div>
+  </div>
+</main>
+
+<script src="../../assets/site.js?v=7d2e76d680" data-root="../.." data-page="tasks"></script>
+<script src="../../assets/tdb-data.js?v=7d2e76d680"></script>
+<script src="../../assets/tdb-releases.js?v=7d2e76d680"></script>
+<script src="../../assets/tdb-runs.js?v=7d2e76d680"></script>
+</body>
+</html>

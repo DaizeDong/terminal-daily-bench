@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tasks · Terminal-Daily</title>
+<meta name="description" content="Search Terminal-Daily tasks by suite, repository, and capability.">
+<link rel="stylesheet" href="../assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="../assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body class="tdb-catalog tdb-task-catalog">
+<main id="nd-home-layout" class="tdb-catalog-main">
+  <div class="tdb-page-container tdb-catalog-frame" data-tdb-canary-host>
+    <header class="tdb-page-heading tdb-catalog-heading">
+      <h1>Tasks</h1>
+      <p id="task-meta" class="tdb-catalog-meta">Loading tasks&hellip;</p>
+    </header>
+    <div class="tdb-catalog-toolbar">
+      <label class="tdb-catalog-search" for="task-search"><span>Search</span>
+        <input id="task-search" type="search" placeholder="Search tasks or projects" autocomplete="off" disabled>
+      </label>
+      <div class="tdb-catalog-filters" id="task-filters">
+        <label><span>Release</span><select data-filter="suite" aria-label="Release" disabled><option value="">All releases</option></select></label>
+        <label><span>Change</span><select id="task-change" aria-label="Change in release" disabled><option value="">All tasks</option><option value="new">New tasks</option><option value="retained">Retained</option><option value="returned">Returning</option><option value="removed">Removed</option></select></label>
+        <label><span>Status</span><select data-filter="status" aria-label="Publication" disabled><option value="">All statuses</option></select></label>
+        <label><span>Capability</span><select data-filter="capability" aria-label="Capability" disabled><option value="">Capabilities</option></select></label>
+    <details id="task-more-filters" class="tdb-catalog-filter-details">
+      <summary>More filters<span id="task-extra-count"></span></summary>
+      <div class="tdb-catalog-extra-filters">
+        <label><span>Repository</span><select data-filter="repo" aria-label="Repository" disabled><option value="">All repositories</option></select></label>
+        <label><span>Language</span><select data-filter="language" aria-label="Language" disabled><option value="">All languages</option></select></label>
+        <label><span>Estimated difficulty</span><select data-filter="declared" aria-label="Estimated difficulty" disabled><option value="">All difficulties</option></select></label>
+        <label id="task-measured-filter" hidden><span>Measured difficulty</span><select data-filter="difficulty" aria-label="Measured difficulty" disabled><option value="">All measured difficulties</option></select></label>
+      </div>
+    </details>
+      </div>
+      <button type="button" id="task-reset" hidden>Reset</button>
+    </div>
+    <nav class="tdb-pagination" aria-label="Task pages">
+      <p id="task-range" role="status" aria-live="polite">Loading&hellip;</p>
+      <div class="tdb-page-controls">
+        <label class="tdb-page-size"><span class="sr-only">Tasks per page</span><select id="task-size" aria-label="Tasks per page" disabled><option value="25">25 rows</option><option value="50">50 rows</option><option value="100">100 rows</option></select></label>
+        <button id="task-prev" type="button" aria-label="Previous page" title="Previous page" disabled>&larr;</button>
+        <label class="tdb-page-number">Page <input id="task-page" type="number" min="1" value="1" aria-label="Page number" disabled> <span id="task-pages">of 1</span></label>
+        <button id="task-next" type="button" aria-label="Next page" title="Next page" disabled>&rarr;</button>
+      </div>
+    </nav>
+    <div class="tdb-catalog-table-wrap" data-tdb-primary-data aria-busy="true">
+      <table class="tdb-catalog-table" id="task-table" aria-label="Task catalogue" tabindex="-1">
+        <thead id="tdb-head"></thead><tbody id="tdb-rows"><tr><td colspan="5">Loading tasks&hellip;</td></tr></tbody>
+      </table>
+    </div>
+    <nav class="tdb-pagination tdb-pagination-bottom" id="task-bottom" aria-label="Task pages at end of results" hidden>
+      <p id="task-bottom-range"></p>
+      <div class="tdb-page-controls">
+        <button id="task-bottom-prev" type="button" aria-label="Previous task page" disabled>&larr; Previous</button>
+        <span id="task-bottom-page"></span>
+        <button id="task-bottom-next" type="button" aria-label="Next task page" disabled>Next &rarr;</button>
+      </div>
+    </nav>
+    <details class="tdb-catalog-disclosure">
+      <summary>Catalogue notes</summary>
+      <div class="tdb-catalog-disclosure-body">
+        <dl class="tdb-catalog-defs">
+          <dt>Latest release</dt><dd>Each task appears once, ordered by its latest release. Earlier releases remain available in the filters and task details.</dd>
+          <dt>Release status</dt><dd>Active releases keep solutions private. Archived releases include solutions for further study.</dd>
+          <dt>Difficulty</dt><dd>Estimated difficulty is the task author&rsquo;s estimate. Measured difficulty, when available, is a separate filter.</dd>
+          <dt>Capability</dt><dd>Categories describe the skills a task involves. Author-provided labels have not been independently checked.</dd>
+          <dt>Target tests</dt><dd>Tests that fail before the repair and pass afterward.</dd>
+          <dt>Official score coverage</dt><dd id="task-score-note">Official scores are not published.</dd>
+        </dl>
+        <p>The evaluation environment is not yet publicly available. See <a href="../docs/quickstart/">getting started</a> for current options.</p>
+      </div>
+    </details>
+  </div>
+</main>
+<script src="../assets/site.js?v=7d2e76d680" data-root=".." data-page="registry"></script>
+<script src="../assets/tdb-data.js?v=7d2e76d680"></script>
+<script src="../assets/tdb-releases.js?v=7d2e76d680"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.TDB;
+  if (T.redirecting) return;
+  var PAGE_SIZE = 25;
+  var GROUPS = ["suite", "status", "repo", "language", "declared", "difficulty", "capability"];
+  var COLS = [
+    { key: "task", label: "Task", cls: "tdb-task-title-cell" },
+    { key: "suite", label: "Latest release", cls: "tdb-task-suite-cell" },
+    { key: "status", label: "Status", cls: "tdb-task-status-cell" },
+    { key: "capability", label: "Capability", cls: "tdb-task-cap-cell" },
+    { key: "f2p", label: "Target tests", cls: "tdb-task-f2p-cell" }
+  ];
+  var SORT_KEYS = ["task", "suite", "status", "capability", "f2p", "solved", "declared", "difficulty", "repo", "language"];
+  var DEFAULTS = { q: "", suite: "", status: "", repo: "", language: "", declared: "",
+    difficulty: "", capability: "", scope: "", sort: "suite", dir: "desc", page: 1, size: PAGE_SIZE };
+  function esc(value) { return T.esc(value); }
+  function byId(id) { return document.getElementById(id); }
+  function dated(id) { return /^\d{4}-\d{2}-\d{2}$/.test(String(id)); }
+  function suiteOrder(a, b) {
+    return Number(dated(b)) - Number(dated(a)) || String(b).localeCompare(String(a));
+  }
+  function isScored(t) {
+    return Number.isFinite(t.n_models) && t.n_models > 0 &&
+      Number.isFinite(t.solved_by) && t.solved_by >= 0 && t.solved_by <= t.n_models;
+  }
+  function prepareTasks(site, cap) {
+    var derived = new Map(), declared = new Map();
+    var changes = new Map();
+    (T.releaseHistory ? T.releaseHistory(site) : []).forEach(function (release) {
+      ["new", "retained", "returned", "removed"].forEach(function (scope) {
+        release[scope].forEach(function (id) {
+          if (!changes.has(id)) changes.set(id, {});
+          changes.get(id)[release.id] = scope;
+        });
+      });
+    });
+    function add(index, id, code) {
+      if (!index.has(id)) index.set(id, []);
+      if (index.get(id).indexOf(code) < 0) index.get(id).push(code);
+    }
+    ((cap && cap.axes) || []).forEach(function (axis) {
+      if (!axis || !axis.code) return;
+      (axis.task_ids || []).forEach(function (id) { add(derived, id, axis.code); });
+      ((axis.declared_unverified || {}).task_ids || []).forEach(function (id) { add(declared, id, axis.code); });
+    });
+    var unreadable = new Set(((cap && cap.catalogue) || {}).unverifiable_task_ids || []);
+    return T.uniqueTaskCatalogue(site).map(function (source) {
+      var t = Object.assign({}, source);
+      t.title = T.cleanTaskTitle ? T.cleanTaskTitle(t.title) : t.title;
+      t._releaseChanges = changes.get(t.id) || {};
+      t._suites = Array.from(new Set(T.taskSuites(t).concat(Object.keys(t._releaseChanges).filter(function (id) {
+        return t._releaseChanges[id] !== "removed";
+      })))).sort(suiteOrder);
+      t._caps = (derived.get(t.id) || declared.get(t.id) || []).slice().sort(function (a, b) {
+        return a.localeCompare(b, undefined, { numeric: true });
+      });
+      t._capState = !cap ? "unread" : derived.has(t.id) ? "rederived" :
+        (declared.has(t.id) || unreadable.has(t.id)) ? "declared" : "unverified";
+      t._h = [t.id, t.title, t.repo, t.pr_number, t.language, t.status,
+        t.declared_difficulty, t.difficulty, t._suites.join(" "), t._caps.join(" ")].join(" ").toLowerCase();
+      return t;
+    });
+  }
+  function facetValues(t, key) {
+    if (key === "suite") return t._suites;
+    if (key === "capability") return t._caps;
+    var value = t[key === "declared" ? "declared_difficulty" : key];
+    return value == null || value === "" ? [] : [String(value)];
+  }
+  function facetMatches(t, key, value, state) {
+    if (key === "suite" && value && state && state.scope === "removed") return t._releaseChanges[value] === "removed";
+    return !value || facetValues(t, key).indexOf(String(value)) >= 0;
+  }
+  function scopeMatches(t, state) {
+    return !state.scope || !state.suite || t._releaseChanges[state.suite] === state.scope;
+  }
+  function filterTasks(tasks, state) {
+    var q = String(state.q || "").trim().toLowerCase();
+    return tasks.filter(function (t) {
+      return (!q || t._h.indexOf(q) >= 0) && scopeMatches(t, state) && GROUPS.every(function (key) { return facetMatches(t, key, state[key], state); });
+    });
+  }
+  function sortVal(t, key) {
+    if (key === "task") return t.title || t.id;
+    if (key === "suite") return t._suites[0] || "";
+    if (key === "capability") return t._caps.join(" ");
+    if (key === "declared") return t.declared_difficulty;
+    if (key === "f2p") return Number.isFinite(t.n_fail_to_pass) && t.n_fail_to_pass >= 0 ? t.n_fail_to_pass : null;
+    if (key === "solved") return isScored(t) ? t.solved_by / t.n_models : null;
+    return t[key];
+  }
+  function sortTasks(tasks, state) {
+    var key = state.sort || "suite", direction = state.dir === "asc" ? 1 : -1;
+    return tasks.slice().sort(function (a, b) {
+      var av = sortVal(a, key), bv = sortVal(b, key);
+      var am = av == null || av === "", bm = bv == null || bv === "";
+      if (am !== bm) return am ? 1 : -1;
+      if (key === "suite" && dated(av) !== dated(bv)) return dated(av) ? -1 : 1;
+      var cmp = am && bm ? 0 : typeof av === "number" && typeof bv === "number" ? av - bv :
+        String(av).localeCompare(String(bv), undefined, { numeric: true });
+      return direction * cmp || String(a.id).localeCompare(String(b.id));
+    });
+  }
+  function selectTaskPage(tasks, state) {
+    return T.pageSlice(sortTasks(filterTasks(tasks, state), state), state.page, state.size || PAGE_SIZE);
+  }
+  function readTaskState(search) {
+    var params = new URLSearchParams(search), state = Object.assign({}, DEFAULTS);
+    var publicKeys = { q: "query", suite: "release", repo: "project", language: "language", capability: "capability" };
+    ["q"].concat(GROUPS).forEach(function (key) { state[key] = params.get(publicKeys[key] || key) || params.get(key) || ""; });
+    var scope = params.get("scope");
+    if (state.suite && ["new", "retained", "returned", "removed"].indexOf(scope) >= 0) state.scope = scope;
+    if (SORT_KEYS.indexOf(params.get("sort")) >= 0) state.sort = params.get("sort");
+    if ((params.get("order") || params.get("dir")) === "asc") state.dir = "asc";
+    var page = Number(params.get("page")), size = Number(params.get("size"));
+    if (Number.isInteger(page) && page > 0) state.page = page;
+    if ([25, 50, 100].indexOf(size) >= 0) state.size = size;
+    return state;
+  }
+  function withTaskFilters(state, patch) { return Object.assign({}, state, patch, { page: 1 }); }
+  function taskStateUrl(url, state) {
+    var next = new URL(String(url));
+    var publicKeys = { q: "query", suite: "release", repo: "project", dir: "order" };
+    Object.keys(DEFAULTS).forEach(function (key) {
+      var publicKey = publicKeys[key] || key;
+      if (publicKey !== key) next.searchParams.delete(key);
+      if (state[key] == null || state[key] === "" || String(state[key]) === String(DEFAULTS[key])) next.searchParams.delete(publicKey);
+      else next.searchParams.set(publicKey, state[key]);
+    });
+    return next;
+  }
+  function suiteLink(id) { return '<a href="' + esc(T.routeUrl ? T.routeUrl("benchmarks/" + encodeURIComponent(id) + "/") : "../benchmarks/" + encodeURIComponent(id) + "/") + '">' + esc(id) + '</a>'; }
+  function taskRow(t, state, showScores, capSpec) {
+    var href = T.routeUrl ? T.routeUrl("registry/" + encodeURIComponent(t.id) + "/") : "./" + encodeURIComponent(t.id) + "/";
+    var source = t.repo || "";
+    if (t.pr_number != null) source += " #" + t.pr_number;
+    var meta = source ? '<span title="' + esc(source) + '">' + esc(source) + '</span>' : "";
+    if (state.scope && state.suite) meta += '<span>' + esc({ new: "New in release", retained: "Retained", returned: "Returning", removed: "Removed from release" }[state.scope]) + '</span>';
+    if (t.declared_difficulty) meta += '<span title="Estimated difficulty">' + esc(t.declared_difficulty) + '</span>';
+    if (state.difficulty && t.difficulty) meta += '<span>measured: ' + esc(t.difficulty) + '</span>';
+    var first = t._suites[0];
+    var suite = first ? suiteLink(first) : "&mdash;";
+    var caps = t._caps.map(function (code) {
+      var spec = (capSpec || {})[code] || {};
+      return '<span title="' + esc(T.capabilityLabel(code, spec.name)) + '">' + esc(T.capabilityLabel(code, spec.name)) + '</span>';
+    }).join(" ");
+    if (t._capState === "unread") caps = '<span title="Capability labels could not be loaded">Unavailable</span>';
+    else if (t._capState === "unverified") caps = '<span title="This task is not covered by the published capability index">Not reviewed</span>';
+    else if (!caps) caps = t._capState === "declared" ? "No label" : '<span title="No category has been assigned to this task">Not categorized</span>';
+    if (t._capState === "declared") caps += '<span class="tdb-task-meta">Author label</span>';
+    var cells = '<td class="tdb-task-title-cell"><a class="tdb-task-title" href="' + esc(href) +
+      '" title="' + esc(t.title || "Task details") + '">' + esc(t.title || "Task details") +
+      '</a><div class="tdb-task-meta">' + meta + '</div></td>' +
+      '<td class="tdb-task-suite-cell" data-label="Latest release">' + suite + '</td>' +
+      '<td class="tdb-task-status-cell">' + esc(T.releaseStatus(t.status)) + '<span class="tdb-task-meta">' + esc(t.language || "—") + '</span></td>' +
+      '<td class="tdb-task-cap-cell">' + caps + '</td>' +
+      '<td class="tdb-task-f2p-cell" data-label="Target tests">' + (Number.isFinite(t.n_fail_to_pass) && t.n_fail_to_pass >= 0 ? t.n_fail_to_pass : "&mdash;") + '</td>';
+    if (showScores) cells += '<td class="tdb-task-score-cell">' + (isScored(t) ? t.solved_by + "/" + t.n_models : "&mdash;") + '</td>';
+    return '<tr data-href="' + esc(href) + '">' + cells + '</tr>';
+  }
+  /* One pass per render, independent of the number of filter options. */
+  function facetCounts(tasks, state) {
+    var counts = {}, q = String(state.q || "").trim().toLowerCase();
+    GROUPS.forEach(function (key) { counts[key] = new Map(); });
+    tasks.forEach(function (t) {
+      if (q && t._h.indexOf(q) < 0) return;
+      if (!scopeMatches(t, state)) return;
+      var failed = GROUPS.filter(function (key) { return !facetMatches(t, key, state[key], state); });
+      if (failed.length > 1) return;
+      (failed.length ? failed : GROUPS).forEach(function (key) {
+        var values = key === "suite" && state.scope === "removed" ? Object.keys(t._releaseChanges).filter(function (id) { return t._releaseChanges[id] === "removed"; }) : facetValues(t, key);
+        values.forEach(function (value) { counts[key].set(value, (counts[key].get(value) || 0) + 1); });
+      });
+    });
+    return counts;
+  }
+  Promise.all([
+    T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")),
+    T.getJSON("data/capability.json").catch(T.fetchFailed("the capability label set"))
+  ]).then(function (loaded) { start(loaded[0], loaded[1]); });
+  function start(site, cap) {
+    document.querySelector("[data-tdb-primary-data]").setAttribute("aria-busy", "false");
+    if (!site) {
+      byId("task-meta").textContent = "Catalogue unavailable";
+      byId("task-range").textContent = "";
+      byId("tdb-rows").innerHTML = '<tr><td colspan="5">Task data could not be loaded. Reload to try again.</td></tr>';
+      return;
+    }
+    var tasks = prepareTasks(site, cap), capSpec = Object.create(null);
+    ((cap && cap.axes) || []).forEach(function (axis) { capSpec[axis.code] = axis; });
+    var showScores = false, cols = COLS.slice();
+    if (showScores) {
+      cols.push({ key: "solved", label: "Official Solves", cls: "tdb-task-score-cell" });
+      byId("task-score-note").textContent = "Models solving this task / evaluated models.";
+    }
+    var state = readTaskState(window.location.search);
+    if (!cap) state.capability = "";
+    var selects = Array.from(document.querySelectorAll("select[data-filter]")), options = {};
+    GROUPS.forEach(function (key) {
+      var values = new Set();
+      tasks.forEach(function (t) { facetValues(t, key).forEach(function (value) { values.add(value); }); });
+      if (key === "capability") Object.keys(capSpec).forEach(function (code) { values.add(code); });
+      if (key === "suite") ((site && site.suites) || []).forEach(function (s) { values.add(String(s.id)); });
+      options[key] = Array.from(values).sort(key === "suite" ? suiteOrder : function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+    });
+    byId("task-meta").textContent = tasks.length.toLocaleString() + " unique tasks" +
+      (site.generated ? " · Updated " + String(site.generated).slice(0, 10) : "");
+    byId("task-measured-filter").hidden = !options.difficulty.length && !state.difficulty;
+    byId("task-table").setAttribute("data-scored", String(showScores));
+    if (state.repo || state.language || state.declared || state.difficulty) byId("task-more-filters").open = true;
+    function render(push, focusSort) {
+      if (!state.suite) state.scope = "";
+      byId("task-change").disabled = !state.suite;
+      byId("task-change").value = state.scope;
+      var page = selectTaskPage(tasks, state);
+      state.page = page.page;
+      var counts = facetCounts(tasks, state);
+      selects.forEach(function (select) {
+        var key = select.dataset.filter, allLabel = select.options[0].textContent;
+        var values = options[key].slice();
+        if (state[key] && values.indexOf(state[key]) < 0) values.unshift(state[key]);
+        if (key === "capability" && !cap) allLabel = "Capabilities unavailable";
+        select.innerHTML = '<option value="">' + esc(allLabel) + '</option>' + values.map(function (value) {
+          var n = counts[key].get(value) || 0, spec = key === "capability" ? capSpec[value] : null;
+          var label = spec ? T.capabilityLabel(value, spec.name) : key === "status" ? T.releaseStatus(value) : value;
+          return '<option value="' + esc(value) + '"' + (state[key] === value ? ' selected' : '') +
+            (!n && state[key] !== value ? ' disabled' : '') + '>' + esc(label) + ' (' + n + ')</option>';
+        }).join("");
+        select.disabled = key === "capability" && !cap;
+      });
+      byId("task-search").value = state.q;
+      byId("task-search").disabled = false;
+      byId("task-reset").hidden = !state.q && !GROUPS.some(function (key) { return !!state[key]; });
+      var extra = ["repo", "language", "declared", "difficulty"].filter(function (key) { return !!state[key]; }).length;
+      byId("task-extra-count").textContent = extra ? " (" + extra + ")" : "";
+      byId("tdb-head").innerHTML = '<tr>' + cols.map(function (col) {
+        var active = state.sort === col.key;
+        return '<th scope="col" class="' + col.cls + '" aria-sort="' + (active ? state.dir === "asc" ? "ascending" : "descending" : "none") +
+          '"><button type="button" data-sort="' + col.key + '" aria-label="Sort by ' + esc(col.label) + '">' + esc(col.label) +
+          (active ? state.dir === "asc" ? " ↑" : " ↓" : "") + '</button></th>';
+      }).join("") + '</tr>';
+      byId("tdb-rows").innerHTML = page.items.length ? page.items.map(function (t) { return taskRow(t, state, showScores, capSpec); }).join("") :
+        '<tr><td colspan="' + cols.length + '">' + (tasks.length ? "No matching tasks. Adjust the filters or reset." : "No tasks published.") + '</td></tr>';
+      byId("task-range").textContent = page.total ? page.start.toLocaleString() + "–" + page.end.toLocaleString() + " of " + page.total.toLocaleString() + (page.total === 1 ? " task" : " tasks") : "0 tasks";
+      byId("task-page").value = page.page;
+      byId("task-page").max = page.pages;
+      byId("task-page").disabled = page.pages === 1;
+      byId("task-pages").textContent = "of " + page.pages;
+      byId("task-prev").disabled = page.page === 1;
+      byId("task-next").disabled = page.page === page.pages;
+      byId("task-size").value = state.size;
+      byId("task-size").disabled = false;
+      byId("task-bottom").hidden = page.pages <= 1;
+      byId("task-bottom-range").textContent = byId("task-range").textContent;
+      byId("task-bottom-page").textContent = "Page " + page.page + " of " + page.pages;
+      byId("task-bottom-prev").disabled = page.page <= 1;
+      byId("task-bottom-next").disabled = page.page >= page.pages;
+      var nextUrl = taskStateUrl(window.location.href, state);
+      if (nextUrl.href !== window.location.href) window.history[push ? "pushState" : "replaceState"](null, "", nextUrl);
+      if (focusSort) byId("tdb-head").querySelector('button[data-sort="' + focusSort + '"]').focus();
+    }
+    function update(patch, push, focusSort) { state = withTaskFilters(state, patch); render(push !== false, focusSort); }
+    byId("task-change").addEventListener("change", function () { update({ scope: this.value }); });
+    selects.forEach(function (select) { select.addEventListener("change", function () {
+      var patch = {}; patch[select.dataset.filter] = select.value; update(patch);
+    }); });
+    byId("task-search").addEventListener("input", function (event) { update({ q: event.target.value }, false); });
+    byId("task-reset").addEventListener("click", function () { state = Object.assign({}, DEFAULTS); render(true); });
+    byId("task-size").addEventListener("change", function (event) { update({ size: Number(event.target.value) }); });
+    byId("task-prev").addEventListener("click", function () { state.page -= 1; render(true); });
+    byId("task-next").addEventListener("click", function () { state.page += 1; render(true); });
+    [["task-bottom-prev", -1], ["task-bottom-next", 1]].forEach(function (entry) {
+      byId(entry[0]).addEventListener("click", function () {
+        state.page += entry[1];
+        render(true);
+        var pager = document.querySelector('.tdb-pagination:not(.tdb-pagination-bottom)');
+        var masthead = document.getElementById("nd-nav");
+        window.scrollTo({ top: pager.getBoundingClientRect().top + window.scrollY - (masthead ? masthead.getBoundingClientRect().height : 56) - 16, behavior: "instant" });
+        byId("task-table").focus({ preventScroll: true });
+      });
+    });
+    byId("task-page").addEventListener("change", function (event) { state.page = Number(event.target.value); render(true); });
+    byId("tdb-head").addEventListener("click", function (event) {
+      var button = event.target.closest("button[data-sort]");
+      if (button) update({ sort: button.dataset.sort, dir: state.sort === button.dataset.sort && state.dir === "desc" ? "asc" : "desc" }, true, button.dataset.sort);
+    });
+    byId("tdb-rows").addEventListener("click", function (event) {
+      if (event.target.closest("a, button, details, summary, input, select") || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || window.getSelection().toString()) return;
+      var row = event.target.closest("tr[data-href]");
+      if (row) window.location.href = row.dataset.href;
+    });
+    window.addEventListener("popstate", function () {
+      state = readTaskState(window.location.search);
+      if (!cap) state.capability = "";
+      render();
+    });
+    render();
+  }
+})();
+</script>
+</body>
+</html>

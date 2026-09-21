@@ -1,83 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The result record — terminal-daily-bench docs</title>
-<meta name="description" content="The JSON one run writes, the three fields you will read, and why a failure never scores.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Read a result · Terminal-Daily</title>
+<meta name="description" content="Check the outcome of a run before comparing it with other results.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/result-record/">
 </head>
 <body>
-
-<!-- Split out of ../quickstart/, which owned #record, #record-bad-safe and
-     #fa-block; that page forwards the first two here and #fa-block on to
-     ../false-accept/, which this page ends by linking. #record-fields is a
-     new id over material that was already inside #record -- the field list
-     under the JSON.
-
-     THE SPLIT WENT ONE STEP FURTHER THAN PLANNED. With the false_accept_check
-     block still on it this page measured 2633px, over the shell's 2500px
-     bound, and the shell said so in the console. The bound is not decoration:
-     a page that has to be told where it is, is a page carrying two topics. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Read a result</h1>
+<p class="tdb-doc-sub">Check the outcome of a run before comparing it with other results.</p>
+</header>
 
-    <h1>The result record</h1>
-    <p class="tdb-doc-sub">What one run writes, and the three fields you will actually read.</p>
+<h2 id="record"><a href="#record">Find the result</a></h2>
+<p>Each evaluation writes a JSON result and prints it to the terminal. Use the output option to choose a file location.</p><figure class="tdb-code"><figcaption>Save a result</figcaption><pre><code>tdb run MODEL path/to/archived-task --out results/run.json</code></pre></figure>
 
-    <h2 id="record"><a href="#record">What one run writes</a></h2>
-    <p>Each run writes one JSON record. A solved run looks like this.</p>
-    <figure class="tdb-code"><pre><code>{
-  "model": "gpt-4o-mini",
-  "task": "td-fc90ea8b76d5f6b6",
-  "task_dir": "/abs/path/tasks/archive/td-fc90ea8b76d5f6b6",
-  "scaffold": "single_shot_patch",
-  "reward": 1.0,
-  "solved": true,
-  "patch_applied": true,
-  "error": null,
-  "model_endpoint": "https://api.openai.com/v1/chat/completions",
-  "runtime_sec": 142.7,
-  "false_accept_check": {
-    "gate": "harbor_protected_tests",
-    "reward_source": "result.json via harbor_score.read_harbor_reward",
-    "protected_tests_relaid_by_harbor": true,
-    "model_is_judge": false,
-    "model_patch_touched_tests": false,
-    "scope": "protected_test_replay_integrity",
-    "claim_acceptance_without_replay": false,
-    "semantic_false_accept": null,
-    "false_accept": 0
-  }
-}</code></pre></figure>
+<h2 id="record-fields"><a href="#record-fields">What to check</a></h2>
+<dl class="tdb-defs">
+<dt>Evaluation</dt><dd>Confirm the model, task, and agent configuration match the run you intended.</dd>
+<dt>Outcome</dt><dd>Check whether the protected tests passed. A local result does not by itself establish a verified leaderboard entry.</dd>
+<dt>Execution</dt><dd>Review the recorded command calls, tool calls, and any error. Keep the result file when reporting a problem.</dd>
+</dl>
 
-    <h2 id="record-fields"><a href="#record-fields">The three fields you will read</a></h2>
-    <dl class="tdb-defs">
-      <dt><code>scaffold</code></dt>
-      <dd><code>single_shot_patch</code> for a model run, <code>oracle_baseline</code> for
-        <code>tdb oracle</code>.</dd>
-      <dt><code>reward</code></dt>
-      <dd>The protected-test outcome. <code>solved</code> is <code>reward &gt;= 0.999</code>.</dd>
-      <dt><code>patch_applied</code></dt>
-      <dd><code>true</code> once a reward is parsed, <code>false</code> if the patch failed to apply,
-        <code>null</code> if the gate never reached the apply step.</dd>
-    </dl>
+<h2 id="comparing-results"><a href="#comparing-results">Compare results</a></h2>
+<p>A task counts as solved when more than half its runs pass: at least two out of three. Scores and rankings use the share of tasks solved. Beside horizontal score bars, ± gives the sample standard deviation of accuracy across repeated runs on the same tasks. It describes run-to-run variation. Results without complete repeat records show their published score without an error bar.</p>
+<p>Efficiency compares success with the mean number of command calls per attempt. Each call to the terminal counts once, including a call that submits several shell operations. Tool calls also include actions such as reading or editing a file. Both passing and failed attempts are included; missing counts are not treated as zero.</p>
 
-    <h2 id="record-bad-safe"><a href="#record-bad-safe">Failure never scores</a></h2>
-    <p>Runs are BAD-safe: any failure yields <code>reward = 0.0</code> and
-      <code>solved = false</code>, with the cause in <code>error</code>.</p>
-    <p>That covers no diff, a patch that does not apply, a hung trial and an unparseable result.
-      There is never a positive score on a crash.</p>
-
-    <p>What that reward does and does not certify is
-      <a href="../false-accept/">the false-accept check</a>.</p>
-
-  </article>
+<h2 id="record-bad-safe"><a href="#record-bad-safe">When a run fails</a></h2>
+<p>A missing patch, a patch that cannot be applied, or an execution error never earns a positive score. The local record includes the failure reason. In published analyses, an unavailable or unaccepted result is treated as missing, not as evidence that the model failed the task.</p><p>See <a href="../false-accept/">Scoring limits</a> for what a passing result establishes.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="docs"></script>
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

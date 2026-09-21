@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Evaluation methods · Terminal-Daily</title>
+<meta name="description" content="Interpret task outcomes, capability results, and the quality of a comparison.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Evaluation methods</h1>
+<p class="tdb-doc-sub">Interpret task outcomes, capability results, and the quality of a comparison.</p>
+</header>
+
+<h2 id="matrix"><a href="#matrix">Start with task outcomes</a></h2>
+<p>The analysis organizes results by task and model: each row is a task, and each column is a model. A completed evaluation reports whether the task passed. Some analyses can also describe intermediate progress.</p>
+
+<h2 id="outcomes"><a href="#outcomes">Keep missing results distinct</a></h2>
+<p>A task that was not run, could not be evaluated, or has no accepted result is missing. It is not counted as a model failure. Coverage reports how much of the task set was evaluated, so always read it alongside the success rate.</p>
+
+<h2 id="tallies"><a href="#tallies">Check the source of a result</a></h2>
+<p>Operator-validated results and contributor claims are recorded separately. A submission does not become a verified result by declaring that it passed. <a href="../submission/">Submission checks</a> explain the distinction.</p>
+
+<h2 id="dimensions"><a href="#dimensions">Read capability results</a></h2>
+<p>The leaderboard can show overall performance or results for a capability category. Categories describe what a repair involves and can overlap. Descriptive capability rates can be available even when there is not enough evidence for a formal category ranking.</p><p>Comparisons by language need the same care about coverage. Task-family rankings are unavailable where reliable family labels are missing.</p>
+
+<h2 id="map"><a href="#map">Explore the methods</a></h2>
+<p><a id="capability-taxonomy" href="capability/">Capability categories</a><span id="capability-codes"></span> and <a id="capability-rules" href="labels/">how tasks are labeled</a><span id="report-capability"></span>.</p><p><a id="axes" href="axes/">What the measures mean</a><span id="D"></span><span id="C"></span><span id="M"></span>, <a id="A" href="advisory/">task coverage and diversity</a><span id="R"></span>, and <a id="I" href="information/">information and reliability</a><span id="kr20"></span>.</p><p><a id="bootstrap" href="power/">Uncertainty and sample size</a><span id="power"></span><span id="reliability-power"></span>, <a id="readiness" href="readiness/">task-set assessment</a><span id="axis-failure-modes"></span>, and <a id="scope" href="scope/">scope and limits</a><span id="estimands"></span><span id="limits"></span>.</p><p><a id="report-discrimination" href="reports/">Read the quality report</a>, <a id="surfaces" href="cli/">analyze a results file</a><span id="output"></span>, or <a id="card" href="api/">use Python</a><span id="helpers"></span>.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+<script>
+/* Anchor continuity. A reader arriving on an old `quality-methods/#<id>` link
+   should land on the SECTION, not on the top of a page that no longer carries
+   it. Each moved id is still present above, on its own link under "Related
+   sections", so a reader with no JavaScript lands on a line that names the
+   section and links to it; this sends everyone else the whole way. */
+(function () {
+  var MOVED = {
+    "scope": "scope/",
+    "estimands": "scope/",
+    "limits": "scope/",
+    "capability-taxonomy": "capability/",
+    "capability-codes": "capability/",
+    "capability-rules": "labels/",
+    "report-capability": "labels/",
+    "axes": "axes/",
+    "D": "axes/",
+    "C": "axes/",
+    "M": "axes/",
+    "A": "advisory/",
+    "R": "advisory/",
+    "I": "information/",
+    "kr20": "information/",
+    "bootstrap": "power/",
+    "power": "power/",
+    "reliability-power": "power/",
+    "axis-failure-modes": "readiness/",
+    "readiness": "readiness/",
+    "report-discrimination": "reports/",
+    "card": "api/",
+    "helpers": "api/",
+    "surfaces": "cli/",
+    "output": "cli/"
+  };
+  var hop = function () {
+    var id = decodeURIComponent(String(location.hash || "").slice(1));
+    var to = Object.prototype.hasOwnProperty.call(MOVED, id) ? MOVED[id] : null;
+    if (to) location.replace(to + "#" + encodeURIComponent(id));
+  };
+  hop();
+  window.addEventListener("hashchange", hop);
+})();
+</script>
+</body>
+</html>

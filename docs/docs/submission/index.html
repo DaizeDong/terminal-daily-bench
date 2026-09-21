@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Submit results · Terminal-Daily</title>
+<meta name="description" content="Contribute a patch with enough information for an independent evaluation.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Submit results</h1>
+<p class="tdb-doc-sub">Contribute a patch with enough information for an independent evaluation.</p>
+</header>
+
+<h2 id="scoring"><a href="#scoring">What to submit</a></h2>
+<p>Provide the proposed code patch, the task it addresses, and the model and agent configuration that produced it. Keep the original run record for reference.</p>
+
+<h2 id="no-cheat"><a href="#no-cheat">How a result is checked</a></h2>
+<p>Operators apply the submitted patch and run the protected tests in the required environment. They use that test outcome to determine the result. A claimed score does not establish a verified score.</p>
+
+<h2 id="ingest"><a href="#ingest">After submission</a></h2>
+<p>A recorded submission is pending until the operators evaluate it. The public release does not include an operational verification service, so recording a patch alone does not produce a verified result.</p>
+
+<h2 id="schema"><a href="#schema">Required information</a></h2>
+<ul>
+<li>The evaluation date and your contributor identity.</li>
+<li>The model name and the exact model release or build.</li>
+<li>The agent used and its exact version.</li>
+<li>The task identifier and proposed patch.</li>
+</ul><p><a href="recording/">Prepare a submission</a> explains how to check the package before sharing it.</p>
+
+<h2 id="operator-replay"><a href="#operator-replay">Validation</a></h2>
+<p>Operators check the task, patch, model, and evaluation conditions together. Ranking also requires evaluated results for the complete published task set; a few selected tasks are insufficient. These checks are separate from the contributor’s local run.</p>
+
+<h2 id="community-submissions"><a href="#community-submissions">View submissions</a></h2>
+<p id="community">The <a href="../../submit/">submission page</a> keeps pending contributions separate from verified results. Follow the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">contribution instructions</a> when preparing a package.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+<script>
+/* Fragments that moved when this page was split.
+
+   Nothing under docs/, web/ or tests/ links any of the ids below -- they were
+   checked -- but a reader's bookmark is a referrer nobody can grep for, so the
+   old URL still has to land on the content instead of on a page that silently
+   ignores its own fragment. Two sibling pages already shipped this and two did
+   not; one treatment survives a bookmark and the other does not, so the site
+   now does the same thing in all four places.
+
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "adapter": "./adapters/",
+    "canary": "./replay-integrity/",
+    "cli": "./recording/",
+    "content-id": "./recording/",
+    "deployment": "./replay-integrity/",
+    "endpoint": "./running/",
+    "evidence": "./replay-integrity/",
+    "failing-ids": "./adapters/",
+    "failure": "./running/",
+    "frozen-policy": "./replay-integrity/",
+    "harbor-binding": "./replay-integrity/",
+    "image-checks": "./replay-integrity/",
+    "interface": "./adapters/",
+    "layout": "./running/",
+    "live-tasks": "./running/",
+    "produce-patch": "./adapters/",
+    "record": "./running/",
+    "reference": "./adapters/",
+    "registering": "./adapters/",
+    "result-binding": "./replay-integrity/",
+    "rules": "./recording/",
+    "run": "./running/",
+    "terminus": "./adapters/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
+})();
+</script>
+</body>
+</html>

@@ -1,65 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The quality card — terminal-daily-bench docs</title>
-<meta name="description" content="Aggregate result records into a selection-quality card with tdb quality, read the card it prints, and submit results.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Quality summary · Terminal-Daily</title>
+<meta name="description" content="Assess whether a task set gives useful evidence for comparing models.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/quality-card/">
 </head>
 <body>
-
-<!-- Split out of ../quickstart/, which owned #quality, #quality-output and
-     #submitting; that page forwards those three ids here. #quality-input and
-     #quality-metrics are new ids on material that was already inside those
-     sections -- the matrix rule, and the sentence naming where each metric
-     comes from. The method behind the numbers is ../quality-methods/. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Quality summary</h1>
+<p class="tdb-doc-sub">Assess whether a task set gives useful evidence for comparing models.</p>
+</header>
 
-    <h1>The quality card</h1>
-    <p class="tdb-doc-sub">What a set of result records says about the benchmark, rather than about one model.</p>
+<h2 id="quality"><a href="#quality">Analyze saved results</a></h2>
+<p>Collect the run records into a JSON Lines file, with one record per line, or a JSON array. The analysis command does not call a model or run the task evaluator.</p><figure class="tdb-code"><figcaption>Summarize a task set</figcaption><pre><code>tdb quality results.jsonl</code></pre></figure>
 
-    <h2 id="quality"><a href="#quality">Aggregate a quality card</a></h2>
-    <p>Collect result records into one file &mdash; JSON Lines (one record per line), or a JSON
-      array.</p>
-    <figure class="tdb-code"><pre><code>cat results/*.json | jq -c . &gt; results.jsonl
-tdb quality results.jsonl</code></pre></figure>
+<h2 id="quality-input"><a href="#quality-input">Use comparable evaluations</a></h2>
+<p>The command needs at least one task and two models. Reference-solution runs are excluded. Use consistent agent settings and check task coverage before interpreting the summary.</p>
 
-    <h2 id="quality-input"><a href="#quality-input">What the card needs</a></h2>
-    <p><code>tdb quality</code> builds a (task &times; model) solved matrix and needs
-      <strong>&ge; 1 task and &ge; 2 models</strong>. Records with <code>model: "oracle"</code> are
-      excluded from it.</p>
+<h2 id="quality-output"><a href="#quality-output">Read the summary</a></h2>
+<p>Start with the number of tasks and models. Then check whether tasks distinguish models, cover a range of difficulty, and give reasonably consistent results. Wide uncertainty intervals mean the task set supports only imprecise conclusions.</p>
 
-    <h2 id="quality-output"><a href="#quality-output">Reading the card</a></h2>
-    <figure class="tdb-code"><pre><code>tasks=40 models=6
-  D(discrimination)=0.517  C(coverage)=0.750  M(monotonicity)=0.912
-  IRT test-information=8.431  KR-20 reliability=0.78
-  D 95% CI=[0.402, 0.631]
-  readiness: NOT-ready (bottleneck=discrimination, need ~64 tasks)</code></pre></figure>
+<h2 id="quality-metrics"><a href="#quality-metrics">Understand the measures</a></h2>
+<p>The summary reports discrimination, difficulty coverage, consistency, information, and reliability. Its readiness assessment is guidance about the task set, not approval of a score. <a href="../quality-methods/">Evaluation methods</a> explains each measure.</p>
 
-    <h2 id="quality-metrics"><a href="#quality-metrics">Where each metric comes from</a></h2>
-    <p>Every metric comes from <code>terminal_daily_bench.quality</code>: <code>D</code>
-      discrimination, <code>C</code> difficulty coverage, <code>M</code> monotonicity, 2PL IRT
-      test-information, KR-20 reliability, a bootstrap 95% CI on <code>D</code>, and a readiness
-      verdict naming the bottleneck axis and a recommended task count.</p>
-    <p>The final line of stdout is the full card as JSON (<code>msq</code>, <code>irt</code>,
-      <code>reliability</code>, <code>readiness</code>) for machine consumption. The method behind
-      these numbers is <a href="../quality-methods/">quality methods</a>.</p>
-
-    <h2 id="submitting"><a href="#submitting">Submitting results</a></h2>
-    <p>Every submission is recorded as <strong>pending</strong> and its claimed reward is ignored.
-      The public bundle does not run a replay worker, and only an operator-published gate receipt can
-      enter the verified ranking.</p>
-    <p>See <a href="../submission/">submission</a> and
-      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a>.</p>
-
-  </article>
+<h2 id="submitting"><a href="#submitting">Share an evaluation</a></h2>
+<p>Include the original records and configuration when <a href="../submission/">submitting results</a>. A locally computed quality summary does not replace operator validation.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="docs"></script>
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

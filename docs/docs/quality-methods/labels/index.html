@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>How tasks are labeled · Terminal-Daily</title>
+<meta name="description" content="Capability labels describe visible features of a repair.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>How tasks are labeled</h1>
+<p class="tdb-doc-sub">Capability labels describe visible features of a repair.</p>
+</header>
+
+<h2 id="capability-rules"><a href="#capability-rules">Automatic labeling</a></h2>
+<p>Rules inspect changed file paths and added code in the reference repair and its tests. A task can receive several labels. Source changes commonly receive the implementation label, and test changes receive the testing label.</p><p>These labels are a practical description of the change. They do not establish that a task isolates one skill or that every labeled skill was necessary to solve it.</p>
+
+<h2 id="capability-gate"><a href="#capability-gate">Labels and performance</a></h2>
+<p>A label identifies a category; a category success rate summarizes evaluated outcomes. A formal category ranking requires additional evidence that enough relevant tests and tasks have been checked. Those checks are incomplete for the current catalogue, so descriptive rates should not be read as certified capability rankings.</p>
+
+<h2 id="report-capability"><a href="#report-capability">Read coverage carefully</a></h2>
+<p>The <a href="../../../quality/">quality report</a> shows all categories, including those with no covered tasks. A task can appear in more than one category, so totals overlap.</p><p>A label marked declared has not been independently re-derived from the full repair. This is common for live tasks, whose reference patches remain withheld. A missing performance estimate is different from a measured zero success rate.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

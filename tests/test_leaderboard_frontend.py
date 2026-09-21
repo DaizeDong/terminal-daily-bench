@@ -3,10 +3,17 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
+from urllib.parse import urlsplit
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "web"))
+import verify_site  # noqa: E402
+
 HOME = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
 LEADERBOARD = (ROOT / "docs" / "leaderboard" / "index.html").read_text(
     encoding="utf-8"
@@ -16,14 +23,7 @@ REGISTRY = (ROOT / "docs" / "registry" / "index.html").read_text(
 )
 SHELL = (ROOT / "docs" / "assets" / "site.js").read_text(encoding="utf-8")
 SITE_CSS = (ROOT / "docs" / "assets" / "site.css").read_text(encoding="utf-8")
-# The quality-methods guide was one page when these assertions were written and
-# is now seven. Every claim below still ships -- only the C1-C14 correction
-# moved, onto `capability/`, which is where a reader looking for it would go.
-# A file-scoped pin would have failed on a legitimate relocation and, worse,
-# would have pushed the content back onto an index that has no room for it:
-# the gate dictating page structure instead of guarding claims. Same fix as
-# verify_site's submission authority gate. The negative assertion below gets
-# stronger for free -- the banned sentence must now be absent from all seven.
+# Reader-facing method claims may move between linked guide pages.
 METHODS = chr(10).join(
     page.read_text(encoding="utf-8")
     for page in sorted((ROOT / "docs" / "guide" / "quality-methods").rglob("index.html"))
@@ -84,62 +84,28 @@ def test_site_data_generator_rejects_legacy_or_partial_matrix_authority():
     assert '"legacy_snapshot_present": legacy_present' in DATA_GENERATOR
 
 
-def test_relative_axes_are_authority_bounded_and_task_family_is_unavailable():
-    # The enforcement is code and lives with the page that renders. The
-    # statement of what is enforced is documentation and lives with the method.
-    # Both halves are asserted: an allowlist nobody documents is unauditable,
-    # and a documented allowlist nobody enforces is decoration.
+def test_relative_axes_are_authority_bounded_and_categories_remain_explained():
     assert (
         "var ALLOWED_DIMENSIONS = { overall: true, language: true, capability: true };"
         in LEADERBOARD
     )
     assert "!ALLOWED_DIMENSIONS[axis.dimension]" in LEADERBOARD
-
-    assert "Task-family: unavailable." in METHODS
-
-    # This assertion has now been wrong in BOTH directions, so it pins the
-    # reasoning and not just the wording.
-    #
-    # It first pinned "canonical C1-C14". That was struck on the finding that
-    # the taxonomy was defined in zero .py files and that C5 covered 61/61
-    # tasks, i.e. the page asserted a label set it could neither produce nor
-    # attribute. The replacement pinned "No capability label set is currently
-    # published".
-    #
-    # The finding was half wrong. The codes ARE defined -- in the research
-    # pipeline's CAPABILITY_TAXONOMY -- and the assignment is deterministic:
-    # re-running the tagger over the 37 archive packages reproduces every
-    # stored capability_labels value exactly. What was true is narrower: this
-    # CATALOGUE cannot score on them. So a label set IS published now, and
-    # "No capability label set is currently published" became a false
-    # sentence on a live page.
-    #
-    # What is pinned now is the pair of claims that are actually true and that
-    # a future edit must not quietly collapse into one: the labels are
-    # published AND no axis clears the publish gate. Asserting only the first
-    # would let the page imply a capability score; only the second would let
-    # the deletion happen again.
-    assert "No capability label set is currently published" not in METHODS
-    assert "labels are published on every archive package" in METHODS
-    assert "no axis clears the publish gate on this catalogue" in METHODS
+    text = verify_site.reader_text(METHODS).lower()
+    assert re.search(r"task.family rankings.{0,90}unavailable", text)
+    assert re.search(r"labels.{0,80}(?:inferred|code changes|repair)", text)
+    assert re.search(r"declared.{0,90}(?:not|cannot).{0,90}(?:checked|derived)", text)
+    assert re.search(r"formal.{0,40}ranking.{0,140}(?:requires|evidence)", text)
+    codes = re.findall(r'<th\b[^>]*>\s*(C\d+)\s*</th>', METHODS)
+    assert set(codes) == {f"C{number}" for number in range(1, 15)}
     assert 'id="capability-taxonomy"' in METHODS
-    assert "An earlier revision of this page deleted the C1&ndash;C14 claim" in METHODS
-    assert "does not infer one from tracks, merged labels" in METHODS
-    assert "does not display zero" in METHODS
-    assert "<code>ALLOWED_DIMENSIONS</code>" in METHODS
+    assert any(tag == "a" and "labels/" in attrs.get("href", "")
+               for tag, attrs in verify_site._ReaderMarkup(METHODS).nodes)
 
 
-def test_non_success_statuses_are_null_not_zero_and_never_ranked():
-    for status in ("FAILED", "BLOCKED", "NOT_RUN"):
-        assert f"<code>{status}</code>" in METHODS
-    assert "<code>outcome:null</code>" in METHODS
-    assert "are not converted to zero" in METHODS
-    assert "excluded from ratings" in METHODS
-    assert "counted in coverage, not outcomes" in METHODS
-    # A declaration must never be able to authenticate its own status, so the
-    # two tallies are named separately and never summed.
-    assert "authenticated_counts" in METHODS
-    assert "untrusted_declared_counts" in METHODS
+def test_missing_outcomes_and_result_sources_remain_distinct():
+    assert verify_site.check_reader_claims(
+        METHODS, ["missing_not_failure", "separate_result_sources"]
+    ) == []
     assert "worth zero" not in PAGE_GENERATOR.lower()
     assert "attempt worth zero" not in PAGE_GENERATOR.lower()
 
@@ -147,9 +113,10 @@ def test_non_success_statuses_are_null_not_zero_and_never_ranked():
 def test_registry_never_reconstructs_tasks_or_scores_from_legacy_matrix():
     assert 'T.getJSON("leaderboard_data.json")' not in REGISTRY
     assert "board.matrix" not in REGISTRY
-    assert "Official Solves" in REGISTRY
-    assert "means awaiting formal coverage, not zero solves" in REGISTRY
-    assert "official score coverage" in REGISTRY.lower()
+    # Arithmetic, including unknown versus zero, is exercised by the catalogue
+    # behavior cases below; labels may change without changing score eligibility.
+    assert "function isScored(" in REGISTRY
+    assert "isScored(t)" in REGISTRY
 
 
 def _nav_table():
@@ -164,16 +131,7 @@ def _nav_table():
 
 
 def test_the_quality_report_is_reachable_without_typing_the_url():
-    """/quality/ was an orphan: reachable only by typing the URL.
-
-    A top-level nav row is the obvious fix and is the wrong one --
-    verify_site.py pins the header to five items and explicitly bans a
-    top-level quality entry as retired navigation. So `quality` stays a
-    `docs` key and the entrances live in the pages: the home masthead, the
-    leaderboard foot, and the docs shortcut rail. Each is asserted here
-    because losing any one of them puts the report back out of reach, and
-    nothing else in the suite would notice.
-    """
+    """Readers can reach the quality evidence from results and guide pages."""
     nav = _nav_table()
 
     # the pinned five, in the pinned order, with quality NOT among them
@@ -183,7 +141,7 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
     # the label form here would have made every future copy edit a test
     # failure, which is how a gate stops being read.
     assert [row[1] for row in nav] == [
-        "benchmarks/", "leaderboard/", "registry/", "guide/", "submit/"
+        "leaderboard/", "registry/", "benchmarks/", "guide/", "submit/"
     ]
 
     # every key belongs to exactly one row, or two header items light at once
@@ -199,19 +157,25 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
     assert 'data-page="quality"' in quality_page
     assert 'id="discrimination"' in quality_page
 
-    # In-page entrances. The home masthead used to carry one; the results-first
-    # rebuild cut it, so home is no longer named here. What is still required is
-    # the property that made the list worth asserting: the report must be
-    # reachable from more than one page, and specifically from the leaderboard,
-    # which is where the numbers the report qualifies are printed. Naming the
-    # pages individually is what made this test brittle; naming the leaderboard
-    # is not brittleness, it is the point.
-    linking = [
-        page for page in PUBLISHED_PAGES
-        if page.parent.name != "quality"
-        and "quality/#discrimination" in page.read_text(
-            encoding="utf-8", errors="replace")
-    ]
+    # Both a direct section link and a link to the report itself are useful
+    # entrances. Literal anchors also cover links rendered by page JavaScript;
+    # the browser audit verifies that those links appear at runtime.
+    quality_target = (ROOT / "docs/quality").resolve()
+    quality_ids = {attrs["id"] for _, attrs in verify_site._ReaderMarkup(quality_page).nodes
+                   if attrs.get("id")}
+    linking = []
+    for page in PUBLISHED_PAGES:
+        if page.parent.resolve() == quality_target:
+            continue
+        raw = page.read_text(encoding="utf-8", errors="replace")
+        for href in re.findall(r'''href=["']([^"']+)["']''', raw):
+            target = urlsplit(href)
+            if target.scheme or target.netloc:
+                continue
+            if (page.parent / target.path).resolve() == quality_target:
+                assert not target.fragment or target.fragment in quality_ids
+                linking.append(page)
+                break
     assert len(linking) >= 2, (
         "the discrimination report is reachable from "
         f"{len(linking)} page(s); it was an orphan once already")
@@ -219,60 +183,16 @@ def test_the_quality_report_is_reachable_without_typing_the_url():
         "the leaderboard lost its link to the discrimination report")
 
 
-def _registry_columns():
-    assert "var COLS = [" in REGISTRY, "the registry no longer declares COLS"
-    block = REGISTRY.split("var COLS = ", 1)[1].split("\n  ];", 1)[0]
-    block = re.sub(r"/\*.*?\*/", " ", block, flags=re.S)
-    return re.findall(r'key:\s*"([^"]+)",\s*label:\s*"([^"]+)"', block)
-
-
-def test_the_declared_difficulty_facet_has_a_column_to_show_its_value():
-    """A filter for an attribute the table never renders is a dead end.
-
-    The facet rail offers "hard 43 / medium 18" and the predicate filters on
-    `declared_difficulty`; the Status cell rendered `t.difficulty` -- the
-    MEASURED field, which is "" on all 61 tasks while no official ranking is
-    published -- so clicking a chip returned rows that looked identical to the
-    ones it excluded.
-    """
-    cols = _registry_columns()
-    by_key = dict(cols)
-    assert by_key.get("declared") == "Difficulty", cols
-    assert "Official Solves" in by_key.values()
-
-    # sortable headers are driven by COLS; a key sortVal cannot read is inert
-    assert 'if (k === "declared") return String(t.declared_difficulty || "");'         in REGISTRY
-    # the cell is rendered from the EDITORIAL field ...
-    assert "esc(t.declared_difficulty)" in REGISTRY
-    # ... and the dead measured badge that used to sit in the Status cell is
-    # gone, so one row can never show two difficulty slots
-    assert "esc(t.difficulty)" not in REGISTRY
-
-    # header, body row and the static loading row must agree on the width
-    body_cells = REGISTRY.count(
-        "'<td data-slot=\"table-cell\" class=\"' + TD")
-    assert body_cells == len(cols), (body_cells, len(cols))
-    spans = re.findall(r'<td data-slot="table-cell" colspan="(\d+)"', REGISTRY)
-    assert spans and all(int(x) == len(cols) for x in spans), spans
-
-
-def test_guide_prose_can_break_the_identifiers_that_overflow_a_phone():
-    """/guide/task-format/ was the one page wider than a 390px viewport.
-
-    `terminal_daily_bench/adapters/base.py::HarnessAdapter` in body copy is one
-    unbreakable token 440px wide in a 358px content box, and because
-    `body { overflow-x: hidden }` propagates to the viewport the page got no
-    scrollbar -- the tail was simply cut off. The article opts its prose into
-    breaking anywhere; the code blocks are unaffected because `white-space:
-    pre` suppresses wrapping outright.
-    """
-    article = re.search(r'<article class="([^"]*prose[^"]*)"', TASK_FORMAT)
-    assert article, "task-format no longer wraps its body in an article.prose"
-    classes = article.group(1).split()
-    assert "wrap-anywhere" in classes, classes
-    # and the class must still BE something: a utility deleted from the
-    # stylesheet leaves the markup looking fixed and the page still clipped
-    assert ".wrap-anywhere{overflow-wrap:anywhere}" in TW_CSS
+def test_guide_content_uses_the_shared_responsive_document_layout():
+    nodes = verify_site._ReaderMarkup(TASK_FORMAT).nodes
+    assert any(tag == "article" and "tdb-doc" in attrs.get("class", "").split()
+               for tag, attrs in nodes)
+    assert any(tag == "main" and "tdb-docs" in attrs.get("class", "").split()
+               for tag, attrs in nodes)
+    # Long examples still need a bounded document and a scrollable code surface.
+    compact = re.sub(r"\s+", "", SITE_CSS)
+    assert ".tdb-doc>*{max-width:100%;}" in compact
+    assert re.search(r"\.tdb-code[^{}]*pre[^{}]*\{[^{}]*overflow(?:-x)?:\s*auto", SITE_CSS)
 
 
 _JS_WORDS = {
@@ -387,6 +307,33 @@ def _strip_safe_calls(src, safe_names):
         src = src[:m.start()] + " " + src[i + 1:]
 
 
+def _strip_guard_condition(src):
+    """A leading if condition controls output but is not part of that output.
+
+    Strings and safe calls have already been removed. Keep the entire body so
+    a raw property in guarded markup is checked exactly as an unguarded one.
+    """
+    guard = re.match(r"\s*if\s*\(", src)
+    if not guard:
+        return src
+    depth = 1
+    for i in range(guard.end(), len(src)):
+        if src[i] == "(":
+            depth += 1
+        elif src[i] == ")":
+            depth -= 1
+            if depth == 0:
+                return src[i + 1:]
+    return src
+
+
+def test_markup_scan_excludes_guards_but_keeps_guarded_output_values():
+    body = _strip_guard_condition("if (row.enabled && check(row.n)) { html += row.model; }")
+    assert "row.enabled" not in body and "row.n" not in body
+    assert "row.model" in body
+    assert _strip_guard_condition("html += row.model;") == "html += row.model;"
+
+
 def test_output_values_are_escaped_before_entering_the_dom():
     """No data-derived value reaches innerHTML unescaped.
 
@@ -423,7 +370,7 @@ def test_output_values_are_escaped_before_entering_the_dom():
             continue
         scanned += 1
         covers_row = covers_row or "<td" in chunk
-        bare = _strip_strings(_strip_safe_calls(chunk, SAFE))
+        bare = _strip_guard_condition(_strip_strings(_strip_safe_calls(chunk, SAFE)))
         for name in ident.findall(bare):
             head, tail = name.split(".")[0], name.rsplit(".", 1)[-1]
             if head in _JS_WORDS or name in _JS_WORDS:
@@ -467,31 +414,17 @@ def test_output_values_are_escaped_before_entering_the_dom():
                     ('"', "&quot;"), ("'", "&#39;")):
         assert ent in body, f"esc() has no mapping for {ch!r}"
 
-def test_stat_values_are_not_document_headings():
-    # The stat grid left the home page with the rest of the explanatory
-    # blocks, so the marker is required of the SITE rather than of index.html.
-    # The ban on rendering a stat value as a heading is unconditional and is
-    # applied to every published page, which is stronger than the two pages it
-    # used to name.
-    assert "<p data-tdb-stat-value" in PUBLISHED, (
-        "no published page renders a stat value any more")
-    assert "<p data-tdb-stat-value" in PAGE_GENERATOR
-    assert '<h2 class="mt-2 line-clamp-1 font-mono text-xl' not in PUBLISHED
-    assert (
-        '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
-        not in PAGE_GENERATOR
-    )
-
+def test_generated_pages_have_one_title_and_do_not_use_headings_for_metrics():
     generated = sorted((ROOT / "docs" / "benchmarks").glob("*/index.html"))
     generated += sorted((ROOT / "docs" / "registry").glob("*/index.html"))
     assert generated
     for page in generated:
-        source = page.read_text(encoding="utf-8")
-        assert "<p data-tdb-stat-value" in source, page
-        assert (
-            '<h2 class="line-clamp-1 font-mono text-xl font-medium tabular-nums"'
-            not in source
-        ), page
+        nodes = verify_site._ReaderMarkup(page.read_text(encoding="utf-8")).nodes
+        assert sum(tag == "h1" for tag, _ in nodes) == 1, page
+        for tag, attrs in nodes:
+            if re.fullmatch(r"h[1-6]", tag):
+                assert "data-tdb-stat-value" not in attrs, page
+                assert "tabular-nums" not in attrs.get("class", "").split(), page
 
 
 def test_mobile_menu_is_opaque_non_overlapping_and_accessible():
@@ -510,57 +443,109 @@ def test_shell_mounts_a_real_footer_landmark():
     assert "document.body.appendChild(footer)" in SHELL
 
 
-def test_operator_evidence_survives_where_it_is_documentation():
-    """What the integrity deletion was, and what it was not.
-
-    On the owner's instruction the disclosure CHAIN was removed: the
-    quote-styled `data-tdb-integrity` block on nine pages, the scoring
-    invariant, the replay-blocker ledger, the `#integrity` anchor, the `why`
-    link on both UNOFFICIAL badges, and tests/test_disclosure_path.py.
-
-    What was NOT removed is the same material where it appears as ordinary
-    documentation in the guide -- a reader following those pages is being told
-    how the system works, and deleting a true operational fact from an install
-    guide makes the guide wrong rather than merely quieter. The two lists below
-    keep that distinction honest in both directions: the chain must stay gone,
-    and the documentation must stay accurate.
-    """
-    for fact in (
-        "no production protected replay has run",
-        "active=false",
-        "one collaborator",
-        "unpublished patched Harbor fork",
-        "stock Harbor 0.13.1 is insufficient",
-    ):
-        assert fact in PUBLISHED, (
-            f"operational fact published on no page under docs/: {fact!r}")
-
-    for removed in (
-        "data-tdb-integrity",
-        "tdb-badge-why",
-        "#integrity",
-        "Protected tests decide published scores",
-        "integrity limits and current blockers",
-    ):
-        assert removed not in PUBLISHED, (
-            f"the retired integrity disclosure came back: {removed!r}. It was "
-            f"deleted deliberately; a partial return leaves the site quoting "
-            f"half a caveat.")
-
-    assert "deployment egress canary is still pending" not in PUBLISHED
+def test_public_guides_explain_limitations_without_internal_contract_dumps():
+    quickstart = (ROOT / "docs/guide/quickstart/index.html").read_text(encoding="utf-8")
+    submit = (ROOT / "docs/submit/index.html").read_text(encoding="utf-8")
+    assert verify_site.check_reader_claims(quickstart, ["evaluation_unavailable"]) == []
+    assert verify_site.check_reader_claims(submit, ["pending_excluded", "full_task_set"]) == []
+    for page in PUBLISHED_PAGES:
+        assert verify_site.check_reader_copy(page.read_text(encoding="utf-8"), str(page)) == []
+    assert verify_site.check_canary_metadata(SHELL) == []
 
 
-def test_the_unofficial_word_is_still_rendered():
-    """The only thing left saying these numbers are not a certified ranking."""
-    assert 'data-official="false"' in HOME and "unofficial" in HOME.lower()
+def test_preliminary_results_have_a_reader_visible_status():
+    pages = {"index.html": HOME, "leaderboard/index.html": LEADERBOARD}
+    assert verify_site.check_preliminary_marker(pages.__getitem__) == []
 
-def test_homepage_previews_stay_short_and_link_to_full_views():
+
+@pytest.mark.parametrize("markup", [
+    '<span data-official="false">Official</span>',
+    '<span>Preliminary</span>',
+    '<span data-official="false" hidden>Preliminary</span>',
+    '<!-- <span data-official="false">Preliminary</span> -->',
+])
+def test_preliminary_marker_cannot_be_replaced_by_an_unrelated_word_or_comment(markup):
+    assert len(verify_site.check_preliminary_marker(lambda _: markup)) == 2
+
+
+@pytest.mark.parametrize("markup, finding", [
+    ("<p>td-" + "a" * 16 + "</p>", "task identifier"),
+    ("<footer>00000000-0000-0000-0000-000000000000</footer>", "UUID"),
+    ("<code>" + "b" * 64 + "</code>", "raw digest"),
+    ("<p>frozen_task_roster_n: 50</p>", "internal publication field"),
+    ("<p>awaiting-certified-50-task-results</p>", "internal publication state"),
+    ('<button aria-label="Open td-' + 'c' * 16 + '">Open</button>', "task identifier"),
+    ("<p>td&#45;" + "d" * 16 + "</p>", "task identifier"),
+    ('<span aria-hidden="true">td-' + 'e' * 16 + '</span>', "task identifier"),
+])
+def test_reader_copy_rejects_visible_engineering_leaks(markup, finding):
+    assert any(finding in error for error in verify_site.check_reader_copy(markup))
+
+
+def test_reader_copy_keeps_machine_metadata_routes_and_useful_commands():
+    task_id = "td-" + "a" * 16
+    markup = (
+        '<head><meta id="tdb-canary" content="00000000-0000-0000-0000-000000000000"></head>'
+        '<main><a href="/registry/' + task_id + '/" data-task-id="' + task_id + '">Repair file handling</a>'
+        '<!-- frozen_task_roster_n -->'
+        '<script type="application/json">{"frozen_task_roster_n":50}</script>'
+        '<pre><code>tdb doctor path/to/task</code></pre></main>'
+    )
+    assert verify_site.check_reader_copy(markup) == []
+    text = verify_site.reader_text(markup)
+    assert "Repair file handling" in text and "tdb doctor" in text
+    assert task_id not in text and "frozen_task_roster_n" not in text
+
+
+@pytest.mark.parametrize("claim, positive, negative", [
+    ("evaluation_unavailable", "The required scoring environment is not publicly available.",
+     "The required scoring environment is publicly available."),
+    ("pending_excluded", "Pending submissions do not count toward leaderboard scores.",
+     "Pending submissions count toward leaderboard scores."),
+    ("full_task_set", "Compare models on the same full task set.",
+     "Compare models using any selected tasks."),
+    ("missing_not_failure", "Missing outcomes are not counted as model failures.",
+     "Missing outcomes are counted as model failures."),
+    ("separate_result_sources", "Checked results and contributor claims are recorded separately.",
+     "Checked results and contributor claims are combined."),
+])
+def test_reader_claims_require_the_meaning_in_public_text(claim, positive, negative):
+    assert verify_site.check_reader_claims('<p>' + positive + '</p>', [claim]) == []
+    assert verify_site.check_reader_claims('<p>' + negative + '</p>', [claim])
+    assert verify_site.check_reader_claims('<script>' + json.dumps(positive) + '</script>', [claim])
+    assert verify_site.check_reader_claims('<!-- ' + positive + ' -->', [claim])
+
+
+def test_footer_keeps_the_contamination_marker_in_head_metadata():
+    from test_capability_ranking import _extract, _run
+    result = _run(
+        """var CANARY = INPUT.marker, GITHUB = 'https://example.com/project';
+        function url(path) { return './' + path; }
+        var head = [], body = [];
+        var document = {
+          head:{appendChild:function(node){head.push(node);}},
+          body:{appendChild:function(node){body.push(node);}},
+          getElementById:function(id){return head.concat(body).find(function(node){return node.id===id;});},
+          createElement:function(tag){return {tag:tag,attrs:{},setAttribute:function(key,value){this.attrs[key]=value;}};}
+        };
+        """ + _extract(SHELL, "mountFooter") + """
+        mountFooter(); mountFooter();
+        console.log(JSON.stringify({head:head,body:body}));
+        """, {"marker": "synthetic benchmark contamination marker"})
+    assert len(result["head"]) == 1 and len(result["body"]) == 1
+    assert result["head"][0]["tag"] == "meta"
+    assert result["head"][0]["id"] == "tdb-canary"
+    assert result["head"][0]["content"] == "synthetic benchmark contamination marker"
+    assert result["body"][0]["tag"] == "footer"
+    assert "synthetic benchmark contamination marker" not in verify_site.reader_text(result["body"][0]["innerHTML"])
+
+
+def test_homepage_preview_is_bounded_and_links_to_full_views():
     # The task preview was removed from home: the registry has its own page,
     # and previewing it pushed the only measured numbers below the fold. The
     # board preview stays, so the rule is written to bind whatever previews
     # home actually renders -- every declared *_PREVIEW_LIMIT must be used to
     # slice, so a limit cannot be declared and quietly ignored.
-    assert "var BOARD_PREVIEW_LIMIT = 5;" in HOME
     # The name of the array being sliced is deliberately NOT pinned. It was
     # `rows.slice(0, BOARD_PREVIEW_LIMIT)` while the preview ranked every
     # flattened cell together; it is now sliced from the mainline partition,
@@ -569,173 +554,247 @@ def test_homepage_previews_stay_short_and_link_to_full_views():
     # detail that the rule below already covers properly: the loop requires
     # EVERY declared limit to be used in a slice, whatever it slices, so a
     # limit still cannot be declared and quietly ignored.
-    limits = re.findall(r"var (\w*PREVIEW_LIMIT) = \d+;", HOME)
+    limits = dict(re.findall(r"var (\w*PREVIEW_LIMIT) = (\d+);", HOME))
     assert "BOARD_PREVIEW_LIMIT" in limits
-    for name in limits:
+    for name, limit in limits.items():
+        assert int(limit) > 0, f"home declares an empty preview: {name}={limit}"
         assert f".slice(0, {name})" in HOME, (
             f"home declares {name} but never slices by it")
 
     # A preview is only honest if the full view is one click away.
-    assert 'href="./leaderboard/">full leaderboard' in HOME.lower()
+    assert 'href="./leaderboard/"' in HOME, "home lost its link to the full leaderboard"
     assert 'href="./registry/"' in HOME, "home lost its way into the task registry"
 
 
-def test_terminal_daily_has_an_independent_visual_identity():
-    """Own palette, own type, own brand, own controls -- and not a clone.
-
-    This used to also require a conic-gradient blob behind the home masthead
-    and a card rail of published suites. Those were one design's answer to the
-    constraint, not the constraint; when the home page became a dense status
-    table they failed a design nobody had objected to, while the rules they
-    named sat in the stylesheet applying to nothing. Every marker below is a
-    selector or token the site actually ships, so deleting a rule as dead code
-    fails here instead of being kept alive to satisfy a checker.
-    """
-    for marker in (
-        "--td-paper",
-        "--td-night",
-        "--td-coral",
-        # a DECLARATION, not a reference: "--td-font-display" survives only as
-        # an alias now, and every "var(--td-font-display)" still spells it, so
-        # the old marker would pass on a stylesheet that declares no family.
-        "--td-font:",
-        "--ts-body",
-        "--sp-7",
-        ".tdb-brand-mark",
-        ".tdb-daynav",
-        ".tdb-statrow",
-        '[data-slot="card"]',
-        "[data-tdb-stat-value]",
-        '[data-slot="table-container"]',
-        "@media (prefers-reduced-motion: reduce)",
-    ):
-        assert marker in SITE_CSS
-
-    for retired in (
-        "square, hairline, mono, no shadow",
-        "copied verbatim from the reference",
-        "byte-equality with the reference",
-    ):
-        assert retired not in SITE_CSS.lower()
-        assert retired not in PAGE_GENERATOR.lower()
-
-    # site.css:390-397 re-pointed Tailwind's .font-mono back to the body face
-    # at specificity (0,1,1), silently reverting ~262 elements to sans while
-    # span/a/h1/h2/pre/figure stayed mono. It is the reason the site looked
-    # like three fonts. It must not come back.
-    assert "p.font-mono," not in SITE_CSS
-
-    # THE TYPE RULE. This used to assert "exactly one applied font-family",
-    # which was the right shape of gate for a decision the reader has since
-    # reversed: one family meant monospace prose, and monospace prose two
-    # points small is what the "unreadable" complaint was about. The decision
-    # is now TWO families under ONE RULE -- prose, headings and UI labels in
-    # the sans; code, commands, numeric cells and identifiers in the mono --
-    # and the gate is rewritten to guard that with equal force, not relaxed.
-    #
-    # Deliberately NOT a count. `applied.count("font-family") == 2` would pass
-    # a stylesheet that put every paragraph back in mono and set one <code>
-    # in sans, which is precisely the defect being fixed. Two-ness is not the
-    # decision; the ASSIGNMENT is. So: the body resolves to the sans, the mono
-    # is reached only by opting in, the opt-in list is non-empty and semantic,
-    # and no third family can appear.
+def test_project_identity_and_local_font_sources_are_preserved():
+    """Reference styling may change while project identity and offline assets remain."""
+    # The reference-led redesign supersedes exact palette, family-count,
+    # type-assignment and selector pins. Retain the local-source requirement
+    # without choosing which font family the interface must use.
     faces = re.findall(r"@font-face\s*\{(.*?)\}", SITE_CSS, re.S)
-    assert faces, "the vendored faces are gone; the type scale needs its weight axis"
-    face_names = {re.search(r"font-family:\s*([^;]+);", f).group(1).strip()
-                  for f in faces}
-    assert face_names == {'"Google Sans Code"', '"Geist"'}, (
-        f"exactly two families may be vendored, and these are they: {face_names}"
-    )
-    for f in faces:
-        # a variable axis is the whole point: static weights would resynthesise
-        assert re.search(r"font-weight:\s*\d+\s+\d+\s*;", f), f
-        assert "url(" in f and "//" not in f.split("url(", 1)[1][:40], (
-            "the faces must stay self-hosted; a remote URL breaks offline render"
+    for face in faces:
+        assert "url(" in face and "//" not in face.split("url(", 1)[1][:40], (
+            "font sources must stay self-hosted; a remote URL breaks offline render"
         )
-
-    # Two tokens, and --td-font survives as an alias meaning MONO, because
-    # web/verify_site.py greps it by literal string.
-    assert "--td-font-sans:" in SITE_CSS and "--td-font-mono:" in SITE_CSS
-    assert re.search(r"--td-font:\s*var\(--td-font-mono\)\s*;", SITE_CSS), (
-        "--td-font must stay a live alias of the mono token; it has never "
-        "meant anything else, and verify_site.py still spells it"
-    )
-
-    applied = SITE_CSS
-    for f in faces:
-        applied = applied.replace(f, "")
-    # Comments are stripped for everything below. This file explains its own
-    # rules at length, and several of those explanations QUOTE the selectors
-    # and declarations they are warning about -- so a scan that reads comments
-    # reports the warning as the violation.
-    applied = re.sub(r"/\*.*?\*/", " ", applied, flags=re.S)
-
-    # Direction 1: the default is SANS. Everything inherits from <body>, so
-    # this one declaration decides the family of all prose on the site.
-    body_rule = re.search(r"\nbody \{(.*?)\n\}", applied, re.S)
-    assert body_rule and "font-family: var(--td-font-sans);" in body_rule.group(1), (
-        "body must set the SANS token: prose, headings and UI labels inherit "
-        "their family from here, and a mono default is the reported defect"
-    )
-
-    # Direction 2: the mono is OPTED INTO, never out of, and the opt-in is a
-    # list of semantic selectors -- what the content IS, not where it sits.
-    mono_rules = re.findall(
-        r"([^{}]+)\{[^{}]*font-family:\s*var\(--td-font-mono\)[^{}]*\}", applied)
-    assert mono_rules, "nothing opts into the mono; code and numbers are prose now"
-    opt_in = {sel.strip() for r in mono_rules for sel in r.split(",")}
-    for required in ("code", "pre", "kbd", "samp"):
-        assert required in opt_in, (
-            f"<{required}> is not in the mono opt-in list: {sorted(opt_in)}"
-        )
-    assert any(sel.startswith("[") for sel in opt_in), (
-        "the opt-in names no attribute hook, so markup that needs mono and has "
-        "no semantic tag would have to reach for a layout class again"
-    )
-
-    # Direction 3: no THIRD family. Every applied font-family must resolve to
-    # one of the two tokens, to `inherit`, or to a keyword -- never to a face
-    # name typed inline, which is how a third family gets in without a
-    # @font-face block to give it away.
-    for value in re.findall(r"font-family:\s*([^;}]+)", applied):
-        value = value.strip()
-        assert (value.startswith("var(--td-font")
-                or value in ("inherit", "initial", "unset")), (
-            f"a third family is being applied: font-family: {value}. Families "
-            "come from --td-font-sans or --td-font-mono, and nowhere else"
-        )
-
-    # Direction 4: the vendored utility classes must not choose a family.
-    # tw.css ships `.font-mono` and `.font-sans` at (0,1,0) and the generator
-    # sprays `font-mono` on ~460 elements -- <h2> section headings, /quality/
-    # metric labels, and one wrapper <div> around the whole leaderboard table.
-    # Measured after the two families landed but before this rule: 3238 of
-    # 3264 text elements on /leaderboard/ still rendered mono, from that one
-    # wrapper alone. A class that says how something LOOKS must not decide
-    # what it IS, so site.css disarms both utilities.
-    disarm = re.search(
-        r"([^{}]*\.font-mono[^{}]*)\{[^{}]*font-family:\s*inherit", applied)
-    assert disarm, (
-        "site.css no longer disarms tw.css's .font-mono; leaving it live puts "
-        "headings, nav and whole table bodies back in mono by layout class"
-    )
-    # ...and the disarming must spare the things that genuinely earned mono,
-    # or `<code class="font-mono">` would be set in sans.
-    assert "code" in disarm.group(1), (
-        "the .font-mono disarming rule must exclude the mono opt-in list, or "
-        "it takes the mono away from code as well as from headings"
-    )
-
-    # Direction 5: the vendored sheet hard-codes `#nd-nav { font-family: <mono> }`
-    # at (1,0,0). No token alias reaches it and no class rule outranks it, so
-    # the site chrome -- brand, kicker, twelve nav links -- rendered mono on
-    # every page until site.css re-applied the sans by id.
-    assert re.search(r"#nd-nav \{[^{}]*font-family:\s*var\(--td-font-sans\)", applied), (
-        "#nd-nav does not re-apply the sans; tw.css sets it to mono at (1,0,0) "
-        "and the header is UI labels, which are sans under the rule"
-    )
 
     assert "Terminal Daily" in SHELL
-    assert "tdb-brand-mark" in SHELL
     assert "tdb-page-" in SHELL
-    assert "<span>Terminal</span> <span>Daily</span>" in HOME
+
+
+def _catalogue_fixture():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("catalogue_fixtures", ROOT / "tools/make_fixtures.py")
+    fixtures = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixtures)
+    return fixtures.catalogue_fixture()
+
+
+def _catalogue_run(kind, script, payload):
+    """Run the page's actual closures; pending fetches keep boot outside the probe."""
+    from test_capability_ranking import _extract, _run
+
+    page = REGISTRY if kind == "tasks" else (ROOT / "docs/benchmarks/index.html").read_text(encoding="utf-8")
+    inline = re.findall(r"<script>\s*(.*?)</script>", page, re.S)[-1]
+    names = re.findall(r"^  function (\w+)\(", inline, re.M)
+    end = inline.rfind("})();")
+    assert end >= 0 and names, "the catalogue probe did not reach the page closure"
+    exports = "window.catalogueProbe = {" + ",".join(name + ":" + name for name in names) + "};\n"
+    inline = inline[:end] + exports + inline[end:]
+    setup = "\n".join([
+        _extract(SHELL, "taskSuites"), _extract(SHELL, "taskInSuite"),
+        "T.taskSuites = taskSuites; T.taskInSuite = taskInSuite;",
+        "var window = {TDB:T, URL:URL, location:new URL('https://example.com/registry/'), addEventListener:function(){}, history:{replaceState:function(){},pushState:function(){}}};",
+        DATA_RUNTIME,
+        (ROOT / "docs/assets/tdb-releases.js").read_text(encoding="utf-8"),
+        "T = window.TDB; T.getJSON = function(){return new Promise(function(){});}; T.fetchFailed = function(){return function(){return null;};};",
+        """function probeElement() {
+          return {value:'',innerHTML:'',textContent:'',hidden:false,disabled:false,className:'',
+            addEventListener:function(){},setAttribute:function(){},removeAttribute:function(){},
+            querySelector:function(){return probeElement();},querySelectorAll:function(){return [];},
+            classList:{add:function(){},remove:function(){},toggle:function(){}},
+            style:{setProperty:function(){},removeProperty:function(){}}};
+        }""",
+        "var probeElements = {}; " + json.dumps(re.findall(r'\bid="([^"]+)"', page)) + ".forEach(function(id){probeElements[id]=probeElement();});",
+        "var document={getElementById:function(id){return probeElements[id] || null;},querySelector:function(){return probeElement();},querySelectorAll:function(){return [];},addEventListener:function(){}};",
+    ])
+    return _run(setup + "\n" + inline + "\nvar C = window.catalogueProbe;\n" + script, payload)
+
+
+def test_large_task_catalogue_filters_and_sorts_before_selecting_a_page():
+    data = _catalogue_fixture()
+    target = data["site"]["tasks"][-1]
+    older_suite = target["suites"][0]
+    expected_members = sorted(t["id"] for t in data["site"]["tasks"] if older_suite in t["suites"])
+    out = _catalogue_run("tasks", """
+      var tasks = C.prepareTasks(INPUT.site, INPUT.cap).reverse();
+      var state = C.readTaskState('');
+      var last = C.withTaskFilters(state, {q:'Unique terminal fixture', suite:INPUT.older});
+      var match = C.selectTaskPage(tasks, last);
+      var base = C.withTaskFilters(state, {sort:'task', dir:'asc'});
+      var second = C.selectTaskPage(tasks, Object.assign({},base,{page:2}));
+      var finalPage = C.selectTaskPage(tasks, Object.assign({},base,{page:1000000}));
+      var members = C.filterTasks(tasks, C.withTaskFilters(state,{suite:INPUT.older}));
+      console.log(JSON.stringify({match:match, second:second, finalPage:finalPage,
+        members:members.map(function(t){return t.id;}).sort(), original:tasks.map(function(t){return t.id;})}));
+    """, dict(data, older=older_suite))
+    assert [t["id"] for t in out["match"]["items"]] == [target["id"]]
+    assert out["members"] == expected_members
+    assert [t["id"] for t in out["second"]["items"]] == [f"task-{i:05d}" for i in range(25, 50)]
+    assert (out["second"]["start"], out["second"]["end"], out["second"]["total"]) == (26, 50, 2401)
+    assert (out["finalPage"]["page"], len(out["finalPage"]["items"])) == (97, 1)
+    assert out["original"] == [t["id"] for t in reversed(data["site"]["tasks"])]
+
+
+def test_task_filters_compose_and_keep_capability_provenance_distinct():
+    data = _catalogue_fixture()
+    expected = sorted(t["id"] for i, t in enumerate(data["site"]["tasks"])
+                      if i % 3 == 0 and t["language"] == "python" and t["declared_difficulty"] == "hard")
+    out = _catalogue_run("tasks", """
+      var tasks = C.prepareTasks(INPUT.site,INPUT.cap);
+      var state=C.withTaskFilters(C.readTaskState(''),{language:'python',declared:'hard',capability:'C1'});
+      var matches=C.filterTasks(tasks,state);
+      var empty=C.selectTaskPage(tasks,C.withTaskFilters(state,{q:'missing synthetic phrase'}));
+      var unread=C.prepareTasks(INPUT.site,null);
+      var unindexed=C.prepareTasks(INPUT.site,INPUT.unindexed_cap);
+      console.log(JSON.stringify({ids:matches.map(function(t){return t.id;}).sort(),empty:empty,
+        states:tasks.slice(0,3).map(function(t){return {state:t._capState,codes:t._caps};}),
+        unread:unread[0]._capState,
+        unindexed:unindexed.every(function(t){return t._capState==='unverified' && t._caps.length===0;}),
+        unindexedRow:C.taskRow(unindexed[0],state,false,{})}));
+    """, data)
+    assert expected and out["ids"] == expected
+    assert (out["empty"]["total"], out["empty"]["start"], out["empty"]["end"], out["empty"]["pages"]) == (0, 0, 0, 1)
+    assert out["states"][0] == {"state": "rederived", "codes": ["C1", "C3"]}
+    assert out["states"][1] == {"state": "declared", "codes": ["C2"]}
+    assert out["states"][2] == {"state": "unverified", "codes": []}
+    assert out["unread"] == "unread"
+    # A catalogue can be newer than its capability index. Missing records do
+    # not establish that the task was audited and matched no taxonomy axis.
+    assert out["unindexed"]
+    assert re.search(r"\b(?:unverified|not (?:checked|reviewed|verified)|awaiting review)\b",
+                     verify_site.reader_text(out["unindexedRow"]), re.I)
+    assert "No axis" not in out["unindexedRow"]
+    assert "No taxonomy axis matched" not in out["unindexedRow"]
+
+
+def test_task_view_state_round_trips_without_losing_external_url_context():
+    out = _catalogue_run("tasks", """
+      var state=C.readTaskState('?q=repair%20%26%20test&suite=2020-01-02&status=archive&repo=example%2Fproject-03&language=python&declared=hard&difficulty=medium&capability=C1&sort=task&dir=asc&page=2&size=50');
+      var url=new URL(C.taskStateUrl('https://example.com/registry/?campaign=synthetic#rows',state));
+      var back=C.readTaskState(url.search);
+      var changed=C.withTaskFilters(state,{language:'go'});
+      var clean=new URL(C.taskStateUrl(url.href,C.readTaskState('')));
+      var invalid=C.readTaskState('?page=-12&size=17&sort=unknown&dir=sideways');
+      console.log(JSON.stringify({state:state,back:back,changed:changed,url:url.href,clean:clean.href,invalid:invalid}));
+    """, {})
+    assert out["back"] == out["state"]
+    assert out["state"] == {
+        "q": "repair & test", "suite": "2020-01-02", "status": "archive",
+        "repo": "example/project-03", "language": "python", "declared": "hard",
+        "difficulty": "medium", "capability": "C1", "sort": "task", "dir": "asc",
+        "scope": "", "page": 2, "size": 50,
+    }
+    assert out["state"]["page"] == 2 and out["state"]["size"] == 50
+    assert out["changed"]["page"] == 1 and out["changed"]["language"] == "go"
+    assert out["state"]["language"] == "python"
+    assert "campaign=synthetic" in out["url"] and out["url"].endswith("#rows")
+    assert "scope=" not in out["url"], "the default change filter is omitted from public links"
+    assert out["clean"] == "https://example.com/registry/?campaign=synthetic#rows"
+    assert out["invalid"]["page"] == 1 and out["invalid"]["size"] in (25, 50, 100)
+    assert out["invalid"]["sort"] == "suite" and out["invalid"]["dir"] in ("asc", "desc")
+
+
+def test_task_rows_keep_editorial_difficulty_and_optional_official_scores():
+    data = _catalogue_fixture()
+    out = _catalogue_run("tasks", """
+      var tasks=C.prepareTasks(INPUT.site,INPUT.cap), state=C.readTaskState('');
+      var spec={}; INPUT.cap.axes.forEach(function(a){spec[a.code]=a;});
+      var zero=tasks[0], unknown=tasks[2], hostile=tasks[tasks.length-1];
+      var editorial=tasks.filter(function(t){return t.declared_difficulty==='hard';})[0];
+      console.log(JSON.stringify({valid:INPUT.score_cases.map(C.isScored),
+        base:C.taskRow(editorial,state,false,spec),measured:C.taskRow(zero,state,true,spec),
+        unknown:C.taskRow(unknown,state,true,spec),hostile:C.taskRow(hostile,state,false,spec)}));
+    """, data)
+    assert out["valid"] == [False, True, True, False, False, False, False, False, False]
+    assert len(re.findall(r"<td\b", out["base"])) == 5
+    assert len(re.findall(r"<td\b", out["measured"])) == 6
+    assert "hard" in out["base"]
+    assert "0/10" in out["measured"]
+    assert "0/" not in out["unknown"] and "&mdash;" in out["unknown"]
+    assert "<task>" not in out["hostile"] and "&lt;task&gt;" in out["hostile"]
+
+
+def test_task_facet_counts_allow_changing_one_active_filter():
+    from collections import Counter
+
+    data = _catalogue_fixture()
+    tasks = data["site"]["tasks"]
+    c1 = set(data["cap"]["axes"][0]["task_ids"])
+    expected_languages = Counter(t["language"] for t in tasks
+                                 if t["title"].startswith("Synthetic") and t["language"]
+                                 and t["declared_difficulty"] == "hard" and t["id"] in c1)
+    expected_declared = Counter(t["declared_difficulty"] for t in tasks
+                               if t["title"].startswith("Synthetic") and t["declared_difficulty"]
+                               and t["language"] == "python" and t["id"] in c1)
+    out = _catalogue_run("tasks", """
+      var tasks=C.prepareTasks(INPUT.site,INPUT.cap);
+      var state=C.withTaskFilters(C.readTaskState(''),{q:'Synthetic',language:'python',declared:'hard',capability:'C1'});
+      var counts=C.facetCounts(tasks,state);
+      var impossible=C.facetCounts(tasks,C.withTaskFilters(state,{q:'missing synthetic phrase'}));
+      console.log(JSON.stringify({language:Object.fromEntries(counts.language),
+        declared:Object.fromEntries(counts.declared), emptyLanguage:Array.from(impossible.language)}));
+    """, data)
+    assert out["language"] == dict(expected_languages)
+    assert len(out["language"]) > 1, "other languages remain reachable with the remaining filters"
+    assert out["declared"] == dict(expected_declared)
+    assert len(out["declared"]) > 1, "other editorial difficulties remain reachable"
+    assert out["emptyLanguage"] == []
+
+
+def test_shared_page_slicing_is_bounded_and_does_not_reorder_inputs():
+    data = _catalogue_fixture()
+    out = _catalogue_run("suites", """
+      var ids=INPUT.site.tasks.map(function(t){return t.id;});
+      var original=ids.slice();
+      var oversized=T.pageSlice(ids,1,10000), negative=T.pageSlice(ids,-9,25);
+      var empty=T.pageSlice([],999,25), notANumber=T.pageSlice(ids,NaN,25);
+      console.log(JSON.stringify({oversized:oversized,negative:negative,empty:empty,notANumber:notANumber,unchanged:JSON.stringify(ids)===JSON.stringify(original)}));
+    """, data)
+    assert len(out["oversized"]["items"]) <= 100
+    assert len(out["negative"]["items"]) == 25 and out["negative"]["page"] == 1
+    assert out["notANumber"]["page"] == 1
+    assert (out["empty"]["start"], out["empty"]["end"], out["empty"]["page"], out["empty"]["pages"]) == (0, 0, 1, 1)
+    assert out["unchanged"]
+
+
+def test_suite_catalogue_infers_all_memberships_and_filters_before_paging():
+    data = _catalogue_fixture()
+    suites = data["site"]["suites"]
+    unsafe_language = '<img src=x onerror="alert(1)"> & synthetic'
+    next(suite for suite in suites if suite["id"] == "sample")["languages"] = [unsafe_language]
+    expected = sorted((s["id"] for s in suites if s["id"].startswith("2020-02") and s["status"] == "archive"), reverse=True)
+    out = _catalogue_run("suites", """
+      var original=JSON.stringify(INPUT.site);
+      var suites=C.catalogueSuites(INPUT.site);
+      var matches=C.filterSuites(suites,{q:'synthetic',status:'archive',period:'2020-02'});
+      var page=T.pageSlice(matches,2,20);
+      var samples=C.filterSuites(suites,{q:'',status:'archive',period:'undated'});
+      console.log(JSON.stringify({ids:matches.map(function(s){return s.id;}),page:page,
+        samples:samples.map(function(s){return s.id;}),html:C.suiteRows(samples,INPUT.site.tasks),
+        languages:suites.filter(function(s){return s.id==='2020-01-01'||s.id==='2020-01-02';}),
+        unchanged:JSON.stringify(INPUT.site)===original}));
+    """, data)
+    assert out["ids"] == expected and len(expected) == 29
+    assert [s["id"] for s in out["page"]["items"]] == expected[20:]
+    assert out["page"]["total"] == 29 and out["page"]["start"] == 21
+    assert out["samples"] == ["sample-zero", "sample"]
+    assert out["unchanged"]
+    languages = {s["id"]: s["languages"] for s in out["languages"]}
+    assert languages["2020-01-01"] == ["published-language"]
+    expected_languages = {t["language"] for t in data["site"]["tasks"] if "2020-01-02" in t["suites"] and t["language"]}
+    assert set(languages["2020-01-02"]) == expected_languages
+    assert "&mdash;" in out["html"] and ">0</td>" in out["html"]
+    assert unsafe_language not in out["html"]
+    assert '&lt;img src=x onerror=&quot;alert(1)&quot;&gt; &amp; synthetic' in out["html"]
+    assert not any(tag == "img" for tag, _ in verify_site._ReaderMarkup(out["html"]).nodes)

@@ -1,99 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Package files — terminal-daily-bench docs</title>
-<meta name="description" content="One section per file in a published terminal-daily-bench task package: instruction.md, task.toml, tests/, environment/Dockerfile, solution/, PROVENANCE.json, record.json.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Read a task package · Terminal-Daily</title>
+<meta name="description" content="Find the instructions, environment settings, and evaluation tests.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../../docs/task-format/files/">
 </head>
 <body>
-
-<!-- Split out of /guide/task-format/. #task-toml and #tests arrived here
-     unchanged; #instruction is a new section for a claim that had no heading
-     of its own. #environment, #solution, #provenance and #record went on to
-     ./build/ -- seven file schemas on one page measured 3739px against the
-     shell's 2500px bound, and a page that long is two pages. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc prose-no-margin wrap-anywhere">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Read a task package</h1>
+<p class="tdb-doc-sub">Find the instructions, environment settings, and evaluation tests.</p>
+</header>
 
-    <h1>Package files</h1>
-    <p class="tdb-doc-sub">One section per file in a published task directory.</p>
+<h2 id="instruction"><a href="#instruction">Task description</a></h2>
+<p>Read <code>instruction.md</code> first. It explains the requested repair. Identifying details about the source project and its change history are removed from the model-facing description.</p>
 
-    <h2 id="instruction"><a href="#instruction">Inside <span class="tdb-id">instruction.md</span></a></h2>
-    <p><code>instruction.md</code> is de-identified: upstream provenance &mdash; origin remote,
-      project name, commit ids &mdash; is stripped, so the task is solved from the tree and the
-      description alone.</p>
+<h2 id="task-toml"><a href="#task-toml">Environment settings</a></h2>
+<p><code>task.toml</code> describes the task environment and resource limits. Published packages point to a build recipe rather than a machine-specific image. Follow <a href="../../run/#image">Prepare the environment</a> before attempting a local evaluation.</p><p>Keep the task’s network and resource settings when comparing results. Changing them changes the evaluation conditions.</p>
 
-    <h2 id="task-toml"><a href="#task-toml">Inside <span class="tdb-id">task.toml</span></a></h2>
-    <p>Harbor&rsquo;s descriptor. The framework reads only <code>[environment]</code>
-      (<code>eval.py::load_task</code>).</p>
-    <figure class="tdb-code">
-      <figcaption><code>task.toml</code></figcaption>
-      <pre><code>schema_version = "1.1"
-
-[task]
-name = "terminal-daily/td-fc90ea8b76d5f6b6"
-description = "Validate format string keys in logger.add() for early error feedback"
-keywords = ["C5", "C4"]                 <span class="text-muted-foreground"># capability labels</span>
-
-[metadata]
-source_repo = "Delgan/loguru"
-pr_number = 1451
-base_sha  = "2abeb0fa6d7be4b0455c6e0b580b1e9dab19005e"
-merge_sha = "b782e56fcf07fecf9545ff6ee2350baacb0968ce"
-oracle_patch_sha256 = "1e843ef7617ac857dfb2139ac3e2f2a6a328b4fc5e1848f8fd021b9f3b0fdda8"
-difficulty = "medium"
-network_profile = "build-online/run-offline"
-
-[environment]
-docker_image  = "environment/Dockerfile"   <span class="text-muted-foreground"># portable ref: build from the task Dockerfile</span>
-allow_internet = false                      <span class="text-muted-foreground"># run-offline -&gt; egress cut at scoring time</span>
-cpus = 1
-memory_mb = 4096
-storage_mb = 16384</code></pre>
-    </figure>
-    <dl class="tdb-defs">
-      <dt class="tdb-id">docker_image</dt>
-      <dd>Rewritten to the portable <code>"environment/Dockerfile"</code> on publish
-        (<code>publish_tasks.py::_sanitize_task_toml</code>). The host-specific absolute
-        <code>.sif</code> path is never shipped &mdash; you build the image from the task&rsquo;s
-        own <code>environment/Dockerfile</code>.</dd>
-      <dt class="tdb-id">allow_internet</dt>
-      <dd>Drives the runtime network cut. When <code>false</code>, the singularity backend gets
-        the no-network <code>--ek</code> switch injected automatically
-        (<code>harbor_score.py::maybe_inject_offline_eks</code>), physically cutting egress
-        during scoring.</dd>
-    </dl>
-
-    <h2 id="tests"><a href="#tests">Inside <span class="tdb-id">tests/</span></a></h2>
-    <p>Re-laid from the trusted package after the patch is applied.</p>
-    <dl class="tdb-defs">
-      <dt class="tdb-id">test.sh</dt>
-      <dd>The runner; it writes the reward.</dd>
-      <dt class="tdb-id">test_outputs.py</dt>
-      <dd>The protected assertions. Carries the <code>FAIL_TO_PASS</code> /
-        <code>PASS_TO_PASS</code> selectors, lands the PR&rsquo;s <code>test_patch.diff</code>
-        onto the tree (<code>_ensure_tests_applied</code>), then runs the fail-to-pass tests.
-        <strong>Archive only</strong> &mdash; the body is withheld for live tasks.</dd>
-      <dt class="tdb-id">test_patch.diff</dt>
-      <dd>The PR&rsquo;s test diff, applied at verify time so the test signal is never baked into
-        the environment image.</dd>
-    </dl>
-    <figure class="tdb-code">
-      <figcaption><code>tests/test.sh</code></figcaption>
-      <pre><code>install    pytest + the project&#39;s test extras
-harden     <span class="text-muted-foreground">remove stray conftest.py / sitecustomize.py &middot; unset PYTHONPATH &middot; pin PATH</span>
-run        pytest -q -rA /tests/test_outputs.py
-reward     1 on all-pass, else 0  -&gt;  /logs/verifier/reward.txt</code></pre>
-    </figure>
-
-  </article>
+<h2 id="tests"><a href="#tests">Evaluation tests</a></h2>
+<p>Archived packages include the test runner and protected assertions. These tests are restored by the evaluator after the proposed patch is applied. Live packages withhold the test bodies until archival.</p><p>For the complete file specification, see the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md">package reference</a>.</p>
+</article>
 </main>
 
-<script src="../../../assets/site.js?v=b1d8696d89" data-root="../../.." data-page="docs"></script>
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

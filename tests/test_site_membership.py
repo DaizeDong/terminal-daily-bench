@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -10,10 +12,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "web"))
+sys.path.insert(0, str(ROOT))
 
 import gen_pages  # noqa: E402
 import gen_site_data  # noqa: E402
 import verify_site  # noqa: E402
+from tools.make_fixtures import catalogue_fixture, site_routes_fixture  # noqa: E402
 
 
 def _write_json(path: Path, payload) -> None:
@@ -452,11 +456,9 @@ def test_generated_detail_pages_are_idempotent_and_include_all_suites(
     task_page = (docs / "registry" / "td-shared" / "index.html").read_text(
         encoding="utf-8"
     )
-    # "Suite <id>", capitalised: the label is English and the id is not, and
-    # gen_pages emits both halves. The id stays lowercase and is what this
-    # assertion is really about -- a task page must name every suite it is in.
-    assert "Suite 2026-08-05" in task_page
-    assert "Suite 2026-08-06" in task_page
+    # Readable labels can change; every release membership must remain linked.
+    assert 'href="../../benchmarks/2026-08-05/"' in task_page
+    assert 'href="../../benchmarks/2026-08-06/"' in task_page
     assert len(data["tasks"]) == 3
 
 
@@ -490,3 +492,65 @@ def test_public_indexes_use_shared_many_to_many_helper():
         source = page.read_text(encoding="utf-8", errors="replace")
         assert ".suite ===" not in source, (
             f"{page.relative_to(ROOT)} hand-rolls suite membership")
+
+
+def _release_navigation():
+    suites = catalogue_fixture(task_count=0, suite_count=3)["site"]["suites"]
+    fixture = {"suites": suites, "base": site_routes_fixture()["base"]}
+    script = r"""
+      const fs=require('fs'), vm=require('vm'), fixture=JSON.parse(process.argv[1]);
+      const document={baseURI:fixture.base+'releases/'+fixture.suites[1].id+'/',
+        currentScript:{getAttribute:k=>k==='data-root'?'../..':'benchmarks'},
+        readyState:'loading',addEventListener:()=>{},querySelectorAll:()=>[],
+        documentElement:{classList:{add:()=>{},remove:()=>{}},style:{},setAttribute:()=>{}}};
+      let destination=null;
+      const context={URL,document,window:{location:{assign:value=>{destination=value;}}}};
+      vm.createContext(context);vm.runInContext(fs.readFileSync(process.argv[2],'utf8'),context);
+      function render(active, suites, target) {
+        destination=null;
+        const select={value:target}, el={innerHTML:'',querySelector:()=>select};
+        context.window.TDB.dayRail(el,suites,active);
+        if (target && select.onchange) select.onchange();
+        return {html:el.innerHTML,destination};
+      }
+      const suites=fixture.suites.slice().reverse().concat(fixture.suites[1]);
+      process.stdout.write(JSON.stringify({
+        first:render(fixture.suites[0].id,suites),
+        middle:render(fixture.suites[1].id,suites,fixture.suites[2].id),
+        last:render(fixture.suites[2].id,suites),
+        sample:render('sample',suites), preview:render('sample-live',suites),
+        empty:render('sample',[])
+      }));
+    """
+    result = subprocess.run(
+        ["node", "-e", script, json.dumps(fixture), str(ROOT / "docs/assets/site.js")],
+        capture_output=True, text=True, encoding="utf-8", check=True,
+    )
+    return json.loads(result.stdout), fixture
+
+
+def test_release_navigation_orders_dates_and_preserves_canonical_project_routes():
+    result, fixture = _release_navigation()
+    dates = [suite["id"] for suite in fixture["suites"][:3]]
+    middle = result["middle"]["html"]
+    assert re.findall(r'<option value="([^"]+)"', middle) == dates
+    assert f'<option value="{dates[1]}" selected' in middle
+    assert 'aria-label="Release navigation"' in middle
+    assert 'aria-label="Release date"' in middle
+    assert middle.count('class="tdb-release-step"') == 2
+    assert f'href="{fixture["base"]}releases/{dates[0]}/"' in middle
+    assert f'href="{fixture["base"]}releases/{dates[2]}/"' in middle
+    assert result["middle"]["destination"] == f'{fixture["base"]}releases/{dates[2]}/'
+    assert '<span class="tdb-release-step" role="link" aria-label="Previous release" aria-disabled="true"' in result["first"]["html"]
+    assert '<span class="tdb-release-step" role="link" aria-label="Next release" aria-disabled="true"' in result["last"]["html"]
+
+
+def test_sample_release_navigation_has_a_return_link_without_dated_selection():
+    result, fixture = _release_navigation()
+    for key in ("sample", "preview", "empty"):
+        html = result[key]["html"]
+        assert f'href="{fixture["base"]}releases/"' in html
+        assert '>All releases</a>' in html
+        assert '<select' not in html
+        assert 'aria-label="Previous release"' not in html
+        assert 'aria-label="Next release"' not in html

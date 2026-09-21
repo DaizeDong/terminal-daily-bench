@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Analyze a results file · Terminal-Daily</title>
+<meta name="description" content="Generate a quality summary from saved evaluation records.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Analyze a results file</h1>
+<p class="tdb-doc-sub">Generate a quality summary from saved evaluation records.</p>
+</header>
+
+<h2 id="surfaces"><a href="#surfaces">Run the analysis</a></h2>
+<p>Provide a JSON Lines file or JSON array containing the run records. The command needs at least one task and two models and excludes reference-solution runs. It does not require a model connection or the task evaluation environment.</p><figure class="tdb-code"><figcaption>Analyze saved results</figcaption><pre><code>tdb quality results.jsonl</code></pre></figure>
+
+<h2 id="output"><a href="#output">Read the output</a></h2>
+<p>The command reports the task and model counts, quality measures, uncertainty intervals, and a readiness assessment. It also prints the complete summary as JSON for further analysis.</p><p>Start with <a href="../axes/">What the measures mean</a>, then review <a href="../readiness/">Assess a task set</a> to interpret the suggested next steps.</p>
+
+<h2 id="today"><a href="#today">Published measurements</a></h2>
+<p id="card-sub">Use the current report to inspect published task coverage and quality.</p><p id="quality-card"><a href="../../../quality/">View the quality report</a>. Its measurements are provisional and should be read within the scope of the reported evaluation.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

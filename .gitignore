@@ -3,3 +3,6 @@ __pycache__/
 .tdb_work/
 *.egg-info/
 .publish-state/
+
+# Process lock used by daily task publication.
+.publication.lock

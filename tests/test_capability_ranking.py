@@ -34,6 +34,8 @@ from pathlib import Path
 
 import pytest
 
+from tools.make_fixtures import repeat_score_fixture
+
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 LEADERBOARD = (DOCS / "leaderboard" / "index.html").read_text(encoding="utf-8")
@@ -49,7 +51,7 @@ NODE = shutil.which("node")
 PAGE_FUNCS = (
     "hasOwn", "pointEstimate", "axisTally", "resolution", "overallPoint",
     "capabilityAxes", "capabilityRows", "provenanceWord", "capCell",
-    "axisNoteHtml",
+    "axisNoteHtml", "capabilityColors", "capColorStyle", "capHeatCell",
     "capColumns", "rankCell", "capabilitySummary", "buildCapability",
 )
 
@@ -84,7 +86,13 @@ def _runtime() -> str:
         _extract(SHELL, "wilson"),
         _extract(SHELL, "pct"),
         "var T = { wilson: wilson, pct: pct };",
+        _extract(DATA_RUNTIME, "modelLabel"),
+        _extract(DATA_RUNTIME, "agentLabel"),
+        "T.modelLabel = modelLabel; T.agentLabel = agentLabel;",
     ]
+    for name in ("repeatStats", "resultStats", "scoreEstimate", "scoreCell"):
+        parts.append(_extract(DATA_RUNTIME, name))
+        parts.append(f"T.{name} = {name};")
     # OVERALL_AXIS is a declaration, not a function, and capCell's overall call
     # site reads it -- so it is lifted by name too rather than restated here.
     m = re.search(r"var OVERALL_AXIS = \{[^}]*\};", LEADERBOARD)
@@ -104,7 +112,7 @@ def _run(script: str, payload: dict) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "probe.js"
         path.write_text(src, encoding="utf-8")
-        proc = subprocess.run([NODE, str(path)], capture_output=True, text=True)
+        proc = subprocess.run([NODE, str(path)], capture_output=True, text=True, encoding="utf-8")
     assert proc.returncode == 0, (
         "the shipped capability renderers threw under Node:\n" + proc.stderr)
     return json.loads(proc.stdout)
@@ -178,7 +186,8 @@ def test_a_null_cell_is_not_a_zero_solve():
     assert out["nulledCell"] == '<span class="text-muted-foreground">&mdash;</span>'
     assert "%" not in out["nulledCell"] and "0/" not in out["nulledCell"]
     # while the genuine zero keeps its measurement.
-    assert "0/2" in out["zeroedCell"]
+    assert "2 tasks" in out["zeroedCell"] and ">0%<" in out["zeroedCell"]
+    assert "tdb-acc-sd" not in out["zeroedCell"]
 
     # The overall column drops the two nulls from its denominator too, rather
     # than scoring the model out of 7.
@@ -250,7 +259,7 @@ def test_an_axis_with_no_task_is_listed_named_and_at_zero():
 
 
 def test_no_rate_is_ever_rendered_without_its_denominator():
-    """Every percentage on the grid is accompanied by its solved/n.
+    """Every percentage on the grid is accompanied by its measured task count.
 
     Checked over the whole published grid -- 12 models by 14 axes plus the
     overall column -- rather than one sampled cell, and the counts are matched
@@ -275,7 +284,7 @@ def test_no_rate_is_ever_rendered_without_its_denominator():
     rated = 0
     for cell in out:
         html, tally = cell["html"], cell["t"]
-        counts = "{}/{}".format(tally["solved"], tally["n"])
+        counts = "{} tasks".format(tally["n"])
         if "%" in html:
             rated += 1
             assert 'class="tdb-cap-n"' in html, (
@@ -294,11 +303,11 @@ def test_no_rate_is_ever_rendered_without_its_denominator():
     assert rated, "no cell on the published grid printed a rate at all"
 
 
-def test_an_axis_below_the_published_floor_is_never_ranked():
+def test_small_samples_show_observed_accuracy_without_becoming_rankable():
     """The refusal is the mechanism, and the floor comes from the file.
 
-    Two halves. An axis under `publish_gate.min_tasks` prints counts and no
-    percentage, and its column is static so the table cannot be ordered by it.
+    An axis under `publish_gate.min_tasks` shows its observed percentage and
+    denominator with a small-sample label, but cannot be used to rank models.
     And a catalogue that publishes NO floor leaves every axis unranked, rather
     than falling back to a floor invented on the page.
     """
@@ -333,10 +342,10 @@ def test_an_axis_below_the_published_floor_is_never_ranked():
         "nothing about the refusal it is here to check")
     for axis in out["small"]:
         assert axis["n"] < out["floor"]
-        assert "%" not in axis["cell"], (
+        assert "%" in axis["cell"] and "small sample" in axis["cell"], (
             f"{axis['code']} carries {axis['n']} tasks and still prints a "
-            f"rate: {axis['cell']}")
-        assert "/" in axis["cell"], (
+            f"rate without its small-sample label: {axis['cell']}")
+        assert f'{axis["n"]} tasks' in axis["cell"], (
             f"{axis['code']} prints neither a rate nor its counts")
         assert "unranked" in axis["note"], (
             f"{axis['code']} is unranked and its column head does not say so: "
@@ -354,37 +363,29 @@ def test_an_axis_below_the_published_floor_is_never_ranked():
         f"{out['noGateRanked']} axes -- the fallback is the bug")
 
 
-def test_the_view_states_its_scope_and_its_two_missing_measurements():
-    """The three sentences that make the numbers readable are on the page.
-
-    Static on purpose: these are claims, not arithmetic. Each one exists
-    because a reader who does not have it will draw a wrong conclusion from a
-    correct number -- that the axis columns split the ranking, that the 22
-    unlabelled tasks have no capability, or that four conditional angles the
-    code can compute were measured and withheld.
+def test_the_view_explains_scope_without_internal_field_names():
+    """The rendered explanation uses its own counts and distinguishes missing evidence."""
+    script = _extract(LEADERBOARD, "splitScaffold") + "\n"
+    script += _extract(LEADERBOARD, "capFootHtml") + "\n"
+    script += """
+      var CAP = buildCapability(INPUT.board, INPUT.cap, null);
+      console.log(JSON.stringify({html: capFootHtml(INPUT.board)}));
     """
-    foot = LEADERBOARD[LEADERBOARD.index("function capFootHtml"):]
-    foot = foot[:foot.index("\n  function show(")] if "\n  function show(" in foot else foot
-
-    assert "reproduce the overall ranking rather than" in foot, (
-        "the page no longer says the carrier axes restate the overall ranking")
-    assert "oracle patch" in foot and "tagger" in foot, (
-        "the page no longer says WHY most tasks carry no capability label")
-    assert "capability_profile()" in foot, (
-        "the page no longer names the four-angle decomposition it cannot run")
-    assert "graded gate states" in foot and "1, 0 or null" in foot, (
-        "the page no longer says WHY the four conditional angles cannot be "
-        "computed: they need graded states and the matrix ships three values")
-    # The scope warning is the capability view's own, not the main table's.
-    assert "different measurements" in foot and "cannot be read against" in foot
-
-    # None of the counts in those sentences is typed: each is interpolated
-    # from the join, so regenerating either input file updates the sentence
-    # instead of falsifying it.
-    for typed in ("28 of 50", "27 and 28", "seven axes", "12 models under"):
-        assert typed not in foot, (
-            f"{typed!r} is written into the page as a literal; it must be "
-            "computed, or it outlives the day it describes")
+    out = _run(script, {"board": SYNTH_BOARD, "cap": SYNTH_CAP})
+    text = out["html"]
+    assert "2 models and 7 tasks" in text
+    assert "at least 5" in text.lower()
+    assert "settings may differ from the overall view" in text
+    assert "Unlabeled tasks do not imply missing skills" in text
+    assert "not been independently checked" in text
+    assert "Missing results are left out" in text
+    assert "more than half its runs succeed" in text
+    assert "Run range" not in text
+    assert "standard deviation" not in text and "±" not in text
+    assert "95%" not in text and "Wilson" not in text
+    assert 'href="../guide/quality-methods/"' in text
+    for internal in ("capability_profile()", "graded gate states", "score_accepted"):
+        assert internal not in text
 
 
 def test_the_capability_view_reuses_the_leaderboard_table():
@@ -406,3 +407,235 @@ def test_the_capability_view_reuses_the_leaderboard_table():
     # And the capability foot replaces the overall foot rather than stacking
     # under it, so the page never shows two scope statements at once.
     assert "byId(\"foot\").innerHTML = capFootHtml(day);" in LEADERBOARD
+
+
+def test_capability_heat_colors_keep_rates_counts_and_small_samples_distinct():
+    out = _run("""
+      var cap = buildCapability(INPUT.board, INPUT.cap, null);
+      var colors = capabilityColors(cap.rows, cap.axes);
+      var row = cap.rows.find(function(r) { return r.model === 'never-ran'; });
+      var axes = Object.fromEntries(cap.axes.map(function(a) { return [a.code, a]; }));
+      console.log(JSON.stringify({colors:colors,
+        missing:capHeatCell(row.axis.AX, axes.AX, colors, 'rate'),
+        zero:capHeatCell(row.axis.DX, axes.DX, colors, 'rate'),
+        peers:capHeatCell(row.axis.DX, axes.DX, colors, 'peers'),
+        small:capHeatCell(row.axis.BX, axes.BX, colors, 'peers'),
+        high:capHeatCell(cap.rows[0].axis.DX, axes.DX, colors, 'peers')}));
+    """, {"board": SYNTH_BOARD, "cap": SYNTH_CAP})
+    # 0/5 and 7/7 have a mean model accuracy of 50%, not pooled 7/12.
+    assert out["colors"]["columns"]["DX"] == {"mean": 0.5, "models": 2}
+    assert out["colors"]["columns"]["AX"] == {"mean": 1, "models": 1}
+    assert out["colors"]["columns"]["CX"] == {"mean": None, "models": 0}
+    assert out["colors"]["span"] == 0.5
+    assert 'data-state="missing"' in out["missing"]
+    assert 'data-rate=' not in out["missing"] and "&mdash;" in out["missing"]
+    for mode in ("zero", "peers"):
+        assert 'data-rate="0"' in out[mode] and 'data-n="5"' in out[mode]
+        assert "5 evaluated tasks" in out[mode]
+        assert '<strong>0%</strong>' in out[mode]
+        assert "Run range" not in out[mode] and "standard deviation" not in out[mode]
+        assert "95%" not in out[mode] and "tdb-cap-range-value" not in out[mode]
+        assert "NaN" not in out[mode]
+    assert "-50.0 percentage points below" in out["peers"]
+    assert "+50.0 percentage points above" in out["high"]
+    assert "Color scale: -50 to +50 percentage points" in out["peers"]
+    assert "statistical significance" in out["peers"]
+    assert 'data-state="small"' in out["small"] and 'data-ranked="false"' in out["small"]
+    assert "2 evaluated tasks" in out["small"] and '<strong>0%</strong>' in out["small"]
+    assert "at least 5 evaluated tasks" in out["small"]
+    assert "style=" not in out["small"]
+
+
+def test_legacy_scores_show_observed_rate_without_invented_variation():
+    """A score without repeat records has no measured SD, including endpoints."""
+    out = _run("""
+      var cap = buildCapability(INPUT.board, INPUT.cap, null);
+      var zero = cap.rows.find(function(r) { return r.model === 'never-ran'; });
+      var full = cap.rows.find(function(r) { return r.model === 'solved-all'; });
+      console.log(JSON.stringify({
+        zero:T.scoreCell(zero.overall.solved, zero.overall.n),
+        full:T.scoreCell(full.overall.solved, full.overall.n),
+        small:T.scoreCell(zero.axis.BX.solved, zero.axis.BX.n),
+        missing:T.scoreCell(zero.axis.AX.solved, zero.axis.AX.n)
+      }));
+    """, {"board": SYNTH_BOARD, "cap": SYNTH_CAP})
+    for key, expected in {
+        "zero": "0%",
+        "full": "100%",
+        "small": "0%",
+    }.items():
+        visible = re.search(r'<strong class="tabular-nums">([^<]+)</strong>', out[key])
+        assert visible and visible.group(1) == expected, out[key]
+        assert 'class="tdb-acc-track"' in out[key]
+        assert "run variation unavailable" in out[key]
+        assert "95%" not in out[key] and "tdb-acc-sd" not in out[key]
+        assert 'class="tdb-acc-range"' not in out[key]
+    assert "&mdash;" in out["missing"]
+    assert "tdb-acc-ci" not in out["missing"] and "%" not in out["missing"]
+
+
+def test_capability_heat_relative_colors_require_more_than_one_measured_model():
+    out = _run("""
+      var board = JSON.parse(JSON.stringify(INPUT.board));
+      board.matrix.rows = board.matrix.rows.filter(function(r) { return r.model === 'solved-all'; });
+      var cap = buildCapability(board, INPUT.cap, null);
+      var axis = cap.axes.find(function(a) { return a.code === 'DX'; });
+      var colors = capabilityColors(cap.rows, cap.axes);
+      console.log(JSON.stringify({html:capHeatCell(cap.rows[0].axis.DX, axis, colors, 'peers')}));
+    """, {"board": SYNTH_BOARD, "cap": SYNTH_CAP})
+    assert 'data-state="uncompared"' in out["html"]
+    assert '<strong>100%</strong>' in out["html"] and "7 evaluated tasks" in out["html"]
+    assert "At least two measured models" in out["html"]
+    assert "style=" not in out["html"]
+
+
+def test_capability_keeps_majority_and_subset_sd_but_only_score_bars_show_uncertainty():
+    sample = repeat_score_fixture()
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      var axes = Object.fromEntries(cap.axes.map(a => [a.code, a]));
+      var colors = capabilityColors(cap.rows, cap.axes);
+      console.log(JSON.stringify(cap.rows.map(r => ({model:r.model, overall:r.overall,
+        subset:r.axis.C2, missing:r.axis.C9,
+        overallHtml:capCell(r.overall, OVERALL_AXIS),
+        subsetBar:capCell(r.axis.C2, axes.C2),
+        subsetHtml:capHeatCell(r.axis.C2, axes.C2, colors, 'rate'),
+        missingHtml:capHeatCell(r.axis.C9, axes.C9, colors, 'rate')}))));
+    """, sample)
+    a, b = out
+    assert [a["model"], b["model"]] == ["model-a", "model-b"]
+    assert a["overall"]["solved"] == 2
+    assert a["overall"]["repeat"]["min"] == pytest.approx(1 / 3)
+    assert a["overall"]["repeat"]["max"] == 1
+    assert a["overall"]["repeat"]["sd"] == pytest.approx(1 / 3)
+    assert a["subset"]["repeat"]["trialRates"] == [.5, 1., 0.]
+    assert a["subset"]["repeat"]["min"] == 0
+    assert a["subset"]["repeat"]["max"] == 1
+    assert a["subset"]["repeat"]["sd"] == .5
+    assert '<span class="tdb-acc-sd">± 50%</span>' in a["subsetBar"]
+    assert b["overall"]["solved"] == 0
+    assert b["overall"]["repeat"]["mean"] == pytest.approx(1 / 3)
+    assert b["overall"]["repeat"]["min"] == b["overall"]["repeat"]["max"] == 1 / 3
+    assert '<strong class="tabular-nums">0%</strong>' in b["overallHtml"]
+    assert '<span class="tdb-acc-sd">± 0%</span>' in b["overallHtml"]
+    assert 'data-rate="0"' in b["subsetHtml"]
+    assert '<strong>0%</strong>' in b["subsetHtml"]
+    for item in out:
+        assert item["overall"]["n"] == 3 and item["subset"]["n"] == 2
+        assert item["overall"]["repeat"]["runs"] == 3
+        assert "3 tasks" in item["overallHtml"] and "2 evaluated tasks" in item["subsetHtml"]
+        assert "tdb-acc-sd" in item["overallHtml"]
+        assert "95%" not in item["overallHtml"] + item["subsetHtml"]
+        assert item["overallHtml"].count("±") == 1
+        assert "tdb-acc-range-value" not in item["overallHtml"]
+        assert "±" not in item["subsetHtml"]
+        assert "standard deviation" not in item["subsetHtml"] and "Run range" not in item["subsetHtml"]
+        assert "tdb-cap-sd" not in item["subsetHtml"] and "tdb-cap-range-value" not in item["subsetHtml"]
+        assert 'data-state="missing"' in item["missingHtml"]
+        assert "tdb-cap-range-value" not in item["missingHtml"]
+
+
+def test_capability_and_overall_ranks_follow_majority_despite_reversed_repeat_means():
+    sample = repeat_score_fixture("rank")
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      var score = cap.cols.find(c => c.key === 'cap:C4');
+      console.log(JSON.stringify(cap.rows.map(r => ({model:r.model, rank:r.rank,
+        overall:overallPoint(r), capability:score.value(r), solved:r.overall.solved}))));
+    """, sample)
+    assert [row["model"] for row in out] == ["model-b", "model-a"]
+    assert [row["solved"] for row in out] == [2, 1]
+    assert [row["rank"] for row in out] == [1, 2]
+    assert [row["overall"] for row in out] == pytest.approx([2 / 3, 1 / 3])
+    assert [row["capability"] for row in out] == pytest.approx([2 / 3, 1 / 3])
+
+
+def test_majority_ties_remain_tied_despite_different_repeat_means_and_sd():
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      var score = cap.cols.find(c => c.key === 'cap:C4');
+      console.log(JSON.stringify(cap.rows.map(r => ({model:r.model, rank:r.rank,
+        overall:overallPoint(r), capability:score.value(r), repeat:r.overall.repeat}))));
+    """, repeat_score_fixture("tie"))
+    assert [row["rank"] for row in out] == [1, 1]
+    assert [row["overall"] for row in out] == pytest.approx([1 / 3, 1 / 3])
+    assert [row["capability"] for row in out] == pytest.approx([1 / 3, 1 / 3])
+    by_model = {row["model"]: row for row in out}
+    assert by_model["model-a"]["repeat"]["mean"] > by_model["model-b"]["repeat"]["mean"]
+    assert by_model["model-a"]["repeat"]["sd"] > by_model["model-b"]["repeat"]["sd"]
+
+
+def test_capability_heat_uses_majority_and_never_displays_repeat_uncertainty():
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      var colors = capabilityColors(cap.rows, cap.axes);
+      var axis = cap.axes.find(a => a.code === 'C4');
+      console.log(JSON.stringify({colors:colors.columns.C4,
+        rows:cap.rows.map(r => ({model:r.model,
+          rate:capHeatCell(r.axis.C4, axis, colors, 'rate'),
+          peers:capHeatCell(r.axis.C4, axis, colors, 'peers')}))}));
+    """, repeat_score_fixture("outside"))
+    assert out["colors"] == {"mean": .5, "models": 2}
+    for row, center in zip(out["rows"], (1, 0)):
+        for html in (row["rate"], row["peers"]):
+            assert f'data-rate="{center}"' in html
+            assert f'<strong>{center * 100}%</strong>' in html
+            assert "tdb-cap-range-value" not in html and "tdb-cap-sd" not in html
+            assert "Run range" not in html and "standard deviation" not in html
+            assert "±" not in html and "95%" not in html
+
+
+def test_small_repeated_capability_keeps_variation_but_cannot_be_sorted():
+    sample = repeat_score_fixture()
+    sample["cap"]["publish_gate"]["min_tasks"] = 3
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      var axis = cap.axes.find(a => a.code === 'C2');
+      var col = cap.cols.find(c => c.key === 'cap:C2');
+      console.log(JSON.stringify({static:col.static, value:col.value(cap.rows[0]),
+        cell:capCell(cap.rows[0].axis.C2, axis)}));
+    """, sample)
+    assert out["static"] is True and out["value"] is None
+    assert "small sample" in out["cell"] and "2 tasks" in out["cell"]
+    assert '<span class="tdb-acc-sd">± 50%</span>' in out["cell"]
+    assert '<strong class="tabular-nums">50%</strong>' in out["cell"]
+
+
+def test_capability_trial_count_mismatch_never_invents_sd():
+    sample = repeat_score_fixture()
+    sample["day"]["aggregation"]["trials_per_cell"] = 4
+    out = _run("""
+      var cap = buildCapability(INPUT.day, INPUT.cap, null);
+      console.log(JSON.stringify(cap.rows.map(r => ({overall:r.overall,
+        html:capCell(r.overall, OVERALL_AXIS)}))));
+    """, sample)
+    for row in out:
+        assert "repeat" not in row["overall"]
+        assert "tdb-acc-sd" not in row["html"] and "tdb-acc-range" not in row["html"]
+
+
+def test_capability_url_restores_axis_color_sort_and_clears_absent_state():
+    functions = "\n".join(_extract(LEADERBOARD, name) for name in ("capMode", "colByKey", "readUrl", "writeUrl"))
+    out = _run(functions + """
+      var MODE_DEFAULT='overall', MODE='overall', CAP=true, COLS=[{key:'rank'}];
+      var SORT_KEY_DEFAULT='rank', SORT_DIR_DEFAULT='asc', sortKey='rank', sortDir='asc';
+      var capAxis='all', capColor='rate', GROUPS=['agent','effort'], facet={};
+      var search={value:''}; function byId(id){return id==='q'?search:null;}
+      var window={URL:URL,location:{href:'https://example.com/leaderboard/?day=2020-01-01&view=capability&cap=C5&capColor=peers&sort=cap:C5&dir=desc&q=Model#results'},
+        history:{state:null,replaceState:function(state,title,url){window.location.href=String(url);}}};
+      readUrl(); writeUrl(search.value);
+      var restored={mode:MODE,axis:capAxis,color:capColor,sort:sortKey,dir:sortDir,q:search.value,url:window.location.href};
+      window.location.href='https://example.com/leaderboard/?day=2020-01-02&view=capability';
+      readUrl();
+      var cleared={mode:MODE,axis:capAxis,color:capColor,sort:sortKey,dir:sortDir,q:search.value};
+      window.location.href='https://example.com/leaderboard/?day=2020-01-02';
+      readUrl();
+      console.log(JSON.stringify({restored:restored,cleared:cleared,overall:MODE}));
+    """, {})
+    assert out["restored"] | {"url": ""} == {
+        "mode": "capability", "axis": "C5", "color": "peers", "sort": "cap:C5", "dir": "desc", "q": "Model", "url": ""}
+    assert "day=2020-01-01" in out["restored"]["url"]
+    assert "color=peers" in out["restored"]["url"] and out["restored"]["url"].endswith("#results")
+    assert "capColor=" not in out["restored"]["url"]
+    assert out["cleared"] == {"mode": "capability", "axis": "all", "color": "rate", "sort": "rank", "dir": "asc", "q": ""}
+    assert out["overall"] == "overall"

@@ -25,7 +25,7 @@ the exact green-while-broken state the audit found the first time.
 
 So every character is resolved to the family its element DECLARES first, and
 the two outcomes are reported separately: covered by that family, versus
-reaching the page only through the named fallback. That fallback list is seven
+reaching the page only through the named fallback. That fallback list is eight
 characters long, every one of them enumerated below, and adding to it is a
 decision rather than a formality.
 """
@@ -78,13 +78,23 @@ _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
 # second typeface for that character on every page that renders it.
 KNOWN_FALLBACK = set("Σρσ₀↵√∞≈")
 
+# Existing upstream task titles retain these emoji. Neither vendored family
+# supplies them; both CSS stacks must name a colour emoji fallback instead.
+# Keep this separate from symbols drawn by the vendored mono.
+EMOJI_FALLBACK = set("⚡✨🐛😊🤖")
+
+# Text/emoji presentation selectors modify the preceding glyph. They do not
+# draw standalone glyphs and must not be treated as missing font characters.
+PRESENTATION_SELECTORS = {"\ufe0e", "\ufe0f"}
+
 # Characters that render in SANS CONTEXT but are not in Geist, so they are
 # drawn by "Google Sans Code" -- the second name in --td-font-sans, and the
-# reason that name is there rather than a system face. Seven characters, each
+# reason that name is there rather than a system face. Eight characters, each
 # one argued:
 #
 #   U+2192 →  the "full leaderboard ->" arrow, 73 files. Rewriting it across
 #             every page to suit a font choice is the tail wagging the dog.
+#   U+2190 ←  the catalogue's previous-page control uses the same fallback.
 #   U+2264 ≤  the two relations in the quality-report and quality-methods
 #   U+2265 ≥  prose. Prose, so sans context, so listed here.
 #   U+2596 ▖  the day-window block in the masthead, 76 files.
@@ -98,11 +108,11 @@ KNOWN_FALLBACK = set("Σρσ₀↵√∞≈")
 # accumulated the first time. Every entry must also be covered by the mono, or
 # it is an OS pick wearing a fallback's clothes; test_sans_fallback_is_a_closed
 # _deliberate_list checks exactly that.
-SANS_FALLBACK = set("→≤≥▖▲▼⌘")
+SANS_FALLBACK = set("←→≤≥▖▲▼⌘")
 
 
 def _cjk(ch: str) -> bool:
-    """CJK ideographs AND the punctuation that travels with them.
+    """CJK ideographs, Japanese kana, and the punctuation that travels with them.
 
     A first pass listed the ideographs only, and the test immediately caught
     U+FF0C and U+FF1B -- the fullwidth comma and semicolon in the same title.
@@ -113,6 +123,8 @@ def _cjk(ch: str) -> bool:
     """
     cp = ord(ch)
     return (0x3000 <= cp <= 0x303F      # CJK symbols and punctuation
+            or 0x3040 <= cp <= 0x30FF  # Hiragana and Katakana in upstream titles
+            or 0x31F0 <= cp <= 0x31FF  # Katakana phonetic extensions
             or 0x3400 <= cp <= 0x9FFF   # ideographs (ext-A + unified)
             or 0xF900 <= cp <= 0xFAFF   # compatibility ideographs
             or 0xFF00 <= cp <= 0xFFEF)  # halfwidth and fullwidth forms
@@ -201,7 +213,7 @@ def _rendered_chars() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
 
     def note(bucket: dict[str, set[str]], text: str, where: str) -> None:
         for ch in text:
-            if ord(ch) > 31:
+            if ord(ch) > 31 and ch not in PRESENTATION_SELECTORS:
                 bucket.setdefault(ch, set()).add(where)
 
     for path in sorted(DOCS.rglob("*.html")):
@@ -240,7 +252,8 @@ def _rendered_chars() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
             if is_mono:
                 depth += 1
 
-    for name in ("site.js", "tdb-data.js"):
+    for name in ("site.js", "tdb-data.js", "tdb-explorer.js", "tdb-insights.js",
+                 "tdb-releases.js", "tdb-share.js", "tdb-runs.js"):
         path = DOCS / "assets" / name
         if not path.exists():
             continue
@@ -288,6 +301,7 @@ def test_sans_context_glyphs_are_drawn_by_the_sans():
         # live example -- listing it under SANS_FALLBACK would claim the mono
         # draws it, and the mono does not.
         and ch not in KNOWN_FALLBACK
+        and ch not in EMOJI_FALLBACK
         and not _cjk(ch)
     }
     if escaped:
@@ -307,7 +321,8 @@ def test_mono_context_glyphs_are_drawn_by_the_mono():
     cov = _mono()
     escaped = {
         ch: files for ch, files in mono_chars.items()
-        if ord(ch) not in cov and ch not in KNOWN_FALLBACK and not _cjk(ch)
+        if ord(ch) not in cov and ch not in KNOWN_FALLBACK
+        and ch not in EMOJI_FALLBACK and not _cjk(ch)
     }
     if escaped:
         raise AssertionError(
@@ -365,6 +380,12 @@ def test_known_fallback_is_really_unfixable():
         f"KNOWN_FALLBACK lists {stale!r}, but the vendored face covers them; "
         "drop the entry rather than documenting a fallback that never happens"
     )
+    vendored = _sans() | cov
+    emoji_stale = sorted(ch for ch in EMOJI_FALLBACK if ord(ch) in vendored)
+    assert not emoji_stale, (
+        f"EMOJI_FALLBACK lists {emoji_stale!r}, but a vendored face covers them; "
+        "the glyph must be attributed to the family that actually draws it"
+    )
 
 
 def test_exactly_two_vendored_families():
@@ -402,6 +423,14 @@ def test_both_fallback_tails_are_named_not_left_to_the_os():
         f"{sorted(SANS_FALLBACK)}, and anything else there is an OS pick. Got: {sans}"
     )
     assert "sans-serif" in sans, "the sans stack must end in a generic family"
+
+    for label, family_stack in (("sans", sans), ("mono", mono)):
+        assert any(face in family_stack for face in (
+            "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"
+        )), (
+            f"the {label} stack does not name an emoji fallback, but upstream "
+            "task titles retain emoji absent from both vendored families"
+        )
 
     # --td-font is the mono token's old name. verify_site.py and
     # test_leaderboard_frontend.py both spell it, so it stays a live alias.

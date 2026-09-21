@@ -131,11 +131,6 @@ CHEVRON = (
     'stroke-linejoin="round" class="text-muted-foreground size-4" aria-hidden="true">'
     '<path d="m6 9 6 6 6-6"></path></svg>'
 )
-CARET = (
-    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" '
-    'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-    'stroke-linejoin="round" class="lucide"><path d="m9 18 6-6-6-6"></path></svg>'
-)
 
 
 # ----------------------------------------------------------------- primitives
@@ -165,8 +160,11 @@ def pill(text, kind: str = "") -> str:
 
 
 def status_pill(status: str) -> str:
-    """live = sealed, gold withheld (primary) · archive = released in full (secondary)."""
-    return pill(status or "unknown", "primary" if status == "live" else "")
+    """Describe what readers can access without internal release terminology."""
+    label = {"live": "Solutions not yet public", "archive": "Solutions available"}.get(
+        status, "Availability not specified"
+    )
+    return pill(label, "primary" if status == "live" else "")
 
 
 def tags(*items) -> str:
@@ -203,18 +201,17 @@ def strip(pairs) -> str:
 
 
 def sec_head(title, eyebrow: str = "", more=None) -> str:
-    """Editorial section header with an optional context line and deep link."""
+    """The same section heading used by the catalogue and report pages."""
     out = [
-        '<div class="tdb-section-head mb-4 flex flex-col items-start gap-2">',
-        f'<p class="text-sm">{esc(title)}</p>',
+        '<div class="tdb-block-head tdb-section-head">',
+        f'<h2>{esc(title)}</h2>',
     ]
     if eyebrow:
-        out.append(f'<p class="text-muted-foreground text-xs">{esc(eyebrow)}</p>')
+        out.append(f'<p>{esc(eyebrow)}</p>')
     if more:
         href, label = more
         out.append(
-            '<a class="text-muted-foreground hover:text-foreground text-xs '
-            f'underline-offset-4 hover:underline" href="{esc(href)}">{esc(label)} &rarr;</a>'
+            f'<a class="tdb-block-tools" href="{esc(href)}">{esc(label)} &rarr;</a>'
         )
     out.append("</div>")
     return "".join(out)
@@ -238,47 +235,11 @@ def prose_block(html: str) -> str:
 
 def code_figure(caption: str, lines) -> str:
     """Self-contained command figure (caption row plus scrollable code)."""
-    body = "".join(f'<span class="line">{line}</span>' for line in lines)
+    body = "\n".join(lines)
     return (
-        '<figure dir="ltr" class="rounded-xl bg-fd-card p-1 shiki relative border '
-        'outline-none overflow-hidden text-sm my-0 mb-6 font-mono">'
-        '<div class="flex text-fd-muted-foreground items-center gap-2 ps-3 h-9.5">'
-        f'<figcaption class="flex-1 truncate">{esc(caption)}</figcaption></div>'
-        '<div class="bg-fd-secondary rounded-lg border text-[13px] py-3.5 overflow-auto '
-        'max-h-[600px] fd-scroll-container">'
-        '<pre class="min-w-full w-max *:flex *:flex-col shiki" tabindex="0"><code>'
-        f"{body}</code></pre></div></figure>"
-    )
-
-
-def breadcrumb(trail) -> str:
-    """Breadcrumb trail; the final item names the current page."""
-    items = []
-    for i, (label, href) in enumerate(trail):
-        if i:
-            items.append(
-                '<li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" '
-                f'class="{cls("[&>svg]:size-3.5")}">{CARET}</li>'
-            )
-        if href:
-            items.append(
-                '<li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5">'
-                '<a data-slot="breadcrumb-link" class="hover:text-foreground transition-colors" '
-                f'href="{esc(href)}">{esc(label)}</a></li>'
-            )
-        else:
-            items.append(
-                '<li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5">'
-                '<span data-slot="breadcrumb-page" role="link" aria-disabled="true" '
-                f'aria-current="page" class="text-foreground font-normal">{esc(label)}</span>'
-                "</li>"
-            )
-    return (
-        '<nav aria-label="breadcrumb" data-slot="breadcrumb" class="mb-6 hidden font-mono sm:block">'
-        '<ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap '
-        'items-center gap-1.5 text-sm break-words sm:gap-2.5">'
-        + "".join(items)
-        + "</ol></nav>"
+        '<figure dir="ltr" class="tdb-code">'
+        f'<figcaption>{esc(caption)}</figcaption>'
+        f'<pre tabindex="0"><code>{body}</code></pre></figure>'
     )
 
 
@@ -294,25 +255,41 @@ def button_row(buttons) -> str:
         f'href="{esc(href)}">{esc(label)}</a>'
         for label, href, primary in buttons
     )
-    return f'<nav class="tdb-navrow mb-6" aria-label="Related pages">{cells}</nav>'
+    return f'<div class="tdb-heading-links">{cells}</div>' if cells else ""
 
 
-def table_block(headers, rows) -> str:
+def page_heading(title: str, *, actions: str = "", metadata: str = "", attributes: str = "") -> str:
+    """Shared page heading: title, optional actions, and optional context."""
+    return (
+        f'<header class="tdb-page-heading tdb-detail-heading"{attributes}>'
+        f'<div class="tdb-heading-main"><h1 class="tdb-page-title">{esc(title)}</h1></div>'
+        + (f'<div class="tdb-heading-actions">{actions}</div>' if actions else "")
+        + (f'<div class="tdb-heading-context">{metadata}</div>' if metadata else "")
+        + '</header>'
+    )
+
+
+def table_block(headers, rows, *, catalogue: bool = False) -> str:
     """A horizontally scrollable Terminal Daily data surface.
 
-    headers -- [(label, align)] where align is "left" | "right"
+    headers -- [(label, align, optional_css_role)] where align is "left" | "right"
     rows    -- list of already-rendered "<td …>…</td>" strings
+    catalogue -- progressively enhance suite tasks with search and pagination
     """
     ths = []
-    for label, align in headers:
+    for column in headers:
+        label, align = column[:2]
+        role = column[2] if len(column) > 2 else ""
         inner = (f'<div class="flex justify-end">{esc(label)}</div>'
                  if align == "right" else esc(label))
-        ths.append(f'<th data-slot="table-head" class="{cls(TH)}">{inner}</th>')
+        ths.append(f'<th scope="col" data-slot="table-head" class="{cls(TH + " " + role)}">{inner}</th>')
+    catalogue_hook = ' data-tdb-suite-tasks' if catalogue else ""
+    table_label = ' aria-label="Tasks in this release"' if catalogue else ""
     return (
-        '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
+        f'<div class="mb-6 flex flex-col"{catalogue_hook}>'
         '<div class="tdb-table-shell bg-card border-y md:border-x">'
         '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
-        f'<table data-slot="table" class="{cls(TABLE)}">'
+        f'<table data-slot="table" class="{cls(TABLE + " tdb-detail-table")}"{table_label}>'
         f'<thead data-slot="table-header" class="{cls("[&_tr]:border-b")}">'
         f'<tr data-slot="table-row" class="{cls(TR_HEAD)}">' + "".join(ths) + "</tr></thead>"
         f'<tbody data-slot="table-body" class="{cls("[&_tr:last-child]:border-0")}">'
@@ -321,10 +298,10 @@ def table_block(headers, rows) -> str:
     )
 
 
-def td(html, align: str = "left", extra: str = "", prose: bool = False) -> str:
+def td(html, align: str = "left", extra: str = "", prose: bool = False, cell_class: str = "") -> str:
     base = TD_PROSE if prose else TD
     p_cls = ("text-right" if align == "right" else "text-left") + (" " + extra if extra else "")
-    return f'<td data-slot="table-cell" class="{cls(base)}"><p class="{cls(p_cls)}">{html}</p></td>'
+    return f'<td data-slot="table-cell" class="{cls(base + " " + cell_class)}"><p class="{cls(p_cls)}">{html}</p></td>'
 
 
 # The cache-busting token on every asset URL, derived from the assets' own
@@ -338,8 +315,9 @@ from asset_version import current as _asset_version   # noqa: E402
 ASSET_V = _asset_version()
 
 FAVICON = (
-    "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>"
-    "<text y='13' font-size='13'>&#9622;</text></svg>"
+    "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' "
+    "fill='none' stroke='%23315aba' stroke-width='1.6'>"
+    "<rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>"
 )
 
 
@@ -348,12 +326,17 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 
     depth  -- directories below the site root (2 for benchmarks/<id>/ and
               registry/<id>/). Drives asset hrefs and data-root.
-    body   -- HTML placed inside the max-w-7xl content column.
+    body   -- HTML placed inside the shared page content column.
     script -- optional JS, emitted after site.js (window.TDB is available).
     head   -- optional extra <head> markup.
     """
     root = "/".join([".."] * depth) if depth > 0 else "."
     tail = f'<script>\n{script}\n</script>\n' if script.strip() else ""
+    if page_key in {"tasks", "benchmarks"}:
+        modules = ["tdb-data", "tdb-releases"]
+        if page_key == "tasks":
+            modules.append("tdb-runs")
+        tail = "".join(f'<script src="{root}/assets/{name}.js?v={ASSET_V}"></script>\n' for name in modules) + tail
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -369,8 +352,8 @@ def render_page(title, description, page_key, depth, body, script="", head="") -
 
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
   <!-- the fixed header is injected here by assets/site.js -->
-  <div class="tdb-page-frame flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
-    <div class="flex w-full max-w-7xl flex-1 flex-col" data-tdb-canary-host>
+  <div class="tdb-page-frame">
+    <div class="tdb-page-container tdb-detail-frame" data-tdb-canary-host>
 {body}
     </div>
   </div>
@@ -397,10 +380,10 @@ def write_page(path: Path, html: str) -> str:
         if path.read_text(encoding="utf-8") == html:
             print(f"  unchanged  {_shown(path)}")
             return "unchanged"
-        path.write_text(html, encoding="utf-8")
+        path.write_text(html, encoding="utf-8", newline="\n")
         print(f"  update     {_shown(path)}")
         return "update"
-    path.write_text(html, encoding="utf-8")
+    path.write_text(html, encoding="utf-8", newline="\n")
     print(f"  write      {_shown(path)}")
     return "write"
 
@@ -465,6 +448,38 @@ def load_task_package(task_id: str) -> dict:
     return {}
 
 
+def load_detail_data(path: Path) -> dict[str, dict]:
+    """Read metadata-only public task details; reject unexpected package fields."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("task detail data must be a task-id mapping")
+    allowed = {"instruction", "summary", "record", "toml", "split", "has_solution"}
+    record_fields = {"repo", "pr_number", "source_license_spdx"}
+    toml_fields = {"description", "difficulty", "source_repo", "pr_number"}
+    for tid, package in data.items():
+        if not safe_id(tid) or not isinstance(package, dict) or set(package) - allowed:
+            raise ValueError("invalid task identity or unsupported task detail fields")
+        if not isinstance(package.get("instruction", ""), str):
+            raise ValueError("task instruction must be a string")
+        if not isinstance(package.get("summary", ""), str):
+            raise ValueError("task summary must be a string")
+        for key, fields in (("record", record_fields), ("toml", toml_fields)):
+            values = package.get(key, {})
+            if not isinstance(values, dict) or set(values) - fields:
+                raise ValueError("unsupported task metadata fields")
+            for name, value in values.items():
+                if name == "pr_number":
+                    if value is not None and (type(value) is not int or value <= 0):
+                        raise ValueError("task pull request number must be a positive integer")
+                elif not isinstance(value, str):
+                    raise ValueError("task metadata text must be a string")
+        if package.get("split", "live") not in {"live", "archive"}:
+            raise ValueError("unknown task publication status")
+        if type(package.get("has_solution", False)) is not bool:
+            raise ValueError("task solution availability must be boolean")
+    return data
+
+
 def task_suites(task: dict) -> list[str]:
     """Normalise the many-to-many suite edge list for page consumers.
 
@@ -501,20 +516,22 @@ def instruction_title(text: str) -> str:
 
 
 # Every instruction opens with the same harness preamble and closes with the same
-# goal line. Both are identical on all 61 task pages, so neither says anything about
+# goal line. Both repeat across task pages, so neither says anything about
 # the task the page is about; the excerpt starts at the task-specific text instead.
 _INSTRUCTION_BOILERPLATE = (
     "You are working in a checked-out source repository. The upstream provenance "
     "(origin remote, project name, and commit identifiers) has been removed; solve "
     "the task from the working tree and the description below alone.",
+    "You are working in a checked-out source repository. The upstream provenance "
+    "(origin remote, project name, and commit identifiers) has been removed; solve "
+    "the task from the working tree and the specification below alone.",
     "Make the change so that the project's regression tests pass. "
     "Do not edit the test files.",
 )
 
 
 _MD = [
-    (re.compile(r"`{1,3}([^`]*)`{1,3}"), r"\1"),          # code spans
-    (re.compile(r"\*{1,3}([^*]+)\*{1,3}"), r"\1"),        # bold / italic
+    (re.compile(r"(?<!\w)(\*{1,3})(?=\S)(.+?)(?<=\S)\1(?!\w)"), r"\2"),
     (re.compile(r"\[([^\]]+)\]\([^)]*\)"), r"\1"),        # links -> label
     (re.compile(r"\s+"), " "),
 ]
@@ -523,214 +540,299 @@ _MD = [
 def instruction_excerpt(text: str, limit: int = 700) -> str:
     """First prose paragraphs of the instruction, de-marked-down and trimmed."""
     body = []
+    in_code = False
     for line in (text or "").splitlines():
         s = line.strip()
-        if not s or s.startswith("#") or s.startswith("```"):
+        if s.startswith(("```", "~~~")):
+            in_code = not in_code
             continue
-        body.append(s.lstrip("-* "))
+        if in_code or not s or s.startswith("#"):
+            continue
+        if s.startswith("**") and s.endswith("**") and s.count("**") == 2:
+            continue
+        body.append(re.sub(r"^(?:[-*+]\s+|\d+\.\s+)", "", s))
         if sum(len(b) for b in body) > limit:
             break
     out = " ".join(body)
+    code = []
+
+    def preserve_code(match):
+        code.append(match.group(1))
+        return f"\ue000{len(code) - 1}\ue001"
+
+    # Code may contain multiplication or exponentiation; Markdown cleanup must
+    # not turn a quoted expression such as j**2 + 4*j into a different formula.
+    out = re.sub(r"`{1,3}([^`]*)`{1,3}", preserve_code, out)
     for pat, rep in _MD:
         out = pat.sub(rep, out)
-    out = out.strip()[:limit]
-    return out + ("…" if len(out) >= limit else "")
+    for index, value in enumerate(code):
+        out = out.replace(f"\ue000{index}\ue001", value)
+    out = out.strip()
+    if len(out) > limit:
+        return out[:limit].rsplit(" ", 1)[0].rstrip(".,;:") + "…"
+    return out
+
+
+def clean_instruction_text(text: str) -> str:
+    """Remove generation boilerplate while preserving literal comment examples."""
+    code = []
+
+    def protect(match):
+        code.append(match.group(0))
+        return f"\ue100{len(code) - 1}\ue101"
+
+    text = re.sub(r"(`{1,3}|~{3})(.+?)\1", protect, text, flags=re.S)
+    for chunk in _INSTRUCTION_BOILERPLATE:
+        text = text.replace(chunk, "")
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    for line in (
+        "These names are referenced by the project's regression tests and must exist exactly as written.",
+        "These methods are not defined anywhere in the tests, so they must be added to the project.",
+        "This list is derived from the project's regression tests and is not exhaustive; it names what the tests reference by name, not everything the change must do.",
+    ):
+        text = text.replace(line, "")
+    text = re.sub(r"(?m)^## Context \(de-identified\)\s*$", "", text)
+    text = re.sub(r"(?m)^\s*\[redacted-ref\]\.?\s*$", "", text)
+    for index, value in enumerate(code):
+        text = text.replace(f"\ue100{index}\ue101", value)
+    text = re.sub(r"(?m)^## Goal\s*\Z", "", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip() + "\n"
+
+
+def task_summary(text: str, limit: int = 420) -> str:
+    """Extract one public prose paragraph, omitting setup and provenance text."""
+    text = clean_instruction_text(text)
+    text = re.sub(r'(?ms)^\[//\]:\s*#\s*"\s*\n.*?^\s*"\s*$', "", text)
+    text = re.sub(r"<summary\b[^>]*>.*?</summary>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"</?(?:details|div|p)\b[^>]*>", "", text, flags=re.IGNORECASE)
+    paragraphs, lines = [], []
+    in_code = False
+    skip_section = False
+    for raw in (text or "").splitlines() + [""]:
+        line = raw.strip()
+        if line.startswith(("```", "~~~")):
+            in_code = not in_code
+            line = ""
+        elif in_code:
+            continue
+        heading = re.match(r"^(#{1,6})\s+(.*)", line)
+        if not line or heading:
+            if lines:
+                paragraphs.append("\n".join(lines))
+                lines = []
+            if heading:
+                depth, label = len(heading[1]), heading[2]
+                if depth > 1:
+                    skip_section = not re.search(
+                        r"^(?:context\b|summary\b|description\b|overview\b|problem\b|"
+                        r"bug\b|what(?:'s| is| changed| this)\b|fix\b|changes\b|"
+                        r"motivation\b|implementation\b|why (?:this|it)\b|root cause\b|"
+                        r"proposed (?:fix|change)\b|required behavio[u]?r\b)", label, re.IGNORECASE
+                    )
+            continue
+        if skip_section or re.fullmatch(r"(?:[-*]\s+)?\*\*[^*]+\*\*:? *", line):
+            continue
+        if re.match(r"^(?:[-*+]\s+|\d+\.\s+)", line):
+            if lines:
+                paragraphs.append("\n".join(lines))
+                lines = []
+            paragraphs.append(line)
+            continue
+        lines.append(line)
+
+    omitted = re.compile(
+        r"\[redacted[^\]]*\]|\b[0-9a-f]{7,64}\b|"
+        r"(?:https?://|[A-Za-z]:[\\/]|(?<!\w)\.{1,2}[\\/])|"
+        r"\b[\w.-]+(?:[\\/][\w.@+-]+)+\b|"
+        r"no task description provided|"
+        r"please (?:include|describe|fill|check)|include a description of|"
+        r"how does someone fix|by submitting this pull request|we use the title|"
+        r"\b(?:I|my|we|our)\b|"
+        r"thank you|feel free to|powered by|release note:|"
+        r"this (?:PR|pull request) (?:should )?fix(?:es)? this issue|"
+        r"^(?:amend|commit|merge|cherry[- ]pick|co-authored-by|signed-off-by|"
+        r"the last commit|previous style|no release,|"
+        r"(?:added|contains) (?:a |new |unit |regression )*(?:tests?|unittests))\b",
+        re.IGNORECASE | re.MULTILINE,
+    )
+    for paragraph in paragraphs:
+        if omitted.search(paragraph) or paragraph.startswith(("|", ">", "![", "- [", "* [")):
+            continue
+        prose = instruction_excerpt(paragraph, len(paragraph) + 1)
+        if omitted.search(prose):
+            continue
+        if len(prose) > limit or prose.endswith(":"):
+            complete = list(re.finditer(r"[.!?](?=\s+[A-Z]|\s*$)", prose[:limit]))
+            if complete:
+                prose = prose[:complete[-1].end()]
+            elif prose.endswith(":"):
+                continue
+            else:
+                prose = prose[:limit].rsplit(" ", 1)[0].rstrip(".,;:") + "…"
+        # Count whole words, not pieces of identifiers: a bare equation or
+        # change-record fragment does not explain a task to a reader.
+        if len(re.findall(r"\b[A-Za-z]{2,}\b", prose)) < 6 and len(re.findall(r"[\u3400-\u9fff]", prose)) < 24:
+            continue
+        return prose
+    return ""
 
 
 # ----------------------------------------------------------------- page bodies
 
 def _pr_link(repo, pr_number) -> str:
+    project = str(repo).rsplit("/", 1)[-1] if repo else ""
     if repo and pr_number:
         url = f"https://github.com/{repo}/pull/{pr_number}"
         return (f'<a class="{cls(LINK)}" href="{esc(url)}" target="_blank" '
-                f'rel="noopener noreferrer">{esc(repo)}#{esc(pr_number)}</a>')
+                f'rel="noopener noreferrer">{esc(project)} #{esc(pr_number)}</a>')
     if repo:
         return (f'<a class="{cls(LINK)}" href="https://github.com/{esc(repo)}" '
-                f'target="_blank" rel="noopener noreferrer">{esc(repo)}</a>')
+                f'target="_blank" rel="noopener noreferrer">{esc(project)}</a>')
     return DASH
 
 
-def _h2(text) -> str:
-    return f'<h2 class="tdb-page-title mb-6 text-4xl tracking-tighter">{esc(text)}</h2>'
-
-
-def _lede(html) -> str:
-    return f'<p class="tdb-page-lede text-muted-foreground mb-6 text-sm">{html}</p>'
-
-
 def _section(inner) -> str:
-    return f'<section class="tdb-content-section flex flex-col py-12 sm:pb-16">{inner}</section>'
+    return f'<section class="tdb-block tdb-content-section">{inner}</section>'
 
 
-def _retrievability_note() -> str:
-    """The honest caveat that belongs on every LIVE suite page.
-
-    A live task withholds the gold patch and the protected assertions, and we redact the
-    upstream commit from its metadata. But environment/Dockerfile has to name the source
-    repo and the base commit or the task cannot be built and run at all -- and the merged
-    PR is a descendant of that base commit in a public repository. Recovery is expensive,
-    not impossible. Every PR-derived benchmark inherits this; what is avoidable is
-    letting a reader assume we solved it.
-
-    The canary date and the never-run production replay are stated once, in the scoring
-    section directly above; repeating them here printed one caveat twice on one page.
-    """
-    return (
-        '<p class="text-muted-foreground mx-auto mt-4 max-w-3xl text-center '
-        'text-sm/relaxed">Tasks come from <span class="text-foreground">public merged pull '
-        "requests</span>. A live package redacts the merge commit but still names the source "
-        "repo and base commit, so it can be built. An agent with network access can retrieve "
-        'rather than solve. Read any online score as an <span class="text-foreground">upper '
-        "bound</span>.</p>"
+def _release_label(sid: str) -> str:
+    """Dates identify releases; internal identifiers stay in their URLs."""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", sid or ""):
+        return f"{sid} release"
+    return {"sample": "Sample tasks", "sample-live": "Sample preview"}.get(
+        sid, "Task collection"
     )
 
 
-def suite_page_body(suite: dict, suite_tasks: list) -> str:
+def _task_title(task: dict, pkg: dict | None = None) -> str:
+    package = pkg or {}
+    return clean_task_title(task.get("title") or (package.get("toml") or {}).get("description")
+                            or instruction_title(package.get("instruction") or ""))
+
+
+def clean_task_title(text: str) -> str:
+    """Remove publishing syntax without reconstructing redacted names."""
+    text = str(text or "").strip()
+    text = re.sub(r"^(?:fix|feat|perf|refactor|docs|test|chore|build|ci|style)(?:\([^)]*\))?!?:\s*", "", text, flags=re.I)
+    text = re.sub(r"\([^()]*\[redacted-ref\][^()]*\)", "", text, flags=re.I)
+    text = re.sub(r"\[redacted[^\]]*\]", "", text, flags=re.I)
+    text = re.sub(r"\b[0-9a-f]{8,64}\b", "", text, flags=re.I)
+    text = text.replace("`", "")
+    text = re.sub(r"\(\s*\)", "", text)
+    text = re.sub(r"\s+([,;:)])", r"\1", text)
+    text = re.sub(r"\s+", " ", text).strip(" ,:;-")
+    return text[:1].upper() + text[1:] if text else "Software maintenance task"
+
+
+# Short editorial examples, grounded in each task's published instruction.md.
+# These describe the requested change and its checks, never a model's reasoning.
+TASK_CASES = {
+    "td-a1e719fced6e790d": {
+        "title": "Recognize image paths in any letter case",
+        "goal": "Treat recognized image extensions as file paths regardless of letter case, even when the string could also decode as base64.",
+        "success": "Missing image paths raise ValueError with a \"does not exist\" message; strings without a recognized image extension keep their base64 behavior.",
+    },
+    "td-c3d8f979a1b6446f": {
+        "title": "Save configuration without breaking symbolic links",
+        "goal": "Write configuration changes through each symbolic link to its real target, preserving the link and the target file's permissions.",
+        "success": "Primary and included files retain their links and permission bits; dangling targets are created with mode 0o600 and temporary files are cleaned up.",
+    },
+    "td-a12f9e85169e6c4b": {
+        "title": "Resume downloads without corrupting the file",
+        "goal": "Decide whether to resume from the server's actual HTTP response, validating range headers before appending bytes.",
+        "success": "Restart on HTTP 200, reject invalid partial responses without changing the file, stop oversized streams, and clear saved state before retrying HTTP 416 responses.",
+    },
+    "td-fd876514b9fadbb9": {
+        "title": "Keep quoted configuration values intact",
+        "goal": "Split configuration directives at unquoted separators while preserving semicolons, braces, whitespace, and opposite-kind quotes inside quoted values.",
+        "success": "Formatted text must match the expected output exactly, including original quoted contents and trailing newlines.",
+    },
+}
+
+
+def case_cards(tasks: list[dict]) -> str:
+    available = {task.get("id"): task for task in tasks}
+    cards = []
+    for tid, case in TASK_CASES.items():
+        task = available.get(tid)
+        if not task:
+            continue
+        project = str(task.get("repo") or "").rsplit("/", 1)[-1]
+        cards.append(
+            f'<article class="tdb-case" data-case-task="{esc(tid)}" data-case-observed-date="2026-09-17">'
+            f'<p class="tdb-case-project">{esc(project)}</p><h3>{esc(case["title"])}</h3>'
+            f'<p>{esc(case["goal"])}</p>'
+            '<p class="tdb-case-outcome">Loading observed results&hellip;</p>'
+            f'<a href="./registry/{esc(tid)}/" data-case-link>Task and model outcomes &rarr;</a></article>'
+        )
+    return "\n".join(cards)
+
+
+def _evaluation_note(live: bool) -> str:
+    text = "Official evaluation is not open yet; submissions do not receive an official score. "
+    if not live:
+        text += "Local evaluation requires a custom runner that is not yet public. "
+    return (
+        '<p class="tdb-detail-note text-muted-foreground text-sm/relaxed">'
+        + text
+        + '<a class="hover:text-foreground underline underline-offset-4" '
+          'href="../../guide/quickstart/">How to evaluate a model &rarr;</a></p>'
+    )
+
+
+def suite_page_body(suite: dict, suite_tasks: list, result_days: set[str] | None = None) -> str:
     sid = suite.get("id", "")
     live = suite.get("status") == "live"
-    langs = suite.get("languages") or sorted(
-        {t.get("language") for t in suite_tasks if t.get("language")}
-    )
-    n_tasks = suite.get("n_tasks")
-    if n_tasks is None:
-        n_tasks = len(suite_tasks)
-    scored_tasks = sum(1 for t in suite_tasks if t.get("n_models"))
-    f2p = sum(t.get("n_fail_to_pass") or 0 for t in suite_tasks)
-    count = f"{n_tasks} task" + ("" if n_tasks == 1 else "s")
-
-    # The lede gives the size and the release state, then links out. What certification
-    # would additionally require is documentation; it is not reprinted on each daily page.
-    lede = (
-        f"{count}, live. Gold patch and protected tests withheld. Submissions are "
-        'unranked. <a class="hover:text-foreground underline underline-offset-4" '
-        'href="../../guide/task-format/#archive-vs-live">what live withholds &rarr;</a>'
-        if live
-        else f"{count}, archived. All artifacts released. Local runs require the patched "
-        'Harbor fork. <a class="hover:text-foreground underline '
-        'underline-offset-4" href="../../guide/quickstart/#requirements">fork status '
-        "&rarr;</a>"
-    )
-
-    head = [
-        breadcrumb([("Home", "../../"), ("Benchmarks", "../"), (f"Suite {sid}", None)]),
-        _h2(f"Suite {sid}"),
-        _lede(lede),
-        tags(status_pill(suite.get("status", "")),
-             *[pill(language, "outline") for language in langs]),
-        button_row([
-            ("all suites", "../", False),
-            ("leaderboard", "../../leaderboard/", False),
-            ("task registry", "../../registry/", False),
-        ]),
-        '<div class="-mx-4 mb-6 sm:mx-0" id="rail"></div>',
-    ]
-
-    stats = strip([
-        ("tasks", n_tasks, "one merged pull request each"),
-        ("languages", len(langs) or None, "upstream languages"),
-        ("fail-to-pass tests", f2p or None, "re-laid over the agent's workspace"),
-        (
-            "official score coverage",
-            f"{scored_tasks}/{len(suite_tasks)}" if scored_tasks else None,
-            "none carries an official score" if not scored_tasks
-            else "bound to the published official matrix",
-        ),
-        ("semantic exploit FA", None, "not measured"),
-        (
-            "status",
-            suite.get("status") or None,
-            "gold and protected tests withheld" if live else "all artifacts published",
-        ),
-    ])
+    label = _release_label(sid)
+    buttons = []
+    if sid in (result_days or set()):
+        buttons.append(("Model results", f"../../leaderboard/?d={sid}", False))
+    header = page_heading(label, actions='<div id="rail"></div>' + button_row(buttons),
+                          attributes=f' data-suite-id="{esc(sid)}"')
 
     if suite_tasks:
+        # Site-wide rollups have no evaluation date. A release page must not
+        # present them as results for this historical release.
+        has_languages = any(task.get("language") for task in suite_tasks)
         rows = []
-        for t in suite_tasks:
-            tid = t.get("id", "")
+        for task in suite_tasks:
+            tid = task.get("id", "")
             href = f"../../registry/{tid}/" if safe_id(tid) else "../../registry/"
-            solved = t.get("solved_by")
-            n_models = t.get("n_models")
-            if solved is None or not n_models:
-                cell = DASH
-            else:
-                muted = "" if solved else " text-muted-foreground"
-                cell = f'<span class="tabular-nums{muted}">{esc(solved)}/{esc(n_models)}</span>'
+            checks = task.get("n_fail_to_pass")
             rows.append(
-                td(f'<a class="{cls(LINK)}" href="{esc(href)}">{esc(tid)}</a>')
-                + td(esc(t.get("title") or ""), prose=True)
-                + td(_pr_link(t.get("repo"), t.get("pr_number")))
-                + td(pill(t.get("language"), "outline") if t.get("language") else DASH)
-                + td(pill(t.get("difficulty")) if t.get("difficulty") else DASH)
-                + td(esc(t.get("n_fail_to_pass") or 0), "right", "tabular-nums")
-                + td(cell, "right")
+                td(f'<a class="{cls(LINK)}" data-task-id="{esc(tid)}" '
+                   f'href="{esc(href)}">{esc(_task_title(task))}</a>',
+                   prose=True, cell_class="tdb-detail-task")
+                + td(_pr_link(task.get("repo"), task.get("pr_number")),
+                     prose=True, cell_class="tdb-detail-project")
+                + (td(esc(task.get("language")) if task.get("language") else DASH,
+                      cell_class="tdb-detail-language") if has_languages else "")
+                + td(esc(checks) if checks is not None else DASH, "right", "tabular-nums",
+                     cell_class="tdb-detail-checks")
+                + td(DASH, "right", cell_class="tdb-detail-score")
             )
         table = table_block(
-            [("Task", "left"), ("What it asks for", "left"), ("Source pull request", "left"),
-             ("Language", "left"), ("Difficulty", "left"),
-             ("F2P Tests", "right"), ("Official Solves", "right")],
+            [("Task", "left", "tdb-detail-task"), ("Project", "left", "tdb-detail-project")]
+            + ([("Language", "left", "tdb-detail-language")] if has_languages else [])
+            + [("Target tests", "right", "tdb-detail-checks"), ("Observed passes", "right", "tdb-detail-score")],
             rows,
+            catalogue=True,
         )
     else:
-        table = (
-            '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-            + empty(
-                "No published task list. A live suite exposes tasks through the scoring "
-                "endpoint until archived."
-            )
-            + "</div>"
-        )
-
-    cmd = (
-        ["python web/submit_result.py record --authenticated-submitter github:LOGIN "
-         "&lt; submission.json   # pending; no score until official replay"]
-        if live
-        else [
-            "tdb run    &lt;MODEL&gt; tasks/archive/&lt;task-id&gt;",
-            "tdb oracle tasks/archive/&lt;task-id&gt;   # -&gt; reward 1.0",
-        ]
-    )
+        table = '<div class="mb-6">' + empty("No tasks are published in this release.") + '</div>'
 
     return "\n".join([
-        "\n".join(head),
-        _section(
-            sec_head("tasks in this suite", suite.get("note") or "",
-                     ("../../registry/", "all tasks"))
-            + stats
-            + table
-        ),
-        _section(
-            sec_head("how this suite is scored", "execution proof only")
-            + code_figure(
-                "Local commands, patched Harbor fork required"
-                if not live else "Run your model, then submit the patch",
-                cmd,
-            )
-            # Seven sentences of scoring narration, centred, on every suite page.
-            # Four of them are facts (throwaway copy, re-laid protected tests,
-            # the network cut, what an accepted run does NOT prove); three were
-            # emphasis. The facts stay, one clause each.
-            + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
-              'text-sm/relaxed">A patch applies to a throwaway copy; protected tests are '
-              "re-laid from the trusted package and the workspace tests are discarded. "
-              "The receipt contract requires a verified network cut, proven only by a "
-              "staged-SIF canary on 2026-08-06 -- no production protected replay has run. "
-              "An accepted run proves replay integrity, not semantic verifier false-accept, "
-              "which is unmeasured. "
-            # "unpublished" is the load-bearing word: it says WHY a third party
-            # cannot reproduce this run. The registry pages already said it; this
-            # site said only "patched", which reads as a version skew you could fix.
-            + ("Requires the unpublished patched Harbor fork; "
-               "stock Harbor 0.13.1 is insufficient end to end. "
-               if not live else "")
-            + '<a class="hover:text-foreground underline underline-offset-4" '
-              'href="../../guide/submission/#scoring">how scoring works &rarr;</a></p>'
-            + (_retrievability_note() if live else "")
-        ),
+        header,
+        (f'<section class="tdb-release-digest" data-release-digest="{esc(sid)}" aria-live="polite"></section>'
+         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", sid) else ""),
+        _section(sec_head("Tasks") + f'<div data-release-tasks="{esc(sid)}">{table}</div>'),
+        f'<details class="tdb-methods tdb-evaluation-note"><summary>Run an evaluation</summary>{_evaluation_note(live)}</details>',
     ])
 
 
 SUITE_SCRIPT = """(async function () {
   var T = window.TDB;
+  if (T.redirecting) return;
   var site = await T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue"));
   if (site && site.suites) {
     T.dayRail(document.getElementById("rail"), site.suites, %s);
@@ -739,157 +841,73 @@ SUITE_SCRIPT = """(async function () {
 
 
 def task_page_body(task: dict, pkg: dict) -> str:
-    """SHARED task-page body. The registry generator renders this inside render_page(depth=2)."""
+    """Describe the task first; keep tooling identifiers in links and data attributes."""
     tid = task.get("id", "")
     suites = task_suites(task)
-    suite = task.get("suite", "") or (suites[-1] if suites else "")
     live = task.get("status") == "live"
     rec = (pkg or {}).get("record") or {}
     tom = (pkg or {}).get("toml") or {}
     instruction = (pkg or {}).get("instruction") or ""
-
     repo = task.get("repo") or rec.get("repo") or tom.get("source_repo")
     pr = task.get("pr_number") or rec.get("pr_number") or tom.get("pr_number")
-    title = task.get("title") or tom.get("description") or instruction_title(instruction)
+    title = _task_title(task, pkg)
     f2p = rec.get("fail_to_pass") or []
-    n_f2p = task.get("n_fail_to_pass") or len(f2p) or None
+    n_f2p = task.get("n_fail_to_pass")
+    if n_f2p is None and f2p:
+        n_f2p = len(f2p)
     language = task.get("language") or rec.get("language")
-    # EDITORIAL, from task.toml -- NOT task["difficulty"], which is the
-    # MEASURED one and is gated on scoring authority (it is "" while
-    # unranked). Reading the measured field here would make the row note
-    # below false the day a ranking is published.
+    # Estimated difficulty is the author's label, never a measured result.
     difficulty = task.get("declared_difficulty") or tom.get("difficulty") or ""
+    case = TASK_CASES.get(tid)
+    summary = case["goal"] if case else (pkg.get("summary") or task_summary(instruction))
+    if summary.rstrip(".") == instruction_excerpt(title).rstrip("."):
+        summary = ""
 
     buttons = []
-    for sid in suites:
-        if safe_id(sid):
-            buttons.append((f"Suite {sid}", f"../../benchmarks/{sid}/", False))
-    buttons.append(("all tasks", "../", False))
     if repo and pr:
-        buttons.append(("source pull request", f"https://github.com/{repo}/pull/{pr}", False))
-    buttons.append(("how to submit", "../../submit/", False))
+        buttons.append(("Original change", f"https://github.com/{repo}/pull/{pr}", False))
+    buttons.append(("Submit results", "../../submit/", False))
+    header = page_heading(title, actions=button_row(buttons),
+                          attributes=f' data-task-id="{esc(tid)}"')
 
-    head = [
-        breadcrumb([("Home", "../../"), ("Tasks", "../"), (tid, None)]),
-        _h2(title or tid),
-        _lede(f'<span class="text-foreground">{esc(tid)}</span>'),
-        tags(status_pill(task.get("status", "")),
-             pill(language, "outline") if language else "",
-             pill(difficulty) if difficulty else ""),
-        button_row(buttons),
-    ]
-
-    solved, n_models = task.get("solved_by"), task.get("n_models")
-    stats = strip([
-        ("language", language or None, ""),
-        ("difficulty", difficulty or None, "declared by the task author in task.toml"),
-        ("fail-to-pass tests", n_f2p, "must fail before the patch, pass after"),
-        ("official solves",
-         f"{solved}/{n_models}" if solved is not None and n_models else None,
-         "dash means awaiting formal coverage, not zero solves"),
-        ("semantic exploit FA", None, "unmeasured"),
-        ("suites", len(suites) or None, ""),
-    ])
-
-    suite_links = [
-        f'<a class="{cls(LINK)}" href="../../benchmarks/{esc(sid)}/">{esc(sid)}</a>'
+    release_links = [
+        f'<a class="{cls(LINK)}" href="../../benchmarks/{esc(sid)}/">'
+        f'{esc(_release_label(sid).removesuffix(" release"))}</a>'
         for sid in suites if safe_id(sid)
     ]
-    suite_cell = ", ".join(suite_links) or (esc(suite) or DASH)
     facts = [
-        ("Task id", f'<span class="text-foreground">{esc(tid)}</span>'),
-        ("Suite", suite_cell),
-        ("Status", status_pill(task.get("status", ""))),
-        ("Source", _pr_link(repo, pr)),
-        ("Base commit", esc(rec.get("base_sha", "")) if rec.get("base_sha") else None),
-        ("Merge commit", esc(rec.get("merge_sha", "")) if rec.get("merge_sha") else None),
-        ("Network", esc(rec.get("network_profile") or "run-offline")),
-        ("Upstream license", esc(rec.get("source_license_spdx") or "see source repository")),
+        ("Project", _pr_link(repo, pr) if repo else None),
+        ("Language", esc(language) if language else None),
+        ("Estimated difficulty", esc(difficulty) if difficulty else None),
+        ("Target tests", esc(n_f2p) if n_f2p is not None else None),
+        ("Releases", '<span class="tdb-task-releases">' + ", ".join(release_links) + '</span>' if release_links else None),
+        ("License", esc(rec.get("source_license_spdx")) if rec.get("source_license_spdx") else None),
     ]
     fact_rows = [
-        f'<th data-slot="table-head" class="{cls(TH)}">{esc(k)}</th>' + td(v)
-        for k, v in facts if v
+        f'<th scope="row" data-slot="table-head" class="{cls(TH)}">{esc(key)}</th>' + td(value)
+        for key, value in facts if value is not None
     ]
     fact_table = (
-        '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-        '<div class="tdb-table-shell bg-card border-y font-mono md:border-x">'
+        '<div class="tdb-task-facts mb-6 flex flex-col">'
+        '<div class="tdb-table-shell bg-card border-y md:border-x">'
         '<div data-slot="table-container" class="relative w-full overflow-x-auto">'
-        f'<table data-slot="table" class="{cls(TABLE)}">'
+        f'<table data-slot="table" class="{cls(TABLE + " tdb-facts-table")}" aria-label="About this task">'
         f'<tbody data-slot="table-body" class="{cls("[&_tr:last-child]:border-0")}">'
-        + "".join(f'<tr data-slot="table-row" class="{cls(TR_BODY)}">{r}</tr>' for r in fact_rows)
+        + "".join(f'<tr data-slot="table-row" class="{cls(TR_BODY)}">{row}</tr>' for row in fact_rows)
         + "</tbody></table></div></div></div>"
     )
-
-    brief = ""
-    if instruction:
-        text = instruction
-        for chunk in _INSTRUCTION_BOILERPLATE:
-            text = text.replace(chunk, "")
-        brief = _section(
-            sec_head("instruction")
-            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-            + prose_block(f"<p>{esc(instruction_excerpt(text, 260))}</p>")
-            + "</div>"
-        )
-
-    if f2p and not live:
-        items = "".join(
-            f'<li class="border-b py-2 last:border-b-0">{esc(x)}</li>' for x in f2p
-        )
-        f2p_block = _section(
-            sec_head("fail-to-pass tests")
-            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-            + prose_block(f'<ul class="flex flex-col">{items}</ul>')
-            + "</div>"
-        )
-    elif live:
-        f2p_block = _section(
-            sec_head("protected tests", "withheld while the suite is live")
-            + '<div class="-mx-4 mb-6 flex flex-col md:mx-0">'
-            + empty(
-                "Test bodies and the reference solution are withheld. The agent sees only the "
-                "failing-test identifiers. Scoring runs server-side. The package is released "
-                "when the suite is archived, two weeks after sealing."
-            )
-            + "</div>"
-        )
-    else:
-        f2p_block = ""
-
-    cmd = (
-        ["python web/submit_result.py record --authenticated-submitter github:LOGIN "
-         "&lt; submission.json"]
-        if live
-        else [
-            f"tdb run    &lt;MODEL&gt; tasks/archive/{esc(tid)}",
-            f"tdb oracle tasks/archive/{esc(tid)}   # -&gt; reward 1.0",
-        ]
-    )
-    run = _section(
-        sec_head("reproduce it")
-        + code_figure("Score a model, then run the oracle", cmd)
-        + '<p class="text-muted-foreground mx-auto max-w-3xl text-center '
-          'text-sm/relaxed">The reward is the outcome of the re-laid protected tests. '
-          "A submitted reward is advisory: the receipt authority is inactive, so "
-          "submissions stay pending and unranked. "
-          + ("Requires the unpublished patched Harbor fork; "
-             "stock Harbor 0.13.1 is insufficient. " if not live else "")
-          + '<a class="hover:text-foreground underline underline-offset-4" href="../../submit/">'
-          "how to submit &rarr;</a></p>"
-    )
-
-    body = [
-        "\n".join(h for h in head if h),
-        _section(
-            sec_head("provenance")
-            + stats
-            + fact_table
-        ),
-        brief,
-        f2p_block,
-        run,
-    ]
-    return "\n".join(b for b in body if b)
+    return "\n".join([
+        header,
+        _section(sec_head("About this task")
+                 + (f'<p class="tdb-task-summary">{esc(summary)}</p>' if summary else "")
+                 + (f'<p class="tdb-task-success"><strong>Success criterion:</strong> {esc(case["success"])}</p>' if case else
+                    (f'<p class="tdb-task-success"><strong>Success criterion:</strong> Pass the {esc(n_f2p)} target regression '
+                     f'{"test" if n_f2p == 1 else "tests"} without editing the test files.</p>' if n_f2p else
+                     '<p class="tdb-task-success"><strong>Success criterion:</strong> Make the project regression tests pass without editing the test files.</p>'))
+                 + fact_table),
+        f'<section class="tdb-run-details" id="model-outcomes" data-task-runs="{esc(tid)}"></section>',
+        f'<details class="tdb-methods tdb-evaluation-note"><summary>Run an evaluation</summary>{_evaluation_note(live)}</details>',
+    ])
 
 
 # ----------------------------------------------------------------- generation
@@ -918,9 +936,16 @@ def main(argv=None) -> int:
     ap.add_argument("--docs", default=str(DOCS), help="site root (default: release/docs)")
     ap.add_argument("--suites-only", action="store_true", help="skip per-task pages")
     ap.add_argument("--tasks-only", action="store_true", help="skip per-suite pages")
+    ap.add_argument("--detail-data", help="metadata-only task detail mapping (default: docs/data/task-details.json when present)")
     args = ap.parse_args(argv)
 
     docs = Path(args.docs).resolve()
+    detail_path = Path(args.detail_data).resolve() if args.detail_data else docs / "data" / "task-details.json"
+    try:
+        detail_packages = load_detail_data(detail_path) if args.detail_data or detail_path.is_file() else {}
+    except (OSError, ValueError) as error:
+        print(f"Invalid task detail data: {error}", file=sys.stderr)
+        return 1
     registry = read_json(RELEASE / "registry.json", {}) or {}
     site = read_json(docs / "site_data.json")
     if site is None:
@@ -928,7 +953,22 @@ def main(argv=None) -> int:
         site = {}
 
     suites, tasks = collect(site, registry)
+    homepage = docs / "index.html"
+    if homepage.is_file() and not args.suites_only:
+        home = homepage.read_text(encoding="utf-8")
+        updated = re.sub(
+            r"<!-- TDB_CASES_START -->.*?<!-- TDB_CASES_END -->",
+            lambda _: "<!-- TDB_CASES_START -->\n" + case_cards(tasks) + "\n<!-- TDB_CASES_END -->",
+            home, flags=re.S,
+        )
+        if updated != home:
+            write_page(homepage, updated)
     by_suite = index_tasks_by_suite(tasks)
+    day_index = read_json(docs / "data" / "index.json", {}) or {}
+    result_days = {
+        day for day in day_index.get("days", [])
+        if isinstance(day, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", day)
+    }
 
     counts = {"write": 0, "update": 0, "unchanged": 0}
 
@@ -943,14 +983,14 @@ def main(argv=None) -> int:
             sid = safe_id(s.get("id"))
             st = by_suite.get(s.get("id"), [])
             html = render_page(
-                title=f"Suite {sid} — terminal-daily-bench",
+                title=f"{_release_label(sid)} · Terminal-Daily",
                 description=(
-                    f"The {sid} daily suite: "
-                    f"{s.get('n_tasks', len(st))} tasks mined from merged pull requests."
+                    f"{_release_label(sid)}: "
+                    f"{s.get('n_tasks', len(st))} software tasks from merged public code changes."
                 ),
                 page_key="benchmarks",
                 depth=2,
-                body=suite_page_body(s, st),
+                body=suite_page_body(s, st, result_days),
                 script=SUITE_SCRIPT % json.dumps(sid),
             )
             tally(write_page(docs / "benchmarks" / sid / "index.html", html))
@@ -968,12 +1008,11 @@ def main(argv=None) -> int:
             if tid in seen:
                 continue
             seen.add(tid)
-            pkg = load_task_package(tid)
+            pkg = load_task_package(tid) or detail_packages.get(tid, {})
             html = render_page(
-                title=f"{t.get('title') or tid} — terminal-daily-bench",
+                title=f"{_task_title(t, pkg)} · Terminal-Daily",
                 description=(
-                    f"Task {tid} from suite {t.get('suite', '')}, mined from "
-                    f"{t.get('repo', 'a merged pull request')}. Scored by re-laid protected tests."
+                    f"{_task_title(t, pkg)}. A software maintenance task from a public code change."
                 ),
                 page_key="tasks",
                 depth=2,

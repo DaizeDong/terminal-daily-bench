@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Task packages · Terminal-Daily</title>
+<meta name="description" content="Each package describes a code repair and the environment used to evaluate it.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Task packages</h1>
+<p class="tdb-doc-sub">Each package describes a code repair and the environment used to evaluate it.</p>
+</header>
+
+<h2 id="layout"><a href="#layout">What a package contains</a></h2>
+<p>Start with the task description. The package also includes an environment recipe and evaluation settings. Archived packages add the reference solution and the tests needed to reproduce the result.</p><p><a href="files/">Read a task package</a> explains the files. The <a href="../../tasks/">task catalogue</a> lists available packages.</p>
+
+<h2 id="archive-vs-live"><a href="#archive-vs-live">Live and archived tasks</a></h2>
+<p>A task is live for the first two weeks after its source pull request is merged. During that period, its reference solution and protected test bodies are withheld. After two weeks, the package is archived and those materials are published.</p>
+
+<h2 id="shipped"><a href="#shipped">Choose the right package</a></h2>
+<dl class="tdb-defs">
+<dt>Live</dt><dd>Use it to inspect a current task and prepare a patch. Operators run the withheld tests before a submission can enter verified results.</dd>
+<dt>Archived</dt><dd>Use it to inspect the full task, reference solution, and tests. Local scoring still requires the <a href="../quickstart/#availability">evaluation environment</a>.</dd>
+</dl>
+
+<h2 id="failing-tests"><a href="#failing-tests">Tests listed in a live package</a></h2>
+<p>A live package lists the tests associated with the repair. Their names help describe the task; the protected assertions are withheld. A test name alone is not enough to reproduce or verify a score.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+<script>
+/* Fragments that moved when this page was split.
+
+   Nothing under docs/, web/ or tests/ links any of the ids below -- they were
+   checked -- but a reader's bookmark is a referrer nobody can grep for, so the
+   old URL still has to land on the content instead of on a page that silently
+   ignores its own fragment. Two sibling pages already shipped this and two did
+   not; one treatment survives a bookmark and the other does not, so the site
+   now does the same thing in all four places.
+
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "environment": "./build/",
+    "examples": "./examples/",
+    "instruction": "./files/",
+    "provenance": "./build/",
+    "publish": "./examples/",
+    "read-a-live-task": "./examples/",
+    "record": "./build/",
+    "scaffold": "./scaffold/",
+    "scaffold-limits": "./scaffold/",
+    "score-a-task": "./examples/",
+    "scoring": "./scoring/",
+    "scoring-guarantees": "./scoring/",
+    "scoring-record": "./scoring/",
+    "solution": "./build/",
+    "submit": "./examples/",
+    "task-toml": "./files/",
+    "tests": "./files/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
+})();
+</script>
+</body>
+</html>

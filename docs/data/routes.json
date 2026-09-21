@@ -1,0 +1,2264 @@
+{
+  "routes": [
+    {
+      "legacy": "/registry/",
+      "path": "/tasks/"
+    },
+    {
+      "legacy": "/registry/td-00ef11f5119f8a79/",
+      "path": "/tasks/td-00ef11f5119f8a79/"
+    },
+    {
+      "legacy": "/registry/td-0176ff59ad1bb441/",
+      "path": "/tasks/td-0176ff59ad1bb441/"
+    },
+    {
+      "legacy": "/registry/td-0263cd1c168cbeb6/",
+      "path": "/tasks/td-0263cd1c168cbeb6/"
+    },
+    {
+      "legacy": "/registry/td-03137cdb7a9cbaaa/",
+      "path": "/tasks/td-03137cdb7a9cbaaa/"
+    },
+    {
+      "legacy": "/registry/td-0394876511090fba/",
+      "path": "/tasks/td-0394876511090fba/"
+    },
+    {
+      "legacy": "/registry/td-048a5ff7be96681e/",
+      "path": "/tasks/td-048a5ff7be96681e/"
+    },
+    {
+      "legacy": "/registry/td-049839985189ebab/",
+      "path": "/tasks/td-049839985189ebab/"
+    },
+    {
+      "legacy": "/registry/td-0565a597cca1cf43/",
+      "path": "/tasks/td-0565a597cca1cf43/"
+    },
+    {
+      "legacy": "/registry/td-05c5de2bb990d139/",
+      "path": "/tasks/td-05c5de2bb990d139/"
+    },
+    {
+      "legacy": "/registry/td-0667f41c830de26b/",
+      "path": "/tasks/td-0667f41c830de26b/"
+    },
+    {
+      "legacy": "/registry/td-06b7b75b9a916207/",
+      "path": "/tasks/td-06b7b75b9a916207/"
+    },
+    {
+      "legacy": "/registry/td-06b850f0ba89c481/",
+      "path": "/tasks/td-06b850f0ba89c481/"
+    },
+    {
+      "legacy": "/registry/td-06f75e6d76a29ddc/",
+      "path": "/tasks/td-06f75e6d76a29ddc/"
+    },
+    {
+      "legacy": "/registry/td-07a54c4e684f2fc7/",
+      "path": "/tasks/td-07a54c4e684f2fc7/"
+    },
+    {
+      "legacy": "/registry/td-07a9c3e377139778/",
+      "path": "/tasks/td-07a9c3e377139778/"
+    },
+    {
+      "legacy": "/registry/td-07f6292be0cb0bff/",
+      "path": "/tasks/td-07f6292be0cb0bff/"
+    },
+    {
+      "legacy": "/registry/td-080f736f685d2560/",
+      "path": "/tasks/td-080f736f685d2560/"
+    },
+    {
+      "legacy": "/registry/td-0822994c56aa9aed/",
+      "path": "/tasks/td-0822994c56aa9aed/"
+    },
+    {
+      "legacy": "/registry/td-084cf6f831d9eb3a/",
+      "path": "/tasks/td-084cf6f831d9eb3a/"
+    },
+    {
+      "legacy": "/registry/td-0980962a477fa0f5/",
+      "path": "/tasks/td-0980962a477fa0f5/"
+    },
+    {
+      "legacy": "/registry/td-0987fce7d3a8aab4/",
+      "path": "/tasks/td-0987fce7d3a8aab4/"
+    },
+    {
+      "legacy": "/registry/td-09abb8690a2dc7a4/",
+      "path": "/tasks/td-09abb8690a2dc7a4/"
+    },
+    {
+      "legacy": "/registry/td-0a4c3d30bcad3651/",
+      "path": "/tasks/td-0a4c3d30bcad3651/"
+    },
+    {
+      "legacy": "/registry/td-0bc205db2e08e70f/",
+      "path": "/tasks/td-0bc205db2e08e70f/"
+    },
+    {
+      "legacy": "/registry/td-0c14cc8c6be48d82/",
+      "path": "/tasks/td-0c14cc8c6be48d82/"
+    },
+    {
+      "legacy": "/registry/td-0c60df86d62a3197/",
+      "path": "/tasks/td-0c60df86d62a3197/"
+    },
+    {
+      "legacy": "/registry/td-0e0911d980675cb3/",
+      "path": "/tasks/td-0e0911d980675cb3/"
+    },
+    {
+      "legacy": "/registry/td-0f2878cf111c8d16/",
+      "path": "/tasks/td-0f2878cf111c8d16/"
+    },
+    {
+      "legacy": "/registry/td-0f76fe4aa9928943/",
+      "path": "/tasks/td-0f76fe4aa9928943/"
+    },
+    {
+      "legacy": "/registry/td-105e4dee15a31679/",
+      "path": "/tasks/td-105e4dee15a31679/"
+    },
+    {
+      "legacy": "/registry/td-10d13616da715aca/",
+      "path": "/tasks/td-10d13616da715aca/"
+    },
+    {
+      "legacy": "/registry/td-1112e680c9d5f642/",
+      "path": "/tasks/td-1112e680c9d5f642/"
+    },
+    {
+      "legacy": "/registry/td-1146a5d4e5e987d8/",
+      "path": "/tasks/td-1146a5d4e5e987d8/"
+    },
+    {
+      "legacy": "/registry/td-123b3c8d9c22a9a3/",
+      "path": "/tasks/td-123b3c8d9c22a9a3/"
+    },
+    {
+      "legacy": "/registry/td-13eb0948b38e2315/",
+      "path": "/tasks/td-13eb0948b38e2315/"
+    },
+    {
+      "legacy": "/registry/td-14227cc59b6e7d6d/",
+      "path": "/tasks/td-14227cc59b6e7d6d/"
+    },
+    {
+      "legacy": "/registry/td-1429f4968efb8658/",
+      "path": "/tasks/td-1429f4968efb8658/"
+    },
+    {
+      "legacy": "/registry/td-14a268d498129959/",
+      "path": "/tasks/td-14a268d498129959/"
+    },
+    {
+      "legacy": "/registry/td-14d34f6a3408efbf/",
+      "path": "/tasks/td-14d34f6a3408efbf/"
+    },
+    {
+      "legacy": "/registry/td-14e232e3b26f152e/",
+      "path": "/tasks/td-14e232e3b26f152e/"
+    },
+    {
+      "legacy": "/registry/td-150cc24fe18ca0bf/",
+      "path": "/tasks/td-150cc24fe18ca0bf/"
+    },
+    {
+      "legacy": "/registry/td-152b5e8e36139838/",
+      "path": "/tasks/td-152b5e8e36139838/"
+    },
+    {
+      "legacy": "/registry/td-15ced6f65a875e3e/",
+      "path": "/tasks/td-15ced6f65a875e3e/"
+    },
+    {
+      "legacy": "/registry/td-15de98a794ba8112/",
+      "path": "/tasks/td-15de98a794ba8112/"
+    },
+    {
+      "legacy": "/registry/td-15e796f0ba847e2d/",
+      "path": "/tasks/td-15e796f0ba847e2d/"
+    },
+    {
+      "legacy": "/registry/td-15f749f1a9de3073/",
+      "path": "/tasks/td-15f749f1a9de3073/"
+    },
+    {
+      "legacy": "/registry/td-172882a1d04a497b/",
+      "path": "/tasks/td-172882a1d04a497b/"
+    },
+    {
+      "legacy": "/registry/td-17400aa343ff3056/",
+      "path": "/tasks/td-17400aa343ff3056/"
+    },
+    {
+      "legacy": "/registry/td-1743dd631cb18b27/",
+      "path": "/tasks/td-1743dd631cb18b27/"
+    },
+    {
+      "legacy": "/registry/td-1976e0af7536d92d/",
+      "path": "/tasks/td-1976e0af7536d92d/"
+    },
+    {
+      "legacy": "/registry/td-19c432b6ad32355e/",
+      "path": "/tasks/td-19c432b6ad32355e/"
+    },
+    {
+      "legacy": "/registry/td-1a9ac291f60512de/",
+      "path": "/tasks/td-1a9ac291f60512de/"
+    },
+    {
+      "legacy": "/registry/td-1ae72ada0f381926/",
+      "path": "/tasks/td-1ae72ada0f381926/"
+    },
+    {
+      "legacy": "/registry/td-1bba65ed477c9e29/",
+      "path": "/tasks/td-1bba65ed477c9e29/"
+    },
+    {
+      "legacy": "/registry/td-1bfc0571c6c30dc0/",
+      "path": "/tasks/td-1bfc0571c6c30dc0/"
+    },
+    {
+      "legacy": "/registry/td-1c0e0f84b86e794e/",
+      "path": "/tasks/td-1c0e0f84b86e794e/"
+    },
+    {
+      "legacy": "/registry/td-1c4fe4ee0dce381e/",
+      "path": "/tasks/td-1c4fe4ee0dce381e/"
+    },
+    {
+      "legacy": "/registry/td-1d71182a2df2b64d/",
+      "path": "/tasks/td-1d71182a2df2b64d/"
+    },
+    {
+      "legacy": "/registry/td-1e814dad6ba03755/",
+      "path": "/tasks/td-1e814dad6ba03755/"
+    },
+    {
+      "legacy": "/registry/td-1f44cf5052e7beff/",
+      "path": "/tasks/td-1f44cf5052e7beff/"
+    },
+    {
+      "legacy": "/registry/td-1f780bedacdcb6de/",
+      "path": "/tasks/td-1f780bedacdcb6de/"
+    },
+    {
+      "legacy": "/registry/td-2039b165affdc1b4/",
+      "path": "/tasks/td-2039b165affdc1b4/"
+    },
+    {
+      "legacy": "/registry/td-20eafaac20cbf4f8/",
+      "path": "/tasks/td-20eafaac20cbf4f8/"
+    },
+    {
+      "legacy": "/registry/td-215529f1255d9b3d/",
+      "path": "/tasks/td-215529f1255d9b3d/"
+    },
+    {
+      "legacy": "/registry/td-21c4c7ba73da2ad6/",
+      "path": "/tasks/td-21c4c7ba73da2ad6/"
+    },
+    {
+      "legacy": "/registry/td-224f71aa33f5b06f/",
+      "path": "/tasks/td-224f71aa33f5b06f/"
+    },
+    {
+      "legacy": "/registry/td-230aaa1c5c1dabd2/",
+      "path": "/tasks/td-230aaa1c5c1dabd2/"
+    },
+    {
+      "legacy": "/registry/td-230b9679c632f9cd/",
+      "path": "/tasks/td-230b9679c632f9cd/"
+    },
+    {
+      "legacy": "/registry/td-23116647bb846dae/",
+      "path": "/tasks/td-23116647bb846dae/"
+    },
+    {
+      "legacy": "/registry/td-23334546970c5de0/",
+      "path": "/tasks/td-23334546970c5de0/"
+    },
+    {
+      "legacy": "/registry/td-2430537af4b4cb7d/",
+      "path": "/tasks/td-2430537af4b4cb7d/"
+    },
+    {
+      "legacy": "/registry/td-24cd36513d971eda/",
+      "path": "/tasks/td-24cd36513d971eda/"
+    },
+    {
+      "legacy": "/registry/td-25198976d4e3cc28/",
+      "path": "/tasks/td-25198976d4e3cc28/"
+    },
+    {
+      "legacy": "/registry/td-25cceb3b9de8a600/",
+      "path": "/tasks/td-25cceb3b9de8a600/"
+    },
+    {
+      "legacy": "/registry/td-25ef372608020d70/",
+      "path": "/tasks/td-25ef372608020d70/"
+    },
+    {
+      "legacy": "/registry/td-26dcf1ddfc6cd8d2/",
+      "path": "/tasks/td-26dcf1ddfc6cd8d2/"
+    },
+    {
+      "legacy": "/registry/td-26e6f707af4b6d52/",
+      "path": "/tasks/td-26e6f707af4b6d52/"
+    },
+    {
+      "legacy": "/registry/td-27215bb023cab249/",
+      "path": "/tasks/td-27215bb023cab249/"
+    },
+    {
+      "legacy": "/registry/td-2778cf78af9a69e5/",
+      "path": "/tasks/td-2778cf78af9a69e5/"
+    },
+    {
+      "legacy": "/registry/td-27b4877df50c6836/",
+      "path": "/tasks/td-27b4877df50c6836/"
+    },
+    {
+      "legacy": "/registry/td-2851abf600a493e5/",
+      "path": "/tasks/td-2851abf600a493e5/"
+    },
+    {
+      "legacy": "/registry/td-288d17d23c160bcd/",
+      "path": "/tasks/td-288d17d23c160bcd/"
+    },
+    {
+      "legacy": "/registry/td-2a2150b8e1dd2372/",
+      "path": "/tasks/td-2a2150b8e1dd2372/"
+    },
+    {
+      "legacy": "/registry/td-2b6d90dbdf14202e/",
+      "path": "/tasks/td-2b6d90dbdf14202e/"
+    },
+    {
+      "legacy": "/registry/td-2c5b76e3d15a7260/",
+      "path": "/tasks/td-2c5b76e3d15a7260/"
+    },
+    {
+      "legacy": "/registry/td-2c6f22e9f33d9472/",
+      "path": "/tasks/td-2c6f22e9f33d9472/"
+    },
+    {
+      "legacy": "/registry/td-2d022d8755399371/",
+      "path": "/tasks/td-2d022d8755399371/"
+    },
+    {
+      "legacy": "/registry/td-2df97642a73aba1f/",
+      "path": "/tasks/td-2df97642a73aba1f/"
+    },
+    {
+      "legacy": "/registry/td-2e3daefd566782e4/",
+      "path": "/tasks/td-2e3daefd566782e4/"
+    },
+    {
+      "legacy": "/registry/td-2eed3550c27b3d39/",
+      "path": "/tasks/td-2eed3550c27b3d39/"
+    },
+    {
+      "legacy": "/registry/td-2fb46c50881a0d73/",
+      "path": "/tasks/td-2fb46c50881a0d73/"
+    },
+    {
+      "legacy": "/registry/td-2fbc804f19e8dad7/",
+      "path": "/tasks/td-2fbc804f19e8dad7/"
+    },
+    {
+      "legacy": "/registry/td-30f08c1e9e822109/",
+      "path": "/tasks/td-30f08c1e9e822109/"
+    },
+    {
+      "legacy": "/registry/td-311fa42184a8e0a2/",
+      "path": "/tasks/td-311fa42184a8e0a2/"
+    },
+    {
+      "legacy": "/registry/td-32333eabb38ced69/",
+      "path": "/tasks/td-32333eabb38ced69/"
+    },
+    {
+      "legacy": "/registry/td-32786aa898f069e9/",
+      "path": "/tasks/td-32786aa898f069e9/"
+    },
+    {
+      "legacy": "/registry/td-334cd88fbbab8fce/",
+      "path": "/tasks/td-334cd88fbbab8fce/"
+    },
+    {
+      "legacy": "/registry/td-33634ae87ab2c78b/",
+      "path": "/tasks/td-33634ae87ab2c78b/"
+    },
+    {
+      "legacy": "/registry/td-33ffc1bdbd73167b/",
+      "path": "/tasks/td-33ffc1bdbd73167b/"
+    },
+    {
+      "legacy": "/registry/td-34bc19c54c85f5ab/",
+      "path": "/tasks/td-34bc19c54c85f5ab/"
+    },
+    {
+      "legacy": "/registry/td-352f739efbf001d0/",
+      "path": "/tasks/td-352f739efbf001d0/"
+    },
+    {
+      "legacy": "/registry/td-353d3a1ca1556d1b/",
+      "path": "/tasks/td-353d3a1ca1556d1b/"
+    },
+    {
+      "legacy": "/registry/td-358ac0fdef9266ac/",
+      "path": "/tasks/td-358ac0fdef9266ac/"
+    },
+    {
+      "legacy": "/registry/td-36ae31b683b95793/",
+      "path": "/tasks/td-36ae31b683b95793/"
+    },
+    {
+      "legacy": "/registry/td-36b2d2254294be44/",
+      "path": "/tasks/td-36b2d2254294be44/"
+    },
+    {
+      "legacy": "/registry/td-373d99a89e89d443/",
+      "path": "/tasks/td-373d99a89e89d443/"
+    },
+    {
+      "legacy": "/registry/td-38446475afe7e31d/",
+      "path": "/tasks/td-38446475afe7e31d/"
+    },
+    {
+      "legacy": "/registry/td-387b0882dad45c60/",
+      "path": "/tasks/td-387b0882dad45c60/"
+    },
+    {
+      "legacy": "/registry/td-389b6d72685fa416/",
+      "path": "/tasks/td-389b6d72685fa416/"
+    },
+    {
+      "legacy": "/registry/td-3917faa8ced37005/",
+      "path": "/tasks/td-3917faa8ced37005/"
+    },
+    {
+      "legacy": "/registry/td-394d1de1a5fcb0f5/",
+      "path": "/tasks/td-394d1de1a5fcb0f5/"
+    },
+    {
+      "legacy": "/registry/td-399edd99273e7a61/",
+      "path": "/tasks/td-399edd99273e7a61/"
+    },
+    {
+      "legacy": "/registry/td-39c299153c88f866/",
+      "path": "/tasks/td-39c299153c88f866/"
+    },
+    {
+      "legacy": "/registry/td-3a66181dbba62f77/",
+      "path": "/tasks/td-3a66181dbba62f77/"
+    },
+    {
+      "legacy": "/registry/td-3a6ffa310eeecfbf/",
+      "path": "/tasks/td-3a6ffa310eeecfbf/"
+    },
+    {
+      "legacy": "/registry/td-3b066bf93e5446c0/",
+      "path": "/tasks/td-3b066bf93e5446c0/"
+    },
+    {
+      "legacy": "/registry/td-3b88c35e1033b47f/",
+      "path": "/tasks/td-3b88c35e1033b47f/"
+    },
+    {
+      "legacy": "/registry/td-3be1a7af57f0f559/",
+      "path": "/tasks/td-3be1a7af57f0f559/"
+    },
+    {
+      "legacy": "/registry/td-3cbae1d0039f93bb/",
+      "path": "/tasks/td-3cbae1d0039f93bb/"
+    },
+    {
+      "legacy": "/registry/td-3db516c35ed296e7/",
+      "path": "/tasks/td-3db516c35ed296e7/"
+    },
+    {
+      "legacy": "/registry/td-3e581ba3eb25fbfd/",
+      "path": "/tasks/td-3e581ba3eb25fbfd/"
+    },
+    {
+      "legacy": "/registry/td-3f82c2e5c91b7c6e/",
+      "path": "/tasks/td-3f82c2e5c91b7c6e/"
+    },
+    {
+      "legacy": "/registry/td-3fe7f40956f9dbd1/",
+      "path": "/tasks/td-3fe7f40956f9dbd1/"
+    },
+    {
+      "legacy": "/registry/td-40063b5d3aa6ab4b/",
+      "path": "/tasks/td-40063b5d3aa6ab4b/"
+    },
+    {
+      "legacy": "/registry/td-40e0a8fdf306d4c7/",
+      "path": "/tasks/td-40e0a8fdf306d4c7/"
+    },
+    {
+      "legacy": "/registry/td-40fc393f566a672b/",
+      "path": "/tasks/td-40fc393f566a672b/"
+    },
+    {
+      "legacy": "/registry/td-41208e9bb575e61f/",
+      "path": "/tasks/td-41208e9bb575e61f/"
+    },
+    {
+      "legacy": "/registry/td-415cbe190bcfd66d/",
+      "path": "/tasks/td-415cbe190bcfd66d/"
+    },
+    {
+      "legacy": "/registry/td-4165a4fb9c0acddb/",
+      "path": "/tasks/td-4165a4fb9c0acddb/"
+    },
+    {
+      "legacy": "/registry/td-428e3784c727ef72/",
+      "path": "/tasks/td-428e3784c727ef72/"
+    },
+    {
+      "legacy": "/registry/td-42da1c5dc37cb47a/",
+      "path": "/tasks/td-42da1c5dc37cb47a/"
+    },
+    {
+      "legacy": "/registry/td-430816a36f6f7749/",
+      "path": "/tasks/td-430816a36f6f7749/"
+    },
+    {
+      "legacy": "/registry/td-4314f1556f080648/",
+      "path": "/tasks/td-4314f1556f080648/"
+    },
+    {
+      "legacy": "/registry/td-4369ed3a387d11e8/",
+      "path": "/tasks/td-4369ed3a387d11e8/"
+    },
+    {
+      "legacy": "/registry/td-43934e7a811c9e83/",
+      "path": "/tasks/td-43934e7a811c9e83/"
+    },
+    {
+      "legacy": "/registry/td-43ce494bee2f12ab/",
+      "path": "/tasks/td-43ce494bee2f12ab/"
+    },
+    {
+      "legacy": "/registry/td-43d3f430db891b33/",
+      "path": "/tasks/td-43d3f430db891b33/"
+    },
+    {
+      "legacy": "/registry/td-44955d091b1fe394/",
+      "path": "/tasks/td-44955d091b1fe394/"
+    },
+    {
+      "legacy": "/registry/td-45722f8afb3aa527/",
+      "path": "/tasks/td-45722f8afb3aa527/"
+    },
+    {
+      "legacy": "/registry/td-45815ec8eb09e65c/",
+      "path": "/tasks/td-45815ec8eb09e65c/"
+    },
+    {
+      "legacy": "/registry/td-471fc13e09aa9544/",
+      "path": "/tasks/td-471fc13e09aa9544/"
+    },
+    {
+      "legacy": "/registry/td-47590e33b7ff6e17/",
+      "path": "/tasks/td-47590e33b7ff6e17/"
+    },
+    {
+      "legacy": "/registry/td-4769f3f9e2a4ae4a/",
+      "path": "/tasks/td-4769f3f9e2a4ae4a/"
+    },
+    {
+      "legacy": "/registry/td-48f89934de58e0e3/",
+      "path": "/tasks/td-48f89934de58e0e3/"
+    },
+    {
+      "legacy": "/registry/td-49258d4b396257a7/",
+      "path": "/tasks/td-49258d4b396257a7/"
+    },
+    {
+      "legacy": "/registry/td-4972e49463869878/",
+      "path": "/tasks/td-4972e49463869878/"
+    },
+    {
+      "legacy": "/registry/td-4a3ec98af511ae72/",
+      "path": "/tasks/td-4a3ec98af511ae72/"
+    },
+    {
+      "legacy": "/registry/td-4a5a61372d1b0d20/",
+      "path": "/tasks/td-4a5a61372d1b0d20/"
+    },
+    {
+      "legacy": "/registry/td-4b0c38b03c687a64/",
+      "path": "/tasks/td-4b0c38b03c687a64/"
+    },
+    {
+      "legacy": "/registry/td-4b0e67660dabca0c/",
+      "path": "/tasks/td-4b0e67660dabca0c/"
+    },
+    {
+      "legacy": "/registry/td-4df6c6d83bb4e6db/",
+      "path": "/tasks/td-4df6c6d83bb4e6db/"
+    },
+    {
+      "legacy": "/registry/td-4e5b76c7a70f53c2/",
+      "path": "/tasks/td-4e5b76c7a70f53c2/"
+    },
+    {
+      "legacy": "/registry/td-4eb7aa52cf577648/",
+      "path": "/tasks/td-4eb7aa52cf577648/"
+    },
+    {
+      "legacy": "/registry/td-4ec48cede5878846/",
+      "path": "/tasks/td-4ec48cede5878846/"
+    },
+    {
+      "legacy": "/registry/td-50a25ba01fca8380/",
+      "path": "/tasks/td-50a25ba01fca8380/"
+    },
+    {
+      "legacy": "/registry/td-5118db1c7e676f2d/",
+      "path": "/tasks/td-5118db1c7e676f2d/"
+    },
+    {
+      "legacy": "/registry/td-516ccca020c3e757/",
+      "path": "/tasks/td-516ccca020c3e757/"
+    },
+    {
+      "legacy": "/registry/td-51b5e6ef9cc54c19/",
+      "path": "/tasks/td-51b5e6ef9cc54c19/"
+    },
+    {
+      "legacy": "/registry/td-51e60428e25087f9/",
+      "path": "/tasks/td-51e60428e25087f9/"
+    },
+    {
+      "legacy": "/registry/td-51f38f8f90cbe9d6/",
+      "path": "/tasks/td-51f38f8f90cbe9d6/"
+    },
+    {
+      "legacy": "/registry/td-52694fc66b4c78d7/",
+      "path": "/tasks/td-52694fc66b4c78d7/"
+    },
+    {
+      "legacy": "/registry/td-52c419bdf0f25aa8/",
+      "path": "/tasks/td-52c419bdf0f25aa8/"
+    },
+    {
+      "legacy": "/registry/td-534b263dc93dff7f/",
+      "path": "/tasks/td-534b263dc93dff7f/"
+    },
+    {
+      "legacy": "/registry/td-5395dde02cc33322/",
+      "path": "/tasks/td-5395dde02cc33322/"
+    },
+    {
+      "legacy": "/registry/td-543ddbe4c9fcc952/",
+      "path": "/tasks/td-543ddbe4c9fcc952/"
+    },
+    {
+      "legacy": "/registry/td-54b769dc3d661e39/",
+      "path": "/tasks/td-54b769dc3d661e39/"
+    },
+    {
+      "legacy": "/registry/td-55800f501aec33e4/",
+      "path": "/tasks/td-55800f501aec33e4/"
+    },
+    {
+      "legacy": "/registry/td-559b4b2bee7d964b/",
+      "path": "/tasks/td-559b4b2bee7d964b/"
+    },
+    {
+      "legacy": "/registry/td-55cb78b3af004049/",
+      "path": "/tasks/td-55cb78b3af004049/"
+    },
+    {
+      "legacy": "/registry/td-56a45b1551b882f6/",
+      "path": "/tasks/td-56a45b1551b882f6/"
+    },
+    {
+      "legacy": "/registry/td-57aba808ba464747/",
+      "path": "/tasks/td-57aba808ba464747/"
+    },
+    {
+      "legacy": "/registry/td-580b22ad12ab39c6/",
+      "path": "/tasks/td-580b22ad12ab39c6/"
+    },
+    {
+      "legacy": "/registry/td-582d776ee8fd7c28/",
+      "path": "/tasks/td-582d776ee8fd7c28/"
+    },
+    {
+      "legacy": "/registry/td-5842c10237b17bb4/",
+      "path": "/tasks/td-5842c10237b17bb4/"
+    },
+    {
+      "legacy": "/registry/td-58db3aac4e1612d0/",
+      "path": "/tasks/td-58db3aac4e1612d0/"
+    },
+    {
+      "legacy": "/registry/td-5a441747bf3c12d7/",
+      "path": "/tasks/td-5a441747bf3c12d7/"
+    },
+    {
+      "legacy": "/registry/td-5af44f6afff6bd11/",
+      "path": "/tasks/td-5af44f6afff6bd11/"
+    },
+    {
+      "legacy": "/registry/td-5b13f4573f056643/",
+      "path": "/tasks/td-5b13f4573f056643/"
+    },
+    {
+      "legacy": "/registry/td-5b2b7e16b5d0a3b6/",
+      "path": "/tasks/td-5b2b7e16b5d0a3b6/"
+    },
+    {
+      "legacy": "/registry/td-5b45b6e9b413d312/",
+      "path": "/tasks/td-5b45b6e9b413d312/"
+    },
+    {
+      "legacy": "/registry/td-5b9782699a22be02/",
+      "path": "/tasks/td-5b9782699a22be02/"
+    },
+    {
+      "legacy": "/registry/td-5cf14361c19fc401/",
+      "path": "/tasks/td-5cf14361c19fc401/"
+    },
+    {
+      "legacy": "/registry/td-5cf73dbf59c9890c/",
+      "path": "/tasks/td-5cf73dbf59c9890c/"
+    },
+    {
+      "legacy": "/registry/td-5d62365c81603bb4/",
+      "path": "/tasks/td-5d62365c81603bb4/"
+    },
+    {
+      "legacy": "/registry/td-5d73078aacbbb36c/",
+      "path": "/tasks/td-5d73078aacbbb36c/"
+    },
+    {
+      "legacy": "/registry/td-5d9aa5151dd271d8/",
+      "path": "/tasks/td-5d9aa5151dd271d8/"
+    },
+    {
+      "legacy": "/registry/td-5dc85b7da591412a/",
+      "path": "/tasks/td-5dc85b7da591412a/"
+    },
+    {
+      "legacy": "/registry/td-5df559d6373c4047/",
+      "path": "/tasks/td-5df559d6373c4047/"
+    },
+    {
+      "legacy": "/registry/td-5df9c3cfa140e06d/",
+      "path": "/tasks/td-5df9c3cfa140e06d/"
+    },
+    {
+      "legacy": "/registry/td-5e2d24c2bda82748/",
+      "path": "/tasks/td-5e2d24c2bda82748/"
+    },
+    {
+      "legacy": "/registry/td-5e510b1f74e88ba5/",
+      "path": "/tasks/td-5e510b1f74e88ba5/"
+    },
+    {
+      "legacy": "/registry/td-5ea248d3cc1b69d2/",
+      "path": "/tasks/td-5ea248d3cc1b69d2/"
+    },
+    {
+      "legacy": "/registry/td-5ef7d8897760e636/",
+      "path": "/tasks/td-5ef7d8897760e636/"
+    },
+    {
+      "legacy": "/registry/td-5f952ce374849a64/",
+      "path": "/tasks/td-5f952ce374849a64/"
+    },
+    {
+      "legacy": "/registry/td-5ff817d8ba376d97/",
+      "path": "/tasks/td-5ff817d8ba376d97/"
+    },
+    {
+      "legacy": "/registry/td-5ffd97c260c02dfb/",
+      "path": "/tasks/td-5ffd97c260c02dfb/"
+    },
+    {
+      "legacy": "/registry/td-600c95a477170d36/",
+      "path": "/tasks/td-600c95a477170d36/"
+    },
+    {
+      "legacy": "/registry/td-601b9b9fe1a248c6/",
+      "path": "/tasks/td-601b9b9fe1a248c6/"
+    },
+    {
+      "legacy": "/registry/td-6025f2641895f71c/",
+      "path": "/tasks/td-6025f2641895f71c/"
+    },
+    {
+      "legacy": "/registry/td-61e8a47aab776300/",
+      "path": "/tasks/td-61e8a47aab776300/"
+    },
+    {
+      "legacy": "/registry/td-61eeddb64c4e346d/",
+      "path": "/tasks/td-61eeddb64c4e346d/"
+    },
+    {
+      "legacy": "/registry/td-625055c3e86304e4/",
+      "path": "/tasks/td-625055c3e86304e4/"
+    },
+    {
+      "legacy": "/registry/td-625db5b8361e8185/",
+      "path": "/tasks/td-625db5b8361e8185/"
+    },
+    {
+      "legacy": "/registry/td-626b33ab47f3a6eb/",
+      "path": "/tasks/td-626b33ab47f3a6eb/"
+    },
+    {
+      "legacy": "/registry/td-62760ad1d4ed827e/",
+      "path": "/tasks/td-62760ad1d4ed827e/"
+    },
+    {
+      "legacy": "/registry/td-63849d24555f3850/",
+      "path": "/tasks/td-63849d24555f3850/"
+    },
+    {
+      "legacy": "/registry/td-63d1082e3ec30755/",
+      "path": "/tasks/td-63d1082e3ec30755/"
+    },
+    {
+      "legacy": "/registry/td-645a88238f4902d5/",
+      "path": "/tasks/td-645a88238f4902d5/"
+    },
+    {
+      "legacy": "/registry/td-645f816ef37c9874/",
+      "path": "/tasks/td-645f816ef37c9874/"
+    },
+    {
+      "legacy": "/registry/td-646a8a15f64a3c90/",
+      "path": "/tasks/td-646a8a15f64a3c90/"
+    },
+    {
+      "legacy": "/registry/td-64bae8ea0316c8dd/",
+      "path": "/tasks/td-64bae8ea0316c8dd/"
+    },
+    {
+      "legacy": "/registry/td-65baed5c1cd731c6/",
+      "path": "/tasks/td-65baed5c1cd731c6/"
+    },
+    {
+      "legacy": "/registry/td-66d01cba2ad0adc2/",
+      "path": "/tasks/td-66d01cba2ad0adc2/"
+    },
+    {
+      "legacy": "/registry/td-6750abf1ab84864c/",
+      "path": "/tasks/td-6750abf1ab84864c/"
+    },
+    {
+      "legacy": "/registry/td-67724a588b70ee5c/",
+      "path": "/tasks/td-67724a588b70ee5c/"
+    },
+    {
+      "legacy": "/registry/td-68ef492b6fb3956e/",
+      "path": "/tasks/td-68ef492b6fb3956e/"
+    },
+    {
+      "legacy": "/registry/td-699c8637e7c1e14f/",
+      "path": "/tasks/td-699c8637e7c1e14f/"
+    },
+    {
+      "legacy": "/registry/td-69a8cad24a66e133/",
+      "path": "/tasks/td-69a8cad24a66e133/"
+    },
+    {
+      "legacy": "/registry/td-69ec1d16aa21e614/",
+      "path": "/tasks/td-69ec1d16aa21e614/"
+    },
+    {
+      "legacy": "/registry/td-6a824a1ab9be8b9c/",
+      "path": "/tasks/td-6a824a1ab9be8b9c/"
+    },
+    {
+      "legacy": "/registry/td-6c1b1fcb31cdc49f/",
+      "path": "/tasks/td-6c1b1fcb31cdc49f/"
+    },
+    {
+      "legacy": "/registry/td-6c681c335b468cb1/",
+      "path": "/tasks/td-6c681c335b468cb1/"
+    },
+    {
+      "legacy": "/registry/td-6c9b088335feb746/",
+      "path": "/tasks/td-6c9b088335feb746/"
+    },
+    {
+      "legacy": "/registry/td-6d34cb72772b435c/",
+      "path": "/tasks/td-6d34cb72772b435c/"
+    },
+    {
+      "legacy": "/registry/td-6e160b3b79439907/",
+      "path": "/tasks/td-6e160b3b79439907/"
+    },
+    {
+      "legacy": "/registry/td-6e360ec3a6df9553/",
+      "path": "/tasks/td-6e360ec3a6df9553/"
+    },
+    {
+      "legacy": "/registry/td-6ee6220ba8538197/",
+      "path": "/tasks/td-6ee6220ba8538197/"
+    },
+    {
+      "legacy": "/registry/td-6fa49c99635bde28/",
+      "path": "/tasks/td-6fa49c99635bde28/"
+    },
+    {
+      "legacy": "/registry/td-6fedde17c75ca4cb/",
+      "path": "/tasks/td-6fedde17c75ca4cb/"
+    },
+    {
+      "legacy": "/registry/td-703875d00986ab8d/",
+      "path": "/tasks/td-703875d00986ab8d/"
+    },
+    {
+      "legacy": "/registry/td-707da56342332cbc/",
+      "path": "/tasks/td-707da56342332cbc/"
+    },
+    {
+      "legacy": "/registry/td-70f94d2c6c42cc1d/",
+      "path": "/tasks/td-70f94d2c6c42cc1d/"
+    },
+    {
+      "legacy": "/registry/td-71076ad73f0a70ef/",
+      "path": "/tasks/td-71076ad73f0a70ef/"
+    },
+    {
+      "legacy": "/registry/td-717ed5ee3d3830b1/",
+      "path": "/tasks/td-717ed5ee3d3830b1/"
+    },
+    {
+      "legacy": "/registry/td-72183c45996e3314/",
+      "path": "/tasks/td-72183c45996e3314/"
+    },
+    {
+      "legacy": "/registry/td-721c47ae86f458ad/",
+      "path": "/tasks/td-721c47ae86f458ad/"
+    },
+    {
+      "legacy": "/registry/td-72e890e35e617758/",
+      "path": "/tasks/td-72e890e35e617758/"
+    },
+    {
+      "legacy": "/registry/td-7343e19254595198/",
+      "path": "/tasks/td-7343e19254595198/"
+    },
+    {
+      "legacy": "/registry/td-73f42b67c97eae89/",
+      "path": "/tasks/td-73f42b67c97eae89/"
+    },
+    {
+      "legacy": "/registry/td-742707b9dfa97ee6/",
+      "path": "/tasks/td-742707b9dfa97ee6/"
+    },
+    {
+      "legacy": "/registry/td-74472ff37248b76c/",
+      "path": "/tasks/td-74472ff37248b76c/"
+    },
+    {
+      "legacy": "/registry/td-7463e8639d790381/",
+      "path": "/tasks/td-7463e8639d790381/"
+    },
+    {
+      "legacy": "/registry/td-74f5e5be783138f5/",
+      "path": "/tasks/td-74f5e5be783138f5/"
+    },
+    {
+      "legacy": "/registry/td-74fcfa9f7bfbd244/",
+      "path": "/tasks/td-74fcfa9f7bfbd244/"
+    },
+    {
+      "legacy": "/registry/td-752955c23836a7cd/",
+      "path": "/tasks/td-752955c23836a7cd/"
+    },
+    {
+      "legacy": "/registry/td-759df575203ef9a3/",
+      "path": "/tasks/td-759df575203ef9a3/"
+    },
+    {
+      "legacy": "/registry/td-781453e813c11941/",
+      "path": "/tasks/td-781453e813c11941/"
+    },
+    {
+      "legacy": "/registry/td-78ce543722ea2671/",
+      "path": "/tasks/td-78ce543722ea2671/"
+    },
+    {
+      "legacy": "/registry/td-78d10de293034682/",
+      "path": "/tasks/td-78d10de293034682/"
+    },
+    {
+      "legacy": "/registry/td-79e4ef873e5ebae2/",
+      "path": "/tasks/td-79e4ef873e5ebae2/"
+    },
+    {
+      "legacy": "/registry/td-7b63d1d1e6234ec4/",
+      "path": "/tasks/td-7b63d1d1e6234ec4/"
+    },
+    {
+      "legacy": "/registry/td-7c179caa8f1ccc93/",
+      "path": "/tasks/td-7c179caa8f1ccc93/"
+    },
+    {
+      "legacy": "/registry/td-7d4a08c4a21ff9bd/",
+      "path": "/tasks/td-7d4a08c4a21ff9bd/"
+    },
+    {
+      "legacy": "/registry/td-7d58141ffe53b958/",
+      "path": "/tasks/td-7d58141ffe53b958/"
+    },
+    {
+      "legacy": "/registry/td-7e0f5df483af83b0/",
+      "path": "/tasks/td-7e0f5df483af83b0/"
+    },
+    {
+      "legacy": "/registry/td-7e5287e8e7409f1a/",
+      "path": "/tasks/td-7e5287e8e7409f1a/"
+    },
+    {
+      "legacy": "/registry/td-7e7575ebf9223a97/",
+      "path": "/tasks/td-7e7575ebf9223a97/"
+    },
+    {
+      "legacy": "/registry/td-7e8acdc90e80d7de/",
+      "path": "/tasks/td-7e8acdc90e80d7de/"
+    },
+    {
+      "legacy": "/registry/td-7e8c5773ec7bd71e/",
+      "path": "/tasks/td-7e8c5773ec7bd71e/"
+    },
+    {
+      "legacy": "/registry/td-7f900bc124db1992/",
+      "path": "/tasks/td-7f900bc124db1992/"
+    },
+    {
+      "legacy": "/registry/td-80c689759b94cc5e/",
+      "path": "/tasks/td-80c689759b94cc5e/"
+    },
+    {
+      "legacy": "/registry/td-813e0e2e831c5f4e/",
+      "path": "/tasks/td-813e0e2e831c5f4e/"
+    },
+    {
+      "legacy": "/registry/td-816cd502918952e4/",
+      "path": "/tasks/td-816cd502918952e4/"
+    },
+    {
+      "legacy": "/registry/td-819f2ac85eeead88/",
+      "path": "/tasks/td-819f2ac85eeead88/"
+    },
+    {
+      "legacy": "/registry/td-81a07fa06dea82eb/",
+      "path": "/tasks/td-81a07fa06dea82eb/"
+    },
+    {
+      "legacy": "/registry/td-82552e3193df6b28/",
+      "path": "/tasks/td-82552e3193df6b28/"
+    },
+    {
+      "legacy": "/registry/td-825a7aceb42df15d/",
+      "path": "/tasks/td-825a7aceb42df15d/"
+    },
+    {
+      "legacy": "/registry/td-826087bc81783afe/",
+      "path": "/tasks/td-826087bc81783afe/"
+    },
+    {
+      "legacy": "/registry/td-830e2cb7ef48c7d0/",
+      "path": "/tasks/td-830e2cb7ef48c7d0/"
+    },
+    {
+      "legacy": "/registry/td-8338f63dfc06f594/",
+      "path": "/tasks/td-8338f63dfc06f594/"
+    },
+    {
+      "legacy": "/registry/td-84211402e52b7db8/",
+      "path": "/tasks/td-84211402e52b7db8/"
+    },
+    {
+      "legacy": "/registry/td-8428efb3f4cf1808/",
+      "path": "/tasks/td-8428efb3f4cf1808/"
+    },
+    {
+      "legacy": "/registry/td-84585d197069ae10/",
+      "path": "/tasks/td-84585d197069ae10/"
+    },
+    {
+      "legacy": "/registry/td-85527311cc954a5c/",
+      "path": "/tasks/td-85527311cc954a5c/"
+    },
+    {
+      "legacy": "/registry/td-8563a99b0ed0fb3d/",
+      "path": "/tasks/td-8563a99b0ed0fb3d/"
+    },
+    {
+      "legacy": "/registry/td-85c32f1f83a10854/",
+      "path": "/tasks/td-85c32f1f83a10854/"
+    },
+    {
+      "legacy": "/registry/td-85e626bf1f08c74f/",
+      "path": "/tasks/td-85e626bf1f08c74f/"
+    },
+    {
+      "legacy": "/registry/td-87320e1f66890322/",
+      "path": "/tasks/td-87320e1f66890322/"
+    },
+    {
+      "legacy": "/registry/td-874ad766dc41cec6/",
+      "path": "/tasks/td-874ad766dc41cec6/"
+    },
+    {
+      "legacy": "/registry/td-875886701b098a09/",
+      "path": "/tasks/td-875886701b098a09/"
+    },
+    {
+      "legacy": "/registry/td-87973214ffbc956b/",
+      "path": "/tasks/td-87973214ffbc956b/"
+    },
+    {
+      "legacy": "/registry/td-879741366d0283e9/",
+      "path": "/tasks/td-879741366d0283e9/"
+    },
+    {
+      "legacy": "/registry/td-87ce1ba357e33d17/",
+      "path": "/tasks/td-87ce1ba357e33d17/"
+    },
+    {
+      "legacy": "/registry/td-88670ed2736eaf7d/",
+      "path": "/tasks/td-88670ed2736eaf7d/"
+    },
+    {
+      "legacy": "/registry/td-895bbe3250273a27/",
+      "path": "/tasks/td-895bbe3250273a27/"
+    },
+    {
+      "legacy": "/registry/td-89607c9dc42e489d/",
+      "path": "/tasks/td-89607c9dc42e489d/"
+    },
+    {
+      "legacy": "/registry/td-89c724b066223878/",
+      "path": "/tasks/td-89c724b066223878/"
+    },
+    {
+      "legacy": "/registry/td-89e5d9486ac5302e/",
+      "path": "/tasks/td-89e5d9486ac5302e/"
+    },
+    {
+      "legacy": "/registry/td-8a28b19587a651d7/",
+      "path": "/tasks/td-8a28b19587a651d7/"
+    },
+    {
+      "legacy": "/registry/td-8a8eb962478238ec/",
+      "path": "/tasks/td-8a8eb962478238ec/"
+    },
+    {
+      "legacy": "/registry/td-8b5aac24794a8b67/",
+      "path": "/tasks/td-8b5aac24794a8b67/"
+    },
+    {
+      "legacy": "/registry/td-8cd8140345c51c40/",
+      "path": "/tasks/td-8cd8140345c51c40/"
+    },
+    {
+      "legacy": "/registry/td-8d5e2a2f6742546f/",
+      "path": "/tasks/td-8d5e2a2f6742546f/"
+    },
+    {
+      "legacy": "/registry/td-8d79b8a28f8063d8/",
+      "path": "/tasks/td-8d79b8a28f8063d8/"
+    },
+    {
+      "legacy": "/registry/td-8dab2f1a4ab85370/",
+      "path": "/tasks/td-8dab2f1a4ab85370/"
+    },
+    {
+      "legacy": "/registry/td-8e256eb038e80765/",
+      "path": "/tasks/td-8e256eb038e80765/"
+    },
+    {
+      "legacy": "/registry/td-8e9ce87e4fecd3ab/",
+      "path": "/tasks/td-8e9ce87e4fecd3ab/"
+    },
+    {
+      "legacy": "/registry/td-8ea1c4a1eded4486/",
+      "path": "/tasks/td-8ea1c4a1eded4486/"
+    },
+    {
+      "legacy": "/registry/td-8ef7c2e4d45ea2c2/",
+      "path": "/tasks/td-8ef7c2e4d45ea2c2/"
+    },
+    {
+      "legacy": "/registry/td-8f1fbd70511437ce/",
+      "path": "/tasks/td-8f1fbd70511437ce/"
+    },
+    {
+      "legacy": "/registry/td-8f59d5e9c8b20275/",
+      "path": "/tasks/td-8f59d5e9c8b20275/"
+    },
+    {
+      "legacy": "/registry/td-8f9410894b2f593f/",
+      "path": "/tasks/td-8f9410894b2f593f/"
+    },
+    {
+      "legacy": "/registry/td-8f9cf9573d08743d/",
+      "path": "/tasks/td-8f9cf9573d08743d/"
+    },
+    {
+      "legacy": "/registry/td-90014d43df3f19e6/",
+      "path": "/tasks/td-90014d43df3f19e6/"
+    },
+    {
+      "legacy": "/registry/td-90882f4ffb755d10/",
+      "path": "/tasks/td-90882f4ffb755d10/"
+    },
+    {
+      "legacy": "/registry/td-915fb015393896c3/",
+      "path": "/tasks/td-915fb015393896c3/"
+    },
+    {
+      "legacy": "/registry/td-91c66de827baccc3/",
+      "path": "/tasks/td-91c66de827baccc3/"
+    },
+    {
+      "legacy": "/registry/td-922170bc16461832/",
+      "path": "/tasks/td-922170bc16461832/"
+    },
+    {
+      "legacy": "/registry/td-948087ebc5fe96b7/",
+      "path": "/tasks/td-948087ebc5fe96b7/"
+    },
+    {
+      "legacy": "/registry/td-9482e2d648b0ae23/",
+      "path": "/tasks/td-9482e2d648b0ae23/"
+    },
+    {
+      "legacy": "/registry/td-94d3134cf941d53e/",
+      "path": "/tasks/td-94d3134cf941d53e/"
+    },
+    {
+      "legacy": "/registry/td-94e31e8cbbc1603a/",
+      "path": "/tasks/td-94e31e8cbbc1603a/"
+    },
+    {
+      "legacy": "/registry/td-95682318cf5076df/",
+      "path": "/tasks/td-95682318cf5076df/"
+    },
+    {
+      "legacy": "/registry/td-956fb742857d1196/",
+      "path": "/tasks/td-956fb742857d1196/"
+    },
+    {
+      "legacy": "/registry/td-95cde8aeb800cab3/",
+      "path": "/tasks/td-95cde8aeb800cab3/"
+    },
+    {
+      "legacy": "/registry/td-97a730c73d00d562/",
+      "path": "/tasks/td-97a730c73d00d562/"
+    },
+    {
+      "legacy": "/registry/td-9938369bcadeee2a/",
+      "path": "/tasks/td-9938369bcadeee2a/"
+    },
+    {
+      "legacy": "/registry/td-99cb6a44316ab7c0/",
+      "path": "/tasks/td-99cb6a44316ab7c0/"
+    },
+    {
+      "legacy": "/registry/td-9b882fe0cd708e25/",
+      "path": "/tasks/td-9b882fe0cd708e25/"
+    },
+    {
+      "legacy": "/registry/td-9b9b343dca7c73d8/",
+      "path": "/tasks/td-9b9b343dca7c73d8/"
+    },
+    {
+      "legacy": "/registry/td-9bcb81f0a5ac4397/",
+      "path": "/tasks/td-9bcb81f0a5ac4397/"
+    },
+    {
+      "legacy": "/registry/td-9bda23f6e998c93a/",
+      "path": "/tasks/td-9bda23f6e998c93a/"
+    },
+    {
+      "legacy": "/registry/td-9c449dd516f2d287/",
+      "path": "/tasks/td-9c449dd516f2d287/"
+    },
+    {
+      "legacy": "/registry/td-9cf114a0dddae8e3/",
+      "path": "/tasks/td-9cf114a0dddae8e3/"
+    },
+    {
+      "legacy": "/registry/td-9d2e0cd9e7c36ba2/",
+      "path": "/tasks/td-9d2e0cd9e7c36ba2/"
+    },
+    {
+      "legacy": "/registry/td-9e23dcf705073f54/",
+      "path": "/tasks/td-9e23dcf705073f54/"
+    },
+    {
+      "legacy": "/registry/td-9eda34d10676231e/",
+      "path": "/tasks/td-9eda34d10676231e/"
+    },
+    {
+      "legacy": "/registry/td-9f9c3c3e77583270/",
+      "path": "/tasks/td-9f9c3c3e77583270/"
+    },
+    {
+      "legacy": "/registry/td-9fc9572b9157bd59/",
+      "path": "/tasks/td-9fc9572b9157bd59/"
+    },
+    {
+      "legacy": "/registry/td-a064f23d667f6f40/",
+      "path": "/tasks/td-a064f23d667f6f40/"
+    },
+    {
+      "legacy": "/registry/td-a0c6f9f85e0ba169/",
+      "path": "/tasks/td-a0c6f9f85e0ba169/"
+    },
+    {
+      "legacy": "/registry/td-a0d4191b528f7af6/",
+      "path": "/tasks/td-a0d4191b528f7af6/"
+    },
+    {
+      "legacy": "/registry/td-a12f9e85169e6c4b/",
+      "path": "/tasks/td-a12f9e85169e6c4b/"
+    },
+    {
+      "legacy": "/registry/td-a17899d8344280cb/",
+      "path": "/tasks/td-a17899d8344280cb/"
+    },
+    {
+      "legacy": "/registry/td-a1911b3d52732b76/",
+      "path": "/tasks/td-a1911b3d52732b76/"
+    },
+    {
+      "legacy": "/registry/td-a1cee25dfb8b5e60/",
+      "path": "/tasks/td-a1cee25dfb8b5e60/"
+    },
+    {
+      "legacy": "/registry/td-a1e719fced6e790d/",
+      "path": "/tasks/td-a1e719fced6e790d/"
+    },
+    {
+      "legacy": "/registry/td-a20467be490665ed/",
+      "path": "/tasks/td-a20467be490665ed/"
+    },
+    {
+      "legacy": "/registry/td-a29f440dfa2644da/",
+      "path": "/tasks/td-a29f440dfa2644da/"
+    },
+    {
+      "legacy": "/registry/td-a2bb9a31ec960314/",
+      "path": "/tasks/td-a2bb9a31ec960314/"
+    },
+    {
+      "legacy": "/registry/td-a2c11ef966f5d11d/",
+      "path": "/tasks/td-a2c11ef966f5d11d/"
+    },
+    {
+      "legacy": "/registry/td-a311428baf682598/",
+      "path": "/tasks/td-a311428baf682598/"
+    },
+    {
+      "legacy": "/registry/td-a3142cfcc86776ef/",
+      "path": "/tasks/td-a3142cfcc86776ef/"
+    },
+    {
+      "legacy": "/registry/td-a387d2c0ce265868/",
+      "path": "/tasks/td-a387d2c0ce265868/"
+    },
+    {
+      "legacy": "/registry/td-a394aceaa7a4f494/",
+      "path": "/tasks/td-a394aceaa7a4f494/"
+    },
+    {
+      "legacy": "/registry/td-a3ca085f88f6d7c6/",
+      "path": "/tasks/td-a3ca085f88f6d7c6/"
+    },
+    {
+      "legacy": "/registry/td-a4b052da16adcb12/",
+      "path": "/tasks/td-a4b052da16adcb12/"
+    },
+    {
+      "legacy": "/registry/td-a4bfa0cafaaf28a7/",
+      "path": "/tasks/td-a4bfa0cafaaf28a7/"
+    },
+    {
+      "legacy": "/registry/td-a4edb6df6b097889/",
+      "path": "/tasks/td-a4edb6df6b097889/"
+    },
+    {
+      "legacy": "/registry/td-a571170c80fc6c68/",
+      "path": "/tasks/td-a571170c80fc6c68/"
+    },
+    {
+      "legacy": "/registry/td-a594018f6d2ff61e/",
+      "path": "/tasks/td-a594018f6d2ff61e/"
+    },
+    {
+      "legacy": "/registry/td-a59538ed3ac418d3/",
+      "path": "/tasks/td-a59538ed3ac418d3/"
+    },
+    {
+      "legacy": "/registry/td-a676014239506440/",
+      "path": "/tasks/td-a676014239506440/"
+    },
+    {
+      "legacy": "/registry/td-a6fc21dbafde8991/",
+      "path": "/tasks/td-a6fc21dbafde8991/"
+    },
+    {
+      "legacy": "/registry/td-a7129807b5083d30/",
+      "path": "/tasks/td-a7129807b5083d30/"
+    },
+    {
+      "legacy": "/registry/td-a7c4763872b851d5/",
+      "path": "/tasks/td-a7c4763872b851d5/"
+    },
+    {
+      "legacy": "/registry/td-a861a1ce58ae89f6/",
+      "path": "/tasks/td-a861a1ce58ae89f6/"
+    },
+    {
+      "legacy": "/registry/td-a9d231f07bef68a8/",
+      "path": "/tasks/td-a9d231f07bef68a8/"
+    },
+    {
+      "legacy": "/registry/td-a9ebb4f4fb30105a/",
+      "path": "/tasks/td-a9ebb4f4fb30105a/"
+    },
+    {
+      "legacy": "/registry/td-ab5b287955cfaa6a/",
+      "path": "/tasks/td-ab5b287955cfaa6a/"
+    },
+    {
+      "legacy": "/registry/td-abfc38940af48dcc/",
+      "path": "/tasks/td-abfc38940af48dcc/"
+    },
+    {
+      "legacy": "/registry/td-accbe3cdf9578ba9/",
+      "path": "/tasks/td-accbe3cdf9578ba9/"
+    },
+    {
+      "legacy": "/registry/td-ad6ed82de86f028e/",
+      "path": "/tasks/td-ad6ed82de86f028e/"
+    },
+    {
+      "legacy": "/registry/td-af816d5955468550/",
+      "path": "/tasks/td-af816d5955468550/"
+    },
+    {
+      "legacy": "/registry/td-afe16b050c7c0503/",
+      "path": "/tasks/td-afe16b050c7c0503/"
+    },
+    {
+      "legacy": "/registry/td-aff6aeafeb0c1762/",
+      "path": "/tasks/td-aff6aeafeb0c1762/"
+    },
+    {
+      "legacy": "/registry/td-b0382b8a8cd4b91e/",
+      "path": "/tasks/td-b0382b8a8cd4b91e/"
+    },
+    {
+      "legacy": "/registry/td-b04c0ae44ebb5e47/",
+      "path": "/tasks/td-b04c0ae44ebb5e47/"
+    },
+    {
+      "legacy": "/registry/td-b0f80251c4fef56b/",
+      "path": "/tasks/td-b0f80251c4fef56b/"
+    },
+    {
+      "legacy": "/registry/td-b1328e469ec72548/",
+      "path": "/tasks/td-b1328e469ec72548/"
+    },
+    {
+      "legacy": "/registry/td-b144565a4cba8cdb/",
+      "path": "/tasks/td-b144565a4cba8cdb/"
+    },
+    {
+      "legacy": "/registry/td-b162f85c912db462/",
+      "path": "/tasks/td-b162f85c912db462/"
+    },
+    {
+      "legacy": "/registry/td-b33b984045ec5238/",
+      "path": "/tasks/td-b33b984045ec5238/"
+    },
+    {
+      "legacy": "/registry/td-b36e5ea0a40ec451/",
+      "path": "/tasks/td-b36e5ea0a40ec451/"
+    },
+    {
+      "legacy": "/registry/td-b3cf1cd66d5c95bd/",
+      "path": "/tasks/td-b3cf1cd66d5c95bd/"
+    },
+    {
+      "legacy": "/registry/td-b4bab058bf16714d/",
+      "path": "/tasks/td-b4bab058bf16714d/"
+    },
+    {
+      "legacy": "/registry/td-b4bb27e8a40a8fa6/",
+      "path": "/tasks/td-b4bb27e8a40a8fa6/"
+    },
+    {
+      "legacy": "/registry/td-b602a92b838b0463/",
+      "path": "/tasks/td-b602a92b838b0463/"
+    },
+    {
+      "legacy": "/registry/td-b634dbe9f6ec0de6/",
+      "path": "/tasks/td-b634dbe9f6ec0de6/"
+    },
+    {
+      "legacy": "/registry/td-b6bf2798b6b9bed5/",
+      "path": "/tasks/td-b6bf2798b6b9bed5/"
+    },
+    {
+      "legacy": "/registry/td-b96ff3a04e799554/",
+      "path": "/tasks/td-b96ff3a04e799554/"
+    },
+    {
+      "legacy": "/registry/td-b99ceee1499ba72c/",
+      "path": "/tasks/td-b99ceee1499ba72c/"
+    },
+    {
+      "legacy": "/registry/td-b9c2f4985f23372a/",
+      "path": "/tasks/td-b9c2f4985f23372a/"
+    },
+    {
+      "legacy": "/registry/td-babc61454b159031/",
+      "path": "/tasks/td-babc61454b159031/"
+    },
+    {
+      "legacy": "/registry/td-bb1cd513dd91bbc8/",
+      "path": "/tasks/td-bb1cd513dd91bbc8/"
+    },
+    {
+      "legacy": "/registry/td-bca62cbd0a787fef/",
+      "path": "/tasks/td-bca62cbd0a787fef/"
+    },
+    {
+      "legacy": "/registry/td-bcbf96710cfb78fb/",
+      "path": "/tasks/td-bcbf96710cfb78fb/"
+    },
+    {
+      "legacy": "/registry/td-bd7cae4b56c35601/",
+      "path": "/tasks/td-bd7cae4b56c35601/"
+    },
+    {
+      "legacy": "/registry/td-bdb456d897f1000c/",
+      "path": "/tasks/td-bdb456d897f1000c/"
+    },
+    {
+      "legacy": "/registry/td-bf5fb20e5a5f3061/",
+      "path": "/tasks/td-bf5fb20e5a5f3061/"
+    },
+    {
+      "legacy": "/registry/td-c0db29c922d86a0d/",
+      "path": "/tasks/td-c0db29c922d86a0d/"
+    },
+    {
+      "legacy": "/registry/td-c0fb0b8f95e1dcc6/",
+      "path": "/tasks/td-c0fb0b8f95e1dcc6/"
+    },
+    {
+      "legacy": "/registry/td-c24882e5c913bebb/",
+      "path": "/tasks/td-c24882e5c913bebb/"
+    },
+    {
+      "legacy": "/registry/td-c2a09778d4aab45c/",
+      "path": "/tasks/td-c2a09778d4aab45c/"
+    },
+    {
+      "legacy": "/registry/td-c3260b703b18c5a2/",
+      "path": "/tasks/td-c3260b703b18c5a2/"
+    },
+    {
+      "legacy": "/registry/td-c35dc55ec67c2d66/",
+      "path": "/tasks/td-c35dc55ec67c2d66/"
+    },
+    {
+      "legacy": "/registry/td-c3af68e049cc844b/",
+      "path": "/tasks/td-c3af68e049cc844b/"
+    },
+    {
+      "legacy": "/registry/td-c3d8f979a1b6446f/",
+      "path": "/tasks/td-c3d8f979a1b6446f/"
+    },
+    {
+      "legacy": "/registry/td-c3e886de7101382e/",
+      "path": "/tasks/td-c3e886de7101382e/"
+    },
+    {
+      "legacy": "/registry/td-c4110721dde09485/",
+      "path": "/tasks/td-c4110721dde09485/"
+    },
+    {
+      "legacy": "/registry/td-c4dee063008d4258/",
+      "path": "/tasks/td-c4dee063008d4258/"
+    },
+    {
+      "legacy": "/registry/td-c6ac4c9269f92b6e/",
+      "path": "/tasks/td-c6ac4c9269f92b6e/"
+    },
+    {
+      "legacy": "/registry/td-c6cf5f3f7f44dce6/",
+      "path": "/tasks/td-c6cf5f3f7f44dce6/"
+    },
+    {
+      "legacy": "/registry/td-c7e10d87a81d9fca/",
+      "path": "/tasks/td-c7e10d87a81d9fca/"
+    },
+    {
+      "legacy": "/registry/td-c934d1b87afe0889/",
+      "path": "/tasks/td-c934d1b87afe0889/"
+    },
+    {
+      "legacy": "/registry/td-c98abb3ccb18d1a5/",
+      "path": "/tasks/td-c98abb3ccb18d1a5/"
+    },
+    {
+      "legacy": "/registry/td-ca8a25a1f47574ea/",
+      "path": "/tasks/td-ca8a25a1f47574ea/"
+    },
+    {
+      "legacy": "/registry/td-ca9e708618205f75/",
+      "path": "/tasks/td-ca9e708618205f75/"
+    },
+    {
+      "legacy": "/registry/td-cab898df07b97cee/",
+      "path": "/tasks/td-cab898df07b97cee/"
+    },
+    {
+      "legacy": "/registry/td-cade083deed931ce/",
+      "path": "/tasks/td-cade083deed931ce/"
+    },
+    {
+      "legacy": "/registry/td-cb5468b6db009ea8/",
+      "path": "/tasks/td-cb5468b6db009ea8/"
+    },
+    {
+      "legacy": "/registry/td-cb8efbcff9d9c6cb/",
+      "path": "/tasks/td-cb8efbcff9d9c6cb/"
+    },
+    {
+      "legacy": "/registry/td-cc0e5465a3dbd9e4/",
+      "path": "/tasks/td-cc0e5465a3dbd9e4/"
+    },
+    {
+      "legacy": "/registry/td-cca0100b543d14b5/",
+      "path": "/tasks/td-cca0100b543d14b5/"
+    },
+    {
+      "legacy": "/registry/td-ce0e54665f78bbba/",
+      "path": "/tasks/td-ce0e54665f78bbba/"
+    },
+    {
+      "legacy": "/registry/td-ce0f95925f05b574/",
+      "path": "/tasks/td-ce0f95925f05b574/"
+    },
+    {
+      "legacy": "/registry/td-ceb8dc21bc04b086/",
+      "path": "/tasks/td-ceb8dc21bc04b086/"
+    },
+    {
+      "legacy": "/registry/td-cf77df8b2872b979/",
+      "path": "/tasks/td-cf77df8b2872b979/"
+    },
+    {
+      "legacy": "/registry/td-cf7f0017e60dc322/",
+      "path": "/tasks/td-cf7f0017e60dc322/"
+    },
+    {
+      "legacy": "/registry/td-d04a48c5dd71d847/",
+      "path": "/tasks/td-d04a48c5dd71d847/"
+    },
+    {
+      "legacy": "/registry/td-d04e1c7846f80ddb/",
+      "path": "/tasks/td-d04e1c7846f80ddb/"
+    },
+    {
+      "legacy": "/registry/td-d0fe8274878b8840/",
+      "path": "/tasks/td-d0fe8274878b8840/"
+    },
+    {
+      "legacy": "/registry/td-d1612ab4c98910b9/",
+      "path": "/tasks/td-d1612ab4c98910b9/"
+    },
+    {
+      "legacy": "/registry/td-d16cb503c8850e5b/",
+      "path": "/tasks/td-d16cb503c8850e5b/"
+    },
+    {
+      "legacy": "/registry/td-d18e8d3844cbebd4/",
+      "path": "/tasks/td-d18e8d3844cbebd4/"
+    },
+    {
+      "legacy": "/registry/td-d18ff08d0140f1d8/",
+      "path": "/tasks/td-d18ff08d0140f1d8/"
+    },
+    {
+      "legacy": "/registry/td-d1fece63f49d45a5/",
+      "path": "/tasks/td-d1fece63f49d45a5/"
+    },
+    {
+      "legacy": "/registry/td-d31ca8c9e38dc5ab/",
+      "path": "/tasks/td-d31ca8c9e38dc5ab/"
+    },
+    {
+      "legacy": "/registry/td-d357c1710c0e42ee/",
+      "path": "/tasks/td-d357c1710c0e42ee/"
+    },
+    {
+      "legacy": "/registry/td-d3850ab230f48161/",
+      "path": "/tasks/td-d3850ab230f48161/"
+    },
+    {
+      "legacy": "/registry/td-d3ea7ea77fed3f2e/",
+      "path": "/tasks/td-d3ea7ea77fed3f2e/"
+    },
+    {
+      "legacy": "/registry/td-d3fd0713d0b48200/",
+      "path": "/tasks/td-d3fd0713d0b48200/"
+    },
+    {
+      "legacy": "/registry/td-d40a4be39c0b73be/",
+      "path": "/tasks/td-d40a4be39c0b73be/"
+    },
+    {
+      "legacy": "/registry/td-d4c43dd0a998e46b/",
+      "path": "/tasks/td-d4c43dd0a998e46b/"
+    },
+    {
+      "legacy": "/registry/td-d59fc46e2c0f7464/",
+      "path": "/tasks/td-d59fc46e2c0f7464/"
+    },
+    {
+      "legacy": "/registry/td-d5e9076ff7ab6469/",
+      "path": "/tasks/td-d5e9076ff7ab6469/"
+    },
+    {
+      "legacy": "/registry/td-d6db8b588a9a7d4f/",
+      "path": "/tasks/td-d6db8b588a9a7d4f/"
+    },
+    {
+      "legacy": "/registry/td-d6eefda2e4d83b65/",
+      "path": "/tasks/td-d6eefda2e4d83b65/"
+    },
+    {
+      "legacy": "/registry/td-d7e4208726a4b85b/",
+      "path": "/tasks/td-d7e4208726a4b85b/"
+    },
+    {
+      "legacy": "/registry/td-d81ad1d0281ae5de/",
+      "path": "/tasks/td-d81ad1d0281ae5de/"
+    },
+    {
+      "legacy": "/registry/td-d84121e7d8aabf14/",
+      "path": "/tasks/td-d84121e7d8aabf14/"
+    },
+    {
+      "legacy": "/registry/td-d893f2c32c24c6c9/",
+      "path": "/tasks/td-d893f2c32c24c6c9/"
+    },
+    {
+      "legacy": "/registry/td-d906fffddc9ef368/",
+      "path": "/tasks/td-d906fffddc9ef368/"
+    },
+    {
+      "legacy": "/registry/td-d9e1fe16038cb01e/",
+      "path": "/tasks/td-d9e1fe16038cb01e/"
+    },
+    {
+      "legacy": "/registry/td-d9f9f406476c2c20/",
+      "path": "/tasks/td-d9f9f406476c2c20/"
+    },
+    {
+      "legacy": "/registry/td-da6470549459cbd5/",
+      "path": "/tasks/td-da6470549459cbd5/"
+    },
+    {
+      "legacy": "/registry/td-da888051261e7385/",
+      "path": "/tasks/td-da888051261e7385/"
+    },
+    {
+      "legacy": "/registry/td-dad378d82920d5c0/",
+      "path": "/tasks/td-dad378d82920d5c0/"
+    },
+    {
+      "legacy": "/registry/td-dc3e10ec215c5100/",
+      "path": "/tasks/td-dc3e10ec215c5100/"
+    },
+    {
+      "legacy": "/registry/td-dc4268d1a8ded576/",
+      "path": "/tasks/td-dc4268d1a8ded576/"
+    },
+    {
+      "legacy": "/registry/td-dd752a30a6221a62/",
+      "path": "/tasks/td-dd752a30a6221a62/"
+    },
+    {
+      "legacy": "/registry/td-de7f4f0514d27bec/",
+      "path": "/tasks/td-de7f4f0514d27bec/"
+    },
+    {
+      "legacy": "/registry/td-de9dff166e2f0c6e/",
+      "path": "/tasks/td-de9dff166e2f0c6e/"
+    },
+    {
+      "legacy": "/registry/td-df591340f4ab6622/",
+      "path": "/tasks/td-df591340f4ab6622/"
+    },
+    {
+      "legacy": "/registry/td-df7630c83c2aad03/",
+      "path": "/tasks/td-df7630c83c2aad03/"
+    },
+    {
+      "legacy": "/registry/td-dffd8b0ed57c22b7/",
+      "path": "/tasks/td-dffd8b0ed57c22b7/"
+    },
+    {
+      "legacy": "/registry/td-e0c95e8e7b6db9f0/",
+      "path": "/tasks/td-e0c95e8e7b6db9f0/"
+    },
+    {
+      "legacy": "/registry/td-e1f9b973b55f7dfc/",
+      "path": "/tasks/td-e1f9b973b55f7dfc/"
+    },
+    {
+      "legacy": "/registry/td-e1fa8b54aa8048fb/",
+      "path": "/tasks/td-e1fa8b54aa8048fb/"
+    },
+    {
+      "legacy": "/registry/td-e36e93ff05021b8c/",
+      "path": "/tasks/td-e36e93ff05021b8c/"
+    },
+    {
+      "legacy": "/registry/td-e39d5a4a11cfc645/",
+      "path": "/tasks/td-e39d5a4a11cfc645/"
+    },
+    {
+      "legacy": "/registry/td-e3cca77cd6d3fb34/",
+      "path": "/tasks/td-e3cca77cd6d3fb34/"
+    },
+    {
+      "legacy": "/registry/td-e3fec75b79351fe9/",
+      "path": "/tasks/td-e3fec75b79351fe9/"
+    },
+    {
+      "legacy": "/registry/td-e462289d62e5142f/",
+      "path": "/tasks/td-e462289d62e5142f/"
+    },
+    {
+      "legacy": "/registry/td-e48d3444c4c946d6/",
+      "path": "/tasks/td-e48d3444c4c946d6/"
+    },
+    {
+      "legacy": "/registry/td-e5d815eef932c2b5/",
+      "path": "/tasks/td-e5d815eef932c2b5/"
+    },
+    {
+      "legacy": "/registry/td-e690981a5b0cd851/",
+      "path": "/tasks/td-e690981a5b0cd851/"
+    },
+    {
+      "legacy": "/registry/td-e6adaed1000d0dc4/",
+      "path": "/tasks/td-e6adaed1000d0dc4/"
+    },
+    {
+      "legacy": "/registry/td-e6cd0c9806cf9201/",
+      "path": "/tasks/td-e6cd0c9806cf9201/"
+    },
+    {
+      "legacy": "/registry/td-e745d06132dd2551/",
+      "path": "/tasks/td-e745d06132dd2551/"
+    },
+    {
+      "legacy": "/registry/td-e75813c215b9528f/",
+      "path": "/tasks/td-e75813c215b9528f/"
+    },
+    {
+      "legacy": "/registry/td-e77a512bb41bf293/",
+      "path": "/tasks/td-e77a512bb41bf293/"
+    },
+    {
+      "legacy": "/registry/td-e7f480c8c0064b1a/",
+      "path": "/tasks/td-e7f480c8c0064b1a/"
+    },
+    {
+      "legacy": "/registry/td-e85ca08bd7aceb52/",
+      "path": "/tasks/td-e85ca08bd7aceb52/"
+    },
+    {
+      "legacy": "/registry/td-e8c0b5c98451433e/",
+      "path": "/tasks/td-e8c0b5c98451433e/"
+    },
+    {
+      "legacy": "/registry/td-e9146de5f34c0ee5/",
+      "path": "/tasks/td-e9146de5f34c0ee5/"
+    },
+    {
+      "legacy": "/registry/td-e9267c049b073d9f/",
+      "path": "/tasks/td-e9267c049b073d9f/"
+    },
+    {
+      "legacy": "/registry/td-e9b1bc1990f66b7a/",
+      "path": "/tasks/td-e9b1bc1990f66b7a/"
+    },
+    {
+      "legacy": "/registry/td-ea295d6cb7470995/",
+      "path": "/tasks/td-ea295d6cb7470995/"
+    },
+    {
+      "legacy": "/registry/td-ea3bbb6bc76ab668/",
+      "path": "/tasks/td-ea3bbb6bc76ab668/"
+    },
+    {
+      "legacy": "/registry/td-ea49f2bb7b9d832c/",
+      "path": "/tasks/td-ea49f2bb7b9d832c/"
+    },
+    {
+      "legacy": "/registry/td-ea7284aef28ff935/",
+      "path": "/tasks/td-ea7284aef28ff935/"
+    },
+    {
+      "legacy": "/registry/td-ead8b5e21966f497/",
+      "path": "/tasks/td-ead8b5e21966f497/"
+    },
+    {
+      "legacy": "/registry/td-eae154905e07a86b/",
+      "path": "/tasks/td-eae154905e07a86b/"
+    },
+    {
+      "legacy": "/registry/td-ec2a4fa6a1834389/",
+      "path": "/tasks/td-ec2a4fa6a1834389/"
+    },
+    {
+      "legacy": "/registry/td-ec44802af803e553/",
+      "path": "/tasks/td-ec44802af803e553/"
+    },
+    {
+      "legacy": "/registry/td-ed1f2e0d64f9c73e/",
+      "path": "/tasks/td-ed1f2e0d64f9c73e/"
+    },
+    {
+      "legacy": "/registry/td-ed22c24f331c8805/",
+      "path": "/tasks/td-ed22c24f331c8805/"
+    },
+    {
+      "legacy": "/registry/td-ed59ce9a37ee6506/",
+      "path": "/tasks/td-ed59ce9a37ee6506/"
+    },
+    {
+      "legacy": "/registry/td-ee8e6395f0aa0a0c/",
+      "path": "/tasks/td-ee8e6395f0aa0a0c/"
+    },
+    {
+      "legacy": "/registry/td-ef26de2e44d9d21f/",
+      "path": "/tasks/td-ef26de2e44d9d21f/"
+    },
+    {
+      "legacy": "/registry/td-ef39d8d54dc8444c/",
+      "path": "/tasks/td-ef39d8d54dc8444c/"
+    },
+    {
+      "legacy": "/registry/td-ef472f7a4e151ae5/",
+      "path": "/tasks/td-ef472f7a4e151ae5/"
+    },
+    {
+      "legacy": "/registry/td-ef931f2221401cab/",
+      "path": "/tasks/td-ef931f2221401cab/"
+    },
+    {
+      "legacy": "/registry/td-efd94829c22a15dd/",
+      "path": "/tasks/td-efd94829c22a15dd/"
+    },
+    {
+      "legacy": "/registry/td-efda4ed917d716f8/",
+      "path": "/tasks/td-efda4ed917d716f8/"
+    },
+    {
+      "legacy": "/registry/td-f005ad9a6cd62590/",
+      "path": "/tasks/td-f005ad9a6cd62590/"
+    },
+    {
+      "legacy": "/registry/td-f0c67ff256ef055d/",
+      "path": "/tasks/td-f0c67ff256ef055d/"
+    },
+    {
+      "legacy": "/registry/td-f0df5b722c1c5433/",
+      "path": "/tasks/td-f0df5b722c1c5433/"
+    },
+    {
+      "legacy": "/registry/td-f14935f0391450ff/",
+      "path": "/tasks/td-f14935f0391450ff/"
+    },
+    {
+      "legacy": "/registry/td-f187e1f16b1da3fc/",
+      "path": "/tasks/td-f187e1f16b1da3fc/"
+    },
+    {
+      "legacy": "/registry/td-f244662250f2c5f2/",
+      "path": "/tasks/td-f244662250f2c5f2/"
+    },
+    {
+      "legacy": "/registry/td-f25372f793be0a54/",
+      "path": "/tasks/td-f25372f793be0a54/"
+    },
+    {
+      "legacy": "/registry/td-f2ba778740a2154a/",
+      "path": "/tasks/td-f2ba778740a2154a/"
+    },
+    {
+      "legacy": "/registry/td-f4356efef9ec7349/",
+      "path": "/tasks/td-f4356efef9ec7349/"
+    },
+    {
+      "legacy": "/registry/td-f456b3708841860e/",
+      "path": "/tasks/td-f456b3708841860e/"
+    },
+    {
+      "legacy": "/registry/td-f54b06ee209f82d3/",
+      "path": "/tasks/td-f54b06ee209f82d3/"
+    },
+    {
+      "legacy": "/registry/td-f66e15de833399bf/",
+      "path": "/tasks/td-f66e15de833399bf/"
+    },
+    {
+      "legacy": "/registry/td-f7231dfff7039690/",
+      "path": "/tasks/td-f7231dfff7039690/"
+    },
+    {
+      "legacy": "/registry/td-f859914df0ceb48d/",
+      "path": "/tasks/td-f859914df0ceb48d/"
+    },
+    {
+      "legacy": "/registry/td-f8b715bf7b494910/",
+      "path": "/tasks/td-f8b715bf7b494910/"
+    },
+    {
+      "legacy": "/registry/td-f8be69fa21e4fdef/",
+      "path": "/tasks/td-f8be69fa21e4fdef/"
+    },
+    {
+      "legacy": "/registry/td-fb6818423e93d217/",
+      "path": "/tasks/td-fb6818423e93d217/"
+    },
+    {
+      "legacy": "/registry/td-fc1f353b207fa884/",
+      "path": "/tasks/td-fc1f353b207fa884/"
+    },
+    {
+      "legacy": "/registry/td-fc90ea8b76d5f6b6/",
+      "path": "/tasks/td-fc90ea8b76d5f6b6/"
+    },
+    {
+      "legacy": "/registry/td-fc9e75463c4a61ea/",
+      "path": "/tasks/td-fc9e75463c4a61ea/"
+    },
+    {
+      "legacy": "/registry/td-fd876514b9fadbb9/",
+      "path": "/tasks/td-fd876514b9fadbb9/"
+    },
+    {
+      "legacy": "/registry/td-fded9799d8e5d1ce/",
+      "path": "/tasks/td-fded9799d8e5d1ce/"
+    },
+    {
+      "legacy": "/registry/td-fe3a30736af5cc49/",
+      "path": "/tasks/td-fe3a30736af5cc49/"
+    },
+    {
+      "legacy": "/registry/td-feca3099b61e90b7/",
+      "path": "/tasks/td-feca3099b61e90b7/"
+    },
+    {
+      "legacy": "/registry/td-ff462bd65910d047/",
+      "path": "/tasks/td-ff462bd65910d047/"
+    },
+    {
+      "legacy": "/registry/td-ff79081914cd3936/",
+      "path": "/tasks/td-ff79081914cd3936/"
+    },
+    {
+      "legacy": "/registry/td-ffec7335d833adde/",
+      "path": "/tasks/td-ffec7335d833adde/"
+    },
+    {
+      "legacy": "/registry/td-fff2af2450b12f27/",
+      "path": "/tasks/td-fff2af2450b12f27/"
+    },
+    {
+      "legacy": "/benchmarks/2026-08-01/",
+      "path": "/releases/2026-08-01/"
+    },
+    {
+      "legacy": "/benchmarks/2026-08-19/",
+      "path": "/releases/2026-08-19/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-03/",
+      "path": "/releases/2026-09-03/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-04/",
+      "path": "/releases/2026-09-04/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-05/",
+      "path": "/releases/2026-09-05/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-06/",
+      "path": "/releases/2026-09-06/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-10/",
+      "path": "/releases/2026-09-10/"
+    },
+    {
+      "legacy": "/benchmarks/2026-09-17/",
+      "path": "/releases/2026-09-17/"
+    },
+    {
+      "legacy": "/benchmarks/",
+      "path": "/releases/"
+    },
+    {
+      "legacy": "/benchmarks/sample/",
+      "path": "/releases/sample/"
+    },
+    {
+      "legacy": "/benchmarks/sample-live/",
+      "path": "/releases/sample-live/"
+    },
+    {
+      "legacy": "/guide/false-accept/",
+      "path": "/docs/false-accept/"
+    },
+    {
+      "legacy": "/guide/",
+      "path": "/docs/"
+    },
+    {
+      "legacy": "/guide/quality-card/",
+      "path": "/docs/quality-card/"
+    },
+    {
+      "legacy": "/guide/quality-methods/advisory/",
+      "path": "/docs/quality-methods/advisory/"
+    },
+    {
+      "legacy": "/guide/quality-methods/api/",
+      "path": "/docs/quality-methods/api/"
+    },
+    {
+      "legacy": "/guide/quality-methods/axes/",
+      "path": "/docs/quality-methods/axes/"
+    },
+    {
+      "legacy": "/guide/quality-methods/capability/",
+      "path": "/docs/quality-methods/capability/"
+    },
+    {
+      "legacy": "/guide/quality-methods/cli/",
+      "path": "/docs/quality-methods/cli/"
+    },
+    {
+      "legacy": "/guide/quality-methods/",
+      "path": "/docs/quality-methods/"
+    },
+    {
+      "legacy": "/guide/quality-methods/information/",
+      "path": "/docs/quality-methods/information/"
+    },
+    {
+      "legacy": "/guide/quality-methods/labels/",
+      "path": "/docs/quality-methods/labels/"
+    },
+    {
+      "legacy": "/guide/quality-methods/power/",
+      "path": "/docs/quality-methods/power/"
+    },
+    {
+      "legacy": "/guide/quality-methods/readiness/",
+      "path": "/docs/quality-methods/readiness/"
+    },
+    {
+      "legacy": "/guide/quality-methods/reports/",
+      "path": "/docs/quality-methods/reports/"
+    },
+    {
+      "legacy": "/guide/quality-methods/scope/",
+      "path": "/docs/quality-methods/scope/"
+    },
+    {
+      "legacy": "/guide/quickstart/",
+      "path": "/docs/quickstart/"
+    },
+    {
+      "legacy": "/guide/result-record/",
+      "path": "/docs/result-record/"
+    },
+    {
+      "legacy": "/guide/run/",
+      "path": "/docs/run/"
+    },
+    {
+      "legacy": "/guide/submission/adapters/",
+      "path": "/docs/submission/adapters/"
+    },
+    {
+      "legacy": "/guide/submission/",
+      "path": "/docs/submission/"
+    },
+    {
+      "legacy": "/guide/submission/recording/",
+      "path": "/docs/submission/recording/"
+    },
+    {
+      "legacy": "/guide/submission/replay-integrity/",
+      "path": "/docs/submission/replay-integrity/"
+    },
+    {
+      "legacy": "/guide/submission/running/",
+      "path": "/docs/submission/running/"
+    },
+    {
+      "legacy": "/guide/task-format/build/",
+      "path": "/docs/task-format/build/"
+    },
+    {
+      "legacy": "/guide/task-format/examples/",
+      "path": "/docs/task-format/examples/"
+    },
+    {
+      "legacy": "/guide/task-format/files/",
+      "path": "/docs/task-format/files/"
+    },
+    {
+      "legacy": "/guide/task-format/",
+      "path": "/docs/task-format/"
+    },
+    {
+      "legacy": "/guide/task-format/scaffold/",
+      "path": "/docs/task-format/scaffold/"
+    },
+    {
+      "legacy": "/guide/task-format/scoring/",
+      "path": "/docs/task-format/scoring/"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Task coverage and diversity · Terminal-Daily</title>
+<meta name="description" content="Check which stages of a repair are represented and how much tasks overlap.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Task coverage and diversity</h1>
+<p class="tdb-doc-sub">Check which stages of a repair are represented and how much tasks overlap.</p>
+</header>
+
+<h2 id="A"><a href="#A">Stages of a repair</a></h2>
+<p>Where progress observations are available, coverage can distinguish building the environment, making a partial repair, passing all repair tests, and preserving tests that already passed. Each stage asks a different question about the task set.</p>
+
+<h2 id="A-support"><a href="#A-support">Enough observations to interpret</a></h2>
+<p>A later stage can be assessed only among runs that reached the preceding stage. If too few runs reach it, the estimate is unavailable. For example, a set with no completed repair cannot show how often a completed repair preserves existing behavior.</p>
+
+<h2 id="R"><a href="#R">Task diversity</a></h2>
+<p>Diversity estimates how much tasks overlap in source repository, changed files, and relevant tests. Many similar tasks can make a large set less informative than its size suggests.</p><p>This is a measure of task similarity, not proof of independent skills or independent observations. Read it as supporting context.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

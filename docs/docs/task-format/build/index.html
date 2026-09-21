@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Task environments and sources · Terminal-Daily</title>
+<meta name="description" content="Understand where a task comes from and how its environment is prepared.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Task environments and sources</h1>
+<p class="tdb-doc-sub">Understand where a task comes from and how its environment is prepared.</p>
+</header>
+
+<h2 id="environment"><a href="#environment">Build recipe</a></h2>
+<p>Each task includes a Dockerfile describing the source checkout and dependencies used for evaluation. Build from that recipe to reproduce the intended environment. <a href="../../run/#image">Build instructions</a>.</p>
+
+<h2 id="solution"><a href="#solution">Reference solution</a></h2>
+<p>Archived tasks include the repair from the merged pull request and a script that applies it. Running this solution checks that the task environment can reproduce a passing result. Live tasks withhold it.</p>
+
+<h2 id="provenance"><a href="#provenance">Source information</a></h2>
+<p>Source metadata identifies the repository, source revision, and license information. Tasks are drawn from permissively licensed repositories. This information helps readers trace a task to its origin.</p>
+
+<h2 id="record"><a href="#record">Task record</a></h2>
+<p>Archived packages also describe the source change, relevant tests, and capability labels. Use this record when examining how the task was constructed; it is separate from a model’s evaluation result.</p><p>See the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md">package reference</a> for exact file contents.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

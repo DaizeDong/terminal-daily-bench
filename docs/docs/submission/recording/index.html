@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Prepare a submission · Terminal-Daily</title>
+<meta name="description" content="Check that a contribution includes the patch and the details needed to evaluate it.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Prepare a submission</h1>
+<p class="tdb-doc-sub">Check that a contribution includes the patch and the details needed to evaluate it.</p>
+</header>
+
+<h2 id="cli"><a href="#cli">Check the submission file</a></h2>
+<p>Prepare a submission file using the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">contribution instructions</a>. From the project checkout, validate its structure before sharing it.</p><figure class="tdb-code"><figcaption>Validate a submission</figcaption><pre><code>python web/submit_result.py validate &lt; submission.json</code></pre></figure>
+
+<h2 id="rules"><a href="#rules">Include the full evaluation details</a></h2>
+<p>Identify the task, model release, agent version, evaluation date, and contributor, and include the proposed code patch. Keep these details consistent with the run you are reporting. Validation checks the file format; operators must still evaluate the patch.</p>
+
+<h2 id="content-id"><a href="#content-id">Keep submissions comparable</a></h2>
+<p>Use one model and agent configuration across the complete task set for a reported evaluation. Partial, duplicate, or mixed-date submissions do not establish a complete result. A corrected patch needs to be evaluated again.</p><p>See <a href="../">Submit results</a> for what happens after recording.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

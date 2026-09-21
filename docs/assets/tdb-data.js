@@ -132,7 +132,8 @@
       if (!id || id === active) return;
       try {
         var u = new URL(window.location.href);
-        u.searchParams.set("d", id);
+        u.searchParams.set("date", id);
+        u.searchParams.delete("d");
         window.history.pushState({ d: id }, "", u);
       } catch (e) { /* file:// has no URL API for this; navigation still works */ }
       onChange(id);
@@ -151,7 +152,8 @@
   /* The day the URL asks for, if any. */
   function dayFromUrl() {
     try {
-      return new URL(window.location.href).searchParams.get("d");
+      var params = new URL(window.location.href).searchParams;
+      return params.get("date") || params.get("d");
     } catch (e) { return null; }
   }
 
@@ -245,14 +247,201 @@
     el.innerHTML =
       '<div class="tdb-loaderr border-y px-6 py-8">' +
         '<p class="font-medium">Could not load ' + esc(what) + ".</p>" +
-        '<p class="text-muted-foreground mt-2 font-mono text-sm">' + esc(String(err)) + "</p>" +
-        '<p class="text-muted-foreground mt-2 text-sm">This is a failure to read the ' +
-          'data, not an empty result. The two are different and the page will not ' +
-          'show one as the other.</p>' +
+        '<p class="text-muted-foreground mt-2 text-sm">Reload the page to try again.</p>' +
       "</div>";
   }
 
+  /* Keep measurements intact; only choose which effort represents a model.
+     Unknown/default efforts have no ordered strength. Explicit efforts take
+     precedence; ties prefer the day's primary agent, then greater coverage. */
+  function groupModelEfforts(rows, preferredAgent) {
+    var order = { none: 0, minimal: 1, low: 2, medium: 3, high: 4,
+      xhigh: 5, max: 6, ultra: 7 };
+    function strength(r) {
+      var key = String(r.effort || "").toLowerCase();
+      return Object.prototype.hasOwnProperty.call(order, key) ? order[key] : -1;
+    }
+    function compare(a, b) {
+      return strength(b) - strength(a) ||
+        Number(b.agent === preferredAgent) - Number(a.agent === preferredAgent) ||
+        b.n - a.n || String(a.agent).localeCompare(String(b.agent)) ||
+        String(a.effort || "").localeCompare(String(b.effort || ""));
+    }
+    var groups = new Map();
+    rows.forEach(function (r) {
+      if (!groups.has(r.model)) { groups.set(r.model, []); }
+      groups.get(r.model).push(r);
+    });
+    var out = [];
+    groups.forEach(function (variants) {
+      variants.sort(compare);
+      out.push(Object.assign({}, variants[0], { variants: variants }));
+    });
+    out.sort(function (a, b) {
+      return b.rate - a.rate || String(a.model).localeCompare(String(b.model));
+    });
+    var last = null, rank = 0;
+    out.forEach(function (r, i) {
+      if (last === null || r.rate !== last) { rank = i + 1; last = r.rate; }
+      r.rank = rank;
+    });
+    return out;
+  }
+
+  function modelLabel(raw) {
+    var id = String(raw == null ? "" : raw);
+    var gpt = /^gpt-(\d+(?:\.\d+)*|oss)(?:-([A-Za-z0-9.-]+))?$/i.exec(id);
+    function words(suffix) {
+      return suffix.split("-").map(function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(" ");
+    }
+    if (gpt) { return "GPT-" + gpt[1] + (gpt[2] ? " " + words(gpt[2]) : ""); }
+    var family = /^(claude|kimi|deepseek|gemma|llama|phi)-([A-Za-z0-9][A-Za-z0-9.-]*)$/i.exec(id);
+    if (!family) { return id; }
+    var names = { claude: "Claude", kimi: "Kimi", deepseek: "DeepSeek",
+      gemma: "Gemma", llama: "Llama", phi: "Phi" };
+    return names[family[1].toLowerCase()] + " " + words(family[2]);
+  }
+
+  function agentLabel(raw) {
+    var id = String(raw == null ? "" : raw);
+    var names = { single_shot: "Single response", codex: "Codex",
+      "claude-code": "Claude Code", "terminus-2": "Terminus 2" };
+    return Object.prototype.hasOwnProperty.call(names, id) ? names[id] : id;
+  }
+
+  function releaseStatus(raw) {
+    return { live: "Active", archive: "Archived" }[raw] || "Not specified";
+  }
+
+  function capabilityLabel(code, fallback) {
+    var names = {
+      C1: "Files and folders", C2: "Building software", C3: "Debugging", C4: "Implementation",
+      C5: "Testing", C6: "Data processing", C7: "Networking", C8: "Security",
+      C9: "System administration", C10: "Version control", C11: "Performance",
+      C12: "Reverse engineering", C13: "Machine learning", C14: "Workflow automation"
+    };
+    return names[code] || fallback || "Uncategorized";
+  }
+
+  function cleanTaskTitle(text) {
+    text = String(text || "").trim();
+    text = text.replace(/^(?:fix|feat|perf|refactor|docs|test|chore|build|ci|style)(?:\([^)]*\))?!?:\s*/i, "");
+    text = text.replace(/\([^()]*\[redacted-ref\][^()]*\)/gi, "");
+    text = text.replace(/\[redacted[^\]]*\]/gi, "");
+    text = text.replace(/\b[0-9a-f]{8,64}\b/gi, "").replace(/`/g, "");
+    text = text.replace(/\(\s*\)/g, "").replace(/\s+([,;:)])/g, "$1");
+    text = text.replace(/\s+/g, " ").replace(/^[ ,:;-]+|[ ,:;-]+$/g, "");
+    return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Software maintenance task";
+  }
+
+  function modelToggle(row, expanded) {
+    var labelHtml = '<span class="tdb-model-name" title="' + esc(row.model + ' (' + (row.effort || 'default') + ')') + '">' + esc(modelLabel(row.model)) + '</span>' +
+      '<span class="tdb-model-effort">(' + esc(row.effort || "default") + ')</span>';
+    if ((row.variants || []).length < 2) { return '<span class="tdb-model-label">' + labelHtml + '</span>'; }
+    return '<button type="button" class="tdb-model-toggle" data-model="' + esc(row.model) +
+      '" aria-expanded="' + (expanded ? "true" : "false") +
+      '" aria-label="' + esc((expanded ? "Collapse " : "Expand ") + row.model + " effort results") +
+      '"><span class="tdb-model-chevron" aria-hidden="true">&#8250;</span>' + labelHtml + '</button>';
+  }
+
+  /* Run variation uses complete repeats on the same tasks. Missing or
+     incomplete repeats never become a zero standard deviation. */
+  function repeatStats(row, cols) {
+    if (!row || !Array.isArray(row.g) || !Array.isArray(row.trials) || row.trials.length < 2) return null;
+    var trials = row.trials, width = row.g.length;
+    if (trials.some(function (values) { return !Array.isArray(values) || values.length !== width; })) return null;
+    cols = cols === undefined ? row.g.map(function (_, i) { return i; }) : cols;
+    if (!Array.isArray(cols) || new Set(cols).size !== cols.length || cols.some(function (i) { return !Number.isInteger(i) || i < 0 || i >= width; })) return null;
+    var totals = trials.map(function () { return 0; }), n = 0, invalid = false;
+    cols.forEach(function (i) {
+      var values = trials.map(function (trial) { return trial[i]; });
+      if (row.g[i] === null) { if (values.some(function (v) { return v !== null; })) invalid = true; return; }
+      if ((row.g[i] !== 0 && row.g[i] !== 1) || values.some(function (v) { return v !== 0 && v !== 1; })) { invalid = true; return; }
+      if (Number(values.reduce(function (sum, v) { return sum + v; }, 0) * 2 > trials.length) !== row.g[i]) { invalid = true; return; }
+      values.forEach(function (v, index) { totals[index] += v; }); n++;
+    });
+    if (invalid || !n) return null;
+    var rates = totals.map(function (total) { return total / n; });
+    var mean = totals.reduce(function (sum, value) { return sum + value; }, 0) / (n * rates.length);
+    var variance = rates.reduce(function (sum, value) { return sum + Math.pow(value - mean, 2); }, 0) / (rates.length - 1);
+    return { mean: mean, sd: Math.sqrt(variance), min: Math.min.apply(null, rates),
+      max: Math.max.apply(null, rates), runs: rates.length, n: n, trialRates: rates };
+  }
+
+  function resultStats(day, model, scaffold, taskIds) {
+    if (!day) return null;
+    var matrix = day.matrices && day.matrices[scaffold] || (day.matrix && day.matrix.scaffold === scaffold ? day.matrix : null);
+    if (!matrix || !Array.isArray(matrix.tasks) || !Array.isArray(matrix.rows) || new Set(matrix.tasks).size !== matrix.tasks.length) return null;
+    var rows = matrix.rows.filter(function (row) { return row.model === model; });
+    if (rows.length !== 1 || !Array.isArray(rows[0].g) || rows[0].g.length !== matrix.tasks.length) return null;
+    var row = rows[0], declared = day.aggregation && day.aggregation.trials_per_cell;
+    if (declared != null && (!Array.isArray(row.trials) || row.trials.length !== declared)) return null;
+    var cols;
+    if (taskIds !== undefined) {
+      if (!Array.isArray(taskIds) || new Set(taskIds).size !== taskIds.length) return null;
+      cols = taskIds.map(function (id) { return matrix.tasks.indexOf(id); });
+      if (cols.some(function (i) { return i < 0; })) return null;
+    }
+    return repeatStats(row, cols);
+  }
+
+  function scoreEstimate(solved, n, repeat) {
+    if (!Number.isFinite(solved) || !Number.isFinite(n) || n <= 0 || solved < 0 || solved > n) {
+      return null;
+    }
+    var measured = repeat && repeat.n === n && Number.isInteger(repeat.runs) && repeat.runs >= 2 &&
+      Number.isFinite(repeat.sd) && repeat.sd >= 0 && repeat.sd <= 1;
+    // Rank by majority outcomes; the SD separately describes run-to-run variation.
+    var p = solved / n, sd = measured ? repeat.sd : null;
+    return { p: p, sd: sd, runs: measured ? repeat.runs : null,
+      lo: measured ? Math.max(0, p - sd) : null, hi: measured ? Math.min(1, p + sd) : null };
+  }
+
+  function scoreCell(solved, n, repeat) {
+    var estimate = scoreEstimate(solved, n, repeat);
+    if (!estimate) return '<span class="text-muted-foreground">&mdash;</span>';
+    var measured = estimate.sd !== null;
+    var title = solved + "/" + n + " tasks solved; " + (measured ?
+      "a task counts as solved when more than half its runs pass; " + (estimate.sd * 100).toFixed(1) +
+      " percentage points standard deviation across " + estimate.runs + " run accuracies" : "run variation unavailable");
+    return '<span class="tdb-acc-row" title="' + esc(title) + '">' +
+      '<span class="tdb-acc-value"><strong class="tabular-nums">' + T.pct(estimate.p) + '</strong>' +
+      (measured ? '<span class="tdb-acc-sd">± ' + T.pct(estimate.sd) + '</span>' : '') + '</span>' +
+      '<span class="tdb-acc-track" aria-hidden="true">' +
+        '<span class="tdb-acc-fill" style="width:' + (estimate.p * 100).toFixed(2) + '%"></span>' +
+        (measured ? '<span class="tdb-acc-range" style="left:' + (estimate.lo * 100).toFixed(2) +
+          '%;width:' + ((estimate.hi - estimate.lo) * 100).toFixed(2) + '%"></span>' : '') +
+      '</span></span>';
+  }
+
+  /* Bound the rendered collection after the caller filters and sorts it. */
+  function pageSlice(items, requestedPage, pageSize) {
+    var size = Number(pageSize);
+    size = Number.isInteger(size) && size > 0 ? Math.min(size, 100) : 25;
+    var total = items.length;
+    var pages = Math.max(1, Math.ceil(total / size));
+    var page = Number(requestedPage);
+    page = Number.isInteger(page) ? Math.max(1, Math.min(page, pages)) : 1;
+    var offset = (page - 1) * size;
+    return { items: items.slice(offset, offset + size), page: page, pages: pages,
+      total: total, start: total ? offset + 1 : 0, end: Math.min(offset + size, total) };
+  }
+
   window.TDB = Object.assign(T, {
+    pageSlice: pageSlice,
+    modelLabel: modelLabel,
+    agentLabel: agentLabel,
+    releaseStatus: releaseStatus,
+    capabilityLabel: capabilityLabel,
+    cleanTaskTitle: cleanTaskTitle,
+    scoreCell: scoreCell,
+    scoreEstimate: scoreEstimate,
+    repeatStats: repeatStats,
+    resultStats: resultStats,
+    groupModelEfforts: groupModelEfforts,
+    modelToggle: modelToggle,
     dataUrl: dataUrl,
     getData: getData,
     dayIndex: dayIndex,

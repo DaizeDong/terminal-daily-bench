@@ -1,63 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>quality methods (MSQ) — terminal-daily-bench docs</title>
-<meta name="description" content="Multi-angle Selection-Quality: the graded matrix convention, what enters it, the two tallies, and which dimensions may be ranked.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Evaluation methods · Terminal-Daily</title>
+<meta name="description" content="Interpret task outcomes, capability results, and the quality of a comparison.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/quality-methods/">
 </head>
 <body>
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
-    <h1>Selection-quality methods (MSQ)</h1>
-    <p class="tdb-doc-sub">Multi-angle Selection-Quality &mdash; how well a task set discriminates models, scored from a graded <code>(task &times; model)</code> matrix.</p>
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Evaluation methods</h1>
+<p class="tdb-doc-sub">Interpret task outcomes, capability results, and the quality of a comparison.</p>
+</header>
 
-    <h2 id="matrix"><a href="#matrix">The matrix convention</a></h2>
-    <p><strong>Solved</strong> means grade <code>&gt;= solved_threshold</code> (default <code>1</code>). Binary <code>0/1</code> and graded <code>0..K</code> both work, and the CLI <a href="cli/#surfaces">builds the matrix for you</a>.</p>
-    <figure class="tdb-code"><pre><code>matrix   rows = tasks, cols = models
-         matrix[t][j] = the graded outcome of model j on task t (int, 0 = fail)</code></pre></figure>
+<h2 id="matrix"><a href="#matrix">Start with task outcomes</a></h2>
+<p>The analysis organizes results by task and model: each row is a task, and each column is a model. A completed evaluation reports whether the task passed. Some analyses can also describe intermediate progress.</p>
 
-    <h2 id="outcomes"><a href="#outcomes">What enters the matrix</a></h2>
-    <p>A run produces a status before it produces a grade. Only an authenticated <code>SUCCESS</code> with <code>score_accepted=true</code> becomes a numeric outcome; <code>SUCCESS</code> with <code>score_accepted=false</code>, <code>FAILED</code>, <code>BLOCKED</code> and <code>NOT_RUN</code> all record <code>outcome:null</code>. All five statuses are counted in coverage.</p>
-    <p>Null is not zero. Those rows <strong>are not converted to zero</strong> and are excluded from ratings, because a task that could not be attempted is not a task the model failed &mdash; zeroing them would move a harness outage into the model&rsquo;s score. They are <strong>counted in coverage, not outcomes</strong>, so a model that ran few tasks shows low coverage rather than a clean-looking rate.</p>
+<h2 id="outcomes"><a href="#outcomes">Keep missing results distinct</a></h2>
+<p>A task that was not run, could not be evaluated, or has no accepted result is missing. It is not counted as a model failure. Coverage reports how much of the task set was evaluated, so always read it alongside the success rate.</p>
 
-    <h2 id="tallies"><a href="#tallies">Two tallies, never summed</a></h2>
-    <p>A declaration cannot authenticate its own status, so the two tallies are never summed.</p>
-    <dl class="tdb-defs">
-      <dt class="tdb-id">authenticated_counts</dt>
-      <dd>Bound to receipts.</dd>
-      <dt class="tdb-id">untrusted_declared_counts</dt>
-      <dd>Bound to what a submission asserted about itself.</dd>
-    </dl>
+<h2 id="tallies"><a href="#tallies">Check the source of a result</a></h2>
+<p>Operator-validated results and contributor claims are recorded separately. A submission does not become a verified result by declaring that it passed. <a href="../submission/">Submission checks</a> explain the distinction.</p>
 
-    <h2 id="dimensions"><a href="#dimensions">Which dimensions may be ranked</a></h2>
-    <p>Three dimensions, each bound by the trusted task catalogue. <code>ALLOWED_DIMENSIONS</code> enforces the list in code, and a dimension outside it is not rendered. Unavailable and zero are different claims.</p>
-    <dl class="tdb-defs">
-      <dt class="tdb-id">overall</dt>
-      <dd>Rankable.</dd>
-      <dt class="tdb-id">language</dt>
-      <dd>Rankable.</dd>
-      <dt class="tdb-id">capability</dt>
-      <dd>Authorised. The <a href="capability/#capability-taxonomy">C1&ndash;C14</a> labels are published on every archive package, but no axis clears the publish gate on this catalogue.</dd>
-      <dt>Task-family</dt>
-      <dd><strong>Task-family: unavailable.</strong> Historical data carries no authority-bound family field. The site does not infer one from tracks, merged labels, or repository metadata, and does not display zero.</dd>
-    </dl>
+<h2 id="dimensions"><a href="#dimensions">Read capability results</a></h2>
+<p>The leaderboard can show overall performance or results for a capability category. Categories describe what a repair involves and can overlap. Descriptive capability rates can be available even when there is not enough evidence for a formal category ranking.</p><p>Comparisons by language need the same care about coverage. Task-family rankings are unavailable where reliable family labels are missing.</p>
 
-    <h2 id="map"><a href="#map">Sections that moved</a></h2>
-    <p>This was one document of thirty sections; it is eleven pages now, listed in the sidebar. Every id it used to carry still resolves here, and each one below links to the page that holds it: <a id="scope" href="scope/#scope">scope</a> &middot; <a id="estimands" href="scope/#estimands">estimands</a> &middot; <a id="limits" href="scope/#limits">limits</a> &middot; <a id="capability-taxonomy" href="capability/#capability-taxonomy">capability-taxonomy</a> &middot; <a id="capability-codes" href="capability/#capability-codes">capability-codes</a> &middot; <a id="capability-rules" href="labels/#capability-rules">capability-rules</a> &middot; <a id="report-capability" href="labels/#report-capability">report-capability</a> &middot; <a id="axes" href="axes/#axes">axes</a> &middot; <a id="D" href="axes/#D">D</a> &middot; <a id="C" href="axes/#C">C</a> &middot; <a id="M" href="axes/#M">M</a> &middot; <a id="A" href="advisory/#A">A</a> &middot; <a id="R" href="advisory/#R">R</a> &middot; <a id="I" href="information/#I">I</a> &middot; <a id="kr20" href="information/#kr20">kr20</a> &middot; <a id="bootstrap" href="power/#bootstrap">bootstrap</a> &middot; <a id="power" href="power/#power">power</a> &middot; <a id="reliability-power" href="power/#reliability-power">reliability-power</a> &middot; <a id="axis-failure-modes" href="readiness/#axis-failure-modes">axis-failure-modes</a> &middot; <a id="readiness" href="readiness/#readiness">readiness</a> &middot; <a id="report-discrimination" href="reports/#report-discrimination">report-discrimination</a> &middot; <a id="card" href="api/#card">card</a> &middot; <a id="helpers" href="api/#helpers">helpers</a> &middot; <a id="surfaces" href="cli/#surfaces">surfaces</a> &middot; <a id="output" href="cli/#output">output</a>.</p>
-  </article>
+<h2 id="map"><a href="#map">Explore the methods</a></h2>
+<p><a id="capability-taxonomy" href="capability/">Capability categories</a><span id="capability-codes"></span> and <a id="capability-rules" href="labels/">how tasks are labeled</a><span id="report-capability"></span>.</p><p><a id="axes" href="axes/">What the measures mean</a><span id="D"></span><span id="C"></span><span id="M"></span>, <a id="A" href="advisory/">task coverage and diversity</a><span id="R"></span>, and <a id="I" href="information/">information and reliability</a><span id="kr20"></span>.</p><p><a id="bootstrap" href="power/">Uncertainty and sample size</a><span id="power"></span><span id="reliability-power"></span>, <a id="readiness" href="readiness/">task-set assessment</a><span id="axis-failure-modes"></span>, and <a id="scope" href="scope/">scope and limits</a><span id="estimands"></span><span id="limits"></span>.</p><p><a id="report-discrimination" href="reports/">Read the quality report</a>, <a id="surfaces" href="cli/">analyze a results file</a><span id="output"></span>, or <a id="card" href="api/">use Python</a><span id="helpers"></span>.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="docs"></script>
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 <script>
 /* Anchor continuity. A reader arriving on an old `quality-methods/#<id>` link
    should land on the SECTION, not on the top of a page that no longer carries
-   it. Each moved id is still present above, on its own link under "Sections
-   that moved", so a reader with no JavaScript lands on a line that names the
+   it. Each moved id is still present above, on its own link under "Related
+   sections", so a reader with no JavaScript lands on a line that names the
    section and links to it; this sends everyone else the whole way. */
 (function () {
   var MOVED = {

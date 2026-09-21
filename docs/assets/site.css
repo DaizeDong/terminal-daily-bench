@@ -1,46 +1,5 @@
-/* Terminal Daily visual system
-   --------------------------------------------------------------------------
-   An instrument, not a brochure. White ground, near-black ink, square
-   geometry, one border weight, no shadows, no decorative rules. Everything
-   that survives here carries information; nothing is here to look designed.
 
-   THE FOUR THINGS THIS FILE DECIDES, and the order to read them in:
 
-     1. TYPE      two vendored families under one rule -- sans for prose,
-                  headings and UI labels; mono for code, commands, numeric
-                  cells and identifiers. Mono is opted INTO, never out of.
-     2. RHYTHM    four vertical distances, chosen by ELEMENT TYPE:
-                  48 above a heading, 24 below it, 20 below a paragraph,
-                  16 around a code figure. Nothing else spaces anything.
-                  Side-by-side blocks are spaced by the parent's `gap`.
-     3. SURFACE   one border spec (1px solid var(--td-line)) and one state
-                  marker (2px solid var(--td-coral)). No fills, no shadows,
-                  no radius. A container is drawn only around an instrument
-                  -- never around a sentence, a term, or a value.
-     4. DENSITY   prose sets on 1.75; anything that stacks into a column of
-                  digits sets on 1.45 and gets tabular figures.
-
-   Both faces are vendored into assets/fonts/, so the published page makes no
-   remote request and renders identically offline.
-   -------------------------------------------------------------------------- */
-
-/* ==========================================================================
-   The two vendored faces. Google Sans Code is the mono; Geist is the sans.
-   Both are VARIABLE, which is why a 500 next to a 400 is drawn rather than
-   synthesised -- a static two-weight family reads as a second typeface.
-
-   The subset boundaries of the two families are deliberately IDENTICAL: two
-   families split on different ranges would hand the same character to
-   different faces on different pages. The math and symbol subsets exist
-   because Geist carries no `->` (U+2192, in 73 files), no Greek and no box
-   drawing, and a glyph a face lacks falls back to a different FAMILY for that
-   character alone. --td-font-sans therefore names the mono as its immediate
-   fallback, so an uncovered character is still drawn by a vendored face
-   rather than by whatever the OS picks. tests/test_font_coverage.py resolves
-   every rendered character against the family that will actually draw it.
-
-   woff2, self-hosted, SIL OFL 1.1 -- assets/fonts/OFL-*.txt.
-   ========================================================================== */
 @font-face {
   font-family: "Google Sans Code";
   font-style: normal;
@@ -112,234 +71,74 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* Terminal-Daily: sans text, measured mono data, cool paper and blue ink. */
 :root {
   color-scheme: light;
-
-  /* -- TYPE: two tokens, one rule ----------------------------------------
-     Every legacy name is an alias of one of the two, so no declaration path
-     can diverge and the ~460 `class="font-mono"` attributes the generator
-     emits stay no-ops. --td-font is the mono token's old name; verify_site.py
-     and tests/ grep it by literal string. It has never meant anything else. */
   --td-font-sans: "Geist", "Google Sans Code",
                   "Source Han Sans SC", "Noto Sans CJK SC", "Microsoft YaHei",
-                  "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+                  "PingFang SC", "Hiragino Sans GB", "Segoe UI Emoji",
+                  "Apple Color Emoji", "Noto Color Emoji", system-ui, sans-serif;
   --td-font-mono: "Google Sans Code", ui-monospace, "SFMono-Regular",
                   "Cascadia Code", "JetBrains Mono", "Roboto Mono", Menlo,
-                  Consolas, "Liberation Mono",
-                  "Sarasa Mono SC", "Noto Sans Mono CJK SC", "Microsoft YaHei",
-                  "PingFang SC", "Hiragino Sans GB", monospace;
+                  Consolas, "Liberation Mono", "Sarasa Mono SC",
+                  "Noto Sans Mono CJK SC", "Microsoft YaHei", "PingFang SC",
+                  "Hiragino Sans GB", "Segoe UI Emoji", "Apple Color Emoji",
+                  "Noto Color Emoji", monospace;
   --td-font: var(--td-font-mono);
-  --td-font-body:          var(--td-font-sans);
-  --td-font-display:       var(--td-font-sans);
-  --td-font-data:          var(--td-font-mono);
-  --font-geist-sans:       var(--td-font-sans);
-  --font-geist-mono:       var(--td-font-mono);
+  --td-font-body: var(--td-font-sans);
+  --td-font-display: var(--td-font-sans);
+  --td-font-data: var(--td-font-mono);
+  --font-geist-sans: var(--td-font-sans);
+  --font-geist-mono: var(--td-font-mono);
   --font-google-sans-code: var(--td-font-mono);
-  --font-sans:             var(--td-font-sans);   /* overrides tw.css :root */
-  --font-mono:             var(--td-font-mono);   /* overrides tw.css :root */
+  --font-sans: var(--td-font-sans);
+  --font-mono: var(--td-font-mono);
 
-  /* -- TYPE SCALE: five steps ---------------------------------------------
-       micro  14px   uppercase labels, table heads, legends, CIs
-       body   16px   all prose, all table cells, all data
-       lead   20px   ledes, deks, stat values, inputs
-       sub    28px   every section heading, h2 and h3 alike
-       title  36-48  page titles only
-     Adjacent ratios 1.14 / 1.25 / 1.4 / 1.29: the ladder opens as it climbs.
-     There is no sixth step. A component that wants an in-between size is a
-     component that has not decided whether it is a label or a heading. */
-  --ts-micro: 0.875rem;
-  --ts-body:  1rem;
-  --ts-lead:  1.25rem;
-  --ts-sub:   1.75rem;
-  --ts-title: clamp(2.25rem, 4.2vw, 3rem);
-
-  /* -- THE TEN SANCTIONED PAIRS -------------------------------------------
-     Five sizes and three weights do not make fifteen combinations; they make
-     the ten below, and a measurement that finds an eleventh has found a bug.
-     (Measured before this block existed: nineteen, over ten pages.) Each line
-     is family / size / weight and the job it is FOR. A pair that cannot
-     finish the sentence "this is for ..." is not a pair, it is drift.
-
-       sans 16/400   running prose, list items, definition bodies, table
-                     cells, links, breadcrumbs -- the default, inherited from
-                     <body> and never restated
-       sans 16/500   a MARK inside body-size text: <strong>, a <dt> term, a
-                     row head, the nav link for the page you are on
-       sans 14/400   an ANNOTATION hung off a value it does not name: a column
-                     note, an axis tick, a key hint, a position count
-       sans 14/500   a LABEL that names the thing beside or below it: every
-                     column head, badge, kicker, rail key, nav group, card
-                     label and figure caption. ONE treatment, and this is it
-       sans 20/400   the one-sentence LEDE under a page title, the document
-                     sub-head, and the day-step arrows
-       sans 20/600   the wordmark -- the only 600 that is not a heading
-       sans 28/600   h2 -- every section heading on the site
-       sans 48/600   h1 -- page titles only
-       mono 16/400   code, commands, identifiers, and numeric cells
-       mono 14/400   the same three inside a 14px frame: a path in a caption,
-                     a confidence interval, the copy control
-
-     Note what is NOT here. THE MONO HAS EXACTLY ONE WEIGHT. An identifier
-     cannot be emphasised into being more of an identifier, and one monospace
-     face at two weights inside one table is precisely the "second typeface"
-     effect the @font-face note above warns about -- so a <strong> that is
-     itself a numeric cell, and the status readout's value, both draw at 400
-     and are marked by ink and size instead. 600 appears at three sizes and
-     nowhere below 20px, which is the whole of "600 heads". There is no 14px
-     prose (see the --ts-micro floor rule) and no sixth size.
-
-     HOW TO CHECK THIS. Walk every text node on a page, take
-     getComputedStyle(node.parentElement) and count the distinct
-     (fontFamily, fontSize, fontWeight, textTransform, letterSpacing) tuples.
-     Ten pages must yield these ten and nothing else, textTransform must be
-     `none` on every one of them, and letterSpacing must be `normal` on every
-     row below 20px. */
-
-  /* -- LINE HEIGHT --------------------------------------------------------
-     Prose and data want opposite things: a paragraph wants air between lines,
-     a table wants rows the eye can sweep. 1.75 at 16px is the one ratio here
-     copied from the reference rather than derived. */
-  --lh-flat:  1;      /* single-line numerals and chips                  */
-  --lh-head:  1.1;    /* the page title only, at 36-48px                 */
-  --lh-sub:   1.3;    /* every heading below the title                   */
-  --lh-ui:    1.45;   /* table cells, controls, dense single-purpose data */
-  --lh-prose: 1.75;   /* running text: p, li, dd, blockquote, figcaption */
-
-  /* -- WEIGHT: three, and the rule is a sentence. 400 READS -- prose, list
-     items, table cells, every number. 500 MARKS -- a term, a column head, a
-     label, a <strong>, the link you are on. 600 HEADS -- h1, h2 and the
-     wordmark, and nothing else. `<strong>` was 600 here, which put a
-     percentage inside a data cell at heading weight; a mark is not a head. */
+  /* Metadata 12, interface 14, prose 16, headings 18/24/36. */
+  --ts-meta: .75rem;
+  --ts-micro: .875rem;
+  --ts-body: 1rem;
+  --ts-lead: 1.125rem;
+  --ts-sub: 1.5rem;
+  --ts-title: 2.25rem;
+  --lh-flat: 1;
+  --lh-head: 1.15;
+  --lh-sub: 1.3;
+  --lh-ui: 1.45;
+  --lh-prose: 1.75;
   --fw-normal: 400;
   --fw-medium: 500;
-  --fw-semi:   600;
-
-  /* -- TRACKING: two, and BOTH ARE NEGATIVE. --------------------------------
-     Letter-spacing on this site does exactly one job: it closes the gaps a
-     large size opens, so a 48px line and a 16px line have the same colour.
-     That job only exists above 20px, so --tr-head is the only non-zero value
-     and --tr-body: 0 names the absence for everything else.
-
-     There WAS a third, --tr-micro: 0.06em, and it existed only because
-     fourteen rules set `text-transform: uppercase` -- tracking is what makes
-     uppercase legible, so the two always shipped together. Both are gone, for
-     the reason recorded under CASE below. Positive tracking on mixed-case
-     text has no job: it does not aid a reader, it just spreads a word until
-     it stops looking like one. A label that needs to separate itself from the
-     prose around it does so with SIZE, WEIGHT and COLOUR -- three signals
-     that survive being read aloud. */
-  --tr-head:  -0.04em;   /* 20px and up: the wordmark, h2, h1 */
-  --tr-body:  0;         /* every other line on the site */
-
-  /* -- CASE: THE STYLESHEET NEVER CHANGES CASE. ----------------------------
-     `text-transform: uppercase` appeared fourteen times -- on every column
-     head, badge, kicker, rail key, nav group, card label and figure caption
-     -- and it is the single largest reason this page read as a brochure
-     rather than as an instrument. Three separate arguments, any one of which
-     is sufficient:
-
-       1. IT REWRITES THE STRING. A column head, a <dt> and a caption on this
-          site routinely hold something a reader is meant to TYPE -- a field
-          name, a scaffold id, a path. `single_shot` drawn as SINGLE_SHOT is
-          a value that does not exist. The rest of this file is built on the
-          rule that a style may not decide what a thing IS; a transform that
-          edits the letters is that same defect at the glyph level.
-       2. IT DUPLICATES A JOB ALREADY DONE. Every one of those labels is
-          already 14px and already muted. Uppercase adds no third fact, and it
-          costs word-shape at the smallest size on the page.
-       3. IT WAS NEVER ONE TREATMENT. The uppercase labels shipped at two
-          weights (400 and 500), in two families (sans and mono) and at two
-          sizes (14 and 16) -- four registers doing one job, which is most of
-          what "several fonts" meant.
-
-     A capital letter on this site therefore comes from the CONTENT, and the
-     content is either prose or an identifier: prose is sentence case, an
-     identifier keeps whatever case it really has. Nothing in CSS may overrule
-     that, which is also why there is no `text-transform: capitalize` here. */
-
-  /* == THE FOUR VERTICAL DISTANCES =======================================
-     This is the whole vertical rhythm of the site, and it is applied BY
-     ELEMENT TYPE under RHYTHM below -- never sprinkled onto an element by a
-     utility class, and never used to space two blocks that sit side by side.
-     A container that declares a `gap` has already decided how far apart its
-     children sit; a margin on the child then stacks on top of it.
-
-     The file previously ran nine distances for block separation with no rule
-     for choosing between them, so a figcaption sat 12px above its figure, a
-     section head 24px above its table, a home h2 64px below the paragraph
-     before it and an h3 44px -- a subheading and its own parent opening the
-     same gap. Four, ordered, each with one job:
-
-       --rh-fig  16   a caption binds to the thing it names; a code figure
-                      to the sentence that introduced it
-       --rh-para 20   one block of prose to the next
-       --rh-head 24   a heading binds DOWN to the text it introduces
-       --rh-sec  48   above a heading: the only section separator on the site
-
-     The ordering is the rule: fig < para < head < sec. --rh-head must stay
-     larger than --rh-para or a heading reads as belonging to the block above
-     it; --rh-sec must stay larger than both or a section boundary reads as a
-     paragraph break. If a component wants a fifth distance, that distance is
-     internal padding and takes an --sp step by name. */
-  --rh-fig:  1rem;      /* 16px */
-  --rh-para: 1.25rem;   /* 20px */
-  --rh-head: 1.5rem;    /* 24px */
-  --rh-sec:  3rem;      /* 48px */
-
-  /* -- SPACING: nine steps, a clean 4px ladder ---------------------------
-     PADDING, GAP and INSET only -- the distances INSIDE a component, which
-     are a property of that component and not of the page. Never substituted
-     into vertical rhythm (that is --rh, above), border-radius (there is
-     none), font-size, width or stroke-width. */
+  --fw-semi: 600;
+  --tr-head: -.035em;
+  --tr-body: 0;
+  --rh-fig: 1rem;
+  --rh-para: 1rem;
+  --rh-head: 1rem;
+  --rh-sec: 2rem;
   --sp-0: 0;
-  --sp-1: 0.25rem;   /*  4px  hairline insets, chip padding-block   */
-  --sp-2: 0.5rem;    /*  8px  intra-group gap, control padding      */
-  --sp-3: 0.75rem;   /* 12px  table HEAD padding-block, bar padding */
-  --sp-4: 1rem;      /* 16px  table CELL padding-block              */
-  --sp-5: 1.5rem;    /* 24px  table cell inline padding, column gap */
-  --sp-6: 2rem;      /* 32px  page gutter                           */
-  --sp-7: 3rem;      /* 48px  wide column gap                       */
-  --sp-8: 4rem;      /* 64px  masthead / footer separation          */
-  --chrome-h: 4.25rem; /* 68px header height. NOT a spacing step. */
+  --sp-1: .25rem;
+  --sp-2: .5rem;
+  --sp-3: .75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --chrome-h: 3.5rem;
+  /* Paragraphs use their content column, without a second line-length cap. */
+  --w-prose: 100%;
+  --w-page: 86rem;
 
-  /* -- MEASURE ------------------------------------------------------------
-     Running text is capped at 44rem (73 characters at 16px); tables and data
-     keep the full page width. */
-  --w-prose: 44rem;
-
-  /* == COLOUR: white ground, near-black ink ==============================
-     The site ran warm paper under dark green ink plus two radial washes and
-     a dot grid. Each is defensible alone; together they spent about a
-     quarter of the available contrast on every glyph, and they are the
-     single largest reason the page read as a brochure. The warmth survives
-     only where it can be seen doing a job: the brand mark, and the coral
-     that marks a caveat or a failed read.
-
-     Measured: ink 18.6:1 on paper, muted 8.4:1. Both AAA, 1.15 stops apart,
-     so the muted/ink hierarchy that carries the whole page is still legible
-     AS a hierarchy. There are no tinted surfaces left to erode it. */
-  --td-paper: #ffffff;
-  --td-surface: #fafaf9;
-  --td-ink: #111312;
-  --td-muted: #494f4b;
-  --td-night: #14312b;
-  --td-coral: #ff5533;
-  /* THE ONE BORDER COLOUR. Every rule, divider, container edge and control
-     outline on this site is `1px solid var(--td-line)`. Changing this value
-     changes every line on the page, which is the point: there is no second
-     weight to reach for and no strong variant to promote a divider into. */
-  --td-line: #d8d8d3;
-  /* --td-sun paints nothing. It is kept declared, and this comment kept
-     honest, because verify_site.py pins the palette by name and a palette
-     entry that is spelled but unused is exactly what this file's own checkers
-     exist to catch. Reach for a hue only if a future state has an argument
-     the greys genuinely cannot carry, and say what it is. */
-  --td-sun: #ffd66b;
-  /* The item strip's floor. No model solved this is an absence of
-     information, not a low score, so it is drawn as an OUTLINE over a
-     near-empty fill -- different in kind from the ink ramp, not in value. */
-  --td-cell-zero: #9aa19d;
-
+  --td-paper: #fcfdff;
+  --td-surface: #f0f4fa;
+  --td-ink: #18243b;
+  --td-muted: #61708b;
+  --td-night: #18243b;
+  --td-blue: #315aba;
+  --td-coral: #b84332;
+  --td-line: #dce3ef;
+  --td-sun: #f5e6bd;
+  --td-cell-zero: #8796af;
   --radius: 0;
   --background: var(--td-paper);
   --foreground: var(--td-ink);
@@ -347,86 +146,56 @@
   --card-foreground: var(--td-ink);
   --popover: var(--td-paper);
   --popover-foreground: var(--td-ink);
-  --primary: var(--td-night);
-  --primary-foreground: #ffffff;
-  --secondary: #f0f0ec;
+  --primary: var(--td-blue);
+  --primary-foreground: #fff;
+  --secondary: var(--td-surface);
   --secondary-foreground: var(--td-ink);
-  --muted: #f4f4f1;
+  --muted: var(--td-surface);
   --muted-foreground: var(--td-muted);
-  --accent: var(--muted);
-  --accent-foreground: var(--foreground);
-  --destructive: #b8301f;
+  --accent: var(--td-surface);
+  --accent-foreground: var(--td-ink);
+  --destructive: var(--td-coral);
   --border: var(--td-line);
   --input: var(--td-line);
   --td-control-line: var(--td-line);
   --td-control-fill: var(--td-paper);
-  --ring: var(--foreground);
+  --ring: var(--td-blue);
   --sidebar: var(--td-surface);
   --sidebar-foreground: var(--td-ink);
-  --sidebar-primary: var(--td-night);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--muted);
-  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-primary: var(--td-blue);
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: var(--td-surface);
+  --sidebar-accent-foreground: var(--td-ink);
   --sidebar-border: var(--td-line);
-  --sidebar-ring: var(--foreground);
+  --sidebar-ring: var(--td-blue);
 }
 
-/* The dark theme is the same decision inverted, held to the same two ratios
-   -- ink 17.3:1 on paper, muted 9.4:1 -- so neither theme is the one that
-   also works. --td-line is lifted here rather than inherited: one border spec
-   means one VISIBLE weight in both schemes, not one hex value. */
 :root.dark {
   color-scheme: dark;
-
-  --td-paper: #0d0f0e;
-  --td-surface: #151918;
-  --td-ink: #f2f3f1;
-  --td-muted: #b0b7b3;
-  --td-night: #a9e8d4;
-  --td-coral: #ff7a5c;
-  --td-line: #3a413e;
+  --td-paper: #101725;
+  --td-surface: #172134;
+  --td-ink: #e6edf8;
+  --td-muted: #9aacc6;
+  --td-night: #e6edf8;
+  --td-blue: #9cb8ff;
+  --td-coral: #f39985;
+  --td-line: #303f56;
   --td-sun: #453a1c;
-  /* 2.99:1 on the dark paper, and it has to stay distinguishable from the
-     dark .c-lo above it as well as from the ground below it. */
-  --td-cell-zero: #5a625e;
-
-  --background: var(--td-paper);
-  --foreground: var(--td-ink);
-  --card: var(--td-paper);
-  --card-foreground: var(--td-ink);
+  --td-cell-zero: #637590;
+  --primary-foreground: #101725;
   --popover: var(--td-surface);
-  --popover-foreground: var(--td-ink);
-  --primary: var(--td-night);
-  --primary-foreground: #0b1f1b;
-  --secondary: #232827;
-  --secondary-foreground: var(--td-ink);
-  --muted: #1e2321;
-  --muted-foreground: var(--td-muted);
-  --accent: var(--muted);
-  --accent-foreground: var(--foreground);
-  --destructive: #ff7a6a;
-  --border: var(--td-line);
-  --input: var(--td-line);
-  --td-control-line: var(--td-line);
   --td-control-fill: var(--td-surface);
-  --ring: var(--foreground);
-  --sidebar: var(--td-surface);
-  --sidebar-foreground: var(--td-ink);
-  --sidebar-primary: var(--td-night);
-  --sidebar-primary-foreground: #0b1f1b;
-  --sidebar-accent: var(--muted);
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--td-line);
-  --sidebar-ring: var(--foreground);
+  --sidebar-primary-foreground: #101725;
 }
 
-/* ==========================================================================
-   BASE
-   ========================================================================== */
-
+/* Base type and semantic roles. */
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
 /* Family declaration 1 of exactly 2. The ground state of the site is SANS:
@@ -445,13 +214,6 @@ body {
   background: var(--background);
 }
 
-/* THERE ARE NO SHADOWS. A shadow says this surface floats above the page;
-   nothing on a benchmark does, and a shadow under a square-cornered panel on
-   a white ground reads as a rendering artefact. Declared once, universally,
-   rather than deleted rule by rule -- that is what makes it checkable, and it
-   also disarms the vendored ring utilities, which compose a five-part
-   box-shadow that paints nothing but still answers to getComputedStyle.
-   Focus is an OUTLINE (below), which is unaffected. */
 *,
 *::before,
 *::after {
@@ -481,39 +243,12 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Every heading is SEMIBOLD, and it is one rule because it was six -- the
-   home h1 at 500, the leaderboard h1 at 400, a bare h2 at 500 and the guide
-   h2/h3 at 600, each from whatever weight utility the generator emitted. On
-   a monospace page that was invisible; Geist has a real weight axis and it is
-   not. The doubled `:is()` is specificity, not decoration: (0,0,1) sets the
-   bare headings and the `[class]` variant at (0,1,1) outranks the utility. */
 :is(h1, h2, h3, h4, h5, h6),
 :is(h1, h2, h3, h4, h5, h6)[class] {
   font-weight: var(--fw-semi);
   letter-spacing: var(--tr-head);
 }
 
-/* ==========================================================================
-   THE UTILITIES THAT DECIDE TYPE ARE DISARMED, for the same reason
-   `.font-mono` is disarmed further down: a class that says how something
-   LOOKS must not decide what it IS. Two of the four decisions this file makes
-   about type -- tracking and case -- can be taken away from it by a class
-   name in the markup, and both had been.
-
-   TRACKING. tw.css ships four `.tracking-*` utilities at (0,1,0). Six
-   elements carry one. Measured: one <p> with `tracking-tight` rendered at
-   -0.5px, a fifth letter-spacing value that belongs to no role and describes
-   no job -- it is simply the value that utility happens to hold. Headings are
-   excluded from the selector rather than beaten by it, because they are the
-   one place where tracking IS a decision this file makes.
-
-   CASE. `.uppercase`, `.lowercase` and `.capitalize` are in tw.css. None is
-   used in the markup TODAY, which is exactly when to close the door: the
-   fourteen uppercase rules this file just deleted are the proof that the
-   treatment comes back the moment a label needs to look like a label. The
-   declaration below is `none`, so this file still changes no letter -- it
-   only stops a class from doing it. See CASE in the token block for why.
-   ========================================================================== */
 main :not(h1, h2, h3, h4, h5, h6)[class*="tracking-"] {
   letter-spacing: var(--tr-body);
 }
@@ -522,38 +257,9 @@ main [class~="lowercase"],
 main [class~="capitalize"] {
   text-transform: none;
 }
-/* And the third layer a transform can arrive through. One page builder still
-   writes `text-transform:uppercase` into a style attribute (a <p> on
-   /quality/ introducing a partition of CI rows), which no selector can
-   outrank -- an inline declaration beats every rule in this file that is not
-   !important. This is the only !important on case in the file, and it exists
-   because the alternative is a stylesheet whose stated invariant is true in
-   two layers out of three. The markup should stop emitting it; until it does,
-   the invariant holds anyway. */
+
 main [style*="uppercase"] { text-transform: none !important; }
 
-/* ==========================================================================
-   MONO OPT-IN -- family declaration 2 of exactly 2, and the complete list of
-   things on this site that are not sans. Three kinds of content earn it:
-
-     1. CODE -- code, pre, kbd, samp, var, and the copy-this-command block.
-     2. NUMERIC CELLS -- anything that stacks into a column of digits. Mono
-        plus tabular figures is what makes a column scannable.
-     3. IDENTIFIERS -- task ids, run ids, hashes: strings compared character
-        by character, where l/1 and O/0 have to differ.
-
-   Note what is ABSENT. `.font-mono`, the utility the generator emits on ~460
-   elements, is NOT here and must not be added: it sits on <h2> section
-   headings and on /quality/ metric labels alike. Measured before the rule
-   below existed: 3238 of 3264 text elements on /leaderboard/ rendered mono
-   because ONE wrapper <div class="... font-mono"> set the family for every
-   cell under it. A class that says how something LOOKS must not decide what
-   it IS -- so both utilities are disarmed, sparing the opt-in list, and the
-   `.font-sans` half is disarmed with it for the same reason in reverse.
-
-   [data-tdb-mono] and .tdb-id are the sanctioned hooks for markup that needs
-   mono and has no semantic tag. Widen the list only with one of those.
-   ========================================================================== */
 :is(.font-mono, .font-sans):not(
   code, kbd, samp, pre, var,
   .tdb-cmd, .tabular-nums, .tdb-num, .tdb-acc, .tdb-acc-ci, .tdb-ci-v,
@@ -601,30 +307,6 @@ pre,
   font-variant-numeric: tabular-nums;
 }
 
-/* ==========================================================================
-   RHYTHM -- the four distances, applied by ELEMENT TYPE.
-
-   Everything below is unlayered, so it beats Tailwind's preflight
-   (`@layer base { * { margin: 0 } }`) with a bare element selector and needs
-   no !important. If one of these rules loses, it lost to a component rule in
-   this same file, and the fix is to look at that component.
-
-   WHY ADJACENT SIBLINGS AND NOT `main p`. Most <p> on this site are the only
-   child of a <td>, a flex row or a meter -- 218 of 230 on /quality/ alone.
-   Giving every paragraph a margin would loosen every data row on the site to
-   fix prose that only exists where two blocks actually stack. `+` says
-   exactly that and nothing more.
-   ========================================================================== */
-
-/* The reset the four distances are declared against. The UA gives block
-   elements their own margins and tw.css's `.prose` gives its descendants a
-   second set (32px around a table, 28px under an h2, 12px under an h3); with
-   both live, the measured vertical gaps on this site came from eight
-   different numbers. site.css is UNLAYERED, so a bare element selector clears
-   every one of them -- verified: `main table { margin-top: 7px }` wins over
-   `.prose :where(table)` -- and everything after this rule is the rhythm.
-   Do not reach for !important here; each rule below wins on specificity, and
-   an !important would make the exceptions unreachable. */
 main :is(p, ul, ol, dl, li, blockquote, figure, pre, table, hr, div,
          h1, h2, h3, h4, h5, h6) {
   margin-block: 0;
@@ -650,12 +332,6 @@ main :is(p, ul, ol, dl, blockquote, figure, pre, hr, table)
   margin-top: var(--rh-para);
 }
 
-/* A data block is a block. These are the seven wrappers a table, a shell or a
-   figure actually ships in, and without them a caption sat flush against the
-   table above it. Kept as its own rule and NOT folded into the list above:
-   merging them would raise that selector to (0,2,1) and silently outrank the
-   gap exception at (0,1,3), which measured as 24px of container gap plus 20px
-   of margin on every guide header. Specificity is the contract here. */
 main :is(.tdb-plain-table, .tdb-shell, .tdb-statgrid, .tdb-doclist, .tdb-cmd,
          [data-slot="table-container"]) + *,
 main * + :is(.tdb-plain-table, .tdb-shell, .tdb-statgrid, .tdb-doclist, .tdb-cmd,
@@ -674,22 +350,6 @@ main :is(figure, pre) + :is(p, ul, ol, dl, blockquote, hr, table, figure, pre) {
   margin-top: var(--rh-fig);
 }
 
-/* A caption binds to the thing it names, at the same 16, and it takes the one
-   LABEL treatment -- 14/500, muted -- exactly like a column head.
-
-   THE FAMILY IS DECLARED HERE, and that is the point of this rule. A caption
-   is prose: `install, then score` and `every task in the catalogue, one
-   square` are English sentences. But every one of these captions is a CHILD
-   of a container that opted into the mono -- `.tdb-cmd` is a command block,
-   `.tdb-strip` and `.tdb-ci` are figures of numbers -- so all 95 captions on
-   the site inherited the monospace face from the box they label, and then had
-   their letters rewritten to uppercase on top of it. English prose set in the
-   code face, in capitals, at the smallest size on the page: that combination
-   alone accounts for a good deal of what "several fonts" meant. A caption
-   names a thing, it is not part of it, so it sets the sans back explicitly.
-   Where the caption IS an identifier -- `environment/Dockerfile`,
-   `tasks/archive/<task-id>/` -- the identifier belongs in <code>, which is
-   the site-wide hook and takes the mono back at higher specificity below. */
 main figcaption { margin-bottom: var(--rh-fig); font-family: var(--td-font-sans); }
 main figcaption :is(code, kbd, samp, var) { font-family: var(--td-font-mono); }
 .tdb-strip > figcaption,
@@ -701,22 +361,12 @@ main figcaption :is(code, kbd, samp, var) { font-family: var(--td-font-mono); }
   font-weight: var(--fw-medium);
 }
 
-/* <hr> draws NOTHING. The site shipped 15 of them; a horizontal rule is a
-   section break spelled as decoration, and the 48px above the next heading
-   already says it. The element is left in the flow at zero height so the
-   prose rhythm still passes through it -- a `display: none` would break the
-   `p + p` adjacency it sits between and collapse two paragraphs to 0px. */
 main hr {
   height: 0;
   border: 0;
   margin-block: 0;
 }
 
-/* Sections do not pad and do not rule; the heading inside them separates
-   them. With no border and no padding the leading heading's own 48px margin
-   collapses out through the section, so two sections are 48px apart whether
-   or not the second one opens with a heading -- not 96px, and not two
-   different distances depending on the markup. */
 main :is([data-tdb-section], .tdb-block, .tdb-content-section) {
   margin-top: var(--rh-sec);
   border-top: 0;
@@ -729,22 +379,6 @@ main :is([data-tdb-section], .tdb-block, .tdb-content-section):first-child {
 /* An anchor lands under a fixed 68px header, plus the heading's own 24. */
 main [id] { scroll-margin-top: calc(var(--chrome-h) + var(--rh-head)); }
 
-/* THE EXCEPTIONS, and the reason the rules above can stay this short.
-
-   A parent that declares its own row gap has ALREADY decided how far apart
-   its children sit; a margin-top then stacks on top of that gap rather than
-   replacing it. Measured: the `flex flex-col gap-6` block on
-   /guide/quickstart/ went from 24px to 56px the moment the paragraph rhythm
-   reached it.
-
-   `gap` is the honest signal, and it separates the two cases cleanly. The
-   containers that broke when this was matched on DISPLAY instead -- `flex
-   flex-col py-12` and `.tdb-block` -- compute `row-gap: normal`: they are
-   flex, but they never claimed to handle spacing, so the prose rhythm is
-   theirs to obey. Measured consequence of the display-based version:
-   adjacent paragraphs on the three benchmark day pages rendered at a 0.00px
-   gap. Never reintroduce a display-based matcher. Display is not the
-   question -- who owns the spacing is. */
 main [class*="gap-"] > :is(h1, h2, h3, h4, p, ul, ol, dl) + :is(p, ul, ol, dl, blockquote),
 main :is(.tdb-block-head, .tdb-statrow, .tdb-acc, .tdb-card, .tdb-strip-row,
          .tdb-ci-row, .tdb-defs, .tdb-limits, .tdb-instrument)
@@ -752,18 +386,6 @@ main :is(.tdb-block-head, .tdb-statrow, .tdb-acc, .tdb-card, .tdb-strip-row,
   margin-top: 0;
 }
 
-/* ---- the spacing utilities the markup still emits -----------------------
-   Every rule here folds a utility onto one of the four distances. The list is
-   SHORTER than it was, because the utilities it used to answer for have been
-   deleted from the markup instead: py-3.5 (14px, the only value on the site
-   that was not a multiple of 2), -mx-4 and -ml-3 (a child pulling itself out
-   of its parent to bleed past the viewport gutter), -mb-px (a block
-   overlapping its neighbour's border), my-0, my-6, mt-2, mt-6 and mb-2. A
-   rule that neutralises a class no page ships is not a defence; it is a
-   second place the reader has to look before believing the first.
-
-   What is left is what is still spelled somewhere: py-0.5 and gap-1.5 /
-   gap-2.5 remain the only non-multiples of 4 on the site. */
 main :is(.py-0\.5, .p-1) { padding-block: var(--sp-1); }
 main :is(.gap-1\.5, .gap-2\.5) { gap: var(--sp-2); }
 
@@ -780,22 +402,7 @@ main [data-slot="card"] :is(.mt-4, .mt-8, .mb-4, .mb-6, .mb-8) {
 /* A breadcrumb is chrome above a title, and the title's own margin is zero. */
 main nav + :is(h1, h2) { margin-top: var(--rh-head); }
 
-/* Prose list items were inheriting only tw.css's list spacing, stacking real
-   sentences 7.5px apart on the four guide subpages where the lists ARE the
-   content. Scoped to `article.prose`: the 3-6 <li> on every other page are a
-   breadcrumb, a horizontal flex row where a top margin is a visible nudge. */
-main article.prose li + li { margin-top: var(--rh-para); }
-
-
-/* ==========================================================================
-   THE TYPE SCALE, APPLIED
-
-   Headings first, then the normalisation of the ~2700 Tailwind size
-   utilities the four hand-written pages still carry. Every one of those
-   utilities declares font-size AND a paired line-height, so both halves are
-   mapped -- otherwise a normalised 14px label sits on a 1.333 row beside a
-   component-styled one on 1.75.
-   ========================================================================== */
+main article.prose li + li { margin-top: var(--sp-2); }
 
 main#nd-home-layout h1,
 .tdb-page-title {
@@ -817,15 +424,10 @@ main#nd-home-layout .tdb-page-lede[class] {
   color: var(--muted-foreground);
 }
 
-/* Prose has a measure; data does not. 44rem is 73 characters at 16px, inside
-   the 45-75 range. A table keeps the full page width. */
+/* Running text shares the body scale and wraps within its content column. */
 main#nd-home-layout article.prose :is(p, ul, ol, blockquote),
 .tdb-lede,
 
-/* Scoped to element names so it cannot reach pre, code, figure.shiki or a
-   16px inherited down from <article class="prose">. `table`, `nav`, `ol` and
-   `ul` are in the list because a bare `text-sm` on one of them leaks 14px
-   down the whole subtree by inheritance, which no cell-level rule reclaims. */
 main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-base,
 main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-base\/relaxed,
 main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, thead, tbody, tr, button, summary, dt, dd, caption).text-sm,
@@ -834,12 +436,6 @@ main#nd-home-layout :is(p, span, div, td, th, li, label, a, nav, ol, ul, table, 
   line-height: var(--lh-prose) !important;
 }
 
-/* `.text-xs` used to send everything it touched to 12px, and that is where
-   the 122 fourteen-pixel paragraphs on /quality/ came from. --ts-micro is a
-   real step and it keeps its job, but that job is UPPERCASE LABELS, table
-   heads, breadcrumbs and chips: text read as a marker, not as a sentence.
-   Anything that can hold a sentence has a floor of --ts-body. There is no
-   14px prose on this site. */
 main#nd-home-layout :is(p, li, dt, dd, figcaption, td).text-xs {
   font-size: var(--ts-body) !important;
   line-height: var(--lh-prose) !important;
@@ -875,12 +471,6 @@ main#nd-home-layout :is(h1, h2).text-4xl {
   main#nd-home-layout :is(h1, h2).sm\:text-6xl\/tight { font-size: var(--ts-title) !important; line-height: var(--lh-head) !important; }
 }
 
-/* tw.css sets `.prose` at (0,1,0) and the element-scoped normaliser cannot
-   reach elements that carry no class at all -- their size arrives by
-   INHERITANCE from the article. (1,1,1) settles that without !important. The
-   descendant rule is not optional: tw.css also sizes `.prose :where(table)`
-   and `:where(figcaption)` at .875em, so reclaiming only the article would
-   drop those to 14px, trading one off-scale leak for another. */
 main#nd-home-layout article.prose,
 main#nd-home-layout article.prose :is(table, td, th, figcaption) {
   font-size: var(--ts-body);
@@ -891,29 +481,13 @@ main#nd-home-layout article.prose :is(table, td, th, figcaption) {
    arriving by multiplication. Inline code takes the size of the line it sits
    in; only a code FIGURE sets its own. */
 main :is(code, kbd, samp) { font-size: inherit; }
-/* ...and at 16px instead of 13px a long identifier no longer fits a 390px
-   line, so inline code has to be breakable. Measured: one 430px <code> on
-   /guide/submission/ took the page to 446px. `pre` is untouched -- a command
-   broken across lines is a command you cannot copy, and it has a scroller. */
+
 main :not(pre) > :is(code, kbd, samp) { overflow-wrap: anywhere; }
-/* <strong> is UA-700, and the site declares three weights. Emphasis is the
-   MARK weight, not the head weight: this element wraps a percentage inside a
-   data cell about as often as it wraps a word inside a sentence, and 600 in a
-   column of 400s reads as a heading that wandered into the table. 500 marks. */
+
 main :is(strong, b) { font-weight: var(--fw-medium); }
-/* ...and an identifier inside a mark takes no weight from it. A <code> inside
-   a <strong>, a <dt> or a <th> is the same string as a <code> in a sentence;
-   drawing it at 500 puts the one monospace face on the page at two weights,
-   which is how a second typeface arrives without a second @font-face. The
-   heading rule below is deliberately more specific and still wins. */
+
 main :is(strong, b, dt, th) :is(code, kbd, samp, var) { font-weight: var(--fw-normal); }
-/* Same rule from the other side: a <strong> that is ITSELF a numeric cell --
-   `<strong class="tabular-nums">30%</strong>`, the accuracy of a leaderboard
-   row -- resolves to the mono through the opt-in list, so marking it draws
-   the mono at 500. What separates that percentage from the CI beside it is
-   already SIZE (16 against 14); a second weight in the same face adds no
-   fact and costs the column its evenness. The mono draws at 400, everywhere,
-   full stop -- that is why there is no mono row above 400 in the pair list. */
+
 main :is(strong, b):is(
   code, kbd, samp, var,
   .tdb-cmd, .tabular-nums, .tdb-num, .tdb-acc, .tdb-acc-ci, .tdb-ci-v,
@@ -927,29 +501,12 @@ main :is(h1, h2, h3, h4, h5, h6, .tdb-page-lede) :is(code, kbd, samp) { font-wei
 /* A bare <th> is UA-700. A column head is set by the table rules below; this
    is the row head in a <tbody>, and it is a label, not a heading. */
 main th { font-weight: var(--fw-medium); text-align: left; }
-/* ONE FAMILY FOR EVERY COLUMN HEAD. `.tdb-num` and `.tabular-nums` are in the
-   mono opt-in because they mark a NUMERIC CELL -- but the generator puts them
-   on that column's <th> too, to inherit the right alignment, and a head is
-   never a number. Measured: fourteen heads on /quality/ -- `catalogue`,
-   `ceiling`, `discriminating`, `top repo` -- were English words set in the
-   monospace face, one table away from `Rank` and `Agent` set in the sans.
-   That is two faces spelling one role, which is the reported defect in its
-   purest form. A head is a label, so a head is sans; an identifier inside one
-   is <code>, which is the sanctioned hook and keeps the mono. */
+
 main th,
 main th[class] { font-family: var(--td-font-sans); }
+main th.tdb-id,
 main th :is(code, kbd, samp, var) { font-family: var(--td-font-mono); }
 
-/* == DATA DENSITY ========================================================
-   Prose sets on 1.75 so a paragraph reads like a paragraph. A table row is
-   not a paragraph: 354 leaderboard rows at 28px line boxes is 1062px of
-   added scroll for nothing. Everything inside a table, and every single-line
-   control, sets on --lh-ui instead.
-
-   Two variants of the cell selector on purpose. The `[class]` form scores
-   (1,1,2) and is the only thing that outranks the !important normaliser
-   above at (1,1,1); the bare form catches the unclassed <p> the row builder
-   puts inside every cell, which no !important rule touches at all. */
 main#nd-home-layout :is(table, thead, tbody, tr, td, th)[class],
 main#nd-home-layout :is(td, th) :is(p, span, a, div, strong)[class],
 main#nd-home-layout :is(td, th) :is(p, span, a, div, strong),
@@ -986,19 +543,6 @@ main#nd-home-layout [class][class*="leading-none"] { line-height: var(--lh-flat)
 .tdb-page-title,
 main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere; }
 
-/* ==========================================================================
-   PROSE PRIMITIVES -- how this site states a fact without a box round it.
-
-   `.tdb-defs` is THE replacement for a two-column table. A term-and-meaning
-   grid is a table with the header row deleted; it needs no rules, no fixed
-   column and no fill, because a term set in ink over its sentence is already
-   a term and a sentence. Use it wherever a `key -> what it does` table would
-   otherwise appear, and use a real <table> only for data that is genuinely
-   two-dimensional -- three or more columns whose rows can be compared.
-
-   `.tdb-instrument` and `.tdb-limits` are the two existing lists on the site
-   and are aliases of it, so there is one treatment and not three.
-   ========================================================================== */
 .tdb-defs,
 .tdb-instrument,
 .tdb-limits {
@@ -1023,11 +567,7 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
   color: var(--muted-foreground);
   overflow-wrap: anywhere;
 }
-/* A list of measured scalars -- `scaffold  w1-fixed50` -- reads better as
-   one line per fact than as a term stacked over a two-word value. This is
-   the ONE place a term and its value share a line, it is opt-in by
-   attribute, and it still draws no rule and no column: the term column is
-   `max-content`, so it is exactly as wide as the longest term and no wider. */
+
 .tdb-defs[data-inline],
 .tdb-instrument {
   display: grid;
@@ -1058,16 +598,6 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
    SHELL -- masthead, footer, and the page frame.
    ========================================================================== */
 
-/* The header was a rounded pill floating 0.75rem off the top with a 40px
-   shadow and a saturating backdrop filter. A benchmark's header is a place to
-   be, not an object to look at: full width, one hairline underneath, an
-   opaque ground.
-
-   The font-family here is the one place the sans has to be re-applied by
-   selector rather than inherited: tw.css hard-codes `#nd-nav { font-family:
-   <mono> }` at (1,0,0), which no token alias reaches and no class rule
-   outranks, and it put the brand, the kicker and all twelve nav links in
-   mono on every page. */
 #nd-nav {
   top: 0;
   right: 0;
@@ -1100,35 +630,12 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
    offsets are optical nudges that align a circle's visual edge, deliberately
    off the spacing ladder because they are not a rhythm. */
 .tdb-brand-mark {
-  position: relative;
-  display: inline-grid;
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 0;
-  background: var(--td-night);
+  display: block;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  color: var(--td-blue);
 }
-.tdb-brand-mark::before {
-  position: absolute;
-  right: -0.18rem;
-  bottom: -0.22rem;
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 999px;
-  background: var(--td-coral);
-  content: "";
-}
-.tdb-brand-mark::after {
-  z-index: 1;
-  width: 0.45rem;
-  height: 0.45rem;
-  border: 2px solid var(--primary-foreground);
-  border-radius: 999px;
-  content: "";
-}
-.tdb-brand-copy { display: flex; flex-direction: column; line-height: var(--lh-flat); }
 .tdb-brand-name {
   font-size: var(--ts-lead);
   font-weight: var(--fw-semi);
@@ -1141,22 +648,6 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
   font-weight: var(--fw-medium);
 }
 
-/* WHICH PAGE YOU ARE ON, without a hue and without a fill. This was a coral
-   pill with a coral hairline and a per-scheme ink -- the loudest object in
-   the header. Position in the nav already says which link it is; all the
-   state has to add is "this one".
-
-   COLOUR ALONE, as of the docs rebuild. It kept a semibold and a 1px
-   underline on top of the colour change until the reference was measured:
-   there, the ONLY difference between the current page and every other link
-   is the ink -- no weight, no rule, no fill, no indent. Three markers for one
-   fact is two markers of decoration, and the underline in particular
-   collided with the underline this site gives every real link, so the
-   current page read as the most clickable item in the row. The muted-to-ink
-   step here is 8.4:1 -> 18.6:1 light and 9.4:1 -> 17.3:1 dark, which is a
-   wider separation than the reference's own 4.83 -> 17.72 and is doing the
-   whole job. The sidebar below marks its active entry the same way, and
-   there is now exactly one way this site says "you are here". */
 .tdb-nav-link {
   border-radius: 0;
   padding: var(--sp-3) var(--sp-4);
@@ -1176,11 +667,15 @@ main#nd-home-layout article.prose :is(h1, h2, h3, h4) { overflow-wrap: anywhere;
 .tdb-theme-switch { border-color: var(--td-line); background: none; }
 .tdb-mobile-menu {
   margin-top: var(--sp-2);
-  overflow: hidden;
+  max-height: calc(100dvh - var(--chrome-h) - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--td-line);
   border-radius: 0;
   background: var(--background);
 }
+#nd-nav .tdb-mobile-menu { width: calc(100% - 64px); max-width: var(--w-page); margin-inline: auto; padding: 8px; }
+.tdb-menu-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 12px; padding-top: 12px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 14px; }
 
 /* The header does not float, so the clearance under it is the header height
    plus one section step. This is the only main padding-top in the file, and
@@ -1207,7 +702,7 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
 .tdb-page-frame { position: relative; min-width: 0; }
 .tdb-page-title { overflow-wrap: anywhere; text-wrap: balance; }
 .tdb-content-section { position: relative; width: 100%; min-width: 0; max-width: 100%; }
-.tdb-section-head { max-width: 54rem; }
+.tdb-section-head { max-width: 100%; }
 .tdb-card { min-width: 0; }
 [data-tdb-canary-host] { width: min(100%, 76rem); min-width: 0; }
 
@@ -1225,14 +720,6 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
   font-size: var(--ts-lead) !important;
   line-height: var(--lh-prose);
 }
-
-/* The home title was a hero at clamp(2.75rem, 6vw, 4.5rem) -- 72px at this
-   viewport, a sixth step on a five-step ladder, and it was the reason the
-   home page rendered eight size/weight pairs where every other screen ran
-   seven. It takes --ts-title like every other page title, and the table it
-   introduces comes up the page by 24px for free.
-
-   (Deliberately no rule here. The step is the ladder's.) */
 
 /* --- the home masthead: three lines, no rule, no blob -------------------- */
 [data-tdb-section="intro"].tdb-masthead {
@@ -1252,12 +739,7 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
 }
 [data-tdb-section="intro"].tdb-masthead::before,
 [data-tdb-section="intro"].tdb-masthead::after { content: none; }
-/* The line above the page title. It was 16px, TRACKED AND UPPERCASED -- the
-   one place on the site where a whole line of body-size text was spread into
-   capitals, and the first thing a reader meets. That is a magazine eyebrow,
-   and it is doing the work of prose: `living coding-agent benchmark` is a
-   phrase, not a label, so it is set as one. Muted ink is the whole
-   distinction it needs from the title beneath it. */
+
 [data-tdb-section="intro"].tdb-masthead > p:first-of-type {
   display: block;
   color: var(--muted-foreground);
@@ -1269,7 +751,7 @@ main#nd-home-layout { padding-top: calc(var(--chrome-h) + var(--sp-6)); }
 }
 [data-tdb-section="intro"].tdb-masthead h1 + p {
   margin: 0;
-  max-width: 46rem;
+  max-width: 100%;
   font-size: var(--ts-lead) !important;
   line-height: var(--lh-prose);
   color: var(--muted-foreground);
@@ -1324,26 +806,6 @@ button.bg-secondary { background: none; }
 a.bg-secondary:hover,
 button.bg-secondary:hover { background: var(--muted); }
 
-/* == THE ONE BADGE RULE ==================================================
-   A badge marks STATE. It never restates what its own row already says, and
-   it is never a box.
-
-   /registry/ hydrated 302 of them -- `python` 37 times in a catalogue whose
-   own stat block reads LANGUAGES 1, `archive` 37 times in a column already
-   headed SUITE. 302 bordered chips is 302 rectangles carrying, between them,
-   about six facts. The border, the fill, the min-height and the padding are
-   all deleted here, which is as far as a stylesheet can go on its own: a
-   badge is now an uppercase micro-label in muted ink, and a badge that
-   genuinely marks a state -- [data-official], [data-state] -- is the same
-   label in full ink.
-
-   The markup half is now done where the rule applies: /registry/ hydrates
-   none (the capability codes became identifiers, the publication and
-   difficulty cells became the plain words their own column headers name),
-   and the 65 generated pages ship none (status, language and difficulty are
-   three rows of a provenance list). The 72 left on /quality/ are NOT
-   restatements -- each names a different measurement of its own frame -- so
-   they keep the label treatment above. */
 [data-slot="badge"],
 .tdb-badge {
   display: inline-block;
@@ -1357,13 +819,7 @@ button.bg-secondary:hover { background: var(--muted); }
   color: var(--muted-foreground);
   font-size: var(--ts-micro);
   font-weight: var(--fw-medium);
-  /* A LABEL IS NEVER TRACKED, and this is the one that has to say so out
-     loud: a badge sits inside an <h2>, so it inherits the heading's -0.04em
-     and draws it at 14px, where the same em value is nearly twice as tight
-     relative to the letterform. Measured: `unofficial` set at -1.12px beside
-     28px text set at -1.12px -- one number, two completely different
-     colours. Tracking belongs to a size, so it is re-zeroed at every size
-     change. */
+
   letter-spacing: var(--tr-body);
 }
 [data-slot="badge"][class],
@@ -1382,27 +838,9 @@ body.tdb-generated-page [data-slot="badge"] {
 }
 .tdb-count-sep { margin: 0 var(--sp-3); color: var(--muted-foreground); }
 
-/* == THE ONE STATE MARKER ================================================
-   --td-coral is spent in exactly one place on this site -- the caveat and
-   the failure state -- and only ever as a 2px rule down the left edge: the
-   integrity block, a failed data read, a failed search. It is not a fill
-   anywhere. It stays because a reader who misses "these numbers are
-   provisional" has misread the page, and no amount of grey says that as
-   fast as a coloured line does. */
 /* A failure to READ the data is not an empty result. */
 .tdb-loaderr,
 .tdb-find-err { border-left: 2px solid var(--td-coral); background: none; }
-
-/* ==========================================================================
-   TABLES -- rules, not surfaces.
-
-   A table used to be a tinted panel with a mint head band, a shadow and a
-   1px box, in four variants that did not look like each other. It is one
-   component now: no fill anywhere, a rule under the head, a rule under every
-   row, and a single 1px box where the table stands alone as an instrument.
-   The head band is gone because an uppercase micro-label in muted ink over a
-   rule is already unmistakably a head.
-   ========================================================================== */
 
 [data-slot="table-container"],
 .tdb-plain-table {
@@ -1433,11 +871,6 @@ main#nd-home-layout :is(thead, th)[class],
 [data-slot="table-header"],
 .tdb-plain-table thead { background: none; }
 
-/* One row height for all four table variants. The markup's h-10 / py-3 /
-   py-4 come from constants in tdb-data.js and per-page JS that this
-   stylesheet cannot edit, so the height is taken back here. 16px of cell
-   padding-block is the reference's, and a row you can track across is worth
-   more than rows-per-screen. */
 [data-slot="table-head"],
 .tdb-plain-table thead th,
 main#nd-home-layout article.prose thead th {
@@ -1496,31 +929,6 @@ main#nd-home-layout article.prose td {
    width. min-width: 0 is what lets it shrink and scroll. */
 .tdb-scroll-x { overflow-x: auto; min-width: 0; }
 body.tdb-generated-page :is(figure.shiki, pre) { min-width: 0; max-width: 100%; }
-
-/* ==========================================================================
-   THE TABLE SHELL -- the count line, the search field, the filter rail and
-   the table are ONE instrument, so they are drawn as one box with internal
-   rules rather than four floating pieces.
-
-   HOW THE BOX IS DRAWN, and why it is not a border on a wrapper: these pages
-   have no element that wraps exactly these parts and only these parts. So
-   the box is COMPOSED out of the parts themselves --
-
-     every part   border-inline 1px   the two long sides
-     first part   border-top    1px   the lid
-     every part   border-bottom 1px   an internal rule, and on the last part
-                                      the floor
-
-   That composition is closed under a missing part, which matters because the
-   filter rail carries [hidden] until it paints: a hidden part is
-   display:none, and the part ABOVE it already owns the rule below itself.
-
-   .tdb-shell, .tdb-shell-bar, .tdb-shell-search, .tdb-shell-search-row,
-   .tdb-shell-meta, .tdb-shell-rail and .tdb-shell-body are the shipped
-   hooks. Each is aliased to the structure the two filterable pages have
-   today, because this stylesheet cannot write their HTML. Add a page by
-   adding an alias; do not widen what a part does.
-   ========================================================================== */
 
 .tdb-shell {
   display: flex;
@@ -1640,12 +1048,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
 }
 
 /* --- sortable column headers -------------------------------------------- */
-/* The affordance has to be visible BEFORE the click: every sortable label
-   carries a direction glyph, muted while the column is idle and full ink
-   while it is the active key. A table that sorts but does not say which key
-   it is in is a table whose order you cannot check. The glyph is an inline
-   SVG, not a character: the site ships one glyph-coverage test and a caret
-   typed as text would be drawn by whatever face the OS picked. */
+
 .tdb-sort {
   appearance: none;
   display: inline-flex;
@@ -1687,19 +1090,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   font-variant-numeric: tabular-nums;
 }
 
-/* The score bar. A column of percentages is 354 numbers a reader has to
-   compare by reading; one length beside each number turns the column into a
-   shape. The number sits BESIDE the track, never on it: text over a
-   partially filled bar has two different grounds under it and the contrast
-   of the half that lands on the fill cannot be fixed without dimming the
-   fill into invisibility. `min-width` on the number is what keeps the tracks
-   in one vertical line.
-
-   There is NO track for an unmeasured cell. A zero-width bar and a bar that
-   was never drawn look the same from two feet away, and the difference is
-   "this configuration scored nothing" versus "this configuration was never
-   run". The renderer returns an em dash and no track at all. */
-.tdb-acc-row { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-3); }
+.tdb-acc-row { position: relative; display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-3); }
 .tdb-acc-row strong { min-width: 3.5rem; text-align: right; }
 .tdb-acc-track {
   position: relative;
@@ -1718,31 +1109,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
 }
 
 /* --- the capability view ------------------------------------------------ */
-/* The same table with a different set of columns, so it borrows the same
-   cell, the same head and the same chip. Three rules is the whole of it.
 
-   1. THE COLUMN NOTE. n is a property of a COLUMN, not of a cell: printing
-      "27 tasks +/-18%" in twelve cells is eleven copies of one reading, while
-      printing it once under the label is the condition the whole column has to
-      be read under. It sits under the label rather than beside it because the
-      label is the name and the note is the measurement, and a name that has
-      grown a clause reads as a longer name.
-
-   2. THE AXIS CELL. Rate over counts, not rate beside counts: fifteen columns
-      of "47% 13/28" on one line is a table twice as wide as the viewport, and
-      every row stacks identically so the baselines still agree across a row --
-      the failure the accuracy cell was flattened to avoid does not recur when
-      EVERY cell in the row is two lines.
-
-   3. NO BAR IN AN AXIS CELL. The score bar is 5rem wide and there are up to
-      fourteen axis columns; fourteen bars is 70rem of track for numbers that
-      mostly cannot be ordered anyway. The Overall column keeps its bar because
-      that column can be ordered.
-
-   An unranked cell is not greyed into near-invisibility -- it holds full ink,
-   because "6 of 12 tasks, and this axis is too small to rank" is a
-   measurement a reader should be able to READ. What marks it is the absence
-   of a percentage, which no amount of squinting restores. */
 .tdb-col-note {
   display: block;
   margin-top: var(--sp-1);
@@ -1851,12 +1218,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   overflow-wrap: anywhere;
 }
 /* A status value is data: same size as its label, tabular, just heavier. */
-/* The status readout's value. It was 600, which is the head weight, and it is
-   drawn in the MONO -- so `live`, `50` and `258` were the one monospace face
-   on the site appearing at a second weight, three rows above a table of the
-   same face at 400. What separates a value from its key here is already ink
-   against muted, and from its note already 16 against 14. Weight was carrying
-   nothing that colour and size were not carrying better. */
+
 .tdb-statrow .tdb-statrow-v[data-tdb-stat-value] {
   margin: 0;
   color: inherit;
@@ -1889,11 +1251,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
   font-weight: var(--fw-medium);
   margin-right: var(--sp-1);
 }
-/* The suite you are looking at, and the primary nav link. 600 is the head
-   weight and these are links inside a rail of links: full ink against muted
-   is the whole signal, and 500 is what marks it. At 600 the active suite was
-   set heavier than any body text on the page while being one of eight
-   sixteen-pixel words in a row -- a rail item shouting at h2 weight. */
+
 .tdb-suitelink[data-active="true"],
 .tdb-navlink[data-primary="true"] { color: var(--foreground); font-weight: var(--fw-medium); }
 
@@ -1940,11 +1298,7 @@ div:has(> #tdb-q) { height: 2rem; max-width: 26rem; }
 }
 
 /* --- the copy-able command ---------------------------------------------- */
-/* The label and the two controls have no reason to share the command's line:
-   at 16px the 108-character string measured wider than its own box, so the
-   one string on the page whose entire job is to be read and copied sat
-   behind an overflow scroller. Caption and controls above, command across
-   the full width below. */
+
 .tdb-cmd {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content max-content;
@@ -2011,23 +1365,20 @@ figure.shiki {
   border: 0;
   border-radius: 0;
   padding: 0;
-  color: #eff8f4;
-  background: #102b26;
+  color: var(--foreground);
+  background: var(--td-surface);
 }
 /* #c2d5ce is 8.11:1 on the band. The filename is a label, not decoration,
    and it is theme-independent, so one value has to serve both schemes. */
-/* The caption row and the code well. Both used to spell their shape in the
-   markup -- nine utility names between them, including a radius the site sets
-   to zero, a border on a band that is its own edge, and the only 14px step on
-   the site. Neither div needs a name: a code figure has exactly two. */
+
 figure.shiki > div:first-child {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   height: 2.9rem;
   padding-inline: var(--sp-5);
-  color: #c2d5ce;
-  background: #173a33;
+  color: var(--muted-foreground);
+  background: var(--td-surface); border-bottom: 1px solid var(--border);
 }
 figure.shiki > div:first-child figcaption {
   flex: 1;
@@ -2043,19 +1394,15 @@ figure.shiki > div:last-child {
   overflow: auto;
   border: 0;
   border-radius: 0;
-  color: #eff8f4;
-  background: #102b26;
+  color: var(--foreground);
+  background: var(--td-surface);
 }
 figure.shiki > div:last-child pre { min-width: 100%; width: max-content; }
 figure.shiki > div:last-child code { display: flex; flex-direction: column; }
 figure.shiki .line { padding-block: var(--sp-1); }
 
 /* --- no cards anywhere -------------------------------------------------- */
-/* A card is a rectangle drawn around content that was already grouped by
-   being next to itself. The 0.32rem colour stripe on top of every one of
-   them cycled coral / blue / green / violet by nth-child -- a rainbow of
-   rules across a page of numbers, where the colour never meant anything but
-   position. */
+
 [data-slot="card"],
 .tdb-card,
 body.tdb-generated-page .bg-card,
@@ -2097,12 +1444,7 @@ body.tdb-generated-page .tdb-table-shell {
 body.tdb-generated-page .tdb-statgrid + .tdb-table-shell { margin-top: var(--rh-para); }
 
 /* --- generated task and suite pages ------------------------------------- */
-/* .tdb-panel wraps a block on the generated task pages -- the instruction,
-   the test list, the withheld-tests notice. It was a bordered, tinted,
-   shadowed rectangle around content that was already grouped by being next to
-   itself, inside a second wrapper that pulled it past the viewport gutter.
-   Both are gone from the markup; what is left are the shrink guards that stop
-   a long identifier pushing the page sideways. */
+
 .tdb-panel {
   width: 100%;
   min-width: 0;
@@ -2131,11 +1473,6 @@ body.tdb-generated-page [data-slot="table-container"] :is(th, td) {
   line-height: var(--lh-ui) !important;
 }
 
-/* The generated tables used to spell this geometry into the markup -- p-2 and
-   py-4 on 350 cells of a single day page, the edge inset written twice as an
-   arbitrary variant on the <table>, and a <p> inside every cell whose entire
-   job was one `text-align`. The distances are unchanged; they are declared
-   once here, and the alignment is an attribute on the cell that carries it. */
 body.tdb-generated-page [data-slot="table-container"] :is(th, td) {
   padding-inline: var(--sp-2);
   text-align: left;
@@ -2162,22 +1499,10 @@ body.tdb-generated-page [data-slot="table-container"] tbody tr:hover {
   background: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
-/* A task's provenance is twelve rows of `key -> one value`. Eight of them were
-   a bordered two-column table -- the last one on the site -- sitting under a
-   six-row grid of the same shape. One list, one column: at two columns a
-   40-character commit hash wraps into four lines against a 7rem minimum. */
 .tdb-statgrid[data-flow="list"] { column-count: 1; }
 .tdb-empty { color: var(--muted-foreground); }
 
-body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-lead) !important; }
-
-/* ==========================================================================
-   THE DISCRIMINATION FIGURES on /quality/.
-   Colour in this block is reserved entirely for data: one ink ramp in three
-   steps, one neutral floor, one hollow absence. There is no hue, because on
-   a page of numbers a saturated square is the loudest object on it, and
-   density orders a ramp as well as hue does.
-   ========================================================================== */
+body.tdb-generated-page .tdb-section-head h2 { margin: 0; font-size: var(--ts-sub) !important; }
 
 /* -- item strip: one square per catalogue task --------------------------- */
 /* Row length IS n: each row's <svg> takes a percentage of a fixed cells
@@ -2203,11 +1528,7 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
 .tdb-strip .c-hi  { fill: var(--foreground); }
 .tdb-strip .c-mid { fill: color-mix(in srgb, var(--foreground) 62%, var(--td-surface)); }
 .tdb-strip .c-lo  { fill: color-mix(in srgb, var(--foreground) 30%, var(--td-surface)); }
-/* The three states differ in KIND, not only in value: the ramp is fill and
-   no outline; the floor -- "no model solved this", an absence of information
-   rather than a low score -- is a near-empty fill WITH a solid outline; and
-   "never run" stays hollow and dashed. Against a grey ramp a mid-grey floor
-   would read as one more step, which is the misreading it exists to prevent. */
+
 .tdb-strip .c-zero {
   fill: color-mix(in srgb, var(--foreground) 7%, var(--td-surface));
   stroke: var(--td-cell-zero);
@@ -2306,12 +1627,7 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
   font-weight: var(--fw-medium);
 }
 .tdb-toc-list { display: flex; flex-direction: column; border-left: 1px solid var(--td-line); }
-/* Body size, not micro: these are section TITLES -- the same strings as the
-   headings they point at -- and the rail is the only navigation of a
-   26-section page. The marked entry used to redraw the rail's hairline in ink
-   over a -1px pull: a second border colour and a negative-margin hack to say
-   one thing that colour and weight already say. The rail keeps one rule, on
-   the list. */
+
 .tdb-toc-link {
   padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
   color: var(--muted-foreground);
@@ -2356,11 +1672,6 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
 }
 .tdb-doclist-d { overflow-wrap: anywhere; }
 
-/* Ctrl+K over the guide. Both pieces are built in site.js, so nothing here is
-   reachable from static markup -- which is also why the trigger has to LOOK
-   like a control rather than rely on a reader guessing a shortcut exists.
-   No animation, so there is nothing for the reduced-motion block to undo:
-   the panel is either there or it is not. */
 .tdb-findbtn {
   display: inline-flex;
   align-items: center;
@@ -2513,64 +1824,8 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
 }
 .tdb-find-foot-n { margin-left: auto; }
 
-/* ==========================================================================
-   THE DOCUMENTATION SHELL
-
-   WHAT THE REFERENCE ACTUALLY SHOWED, and what this file therefore does NOT
-   copy. The reference benchmark's whole doc set is ONE page: no sidebar, no
-   section rail, no search, five h2, 1529px. Its shell is a 56px sticky
-   header over a single 736px column, and the reason it needs nothing else is
-   that a five-entry list of headings is already visible without a rail, and a
-   one-page doc set needs no index.
-
-   We are about to ship roughly twenty pages, so the one thing the reference
-   cannot tell us is how to navigate twenty of anything -- it never has to.
-   So the DECISIONS are copied, and the OMISSIONS are copied wherever the
-   omission's premise still holds:
-
-     * ONE MEASURE, INVARIANT.  736px (--w-doc), at every viewport above the
-       phone breakpoint. The reference holds this across 1440 and 1024 by
-       moving nothing; we hold it by shrinking the sidebar instead of the
-       text. A reader's line length must not be a function of their window.
-     * THE TOP BAR SURVIVES.  The reference marks the current page in a
-       persistent sticky strip and has no sidebar at all, so nothing in it
-       argues for replacing the masthead. The sidebar is ADDED, at doc scale
-       only, and is built to the masthead's own rules rotated 90 degrees.
-     * ACTIVE IS COLOUR ALONE.  No fill, no rule, no indent, no weight change
-       -- in the sidebar, and now in the masthead too. Position in the list
-       already says which link it is.
-     * THE RAIL IS CONDITIONAL.  The reference omits "on this page" because
-       its headings fit on one and a half screens. That premise is checkable,
-       so it is checked at runtime rather than assumed: a page inside the
-       shell's bound (7 or fewer h2, 2500px or shorter) is its own table of
-       contents and gets no rail; a page that has outgrown the bound gets one
-       and says so in the console. The rail is scaffolding for a defect, not
-       furniture.
-     * WHAT IS NOT COPIED.  The reference sets h1/h2 in mono, and its muted
-       prose colour measures 4.83:1. This site's type rule (sans for prose AND
-       headings) is pinned by tests/test_leaderboard_frontend.py and is not
-       reopened here, and every colour below is one of the two prose tokens,
-       which measure 8.4:1 and 18.6:1 light, 9.4:1 and 17.3:1 dark.
-
-   THE MARKUP A PAGE HAS TO WRITE is exactly this -- site.js builds the rest:
-
-     main#nd-home-layout.tdb-docs
-       > article.tdb-doc
-           h1
-           p.tdb-doc-sub
-           h2[id]
-           p
-           figure.tdb-code > pre > code
-   ========================================================================== */
-
 :root {
-  /* The measure. 46rem is 736px, which is the reference's 768px article box
-     less its 16px gutters -- 69 characters of Geist at 16px. It is a
-     CONSTANT: no breakpoint below changes it, and nothing else on the site
-     may set a width on running text inside .tdb-doc. */
-  --w-doc: 46rem;
-  /* The sidebar track. It is the variable the layout spends when the window
-     narrows, precisely so that --w-doc is not. */
+  /* Navigation stays compact; the article uses the remaining page width. */
   --w-docnav: 12rem;
   /* Where an anchor jump parks a heading: the masthead plus a clear line.
      TOC_FOLD in site.js is 128 and must stay ABOVE this, or clicking a rail
@@ -2578,44 +1833,35 @@ body.tdb-generated-page .tdb-section-head p:first-child { font-size: var(--ts-le
   --doc-anchor: 7rem;
 }
 
-/* -- the grid ------------------------------------------------------------
-   One column on a phone and a tablet; two once a sidebar fits; three once a
-   rail fits beside it. The third track is declared whether or not the rail
-   mounts, so the prose column never moves between two pages that differ only
-   in how long they are. */
-main.tdb-docs {
+main#nd-home-layout.tdb-docs {
   width: 100%;
-  /* The masthead is `position: fixed`, so the docs frame has to clear it
-     itself. The legacy frame did this with Tailwind's `pt-14` -- 56px against
-     a header that measures 68 -- so content there has been riding 12px under
-     the bar. `--chrome-h` is the measured height and the only place it is
-     declared; hard-coding a second number is how the first 12px went missing. */
-  padding-top: var(--chrome-h);
-  padding-inline: var(--sp-4);
-  padding-bottom: var(--sp-8);
+  padding: calc(var(--chrome-h) + 32px) 0 48px;
 }
 .tdb-doc-shell {
   display: grid;
-  grid-template-columns: minmax(0, var(--w-doc));
-  justify-content: center;
-  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  align-items: start;
+  column-gap: 24px;
+  width: calc(100% - 64px);
+  max-width: var(--w-page);
+  margin-inline: auto;
 }
 
 @media (min-width: 64rem) {
   .tdb-doc-shell {
-    grid-template-columns: var(--w-docnav) minmax(0, var(--w-doc));
-    column-gap: var(--sp-5);
+    grid-template-columns: var(--w-docnav) minmax(0, 1fr);
   }
 }
 @media (min-width: 80rem) {
   .tdb-doc-shell {
-    grid-template-columns: 15rem minmax(0, var(--w-doc));
-    column-gap: var(--sp-7);
+    grid-template-columns: 13rem minmax(0, 1fr);
+    column-gap: 32px;
   }
 }
 @media (min-width: 88rem) {
-  .tdb-doc-shell {
-    grid-template-columns: 15rem minmax(0, var(--w-doc)) 15rem;
+  .tdb-doc-shell:has(> #toc.tdb-toc:not([hidden])) {
+    grid-template-columns: 13rem minmax(0, 1fr) 13rem;
   }
 }
 
@@ -2624,12 +1870,13 @@ main.tdb-docs {
    descendants through :where() at zero specificity and every value here would
    otherwise be an argument with a vendored sheet. */
 .tdb-doc {
+  width: 100%;
   min-width: 0;
-  max-width: var(--w-doc);
+  max-width: none;
   font-size: var(--ts-body);
   line-height: var(--lh-prose);
 }
-.tdb-doc > h1 {
+.tdb-doc-heading > h1 {
   margin: 0;
   font-size: var(--ts-title);
   font-weight: var(--fw-semi);
@@ -2641,12 +1888,12 @@ main.tdb-docs {
    8 under the title, 32 under the subtitle. They are not a fifth and a sixth
    rhythm step -- they are the internal spacing of one component, the page
    head, and they take --sp names for exactly that reason. */
-.tdb-doc > .tdb-doc-sub {
+.tdb-doc-heading > .tdb-doc-sub {
   margin: var(--sp-2) 0 var(--sp-6);
   color: var(--td-muted);
   font-size: var(--ts-lead);
   line-height: var(--lh-sub);
-  text-wrap: pretty;
+  text-wrap: wrap;
 }
 .tdb-doc > h2 {
   margin: var(--rh-sec) 0 var(--rh-head);
@@ -2663,6 +1910,8 @@ main.tdb-docs {
   line-height: var(--lh-prose);
 }
 .tdb-doc > * { max-width: 100%; }
+.tdb-doc > :is(p, ul, ol, blockquote) { max-width: var(--w-prose); }
+.tdb-doc > :is(h1, h2, h3, h4, figure, pre, table, .tdb-plain-table, .tdb-defs) { width: 100%; min-width: 0; }
 .tdb-doc > :last-child { margin-bottom: 0; }
 
 /* A self-referencing heading, as the reference has: the whole heading is the
@@ -2683,10 +1932,6 @@ main.tdb-docs {
   text-decoration-thickness: 1px;
 }
 
-/* An inline term, with no chip drawn round it: a container belongs round an
-   instrument, not round a word. (The reference has zero inline code in prose
-   -- its commands live only in figures -- so this rule exists for the terms
-   ours cannot avoid: a field name, a task id, a flag inside a sentence.) */
 .tdb-doc :not(pre) > code {
   padding: 0;
   border: 0;
@@ -2703,7 +1948,9 @@ main.tdb-docs {
   margin: 0 0 var(--rh-para);
   padding-left: var(--sp-5);
 }
-.tdb-doc li + li { margin-top: var(--rh-para); }
+.tdb-doc ul { list-style-type: disc; }
+.tdb-doc ol { list-style-type: decimal; }
+.tdb-doc li + li { margin-top: var(--sp-2); }
 
 /* -- the code figure -----------------------------------------------------
    16 above and below, one hairline, no fill beyond the site's own surface,
@@ -2727,12 +1974,7 @@ main.tdb-docs {
   border-bottom: 1px solid var(--td-line);
   padding: 0 3.25rem 0 var(--sp-4);
   color: var(--td-muted);
-  /* Sans, not mono. This rule carries a class, so it outranked `main
-     figcaption` and kept eight English captions -- "Install, then score",
-     "The abstract base and its result type" -- painting in the code face
-     while their capitalisation had already been fixed. A caption is prose
-     about the figure; an identifier inside one goes in <code>, which is the
-     site-wide hook and takes the mono back on its own element. */
+
   font-family: var(--td-font-sans);
   font-size: var(--ts-micro);
   line-height: var(--lh-ui);
@@ -2777,25 +2019,13 @@ main.tdb-docs {
 .tdb-copy svg { width: 0.875rem; height: 0.875rem; }
 .tdb-copy:hover { color: var(--foreground); }
 .tdb-copy[data-copied="true"] { color: var(--foreground); }
-/* A clipboard write can be refused, and a button that says nothing when it
-   fails has told the reader their command is copied when it is not. The
-   failure is the site's ONE state marker -- 2px of coral -- drawn as an
-   outline rather than as the glyph's colour: coral on this surface measures
-   3.05:1 light, which is fine for a 2px marker and nowhere near the 7:1 this
-   site holds anything readable to. The glyph itself stays at full ink, and
-   the button's aria-label changes to "Copy failed". */
+
 .tdb-copy[data-copied="false"] {
   color: var(--foreground);
   outline: 2px solid var(--td-coral);
   outline-offset: -2px;
 }
 
-/* -- the sidebar ---------------------------------------------------------
-   The masthead's nav rules, rotated: one colour for idle, one for here,
-   nothing else. Below 64rem it does not exist as a column -- its entries are
-   rendered into the masthead's own push-down panel instead, which is where
-   the site nav already goes at that width, so the collapse is ONE panel and
-   ONE breakpoint rather than two competing menus. */
 .tdb-docnav {
   display: none;
   font-family: var(--td-font-sans);
@@ -2822,21 +2052,17 @@ main.tdb-docs {
 .tdb-docnav-g:first-child { margin-top: 0; }
 .tdb-docnav-l { display: flex; flex-direction: column; }
 .tdb-docnav-a {
-  padding: var(--sp-2) 0;
+  padding: 6px 10px;
+  border-left: 2px solid transparent;
   color: var(--td-muted);
-  font-size: var(--ts-body);
+  font-size: var(--ts-micro);
   line-height: var(--lh-ui);
   text-decoration: none;
   overflow-wrap: anywhere;
 }
 .tdb-docnav-a:hover { color: var(--foreground); }
-.tdb-docnav-a[data-active="true"] { color: var(--foreground); }
+.tdb-docnav-a[data-active="true"] { color: var(--td-blue); border-left-color: var(--td-blue); background: var(--td-surface); }
 
-/* A page the index does not know about is a page nobody can reach from any
-   other page. That is a defect, and the fix is to make it loud on the page
-   itself rather than to let the sidebar quietly render one entry short --
-   which is the failure that would survive a review. Same coral left rule the
-   site already uses for a failed read. */
 .tdb-docnav-x {
   margin: 0 0 var(--sp-5);
   border-left: 2px solid var(--td-coral);
@@ -2857,14 +2083,9 @@ main.tdb-docs {
   line-height: var(--lh-ui);
 }
 
-/* -- the section rail, inside the shell ----------------------------------
-   .tdb-toc keeps its own type and marker rules (declared with the rest of
-   document navigation, above); what changes here is only that in the grid it
-   is a track rather than a 15rem flex item, and that it does not exist at all
-   until a third track does. */
 .tdb-doc-shell > #toc { display: none; }
 @media (min-width: 88rem) {
-  .tdb-doc-shell > #toc.tdb-toc {
+  .tdb-doc-shell > #toc.tdb-toc:not([hidden]) {
     display: block;
     position: sticky;
     top: calc(var(--chrome-h) + var(--sp-5));
@@ -2915,22 +2136,11 @@ main.tdb-docs {
      the accuracy cell that can be dropped without losing a number. */
   .tdb-acc-track { display: none; }
 
-  /* Two columns, placed explicitly. Auto-placement cannot produce the
-     intended "label left, count right, bar under both": the cells span
-     1/-1, so they are pushed to row 2, the cursor ends past row 2, the count
-     lands in row 3 col 1, and nothing ever occupies the `auto` track -- which
-     then resolves to 0px and the row triples in height. */
   .tdb-strip-row   { grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-4); }
   .tdb-strip-k     { grid-column: 1; grid-row: 1; }
   .tdb-strip-n     { grid-column: 2; grid-row: 1; text-align: right; }
   .tdb-strip-cells { grid-column: 1 / -1; grid-row: 2; }
 
-  /* Dropping the axis margins puts the last tick's centre ON the container's
-     right edge, and translateX(-50%) then hangs half a "100%" label past it
-     -- 2px of sideways scroll on every phone that loads /quality/. The two
-     extreme ticks anchor to their own edges instead of their centres, which
-     is arguably what an axis should do at either end anyway; the inner ticks
-     keep centring, which is where centring matters. */
   .tdb-ci-axis  { margin-inline: 0; }
   .tdb-ci-axis > span:first-child { transform: none; }
   .tdb-ci-axis > span:last-child  { transform: translateX(-100%); }
@@ -2969,29 +2179,6 @@ main.tdb-docs {
   }
 }
 
-/* ==========================================================================
-   THE VENDORED RADIUS LADDER
-
-   Zeroing --radius squares tw.css's .rounded-lg, .rounded-md and .rounded-sm,
-   because all three derive from it. Four utilities do not, and stayed round
-   on a page that is otherwise square:
-
-     .rounded-xl    calc(var(--radius) + 4px)   ->  4px
-     .rounded-xs    var(--radius-xs)            ->  2px
-     .rounded-2xl   var(--radius-2xl)           -> 16px
-     .rounded-full  3.40282e38px                -> pill
-
-   One of these still ships: .rounded-full, on the theme switch in the
-   masthead, where tests/test_site_geometry.py pins it as the canary for this
-   very rule. (.rounded-xl was on the code figure of all 65 generated pages
-   until that figure stopped spelling its own shape; no radius utility other
-   than .rounded-full appears in the rendered markup of any screen now.) The
-   whole ladder stays named anyway: a class that SPELLS a radius is the one
-   way a radius re-enters the site without any rule in this file changing.
-
-   These are tw.css's classes. The site's own two circles are drawn by
-   .tdb-brand-mark and .tdb-ci-dot, which are not in this list.
-   ========================================================================== */
 .rounded-xs,
 .rounded-sm,
 .rounded-md,
@@ -3014,3 +2201,1118 @@ body.tdb-generated-page .prose :where(code),
 body.tdb-generated-page .prose :where(kbd) {
   border-radius: 0;
 }
+/* Model rows disclose the measured effort configurations directly below. */
+.tdb-model-toggle { display: inline-flex; align-items: center; gap: .5rem; text-align: left; cursor: pointer; color: inherit; font: inherit; }
+.tdb-model-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.tdb-model-chevron { display: inline-block; font-size: 1.25rem; width: .75rem; }
+.tdb-model-toggle[aria-expanded="true"] .tdb-model-chevron { transform: rotate(90deg); }
+.tdb-model-count { color: var(--muted-foreground); font-size: .75rem; font-weight: 400; }
+tr[data-model-group] { cursor: pointer; }
+.tdb-effort-row { background: var(--muted); }
+.tdb-effort-row td:first-child { border-left: 2px solid var(--border); }
+.tdb-effort-label { padding-left: 1.25rem; font-size: .875rem; }
+.tdb-cap-select { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding: .75rem 1rem; }
+.tdb-cap-select select { max-width: 100%; padding: .5rem; border: 1px solid var(--border); color: var(--foreground); background: var(--background); }
+
+/* Compact benchmark results. Prose pages retain their reading measure. */
+#nd-nav { font-family: var(--td-font-sans); }
+#nd-nav > div:first-child > * { width: calc(100% - 64px); max-width: var(--w-page); }
+#nd-nav nav { height: var(--chrome-h); padding-inline: 0; }
+#nd-nav nav > ul:nth-of-type(1) { gap: 0; padding-inline: 16px; }
+#nd-nav .tdb-brand { padding: 4px 0; }
+#nd-nav .tdb-brand-name { font-size: 18px; font-weight: 600; letter-spacing: -.035em; }
+#nd-nav .tdb-nav-link { padding: 8px 12px; font-size: 14px !important; }
+#nd-nav .tdb-findbtn { font-size: 12px; }
+#tdb-footer { margin-top: 32px; padding: 0 32px 20px; }
+#tdb-footer .tdb-footer-inner { width: 100%; max-width: var(--w-page); margin-inline: auto; padding: 16px 0; }
+#tdb-footer p[class] { font-size: 12px !important; line-height: 1.5 !important; }
+#tdb-footer .tdb-footer-inner { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+#tdb-footer p { margin: 0; font-size: 12px; }
+#tdb-footer p span { margin-left: 12px; color: var(--muted-foreground); }
+#tdb-footer nav { display: flex; gap: 20px; font-size: 12px; }
+.tdb-about { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; border-top: 1px solid var(--border); padding: 28px 0 8px; margin-top: 24px; }
+.tdb-about h2 { font-size: 18px; line-height: 1.4; margin: 0 0 8px; }
+.tdb-about p { max-width: 100%; margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted-foreground); }
+body.tdb-report #mechanic ol { list-style: decimal; padding-left: 22px; max-width: var(--w-prose); }
+body.tdb-report #mechanic li + li { margin-top: 8px; }
+body.tdb-report #frames { gap: 24px; }
+
+body.tdb-results main#nd-home-layout { padding: var(--chrome-h) 0 0; }
+body.tdb-results .tdb-result-frame { width: calc(100% - 64px); max-width: var(--w-page); margin-inline: auto; }
+body.tdb-results main#nd-home-layout :is(.tdb-shell, .tdb-block, .tdb-plain-table) { margin-top: 0; }
+body.tdb-results main#nd-home-layout .tdb-masthead {
+  align-items: flex-start; gap: 12px; padding: 40px 0 32px; text-align: left;
+}
+body.tdb-results main#nd-home-layout .tdb-masthead h1 {
+  font-family: var(--td-font-sans); font-size: clamp(36px, 4vw, 56px) !important;
+  font-weight: 600; line-height: 1.1 !important; letter-spacing: var(--tr-head);
+}
+body.tdb-results main#nd-home-layout .tdb-masthead h1 + p {
+  max-width: 100%; margin: 0; font-family: var(--td-font-sans);
+  font-size: 16px !important; line-height: 1.6;
+}
+body.tdb-results .tdb-hero-actions { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 8px; }
+body.tdb-results .tdb-hero-actions a {
+  border: 1px solid transparent; background: var(--muted); padding: 7px 14px; font: 14px/1.5 var(--td-font-sans); text-decoration: none;
+}
+body.tdb-results .tdb-hero-actions .tdb-action-primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+body.tdb-results .tdb-hero-actions a:hover { opacity: .75; }
+body.tdb-results main#nd-home-layout .tdb-result-heading {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 32px 0 28px;
+}
+body.tdb-results main#nd-home-layout .tdb-result-heading h1 {
+  margin: 0; font-family: var(--td-font-sans); font-size: var(--ts-title) !important; font-weight: 600; line-height: var(--lh-head) !important; letter-spacing: var(--tr-head);
+}
+body.tdb-results main#nd-home-layout .tdb-result-heading p {
+  margin: 6px 0 0; color: var(--muted-foreground); font-size: 13px; line-height: 1.5;
+}
+body.tdb-results .tdb-heading-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 16px; }
+body.tdb-results main#nd-home-layout .tdb-heading-title p { margin: 0; }
+body.tdb-results main#nd-home-layout .tdb-preview-toolbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 12px; font-family: var(--td-font-sans);
+}
+body.tdb-results main#nd-home-layout .tdb-preview-toolbar h2 { margin: 0; font: 600 24px/1.3 var(--td-font-sans); letter-spacing: var(--tr-head); }
+body.tdb-results main#nd-home-layout .tdb-preview-toolbar p { margin: 0; font-size: 12px; color: var(--muted-foreground); }
+body.tdb-results .tdb-preview-toolbar #daynav { margin-left: auto; }
+body.tdb-results .tdb-preview-toolbar > a { font-size: 12px; text-underline-offset: 3px; }
+body.tdb-results .tdb-daynav { height: 32px; font-family: var(--td-font-sans); }
+body.tdb-results .tdb-daynav-arrow { width: 28px; padding: 0; font-size: 18px; }
+body.tdb-results .tdb-daynav select { padding: 0 10px; font-size: 12px; }
+body.tdb-results .tdb-daynav-pos { display: none; }
+
+body.tdb-results main#nd-home-layout .tdb-tablebar {
+  padding: 0 0 10px; margin: 0; gap: 10px; border: 0; font-family: var(--td-font-sans);
+}
+body.tdb-results main#nd-home-layout :is(.tdb-shell-body, #facet-box) { border: 0; padding: 0; margin: 0; }
+body.tdb-results #facets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+body.tdb-results .tdb-filter-label select {
+  height: 32px; max-width: 100%; border: 1px solid var(--border); background: var(--background);
+  color: var(--foreground); padding: 0 28px 0 10px; font: 12px/1.4 var(--td-font-sans); cursor: pointer;
+}
+body.tdb-results #facet-reset { padding: 4px; font-size: 12px; text-decoration: underline; cursor: pointer; }
+body.tdb-results .tdb-viewswitch { gap: 0; }
+body.tdb-results main#nd-home-layout .tdb-viewswitch .tdb-chip { height: 34px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: none; font-family: var(--td-font-sans); font-size: 14px !important; line-height: 1.4 !important; }
+body.tdb-results .tdb-shell-search { flex: 0 1 184px; margin-left: 0; order: 2; }
+body.tdb-results .tdb-shell-search input { font: 12px/1.4 var(--td-font-sans); }
+body.tdb-results main#nd-home-layout #count { flex: none; margin: 0 0 0 4px; font-size: 12px; color: var(--muted-foreground); }
+body.tdb-results main#nd-home-layout .tdb-badge { padding: 1px 5px; font-size: 10px !important; line-height: 1.4 !important; }
+body.tdb-results main#nd-home-layout .tdb-view-note { margin: 0 0 10px; font-size: 13px; }
+
+/* A fixed model column leaves the remaining width for comparable score bars. */
+body.tdb-results main#nd-home-layout :is(.tdb-plain-table, [data-slot="table-container"]) {
+  width: 100%; max-width: 100%; overflow-x: auto; border: 0; margin: 0;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table { width: 100%; min-width: 980px; table-layout: fixed; margin: 0; }
+body.tdb-results main#nd-home-layout .tdb-results-table :is(th, td) {
+  padding: 9px 12px; font-family: var(--td-font-sans); font-size: 14px !important;
+  line-height: 20px !important; vertical-align: middle; border-bottom: 1px solid var(--border);
+}
+body.tdb-results main#nd-home-layout .tdb-results-table th { height: 42px; padding-block: 10px; font-weight: 400; color: var(--muted-foreground); background: none; border-top: 1px solid var(--border); }
+body.tdb-results main#nd-home-layout .tdb-results-table td :is(p, span, strong, a, div)[class] { line-height: 20px !important; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-rank { width: 68px; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-model { width: 280px; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-agent { width: 116px; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-count { width: 104px; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-sort { font: 13px/20px var(--td-font-sans); }
+body.tdb-results .tdb-results-table th:has(.tdb-sort[data-key="rate"]) .tdb-sort-wrap { justify-content: flex-start; }
+body.tdb-results .tdb-results-table tbody tr:hover { background: var(--td-surface); }
+body.tdb-results .tdb-results-table tbody .tdb-effort-row { background: var(--td-surface); }
+body.tdb-results .tdb-model-toggle, body.tdb-results .tdb-model-label {
+  display: flex; align-items: baseline; gap: 5px; width: 100%; min-width: 0; padding: 0; font: inherit;
+}
+body.tdb-results .tdb-model-label { padding-left: 15px; }
+body.tdb-results .tdb-model-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.tdb-results .tdb-model-effort { flex: none; color: var(--muted-foreground); font-size: 11px; font-weight: 400; }
+body.tdb-results .tdb-model-chevron { flex: 0 0 10px; width: 10px; font-size: 18px; }
+body.tdb-results .tdb-effort-label { display: inline-block; padding-left: 26px; font-size: 12px; color: var(--muted-foreground); }
+body.tdb-results .tdb-acc-row { display: grid; grid-template-columns: 112px minmax(0, 1fr); width: 100%; align-items: center; gap: 10px; white-space: nowrap; }
+body.tdb-results .tdb-acc-value { display: inline-flex; justify-content: flex-end; align-items: baseline; gap: 5px; white-space: nowrap; font: 12px/20px var(--td-font-mono); }
+body.tdb-results .tdb-acc-row strong { min-width: 0; font-size: 14px; font-weight: 600; text-align: right; }
+body.tdb-results .tdb-acc-sd { color: var(--muted-foreground); font: 12px/20px var(--td-font-mono); white-space: nowrap; }
+body.tdb-results .tdb-acc-track { display: block; grid-column: 2; grid-row: 1; flex: 1 1 auto; width: auto; min-width: 0; height: 12px; background: var(--muted); }
+body.tdb-results .tdb-acc-fill { background: var(--td-blue); }
+body.tdb-results .tdb-acc-range { position: absolute; top: 4px; height: 4px; border-inline: 1px solid var(--foreground); }
+body.tdb-results .tdb-acc-range::after { content: ""; position: absolute; left: 0; right: 0; top: 1px; height: 1px; background: var(--foreground); }
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] { min-width: 900px; }
+@media (min-width: 768px) {
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] .tdb-col-model { width: auto; }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] .tdb-col-capability { width: 200px; }
+}
+body.tdb-results .tdb-results-table .tdb-col-overall { width: 200px; }
+body.tdb-results .tdb-cap-cell { flex-direction: row; align-items: center; gap: 12px; }
+body.tdb-results .tdb-cap-cell .tdb-acc-row { flex: 1; min-width: 0; }
+body.tdb-results .tdb-cap-n { flex: 0 0 66px; font-size: 11px; text-align: right; }
+body.tdb-results .tdb-overall-cell .tdb-acc-track { display: none; }
+body.tdb-results .tdb-sample-note { display: block; font-size: 10px; }
+body.tdb-results .tdb-col-note { margin: 0; font-size: 10px; }
+body.tdb-results .tdb-score-cell .tdb-sort-wrap { justify-content: flex-start; }
+body.tdb-results .tdb-results-table[data-view="capability"] th:last-child :is(.tdb-sort-wrap, .tdb-col-note) { justify-content: flex-end; text-align: right; }
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] { min-width: 2400px; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-cap-cell { flex-direction: row; align-items: center; gap: 6px; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-cap-n { flex: none; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-acc-row { width: auto; justify-content: flex-end; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-acc-track { display: none; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-sample-note { display: none; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-sort { white-space: normal; text-align: right; }
+
+body.tdb-results main#nd-home-layout .tdb-result-caption { margin: 12px 0 14px; max-width: 100%; font-family: var(--td-font-sans); font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
+body.tdb-results main#nd-home-layout .tdb-methods { margin: 0; border-top: 1px solid var(--border); padding: 10px 0; }
+body.tdb-results .tdb-methods summary { width: fit-content; cursor: pointer; font: 13px/1.5 var(--td-font-sans); color: var(--muted-foreground); }
+body.tdb-results main#nd-home-layout .tdb-methods .tdb-foot { padding: 12px 0 2px; margin: 0; border: 0; }
+body.tdb-results main#nd-home-layout .tdb-methods :is(p, dt, dd) { font-size: 13px; line-height: 1.6; }
+body.tdb-results main#nd-home-layout .tdb-methods p { margin-top: 8px; }
+body.tdb-results main#nd-home-layout .tdb-methods .tdb-cmd { margin-top: 12px; }
+body.tdb-results #tdb-canary { margin-block: 12px; }
+#nd-nav :is(.tdb-findbtn-t, .tdb-findbtn-k) { display: none; }
+#nd-nav .tdb-findbtn { padding: 6px; border: 0; }
+#nd-nav .tdb-findbtn svg { width: 18px; height: 18px; }
+body.tdb-results .tdb-heading-meta { display: flex; align-items: center; gap: 18px; }
+body.tdb-results main#nd-home-layout .tdb-heading-meta #count { order: 0; margin: 0; }
+body.tdb-results main#nd-home-layout .tdb-heading-meta { border: 0; padding: 0; }
+body.tdb-results main#nd-home-layout .tdb-tablebar #facet-box { order: 1; margin-left: auto; }
+body.tdb-results main#nd-home-layout .tdb-viewswitch .tdb-chip[aria-pressed="true"] { border-bottom-color: var(--td-blue); color: var(--td-blue); }
+body.tdb-results main#nd-home-layout .tdb-viewswitch .tdb-chip:hover { color: var(--foreground); }
+body.tdb-results main#nd-home-layout .tdb-viewswitch .tdb-chip:first-child { padding-left: 0; }
+body.tdb-results main#nd-home-layout .tdb-results-table[data-ranked="false"] :is(td, th):first-child { display: none; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-agent { width: 126px; }
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-col-model { width: 310px; }
+body.tdb-results .tdb-effort-row .tdb-acc-fill { opacity: .55; }
+body.tdb-results .tdb-model-toggle, body.tdb-results .tdb-model-label { font-weight: 500; }
+body.tdb-results .tdb-model-effort { font-size: 12px; }
+body.tdb-results .tdb-cap-n { font-size: 12px; }
+body.tdb-results .tdb-cap-model { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.tdb-results .tdb-results-table[data-view="all-capabilities"] .tdb-cap-n { font-size: 11px; }
+body.tdb-results main#nd-home-layout .tdb-results-table th.tdb-col-count { width: 110px; }
+
+/* Paged catalogues share the compact type and controls of the results pages. */
+body.tdb-catalog main#nd-home-layout,
+body.tdb-catalog main#nd-home-layout.tdb-catalog-main {
+  flex: 1; min-width: 0; width: 100%; padding: var(--chrome-h) 0 0;
+  font-family: var(--td-font-sans); font-size: 14px; line-height: 1.5;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-frame {
+  width: calc(100% - 64px); max-width: var(--w-page); min-width: 0; margin-inline: auto;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-heading {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 8px 20px; padding: 32px 0 24px;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-heading h1 {
+  margin: 0; font-family: var(--td-font-sans); font-size: var(--ts-title) !important;
+  font-weight: 600; line-height: var(--lh-head) !important; letter-spacing: var(--tr-head);
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-meta {
+  display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; max-width: 100%;
+  color: var(--muted-foreground); font-size: 12px !important; line-height: 1.5 !important;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-meta :is(span, time) { font: inherit; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-toolbar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin: 0 0 14px;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-search {
+  display: flex; flex: 1 1 320px; flex-direction: column; gap: 4px; min-width: 180px; max-width: 480px;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-filters {
+  display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: flex-end; gap: 10px;
+}
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-filters, .tdb-catalog-extra-filters) label {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 100%;
+}
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-search, .tdb-catalog-filters label, .tdb-catalog-extra-filters label) > span {
+  color: var(--muted-foreground); font-size: 12px !important; line-height: 16px !important;
+}
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-toolbar, .tdb-catalog-extra-filters, .tdb-pagination) :is(input, select, button) {
+  box-sizing: border-box; height: 32px; min-width: 0; max-width: 100%; margin: 0;
+  border: 1px solid var(--border); border-radius: 0; padding: 4px 10px;
+  background: var(--background); color: var(--foreground);
+  font-family: var(--td-font-sans); font-size: 14px !important; font-weight: 400; line-height: 22px !important;
+}
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-search, .tdb-catalog-filters label) > span {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-search input { width: 100%; }
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-filters, .tdb-catalog-extra-filters) select {
+  min-width: 126px; padding-right: 24px; cursor: pointer;
+}
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-toolbar, .tdb-catalog-extra-filters, .tdb-pagination) button { cursor: pointer; white-space: nowrap; }
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-toolbar, .tdb-catalog-extra-filters, .tdb-pagination) button:hover:not(:disabled) { background: var(--muted); }
+body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-toolbar, .tdb-catalog-extra-filters, .tdb-pagination) :is(button, input, select):disabled { opacity: .45; cursor: default; }
+body.tdb-catalog main#nd-home-layout :is(input, select, button, summary):focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-filter-details { min-width: 0; margin: 0 0 14px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-filter-details > summary {
+  box-sizing: border-box; width: fit-content; min-height: 32px; border: 1px solid var(--border);
+  padding: 4px 10px; cursor: pointer; font: 14px/22px var(--td-font-sans);
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-toolbar .tdb-catalog-filter-details { margin-bottom: 0; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-toolbar .tdb-catalog-filter-details[open] { flex-basis: 100%; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-extra-filters {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; min-width: 0; padding: 12px 0 0;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table-wrap {
+  width: 100%; min-width: 0; max-width: 100%; overflow-x: auto; margin: 0; border: 0;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table {
+  width: 100%; min-width: 940px; table-layout: fixed; border-collapse: collapse; margin: 0;
+  font-family: var(--td-font-sans); font-size: 14px; font-variant-numeric: tabular-nums;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(th, td) {
+  box-sizing: border-box; padding: 10px 12px; border-bottom: 1px solid var(--border);
+  font-family: var(--td-font-sans); font-size: 14px !important; font-weight: 400 !important;
+  line-height: 20px !important; text-align: left; vertical-align: top; white-space: normal; overflow-wrap: anywhere;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table th {
+  border-top: 1px solid var(--border); padding-block: 9px; color: var(--muted-foreground); background: none;
+}
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):first-child { padding-left: 0; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):last-child { padding-right: 0; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody tr:hover { background: var(--td-surface); }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(.tdb-num, .tdb-task-f2p-cell, .tdb-task-score-cell) { text-align: right; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(a, button, summary, code) { font-family: inherit; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(button, .tdb-sort) { font-size: 14px !important; line-height: 20px !important; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table a { text-underline-offset: 3px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-muted { color: var(--muted-foreground); }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-title-cell { width: auto; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-suite-cell { width: 150px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-status-cell { width: 100px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-cap-cell { width: 150px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-f2p-cell { width: 64px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-score-cell { width: 100px; }
+body.tdb-catalog main#nd-home-layout .tdb-task-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 100%; font-size: 14px !important; line-height: 20px !important; }
+body.tdb-catalog main#nd-home-layout .tdb-task-meta {
+  display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 3px; color: var(--muted-foreground);
+  font-size: 12px !important; line-height: 18px !important;
+}
+body.tdb-catalog main#nd-home-layout .tdb-task-meta :is(a, span, code) { font-size: inherit !important; line-height: inherit !important; }
+body.tdb-catalog main#nd-home-layout .tdb-task-memberships { margin-top: 3px; }
+body.tdb-catalog main#nd-home-layout .tdb-task-memberships > summary { width: fit-content; cursor: pointer; color: var(--muted-foreground); font-size: 12px; }
+body.tdb-catalog main#nd-home-layout .tdb-membership-links { display: flex; flex-direction: column; gap: 4px; padding-top: 5px; max-height: 180px; overflow-y: auto; }
+body.tdb-catalog main#nd-home-layout .tdb-membership-links a { font-size: 12px; line-height: 18px; }
+body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table { min-width: 940px; }
+body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table { min-width: 740px; }
+body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):nth-child(1) { width: 150px; }
+body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):nth-child(2) { width: 100px; }
+body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):nth-child(3) { width: 80px; }
+body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table :is(th, td):nth-child(4) { width: 140px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-note-cell { color: var(--muted-foreground); }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-note { max-width: 100%; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-note > summary { cursor: pointer; overflow-wrap: anywhere; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-note > summary:hover { color: var(--foreground); }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-note p { max-width: 100%; margin-top: 8px; font-size: 14px !important; line-height: 1.5 !important; }
+body.tdb-catalog main#nd-home-layout .tdb-pagination {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 20px; margin: 0; padding: 0 0 14px; font-family: var(--td-font-sans);
+}
+body.tdb-catalog main#nd-home-layout .tdb-pagination > p { margin: 0; font-size: 12px !important; line-height: 18px !important; color: var(--muted-foreground); }
+body.tdb-catalog main#nd-home-layout .tdb-page-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+body.tdb-catalog main#nd-home-layout .tdb-page-controls > span { font-size: 12px; line-height: 18px; white-space: nowrap; }
+body.tdb-catalog main#nd-home-layout :is(.tdb-page-size, .tdb-page-number) { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 12px; white-space: nowrap; }
+body.tdb-catalog main#nd-home-layout .tdb-page-size select { width: 110px; padding-right: 20px; }
+body.tdb-catalog main#nd-home-layout .tdb-page-number input { width: 56px; text-align: center; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-disclosure { margin: 0; padding: 10px 0; border-top: 1px solid var(--border); }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-disclosure > summary { width: fit-content; cursor: pointer; color: var(--muted-foreground); font-size: 14px; line-height: 20px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-disclosure-body { max-width: 100%; padding: 10px 0 2px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-disclosure-body :is(p, dt, dd) { font-size: 14px !important; line-height: 1.5 !important; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-disclosure-body p + p { margin-top: 8px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-defs { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 6px 12px; margin: 0 0 10px; }
+body.tdb-catalog main#nd-home-layout .tdb-catalog-defs :is(dt, dd) { margin: 0; }
+body.tdb-catalog main#nd-home-layout .tdb-statgrid { column-count: 1; margin-top: 8px; }
+body.tdb-catalog main#nd-home-layout .tdb-statrow {
+  grid-template-columns: minmax(180px, 240px) minmax(120px, 220px) minmax(0, 1fr);
+  gap: 12px; padding: 8px 0; font-size: 14px; line-height: 20px;
+}
+body.tdb-catalog main#nd-home-layout .tdb-statrow > * { grid-column: auto; }
+body.tdb-catalog main#nd-home-layout .tdb-statrow .tdb-statrow-v[data-tdb-stat-value] { font-size: 14px !important; line-height: 20px !important; }
+body.tdb-catalog main#nd-home-layout .tdb-statrow-n { font-size: 12px !important; line-height: 18px !important; }
+body.tdb-catalog main#nd-home-layout .tdb-empty { margin: 0; padding: 24px 0; color: var(--muted-foreground); font-size: 14px; }
+
+@media (max-width: 767px) {
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-frame { width: calc(100% - 32px); }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-heading { flex-direction: column; align-items: flex-start; gap: 8px; padding: 24px 0 18px; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-heading h1 { font-size: 28px !important; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-toolbar { gap: 10px; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-search { flex-basis: 100%; min-width: 0; max-width: none; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-filters { flex-basis: 100%; gap: 8px; }
+  body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-filters, .tdb-catalog-extra-filters) label { flex: 1 1 140px; }
+  body.tdb-catalog main#nd-home-layout :is(.tdb-catalog-filters, .tdb-catalog-extra-filters) select { width: 100%; min-width: 0; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table-wrap { overflow-x: visible; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table,
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table,
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table { display: block; min-width: 0; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody { display: block; width: 100%; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody tr:first-child { border-top: 1px solid var(--border); }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody td,
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody td[class],
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table tbody td:nth-child(n) { display: block; width: auto; min-width: 0; padding: 0; border: 0; text-align: left; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody td[colspan] { grid-column: 1 / -1; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table tbody td::before { color: var(--muted-foreground); font-size: 12px; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-title-cell { grid-column: 1 / -1; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-suite-cell::before { display: block; content: attr(data-label); }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-status-cell::before { display: block; content: "Status"; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-cap-cell::before { display: block; content: "Capability"; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-f2p-cell::before { display: block; content: attr(data-label); }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-table .tdb-task-score-cell::before { display: block; content: "Official solves"; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead { position: static; display: block; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead tr { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 10px; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead th[class] { display: block; width: auto; padding: 0; border: 0; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead th::before { content: none; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead button { padding: 3px 6px; font-size: 12px !important; border: 1px solid var(--border); cursor: pointer; }
+  body.tdb-catalog.tdb-task-catalog main#nd-home-layout .tdb-catalog-table thead th[aria-sort]:not([aria-sort="none"]) button { background: var(--muted); color: var(--foreground); }
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table tbody td:nth-child(2) { text-align: right; }
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table tbody td:nth-child(3)::before { content: "Tasks "; }
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-table tbody td:nth-child(4)::before { content: "Language "; }
+  body.tdb-catalog.tdb-suite-catalog main#nd-home-layout .tdb-catalog-note-cell { grid-column: 1 / -1; }
+  body.tdb-catalog main#nd-home-layout .tdb-pagination { align-items: flex-start; gap: 10px; padding-bottom: 16px; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-filters .tdb-catalog-filter-details { flex: 1 1 140px; }
+  body.tdb-catalog main#nd-home-layout .tdb-pagination > p { flex-basis: 100%; }
+  body.tdb-catalog main#nd-home-layout .tdb-page-controls { gap: 8px; }
+  body.tdb-catalog main#nd-home-layout .tdb-statrow { grid-template-columns: minmax(0, 1fr) minmax(80px, 1fr); gap: 4px 12px; }
+  body.tdb-catalog main#nd-home-layout .tdb-statrow > :nth-child(3) { grid-column: 1 / -1; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-defs { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  body.tdb-catalog main#nd-home-layout .tdb-catalog-defs dd + dt { margin-top: 6px; }
+}
+
+@media (max-width: 767px) {
+  #nd-nav > div:first-child > * { width: calc(100% - 32px); }
+  #nd-nav .tdb-mobile-menu { width: calc(100% - 32px); }
+  #nd-nav .tdb-brand-name { font-size: 14px; }
+  #tdb-footer { padding-inline: 16px; }
+  body.tdb-results .tdb-result-frame { width: calc(100% - 32px); }
+  body.tdb-results main#nd-home-layout .tdb-masthead { padding: 32px 0; gap: 14px; }
+  body.tdb-results main#nd-home-layout .tdb-masthead h1 + p { font-size: 14px !important; }
+  body.tdb-results main#nd-home-layout .tdb-result-heading { align-items: flex-start; flex-direction: column; gap: 12px; padding: 24px 0 18px; }
+  body.tdb-results main#nd-home-layout .tdb-result-heading h1 { font-size: 28px !important; }
+  body.tdb-results .tdb-heading-meta { width: 100%; justify-content: space-between; gap: 12px; }
+  body.tdb-results .tdb-heading-meta #count { order: 0; }
+  body.tdb-results main#nd-home-layout .tdb-tablebar #facet-box { margin-left: 0; flex: 1 1 180px; min-width: 0; }
+  body.tdb-results #facets .tdb-filter-label { min-width: 0; flex: 1; }
+  body.tdb-results #facets select { width: 100%; }
+  body.tdb-results .tdb-viewswitch { width: 100%; }
+  body.tdb-results main#nd-home-layout .tdb-preview-toolbar { gap: 10px; }
+  body.tdb-results .tdb-preview-toolbar #daynav { margin-left: 0; }
+  body.tdb-results .tdb-preview-toolbar > a { margin-left: auto; }
+  body.tdb-results .tdb-preview-toolbar #hp-board-sub { margin-left: auto; }
+  body.tdb-results .tdb-shell-search { flex: 1 1 120px; margin-left: 0; }
+  body.tdb-results main#nd-home-layout #count { margin-left: auto; }
+  body.tdb-results .tdb-filter-label select { max-width: calc(100vw - 32px); }
+
+  /* Keep model and score on one row; the full capability matrix scrolls. */
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) { display: block; min-width: 0; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) :is(thead, tbody) { display: block; width: 100%; }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) tr {
+    display: grid; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1.18fr); column-gap: 6px;
+    padding: 9px 0; border-bottom: 1px solid var(--border); align-items: center;
+  }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th) {
+    display: block; width: auto; height: auto; padding: 0; border: 0; min-width: 0; background: none;
+  }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) th:first-child { visibility: hidden; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(1) { grid-column: 1; grid-row: 1; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(2) { grid-column: 2; grid-row: 1; }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(3) { display: none; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(4) { grid-column: 3; grid-row: 1; }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(5) { display: none; }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] :is(td, th):nth-child(3) { display: block; grid-column: 3; grid-row: 1; }
+  body.tdb-results main#nd-home-layout .tdb-results-table:not([data-view="all-capabilities"]) :is(td, th):nth-child(6) { display: none; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-acc-track { display: block; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-model-label { padding-left: 0; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-model-toggle { gap: 4px; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-model-effort { display: none; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-effort-label { padding-left: 14px; }
+  body.tdb-results .tdb-results-table[data-view="capability"] .tdb-overall-cell :is(.tdb-cap-n, .tdb-acc-track) { display: none; }
+  body.tdb-results .tdb-results-table[data-view="capability"] .tdb-cap-n { flex-basis: 44px; }
+  body.tdb-results .tdb-results-table[data-view="capability"] .tdb-col-note { display: none; }
+}
+
+/* Shared shell and component roles for reports, articles and generated pages. */
+#nd-nav .tdb-brand { gap: 10px; }
+#nd-nav .tdb-nav-link[data-active="true"] { color: var(--td-blue); background: var(--td-surface); }
+:is(a, button, input, select, summary):focus-visible { outline-color: var(--td-blue); }
+body.tdb-results :is(.tdb-daynav select, .tabular-nums, .tdb-cap-n, .tdb-acc, .tdb-col-note),
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table :is(code, .tdb-num, .tdb-task-f2p-cell, .tdb-task-score-cell),
+body.tdb-catalog .tdb-page-number input { font-family: var(--td-font-mono); }
+body.tdb-results main#nd-home-layout .tdb-results-table :is(td.tabular-nums, td.tdb-num) { font-family: var(--td-font-mono); }
+body.tdb-results .tdb-model-effort { font-family: var(--td-font-sans); }
+body.tdb-results main#nd-home-layout .tdb-results-table th,
+body.tdb-catalog main#nd-home-layout .tdb-catalog-table th { font-weight: 500 !important; }
+body.tdb-results .tdb-results-table .tdb-sort { font-family: var(--td-font-sans); }
+body.tdb-results .tdb-result-caption a,
+body.tdb-results .tdb-preview-toolbar > a,
+body.tdb-catalog .tdb-task-title,
+.tdb-doc a,
+.tdb-block-tools a { color: var(--td-blue); }
+.tdb-doc h2 > a { color: inherit; }
+body.tdb-results .tdb-filter-label select,
+body.tdb-results .tdb-shell-search input { font-size: 14px; }
+
+body.tdb-generated-page main#nd-home-layout,
+body.tdb-report main#nd-home-layout { padding: var(--chrome-h) 0 0; }
+body.tdb-generated-page .tdb-page-frame { padding: 0; }
+body.tdb-generated-page .tdb-detail-frame,
+body.tdb-report .tdb-report-frame {
+  width: calc(100% - 64px); max-width: var(--w-page); margin-inline: auto;
+  min-width: 0; padding: 32px 0 0;
+}
+body.tdb-report main#nd-home-layout > div { padding: 0; }
+body.tdb-generated-page .tdb-detail-heading { margin-bottom: 0; }
+body.tdb-generated-page .tdb-detail-heading h1 { max-width: 38ch; margin: 12px 0; }
+body.tdb-generated-page .tdb-detail-heading [data-slot="breadcrumb"] { font-size: 12px; }
+body.tdb-generated-page .tdb-detail-heading > p { max-width: var(--w-prose); }
+body.tdb-generated-page main#nd-home-layout .tdb-detail-heading > .tdb-page-lede { font-size: 16px !important; line-height: 1.6 !important; margin-top: 8px; }
+body.tdb-generated-page .tdb-detail-heading > .mb-6 { margin-bottom: 12px; }
+body.tdb-generated-page .tdb-detail-heading + .tdb-content-section { margin-top: 24px; }
+body.tdb-generated-page .tdb-task-summary { max-width: var(--w-prose); font-size: 16px; line-height: 1.6; }
+body.tdb-generated-page .tdb-task-facts { width: 100%; max-width: var(--w-prose); }
+body.tdb-generated-page .tdb-task-releases a { white-space: nowrap; }
+body.tdb-generated-page .tdb-detail-note { max-width: var(--w-prose); margin-inline: 0; text-align: left; }
+body.tdb-generated-page .tdb-panel { max-width: var(--w-prose); }
+body.tdb-generated-page .tdb-section-head { margin-bottom: 16px; }
+body.tdb-generated-page .tdb-section-head > p,
+body.tdb-generated-page .tdb-section-head > a { font-size: 14px !important; }
+body.tdb-generated-page main#nd-home-layout .tdb-statgrid { margin-top: 0; }
+body.tdb-generated-page main#nd-home-layout .tdb-statrow { gap: 16px; font-size: 14px; }
+body.tdb-generated-page .tdb-statrow-n { font-size: 12px; }
+body.tdb-generated-page main#nd-home-layout .tdb-statrow-v[data-tdb-stat-value] { font-size: 14px !important; }
+body.tdb-generated-page [data-slot="table-container"] { border: 0; border-top: 1px solid var(--border); }
+body.tdb-generated-page main#nd-home-layout .tdb-detail-table :is(th, td),
+body.tdb-generated-page main#nd-home-layout .tdb-facts-table :is(th, td) {
+  padding: 10px 12px; font-size: 14px !important; line-height: 20px !important;
+}
+body.tdb-generated-page main#nd-home-layout :is(.tdb-detail-table, .tdb-facts-table) :is(th, td):first-child { padding-left: 0; }
+body.tdb-generated-page main#nd-home-layout :is(.tdb-detail-table, .tdb-facts-table) :is(th, td):last-child { padding-right: 0; }
+body.tdb-generated-page main#nd-home-layout .tdb-facts-table td { white-space: normal; overflow-wrap: anywhere; }
+body.tdb-generated-page .tdb-facts-table th:first-child { width: 160px; color: var(--muted-foreground); font-weight: 500; }
+body.tdb-generated-page .tdb-detail-table a { color: var(--td-blue); }
+body.tdb-generated-page .tdb-detail-table { width: 100%; min-width: 920px; table-layout: fixed; }
+body.tdb-generated-page main#nd-home-layout .tdb-detail-table .tdb-detail-task { width: auto; white-space: normal; overflow-wrap: anywhere; }
+body.tdb-generated-page main#nd-home-layout .tdb-detail-table .tdb-detail-project { width: 175px; white-space: normal; overflow-wrap: anywhere; }
+body.tdb-generated-page .tdb-detail-table .tdb-detail-language { width: 92px; }
+body.tdb-generated-page .tdb-detail-table .tdb-detail-difficulty { width: 116px; }
+body.tdb-generated-page .tdb-detail-table :is(.tdb-detail-checks, .tdb-detail-score) { width: 92px; }
+body.tdb-generated-page main#nd-home-layout .tdb-detail-table th { font-family: var(--td-font-sans); white-space: normal; }
+body.tdb-generated-page .tdb-detail-heading :is(.tdb-navrow, .tdb-suiterail) { font-size: 14px; gap: 8px 16px; }
+body.tdb-generated-page .tdb-suiterail { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
+body.tdb-generated-page .tdb-suiterail > * { flex-shrink: 0; }
+body.tdb-report main#nd-home-layout .tdb-report-frame > p { max-width: var(--w-prose); }
+body.tdb-report .tdb-report-heading { width: 100%; min-width: 0; }
+body.tdb-report .tdb-report-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+body.tdb-report .tdb-report-title > p { margin: 0; font: 12px/18px var(--td-font-sans); color: var(--muted-foreground); }
+body.tdb-report .tdb-report-frame a { color: var(--td-blue); }
+body.tdb-report main#nd-home-layout .tdb-report-heading h1 { margin: 0; font-weight: 600; }
+body.tdb-report main#nd-home-layout .tdb-report-heading > p { max-width: var(--w-prose); margin: 8px 0 0; }
+body.tdb-report main#nd-home-layout .tdb-report-heading > .tdb-page-lede { font-size: 16px !important; line-height: 1.6 !important; }
+body.tdb-report main#nd-home-layout :is(.tdb-instrument, .tdb-defs) { font-size: 14px; line-height: 1.6; }
+body.tdb-report .tdb-plain-table:empty { display: none; }
+body.tdb-report .tdb-plain-table:empty + .tdb-empty { margin-top: 0; }
+body.tdb-report .tdb-plain-table { border-inline: 0; }
+body.tdb-report main#nd-home-layout .tdb-plain-table :is(th, td) { font-size: 14px !important; padding-block: 10px; }
+body.tdb-report main#nd-home-layout .tdb-plain-table :is(th, td):first-child { padding-left: 0; }
+body.tdb-report main#nd-home-layout .tdb-plain-table :is(th, td):last-child { padding-right: 0; }
+body.tdb-report main#nd-home-layout .tdb-plain-table th { font-family: var(--td-font-sans); }
+body.tdb-report main#nd-home-layout .tdb-plain-table td :is(p, span, a, strong)[class] { font-size: inherit !important; }
+.tdb-block-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+.tdb-block-head h2 { margin: 0; }
+body.tdb-report .tdb-block-head > :is(h2, p, .tdb-block-tools) { margin-block: 0; }
+.tdb-block-head > p { font-size: 14px !important; }
+.tdb-block-tools { margin: 0 0 0 auto; font-size: 14px; }
+.tdb-block-tools > p { font-size: 12px; color: var(--muted-foreground); }
+body.tdb-report .tdb-instrument { gap: 4px 16px; }
+body.tdb-report :is(.tdb-block-foot, .tdb-empty, .tdb-legend) { font-size: 14px; }
+.tdb-doc-heading > .tdb-doc-sub { font-size: 16px; line-height: 1.6; }
+.tdb-doc :is(h3, h4) { font-size: 18px; }
+.tdb-docnav-g { font-size: 12px; margin-top: 20px; }
+.tdb-toc :is(p, a) { font-size: 12px; }
+.tdb-code > figcaption { min-height: 40px; font-size: 12px; }
+.tdb-code > figcaption { padding-block: 10px; line-height: 20px; white-space: normal; overflow-wrap: anywhere; }
+/* Captionless snippets reserve a separate action column, including on phones. */
+.tdb-code:not(:has(> figcaption)) { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; }
+.tdb-code:not(:has(> figcaption)) > pre { grid-column: 1; grid-row: 1; min-width: 0; }
+.tdb-code:not(:has(> figcaption)) > .tdb-copy { position: static; grid-column: 2; grid-row: 1; margin-top: 8px; justify-self: center; }
+
+/* Prose tables and field definitions use the same compact interface scale. */
+main#nd-home-layout .tdb-doc .tdb-plain-table { border-inline: 0; }
+main#nd-home-layout .tdb-doc .tdb-plain-table table { min-width: 36rem; }
+main#nd-home-layout .tdb-doc .tdb-plain-table .tdb-capability-table { min-width: 0; table-layout: fixed; }
+main#nd-home-layout .tdb-doc .tdb-capability-table th:first-child { width: 4rem; }
+main#nd-home-layout .tdb-doc .tdb-capability-table tbody th { font-weight: 500; border-bottom: 1px solid var(--border); }
+main#nd-home-layout .tdb-doc .tdb-capability-table tbody tr:last-child th { border-bottom: 0; }
+main#nd-home-layout .tdb-doc .tdb-plain-table :is(th, td) {
+  padding: 10px 12px; font-size: 14px !important; line-height: 1.55 !important;
+  white-space: normal; vertical-align: top; overflow-wrap: anywhere;
+}
+main#nd-home-layout .tdb-doc .tdb-plain-table :is(th, td):first-child { padding-left: 0; }
+main#nd-home-layout .tdb-doc .tdb-plain-table th { overflow-wrap: normal; }
+main#nd-home-layout .tdb-doc .tdb-plain-table :is(th, td):last-child { padding-right: 0; }
+main#nd-home-layout .tdb-doc .tdb-plain-table :is(td, th).tdb-num { white-space: nowrap; }
+.tdb-doc .tdb-defs { display: grid; grid-template-columns: minmax(0, 10rem) minmax(0, 1fr); gap: 12px 20px; }
+.tdb-doc .tdb-defs :is(dt, dd) { margin: 0; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.tdb-doc .tdb-defs dt { font-weight: 500; }
+.tdb-doc .tdb-defs dd > p { font-size: inherit; }
+
+/* Secondary controls sit where a long list ends. */
+body.tdb-catalog main#nd-home-layout .tdb-pagination-bottom { margin-top: 12px; }
+.tdb-pagination-bottom[hidden] { display: none !important; }
+
+/* Daily release details share the catalogue controls and row density. */
+main#nd-home-layout [data-tdb-suite-tasks] { margin-top: 0; }
+.tdb-detail-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tdb-detail-search { width: min(480px, 100%); }
+.tdb-detail-search > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tdb-detail-search input { width: 100%; }
+.tdb-detail-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 14px; }
+.tdb-detail-pagination > p { margin: 0; font-size: 12px; line-height: 18px; color: var(--muted-foreground); }
+.tdb-detail-pagination .tdb-page-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tdb-detail-pagination :is(.tdb-page-size, .tdb-page-number) { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); white-space: nowrap; }
+:is(.tdb-detail-toolbar, .tdb-detail-pagination) :is(input, select, button) {
+  box-sizing: border-box; height: 32px; min-width: 0; max-width: 100%; margin: 0;
+  border: 1px solid var(--border); border-radius: 0; padding: 4px 10px;
+  background: var(--background); color: var(--foreground); font: 14px/22px var(--td-font-sans);
+}
+:is(.tdb-detail-toolbar, .tdb-detail-pagination) :is(button, select) { cursor: pointer; }
+:is(.tdb-detail-toolbar, .tdb-detail-pagination) button:hover:not(:disabled) { background: var(--muted); }
+:is(.tdb-detail-toolbar, .tdb-detail-pagination) :disabled { opacity: .45; cursor: default; }
+.tdb-detail-pagination .tdb-page-number input { width: 56px; text-align: center; font-family: var(--td-font-mono); }
+.tdb-detail-pagination .tdb-page-size select { width: 110px; }
+body.tdb-generated-page [data-tdb-paged] tr[hidden],
+.tdb-detail-toolbar [hidden] { display: none !important; }
+body.tdb-generated-page .tdb-detail-empty td { padding: 24px 0; color: var(--muted-foreground); }
+body.tdb-results main#nd-home-layout .tdb-badge { font-size: 12px !important; }
+body.tdb-results .tdb-sample-note,
+body.tdb-results .tdb-col-note { font-size: 12px; }
+figure.shiki { border: 1px solid var(--border); }
+main#nd-home-layout figure.shiki :is(pre, code) { font-size: 14px !important; }
+figure.shiki > div:first-child { height: 40px; padding-inline: 16px; }
+figure.shiki > div:last-child { padding: 12px 16px; }
+figure.shiki .line { padding-block: 0; }
+
+@media (max-width: 767px) {
+  :root { --ts-title: 1.75rem; }
+  .tdb-about { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  #nd-nav .tdb-brand-name { font-size: 16px; }
+  body.tdb-generated-page .tdb-detail-frame,
+  body.tdb-report .tdb-report-frame { width: calc(100% - 32px); padding-top: 24px; }
+  body.tdb-generated-page .tdb-detail-heading h1 { max-width: 100%; }
+  body.tdb-generated-page .tdb-detail-heading h1 { margin-top: 0; margin-bottom: 8px; }
+  body.tdb-generated-page main#nd-home-layout .tdb-detail-table { display: block; min-width: 0; }
+  body.tdb-generated-page .tdb-detail-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  body.tdb-generated-page .tdb-detail-table tbody { display: block; }
+  body.tdb-generated-page .tdb-detail-table tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  body.tdb-generated-page main#nd-home-layout .tdb-detail-table tbody td { display: block; min-width: 0; width: auto; padding: 0; border: 0; white-space: normal; }
+  body.tdb-generated-page main#nd-home-layout .tdb-detail-table tbody .tdb-detail-task { grid-column: 1 / -1; width: auto; }
+  body.tdb-generated-page .tdb-detail-table tbody td::before { display: block; margin-bottom: 3px; color: var(--muted-foreground); font: 12px/18px var(--td-font-sans); }
+  body.tdb-generated-page .tdb-detail-table tbody .tdb-detail-project::before { content: "Project"; }
+  body.tdb-generated-page .tdb-detail-table tbody .tdb-detail-language::before { content: "Language"; }
+  body.tdb-generated-page .tdb-detail-table tbody .tdb-detail-difficulty::before { content: "Estimated difficulty"; }
+  body.tdb-generated-page .tdb-detail-table tbody .tdb-detail-checks::before { content: "Target tests"; }
+  body.tdb-generated-page .tdb-detail-table tbody .tdb-detail-score::before { content: "Observed passes"; }
+  body.tdb-generated-page main#nd-home-layout .tdb-detail-table td p { text-align: left; }
+  body.tdb-generated-page .tdb-detail-table .tdb-detail-empty td { grid-column: 1 / -1; }
+  body.tdb-generated-page .tdb-facts-table th:first-child { width: 112px; }
+  body.tdb-generated-page main#nd-home-layout .tdb-statrow { gap: 8px; }
+  body.tdb-generated-page main#nd-home-layout .tdb-statrow { grid-template-columns: minmax(112px, 1fr) minmax(0, 1fr); gap: 4px 12px; }
+  body.tdb-generated-page .tdb-statrow .tdb-statrow-k { grid-column: 1; }
+  body.tdb-generated-page .tdb-statrow .tdb-statrow-v { grid-column: 2; }
+  body.tdb-generated-page .tdb-statrow .tdb-statrow-n { grid-column: 1 / -1; }
+  body.tdb-generated-page .tdb-statrow .tdb-statrow-n:empty { display: none; }
+  .tdb-block-tools { margin-left: 0; }
+  .tdb-block-head { gap: 4px 12px; }
+  main#nd-home-layout.tdb-docs { padding-top: calc(var(--chrome-h) + 24px); padding-bottom: 32px; }
+  .tdb-doc-shell { width: calc(100% - 32px); }
+  body.tdb-results main#nd-home-layout .tdb-masthead h1 + p { font-size: 16px !important; }
+  body.tdb-results .tdb-results-table:not([data-view="all-capabilities"]) .tdb-model-effort { font-size: 12px; }
+  .tdb-doc .tdb-defs { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .tdb-doc .tdb-defs dd { margin-bottom: 8px; }
+  .tdb-detail-search { width: 100%; }
+  .tdb-detail-pagination { align-items: flex-start; }
+}
+
+/* The task explorer keeps daily model and task measurements in one view. */
+body.tdb-results #task-explorer { --heat-solved: #315aba; --heat-failed: #e1e8f2; min-width: 0; }
+.dark body.tdb-results #task-explorer { --heat-solved: #93b4ff; --heat-failed: #34445e; }
+body.tdb-results #task-explorer[hidden] { display: none; }
+body.tdb-results .tdb-explorer-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+body.tdb-results main#nd-home-layout .tdb-explorer-tools :is(input, select, button),
+body.tdb-results main#nd-home-layout :is(.tdb-explorer-pager, .tdb-heatmap-key) button { font: 13px/20px var(--td-font-sans); min-height: 32px; padding: 5px 9px; color: var(--foreground); background: var(--background); border: 1px solid var(--border); border-radius: 0; }
+body.tdb-results .tdb-explorer-tools input { width: 220px; }
+body.tdb-results .tdb-explorer-switch { display: flex; gap: 2px; margin-right: auto; }
+body.tdb-results main#nd-home-layout :is(.tdb-explorer-switch, .tdb-heatmap-key) button[aria-pressed="true"] { background: var(--td-surface); color: var(--td-accent, #315aba); border-color: var(--td-accent, #315aba); }
+body.tdb-results main#nd-home-layout #task-explorer button:disabled { opacity: .45; cursor: default; }
+body.tdb-results main#nd-home-layout .tdb-explorer-scope,
+body.tdb-results main#nd-home-layout .tdb-explorer-help { font: 12px/20px var(--td-font-sans); color: var(--muted-foreground); margin: 12px 0; max-width: none; }
+body.tdb-results .tdb-heatmap-key { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 8px 0 12px; font-size: 12px; }
+body.tdb-results .tdb-heatmap-key > span { display: inline-flex; align-items: center; gap: 6px; }
+body.tdb-results .tdb-heatmap-key > div { display: flex; gap: 4px; margin-left: auto; }
+body.tdb-results .tdb-heatmap-key i { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--border); }
+body.tdb-results .tdb-heatmap-key i[data-outcome="1"] { background: var(--heat-solved); border-color: var(--heat-solved); }
+body.tdb-results .tdb-heatmap-key i[data-outcome="0"] { background: var(--heat-failed); }
+body.tdb-results .tdb-heatmap-key i[data-outcome="missing"] { background: repeating-linear-gradient(135deg, transparent 0, transparent 3px, var(--border) 3px, var(--border) 4px); }
+body.tdb-results .tdb-heatmap-scroll,
+body.tdb-results .tdb-explorer-table-scroll { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+body.tdb-results .tdb-heatmap-scroll canvas { display: block; cursor: crosshair; }
+body.tdb-results .tdb-heatmap-scroll canvas:focus-visible { outline: 2px solid var(--foreground); outline-offset: -2px; }
+body.tdb-results .tdb-explorer-pages { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
+body.tdb-results .tdb-explorer-pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 12px 0; font-size: 12px; }
+body.tdb-results .tdb-explorer-pager > span { margin-right: 8px; color: var(--muted-foreground); }
+body.tdb-results .tdb-explorer-selection:not(:empty) { padding: 16px 0; border-top: 1px solid var(--border); }
+body.tdb-results .tdb-explorer-selection > div { display: flex; gap: 12px; align-items: center; font-size: 14px; }
+body.tdb-results main#nd-home-layout .tdb-explorer-selection p { margin: 8px 0 0; font: 14px/22px var(--td-font-sans); max-width: 100%; }
+body.tdb-results .tdb-explorer-selection .tdb-outcome { font-size: 12px; padding: 2px 7px; background: var(--heat-failed); }
+body.tdb-results .tdb-explorer-selection .tdb-outcome[data-outcome="1"] { background: var(--heat-solved); color: #fff; }
+.dark body.tdb-results .tdb-explorer-selection .tdb-outcome[data-outcome="1"] { color: #18243b; }
+body.tdb-results main#nd-home-layout .tdb-explorer-selection .tdb-explorer-detail { font-size: 12px; color: var(--muted-foreground); }
+body.tdb-results .tdb-explorer-detail button { text-decoration: underline; text-underline-offset: 3px; }
+body.tdb-results .tdb-explorer-project { display: block; margin-top: 3px; font: 12px/18px var(--td-font-sans); color: var(--muted-foreground); }
+body.tdb-results .tdb-explorer-selection .tdb-explorer-project { display: inline; margin: 0 0 0 .5em; }
+body.tdb-results main#nd-home-layout .tdb-task-ranking { width: 100%; min-width: 720px; table-layout: fixed; border-collapse: collapse; font: 14px/22px var(--td-font-sans); }
+body.tdb-results .tdb-task-ranking th { text-align: left; font-weight: 400; }
+body.tdb-results .tdb-task-ranking thead th { color: var(--muted-foreground); font-size: 12px; padding: 10px 12px; }
+body.tdb-results .tdb-task-ranking :is(td, th) { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+body.tdb-results .tdb-task-ranking th:first-child { width: 58%; white-space: normal; overflow-wrap: anywhere; }
+body.tdb-results .tdb-task-ranking th:nth-child(2) { width: 13%; }
+body.tdb-results .tdb-task-ranking td:nth-child(2) { font-family: var(--td-font-mono); }
+body.tdb-results .tdb-task-ranking .tdb-acc-row { display: grid; gap: 3px 10px; align-items: center; }
+body.tdb-results .tdb-task-ranking .tdb-acc-row > strong { flex: 0 0 58px; font: 12px/20px var(--td-font-mono); }
+body.tdb-results .tdb-task-ranking .tdb-acc-track { display: block; flex: 1; min-width: 60px; }
+body.tdb-results .tdb-heatmap-tooltip { position: fixed; z-index: 100; max-width: min(360px, calc(100vw - 24px)); padding: 10px 12px; background: var(--foreground); color: var(--background); font: 13px/20px var(--td-font-sans); white-space: pre-line; border-radius: 0; pointer-events: none; box-shadow: 0 3px 15px #18243b20; }
+@media (max-width: 640px) {
+  body.tdb-results main#nd-home-layout .tdb-task-ranking { display: block; min-width: 0; }
+  body.tdb-results .tdb-task-ranking thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  body.tdb-results .tdb-task-ranking tbody { display: block; }
+  body.tdb-results .tdb-task-ranking tbody tr { display: grid; grid-template-columns: 94px minmax(0, 1fr); align-items: center; gap: 10px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  body.tdb-results .tdb-task-ranking tbody :is(th, td) { padding: 0; border: 0; min-width: 0; }
+  body.tdb-results .tdb-task-ranking tbody th:first-child { grid-column: 1 / -1; width: auto; }
+  body.tdb-results .tdb-task-ranking td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 3px; font: 12px/18px var(--td-font-sans); color: var(--muted-foreground); }
+  body.tdb-results .tdb-explorer-tools { gap: 8px; }
+  body.tdb-results .tdb-explorer-switch { width: 100%; }
+  body.tdb-results .tdb-explorer-tools > label { flex: 1 1 45%; min-width: 0; }
+  body.tdb-results .tdb-explorer-tools > label:has(input) { flex-basis: 100%; }
+  body.tdb-results .tdb-explorer-tools :is(input, select) { width: 100%; max-width: 100%; }
+  body.tdb-results .tdb-heatmap-key { gap: 10px; }
+  body.tdb-results .tdb-heatmap-key > div { width: 100%; margin-left: 0; }
+}
+
+/* Capability overview: all skills share a scale and remain in one scroll region. */
+body.tdb-results main#nd-home-layout #results-scroll[data-cap-matrix="true"] {
+  max-height: min(70vh, 720px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  isolation: isolate;
+  scrollbar-gutter: stable;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] {
+  width: 100%;
+  min-width: 1180px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(th, td) {
+  padding: 4px 3px;
+  height: auto;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  text-align: center;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(.tdb-col-rank, .tdb-cap-rank) {
+  display: none;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-block: 9px;
+  background: var(--background);
+  box-shadow: 0 1px 0 var(--border);
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(.tdb-col-model, .tdb-cap-model-cell) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 190px;
+  padding-inline: 8px 12px;
+  background: var(--background);
+  box-shadow: 1px 0 0 var(--border);
+  text-align: left;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] th.tdb-col-model {
+  z-index: 3;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(.tdb-col-overall, .tdb-col-capability) {
+  width: 96px;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(.tdb-col-capability, .tdb-col-overall) .tdb-sort-wrap {
+  justify-content: center;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-sort {
+  min-width: 0;
+  gap: 2px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+  white-space: normal;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-sort svg {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-col-note {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 13px;
+  text-align: center;
+  white-space: normal;
+}
+body.tdb-results main#nd-home-layout .tdb-cap-heat {
+  display: flex;
+  width: 100%;
+  min-height: 28px;
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 4px 2px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-variant-numeric: tabular-nums;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-cap-heat strong {
+  font: 600 12px/16px var(--td-font-sans);
+  line-height: 16px !important;
+}
+body.tdb-results main#nd-home-layout .tdb-cap-estimate { display: flex; align-items: baseline; justify-content: center; gap: 5px; }
+body.tdb-results main#nd-home-layout .tdb-cap-estimate { white-space: nowrap; }
+body.tdb-results main#nd-home-layout .tdb-cap-heat:is([data-state="small"], [data-state="uncompared"]) {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+body.tdb-results main#nd-home-layout .tdb-cap-heat[data-state="missing"] {
+  background: transparent;
+  border-color: var(--border);
+  border-style: dashed;
+  color: var(--muted-foreground);
+}
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] .tdb-cap-heat {
+  max-width: 96px;
+  margin-left: auto;
+}
+body.tdb-results main#nd-home-layout .tdb-results-table .tdb-results-message td[colspan] { display: table-cell; visibility: visible; white-space: normal; text-align: left; }
+body.tdb-results main#nd-home-layout .tdb-cap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin: 0 0 12px;
+  color: var(--muted-foreground);
+  font: 12px/16px var(--td-font-sans);
+}
+body.tdb-results main#nd-home-layout .tdb-cap-legend[hidden] { display: none; }
+body.tdb-results .tdb-cap-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: normal;
+}
+body.tdb-results .tdb-cap-ramp {
+  width: 96px;
+  height: 8px;
+  border-radius: 0;
+  background: linear-gradient(to right, rgb(239,246,255), rgb(30,64,175));
+}
+body.tdb-results .tdb-cap-ramp[data-color="peers"] {
+  background: linear-gradient(to right, rgb(173,69,7), rgb(247,247,247), rgb(30,64,175));
+}
+@media (max-width: 767px) {
+  body.tdb-results main#nd-home-layout .tdb-tablebar #facet-box:has(#cap-color),
+  body.tdb-results main#nd-home-layout .tdb-tablebar:has(#cap-color) .tdb-shell-search {
+    flex-basis: 100%;
+  }
+  body.tdb-results main#nd-home-layout #results-scroll[data-cap-matrix="true"] {
+    max-height: 65vh;
+    scrollbar-gutter: auto;
+  }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] :is(.tdb-col-model, .tdb-cap-model-cell) {
+    width: 150px;
+  }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-cap-model {
+    font-size: 12px;
+  }
+  body.tdb-results main#nd-home-layout .tdb-results-table .tdb-results-message { display: block; }
+  body.tdb-results main#nd-home-layout .tdb-results-table .tdb-results-message td[colspan] { display: block; width: 100%; grid-column: 1 / -1; padding: 16px 0; }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] tr { grid-template-columns: 20px minmax(0, 1fr) 64px 64px; }
+  body.tdb-results .tdb-results-table[data-view="capability"] :is(td, th):nth-child(4) { grid-column: 4; }
+  body.tdb-results main#nd-home-layout .tdb-results-table[data-view="capability"] .tdb-sort { gap: 2px; font-size: 12px; white-space: normal; }
+  body.tdb-results .tdb-results-table[data-view="capability"] .tdb-sort svg { width: 12px; height: 12px; flex: 0 0 12px; }
+}
+
+body.tdb-results main#nd-home-layout #results-scroll[hidden] { display: none; }
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-sort:not([data-active="true"]) svg { display: none; }
+body.tdb-results main#nd-home-layout .tdb-results-table[data-view="all-capabilities"] .tdb-sort { max-width: 100%; }
+
+@media (max-width: 640px) {
+  body.tdb-results .tdb-heading-meta { flex-wrap: wrap; row-gap: 8px; }
+  body.tdb-results .tdb-heading-meta #count { white-space: normal; }
+}
+
+body.tdb-results .tdb-explorer-table-scroll { position: relative; }
+
+body.tdb-results .tdb-explorer-selection[hidden] { display: none; }
+body.tdb-results .tdb-explorer-selection:not(:empty):not([hidden]) {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  width: min(680px, calc(100vw - 32px)); max-height: 32vh; overflow-y: auto;
+  z-index: 60; padding: 14px 18px; background: var(--background);
+  border: 1px solid var(--border); box-shadow: 0 4px 24px #18243b26;
+}
+
+/* Shared page layout. Every authored and generated page uses these hooks. */
+main#nd-home-layout.tdb-docs { padding-top: var(--chrome-h); }
+body main#nd-home-layout .tdb-page-container {
+  width: calc(100% - 64px);
+  max-width: var(--w-page);
+  min-width: 0;
+  margin-inline: auto;
+  padding: 32px 0 0;
+}
+body main#nd-home-layout .tdb-page-container:not(.tdb-doc-shell) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+body main#nd-home-layout .tdb-page-container .tdb-page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 24px;
+  padding: 0;
+  text-align: left;
+}
+body main#nd-home-layout .tdb-page-container .tdb-page-heading h1 {
+  max-width: none;
+  margin: 0;
+  font: 600 var(--ts-title)/var(--lh-head) var(--td-font-sans) !important;
+  letter-spacing: var(--tr-head);
+}
+body main#nd-home-layout .tdb-page-heading > :is(.tdb-page-lede, .tdb-doc-sub, .tdb-block-foot, .tdb-report-title, .tdb-heading-context) {
+  flex-basis: 100%;
+  width: 100%;
+  margin: 0;
+}
+body main#nd-home-layout .tdb-page-heading > :is(.tdb-page-lede, .tdb-doc-sub) {
+  font: 16px/1.6 var(--td-font-sans) !important;
+  color: var(--muted-foreground);
+}
+body main#nd-home-layout .tdb-page-heading .tdb-heading-main {
+  flex: 1 1 520px;
+  min-width: 0;
+}
+.tdb-heading-actions, .tdb-heading-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0;
+  font: 14px/1.5 var(--td-font-sans);
+}
+.tdb-heading-links a { color: var(--td-blue); }
+body main#nd-home-layout .tdb-page-heading + :is(.tdb-block, .tdb-content-section, h2),
+body main#nd-home-layout .tdb-release-digest + .tdb-content-section { margin-top: 0; }
+body main#nd-home-layout .tdb-section-head { margin: 0 0 16px; }
+body main#nd-home-layout .tdb-section-head > h2 { margin: 0; }
+.tdb-release-navigation { display: flex; align-items: center; gap: 0; }
+.tdb-release-navigation :is(a, select, span) {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--td-blue);
+  padding: 4px 10px;
+  font: 14px/22px var(--td-font-sans);
+  text-decoration: none;
+}
+.tdb-release-navigation select { border-inline: 0; cursor: pointer; }
+.tdb-release-navigation [aria-disabled="true"] { color: var(--muted-foreground); opacity: .45; }
+.tdb-release-navigation a:hover { background: var(--muted); }
+.tdb-release-navigation :is(a, select):focus-visible { outline: 2px solid var(--td-blue); outline-offset: 2px; }
+.tdb-evaluation-note { margin-top: 24px; font: 14px/1.6 var(--td-font-sans); }
+.tdb-evaluation-note > summary { cursor: pointer; color: var(--muted-foreground); }
+body main#nd-home-layout .tdb-evaluation-note > p { margin: 12px 0 0; font-size: 14px; }
+@media (max-width: 767px) {
+  body main#nd-home-layout .tdb-page-container { width: calc(100% - 32px); padding-top: 24px; }
+  body main#nd-home-layout .tdb-page-container .tdb-page-heading { gap: 8px 16px; }
+  body main#nd-home-layout .tdb-page-container .tdb-page-heading h1 { font-size: 28px !important; }
+  body main#nd-home-layout .tdb-page-heading .tdb-heading-main { flex-basis: 100%; }
+  .tdb-heading-actions { width: 100%; justify-content: space-between; }
+}
+
+/* BEGIN GENERATED FEATURE STYLES */
+/* tdb-insights.css */
+/* Paired comparisons and model profiles use the existing compact shell. */
+.tdb-insights { min-width: 0; padding: 16px 20px 20px; font-family: var(--td-font-sans); }
+.tdb-insights[hidden] { display: none; }
+.tdb-insight-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-bottom: 12px; }
+.tdb-insight-tools label { display: flex; flex-direction: column; gap: 5px; min-width: 160px; max-width: 100%; color: var(--muted-foreground); font-size: 12px; }
+.tdb-insight-tools select { width: 100%; max-width: 340px; min-height: 34px; border: 1px solid var(--border); border-radius: 0; color: var(--foreground); background: var(--background); padding: 5px 28px 5px 9px; font: 14px var(--td-font-sans); }
+.tdb-insights button { border: 1px solid var(--border); border-radius: 0; background: var(--background); color: var(--foreground); padding: 6px 10px; min-height: 32px; font: 13px/18px var(--td-font-sans); cursor: pointer; }
+.tdb-insights button:hover { background: var(--muted); }
+.tdb-insights :is(button, select, a):focus-visible { outline: 2px solid #315aba; outline-offset: 3px; }
+.tdb-insights button:disabled { opacity: .45; cursor: default; }
+.tdb-insight-note { max-width: 100%; margin: 10px 0 16px; font: 13px/1.6 var(--td-font-sans); color: var(--muted-foreground); }
+.tdb-insight-scroll { max-width: 100%; overflow-x: auto; }
+.tdb-insight-table { width: 100%; border-collapse: collapse; font: 14px/1.5 var(--td-font-sans); }
+.tdb-insight-table :is(th, td) { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+.tdb-insight-table th { font-weight: 500; }
+.tdb-insight-table thead th { color: var(--muted-foreground); font-size: 12px; white-space: nowrap; }
+.tdb-insight-table tbody th { min-width: 160px; }
+.tdb-insight-table small { display: block; max-width: 100%; margin-top: 4px; overflow-wrap: anywhere; color: var(--muted-foreground); font: 12px/1.5 var(--td-font-sans); }
+.tdb-insight-table a, .tdb-insight-examples a { color: var(--foreground); text-decoration: underline; text-decoration-color: #97abd3; text-underline-offset: 3px; }
+.tdb-insight-number { font-family: var(--td-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tdb-insight-table .tdb-acc-row { min-width: 225px; }
+.tdb-insight-table .tdb-acc-track, .tdb-pair-scores .tdb-acc-track { flex: 1 1 180px; width: auto; min-width: 130px; max-width: none; }
+.tdb-insight-unavailable { color: var(--muted-foreground); font: 12px var(--td-font-sans); }
+.tdb-pair-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 0; border-block: 1px solid var(--border); }
+.tdb-pair-scores > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.tdb-pair-scores > div > span:first-child { flex-basis: 100%; font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.tdb-pair-scores .tdb-acc-row { flex: 1; min-width: 190px; }
+.tdb-pair-scores button { min-height: 26px; padding: 2px 8px; font-size: 12px; }
+.tdb-insight-details { margin: 0 0 20px; }
+.tdb-insight-details summary { cursor: pointer; padding: 9px 0; font-size: 14px; font-weight: 500; }
+.tdb-insight-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 16px 0; gap: 8px; }
+.tdb-insight-groups button { display: flex; align-items: center; justify-content: space-between; text-align: left; gap: 12px; padding: 10px 12px; }
+.tdb-insight-groups button span { overflow-wrap: anywhere; }
+.tdb-insight-groups button strong { font: 16px var(--td-font-mono); }
+.tdb-insight-groups button[aria-pressed="true"] { border-color: #315aba; background: #edf3ff; color: #244993; }
+.dark .tdb-insight-groups button[aria-pressed="true"] { background: #1b2e50; color: #c9dafe; border-color: #93b4ff; }
+.tdb-insight-pager { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 0 0; font: 12px var(--td-font-mono); }
+.tdb-insight-pager > span { margin-right: auto; }
+.tdb-insights h3 { font: 500 16px/1.5 var(--td-font-sans); margin: 18px 0 12px; }
+.tdb-insight-examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 10px 0 22px; }
+.tdb-insight-examples { margin: 0; padding: 0; list-style: none; }
+.tdb-insight-examples li { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 13px; }
+.tdb-insight-examples li > span { font: 12px/1.5 var(--td-font-mono); color: var(--muted-foreground); }
+.tdb-efficiency-plot { margin: 8px 0 14px; overflow-x: auto; }
+.tdb-efficiency-plot svg { display: block; width: 100%; height: 310px; }
+.tdb-efficiency-plot text { fill: var(--muted-foreground); font: 12px var(--td-font-mono); }
+.tdb-plot-grid { stroke: var(--border); stroke-width: 1; }
+.tdb-efficiency-point circle { fill: #315aba; stroke: var(--background); stroke-width: 1.5; opacity: .75; }
+.dark .tdb-efficiency-point circle { fill: #93b4ff; }
+.tdb-efficiency-point:focus circle, .tdb-efficiency-point:hover circle { opacity: 1; stroke: var(--foreground); stroke-width: 2.5; }
+@media (max-width: 760px) {
+  .tdb-insights { padding: 12px; }
+  .tdb-insight-tools { gap: 9px; }
+  .tdb-insight-tools label { flex: 1 1 180px; }
+  .tdb-insight-tools select { max-width: none; }
+  .tdb-pair-scores, .tdb-insight-examples-grid { grid-template-columns: 1fr; gap: 18px; }
+  .tdb-insight-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tdb-insight-table { font-size: 13px; }
+  .tdb-insight-table :is(th, td) { padding: 9px 8px; }
+}
+
+/* tdb-releases.css */
+/* Explicit layouts keep release summaries consistent across page templates. */
+main .tdb-release-digest[data-release-layout="summary"] { margin-block: 32px; padding-block: 0; border: 0; }
+main .tdb-release-digest[data-release-layout="detail"] { margin: 0 0 24px; padding: 0; border: 0; }
+.tdb-release-digest h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin: 0; font-size: 24px; line-height: 32px; }
+.tdb-release-digest h2 a { font-size: 14px; font-weight: 500; color: var(--muted-foreground); }
+.tdb-release-intro { margin: 8px 0 12px; color: var(--muted-foreground); font-size: 14px; line-height: 22px; }
+.tdb-release-digest[data-release-layout="detail"] .tdb-release-intro { margin-top: 0; }
+.tdb-release-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--border); }
+.tdb-release-stat { display: flex; align-items: baseline; gap: .7rem; padding: .9rem .75rem .9rem 0; }
+.tdb-release-stat strong { font-size: 1.65rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tdb-release-stat span { font-size: 14px; }
+.tdb-release-stat:hover span, .tdb-release-more:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.tdb-release-note { margin: 10px 0; font-size: 14px; line-height: 22px; color: var(--muted-foreground); }
+.tdb-release-outcome { margin: 10px 0; font-size: 14px; line-height: 22px; }
+.tdb-release-more { display: inline-block; margin-top: 4px; font-size: 14px; }
+.tdb-release-notes { font-size: 14px; line-height: 22px; }
+.tdb-release-notes > summary { width: fit-content; cursor: pointer; color: var(--td-blue); }
+.tdb-release-notes > div { padding-top: 2px; }
+.tdb-release-categories { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; }
+.tdb-release-categories a { font-size: 14px; padding-block: 4px; }
+.tdb-release-categories span { color: var(--muted-foreground); font-variant-numeric: tabular-nums; margin-left: .3rem; }
+.tdb-release-filters { display: flex; flex-wrap: wrap; gap: 4px; }
+.tdb-release-filters button { box-sizing: border-box; height: 32px; min-height: 32px; padding: 4px 10px; border: 1px solid var(--border); font-size: 14px; line-height: 22px; cursor: pointer; }
+.tdb-release-filters button[aria-pressed="true"],
+.tdb-detail-toolbar .tdb-release-filters button[aria-pressed="true"] { background: var(--td-surface); color: var(--td-blue); border-color: var(--td-blue); }
+.tdb-release-filters button span { margin-left: .35rem; font-variant-numeric: tabular-nums; }
+.tdb-release-toolbar .tdb-detail-search { flex: 1 1 240px; width: auto; min-width: min(220px, 100%); max-width: 480px; margin-left: auto; }
+[data-release-tasks] > .tdb-release-filters { margin-bottom: 12px; }
+.tdb-release-outcome-note { margin-top: 16px; }
+.tdb-release-task-table { width: 100%; min-width: 42rem; border-collapse: collapse; font: 14px/20px var(--td-font-sans); }
+.tdb-release-task-table th, .tdb-release-task-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.tdb-release-task-table th { color: var(--muted-foreground); font-weight: 500; white-space: nowrap; }
+.tdb-release-task-table :is(th, td):first-child { padding-left: 0; }
+.tdb-release-task-table :is(th, td):last-child { padding-right: 0; }
+.tdb-release-task-table .tdb-num { text-align: right; font-variant-numeric: tabular-nums; }
+.tdb-release-task-table tbody tr:hover { background: var(--td-surface); }
+.tdb-release-task-table a:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.tdb-release-task-table td:first-child { min-width: 16rem; width: 52%; white-space: normal; line-height: 1.6; }
+.tdb-release-task-table td:not(:first-child) { white-space: nowrap; }
+.tdb-case-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .5rem; margin-bottom: 1.1rem; }
+.tdb-case-heading h2 { margin: 0; font-size: 1.4rem; }
+.tdb-case-heading p { color: var(--muted-foreground); font-size: .85rem; }
+.tdb-case-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2rem; }
+.tdb-case { display: flex; flex-direction: column; align-items: flex-start; border-top: 1px solid var(--border); padding: 1.35rem 0; }
+.tdb-case h3 { font-size: 1.08rem; font-weight: 600; line-height: 1.45; margin-bottom: .7rem; }
+.tdb-case p { font-size: .9rem; line-height: 1.7; margin: 0 0 .8rem; }
+.tdb-case .tdb-case-project { color: var(--muted-foreground); font-size: .75rem; }
+.tdb-case .tdb-case-check { color: var(--muted-foreground); }
+.tdb-case .tdb-case-outcome { margin-top: auto; font-variant-numeric: tabular-nums; font-weight: 500; }
+.tdb-case a { font-size: .85rem; text-decoration: underline; text-underline-offset: .2rem; }
+.tdb-task-success { max-width: 100%; line-height: 1.75; font-size: .95rem; margin: 0 0 1.5rem; }
+.tdb-release-filter-note { margin: .3rem 0 1rem; font-size: .85rem; color: var(--muted-foreground); }
+@media (max-width: 640px) {
+  .tdb-release-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tdb-release-stat { gap: .5rem; padding-block: .65rem; }
+  .tdb-release-stat strong { font-size: 1.4rem; }
+  .tdb-case-grid { grid-template-columns: minmax(0, 1fr); }
+  .tdb-case { padding-block: 1.15rem; }
+  .tdb-release-toolbar .tdb-detail-search { flex-basis: 100%; max-width: 100%; margin-left: 0; }
+}
+
+/* tdb-tools.css */
+.tdb-result-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: relative; }
+.tdb-result-tools > button, .tdb-result-tools summary, .tdb-export-menu button { border: 1px solid var(--border); background: var(--background); color: var(--foreground); font: 13px/20px var(--td-font-sans); padding: 5px 10px; cursor: pointer; }
+.tdb-result-tools summary { list-style: none; }
+.tdb-result-tools summary::-webkit-details-marker { display: none; }
+.tdb-result-tools > button:hover, .tdb-result-tools summary:hover, .tdb-export-menu button:hover { background: var(--muted); }
+.tdb-result-tools details { position: relative; }
+.tdb-export-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; width: 160px; display: grid; padding: 4px; border: 1px solid var(--border); background: var(--background); }
+.tdb-export-menu button { border: 0; text-align: left; }
+.tdb-export-menu button:disabled { opacity: .5; cursor: default; }
+.tdb-tool-status { font: 12px/18px var(--td-font-sans); color: var(--muted-foreground); }
+.tdb-share-link { flex-basis: 100%; width: 100%; min-width: 0; border: 1px solid var(--border); padding: 6px; font: 13px/20px var(--td-font-sans); background: var(--background); color: var(--foreground); }
+.tdb-run-details { margin-top: 32px; }
+.tdb-run-details h2 { margin: 0 0 16px; }
+.tdb-run-controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 20px; }
+.tdb-run-controls label { display: flex; flex-direction: column; gap: 4px; font: 12px/18px var(--td-font-sans); color: var(--muted-foreground); }
+.tdb-run-controls select { border: 1px solid var(--border); background: var(--background); color: var(--foreground); padding: 6px 10px; font: 14px/20px var(--td-font-sans); max-width: 100%; }
+.tdb-run-list { display: grid; }
+.tdb-run-list details { border-top: 1px solid var(--border); padding: 12px 0; }
+.tdb-run-list summary { cursor: pointer; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font: 14px/22px var(--td-font-sans); }
+.tdb-run-list summary strong { font-weight: 500; }
+.tdb-run-list summary span { color: var(--muted-foreground); }
+.tdb-run-list summary .tdb-run-outcome { color: var(--primary); }
+.tdb-run-facts { display: flex; gap: 12px 24px; flex-wrap: wrap; margin: 12px 0; font: 13px/20px var(--td-font-sans); }
+.tdb-run-facts strong { font-family: var(--td-font-mono); font-weight: 400; }
+.tdb-run-steps { margin: 16px 0 16px 24px; padding: 0; list-style: decimal; }
+.tdb-run-steps li { margin: 12px 0; padding-left: 4px; font: 14px/22px var(--td-font-sans); }
+.tdb-run-steps p { margin: 4px 0; overflow-wrap: anywhere; color: var(--muted-foreground); }
+.tdb-run-pager { display: flex; gap: 12px; align-items: center; margin: 16px 0; font: 13px/20px var(--td-font-sans); }
+.tdb-run-pager button { border: 1px solid var(--border); padding: 5px 10px; background: var(--background); color: var(--foreground); }
+.tdb-run-note { font: 14px/22px var(--td-font-sans); color: var(--muted-foreground); }
+@media (max-width: 640px) {
+  .tdb-result-tools { width: 100%; margin-top: 8px; }
+  .tdb-run-controls { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .tdb-run-controls select { width: 100%; }
+}
+/* END GENERATED FEATURE STYLES */

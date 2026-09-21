@@ -1,0 +1,60 @@
+/* Paired comparisons and model profiles use the existing compact shell. */
+.tdb-insights { min-width: 0; padding: 16px 20px 20px; font-family: var(--td-font-sans); }
+.tdb-insights[hidden] { display: none; }
+.tdb-insight-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-bottom: 12px; }
+.tdb-insight-tools label { display: flex; flex-direction: column; gap: 5px; min-width: 160px; max-width: 100%; color: var(--muted-foreground); font-size: 12px; }
+.tdb-insight-tools select { width: 100%; max-width: 340px; min-height: 34px; border: 1px solid var(--border); border-radius: 0; color: var(--foreground); background: var(--background); padding: 5px 28px 5px 9px; font: 14px var(--td-font-sans); }
+.tdb-insights button { border: 1px solid var(--border); border-radius: 0; background: var(--background); color: var(--foreground); padding: 6px 10px; min-height: 32px; font: 13px/18px var(--td-font-sans); cursor: pointer; }
+.tdb-insights button:hover { background: var(--muted); }
+.tdb-insights :is(button, select, a):focus-visible { outline: 2px solid #315aba; outline-offset: 3px; }
+.tdb-insights button:disabled { opacity: .45; cursor: default; }
+.tdb-insight-note { max-width: 100%; margin: 10px 0 16px; font: 13px/1.6 var(--td-font-sans); color: var(--muted-foreground); }
+.tdb-insight-scroll { max-width: 100%; overflow-x: auto; }
+.tdb-insight-table { width: 100%; border-collapse: collapse; font: 14px/1.5 var(--td-font-sans); }
+.tdb-insight-table :is(th, td) { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+.tdb-insight-table th { font-weight: 500; }
+.tdb-insight-table thead th { color: var(--muted-foreground); font-size: 12px; white-space: nowrap; }
+.tdb-insight-table tbody th { min-width: 160px; }
+.tdb-insight-table small { display: block; max-width: 100%; margin-top: 4px; overflow-wrap: anywhere; color: var(--muted-foreground); font: 12px/1.5 var(--td-font-sans); }
+.tdb-insight-table a, .tdb-insight-examples a { color: var(--foreground); text-decoration: underline; text-decoration-color: #97abd3; text-underline-offset: 3px; }
+.tdb-insight-number { font-family: var(--td-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tdb-insight-table .tdb-acc-row { min-width: 225px; }
+.tdb-insight-table .tdb-acc-track, .tdb-pair-scores .tdb-acc-track { flex: 1 1 180px; width: auto; min-width: 130px; max-width: none; }
+.tdb-insight-unavailable { color: var(--muted-foreground); font: 12px var(--td-font-sans); }
+.tdb-pair-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 0; border-block: 1px solid var(--border); }
+.tdb-pair-scores > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.tdb-pair-scores > div > span:first-child { flex-basis: 100%; font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.tdb-pair-scores .tdb-acc-row { flex: 1; min-width: 190px; }
+.tdb-pair-scores button { min-height: 26px; padding: 2px 8px; font-size: 12px; }
+.tdb-insight-details { margin: 0 0 20px; }
+.tdb-insight-details summary { cursor: pointer; padding: 9px 0; font-size: 14px; font-weight: 500; }
+.tdb-insight-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 16px 0; gap: 8px; }
+.tdb-insight-groups button { display: flex; align-items: center; justify-content: space-between; text-align: left; gap: 12px; padding: 10px 12px; }
+.tdb-insight-groups button span { overflow-wrap: anywhere; }
+.tdb-insight-groups button strong { font: 16px var(--td-font-mono); }
+.tdb-insight-groups button[aria-pressed="true"] { border-color: #315aba; background: #edf3ff; color: #244993; }
+.dark .tdb-insight-groups button[aria-pressed="true"] { background: #1b2e50; color: #c9dafe; border-color: #93b4ff; }
+.tdb-insight-pager { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 0 0; font: 12px var(--td-font-mono); }
+.tdb-insight-pager > span { margin-right: auto; }
+.tdb-insights h3 { font: 500 16px/1.5 var(--td-font-sans); margin: 18px 0 12px; }
+.tdb-insight-examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 10px 0 22px; }
+.tdb-insight-examples { margin: 0; padding: 0; list-style: none; }
+.tdb-insight-examples li { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 13px; }
+.tdb-insight-examples li > span { font: 12px/1.5 var(--td-font-mono); color: var(--muted-foreground); }
+.tdb-efficiency-plot { margin: 8px 0 14px; overflow-x: auto; }
+.tdb-efficiency-plot svg { display: block; width: 100%; height: 310px; }
+.tdb-efficiency-plot text { fill: var(--muted-foreground); font: 12px var(--td-font-mono); }
+.tdb-plot-grid { stroke: var(--border); stroke-width: 1; }
+.tdb-efficiency-point circle { fill: #315aba; stroke: var(--background); stroke-width: 1.5; opacity: .75; }
+.dark .tdb-efficiency-point circle { fill: #93b4ff; }
+.tdb-efficiency-point:focus circle, .tdb-efficiency-point:hover circle { opacity: 1; stroke: var(--foreground); stroke-width: 2.5; }
+@media (max-width: 760px) {
+  .tdb-insights { padding: 12px; }
+  .tdb-insight-tools { gap: 9px; }
+  .tdb-insight-tools label { flex: 1 1 180px; }
+  .tdb-insight-tools select { max-width: none; }
+  .tdb-pair-scores, .tdb-insight-examples-grid { grid-template-columns: 1fr; gap: 18px; }
+  .tdb-insight-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tdb-insight-table { font-size: 13px; }
+  .tdb-insight-table :is(th, td) { padding: 9px 8px; }
+}

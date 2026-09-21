@@ -1,63 +1,36 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>the quality API — terminal-daily-bench docs</title>
-<meta name="description" content="benchmark_quality_report, what deep=True adds, and the seven selection helpers that build a subset from the same axes.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Analyze results in Python · Terminal-Daily</title>
+<meta name="description" content="Use Python when you need to inspect or extend the quality analysis.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../../docs/quality-methods/api/">
 </head>
 <body>
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
-    <h1>The quality API</h1>
-    <p class="tdb-doc-sub">One call that aggregates every axis, and the selection helpers beside it.</p>
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Analyze results in Python</h1>
+<p class="tdb-doc-sub">Use Python when you need to inspect or extend the quality analysis.</p>
+</header>
 
-    <h2 id="card"><a href="#card">One-call quality card</a></h2>
-    <p><code>benchmark_quality_report(matrix, ..., deep=True)</code> aggregates every axis: <code>msq</code> (the <code>D/C/M</code> profile plus composite), diversity from <code>signatures</code>, angle coverage from the flat <code>graded</code> states, <code>noisy_task_indices</code> (monotonicity violations), and a curated subset (monotonic core &rarr; info-max &rarr; diverse filter). Under <code>deep=True</code> it adds IRT (<code>total_information</code> + SE), <code>ci</code> bootstrap intervals, <code>power</code> precision required-N, <code>reliability</code> KR-20, and <code>reliability_prophecy</code> Spearman-Brown required-k.</p>
-    <figure class="tdb-code"><pre><code>from terminal_daily_bench import quality as q
+<h2 id="card"><a href="#card">Compute a summary</a></h2>
+<p>Prepare a complete rectangular JSON array, with one row per task and the same models in the same column order on every row. Include only tasks with an evaluated outcome for every model. Exclude incomplete tasks and report those exclusions. Use one for a pass and zero for a failure.</p><figure class="tdb-code"><figcaption>Analyze a task-by-model array</figcaption><pre><code>import json
+from terminal_daily_bench import quality
 
-matrix = [
-    [1, 0, 0],   <span class="text-muted-foreground"># td-1: A solves, B/C fail  -&gt; splits</span>
-    [1, 1, 0],   <span class="text-muted-foreground"># td-2</span>
-    [1, 1, 1],   <span class="text-muted-foreground"># td-3: all-pass            -&gt; no discrimination</span>
-    [0, 0, 0],   <span class="text-muted-foreground"># td-4: all-fail            -&gt; no discrimination</span>
-    [1, 0, 1],   <span class="text-muted-foreground"># td-5</span>
-    [1, 1, 0],   <span class="text-muted-foreground"># td-6</span>
-]
+with open(&quot;matrix.json&quot;) as source:
+    matrix = json.load(source)
+report = quality.benchmark_quality_report(matrix, deep=True)</code></pre></figure><p>Use at least one task and two models. For ordinary run files, the <a href="../cli/">command-line analysis</a> handles the input format for you.</p>
 
-card = q.benchmark_quality_report(matrix, deep=True)
-print(card["msq"])          <span class="text-muted-foreground"># {'D': 0.667, 'C': 0.896, 'M': 0.833, 'composite': 0.766, ...}</span>
-print(card["irt"]["total_information"])   <span class="text-muted-foreground"># 1.808</span>
-print(card["reliability"]["kr20"])        <span class="text-muted-foreground"># 0.514</span>
-
-verdict = q.benchmark_readiness(matrix)
-print(verdict["ready"], verdict["bottleneck"], verdict["recommended_n"])
-<span class="text-muted-foreground"># False precision 37</span></code></pre></figure>
-
-    <h2 id="helpers"><a href="#helpers">Selection helpers</a></h2>
-    <dl class="tdb-defs">
-      <dt class="tdb-id">select_informative_subset</dt>
-      <dd>Greedy <code>D + C</code>.</dd>
-      <dt class="tdb-id">select_max_information</dt>
-      <dd>Top-k Fisher.</dd>
-      <dt class="tdb-id">balanced_subset</dt>
-      <dd>Difficulty-balanced.</dd>
-      <dt class="tdb-id">diverse_subset</dt>
-      <dd>Farthest-point over signatures.</dd>
-      <dt class="tdb-id">select_mid_difficulty</dt>
-      <dd>Scaffold-relative discriminative band.</dd>
-      <dt class="tdb-id">filter_monotonic / flag_noisy_tasks</dt>
-      <dd>Drop ability-inverting tasks.</dd>
-      <dt class="tdb-id">cross_scaffold_quality</dt>
-      <dd>Most discriminative scaffold frame.</dd>
-    </dl>
-  </article>
+<h2 id="helpers"><a href="#helpers">Explore task subsets</a></h2>
+<p>The Python tools can select subsets by discrimination, difficulty coverage, information, or diversity. Use them to study task-set design, and report how selection was performed. Selecting and evaluating on the same outcomes can make a comparison look stronger than it generalizes.</p><p>Exact arguments and return values are in the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/terminal_daily_bench/quality.py">Python reference</a>.</p>
+</article>
 </main>
 
-<script src="../../../assets/site.js?v=b1d8696d89" data-root="../../.." data-page="docs"></script>
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

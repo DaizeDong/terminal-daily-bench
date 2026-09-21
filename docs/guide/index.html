@@ -1,52 +1,37 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Docs — terminal-daily-bench</title>
-<meta name="description" content="Install terminal-daily-bench, score a model on a task, read the quality card, submit results. Twenty-nine pages across running it and the measurement method.">
-<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Documentation · Terminal-Daily</title>
+<meta name="description" content="Use Terminal-Daily, understand its results, and contribute evaluations.">
+<link href="../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../docs/">
 </head>
 <body>
-
-<!-- The docs front door. It was the last page still on the legacy frame: no
-     sidebar, and a hand-written list naming FOUR destinations for what is now
-     a twenty-nine page set. Every one of those pages is in the sidebar this
-     page now renders, generated from DOCNAV, so restating them here would be
-     a second index that drifts from the first the moment either changes.
-     What is left is the two things a sidebar cannot say: where to start, and
-     the two limits that apply before a reader runs anything. -->
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
-    <h1>Run the benchmark, read the score, submit a patch</h1>
-    <p class="tdb-doc-sub">A patch in, a test outcome out. Every page is in the sidebar; this is where to start.</p>
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Documentation</h1>
+<p class="tdb-doc-sub">Use Terminal-Daily, understand its results, and contribute evaluations.</p>
+</header>
 
-    <h2 id="start"><a href="#start">Start here</a></h2>
-    <p><a href="quickstart/">Quickstart</a> installs the tool, points it at a model
-      endpoint and scores one task. <a href="run/">Run a task</a> follows it with the
-      oracle baseline and the scoring command.</p>
+<h2 id="start"><a href="#start">Get started</a></h2>
+<p><a href="quickstart/">Quickstart</a> explains installation and current availability. If you have access to the evaluation environment, continue to <a href="run/">Run a task</a>.</p>
 
-    <h2 id="running"><a href="#running">Running it</a></h2>
-    <p>How a task package is laid out on disk, what archive publishes and live
-      withholds, how scoring re-lays the protected tests, and the
-      <code>HarnessAdapter</code> contract for plugging in your own scaffold.</p>
+<h2 id="running"><a href="#running">Explore the tasks</a></h2>
+<p>Browse the <a href="../registry/">task catalogue</a>, then read about <a href="task-format/">task packages</a>. To evaluate your own agent, see <a href="task-format/scaffold/">Agent integration</a>.</p>
 
-    <h2 id="method"><a href="#method">Method</a></h2>
-    <p>Whether the task set separates models at all: discrimination, the C1&ndash;C14
-      capability taxonomy, 2PL information, KR-20 and the readiness verdict. The
-      report itself is at <a href="../quality/#discrimination">selection quality</a>.</p>
+<h2 id="method"><a href="#method">Understand the results</a></h2>
+<p>The <a href="quality-methods/">evaluation methods</a> explain success rates, capability categories, and uncertainty. <a href="quality-card/">Quality summary</a> helps you assess a set of tasks. <a href="submission/">Submit results</a> describes how contributions are checked.</p>
 
-    <h2 id="before-you-run"><a href="#before-you-run">Before you run anything</a></h2>
-    <p><code>tdb run</code> and <code>tdb oracle</code> need the unpublished patched
-      Harbor fork, not stock 0.13.1; the catalogue, quality card, publisher and doctor
-      do not. <a href="quickstart/#requirements">Requirements</a>.</p>
-    <p>Editing tests changes only a discarded workspace.
-      <a href="task-format/#archive-vs-live">Archive vs. live</a>.</p>
-  </article>
+<h2 id="before-you-run"><a href="#before-you-run">Current availability</a></h2>
+<p>End-to-end scoring requires an evaluation environment that has not yet been released. Installing the public tools alone is insufficient. You can still inspect tasks, check your setup, and analyze existing results. <a href="quickstart/#availability">See requirements</a>.</p>
+</article>
 </main>
 
-<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="docs"></script>
+<script data-page="docs" data-root=".." src="../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

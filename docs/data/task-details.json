@@ -1,0 +1,977 @@
+{
+  "td-a1e719fced6e790d": {
+    "instruction": "# Image string values must detect file extensions case-insensitively\n\n## Required behaviour\n\nThe `Image` type (constructed as `Image(value=...)`, a Pydantic model whose serialization is triggered by `model_dump()`) accepts a string that may be either a filesystem path or base64-encoded data. When the string ends in a recognized image file extension — `.png`, `.jpg`, `.jpeg`, `.webp` — it must be interpreted as a path, and if no file exists at that location, serialization must raise a `ValueError` whose message matches `does not exist`. This extension check must be case-insensitive, so values such as `some_path/that/does/not/exist.PNG` or `PHOTO.JPEG` are treated exactly like their lowercase equivalents and rejected, even when the string happens to be decodable as valid base64. Strings without such an extension should continue to be handled as base64 content as before.\n\n## Required API\n\n### Errors\n\n- `ValueError` is raised with a message matching \"does not exist\".\n",
+    "record": {
+      "repo": "ollama/ollama-python",
+      "pr_number": 696,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Image string values must detect file extensions case-insensitively",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Recognize image file extensions regardless of letter case when serializing Image values. A missing image path must raise ValueError even if its text is valid base64; strings without a recognized extension keep their existing base64 behavior."
+  },
+  "td-fc1f353b207fa884": {
+    "instruction": "# Replace URL-based plugin index handling with repository bases and SHA-256 verification\n\n## Required behaviour\n\nThe plugin-management module (the settings plugin exposing the `extension` class, module-level `default_prefs` and `path_plugins`) must source plugins from configurable repository *bases* instead of hard-coded index URLs: `default_prefs` gains a `plugin_repositories` key whose shipped default is a single-element list holding the https raw-content base for the official plugins collection's main branch, and `extension.repository_bases()` must return that preference verbatim with any trailing slash stripped, or an empty list when the key is absent. Add `extension.fetch_resource(location)` returning raw `bytes`: `[redacted-url] URLs are retrieved through `urllib.request.urlopen`, anything that is not an https URL is treated as a local filesystem path and read from disk, and a plain `[redacted-url] location must raise `ValueError`. Add `extension.verify_plugin(meta, data)` returning a bool: a `sha256` entry in the metadata is authoritative, otherwise a legacy `sha1sum` is accepted while printing a warning mentioning sha1, and metadata carrying neither hash returns `False` after printing a warning about the missing integrity hash. `download_plugins_json()` must fetch `<base>/plugins_index.json` for each base in order, merge the results so later bases win on name collisions, tag every entry with a `repository` key naming the base it came from, and on any failure close the wait message, show a menu reading `Error: Could not read plugin repository <base>` plus a line advising to check the connection or configuration, and exit. `download_plugins()` must fetch a selected plugin's source from `<repository>/<plugin_name>.py`, verify it, and only then write `<plugin_name>.py` into `path_plugins`; on verification failure it must write nothing, skip the plugin-cache rebuild, and show a menu stating the plugin failed its integrity check and was not installed. `update_plugins()` must verify each installed file against its index hash, skip fetching when it already verifies, otherwise fetch `<repository>/<name>.py` and overwrite the local file in place only if the new bytes verify — no temporary directories, `wget` or subprocess calls — reporting `<name> was updated to the latest version` or that there are no new updates.\n\n## Required API\n\n### Errors\n\n- `ValueError` is raised.\n",
+    "record": {
+      "repo": "markhedleyjones/dmenu-extended",
+      "pr_number": 184,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Replace URL-based plugin index handling with repository bases and SHA-256 verification",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Load plugin indexes from configurable repository bases and verify downloaded code before installation or updates. Prefer SHA-256 metadata, support legacy SHA-1 with a warning, merge repositories in order, and leave files unchanged when integrity checks fail."
+  },
+  "td-8ea1c4a1eded4486": {
+    "instruction": "# Reverse-tree validation, tool-calling client loop, and live key doctor check\n\n## Required behaviour\n\nBuild a `grok` package whose `XAIClient` (in `grok/client.py`, constructed as `XAIClient(api_key=...)`) sends Responses-style payloads that carry the charter in a top-level `instructions` field with the user prompt as the first `input` item, and whose `complete(instructions=..., text=..., tools=..., function_handlers=...)` drives a chained loop: when a response contains function calls it invokes the matching handler (e.g. `verify_scene` from `grok/tools.py`), posts a follow-up whose first input item is a `function_call_output` with the original `call_id` and JSON result, passes the prior response id as `previous_response_id`, and retries the same way when a response comes back `incomplete`, finally returning the parsed JSON payload; helpers `collect_text`, `user_content`, `api_key_status` (which must never echo the secret), and `collect_function_calls` must also recognise nested `tool_call` entries carrying `function.name`/`function.arguments` and map `id` to `call_id`, while transport failures raise `XAIClientError`. Add `ping()`/`ping_payload()` so a tiny probe (`input` \"Reply with the single word pong.\", `max_output_tokens` 16, `reasoning.effort` \"low\") verifies credentials, and make `main` in `grok/cli.py` run `doctor` so it only pings when a key is present, reports \"not ready\" plus \"key rejected\" on an authentication error, surfaces a successful live ping in its message, exits 0/1 accordingly, and never prints the key. Provide `grok/jsonutil.py` with `extract_json_object(text)` that parses fenced or embedded JSON containing nested objects and brace-laden string values, `extract_python_block(text)` that returns only a Python-fenced block and raises `ValueError` when none exists, and `extract_scene_source(payload, text, function_calls)` that falls back to the `source` argument of a recorded `verify_scene` call. In `grok/validation.py`, `validate_reverse_tree(tree)` must reject plans lacking a depth‑0 target or shaped forward (edges must run from greater depth to smaller, leaves assumed), `normalize_reverse_tree(messy)` must coerce string depths and booleans, `{\"from\",\"to\"}`/`{\"from_id\",\"to_id\"}` edge dicts and whitespace-delimited spines into canonical lists and derive a target name, and `validate_run(run_dir, require_video=...)` must compile the generated scene, returning `(failures, scene_name, ...)` with `scene_name` `None` and a failure mentioning compilation/syntax when the source is invalid. `reverse_tree_for(topic)` in `grok/offline.py` must emit a valid reverse tree whose `claim` node sits at depth 0 and is not assumed, whose spine starts at an assumed node, ends at `claim`, and has non-increasing depths. Finally, `GrokHarness(runs_dir=...)` in `grok/harness.py` and `GrokService(runs_dir=...)` in `grok/service.py` must accept `RunRequest(prompt=..., offline=...)` from `grok/models.py` and, for offline runs invoked through `main([\"run\", prompt, \"--offline\"])`, print a JSON manifest and write a run directory containing a knowledge map that validates and a compilable scene named `GrokOfflineStory` that uses camera-movement calls rather than `self.camera.animate`.\n\n## Required API\n\n### Files the tests import from\n\n- `grok/harness.py`\n- `grok/service.py`\n- `grok/models.py`\n- `grok/client.py`\n- `grok/jsonutil.py`\n- `grok/cli.py`\n- `grok/validation.py`\n- `grok/offline.py`\n- `grok/tools.py`\n\n### Names\n\n- a method `complete` -- the tests call it as `complete(function_handlers=..., instructions=..., text=..., tools=...)`.\n- `grok/harness.py`: module-level name `GrokHarness` -- the tests call it as `GrokHarness(runs_dir=...)`.\n- `grok/service.py`: module-level name `GrokService` -- the tests call it as `GrokService(runs_dir=...)`.\n- `grok/models.py`: module-level name `RunRequest` -- the tests call it as `RunRequest(offline=..., prompt=...)`.\n- `grok/client.py`: module-level name `XAIClient` -- the tests call it as `XAIClient(api_key=...)`.\n- `grok/client.py`: module-level name `XAIClientError` -- the tests call it as `XAIClientError(arg1)`.\n- `grok/client.py`: module-level name `api_key_status`.\n- `grok/client.py`: module-level name `collect_function_calls` -- the tests call it as `collect_function_calls(arg1)`.\n- `grok/client.py`: module-level name `collect_text`.\n- `grok/jsonutil.py`: module-level name `extract_json_object` -- the tests call it as `extract_json_object(text)`. It returns a dict whose keys include `a`, `s`.\n- `grok/jsonutil.py`: module-level name `extract_python_block` -- the tests call it as `extract_python_block(text)`.\n- `grok/jsonutil.py`: module-level name `extract_scene_source` -- the tests call it as `extract_scene_source(arg1, arg2, arg3)`.\n- `grok/cli.py`: module-level name `main` -- the tests call it as `main(arg1)`.\n- `grok/validation.py`: module-level name `normalize_reverse_tree` -- the tests call it as `normalize_reverse_tree(messy)`.\n- `grok/offline.py`: module-level name `reverse_tree_for` -- the tests call it as `reverse_tree_for(arg1)`.\n- `grok/client.py`: module-level name `user_content`.\n- `grok/validation.py`: module-level name `validate_reverse_tree` -- the tests call it as `validate_reverse_tree(tree)`. It returns a list.\n- `grok/validation.py`: module-level name `validate_run` -- the tests call it as `validate_run(run_dir, require_video=...)`.\n- `grok/tools.py`: module-level name `verify_scene`.\n\n### Errors\n\n- `ValueError` is raised.\n",
+    "record": {
+      "repo": "HarleyCoops/Math-To-Manim",
+      "pr_number": 71,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Reverse-tree validation, tool-calling client loop, and live key doctor check",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add a client that continues response and tool-call chains, validates reverse-tree plans and generated scenes, and checks credentials with a live probe without printing secrets. Offline runs must produce a valid knowledge map and a compilable animation scene."
+  },
+  "td-215529f1255d9b3d": {
+    "instruction": "# RSS story provider must skip failing entries instead of losing the feed\n\n## Required behaviour\n\nThe class `RSSFeedStoryProvider` in `[redacted-repo].storyprovider.rss` must isolate failures that occur while converting an individual feed entry into a story. When `get_stories()` processes a parsed feed, any exception raised while handling one entry — for example a network or TLS error raised by `requests.get` when the provider has to fetch the article body because the entry carries no embedded content — must cause only that entry to be discarded, while every other entry is still returned in order. The method must therefore never propagate such per-entry exceptions to the caller, and it should return an empty list only if all entries fail. Entries that already include content in the feed must continue to be rendered from that embedded content without any outbound HTTP request.\n",
+    "record": {
+      "repo": "j6k4m8/goosepaper",
+      "pr_number": 128,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "RSS story provider must skip failing entries instead of losing the feed",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Keep an RSS feed usable when converting an individual entry fails. Skip only the failing entry, return the remaining stories in order, and use embedded article content without making an extra HTTP request."
+  },
+  "td-415cbe190bcfd66d": {
+    "instruction": "# Add an X/Twitter fetcher with URL normalization, oEmbed fallback, and opt-in cookies\n\n## Required behaviour\n\nProvide a module `x_reader/fetchers/twitter.py` (importable as `twitter` from the `x_reader.fetchers` package) exposing helpers `_normalize_x_url(url)`, which canonicalizes any twitter.com/mobile.twitter.com/x.com link (adding a missing scheme and dropping query strings and fragments) to `[redacted-url]>/status/<id>`; `_extract_status_id(url)`, which returns the numeric id from `/status/<id>`, `/i/web/status/<id>`, `/i/article/<id>` and `/<user>/article/<id>` shapes; `_strip_tweet_html(html)`, which converts embed markup into plain text by turning `<br>` into newlines, unwrapping anchors to their visible text, unescaping entities, and discarding the trailing \"&mdash; Author (@handle) <date link>\" chrome; and `_is_thin_oembed_text(text)`, which reports `True` for text that is only a t.co link, too short, or truncated with an ellipsis, and `False` for a substantial complete tweet body. Add an async `fetch_twitter(url)` that first tries the synchronous hook `_fetch_via_oembed`, returns its result with `fetch_method` set to `\"oembed\"` and `url` set to the normalized URL when the text is not thin, and otherwise falls back to the `_fetch_via_fxtwitter` hook, returning its text with `fetch_method` set to `\"fxtwitter\"`; both hooks must be module-level attributes so they can be substituted. Implement `_session_cookie_header()` so it reads the saved browser session file located via `get_session_path` from the `browser` module in `x_reader/fetchers.py` and builds a `name=value` cookie header from the stored cookies, but returns `None` unless the environment variable `X_READER_ALLOW_EXTERNAL_SESSION_COOKIES` is set to an enabling value. Finally, `from_twitter(data)` in `x_reader/schema.py` must preserve fetch metadata such as `fetch_method` and `author_url` in the resulting content object's `extra` mapping. Importing the module must not fail when optional third-party logging packages are stubbed out, and all helpers must be usable without network access.\n\n## Required API\n\n### Files the tests import from\n\n- `x_reader/fetchers/twitter.py`\n- `x_reader/fetchers.py`\n- `x_reader/schema.py`\n\n### Names\n\n- a method `_extract_status_id` -- the tests call it as `_extract_status_id(arg1)`.\n- a method `_is_thin_oembed_text` -- the tests call it as `_is_thin_oembed_text(arg1)`.\n- a method `_normalize_x_url` -- the tests call it as `_normalize_x_url(arg1)`.\n- a method `_session_cookie_header` -- the tests call it as `_session_cookie_header()`.\n- a method `_strip_tweet_html` -- the tests call it as `_strip_tweet_html(html)`.\n- a method `fetch_twitter` -- the tests call it as `fetch_twitter(arg1)`.\n- `x_reader/fetchers.py`: module-level name `browser`.\n- `x_reader/schema.py`: module-level name `from_twitter` -- the tests call it as `from_twitter(arg1)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n- a method `assertFalse` -- the tests call it as `assertFalse(arg1)`.\n- a method `assertIsNone` -- the tests call it as `assertIsNone(arg1)`.\n- a method `assertTrue` -- the tests call it as `assertTrue(arg1)`.\n",
+    "record": {
+      "repo": "runesleo/x-reader",
+      "pr_number": 20,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add an X/Twitter fetcher with URL normalization, oEmbed fallback, and opt-in cookies",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add an X/Twitter fetcher that normalizes supported URLs, extracts status IDs, and converts embedded markup to readable text. Use the secondary fetcher when oEmbed text is incomplete, preserve fetch metadata, and send saved session cookies only when explicitly enabled."
+  },
+  "td-9b882fe0cd708e25": {
+    "instruction": "# Preserve empty tuple-style array items and deduplicate builder strategies in order\n\n## Required behaviour\n\nThe JSON schema builder exposed as `SchemaBuilder` in `[redacted-repo].py` must handle tuple-validation arrays faithfully: when `add_schema({'type': 'array', 'items': []})` is given an explicitly empty `items` list, the schema produced by `to_schema()` must keep `items` as an empty list rather than fabricating a single empty schema object (`[{}]`), and this must hold consistently across repeated builds and when several such schemas are merged. Subsequent calls such as `add_object(['hello'])` must then grow the tuple from zero, yielding exactly one string entry, while existing behaviour for one-item and multi-item tuples — including extension to longer tuples with `add_object` — must be unchanged. Separately, the class-level `STRATEGIES` sequence computed from `EXTRA_STRATEGIES` plus `BASIC_SCHEMA_STRATEGIES` (in `[redacted-repo]/schema/strategies.py`) must contain no duplicates while preserving first-occurrence order. Deduplication must scale linearly with the number of strategies so that even a list of several hundred entries with many repeats is resolved almost instantly (well under two seconds). Callers should be able to verify these results with ordinary dict access, `get(key, default)`, and comparisons such as `assertEqual`, `assertNotEqual`, `assertIsNotNone`, and `assertLess`.\n\n## Required API\n\n### Files the tests import from\n\n- `genson/schema/strategies.py`\n- `genson.py`\n\n### Names\n\n- a method `add_object` -- the tests call it as `add_object(arg1)`.\n- a method `add_schema` -- the tests call it as `add_schema(arg1)`.\n- a method `get` -- the tests call it as `get(arg1, arg2)`.\n- a method `to_schema` -- the tests call it as `to_schema()`.\n- `genson/schema/strategies.py`: module-level name `BASIC_SCHEMA_STRATEGIES`.\n- `genson.py`: module-level name `SchemaBuilder` -- the tests call it as `SchemaBuilder()`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, expected_order)` and `assertEqual(arg1, expected_order, arg3)`.\n- a method `assertIsNotNone` -- the tests call it as `assertIsNotNone(items, arg2)`.\n- a method `assertLess` -- the tests call it as `assertLess(elapsed, arg2, arg3)`.\n- a method `assertNotEqual` -- the tests call it as `assertNotEqual(arg1, arg2, arg3)`.\n",
+    "record": {
+      "repo": "wolverdude/GenSON",
+      "pr_number": 91,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Preserve empty tuple-style array items and deduplicate builder strategies in order",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Preserve an explicitly empty tuple-style items list when building or merging JSON schemas, and grow it correctly when objects are added. Deduplicate the builder strategy list in linear time while preserving first-occurrence order."
+  },
+  "td-ea295d6cb7470995": {
+    "instruction": "# Declare require-dbt-version as a YAML list in the bundled dbt project\n\n## Required behaviour\n\nThe dbt project configuration that ships as part of the packaged data asset must express its supported dbt range as a YAML sequence of individual constraints rather than one comma-joined string: the `require-dbt-version` key must render exactly as `require-dbt-version: [\">=1.10.5\", \"<3.0.0\"]` in the emitted `dbt_project.yml` text. The lower and upper bounds themselves must stay unchanged, so the project still accepts dbt 1.10.5 and newer while excluding 3.0.0 and above. The asset's own `version` entry must remain pinned to `1.0.0` and continue to be maintained independently of the distributing package's version. Any runtime configuration or profile files generated or referenced alongside this project must keep working with the new list form without further changes to their contents or locations.\n",
+    "record": {
+      "repo": "tuva-health/tuva-core",
+      "pr_number": 1450,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Declare require-dbt-version as a YAML list in the bundled dbt project",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Express the bundled dbt project version constraints as a YAML list containing \">=1.10.5\" and \"<3.0.0\". Preserve those bounds, the asset version 1.0.0, and compatibility with the existing runtime configuration and profiles."
+  },
+  "td-23334546970c5de0": {
+    "instruction": "# Support user-defined subclasses of scikit-learn estimators during [redacted-repo] conversion\n\n## Required behaviour\n\nConverting a fitted model with `convert_sklearn` (from `skl2[redacted-repo].py`, called as `convert_sklearn(pipe, initial_types=[(\"X\", FloatTensorType([None, 4]))])`) must succeed when the model's type is a user-defined subclass of a supported scikit-learn estimator rather than the exact supported class. In particular, a class deriving from `Pipeline` (`sklearn/pipeline.py`) that holds standard steps such as `StandardScaler()` (`sklearn/preprocessing.py`) and `LogisticRegression()` (`sklearn/linear_model.py`) must be resolved to the converter/shape-calculator/parser registered for its nearest supported ancestor instead of raising an error about an unsupported or not-implemented model type. The conversion must return a valid non-`None` [redacted-repo] model (as verified with `assertIsNotNone(model_[redacted-repo])`), with input types declared via `FloatTensorType` from `skl2[redacted-repo]/common/data_types.py`. This behaviour must hold even when fitting emits warnings, e.g. under `ignore_warnings(category=(ConvergenceWarning, FutureWarning))` from `sklearn/utils/_testing.py` and `sklearn/exceptions.py`.\n\n## Required API\n\n### Files the tests import from\n\n- `sklearn/exceptions.py`\n- `skl2onnx/common/data_types.py`\n- `sklearn/linear_model.py`\n- `sklearn/pipeline.py`\n- `sklearn/preprocessing.py`\n- `skl2onnx.py`\n- `sklearn/utils/_testing.py`\n\n### Names\n\n- `sklearn/exceptions.py`: module-level name `ConvergenceWarning`.\n- `skl2onnx/common/data_types.py`: module-level name `FloatTensorType` -- the tests call it as `FloatTensorType(arg1)`.\n- `sklearn/linear_model.py`: module-level name `LogisticRegression` -- the tests call it as `LogisticRegression()`.\n- `sklearn/pipeline.py`: module-level name `Pipeline`.\n- `sklearn/preprocessing.py`: module-level name `StandardScaler` -- the tests call it as `StandardScaler()`.\n- `skl2onnx.py`: module-level name `convert_sklearn` -- the tests call it as `convert_sklearn(pipe, initial_types=...)`.\n- `sklearn/utils/_testing.py`: module-level name `ignore_warnings` -- the tests call it as `ignore_warnings(category=...)`.\n- a method `assertIsNotNone` -- the tests call it as `assertIsNotNone(model_onnx)`.\n",
+    "record": {
+      "repo": "onnx/sklearn-onnx",
+      "pr_number": 1249,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Support user-defined subclasses of scikit-learn estimators during [redacted-repo] conversion",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Convert user-defined subclasses of supported scikit-learn estimators by finding the nearest supported ancestor. A fitted Pipeline subclass containing ordinary preprocessing and classification steps must produce a valid converted model."
+  },
+  "td-72183c45996e3314": {
+    "instruction": "# Support deleting registered services from the DI container via `del`\n\n## Required behaviour\n\nThe `Container` class must implement `__delitem__` so that `del container[key]` removes a registration, where `key` may be a string name or a type. Deletion must work for plain values, lazily-evaluated callables registered through `container[key] = lambda di: ...`, and factories registered through `container.factories[key] = ...`, and afterwards `key in container` must be `False`; any memoized result for that key must be discarded so re-registering the same key and reading it yields the new value. Aliases created with `add_alias` must be kept consistent: when a target is deleted the alias drops that target, remaining only if it still points at another live target, and disappearing from the container once all of its targets are gone. Cached `List[...]` resolutions must also be invalidated, so after deleting the only implementation behind an alias, `List[Alias] in container` is `False`. Deleting a key that is not registered (including deleting the same key twice) must raise `KeyError` whose message contains the key, and a key that somehow exists in both the service and factory registries must be removed from both.\n",
+    "record": {
+      "repo": "kodemore/kink",
+      "pr_number": 71,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Support deleting registered services from the DI container via `del`",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Support deleting dependency-injection registrations by name or type. Remove services, factories, and cached values together; update aliases and cached list resolutions, and raise KeyError when the registration does not exist."
+  },
+  "td-14a268d498129959": {
+    "instruction": "# Gaussian proposal with full covariance must draw an independent step per walker\n\n## Required behaviour\n\nIn `[redacted-repo]/moves.py`, the `GaussianMove` class must generate proposals that are statistically independent for each walker, including when it is constructed with a full (non-diagonal) covariance matrix, e.g. `GaussianMove(cov, mode=\"vector\")` where `cov` is an `ndim x ndim` array. Calling `move.get_proposal(x0, rng)` with a coordinate array `x0` of shape `(nwalkers, ndim)` and a NumPy random generator must return new coordinates of the same shape plus the associated log-proposal factors. Each row of the returned coordinates must reflect a separately drawn multivariate normal perturbation of the corresponding row of `x0`; the displacements `xnew - x0` must not be identical across walkers (as would happen if a single draw were broadcast to all rows). This behaviour must hold for any number of walkers and dimensions, and the existing diagonal/isotropic proposal modes must continue to work unchanged.\n\n## Required API\n\n### Files the tests import from\n\n- `emcee/moves.py`\n\n### Names\n\n- a method `get_proposal` -- the tests call it as `get_proposal(x0, rng)`.\n- `emcee/moves.py`: module-level name `GaussianMove` -- the tests call it as `GaussianMove(cov, mode=...)`.\n",
+    "record": {
+      "repo": "dfm/emcee",
+      "pr_number": 571,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Gaussian proposal with full covariance must draw an independent step per walker",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Generate independent Gaussian proposal steps for every walker when using a full covariance matrix. Preserve the coordinate shape and log-proposal factors, and keep diagonal and isotropic proposal modes working."
+  },
+  "td-25cceb3b9de8a600": {
+    "instruction": "# Exclude the defaults configuration file when scanning a folder for DAG YAMLs\n\n## Required behaviour\n\nThe top-level `load_yaml_dags(globals_dict, dags_folder=..., defaults_config_path=..., suffix=...)` helper walks a directory tree and builds DAGs from every matching YAML file it finds. When the shared defaults file (`defaults.yml`) lives inside the scanned directory — for example because `defaults_config_path` points at the same folder as `dags_folder` — it must be skipped during the scan instead of being parsed as a DAG definition, so no entry such as `default_args` is ever injected into the supplied globals dictionary. The defaults must still be applied normally to the real DAG files: a DAG generated from a sibling YAML must inherit values from that defaults file (e.g. a task whose `depends_on_past` is `True` because the defaults declared it). This behaviour should hold regardless of where within the scanned tree the defaults file is located, and other YAML files must continue to be processed as before.\n",
+    "record": {
+      "repo": "astronomer/dag-factory",
+      "pr_number": 889,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Exclude the defaults configuration file when scanning a folder for DAG YAMLs",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Skip the shared defaults file when scanning a directory for DAG definitions. Continue applying its settings to real DAG files, without creating a spurious DAG or adding its default_args entry to the supplied globals."
+  },
+  "td-52c419bdf0f25aa8": {
+    "instruction": "# Declare the HTTP client dependency with SOCKS proxy support enabled\n\n## Required behaviour\n\nThe project must be able to route outgoing HTTP traffic through SOCKS proxies, which requires the optional SOCKS transport extra of the `httpx` client library to be installed alongside the existing HTTP/2 extra. Update the dependency declarations so that both the plain requirements list (`requirements.txt`, at the repository root) and the packaging metadata (the dependency array in `pyproject.toml`) specify the client as `httpx[http2,socks]` pinned to exactly version `0.28.1`. In `pyproject.toml` the entry must appear as a double-quoted string, i.e. `\"httpx[http2,socks]==0.28.1\"`. No other pinned versions should change, and the two files must stay consistent with each other so a fresh install from either source yields the same extras.\n",
+    "record": {
+      "repo": "ZyphrZero/z.ai2api_python",
+      "pr_number": 69,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Declare the HTTP client dependency with SOCKS proxy support enabled",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Install the SOCKS transport extra alongside HTTP/2 support for httpx. Both requirements and packaging metadata must specify httpx[http2,socks]==0.28.1, with all other pinned versions unchanged."
+  },
+  "td-ceb8dc21bc04b086": {
+    "instruction": "# Run the silent upgrade uninstall synchronously and clean up its leftovers\n\n## Required behaviour\n\nThe Windows installer script (`installer.nsi`) must invoke the previously installed uninstaller during an upgrade using exactly one `ExecWait` call of the form `ExecWait '\"$R0\" /S /UPGRADE _?=$R1'`, so the uninstaller runs in place and the installer blocks until it finishes; no other `ExecWait` line may pass `/UPGRADE`. Because the `_?=` form prevents the uninstaller from removing itself, the script must afterwards explicitly `Delete \"$R0\"` and `RMDir \"$R1\"` to remove the stale uninstaller executable and its directory. The uninstaller side must keep parsing the flag with `${GetOptions} \"$R0\" \"/UPGRADE\" $R1` and must preserve the existing policy-cleanup logic, reading `ReadRegStr $0 HKCU \"${CLAUDE_POLICY_KEY}\" \"ccds_managed\"` and branching with `StrCmp $0 \"true\" 0 done_clear_policy` so that only values this installer manages are cleared on a real uninstall while an upgrade leaves the policy intact. Verification compares the collected upgrade invocation lines via `assertEqual(upgrade_lines, [\"ExecWait '\\\"$R0\\\" /S /UPGRADE _?=$R1'\"])` and confirms the cleanup and policy statements with `assertIn(arg1, source)` against the script's text.\n\n## Required API\n\n### Names\n\n- a method `assertEqual` -- the tests call it as `assertEqual(upgrade_lines, arg2)`.\n- a method `assertIn` -- the tests call it as `assertIn(arg1, source)`.\n",
+    "record": {
+      "repo": "lonr-6/cc-desktop-switch",
+      "pr_number": 62,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Run the silent upgrade uninstall synchronously and clean up its leftovers",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Wait for the previous uninstaller to finish during a silent upgrade, then remove its leftover executable and directory. Preserve the existing distinction between upgrade cleanup and a real uninstall when handling managed policy values."
+  },
+  "td-efda4ed917d716f8": {
+    "instruction": "# MicroDVD writer must emit `{1}{1}` fps declaration without mutating input\n\n## Required behaviour\n\nThe MicroDVD format writer (used via `SSAFile.to_string(\"microdvd\", fps=...)`, i.e. the `MicroDVDFormat` subtitle format class registered under the `\"microdvd\"` identifier) must always write the framerate declaration line as `{1}{1}<fps>`, with the literal frame numbers 1 and 1, for every framerate value — not just for artificially high ones. Previously the line was derived from a synthetic 1-millisecond event converted through the ms-to-frames helper, which truncates to frame 0 at any realistic framerate and produced a `{0}{0}` line that readers reject. The written output must round-trip through the strict (default) MicroDVD reader, so that `SSAFile.from_string(out, format_=\"microdvd\")` infers the declared fps, returns exactly the original events, and preserves their text. Additionally, serialization must be free of side effects: the caller's `SSAFile` must contain exactly the same event list after the call as before, with no temporary declaration event inserted into or removed from it.\n",
+    "record": {
+      "repo": "tkarabela/pysubs2",
+      "pr_number": 113,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "MicroDVD writer must emit `{1}{1}` fps declaration without mutating input",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Write the MicroDVD framerate declaration with literal frame numbers {1}{1} at every framerate. Serialized subtitles must load through the strict reader with the original events and text, and serialization must not modify the input event list."
+  },
+  "td-d6eefda2e4d83b65": {
+    "instruction": "# Add `#` stripping and an opt-in Unicode-preserving mode to `sanitize`\n\n## Required behaviour\n\nThe `sanitize` helper in the project's `utils` module must treat the hash character `#` as an invalid filename character: it should be replaced like other invalid characters, with the resulting whitespace collapsed and the string trimmed, so `\"Hello#World\"` yields `\"Hello World\"` and `\"### Title ###\"` yields `\"Title\"`. The function must also accept a new keyword argument `preserve_unicode` (default `False`) so that existing callers keep the current behaviour of transliterating input down to pure ASCII. When `preserve_unicode=True`, non-ASCII letters must be kept as-is rather than transliterated — for example Cyrillic text passes through unchanged — while the usual removal of characters that are illegal in filenames (such as `:`, `/`, `\\`, `?`, `*`, `<`, `>`, `|`, `\"`, `@`, and control/whitespace escapes) plus whitespace collapsing and trimming still applies. Preserved Unicode output must additionally be normalized to NFC, so a decomposed sequence like `\"и\" + U+0306` becomes the single precomposed character `\"й\"`.\n",
+    "record": {
+      "repo": "mohamed-chs/convoviz",
+      "pr_number": 67,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add `#` stripping and an opt-in Unicode-preserving mode to `sanitize`",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Treat # as an invalid filename character and add an optional Unicode-preserving mode to sanitize. The default remains ASCII transliteration; Unicode mode retains non-ASCII letters in NFC form while continuing to remove invalid characters and normalize whitespace."
+  },
+  "td-645f816ef37c9874": {
+    "instruction": "# Support multi-character escape strings when marshalling and patching diffs\n\n## Required behaviour\n\nThe differ must correctly handle an `escape_str` of arbitrary length (not just a single character) wherever symbolic diff keys are serialized to plain strings and back. Specifically, `[redacted-repo]er(escape_str='__')` must marshal a dict whose keys mix diff symbols (e.g. `delete`, `insert`) with literal strings that already begin with the escape string (e.g. `'__delete'`, `'____something'`), and `unmarshal` of that result must reproduce the original dict exactly, so a round-trip check such as `assertEqual(d, differ.unmarshal(dm))` holds. The same must apply to the module-level `diff(a, b, marshal=True, escape_str='__')` and `patch(a, d, marshal=True, escape_str='__')` helpers: applying the marshalled diff to `a` must yield `b`, satisfying `assertEqual(b, arg2)` where `arg2` is the patched result. Escaping must prefix (and unescaping must strip) exactly one full occurrence of the configured escape string, using its true length rather than assuming one character, so literal keys with repeated escape prefixes are preserved without loss or corruption. The default behaviour with the standard single-character escape string must remain unchanged.\n\n## Required API\n\n### Names\n\n- a method `assertEqual` -- the tests call it as `assertEqual(b, arg2)`.\n",
+    "record": {
+      "repo": "xlwings/jsondiff",
+      "pr_number": 93,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Support multi-character escape strings when marshalling and patching diffs",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Support escape strings of any length when serializing and restoring symbolic diff keys. Remove or add one complete escape prefix at a time so repeated literal prefixes survive, and ensure applying a marshalled diff reconstructs the target object."
+  },
+  "td-b9c2f4985f23372a": {
+    "instruction": "# Tokenizer must treat backslashes as literal characters in unquoted words\n\n## Required behaviour\n\nThe command tokenizer (the `Tokenizer` class in the project's `tokenizer` module, producing `Token` instances tagged with `Token.STR`) must not treat the backslash as an escape or separator character when splitting an unquoted input line. Input such as `lcd C:\\FakeFolder\\TestPath` must yield exactly two string tokens, `lcd` and `C:\\FakeFolder\\TestPath`, preserving every backslash verbatim; likewise `put linux\\file\\name.py` must yield `put` and `linux\\file\\name.py`. Backslashes must never be consumed, doubled, or cause the following character to be reinterpreted, so Windows-style paths and POSIX filenames containing literal backslashes survive tokenization unchanged. All existing tokenization behaviour for whitespace separation, quoting, and other special characters must continue to work as before.\n",
+    "record": {
+      "repo": "wendlers/mpfshell",
+      "pr_number": 116,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Tokenizer must treat backslashes as literal characters in unquoted words",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Preserve backslashes literally when tokenizing unquoted command arguments. Windows-style paths and filenames containing backslashes must remain intact, without changing existing whitespace, quoting, or other special-character handling."
+  },
+  "td-a1911b3d52732b76": {
+    "instruction": "# GraphQL fields that collapse to the same CLI name must stay uniquely addressable\n\n## Required behaviour\n\n`[redacted-repo].extract_graphql_commands(schema)` turns an introspection result into command objects whose `.name` is the kebab-cased field name, while `.graphql_field_name` keeps the exact wire name and `.graphql_operation_type` records `query` or `mutation`; introspection fields (those starting with `__`) are skipped and fields whose kebab names are already unique keep them unchanged, in schema order with query fields before mutation fields. When several fields map onto the same kebab name, every command must still end up with a distinct `.name`: e.g. query fields `getUser`, `get_user`, `GetUser` must yield `get-user`, `query-get-user`, `query-get-user-2`, and a query `getUser` colliding with a mutation `get_user` must yield `get-user` and `mutation-get-user`. If two fields with the identical name exist on both Query and Mutation (e.g. `user`), both are disambiguated symmetrically as `query-user` and `mutation-user`. Disambiguation aliases must never take a name that another field owns naturally — with `getUser`, `get_user`, `queryGetUser`, the field `queryGetUser` keeps `query-get-user`, `getUser` keeps `get-user`, and `get_user` gets a third distinct name — so all natural names must be reserved before aliases are handed out. The resulting command list must be usable by `[redacted-repo].build_argparse(commands, parser)` without argparse raising on duplicate subcommand names, and parsing each command's name must resolve back to that exact command object.\n",
+    "record": {
+      "repo": "knowsuchagency/mcp2cli",
+      "pr_number": 106,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "GraphQL fields that collapse to the same CLI name must stay uniquely addressable",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Give every GraphQL field a unique CLI command name when multiple wire names collapse to the same kebab-case form. Reserve natural names before creating aliases, distinguish queries from mutations, and ensure every command parses back to the correct field."
+  },
+  "td-e3fec75b79351fe9": {
+    "instruction": "# `Sync.pull` must support a polling mode that bypasses logical replication\n\n## Required behaviour\n\nThe `Sync` class (in the sync module, e.g. `[redacted-repo].sync.Sync`) must accept a `polling` keyword argument on its `pull()` method, defaulting to the existing non-polling behaviour. When `pull(polling=True)` is called against a PostgreSQL source (i.e. when the instance is not in MySQL-compatibility mode), it must gather changes purely from the transaction-id snapshot: it reads `txid_snapshot_xmin` and stores it as the instance's `checkpoint`, calls `sync()` to produce the documents, and passes the resulting document iterable to `search_client.bulk()` exactly once together with the target index name. In this mode it must never call `logical_slot_changes()`, so the operation works on databases where no logical replication slot exists or is usable. The regular (non-polling) code path, including logical slot consumption and MySQL-compatible behaviour, must remain unchanged.\n",
+    "record": {
+      "repo": "toluaina/pgsync",
+      "pr_number": 651,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "`Sync.pull` must support a polling mode that bypasses logical replication",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add an optional PostgreSQL polling mode to Sync.pull that reads a transaction snapshot, records its checkpoint, and sends synchronized documents to the search client. This mode must not consume a logical replication slot; existing non-polling and MySQL behavior stays intact."
+  },
+  "td-781453e813c11941": {
+    "instruction": "# Recognize K-9 Mail \"sent from\" footers as signatures\n\n## Required behaviour\n\nThe `extract_signature(msg_body)` function in the `signature.bruteforce` module must treat the automatic footer added by the K-9 Mail Android client as a signature, returning a `(stripped_body, signature)` tuple where the footer is the signature and the preceding text is the body. This must work for the English wording (\"Sent from my Android device with K-9 Mail. Please excuse my brevity.\") and the French wording (\"Envoyé de mon appareil Android avec Courriel K-9 Mail. Veuillez excuser ma brièveté.\"), including accented characters, when such a line appears as the last line of the message. Detection must remain conservative: a message that merely mentions Android or K-9 Mail inside an ordinary sentence in the middle of the text, followed by further paragraphs, must be returned unchanged with `None` as the signature. Existing behaviour for other signature patterns and the graceful fallback when internal processing raises an error must be preserved.\n",
+    "record": {
+      "repo": "mailgun/talon",
+      "pr_number": 260,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Recognize K-9 Mail \"sent from\" footers as signatures",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Recognize the English and French K-9 Mail automatic footers when they end a message. Separate the footer from the body while leaving ordinary mentions of Android or K-9 Mail within a longer message untouched."
+  },
+  "td-c3d8f979a1b6446f": {
+    "instruction": "# Preserve symlinks and file permissions when saving KDL configuration files\n\n## Required behaviour\n\nSaving configuration through `[redacted-repo].kdl_parser` must never replace a symbolic link with a regular file: `save_niri_config`, `save_niri_config_multi` and the low-level `replace_config_file` helper must resolve the destination path, write the new content to the real target, and leave the link itself intact (creating the target with mode `0o600` when the link is dangling), while a plain regular file is updated in place with its exact permission bits — including special bits such as setuid/setgid/sticky — unchanged; any temporary or validated staging file used during the swap must be gone afterwards. `load_niri_config_multi` must return the parsed nodes plus the include slots, and feeding those straight back into `save_niri_config_multi` must rewrite each included file through its own symlink target so that both the primary config (keeping its `include` directive) and every included file retain their link structure and modes. The module-level `NIRI_CONFIG` path used to locate the primary config must remain patchable so callers can point the loader and savers at an alternate location. The exported names `parse_kdl`, `write_kdl`, `load_niri_config_multi`, `save_niri_config`, `save_niri_config_multi` and `replace_config_file` must all be importable from `[redacted-repo].kdl_parser`, and the module itself must be importable as `from [redacted-repo] import kdl_parser`. All of this behaviour must be observable from a `unittest.TestCase` using only the standard helpers `addCleanup`, `assertEqual`, `assertTrue`, `assertFalse` and `assertIn` against real files in a temporary directory.\n\n## Required API\n\n### Files the tests import from\n\n- `nirimod.py`\n\n### Names\n\n- `nirimod.py`: module-level name `kdl_parser`.\n- a method `addCleanup` -- the tests call it as `addCleanup(arg1)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n- a method `assertFalse` -- the tests call it as `assertFalse(arg1)`.\n- a method `assertIn` -- the tests call it as `assertIn(arg1, arg2)`.\n- a method `assertTrue` -- the tests call it as `assertTrue(arg1)`.\n",
+    "record": {
+      "repo": "srinivasr/nirimod",
+      "pr_number": 42,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Preserve symlinks and file permissions when saving KDL configuration files",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Save KDL configuration through symbolic links without replacing the links or changing existing permission bits. Apply the same behavior to included files, create dangling link targets with mode 0o600, and remove temporary files after saving."
+  },
+  "td-42da1c5dc37cb47a": {
+    "instruction": "# Reject zero power-limit values when encoding the package power limit MSR\n\n## Required behaviour\n\nThe module-level helper `_encode_pkg_power_limit(pl1, pl1_window, pl2, pl2_window)` in the `[redacted-repo]` module must validate that each raw power-limit value is representable in the MSR's 15-bit power field *and* is non-zero. A raw value of `0` for either limit must raise `ValueError` whose message identifies the offending limit and states that it must be at least one power-unit tick, using exactly the wording \"PL1 must be at least one power-unit tick\" and \"PL2 must be at least one power-unit tick\". Values that do not fit in the field (for example `0x8000`) must continue to raise `ValueError` with a message naming `PL1` or `PL2` respectively. The smallest legal encoding, `1`, must be accepted for both limits and encode successfully without raising.\n",
+    "record": {
+      "repo": "erpalma/throttled",
+      "pr_number": 421,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Reject zero power-limit values when encoding the package power limit MSR",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Reject a zero raw value for either package power limit and identify the invalid limit in the ValueError message. Continue rejecting values outside the 15-bit field while accepting the smallest legal value, one power-unit tick."
+  },
+  "td-0e0911d980675cb3": {
+    "instruction": "# KiCad 8 library symbol definitions must use legacy S-expression grammar\n\n## Required behaviour\n\nProvide a function `part_to_lib_symbol_definition(part)` in the module `[redacted-repo]/tools/kicad8/sexp_schematic.py` (commonly imported under the alias `part_to_kicad8_lib_symbol_definition`) that builds the nested-list S-expression for a part's `lib_symbols` entry using only tokens understood by the KiCad 8 file format. In particular, when pin numbers are hidden the emitted entry must be the two-element form `[\"pin_numbers\", \"hide\"]`, not the newer keyword form `[\"pin_numbers\", [\"hide\", \"yes\"]]`, and the definition must not contain any `embedded_fonts` entry or other grammar introduced after KiCad 8. The function must work on any duck-typed part object that exposes `lib` (with a `filename` attribute), `name`, `ref_prefix`, `datasheet`, `description`, and `draw_cmds`, without requiring a fully constructed part or an attached library file. The returned value must be a plain list of lists/strings so callers can inspect or serialize it directly. Existing KiCad 9 symbol generation behaviour must remain unchanged, so the two backends produce their own respective grammars.\n\n## Required API\n\n### Files the tests import from\n\n- `skidl/tools/kicad8/sexp_schematic.py`\n\n### Names\n\n- `skidl/tools/kicad8/sexp_schematic.py`: function `part_to_kicad8_lib_symbol_definition` -- the tests call it as `part_to_kicad8_lib_symbol_definition(part)`.\n- `skidl/tools/kicad8/sexp_schematic.py`: module-level name `part_to_lib_symbol_definition`.\n",
+    "record": {
+      "repo": "devbisme/skidl",
+      "pr_number": 323,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "KiCad 8 library symbol definitions must use legacy S-expression grammar",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Generate library symbol definitions using KiCad 8 S-expression grammar, including the legacy hidden-pin-number form. Accept a duck-typed part object and avoid newer grammar such as embedded_fonts without changing the separate KiCad 9 backend."
+  },
+  "td-a0d4191b528f7af6": {
+    "instruction": "# Temporary HDF data store must close its descriptor and clean up its file\n\n## Required behaviour\n\nProvide a `TmpDataStore` class (a subclass of `HDFDataStore`, importable from `[redacted-repo].datastore` and defined in `[redacted-repo]/datastore/tmpdatastore.py`) that, when constructed as `TmpDataStore()`, allocates its backing file through module-level `tempfile` and file-system calls through module-level `os` in that module, so both can be substituted; the raw file descriptor returned by `tempfile.mkstemp` must be closed with `os.close` before the HDF layer opens the path (an `os.fstat` on it must then raise `OSError`). If the underlying `HDFDataStore` initialization raises — e.g. a `RuntimeError` with message \"simulated HDF initialization failure\" — the exception must propagate unchanged, but any partially built store object must be closed and the temporary file removed with `os.remove` so nothing is left behind. Calling `close()` on a successfully constructed instance must delete the temporary file, and calling `close()` again must be a harmless no-op rather than an error. The package must expose a shared `STATS_CACHE` object in `[redacted-repo].py` whose `STATS_CACHE.full_path` gives the path of its temporary file. When a process that merely imports the package exits normally, that cache must be closed and its file deleted, with the interpreter exiting with status 0 and emitting no `UnclosedFileWarning` even when warnings are always shown.\n\n## Required API\n\n### Files the tests import from\n\n- `nilmtk.py`\n- `nilmtk/datastore/tmpdatastore.py`\n- `nilmtk/datastore.py`\n\n### Names\n\n- `nilmtk.py`: module-level attribute `STATS_CACHE`.\n- `nilmtk.py`: module-level attribute `STATS_CACHE.full_path`.\n- `nilmtk/datastore/tmpdatastore.py`: module-level attribute `os`.\n- `nilmtk/datastore/tmpdatastore.py`: module-level attribute `tempfile`.\n- `nilmtk/datastore.py`: module-level name `HDFDataStore`.\n- `nilmtk/datastore.py`: module-level name `TmpDataStore` -- the tests call it as `TmpDataStore()`.\n\n### Errors\n\n- `OSError` is raised.\n- `RuntimeError` is raised with a message matching \"simulated HDF initialization failure\".\n",
+    "record": {
+      "repo": "nilmtk/nilmtk",
+      "pr_number": 1020,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Temporary HDF data store must close its descriptor and clean up its file",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Close a temporary file descriptor before opening its HDF store and remove the file when the store closes. Initialization failures must clean up before propagating, repeated close calls must be harmless, and the shared statistics cache must close cleanly at process exit."
+  },
+  "td-e1f9b973b55f7dfc": {
+    "instruction": "# Treat RSS pubDate values without a timezone as UTC\n\n## Required behaviour\n\nThe RSS ingestion module must expose `RSSScraper` (constructed with a list of `RSSSourceConfig` entries and an async HTTP client) and `RSSSourceConfig` (accepting at least `name` and `url`), with an awaitable `fetch(since)` method that returns feed items. When parsing each entry's publication date, the scraper must produce a timezone-aware `datetime` for `published_at`; if the feed's `pubDate` string carries no timezone or offset information (e.g. `Fri, 24 Apr 2026 12:00:00` with no trailing `GMT`), the value must be interpreted as UTC rather than left naive or dropped. Such entries must still be compared correctly against the `since` cutoff and returned like any other item, so a naive date newer than the cutoff yields exactly one item whose `published_at` equals the same wall-clock time with `tzinfo=timezone.utc`. Entries that do specify an explicit timezone must continue to be converted to the equivalent UTC instant.\n",
+    "record": {
+      "repo": "Thysrael/Horizon",
+      "pr_number": 156,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Treat RSS pubDate values without a timezone as UTC",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Interpret RSS publication dates without timezone information as UTC. Return timezone-aware timestamps, compare them correctly against the fetch cutoff, and continue converting explicitly zoned dates to their equivalent UTC instant."
+  },
+  "td-45815ec8eb09e65c": {
+    "instruction": "# Update frontend footer link and version label to current canonical values\n\n## Required behaviour\n\nThe browser-side view model in `templates/index_app.js` must expose two string fields that drive the footer: `githubUrl`, whose value is exactly `\"[redacted-url] and `footerVersion`, whose value is exactly `\"InvoiceFlowAI\"` with no trailing version number or build suffix. Every stale reference to the old account path `github.com/Ethan-YoungQ/[redacted-repo]` must be removed from that file, and no occurrence of a hard-coded versioned label of the form `footerVersion: \"InvoiceFlowAI v` may remain. These values must be literal strings in the source so that a plain text scan of `templates/index_app.js` satisfies `assertIn(arg1, source)` for the two required literals and `assertNotIn(arg1, source)` for the two forbidden ones. The rendered footer should therefore show the plain product label and link to the current repository URL.\n\n## Required API\nThese names are referenced by the project's regression tests and must exist exactly as written.\n\n### Names\n\n- a method `assertIn` -- the tests call it as `assertIn(arg1, source)`.\n- a method `assertNotIn` -- the tests call it as `assertNotIn(arg1, source)`.\n",
+    "record": {
+      "repo": "EthanYoQ/Invoice-Downloader",
+      "pr_number": 169,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Update frontend footer link and version label to current canonical values",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Update the frontend footer repository link and show the plain InvoiceFlowAI product label. Remove stale account links and hard-coded version suffixes from the browser view model."
+  },
+  "td-fb6818423e93d217": {
+    "instruction": "# MCP server must configure SSE host/port via FastMCP settings and pin MCP to major version 1\n\n## Required behaviour\n\nThe `run_server` function in `mcp_server.py` must accept a transport name, a host, and a port (called as `run_server(transport, host, port)`). When the transport is `\"sse\"`, it must not pass host/port as keyword arguments to the FastMCP server's `run` method, since that signature does not support them; instead it must assign the provided host and port onto the server object's `settings` attribute (`settings.host` and `settings.port`) and then invoke `run(transport=\"sse\")` with no other keyword arguments. This must work against any object bound to the module-level `mcp` name, including a substitute injected by patching, so the module must look the name up at call time rather than capturing it earlier. Additionally, the packaging metadata in `pyproject.toml` must constrain the MCP dependency to the FastMCP-compatible major version by declaring `\"mcp[cli]>=1.0,<2\"` in both the dedicated MCP extra and the aggregate \"all\" extra, with no remaining unbounded `\"mcp[cli]>=1.0\"` requirement.\n\n## Required API\n\n### Files the tests import from\n\n- `mcp_server.py`\n\n### Names\n\n- a method `run_server` -- the tests call it as `run_server(arg1, arg2, arg3)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)` and `assertEqual(arg1, arg2, arg3)`.\n- a method `assertNotIn` -- the tests call it as `assertNotIn(arg1, config)`.\n",
+    "record": {
+      "repo": "runesleo/x-reader",
+      "pr_number": 24,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "MCP server must configure SSE host/port via FastMCP settings and pin MCP to major version 1",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Configure the SSE server host and port through FastMCP settings before calling run, rather than passing unsupported run arguments. Constrain the MCP dependency to major version 1 in both the dedicated and aggregate package extras."
+  },
+  "td-4ec48cede5878846": {
+    "instruction": "# Make the developer token optional when constructing the Ads API client\n\n## Required behaviour\n\nThe `utils` module in the `ads_mcp` package must expose a helper, `_get_developer_token()`, that reads the `GOOGLE_ADS_DEVELOPER_TOKEN` environment variable and returns its value, or `None` when the variable is not set. The client factory `_get_[redacted-repo]_client()` must use this helper so that it only forwards a `developer_token` keyword argument to `[redacted-repo]Client` when a token is actually present in the environment; when the variable is unset, the argument must be omitted entirely from the call rather than passed as `None` or an empty string. With the token unset, `_get_[redacted-repo]_client()` must still construct a working client instance without raising — including when `_create_credentials` yields `AnonymousCredentials()` from `google.auth.credentials` — and the resulting client's `developer_token` attribute must be `None`. When the variable is set, its exact value must be passed through as the `developer_token` keyword argument. These behaviours should be verifiable through the usual assertion helpers such as `assertEqual(arg1, arg2)`, `assertIsNone(arg1)`, and `assertNotIn(arg1, kwargs)` on the recorded call arguments.\n\n## Required API\n\n### Files the tests import from\n\n- `google/auth/credentials.py`\n\n### Names\n\n- `google/auth/credentials.py`: module-level name `AnonymousCredentials` -- the tests call it as `AnonymousCredentials()`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n- a method `assertIsNone` -- the tests call it as `assertIsNone(arg1)`.\n- a method `assertNotIn` -- the tests call it as `assertNotIn(arg1, kwargs)`.\n",
+    "record": {
+      "repo": "googleads/google-ads-mcp",
+      "pr_number": 121,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Make the developer token optional when constructing the Ads API client",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Make the Ads client developer token optional. Read it from the environment and forward it only when present; omit the keyword entirely when unset so client construction can still succeed."
+  },
+  "td-8f59d5e9c8b20275": {
+    "instruction": "# Same-day reviews must never reduce a card's stability\n\n## Required behaviour\n\nWhen a card is reviewed again on the same day as its previous review (the elapsed interval is less than one day), the short-term stability update applied by `Scheduler.review_card(card, rating, review_datetime)` must never produce a stability lower than the card's stability before that review. In particular, with a `Scheduler` created with `learning_steps=()`, rating a fresh card `Good` and then rating the resulting `Card` `Hard` one minute later must leave `Card.stability` exactly equal to its value after the first review. The same clamping applies to any rating in `Rating` that would otherwise shrink stability during a same-day repetition; stability may still grow. Behaviour for reviews separated by a day or more, and the existing minimum-stability floor, must remain unchanged, and the public surface (`Scheduler`, `Card`, `Rating`, and `review_card` returning the updated card plus its review log) stays the same.\n",
+    "record": {
+      "repo": "open-spaced-repetition/py-fsrs",
+      "pr_number": 155,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Same-day reviews must never reduce a card's stability",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Prevent a same-day flashcard review from lowering the stability established by the previous review. Clamp any shrinking short-term update while still allowing growth and preserving behavior for reviews at least a day apart."
+  },
+  "td-05c5de2bb990d139": {
+    "instruction": "# Provide select_tables on the algo base class with DAG dependency resolution\n\n## Required behaviour\n\nThe base algo adapter (the `BaseAlgoAdapter` subclassed by algo implementations such as the relationship algo) must expose a single `select_tables(tables, **kwargs)` entry point that takes the full, unfiltered list of entities returned by `get_tables(manifest=..., catalog=...)` or `get_tables_from_metadata(data=...)`, applies the user's selection/exclusion criteria, and — when dependency output is requested — populates each surviving entity's dependency links before returning; because the raw parent/child edges of dropped nodes are only visible in the unfiltered set, resolution must happen inside this call rather than after filtering. The `Table` model in `[redacted-repo]/core/models.py` must support construction with `columns`, `database`, `depends_on`, `name`, `node_name`, `raw_depends_on`, `resource_type` and `schema`, where `raw_depends_on` holds the node identifiers taken from the DAG and `depends_on` holds the resolved, rendered entity names. Dependency resolution (`resolve_dependencies(selected_tables=..., all_tables=...)`) must walk upward through unselected intermediate nodes so that a selected entity links to its nearest selected ancestors, must de-duplicate and sort the resulting names, and must drop self-edges that appear when several nodes collapse to the same entity name under the configured name format. A CLI option that turns on dependency output must make the generator emit these DAG edges as a dedicated section after the entities and relationships, honouring both the configured entity name format and any resource-type restrictions. Entities with no resolved ancestors must end up with an empty dependency list rather than an error.\n\n## Required API\n\n### Files the tests import from\n\n- `dbterd/core/models.py`\n\n### Names\n\n- `dbterd/core/models.py`: module-level name `Table` -- the tests call it as `Table(columns=..., database=..., depends_on=..., name=..., node_name=..., schema=...)` and `Table(database=..., name=..., node_name=..., raw_depends_on=..., schema=...)` and `Table(database=..., name=..., node_name=..., resource_type=..., schema=...)`.\n- a method `get_tables` -- the tests call it as `get_tables(catalog=..., manifest=...)`.\n- a method `get_tables_from_metadata` -- the tests call it as `get_tables_from_metadata(data=...)`.\n- a method `select_tables` -- the tests call it as `select_tables(arg1)`.\n",
+    "record": {
+      "repo": "datnguye/dbterd",
+      "pr_number": 157,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Provide select_tables on the algo base class with DAG dependency resolution",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Select and exclude tables through one adapter entry point that also resolves requested DAG dependencies. Trace through unselected intermediate nodes to the nearest selected ancestors, remove duplicate and self-links, and emit the resulting edges using the configured entity names."
+  },
+  "td-2430537af4b4cb7d": {
+    "instruction": "# Resolve grouped request paths through Host, Mount and nested routers correctly\n\n## Required behaviour\n\nExpose a helper `get_matching_route_path(scope, routes)` in `[redacted-repo]/middleware.py` that, given an ASGI HTTP scope and a list of routes, returns the templated path pattern of the route that would handle the request (e.g. `/api/items/{item_id}`), or `None` when nothing matches. Matching must be decided solely by each route's own `matches()` implementation, so subclasses of `Route` (from `starlette/routing.py`) that narrow or reject matches — for example based on `scope[\"headers\"]` returning `Match.NONE` — are honored and the next candidate route is used instead. Container routes must be traversed recursively: for `Mount(path, app=...)` and `Mount(path, routes=...)` the mount prefix is prepended to the matched child pattern, and for `Host(host, app=...)` the host must match the request's `Host` header while the child pattern is contributed with no extra path segment; a `Host` nested inside a `Mount` must still include the mount prefix. If a container matches but none of its children do, the result must be `None` rather than the literal request path. The same resolution must work for `FastAPI()` / `APIRouter()` from `fastapi.py`, including routers built with `APIRouter(routes=...)` holding plain `Route` or `Mount` objects and routers combined via `include_router(items, prefix=...)`, and for `Starlette(routes=...)` applications mounted underneath. `PrometheusMiddleware` (in `[redacted-repo].py`) must use this resolution when `group_paths=True`, so a request to `/api/items/123` is recorded under `path=\"/api/items/{item_id}\"` in the metrics produced by `generate_latest(REGISTRY)`; the middleware must keep its metrics in `PrometheusMiddleware._metrics` and register collectors in `REGISTRY` such that they can be enumerated via `REGISTRY._collector_to_names` and removed with `REGISTRY.unregister(collector)`.\n\n## Required API\n\n### Files the tests import from\n\n- `prometheus_client/REGISTRY.py`\n- `fastapi.py`\n- `starlette/routing.py`\n- `starlette_exporter.py`\n- `starlette/responses.py`\n- `starlette/applications.py`\n- `prometheus_client.py`\n- `starlette_exporter/middleware.py`\n\n### Names\n\n- `prometheus_client/REGISTRY.py`: module-level attribute `_collector_to_names`.\n- a method `get` -- the tests call it as `get(arg1)`.\n- a method `include_router` -- the tests call it as `include_router(items, prefix=...)`.\n- a method `unregister` -- the tests call it as `unregister(collector)`.\n- `fastapi.py`: module-level name `APIRouter` -- the tests call it as `APIRouter()` and `APIRouter(routes=...)`.\n- `fastapi.py`: module-level name `FastAPI` -- the tests call it as `FastAPI()`.\n- `starlette/routing.py`: module-level name `Host` -- the tests call it as `Host(arg1, app=...)`.\n- `starlette/routing.py`: module-level name `Match`.\n- `starlette/routing.py`: module-level name `Mount` -- the tests call it as `Mount(arg1, app=...)` and `Mount(arg1, routes=...)`.\n- `starlette_exporter.py`: module-level name `PrometheusMiddleware`.\n- `starlette/responses.py`: module-level name `Response` -- the tests call it as `Response()`.\n- `starlette/routing.py`: module-level name `Route` -- the tests call it as `Route(arg1, endpoint)`.\n- `starlette/applications.py`: module-level name `Starlette` -- the tests call it as `Starlette(routes=...)`.\n- `prometheus_client.py`: module-level name `generate_latest` -- the tests call it as `generate_latest(REGISTRY)`.\n- `starlette_exporter/middleware.py`: module-level name `get_matching_route_path` -- the tests call it as `get_matching_route_path(preferred_scope, routes)`.\n",
+    "record": {
+      "repo": "stephenhillier/starlette_exporter",
+      "pr_number": 108,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Resolve grouped request paths through Host, Mount and nested routers correctly",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Resolve metric grouping paths through nested routes, mounts, and host-specific routers using each route's own matching rules. Record the matched template path, including mount prefixes, and return no match when a container has no matching child."
+  },
+  "td-a7c4763872b851d5": {
+    "instruction": "# Per-head state tracking for dual-head lights in `[redacted-repo].bulb`\n\n## Required behaviour\n\n`wizlight.updateState()` (in `[redacted-repo]/bulb.py`) must return, and keep in `wizlight.state`, a list of `Optional[PilotParser]` slots — one per independently controllable head — instead of a single state object; ordinary single-head devices and devices whose two heads are merged through a ratio (see `set_ratio()`) keep exactly one slot and must be polled with only the plain `{\"method\": \"getPilot\", \"params\": {}}` request. For a device that `get_bulbtype()` reports as truly dual-headed, a stale poll must send the plain request first (seeding slot 0 while slot 1 stays `None`) and then one indexed request per head using zero-based `{\"devices\": N}` params; an indexed reply is only accepted into a slot when its result carries the matching one-based `devices` tag, and untagged or mismatched replies must be discarded rather than duplicated into another slot. If an indexed request raises `WizLightConnectionError` (from `[redacted-repo]/exceptions.py`), any head already accepted in that poll must be kept, the remaining indexed requests for that poll are skipped, and indexed polling must be attempted again on the next stale poll. `_on_push(message, addr)` must route a `syncPilot` whose params carry a one-based `devices` tag into only that head's slot for multi-slot devices (updating `last_push` and invoking `push_callback` with the state list only when the stored data actually changed), while for single-slot devices the whole tagged push becomes the one combined state. An untagged push arriving after per-head state has been established must be ignored entirely — it may neither overwrite the zoned slots nor refresh `last_push`. Finally, polling must never discard fresher per-head data learned from pushes, including a push that arrives while a poll is in flight.\n\n## Required API\n\n### Files the tests import from\n\n- `pywizlight/bulb.py`\n- `pywizlight/exceptions.py`\n\n### Names\n\n- `pywizlight/bulb.py`: module-level name `PilotParser`.\n- `pywizlight/exceptions.py`: module-level name `WizLightConnectionError` -- the tests call it as `WizLightConnectionError(arg1)`.\n- a method `_on_push` -- the tests call it as `_on_push(arg1, arg2)`.\n- a method `get_bulbtype` -- the tests call it as `get_bulbtype()`.\n- a method `set_ratio` -- the tests call it as `set_ratio(arg1)`.\n- a method `updateState` -- the tests call it as `updateState()`.\n",
+    "record": {
+      "repo": "sbidy/pywizlight",
+      "pr_number": 209,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Per-head state tracking for dual-head lights in `[redacted-repo].bulb`",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Track each independently controllable light head in its own state slot. Validate indexed polling replies and route pushes to the correct head, retain accepted state after a connection failure, and never overwrite newer push data with an older poll."
+  },
+  "td-a12f9e85169e6c4b": {
+    "instruction": "# Validate server range responses when resuming partial downloads\n\n## Required behaviour\n\nThe downloader module must make resume decisions from the actual HTTP response rather than from the request it sent. `download_file(url, destination)` may send a `Range: bytes=<offset>-` header when a saved state file (see `save_download_state` / `get_download_state_file`) and `supports_range_requests` indicate a resumable partial file, but it must handle a `200` reply by discarding the partial bytes and writing the full body from the start, and handle a `206` reply only after verifying the `Content-Range` header: the unit must be `bytes` (case-insensitively), the start must equal the requested offset, the end must be the last byte of the resource, the total must match the expected size, and any `Content-Length` must equal the length of the returned range. If a `206` reply is missing `Content-Range` or fails any of those checks, the transfer must be abandoned immediately — returning `False` without reading the response body — leaving the existing partial file untouched. `_calculate_total_size(response, request_headers, resume_offset)` must therefore derive the total from `Content-Range` for range replies and from `Content-Length` otherwise, and the write loop must reject a stream that would exceed the expected total before any over-long chunk reaches disk, returning `False`. A `416` reply must invalidate and delete the saved state, then retry the download from scratch with no `Range` header, subject to the `DOWNLOAD_MAX_RETRIES` setting; when the retry budget is exhausted the call returns `False` with the existing file bytes and no state file left behind.\n",
+    "record": {
+      "repo": "rtuszik/photon-docker",
+      "pr_number": 386,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Validate server range responses when resuming partial downloads",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Validate actual HTTP responses before resuming a partial download. Restart for a full response, check range boundaries and lengths before appending, reject invalid or oversized transfers without corrupting the file, and clear stale resume state before retrying a range-not-satisfiable response."
+  },
+  "td-7463e8639d790381": {
+    "instruction": "# Render `...` correctly inside subscripted type annotations\n\n## Required behaviour\n\nFunction parameter annotations that contain an `Ellipsis` literal inside a subscript — for example `def transform(callback: typing.Callable[typing.Concatenate[T, ...], R]) -> R: ...` — must be converted back to source text exactly as written, producing `Callable[Concatenate[T, ...], R]` rather than dropping the element, emitting `Ellipsis`, or raising an error. This must hold in the astroid-based annotation helpers used to extract signatures (the `get_args_info` entry point of the package's astroid utilities module), which should return the annotation string for such a parameter alongside its name, with no default. It must also hold end to end when documentation is generated for a module containing such a signature: the rendered HTML entry for the function must show the parameter as `callback: Callable[Concatenate[T, ...], R]`. Generation must complete cleanly with both nitpicky mode and warnings-as-errors enabled, so no unresolved cross-reference or parsing warning may be produced by the `...` element.\n",
+    "record": {
+      "repo": "readthedocs/sphinx-autoapi",
+      "pr_number": 568,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Render `...` correctly inside subscripted type annotations",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Preserve literal ellipses inside subscripted type annotations when extracting signatures and generating documentation. Render the original annotation syntax without dropping elements, substituting Ellipsis, or producing warnings in strict builds."
+  },
+  "td-0667f41c830de26b": {
+    "instruction": "# Strip LaTeX layout/spacing macros from input-format text before format prediction\n\n## Required behaviour\n\nThe input-format section of a problem page is frequently marked up with purely visual LaTeX commands (e.g. `\\hspace{...}`, `\\kern`, `\\,`, `\\;`, `\\quad`, `\\qquad`, `\\ `, line-break and vertical-spacing macros, and wrappers such as `\\mathrm{...}`/`\\text{...}`), and these currently cause the format analyzer to fail and return no prediction for otherwise ordinary layouts. Add normalization in `atcodertools/fmtprediction/predict_format.py` so that such layout-only markup is removed or replaced by plain whitespace before the text is tokenized, while variable names, indices, subscripts, `\\vdots`/`\\cdots`-style ellipses and the line/column structure of the format are preserved exactly. Expose two helpers from that module: `_normalize_layout_tex_commands(source)`, which takes the raw format string and returns the cleaned string, and `_remove_layout_hspace_commands(arg1)`, which removes horizontal-spacing commands together with their brace-delimited arguments (correctly handling nested braces and multiple occurrences). `predict_format(decorated_content)` must apply this normalization and, for inputs it previously could not handle, return a single valid `Format` (from `atcodertools/fmtprediction/models/format.py`) describing the singular, parallel, two-dimensional and repeated-case variables. The content passed in is a `ProblemContent` (from `atcodertools/client/models/problem_content.py`) built as `ProblemContent(input_format_blocks=..., input_format_text=..., original_html=..., samples=...)` with samples given as `Sample(arg1, arg2)` objects (from `atcodertools/client/models/sample.py`), and previously successful predictions must remain unchanged.\n\n## Required API\n\n### Files the tests import from\n\n- `atcodertools/fmtprediction/models/format.py`\n- `atcodertools/client/models/problem_content.py`\n- `atcodertools/client/models/sample.py`\n- `atcodertools/fmtprediction/predict_format.py`\n\n### Names\n\n- `atcodertools/fmtprediction/models/format.py`: module-level name `Format`.\n- `atcodertools/client/models/problem_content.py`: module-level name `ProblemContent` -- the tests call it as `ProblemContent(input_format_blocks=..., input_format_text=..., original_html=..., samples=...)`.\n- `atcodertools/client/models/sample.py`: module-level name `Sample` -- the tests call it as `Sample(arg1, arg2)`.\n- `atcodertools/fmtprediction/predict_format.py`: module-level name `_normalize_layout_tex_commands` -- the tests call it as `_normalize_layout_tex_commands(source)`.\n- `atcodertools/fmtprediction/predict_format.py`: module-level name `_remove_layout_hspace_commands` -- the tests call it as `_remove_layout_hspace_commands(arg1)`.\n- `atcodertools/fmtprediction/predict_format.py`: module-level name `predict_format` -- the tests call it as `predict_format(decorated_content)`.\n",
+    "record": {
+      "repo": "kyuridenamida/atcoder-tools",
+      "pr_number": 326,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Strip LaTeX layout/spacing macros from input-format text before format prediction",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Remove visual LaTeX layout and spacing commands before predicting an input format. Preserve variable names, indices, meaningful ellipses, and line structure, including nested spacing arguments, while keeping previously successful predictions unchanged."
+  },
+  "td-5dc85b7da591412a": {
+    "instruction": "# Add member listing support to the networks client\n\n## Required behaviour\n\nExpose two new methods on the networks client in `hcloud.networks` — `get_member_list(network, ...)` and `get_member_all(network, ...)` — that retrieve the members attached to a network via `GET /networks/{id}/members`. Both must accept either a `Network` or a `BoundNetwork` as their first argument and resolve its id for the request URL, and both must support the optional filters `type`, `status`, `subnet` and `sort` (each a list of strings); `get_member_list` additionally accepts `page` and `per_page`. Only the arguments explicitly supplied by the caller may be sent as query parameters by `get_member_list`, while `get_member_all` must paginate internally, starting with `page=1` and `per_page=50` merged into the caller's filters, and return a flat list of all members. `get_member_list` must return a page result exposing a `members` sequence plus a `meta` attribute holding the response metadata. Each member must be modelled as an object with `type`, `id`, `ip`, `alias_ips`, `subnet` and `status` attributes, where `type` distinguishes e.g. `server` from `load_balancer`.\n\n## Required API\n\n### Names\n\n- a method `get_member_all` -- the tests call it as `get_member_all(arg1)`.\n- a method `get_member_list` -- the tests call it as `get_member_list(arg1)`.\n",
+    "record": {
+      "repo": "hetznercloud/hcloud-python",
+      "pr_number": 687,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add member listing support to the networks client",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add paginated and all-members network client methods that accept ordinary or bound network objects. Preserve caller-supplied filters, return typed member records and page metadata, and collect all pages into one flat list when requested."
+  },
+  "td-25ef372608020d70": {
+    "instruction": "# ✨ NEW: `docutils` heading-anchor slug preset, and a versioned anchor contract\n\nFinishes the job [redacted-ref]'s slug module started: the anchor behaviour becomes a formal, versioned contract that alternative implementations and tooling can pin against, plus a third slug preset for mixed-format projects.\n\n## A `docutils` slug preset\n\n`myst_heading_slug_func = \"docutils\"` produces slugs **byte-identical to `docutils.nodes.make_id`** — the id style reStructuredText headings receive — so a Sphinx project mixing `.rst` and `.md` sources can choose one uniform anchor rule.\n\n- The algorithm and its translate tables are ported into the pure, stdlib-only `myst_parser.slugs` (no docutils import there; provenance noted — docutils is public domain), keeping the module's replicate-from-one-file property.\n- Fidelity is pinned **by CI, not by care**: the corpus plus adversarial vectors (digraphs, the full 33-entry translate table, combining marks, compatibility/ligature forms, mathematical alphanumerics, Turkish dotless-i, whitespace runs) are asserted byte-equal against the real `make_id`. Review additionally fuzzed **210k random strings and swept every codepoint U+0020–U+2FFF** with zero divergences. Drift policy (documented): if a future docutils changes `make_id`, the preset and corpus stay byte-stable — they are the contract — and the divergence gets documented.\n- The `myst-anchors` CLI picks the preset up automatically (`--slug-func docutils`), with renderer/CLI cross-check tests.\n\n## Empty slugs mean no anchor\n\n`make_id` returns `\"\"` for *any* title without Latin letters (`Привет`, `2.0`, `!!!`) — far more often than the github preset. Previously (unreleased, since [redacted-ref]) an empty slug was stored, and a *second* empty-slugging heading received a literal `-1` HTML anchor. Now an empty slug means the heading simply gets **no anchor** — not stored, no dedup participation, no id emitted — for all presets and custom functions. Two behavioural nuances from review, both strictly-better and test-covered:\n- `<span id=\"-1\">` anchors no longer appear for duplicate punctuation-only headings;\n- `[](#)` (an empty fragment) no longer silently resolves to a punctuation-only heading — it now warns as an unresolved reference.\n\n## The versioned contract\n\n- `tests/fixtures/slugs.json` now carries `version: 1` and a policy statement: append-only within a version; version bump on any semantic change to an existing vector or algorithm. New `docutils` vectors were generated against the real `make_id` at authoring time.\n- A new normative docs subsection, *The anchor contract* (`docs/syntax/optional.md`), states in one place: slug generation (presets + corpus as the machine-readable half), fixed-base deduplication (`x, x-1, x-2`; docutils' own `idN` dedup deliberately not emulated), the empty-slug rule, explicit-id priority, HTML id emission (`id_prefix` bypassed), and the drift policy. The `myst-anchors` CLI preview's one divergence (it cannot apply the renderer-only empty-slug rule) is documented alongside the CLI example.\n\n## Review\n\nTwo implementation agents + a combined adversarial/behaviour review with old-vs-new probes against master: github/gitlab documents render **byte-identically** (docutils publish, sphinx HTML, searchindex, warnings) except the intended empty-slug fix; docutils-preset end-to-end resolution (same-doc, cross-doc, dedup-slug, explicit-target priority, slug==primary-id coincidence) verified with zero warnings. One pre-existing bug surfaced by review (topmatter clobbers validated config values, breaking *all* preset strings in frontmatter since [redacted-ref]) is tracked separately in [redacted-ref] rather than scope-creeping here.\n\nFull suite: 1245 passed. No changes to the `github`/`gitlab` slug outputs; no new configuration surface beyond the preset name.\n\n---\n_Generated by [Claude Code]([redacted-url])_\n",
+    "record": {
+      "repo": "executablebooks/MyST-Parser",
+      "pr_number": 1168,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "✨ NEW: `docutils` heading-anchor slug preset, and a versioned anchor contract",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add a docutils-compatible heading slug preset and a versioned anchor contract for mixed Markdown and reStructuredText projects. Keep empty slugs from producing anchors or taking part in duplicate-name handling, with renderer and CLI behavior aligned."
+  },
+  "td-63849d24555f3850": {
+    "instruction": "# Fix get_fp_lib_tbl_dir versioned preference paths\n",
+    "record": {
+      "repo": "devbisme/skidl",
+      "pr_number": 327,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Fix get_fp_lib_tbl_dir versioned preference paths",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Correct the versioned preference paths returned by get_fp_lib_tbl_dir. The published instruction provides no further behavioral details."
+  },
+  "td-b0382b8a8cd4b91e": {
+    "instruction": "# Never persist or trust an empty vector store in RAG coded tools\n\n## Required behaviour\n\nThe RAG coded tool base class `BaseRag` (module `neuro_san_studio.coded_tools.base_rag`, subclassed by `PdfRag` in `neuro_san_studio.coded_tools.pdf_rag`) must expose a helper `_is_empty_vector_store` that takes an optional `langchain_core.vectorstores.VectorStore` and returns `True` for `None` and for a `langchain_core.vectorstores.InMemoryVectorStore` holding no entries, and `False` for a populated in-memory store or for any other store implementation whose size cannot be counted cheaply. On the save side, `_save_vector_store` must accept `None` or an empty store without raising, must never create or overwrite the configured file in that case, and — only when persistence is configured (`save_vector_store` true with an `abs_vector_store_path`) — must emit a `WARNING` record on the `neuro_san_studio.coded_tools.base_rag` logger whose message contains the target path; with persistence off it must stay silent and write nothing. On the load side, a previously saved store that turns out to be empty must not be returned from cache: it must be ignored with a `WARNING` naming the path, the source documents must be reloaded, and a successfully rebuilt non-empty store must be written over the stale file; a non-empty saved store must still be served directly without reloading the source. A build in which every source fails must yield an empty in-memory store rather than an exception, so that an empty file already on disk plus an all-failed rebuild triggers both guards (two path-bearing warnings) and leaves the existing file byte-for-byte unchanged. A healthy run with persistence configured must write a file that reloads with one entry per produced chunk, using embeddings such as `DeterministicFakeEmbedding` and `Document` inputs, and round-tripping through `InMemoryVectorStore(embedding=...)`, `from_texts` and `load` must remain fully compatible.\n\n## Required API\n\n### Files the tests import from\n\n- `neuro_san_studio/coded_tools/pdf_rag.py`\n- `langchain_core/vectorstores/InMemoryVectorStore.py`\n- `langchain_core/embeddings.py`\n- `langchain_core/documents.py`\n- `langchain_core/vectorstores.py`\n\n### Names\n\n- a method `_is_empty_vector_store` -- the tests call it as `_is_empty_vector_store(empty)`.\n- a method `from_texts` -- the tests call it as `from_texts(arg1, arg2)`.\n- a method `load` -- the tests call it as `load(path, arg2)`.\n- `langchain_core/embeddings.py`: module-level name `DeterministicFakeEmbedding` -- the tests call it as `DeterministicFakeEmbedding(size=...)`.\n- `langchain_core/documents.py`: module-level name `Document` -- the tests call it as `Document(metadata=..., page_content=...)`.\n- `neuro_san_studio/coded_tools/pdf_rag.py`: module-level name `PdfRag`.\n- `langchain_core/vectorstores.py`: module-level name `VectorStore`.\n- a method `addCleanup` -- the tests call it as `addCleanup(arg1, arg2, arg3)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(before, EMPTY_STORE_FILE_SIZE)` and `assertEqual(before, EMPTY_STORE_FILE_SIZE, arg3)`.\n- a method `assertFalse` -- the tests call it as `assertFalse(arg1)`.\n- a method `assertIn` -- the tests call it as `assertIn(path, arg2)`.\n- a method `assertIsInstance` -- the tests call it as `assertIsInstance(store, InMemoryVectorStore)`.\n- a method `assertIsNotNone` -- the tests call it as `assertIsNotNone(store)`.\n- a method `assertLogs` -- the tests call it as `assertLogs(LOGGER_NAME, level=...)`.\n- a method `assertNoLogs` -- the tests call it as `assertNoLogs(LOGGER_NAME, level=...)`.\n- a method `assertTrue` -- the tests call it as `assertTrue(arg1)`.\n",
+    "record": {
+      "repo": "cognizant-ai-lab/neuro-san-studio",
+      "pr_number": 1410,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Never persist or trust an empty vector store in RAG coded tools",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Do not persist an empty vector store or trust an empty saved cache. Rebuild from source documents when necessary, preserve an existing file when rebuilding also produces no data, and warn when configured persistence cannot produce a usable store."
+  },
+  "td-15de98a794ba8112": {
+    "instruction": "# Provide an extensible lazy-propagating segment tree with overridable update hooks\n\n## Required behaviour\n\nAdd a `LazySegmentTree` class in `[redacted-repo]/data_structures/LazySegmentTree.py`, constructed as `LazySegmentTree(values, default, func)` where `values` is the initial sequence, `func` is an associative combining function (e.g. `min` or `max`), and `default` is its identity element. It must support `add(start, stop, value)`, which adds `value` to every element in the half-open range `[start, stop)`, and `query(start, stop, default)`, which returns the combination of that range under `func` using the supplied identity, with all pending lazy updates correctly pushed down so results always match a direct recomputation over the underlying array. The class must also expose a generic `apply(start, stop, value)` that schedules an arbitrary lazy update over a range, plus the overridable hooks `_unset_lazy(idx)`, `_apply_to_data(update_idx, data_idx)` and `_apply_to_lazy(update_idx, lazy_idx)`, and it must store its leaf/internal aggregates in a `data` attribute and its pending updates in a `_lazy` attribute so subclasses can resize or reinitialize them. Subclassing `LazySegmentTree`, calling `super().__init__(...)` with arbitrary (e.g. tuple-valued) elements and overriding those three hooks must yield a working tree for custom update semantics, including point queries expressed as `query(i, i + 1, identity)`. Both the built-in add/query behaviour and subclass-defined behaviour must remain correct under long random sequences of interleaved updates and queries on trees of any size ≥ 1.\n\n## Required API\n\n### Files the tests import from\n\n- `pyrival/data_structures/LazySegmentTree.py`\n\n### Names\n\n- `pyrival/data_structures/LazySegmentTree.py`: module-level name `LazySegmentTree` -- the tests call it as `LazySegmentTree(values, arg2, arg3)`.\n",
+    "record": {
+      "repo": "cheran-senthil/PyRival",
+      "pr_number": 97,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Provide an extensible lazy-propagating segment tree with overridable update hooks",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Provide a lazy segment tree with range additions and queries plus overridable hooks for custom update semantics. Keep pending updates and aggregate values consistent across interleaved operations, including subclasses with tuple-valued elements."
+  },
+  "td-c3260b703b18c5a2": {
+    "instruction": "# Add first-class background worker support with a supervising host and standalone runner\n\n## Required behaviour\n\nIntroduce `BackgroundWorker` and `IntervalWorker` base classes plus an immutable `WorkerStatus` (fields `name`, `state`, `restarts`, `last_error`, with `as_dict()` producing JSON-ready values and attribute assignment raising `AttributeError`) in `nest/common/background_worker.py`, backed by `RestartPolicy` (`NONE`, `ON_FAILURE`, `ALWAYS`) in `nest/common/background_worker/RestartPolicy.py` and `WorkerState` (`RUNNING`, `BACKING_OFF`, `STOPPED`, plus a failed state) in `nest/common/background_worker/WorkerState.py`; a worker must work without subclasses calling `super().__init__()`, default to `name = \"\"`, `restart = RestartPolicy.ON_FAILURE`, `restart_backoff = 1.0`, `restart_backoff_max = 30.0`, expose a fresh `stopping` event via `_prepare_for_start()`, and offer `await sleep(delay)` that returns `True` when the delay elapses, `False` when stopping is set, and raises `ValueError` matching \"greater than or equal to zero\" for negative delays, while `IntervalWorker` calls `execute()` on a non-overlapping schedule honoring `interval` and `run_immediately` and rejects non-positive intervals with `ValueError` matching \"greater than zero\". Add `WorkerHost` in `nest/core/worker_host.py`, constructed as `WorkerHost(workers)` or `WorkerHost(workers, grace_timeout=...)`, which validates its inputs eagerly (`TypeError` matching \"BackgroundWorker\" for non-workers, `ValueError` for duplicate names matching \"Duplicate background worker name\", invalid `restart`/`restart_backoff`/`restart_backoff_max`, or negative `grace_timeout` matching \"grace_timeout\"), falls back to the class name when `name` is blank, and provides `start()`, `stop()`, `wait()`, `get_status()` (list of `WorkerStatus`) and `status()` (list of dicts). The host must run `on_start()`, `run()` and `on_stop()` per worker, record `last_error` as `\"ExceptionType: message\"`, restart according to the policy with exponential backoff, count restarts, make `stop()` idempotent, wait for an in-flight `on_start()` before invoking `on_stop()`, and bound both the cooperative shutdown and the `on_stop()` hook by the grace timeout, cancelling the task (raising `CancelledError` inside the worker) and ending in `STOPPED`. Extend `[redacted-repo]Container` in `nest/core/[redacted-repo]_container.py` with `get_instances_of(BackgroundWorker)` that returns each matching provider instance exactly once across imported `Module`s and raises `RuntimeError` matching \"build\" when called before `build()`. HTTP applications created with `[redacted-repo]Factory.create(AppModule)` must expose `get_worker_host()`, start workers during the server lifespan of `get_server()` and stop them before `OnModuleDestroy` hooks run, with `close()` being idempotent so concurrent callers await the same shutdown. Finally, provide `WorkerAppFactory` and `run_workers` in `nest/core/worker_factory.py`: `WorkerAppFactory.create(AppModule)`/`create(AppModule, grace_timeout=...)` returns an app exposing `container`, `run()`, `close()`, `closed`, `signal`, `request_shutdown(signal)` and `get_worker_host()` that runs `OnApplicationBootstrap`, workers, and `OnModuleDestroy` on a single event loop and still closes when `run()` is cancelled, while `run_workers(AppModule, signals=[])` drives it synchronously and raises `RuntimeError` matching \"running event loop\" when invoked from within a loop.\n\n## Required API\n\n### Files the tests import from\n\n- `nest/common/background_worker/RestartPolicy.py`\n- `nest/common/background_worker/WorkerState.py`\n- `nest/core/worker_factory.py`\n- `nest/common/background_worker.py`\n- `nest/core.py`\n- `nest/common.py`\n- `nest/core/pynest_container.py`\n- `fastapi/testclient.py`\n- `nest/core/worker_host.py`\n\n### Names\n\n- `nest/common/background_worker/RestartPolicy.py`: module-level attribute `ALWAYS`.\n- `nest/common/background_worker/WorkerState.py`: module-level attribute `BACKING_OFF`.\n- `nest/common/background_worker/RestartPolicy.py`: module-level attribute `NONE`.\n- `nest/common/background_worker/RestartPolicy.py`: module-level attribute `ON_FAILURE`.\n- `nest/common/background_worker/WorkerState.py`: module-level attribute `RUNNING`.\n- `nest/common/background_worker/WorkerState.py`: module-level attribute `STOPPED`.\n- a method `add_module` -- the tests call it as `add_module(AppModule)`.\n- a method `as_dict` -- the tests call it as `as_dict()`. It returns a dict whose keys include `last_error`, `name`, `restarts`, `state`.\n- a method `build` -- the tests call it as `build()`.\n- a method `close` -- the tests call it as `close()`.\n- a method `create` -- the tests call it as `create(AppModule)` and `create(AppModule, grace_timeout=...)`.\n- a method `get` -- the tests call it as `get(LongRunningWorker)`.\n- a method `get_instances_of` -- the tests call it as `get_instances_of(BackgroundWorker)`. It returns a list.\n- a method `get_server` -- the tests call it as `get_server()`.\n- a method `get_status` -- the tests call it as `get_status()`.\n- a method `get_worker_host` -- the tests call it as `get_worker_host()`.\n- a method `request_shutdown` -- the tests call it as `request_shutdown(arg1)`.\n- a method `start` -- the tests call it as `start()`.\n- a method `status` -- the tests call it as `status()`. It returns a list of dicts whose keys include `last_error`, `name`, `restarts`, `state`.\n- a method `stop` -- the tests call it as `stop()`.\n- a method `wait` -- the tests call it as `wait()`.\n- `nest/common/background_worker.py`: module-level name `BackgroundWorker`.\n- `nest/core.py`: module-level name `Injectable`.\n- `nest/common/background_worker.py`: module-level name `IntervalWorker`.\n- `nest/core.py`: module-level name `Module` -- the tests call it as `Module()` and `Module(imports=..., providers=...)` and `Module(providers=...)`.\n- `nest/common.py`: module-level name `OnApplicationBootstrap`.\n- `nest/common.py`: module-level name `OnModuleDestroy`.\n- `nest/core/pynest_container.py`: module-level name `PyNestContainer` -- the tests call it as `PyNestContainer()`.\n- `nest/core.py`: module-level name `PyNestFactory`.\n- `fastapi/testclient.py`: module-level name `TestClient` -- the tests call it as `TestClient(arg1)`.\n- `nest/core/worker_factory.py`: module-level name `WorkerAppFactory`.\n- `nest/core/worker_host.py`: module-level name `WorkerHost` -- the tests call it as `WorkerHost(arg1)` and `WorkerHost(arg1, grace_timeout=...)`.\n- `nest/common/background_worker.py`: module-level name `WorkerStatus` -- the tests call it as `WorkerStatus(last_error=..., name=..., restarts=..., state=...)`.\n\n### Errors\n\n- `AttributeError` is raised.\n- `CancelledError` is raised.\n- `RuntimeError` is raised with a message matching \"build\".\n- `RuntimeError` is raised with a message matching \"running event loop\".\n- `TypeError` is raised with a message matching \"BackgroundWorker\".\n- `ValueError` is raised with a message matching \"greater than or equal to zero\".\n- `ValueError` is raised with a message matching \"greater than zero\".\n- `ValueError` is raised with a message matching \"Duplicate background worker name\".\n- `ValueError` is raised.\n- `ValueError` is raised with a message matching \"grace_timeout\".\n",
+    "record": {
+      "repo": "PythonNest/PyNest",
+      "pr_number": 138,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add first-class background worker support with a supervising host and standalone runner",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add background workers, interval workers, and a supervising host with restart policies, bounded shutdown, and status reporting. Integrate workers with dependency injection and HTTP application lifecycles, and provide a standalone runner using one event loop."
+  },
+  "td-80c689759b94cc5e": {
+    "instruction": "# Add photo EXIF and social-media content analysis tools plus JSONL/frontmatter robustness\n\n## Required behaviour\n\nProvide two new modules. `tools/photo_analyzer.py` must expose a module-level `PIL_AVAILABLE` flag (True only when `PIL.ExifTags`, including `GPSTAGS`, imports successfully), plus `_dms_to_decimal(dms, ref)` (returns a decimal degree rounded to at most 6 places, negative for S/W, and `0.0` on malformed input), `_gps_distance_km(a, b)` (symmetric great-circle distance in km between `{\"lat\",\"lon\"}` dicts, `0.0` for identical points), `get_datetime(exif)` (parses `DateTimeOriginal`/`DateTime` in EXIF `YYYY:MM:DD HH:MM:SS` form, else `None`), `get_gps(exif)` (decodes `GPSInfo` only when both latitude and longitude with refs are present, else `None`), `get_make_model(exif)` (whitespace-stripped `\"Make Model\"`, either part alone, or `\"\"`), `scan_photos(directory)` (empty list for a missing directory), `detect_meetups(photos, time_gap_hours=..., location_radius_km=...)` (groups photos whose consecutive timestamps fall within the gap and, when GPS exists on both, within the radius; ignores entries without a datetime, drops single-photo clusters, returns date-sorted dicts with `date`, `start`, `end`, `duration_min`, `photo_count`), and `generate_report(directory, name, output_path=None)` (returns a Markdown string, warns about missing Pillow when `PIL_AVAILABLE` is false, reports \"未找到任何照片\" under a \"照片元数据分析报告\" heading when no photos are found, and writes the file when an output path is given).\n\n`tools/social_parser.py` must expose `detect_platform(filename)` (maps name hints such as 微博/WB, 小红书/xhs/rednote, 朋友圈/wechat moments, 抖音/dy to `weibo`, `xiaohongshu`, `moments`, `douyin`, defaulting to `未知平台`), `platform_display(key)` (Chinese display names for known keys, `未知来源` for `未知平台`, otherwise the key unchanged), `scan_signals(text)` (returns a dict of matched keyword categories such as 积极信号, 情绪低落, 感情相关 with the matched keywords, `{}` when nothing matches), `read_text_file(path, max_chars=...)` (UTF-8 with errors ignored, appends a `[... 内容过长` marker when truncated, returns a `[读取失败` message instead of raising), `parse_json_export(path)` (accepts a top-level list or a dict with a data list, normalises common text keys — text/content/description/body — and time keys into `{\"text\", ...}` entries, caps output at 50 items, returns `[]` for empty or invalid JSON), `scan_directory(path)` (recursive; returns `images`, `texts`, `others` lists of dicts with at least `name` and `rel`, classifies `.md`/`.txt`/`.json` as texts, excludes a generated `report.md`, and returns empty lists for a missing directory), and `generate_report(directory, name, output_path=None)` (Markdown string with a 社交媒体内容报告 heading, a ⚠️ note for an empty directory, 图片清单 and 文字内容 sections with per-file signal scanning, optionally written to disk).\n\nAdditionally, frontmatter parsing must keep identifier-like values as strings so a slug such as `007` survives parse and parse→render→parse round trips without numeric coercion. Appending to the JSONL event and interaction logs must tolerate a crash-truncated final line: the newly appended record must remain independently parseable and readable, and the stored `event_count` in the metadata file must equal the number of records that can actually be read back.\n\n## Required API\n\n### Files the tests import from\n\n- `PIL/ExifTags.py`\n- `tools/photo_analyzer.py`\n- `tools/social_parser.py`\n\n### Names\n\n- `PIL/ExifTags.py`: module-level name `GPSTAGS`.\n- `tools/photo_analyzer.py`: module-level name `PIL_AVAILABLE`.\n- `tools/photo_analyzer.py`: module-level name `_dms_to_decimal` -- the tests call it as `_dms_to_decimal(arg1, arg2)`.\n- `tools/photo_analyzer.py`: module-level name `_gps_distance_km` -- the tests call it as `_gps_distance_km(a, a)`.\n- `tools/photo_analyzer.py`: module-level name `detect_meetups` -- the tests call it as `detect_meetups(photos)` and `detect_meetups(photos, location_radius_km=...)` and `detect_meetups(photos, time_gap_hours=...)`. It returns a list.\n- `tools/social_parser.py`: module-level name `detect_platform` -- the tests call it as `detect_platform(arg1)`.\n- `tools/photo_analyzer.py`: module-level name `generate_report` -- the tests call it as `generate_report(arg1, arg2)` and `generate_report(arg1, arg2, arg3)`.\n- `tools/photo_analyzer.py`: module-level name `get_datetime` -- the tests call it as `get_datetime(exif)`.\n- `tools/photo_analyzer.py`: module-level name `get_gps` -- the tests call it as `get_gps(exif)`.\n- `tools/photo_analyzer.py`: module-level name `get_make_model` -- the tests call it as `get_make_model(exif)`.\n- `tools/social_parser.py`: module-level name `parse_json_export` -- the tests call it as `parse_json_export(arg1)`. It returns a list.\n- `tools/social_parser.py`: module-level name `platform_display` -- the tests call it as `platform_display(arg1)`.\n- `tools/social_parser.py`: module-level name `read_text_file` -- the tests call it as `read_text_file(arg1)` and `read_text_file(arg1, max_chars=...)`.\n- `tools/social_parser.py`: module-level name `scan_directory` -- the tests call it as `scan_directory(arg1)`.\n- `tools/photo_analyzer.py`: module-level name `scan_photos` -- the tests call it as `scan_photos(arg1)`.\n- `tools/social_parser.py`: module-level name `scan_signals` -- the tests call it as `scan_signals(arg1)`.\n",
+    "record": {
+      "repo": "BeamusWayne/simp-skill",
+      "pr_number": 4,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add photo EXIF and social-media content analysis tools plus JSONL/frontmatter robustness",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add photo metadata analysis and social-content parsing tools with graceful handling of missing dependencies or malformed inputs. Support reports and directory scanning, improve JSONL processing, and preserve identifier-like frontmatter values as strings."
+  },
+  "td-f005ad9a6cd62590": {
+    "instruction": "# Report the script name for Guile command lines in `get_command`\n\n## Required behaviour\n\nThe function `get_command(commandline)` in the module `px_commandline` must recognize command lines whose executable is `guile` and return the name of the script being run instead of the interpreter name. It must skip Guile's own options: flags that take no argument (e.g. `--help`, `--debug`, `--no-debug`, `--auto-compile`, `--fresh-auto-compile`, `--no-auto-compile`, `--listen`, `-q`, `--r6rs`, `--r7rs`), long options that carry their value after `=` (e.g. `--language=ecmascript`, `--use-srfi=2,13,14`), and short options that consume the following word as their value (`-L`, `-C`, `-x`, `-e`). The first remaining word is the script, and only its base name is returned (so `guile -L foo -C bar /usr/bin/hej` yields `hej`). The `-l` option is special: the file it names is treated as the command, taking precedence over any later script argument, so `guile -l bar /usr/bin/hej` yields `bar`. If no script or `-l` argument can be determined — including when `-l` is the last word with nothing following it, or when only flags are present — the result falls back to `guile`.\n",
+    "record": {
+      "repo": "walles/px",
+      "pr_number": 131,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Report the script name for Guile command lines in `get_command`",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Identify the script run by a Guile command line instead of reporting only the interpreter. Skip interpreter options, honor the special -l script argument, return the script basename, and fall back to guile when no script can be determined."
+  },
+  "td-580b22ad12ab39c6": {
+    "instruction": "# Configurable cap on consecutive empty lines in nginx config formatting\n\n## Required behaviour\n\nThe formatter module `nginxfmt` must let callers limit how many consecutive blank lines survive formatting. `nginxfmt.FormatterOptions` must expose a `max_empty_lines` attribute (default `2`), and `nginxfmt.Formatter(options).format_string(text)` must collapse any run of blank lines down to at most that many empty lines, leaving the rest of the formatting (indentation, statement splitting, chosen `line_endings`) unchanged; with `max_empty_lines = 0` all empty lines are removed, while the default leaves `\"foo bar {\\n\\n\\n    lorem ipsum;\\n}\\n\"` for an input with five consecutive newlines after the opening brace. The command-line entry point `nginxfmt._standalone_run` must accept a `--max-empty-lines=N` option that feeds this setting, and it must work together with `--line-endings=unix` and reading from standard input via the `-` argument. Verification helpers such as `check_formatting(input_text, expected_output)` and `assertMultiLineEqual(expected, actual)` compare whole formatted strings, while `assertIn(fragment, output)` and `assertNotIn(fragment, output)` check the captured standard output of the command-line run (e.g. `'\\n\\n'` present but `'\\n\\n\\n'` absent when the limit is 1).\n\n## Required API\n\n### Names\n\n- a method `assertIn` -- the tests call it as `assertIn(arg1, output)`.\n- a method `assertMultiLineEqual` -- the tests call it as `assertMultiLineEqual(arg1, arg2)`.\n- a method `assertNotIn` -- the tests call it as `assertNotIn(arg1, output)`.\n- a method `check_formatting` -- the tests call it as `check_formatting(arg1, arg2)`.\n",
+    "record": {
+      "repo": "slomkowski/nginx-config-formatter",
+      "pr_number": 32,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Configurable cap on consecutive empty lines in nginx config formatting",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Let nginx formatter users cap consecutive empty lines through both an option object and the CLI. Default to two blank lines, allow zero to remove them all, and preserve indentation, directive splitting, and selected line endings."
+  },
+  "td-fd876514b9fadbb9": {
+    "instruction": "# Preserve quoted strings when splitting config directives onto separate lines\n\n## Required behaviour\n\nThe configuration formatter must treat single- and double-quoted strings as atomic: any semicolon, brace, or whitespace appearing inside a quoted value must not be interpreted as a statement separator or block delimiter. A quote character of the opposite kind nested inside a quoted string (e.g. `\"` inside `'...'` and vice versa) must be kept verbatim and must not terminate the enclosing string. Consequently, a line containing several directives whose values contain quoted semicolons, such as `add_header Alt-Svc 'h3-25=\":443\"; ma=86400'; add_header Alt-Svc 'h3-29=\":443\"; ma=86400';`, must be split only at the unquoted semicolons, yielding one directive per output line with the original quoting and spacing inside the values untouched. This behaviour must be reachable through the existing formatting entry point exercised by `check_formatting(input_text, expected_output)`, which formats the first argument and requires the result to equal the second exactly, including trailing newlines. Existing handling of unquoted directives, comments, indentation, and multiple semicolons must remain unchanged.\n\n## Required API\n\n### Names\n\n- a method `check_formatting` -- the tests call it as `check_formatting(arg1, arg2)`.\n",
+    "record": {
+      "repo": "slomkowski/nginx-config-formatter",
+      "pr_number": 30,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Preserve quoted strings when splitting config directives onto separate lines",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Keep quoted configuration values intact while splitting directives onto separate lines. Only unquoted separators end a directive; preserve nested opposite-kind quotes, whitespace, and delimiters inside strings, with exact output formatting."
+  },
+  "td-ea3bbb6bc76ab668": {
+    "instruction": "# Preserve RSA SHA-2 host key algorithms when pinning an ssh-rsa host key\n\n## Required behaviour\n\n`SSHSession.connect()` in the module `[redacted-repo].transport.ssh` must narrow the Paramiko transport's preferred host key algorithms to the key type that is actually pinned for the target host, but when that pinned type is the legacy `ssh-rsa` type it must also keep the modern SHA-2 variants enabled. Concretely, after `connect()` runs for a host whose key is found in the known-hosts store (looked up via `paramiko.HostKeys`) or that is supplied through the `hostkey_b64` keyword argument, the `_preferred_keys` attribute of the created `paramiko.Transport` must equal the list `[\"rsa-sha2-512\", \"rsa-sha2-256\", \"ssh-rsa\"]`, as verified by `assertEqual(arg1, arg2)`. This applies both when the known-hosts lookup falls back to a secondary lookup (for example hashed/alternate host entries) that returns an `ssh-rsa` entry and when the base64-encoded key decodes to a `paramiko.RSAKey` whose name is `ssh-rsa`. Non-RSA pinned key types should continue to restrict the preferred algorithms to that single type. The behaviour must hold for sessions created with any device handler and when a pre-created socket is passed via `sock`.\n\n## Required API\n\n### Names\n\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n",
+    "record": {
+      "repo": "ncclient/ncclient",
+      "pr_number": 661,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Preserve RSA SHA-2 host key algorithms when pinning an ssh-rsa host key",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Keep RSA SHA-2 algorithms enabled when an SSH host key is pinned as ssh-rsa. Prefer rsa-sha2-512, then rsa-sha2-256, then ssh-rsa for both stored and explicitly supplied RSA keys, while leaving non-RSA restrictions unchanged."
+  },
+  "td-717ed5ee3d3830b1": {
+    "instruction": "# Support injecting the handler's response into `after` route handlers\n\n## Required behaviour\n\nThe routing decorator `after` (in the `routing` module, used alongside `on` on subclasses of the base `ChargePoint` class) must accept an optional keyword argument `inject_response`, defaulting to `False`. When a `Call` is dispatched, the `on` handler for that action runs first and produces a response payload object; afterwards the corresponding `after` handler is invoked with the original request payload keyword arguments as before. If the `after` handler was registered with `inject_response=True`, it must additionally receive the response produced by the `on` handler as a keyword argument named `call_response`, exposed as a mapping whose keys are the snake_case field names of the response (e.g. `current_time`, `interval`, `status`) and whose values are the exact objects returned by the handler, including enum members. When `inject_response` is omitted or `False`, the `after` handler must be called exactly as it is today, without the extra argument, so existing handlers keep working unchanged.\n",
+    "record": {
+      "repo": "mobilityhouse/ocpp",
+      "pr_number": 683,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Support injecting the handler's response into `after` route handlers",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Let after-route handlers opt in to receiving the response produced by the main handler. Pass it as call_response with snake_case keys and original values, while preserving existing calls when the option is disabled."
+  },
+  "td-0a4c3d30bcad3651": {
+    "instruction": "# Synchronize the application version to 1.0.26 across runtime and packaging\n\n## Required behaviour\n\nBump the release version to `1.0.26` and make every place that reports or declares it agree exactly. At runtime, `APP_VERSION` in `main.py`, the `\"version\"` entry of `DEFAULT_CONFIG` in the `config` module of the `backend` package, and the `version` attribute of the FastAPI applications returned by `create_admin_app()` (from `backend/main.py`) and `create_proxy_app()` (from `backend/proxy.py`) must all equal that string, so an equality check such as `assertEqual(value, EXPECTED_VERSION)` holds for each. The packaging and documentation assets must contain the matching literals: `frontend/index.html` must show `<strong>1.0.26</strong>`, `installer.nsi` must define `!define PRODUCT_VERSION \"1.0.26\"`, `scripts/New-Release.ps1` must default to `[string]$Version = \"1.0.26\"`, `start.bat` must print `CC Desktop Switch v1.0.26`, `build.bat` must print `CC Desktop Switch v1.0.26 - 构建工具`, and `docs/CHANGELOG.md` must include a `## v1.0.26` section. A release notes file `docs/release-notes-v1.0.26.md` must exist and begin with the heading `# CC Desktop Switch v1.0.26`. Each of these files must be readable as UTF-8 and satisfy a substring check of the form `assertIn(expected, text, relative_path)`.\n\n## Required API\n\n### Files the tests import from\n\n- `main.py`\n- `backend.py`\n- `backend/main.py`\n- `backend/proxy.py`\n\n### Names\n\n- `main.py`: module-level attribute `APP_VERSION`.\n- `backend.py`: module-level name `config`.\n- `backend/main.py`: module-level name `create_admin_app` -- the tests call it as `create_admin_app()`.\n- `backend/proxy.py`: module-level name `create_proxy_app` -- the tests call it as `create_proxy_app()`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, EXPECTED_VERSION)`.\n- a method `assertIn` -- the tests call it as `assertIn(expected, text, relative_path)`.\n",
+    "record": {
+      "repo": "lonr-6/cc-desktop-switch",
+      "pr_number": 57,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Synchronize the application version to 1.0.26 across runtime and packaging",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Synchronize version 1.0.26 across runtime values, application metadata, frontend labels, installer and build scripts, and release documentation. Every reported version must agree with the same release string."
+  },
+  "td-d04e1c7846f80ddb": {
+    "instruction": "# Add a JQL dialect for building Jira-style query strings\n\n## Required behaviour\n\nExpose two new public names in `[redacted-repo]/dialects.py`: `JiraTable` and `JiraQueryBuilder`. `JiraTable()` must be constructible with no arguments and its attribute access must yield fields that render as bare names with no table prefix or identifier quoting, while string values render inside double quotes. `JiraQueryBuilder()` must also be constructible with no arguments and, when only `.where(...)` criteria are supplied, `str(q)` must produce just the criterion text with no `SELECT`/`FROM` clause — e.g. `assertEqual('issuetype=\"My issue\"', str(q))` for an equality comparison (no spaces around `=`) and `assertEqual('project IN (\"PROJ1\",\"PROJ2\")', str(q))` for `isin` with a list. Containment negation via `notin` must render as `NOT IN (...)`, and fields must support `isempty()` and `notempty()` rendering as `<field> is EMPTY` and `<field> is not EMPTY`. Combining criteria with `|` and `&` must render as `<left> OR <right>` and `<left> AND <right>` respectively, without wrapping parentheses.\n\n## Required API\n\n### Files the tests import from\n\n- `pypika/dialects.py`\n\n### Names\n\n- `pypika/dialects.py`: module-level name `JiraQueryBuilder` -- the tests call it as `JiraQueryBuilder()`.\n- `pypika/dialects.py`: module-level name `JiraTable` -- the tests call it as `JiraTable()`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n",
+    "record": {
+      "repo": "kayak/pypika",
+      "pr_number": 721,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add a JQL dialect for building Jira-style query strings",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add a Jira Query Language dialect with bare field names, quoted string values, and criteria-only output. Support membership, empty-value checks, and AND/OR combinations without SQL SELECT or FROM clauses."
+  },
+  "td-8f1fbd70511437ce": {
+    "instruction": "# PEG grammar parser must group multi-term alternatives inside ordered choices correctly\n\n## Required behaviour\n\nThe grammar-definition parser in `[redacted-repo].grammar.Grammar` must correctly build rules whose right-hand side is an ordered choice (`/`) in which one or more alternatives are themselves sequences of two or more terms, such as `value = \"[\" \"]\" / \"5\"`. Currently such rules are mis-assembled, so terms bleed across the `/` boundaries and legitimate input fails to parse. After the fix, each alternative must be treated as its own sequence regardless of whether it appears first, last, or in the middle of the choice, and regardless of how many alternatives there are (e.g. `value = \"4\" / \"[\" \"]\" / \"(\" \")\" / \"{\" \"}\" / \"5\"`). Calling `Grammar(...).parse(text)` on any string matching any single alternative must return a parse tree, so that `assertTrue(grammar.parse('[]') is not None)` and the equivalent checks for every other alternative all hold.\n\n## Required API\n\n### Names\n\n- a method `assertTrue` -- the tests call it as `assertTrue(arg1)`.\n",
+    "record": {
+      "repo": "erikrose/parsimonious",
+      "pr_number": 250,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "PEG grammar parser must group multi-term alternatives inside ordered choices correctly",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Keep each multi-term alternative grouped as its own sequence when parsing PEG ordered choices. Terms must not cross choice boundaries, regardless of an alternative's position or the number of alternatives."
+  },
+  "td-600c95a477170d36": {
+    "instruction": "# Track per-artwork statistics: parse, configure, and persist them\n\n## Required behaviour\n\nAdd support for capturing artwork engagement statistics end to end. `PixivImage` (in `model/PixivImage.py`, constructible as `PixivImage()`) must, when `ParseInfo(body, False)` is called with the `body` object of an artwork info JSON payload, populate `jd_rtv` from the view count, `jd_rtc` from the like count, plus `bookmark_count`, `comment_count`, and `image_response_count` as integers. `PixivConfig` (in `common/PixivConfig.py`, constructible as `PixivConfig()`) must expose a new boolean option `autoAddStats` that defaults to `False` when no value is configured. `PixivDBManager` (in `PixivDBManager.py`) must accept `root_directory` and `target` keyword arguments — where `target` may be `\":memory:\"` — and its `createDatabase()` must create a statistics table. It must provide `insertStats(image_id, view_count, like_count, bookmark_count, comment_count, response_count)` and `selectStatsByImageId(image_id)`, where the latter returns the five counts as a tuple in that order, returns `None` when no row exists for the given id, and where re-inserting for an existing image id overwrites the stored snapshot rather than creating a duplicate or failing.\n\n## Required API\n\n### Files the tests import from\n\n- `common/PixivConfig.py`\n- `PixivDBManager.py`\n- `model/PixivImage.py`\n\n### Names\n\n- a method `ParseInfo` -- the tests call it as `ParseInfo(body, arg2)`.\n- `common/PixivConfig.py`: module-level name `PixivConfig` -- the tests call it as `PixivConfig()`.\n- `PixivDBManager.py`: module-level name `PixivDBManager` -- the tests call it as `PixivDBManager(root_directory=..., target=...)`.\n- `model/PixivImage.py`: module-level name `PixivImage` -- the tests call it as `PixivImage()`.\n- a method `assertEqual` -- the tests call it as `assertEqual(result, arg2)`.\n- a method `assertFalse` -- the tests call it as `assertFalse(arg1)`.\n- a method `assertIsNone` -- the tests call it as `assertIsNone(arg1)`.\n",
+    "record": {
+      "repo": "Nandaka/PixivUtil2",
+      "pr_number": 1536,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Track per-artwork statistics: parse, configure, and persist them",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Parse artwork view, like, bookmark, comment, and response counts and support storing them as one replaceable database snapshot per artwork. Add an autoAddStats configuration option that defaults to off."
+  },
+  "td-cb8efbcff9d9c6cb": {
+    "instruction": "# Robust colour parsing for SubStation styles: raise ValueError, warn and use default\n\n## Required behaviour\n\nThe colour helper `rgba_to_color` in the SubStation format module (`formats.substation`) must reject any input it cannot interpret — including an empty string or otherwise malformed text — by raising `ValueError`, rather than letting a low-level error such as `IndexError` escape. Style lines read by `SSAFile.from_string` must no longer abort parsing when one of their colour fields is empty or unparseable: the reader should catch the `ValueError`, emit a `RuntimeWarning` describing the bad field, and continue by assigning that style attribute its default value. For example, a script whose `Default` style has an empty primary colour field must load successfully and yield `subs.styles[\"Default\"].primarycolor == Color(255, 255, 255, 0)`. Valid colours must still round-trip unchanged through `rgba_to_color` and `color_to_ass_rgba`.\n\n## Required API\n\n### Errors\n\n- `ValueError` is raised.\n",
+    "record": {
+      "repo": "tkarabela/pysubs2",
+      "pr_number": 116,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Robust colour parsing for SubStation styles: raise ValueError, warn and use default",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Report malformed SubStation color values as ValueError and let the subtitle reader recover with a RuntimeWarning and the field's default color. Valid colors must continue to round-trip unchanged."
+  },
+  "td-c4110721dde09485": {
+    "instruction": "# OpenAPI schema must mark optional FileField as nullable in responses only\n\n## Required behaviour\n\nThe schema generator (`AutoSchema` in the `openapi` module) must account for the fact that a DRF `FileField`/`ImageField` that is not required (e.g. a model `FileField(blank=True)` mapped through a `ModelSerializer`, or an explicit `serializers.FileField(required=False)`) serializes empty values to `None`. For such fields, the generated response schema property must be `{'type': 'string', 'format': 'uri', 'nullable': True}`, while a required file field must remain `{'type': 'string', 'format': 'uri'}` without a `nullable` flag. The nullability inferred this way must apply only to the response direction: when `COMPONENT_SPLIT_REQUEST` is enabled, the request-side component (e.g. `XRequest`) must not contain `nullable` for the same field, since `allow_null` is `False` there, and the binary `format` handling for uploads must stay unchanged. This inference must not emit any warnings during schema generation.\n",
+    "record": {
+      "repo": "tfranzel/drf-spectacular",
+      "pr_number": 1514,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "OpenAPI schema must mark optional FileField as nullable in responses only",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Mark optional file and image fields as nullable in OpenAPI response schemas because empty values serialize to None. Preserve required fields and request-side upload schemas without introducing warnings."
+  },
+  "td-c4dee063008d4258": {
+    "instruction": "# Prefer YAML front matter when detecting a conversation ID in existing Markdown files\n\n## Required behaviour\n\nExpose a helper `_get_conversation_id_from_file(path)` in `[redacted-repo]/io/writers.py` that inspects an already-written Markdown export and returns the conversation identifier it belongs to, or `None` when no identifier can be determined. If the file begins with a YAML front matter block (delimited by `---` lines) that defines a `conversation_id` key, that value must be returned, with surrounding quotes and whitespace stripped. Only when the front matter is absent or lacks that key may the function fall back to scanning the document body for an HTML-comment marker of the form `<!-- conversation_id=... -->`. Markers that appear in the body — for example inside quoted or copied content — must never override a `conversation_id` declared in the front matter. The function should accept a `pathlib.Path` and behave safely (returning `None`) if the file is unreadable or contains no usable identifier.\n\n## Required API\n\n### Files the tests import from\n\n- `convoviz/io/writers.py`\n\n### Names\n\n- `convoviz/io/writers.py`: module-level name `_get_conversation_id_from_file` -- the tests call it as `_get_conversation_id_from_file(path)`.\n",
+    "record": {
+      "repo": "mohamed-chs/convoviz",
+      "pr_number": 68,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Prefer YAML front matter when detecting a conversation ID in existing Markdown files",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Read an exported conversation identifier from YAML frontmatter before considering a body comment. A copied marker in the body must not override the declared identifier; return None when the file is unreadable or no usable identifier exists."
+  },
+  "td-7e8c5773ec7bd71e": {
+    "instruction": "# Normalize and validate the `format` field in machine-mode requests\n\n## Required behaviour\n\nThe `_machine_request` helper in the `sourcehunt` module must accept an optional `format` key and return it as a normalized list of output-format names. A value may be given either as a single string containing comma-separated names (e.g. `\"json,sarif,markdown\"`) or as a list whose entries may themselves be comma-separated; in both cases the result must be a flat list of trimmed names with duplicates removed while preserving the order of first appearance. Only the supported formats `json`, `sarif`, and `markdown` are permitted; encountering any other name (such as `xml`) must raise a `ValueError` whose message identifies the offending name and matches `invalid.*xml`. If the supplied list contains an element that is not a string (for example an integer), a `ValueError` with a message matching `format entries must be strings` must be raised. Requests that omit `format` must continue to work as before.\n\n## Required API\n\n### Errors\n\n- `ValueError` is raised with a message matching \"invalid.*xml\".\n- `ValueError` is raised with a message matching \"format entries must be strings\".\n",
+    "record": {
+      "repo": "Lazarus-AI/clearwing",
+      "pr_number": 229,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Normalize and validate the `format` field in machine-mode requests",
+      "difficulty": "medium"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Normalize machine-request output formats from comma-separated strings or lists into an ordered, duplicate-free list. Accept only json, sarif, and markdown, and reject unknown names or non-string entries with clear ValueError messages."
+  },
+  "td-e6cd0c9806cf9201": {
+    "instruction": "# Configurable WhatsApp number lookup client with live/cache lookup modes\n\n## Required behaviour\n\nProvide a package importable as `[redacted-repo]_client` whose `__all__` contains exactly `Config`, `ConfigError`, `load_config`, `[redacted-repo]Client`, `CheckerError`, and `CacheResult`, with `Config`/`ConfigError`/`load_config` plus the constants `DEFAULT_RAPIDAPI_HOST` (`wp-data.p.rapidapi.com`), `DEFAULT_RAPIDAPI_CACHE_HOST` (`wp-data-db-only.p.rapidapi.com`), `DEFAULT_NATIVE_BASE_URL` (`[redacted-url]) and `DEFAULT_TIMEOUT_SECONDS` living in `[redacted-repo]_client/config.py`, and `[redacted-repo]Client`, `CheckerError`, `CacheResult` in `[redacted-repo]_client/client.py`. `load_config(env_mapping)` must return an immutable dataclass `Config` (attribute assignment raises `dataclasses.FrozenInstanceError`) exposing `provider`, `mode`, `rapidapi_key`, `native_api_key`, `rapidapi_host`, `rapidapi_cache_host`, `native_base_url` and `timeout_seconds`, reading `CHECK_PROVIDER` (`rapidapi` default, or `native`) and `CHECK_MODE` (`live` default, `cache_first`, `cache_only`) case-insensitively with surrounding whitespace stripped, treating blank host/base-URL variables as absent, parsing `CHECK_TIMEOUT_SECONDS` as a positive float, and raising `ConfigError` whose message names the offending variable for an unknown provider/mode, a missing `RAPIDAPI_KEY`/`NATIVE_API_KEY` for the selected provider, or a non-numeric/non-positive timeout. A module `[redacted-repo]_client/providers.py` must offer `build_request(cfg, kind, number)` returning a `(url, headers)` pair, where `kind` is `\"live\"` or `\"cache\"`: the RapidAPI provider targets `[redacted-url]>/number/<number>` and `[redacted-url]>/number_cache/<number>` and sends both `x-rapidapi-key` and `x-rapidapi-host`, the native provider appends the same paths to its base URL (trailing slashes normalized) and sends only `x-rapidapi-key`, and any other `kind` raises `ValueError`. `[redacted-repo]Client(config)` must expose `check(number)` and `fetch_cache(number)`, the latter returning a `CacheResult` carrying `status_code` and the parsed `data`, and must perform HTTP through `requests` so calls are interceptable by `requests_mock.Mocker()`, honoring the configured timeout. `check` semantics: in `live` mode only the live endpoint is contacted; in `cache_only` mode only the cache endpoint is contacted, a 404 returns the parsed body (or `{\"error\": <raw text>, \"status\": 404}` when the body is not JSON) without raising, and any other failing status raises; in `cache_first` mode a cache 200 is returned directly, while a cache 404 (JSON or not), any 5xx, or a transport failure falls back to the live endpoint, whereas other 4xx statuses propagate without any live call. Failures must raise `CheckerError` exposing the originating HTTP `status_code` — including a `status_code` of 200 with a message mentioning \"non-JSON\" when a successful response body cannot be parsed as JSON — and when a `cache_first` fallback also fails, the live error is the one surfaced.\n\n## Required API\nThese names are referenced by the project's regression tests and must exist exactly as written.\n\n### Files the tests import from\n\n- `whatsosint_client.py`\n- `requests_mock.py`\n- `whatsosint_client/client.py`\n- `whatsosint_client/config.py`\n- `whatsosint_client/providers.py`\n\n### Names\n\n- `whatsosint_client.py`: module-level attribute `__all__`.\n- a method `Mocker` -- the tests call it as `Mocker()`.\n- `whatsosint_client/client.py`: module-level name `CacheResult`.\n- `whatsosint_client/config.py`: module-level name `Config`.\n- `whatsosint_client/config.py`: module-level name `DEFAULT_NATIVE_BASE_URL`.\n- `whatsosint_client/config.py`: module-level name `DEFAULT_RAPIDAPI_CACHE_HOST`.\n- `whatsosint_client/config.py`: module-level name `DEFAULT_RAPIDAPI_HOST`.\n- `whatsosint_client/config.py`: module-level name `DEFAULT_TIMEOUT_SECONDS`.\n- `whatsosint_client/client.py`: module-level name `WhatsOSINTClient` -- the tests call it as `WhatsOSINTClient(arg1)`.\n- `whatsosint_client/providers.py`: module-level name `build_request` -- the tests call it as `build_request(cfg, arg2, arg3)`.\n- `whatsosint_client/config.py`: module-level name `load_config` -- the tests call it as `load_config(RAPIDAPI_ENV)`.\n\nThese methods are not defined anywhere in the tests, so they must be added to the project.\n\n### Errors\n\n- `FrozenInstanceError` is raised.\n- `ValueError` is raised.\n- `CheckerError` is raised.\n- `ConfigError` is raised.\n",
+    "record": {
+      "repo": "HackUnderway/WhatsOSINT",
+      "pr_number": 7,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Configurable WhatsApp number lookup client with live/cache lookup modes",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add a configurable number-lookup client with validated provider credentials, timeouts, and live, cache-only, or cache-first modes. Preserve the documented fallback and error behavior when cached responses are missing or requests fail."
+  },
+  "td-f456b3708841860e": {
+    "instruction": "# Support dbt FQN selector semantics for bare selectors with graph operators\n\n## Required behaviour\n\nThe node selector exposed as `select_nodes(project_dir, nodes, select, exclude)` in the `dbt.selector` module must resolve a bare selector token (one with no `tag:`, `path:`, `config.`, `package:` etc. prefix) the way dbt's FQN selector does, and must keep doing so when graph operators such as `+` are attached. A bare token matches a node if it equals the node's resource name (including the underscore-joined task name of a versioned model, e.g. `customers_v1` for a node whose FQN is `[\"proj\", \"customers\", \"v1\"]`), or if the token — split on `.` for dotted tokens like `marts.core` — is an ordered prefix of the node's FQN (which begins with the package name and excludes the configured model-paths root). Consequently a middle folder segment alone (`core` for `[\"proj\",\"marts\",\"core\",\"dim_users\"]`) matches nothing, `models` or any filesystem ancestor matches nothing, the package name matches every node of that package, and a dotted token never matches an underscore-named model. When a bare token names both a model and a folder, both sets of nodes are selected, and a trailing/leading graph operator must expand from every matched node, so `gen1+` yields the folder's nodes plus all their descendants and `dbt_utils+` behaves exactly like `package:dbt_utils+`; the same resolution must apply to `exclude`, removing matched nodes and their descendants. To support this, `DbtNode` must accept and store an optional `fqn` (falling back to a value derived from the package name and file path when absent) and expose the patched `name` used as the task name.\n",
+    "record": {
+      "repo": "astronomer/astronomer-cosmos",
+      "pr_number": 2978,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Support dbt FQN selector semantics for bare selectors with graph operators",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Apply dbt fully qualified name matching to bare node selectors, including selectors with graph operators. Match resource names and valid FQN prefixes, expand from every matched node, and apply the same rules to exclusions."
+  },
+  "td-c6cf5f3f7f44dce6": {
+    "instruction": "# Raise on RPC replies only when an rpc-error has severity \"error\"\n\n## Required behaviour\n\nWhen an `RPC` object from `[redacted-repo].operations.rpc` is constructed with `raise_mode=RaiseMode.ERRORS`, the decision to raise must be based on the severity of every `<rpc-error>` element present in the reply, not just the first one. If at least one `<rpc-error>` carries `<error-severity>error</error-severity>`, `_request()` must raise `RPCError` (from `[redacted-repo].operations.rpc`), regardless of whether warnings appear before or after it in the reply. If all `<rpc-error>` elements have severity `warning` — whether there is one or several — `_request()` must return the reply object normally instead of raising. This must hold for a plain `RPC` built over a mocked device handler and session (as produced by a helper such as `_mock_device_handler_and_session()`), so that a caller can assert success with `assertIsNotNone(result)` for warning-only replies and `assertRaises(RPCError, obj._request, node)` when any error-severity entry is present; `RaiseMode.ALL` and `RaiseMode.NONE` behaviour must remain unchanged.\n\n## Required API\n\n### Names\n\n- a method `_mock_device_handler_and_session` -- the tests call it as `_mock_device_handler_and_session()`.\n- a method `assertIsNotNone` -- the tests call it as `assertIsNotNone(result)`.\n- a method `assertRaises` -- the tests call it as `assertRaises(RPCError, arg2, node)`.\n",
+    "record": {
+      "repo": "ncclient/ncclient",
+      "pr_number": 667,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Raise on RPC replies only when an rpc-error has severity \"error\"",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Check every rpc-error severity when deciding whether an RPC reply should raise. In errors-only mode, raise if any entry has error severity and return warning-only replies normally, regardless of entry order."
+  },
+  "td-f0c67ff256ef055d": {
+    "instruction": "# Provide safe in-place input/output mutation methods on Transaction\n\n## Required behaviour\n\nThe `Transaction` class (in `bitcoinutils/transactions/Transaction.py`, re-exported from `bitcoinutils.transactions` alongside `TxInput`, `TxOutput` and `TxWitnessInput`) must support mutating an already-constructed transaction: `add_input`/`add_output` must append to the existing inputs/outputs without discarding or duplicating what is already there, and new methods `remove_input(index)`, `remove_output(index)`, `update_input(index, txin)` and `update_output(index, txout)` must delete or replace exactly the element at the given position while leaving all others intact. Any index that is negative or beyond the current list length — including every index on a transaction built as `Transaction([], [])` — must raise `IndexError` and leave the transaction unchanged. For segwit transactions (`Transaction(inputs, outputs, has_segwit=True, ...)`) the `witnesses` list must remain parallel to `inputs`: appending an input appends an empty `TxWitnessInput`, and removing an input removes the corresponding witness entry; for non-segwit transactions no witness entries are created. After mutation the transaction must still serialize and round-trip correctly through `to_hex()` and `Transaction.from_raw(...)`, preserving a non-default `locktime` and existing witness stacks, and `get_txid()` must reflect the new contents (e.g. differ after `update_input`). Mutating a transaction must not affect an independent snapshot obtained via `Transaction.copy(tx)`; all of this must hold after calling `setup(\"testnet\")` from `bitcoinutils.setup` and using scripts built with `Script` from `bitcoinutils.script`.\n\n## Required API\n\n### Files the tests import from\n\n- `bitcoinutils/transactions/Transaction.py`\n- `bitcoinutils/script.py`\n- `bitcoinutils/transactions.py`\n- `bitcoinutils/setup.py`\n\n### Names\n\n- a method `copy` -- the tests call it as `copy(tx)`.\n- a method `from_raw` -- the tests call it as `from_raw(arg1)`.\n- a method `remove_input` -- the tests call it as `remove_input(index)`.\n- a method `remove_output` -- the tests call it as `remove_output(index)`.\n- a method `update_input` -- the tests call it as `update_input(index, arg2)`.\n- a method `update_output` -- the tests call it as `update_output(index, arg2)`.\n- `bitcoinutils/script.py`: module-level name `Script` -- the tests call it as `Script(arg1)`.\n- `bitcoinutils/transactions.py`: module-level name `TxInput` -- the tests call it as `TxInput(arg1, arg2)`.\n- `bitcoinutils/transactions.py`: module-level name `TxOutput` -- the tests call it as `TxOutput(arg1, arg2)`.\n- `bitcoinutils/transactions.py`: module-level name `TxWitnessInput` -- the tests call it as `TxWitnessInput(arg1)`.\n- `bitcoinutils/setup.py`: module-level name `setup` -- the tests call it as `setup(arg1)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)` and `assertEqual(arg1, arg2, arg3)`.\n- a method `assertNotEqual` -- the tests call it as `assertNotEqual(arg1, old_txid)`.\n- a method `assertRaises` -- the tests call it as `assertRaises(IndexError)`.\n",
+    "record": {
+      "repo": "karask/python-bitcoin-utils",
+      "pr_number": 177,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Provide safe in-place input/output mutation methods on Transaction",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Support adding, removing, and replacing transaction inputs and outputs in place. Reject invalid indexes without mutation, keep SegWit witnesses aligned with inputs, preserve independent copies, and maintain serialization round-trips and transaction identifiers."
+  },
+  "td-5e2d24c2bda82748": {
+    "instruction": "# Move the animation pipeline and MCP server onto a Grok-backed core\n\n## Required behaviour\n\nProvide `grok/service.py` exposing a `GrokService(runs_dir=...)` with a `Job` result type and the methods `submit(request)`, `get_job(job_id)`, `inspect_run(run_id)`, and `read_scene_code(run_id)`; `submit` must accept a `RunRequest(prompt=..., offline=...)` from `grok/models.py`, run asynchronously, and report `running`/`completed`/`failed` status plus the resulting `run_id`, while echoing the submitted options (including `offline` and `image`). An offline run must write every artifact listed in `ARTIFACT_NAMES` (`grok/models.py`), name the scene file `grok_scene.py` rather than `mythos_scene.py`, emit a knowledge-map artifact (`02_knowledge_map.json`) that passes `validate_reverse_tree(tree)` from `grok/validation.py` with no errors, and generate a `ThreeDScene` subclass named `GrokOfflineStory` that uses `move_camera` instead of `self.camera.animate`; when an image path is supplied, the intent artifact (`01_intent.json`) must record it under `image_read.path`. Implement the MCP server in `grok/mcp_server.py` built on `from mcp.server import MCPServer` (no FastMCP or `mcp.server.fastmcp` usage, no reference to a `MythosService`), using `GrokService`, and export `DEFAULT_MCP_MODEL = \"grok-4.6\"` as the default `model` for the create-animation input model, whose `command` and `image` fields default to `None` and whose `command` value is accepted but otherwise ignored. The legacy `mythos/mcp_server.py` must become a thin shim that re-exports from `grok.mcp_server` (containing `from grok.mcp_server import ...`) so existing tool names, input models, and the module-level `_service` attribute keep working, with both module paths patchable to the same service instance. Scene-code lookup must prefer `grok_scene.py` and fall back to a legacy `mythos_scene.py` when only that exists, and unknown job or run identifiers must return messages beginning with `Error:`; the cinematic-charter tool must return text starting with `GROK CINEMATIC CONTRACT` that mentions `grok_scene.py`, `move_camera`, and `CAMERA IS THE NARRATOR`, and be annotated with the title \"Get the Grok Cinematic Contract\" plus read-only/idempotent/closed-world hints. Finally, `build_parser()` in `mythos/cli.py` must still offer a `serve-mcp` subcommand whose help text refers to Grok, and the project dependency must be pinned as `\"mcp>=2.0,<3\"`.\n\n## Required API\n\n### Files the tests import from\n\n- `grok/models.py`\n- `grok/mcp_server.py`\n- `grok/service.py`\n- `mythos/cli.py`\n- `grok/validation.py`\n\n### Names\n\n- a method `get_job` -- the tests call it as `get_job(arg1)`.\n- a method `inspect_run` -- the tests call it as `inspect_run(arg1)`.\n- a method `read_scene_code` -- the tests call it as `read_scene_code(arg1)`.\n- a method `submit` -- the tests call it as `submit(arg1)`.\n- `grok/models.py`: module-level name `ARTIFACT_NAMES`.\n- `grok/mcp_server.py`: module-level name `DEFAULT_MCP_MODEL`.\n- `grok/service.py`: module-level name `GrokService` -- the tests call it as `GrokService(runs_dir=...)`.\n- `grok/service.py`: module-level name `Job`.\n- `grok/models.py`: module-level name `RunRequest` -- the tests call it as `RunRequest(offline=..., prompt=...)`.\n- `mythos/cli.py`: module-level name `build_parser` -- the tests call it as `build_parser()`.\n- `grok/validation.py`: module-level name `validate_reverse_tree` -- the tests call it as `validate_reverse_tree(tree)`. It returns a list.\n",
+    "record": {
+      "repo": "HarleyCoops/Math-To-Manim",
+      "pr_number": 72,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Move the animation pipeline and MCP server onto a Grok-backed core",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Move animation jobs and the MCP server onto a Grok-backed service while preserving legacy entry points. Offline jobs must produce valid artifacts and camera-compatible scenes; job inspection, scene lookup, CLI help, and MCP model defaults must follow the new service."
+  },
+  "td-2c5b76e3d15a7260": {
+    "instruction": "# Add it:app:sigma:rule and it:app:sigma:matched forms (SYN-11294)\n\n## Summary\n\nAdds `it:app:sigma:rule` and `it:app:sigma:matched` to the 2.x data\nmodel, modeled on the existing `it:app:suricata:*` pair. This is the 2.x\nhalf of SYN-11294; the equivalent 3.x forms are being added on that line.\n\n- **`it:app:sigma:rule`** (guid) -- `:id`, `:text`, `:name`, `:desc`,\n`:url` (`inet:url`), `:version` (`it:semver`), `:author` (`ps:contact`),\n`:created`, `:updated`, `:enabled`.\n- **`it:app:sigma:matched`** (guid) -- `:rule`, `:target`\n(`it:log:event`), `:sensor` (`it:host`), `:time`, `:version`\n(`it:semver`).\n- A `detects` light edge from `it:app:sigma:rule` to any node, matching\nthe snort, suricata, and YARA rule forms.\n\nBoth forms are placed before the snort block, and the edge ahead of the\nsnort edge, to keep sigma before snort and suricata.\n`it:av:pattern:type` already carried `sigma` in its enum, so no change\nwas needed there.\n\n## Notes\n\n**The match form is `it:app:sigma:matched`, not `:match`.** The ticket\nwrites `:match`, and the YARA form on this line is `it:app:yara:match`,\nbut the 3.x form is `it:app:sigma:matched`. Naming it `matched` here\nmeans it keeps the same name across the 2.x -> 3.x migration and needs no\nrename entry in the 3.x `v2modelmap.yaml` -- the same reasoning applied\nwhen `it:app:suricata:matched` was added.\n\n**`:target`, not `:log`.** The ticket writes `:log`, but the property is\nnamed `:target` to match `it:app:suricata:matched:target` on this line\nand the interface-supplied `:target` on the 3.x form. Keeping the name\nthe same across both lines means no property rename entry is needed\neither.\n\n**`:version` is `it:semver`.** The ticket specifies `it:version` for the\n2.x rule form, but that type does not exist on this line; `it:semver` is\nwhat all four sibling rule forms use.\n\n**`:sensor` is kept even though the log event has a host.**\n`it:log:event` implements `it:host:activity` and so carries `:host`, but\nthe sensor which generates a match is frequently not the host the\nactivity occurred on -- a SIEM or log collector evaluates rules against\nlogs shipped from elsewhere. `:host` on the log event records where the\nactivity happened, `:sensor` what detected it. The 3.x form carries\n`:sensor` for the same reason.\n\n**`:version` on the match form** records the rule version in force at\nmatch time, as `it:app:snort:hit` and `it:app:suricata:matched` both do.\nThe ticket omits it.\n\n## Testing\n\n`test_it_app_sigma` mirrors `test_it_app_suricata`: builds a rule with\nevery property and asserts each, exercises the `detects` edge and the\n`ps:contact` pivot, then builds a matched node against that rule and\nchecks `:rule`, `:target`, `:sensor`, `:time`, and `:version`, plus the\npivots to `it:log:event` and `it:host`.\n\n```\ntest_model_infotech.py + test_datamodel.py + test_lib_types.py\n  + test_tools_utils_changelog.py ... 68 passed, 1 skipped\nruff check ....................... All checks passed!\n```\n\nThe single skip is pre-existing and gated on the `CIRCLECI` envar. A\n`model` changelog fragment is included. No checked-in docs required\nregeneration -- the form reference is built into `docs/[redacted-repo]/autodocs/`\nat docs-build time, and `changes/modelrefs/` plus the\n`model_updates/*.rst` pages are release-time artifacts. Confirmed with\n`[redacted-repo].tools.utils.changelog model -c` against the v2.251.0 modelref\nthat both forms, all their properties, and the edge register as\nadditions.\n",
+    "record": {
+      "repo": "vertexproject/synapse",
+      "pr_number": 5010,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add it:app:sigma:rule and it:app:sigma:matched forms (SYN-11294)",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add Sigma rule and matched-event forms to the 2.x information technology model, including their properties and a detects edge. Keep matched, target, and semantic-version naming consistent with the corresponding model conventions."
+  },
+  "td-5d73078aacbbb36c": {
+    "instruction": "# Add a lossless input-format specification model preserving block and token structure\n\n## Required behaviour\n\nProvide a new module `atcodertools/fmtprediction/models/input_specification.py` exposing an `InputSpecification` class with a `from_problem_content(content)` constructor (usable as `InputSpecification.from_problem_content(content)`), a module-level `normalized_token_lines(specification)` helper, and an `InputTokenKind` enumeration (re-exported from `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`) whose members include `INTEGER`, `WORD`, `ELLIPSIS`, and `DELIMITER`. `ProblemContent` in `atcodertools/client/models/problem_content.py` must accept the keyword arguments `input_format_text`, `samples`, and optionally `input_format_blocks` (a list of separately rendered format snippets, e.g. the main format plus one snippet per query variant) and `input_format_context_text`, keeping the existing behaviour when the optional ones are absent or empty. A built specification must carry one entry in `specification.blocks` per supplied format block — falling back to a single block derived from `input_format_text` when no blocks are given — and each block must expose `.lines` with exactly one entry per source line (including lines that only contain a vertical-ellipsis marker), and each line must expose `.tokens`. Every token must retain its original text in `raw_text` and a cleaned form in `normalized_text`, where LaTeX wrappers such as `\\text{...}` and `\\mathrm{...}` are unwrapped (so `\\mathrm{query}_i` normalizes to `query_i`) and horizontal/vertical ellipsis macros normalize to `...`; token `kind` must be `INTEGER` for numeric literals, `ELLIPSIS` for ellipsis markers, `DELIMITER` for punctuation separators such as `:`, and `WORD` for identifiers and other words. `normalized_token_lines(specification)` must return, for each block in order, the list of its lines represented as lists of normalized token strings, so that e.g. a query-variant block `\"2 l r\"` yields `[[\"2\", \"l\", \"r\"]]`.\n\n## Required API\n\n### Files the tests import from\n\n- `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`\n- `atcodertools/fmtprediction/models/input_specification.py`\n- `atcodertools/client/models/problem_content.py`\n\n### Names\n\n- `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`: module-level attribute `DELIMITER`.\n- `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`: module-level attribute `ELLIPSIS`.\n- `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`: module-level attribute `INTEGER`.\n- `atcodertools/fmtprediction/models/input_specification/InputTokenKind.py`: module-level attribute `WORD`.\n- a method `from_problem_content` -- the tests call it as `from_problem_content(content)`.\n- `atcodertools/fmtprediction/models/input_specification.py`: module-level name `InputSpecification`.\n- `atcodertools/client/models/problem_content.py`: module-level name `ProblemContent` -- the tests call it as `ProblemContent(input_format_blocks=..., input_format_context_text=..., input_format_text=..., samples=...)` and `ProblemContent(input_format_blocks=..., input_format_text=..., samples=...)` and `ProblemContent(input_format_text=..., samples=...)`.\n- `atcodertools/fmtprediction/models/input_specification.py`: module-level name `normalized_token_lines` -- the tests call it as `normalized_token_lines(specification)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(arg1, arg2)`.\n",
+    "record": {
+      "repo": "kyuridenamida/atcoder-tools",
+      "pr_number": 322,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add a lossless input-format specification model preserving block and token structure",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Represent input-format specifications without losing block, line, or token structure. Retain raw token text alongside normalized text, classify literals and delimiters, and preserve separate query variants and ellipsis-only lines."
+  },
+  "td-7e8acdc90e80d7de": {
+    "instruction": "# Enforce container restart policies during app stop and start reconciliation\n\n## Required behaviour\n\nAdd a new module `[redacted-repo]/app_restart.py` that uses `subprocess` to drive the Docker CLI and exposes `set_policy(project, policy)` / `set_policy(project, policy, service)` plus `restore_policies(project, config, services)`: `set_policy` must first inventory containers with `['ps', '--all', '--quiet', '--no-trunc', '--filter', 'label=com.docker.compose.project=<project>']` (appending a `label=com.docker.compose.service=<service>` filter when a service is named), then issue exactly one `['update', '--restart=<policy>', *ids]` call with the discovered IDs, doing nothing further when the inventory is empty, rejecting an empty project name with `ValueError`, and failing closed with `RuntimeError` if the inventory output contains anything that is not a full-length container ID so a broad, unscoped update can never be issued. Any non-zero Docker exit must raise `RuntimeError` carrying the captured stderr, and a `subprocess.TimeoutExpired` must surface as a `RuntimeError` whose message mentions `TimeoutExpired`. `restore_policies` must look up each requested service in the compose config's `services` map and call `set_policy(project, <that service's restart value>, <service>)` only for the services passed in, preserving retry suffixes such as `on-failure:3` and literal `no`.\n\nWire this into the data plane: reconciling an app whose desired state is stopped (an app record such as one produced by `_app(status='stopped')`) must call `app_restart.set_policy(project_name, 'no')` *before* the compose `stop` runs, and if that barrier raises, compose must not be invoked at all, the result must be `(False, 'app_stop_failed')`, and health must be published as `failed`; `_start_project_services` must, after a successful compose command, read the project's compose config and call `app_restart.restore_policies(project, config, services)` with only the services that were actually started (one-shot setup services excluded), returning a falsy success flag with the reason `'restart policy restore failed'` if restoration raises. Additionally, `ControlPlane.run` must own reconnection solely through the network loop — a single `connect(broker, port, keepalive=30)` followed by `loop_forever(retry_first_connection=True)`, never calling `reconnect` and never spawning its own `threading.Thread` or `subprocess.Popen`, while invoking `_start_connection_watchdog` and `_start_control_varlink` exactly once — and a `scripts/prune_overlay_cache.sh` helper taking an overlay dir and target dir must idempotently delete obsolete units, their drop-ins and dangling `*.target.wants` symlinks while leaving still-provided and package-owned files and their active symlinks untouched. These behaviours must hold under the standard assertions `assertEqual`, `assertTrue`, `assertFalse`, `assertIn`, `assertNotIn`, `assertRaises` (e.g. `assertRaises(KeyboardInterrupt)`) and `assertRaisesRegex(RuntimeError, ...)`.\n\n## Required API\n\n### Files the tests import from\n\n- `reefy/app_restart.py`\n\n### Names\n\n- `reefy/app_restart.py`: module-level attribute `subprocess`.\n- a method `restore_policies` -- the tests call it as `restore_policies(arg1, config, arg3)`.\n- a method `set_policy` -- the tests call it as `set_policy(arg1, arg2)` and `set_policy(arg1, arg2, arg3)`.\n- a method `_app` -- the tests call it as `_app(status=...)`.\n- a method `assertEqual` -- the tests call it as `assertEqual(ordering, arg2)`.\n- a method `assertFalse` -- the tests call it as `assertFalse(arg1)`.\n- a method `assertIn` -- the tests call it as `assertIn(arg1, arg2)`.\n- a method `assertNotIn` -- the tests call it as `assertNotIn(arg1, arg2)`.\n- a method `assertRaises` -- the tests call it as `assertRaises(KeyboardInterrupt)`.\n- a method `assertRaisesRegex` -- the tests call it as `assertRaisesRegex(RuntimeError, arg2)`.\n- a method `assertTrue` -- the tests call it as `assertTrue(arg1)`.\n",
+    "record": {
+      "repo": "reefyai/reefy",
+      "pr_number": 26,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Enforce container restart policies during app stop and start reconciliation",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Disable container restart policies before stopping an app and restore configured policies only for services actually started. Validate Docker inventory and failures, centralize broker reconnection in the network loop, and safely prune obsolete overlay units."
+  },
+  "td-bcbf96710cfb78fb": {
+    "instruction": "# Default compose startup command must use `--wait` instead of `-d`\n\n## Required behaviour\n\nThe plugin module that provides the `docker_setup` fixture and the `docker_services` context manager (yielding a `Services` instance) must default its startup command to `up --build --wait` rather than `up --build -d`, so that container start-up blocks until services report as running/healthy. Requesting the `docker_setup` fixture must yield the list `[\"up --build --wait\"]`, while `docker_cleanup` and `docker_compose_command` keep their existing defaults. When `docker_services` is entered, the composed shell invocation passed to the subprocess call must be `<compose command> -f \"<compose file>\" -p \"<project name>\" up --build --wait`, executed with `shell=True` and stderr redirected to stdout. Explicitly supplied `docker_setup` values, whether a single string or a list of strings, must still be honoured and each executed in order with the same file/project prefix.\n",
+    "record": {
+      "repo": "avast/pytest-docker",
+      "pr_number": 129,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Default compose startup command must use `--wait` instead of `-d`",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Make Docker Compose startup wait for running or healthy services by default with up --build --wait. Keep cleanup defaults and preserve explicitly supplied setup commands and their execution order."
+  },
+  "td-703875d00986ab8d": {
+    "instruction": "# Add a Windows scheduled task form to the information technology data model\n\n## Required behaviour\n\nThe infotech model ([redacted-repo]/models/infotech.py) must define a new GUID-based form `it:os:windows:task` that records a scheduled task, along with the secondary properties `:host` (`it:host`), `:account` (`it:account`), `:file` (`file:bytes`), `:path` (`file:path`), `:uri` (a task registration path typed as `file:path`), `:desc` (free text), `:period` (a time interval), and `:cmds` (an array of `it:cmd`). The `:cmds` array must preserve the caller's ordering and retain duplicate entries rather than collapsing or sorting them, so a node created with three command strings where two are identical keeps all three array members (and therefore edges to only two distinct `it:cmd` nodes), while still being liftable with array-value syntax such as `it:os:windows:task:cmds*[=\"cmd.exe /c woot.bat\"]`. Because `:uri` uses the file path type, a value like `\\Microsoft\\Windows\\Woot\\Telemetry` must normalize to `microsoft/windows/woot/telemetry`, and pivoting from the task to `file:path` must reach both the `:uri` and `:path` values. Lifting by `:desc` and by interval on `:period` (for example `it:os:windows:task:period@=2020`) must work, and pivots to `it:host`, `it:account`, and `file:bytes` must each resolve the referenced node. The behaviour must hold on a standard cortex created via `getTestCore()`, where node counts are checked with `len(count, nodes)`, values with `eq(actual, expected)`, and set references with `nn(value)`.\n\n## Required API\n\n### Names\n\n- a method `eq` -- the tests call it as `eq(arg1, arg2)`.\n- a method `getTestCore` -- the tests call it as `getTestCore()`.\n- a method `len` -- the tests call it as `len(arg1, nodes)`.\n- a method `nn` -- the tests call it as `nn(arg1)`.\n",
+    "record": {
+      "repo": "vertexproject/synapse",
+      "pr_number": 5012,
+      "source_license_spdx": ""
+    },
+    "toml": {
+      "description": "Add a Windows scheduled task form to the information technology data model",
+      "difficulty": "hard"
+    },
+    "split": "live",
+    "has_solution": false,
+    "summary": "Add a Windows scheduled-task form with host, account, file, path, description, schedule, and command properties. Preserve command order and duplicates, normalize registration paths, and support the specified lookups and pivots."
+  }
+}

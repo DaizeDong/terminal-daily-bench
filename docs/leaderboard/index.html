@@ -3,87 +3,130 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leaderboard — terminal-daily-bench</title>
-<meta name="description" content="Per-day solve rates for every agent, model and reasoning effort measured on the terminal-daily-bench rotating suite.">
-<link rel="stylesheet" href="../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<title>Leaderboard · Terminal-Daily</title>
+<meta name="description" content="Compare daily model results, skill profiles, and individual task outcomes on Terminal-Daily.">
+<link rel="stylesheet" href="../assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="../assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
 </head>
-<body>
-
+<body class="tdb-results">
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-  <div class="flex flex-1 flex-col items-center px-4 py-6 sm:pt-12">
-    <div class="flex w-full max-w-7xl flex-col" data-tdb-canary-host>
-
-      <nav aria-label="breadcrumb" data-slot="breadcrumb" class="mb-6 hidden font-mono sm:block">
-        <ol data-slot="breadcrumb-list" class="text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5">
-          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><a data-slot="breadcrumb-link" class="hover:text-foreground transition-colors" href="../">Home</a></li>
-          <li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true" class="[&amp;>svg]:size-3.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></li>
-          <li data-slot="breadcrumb-item" class="inline-flex items-center gap-1.5"><span data-slot="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" class="text-foreground font-normal">Leaderboard</span></li>
-        </ol>
-      </nav>
-
-      <div class="tdb-title-row">
-        <h1 class="font-mono text-4xl tracking-tighter" id="title">Leaderboard</h1>
-        <div id="daynav"></div>
-      </div>
-
-      <figure class="tdb-cmd">
-        <figcaption>Reproduce row 1</figcaption>
-        <code id="cmd">tdb run &lt;MODEL&gt; tasks/archive/&lt;task-id&gt; --harness &lt;agent&gt; [--agent-kwarg reasoning_effort=&lt;effort&gt;]</code>
-        <button type="button" id="copy" aria-label="Copy command">Copy</button>
-        <a id="cmd-tasks" href="../benchmarks/">Task ids &rarr;</a>
-      </figure>
-      <p class="tdb-block-foot"><span id="cmd-warn"></span>Other rows swap model, <code>--harness</code> and effort. Needs the unpublished patched Harbor fork.</p>
-
-      <section class="tdb-shell">
-        <div class="tdb-tablebar">
-          <p id="count" class="text-muted-foreground text-sm">Loading&hellip;</p>
-          <div class="tdb-viewswitch" id="views" role="group" aria-label="Table view"></div>
-          <label class="tdb-shell-search">
-            <span class="sr-only">Search leaderboard</span>
-            <input id="q" type="search" placeholder="Search leaderboard" autocomplete="off">
-          </label>
-        </div>
-
-        <!-- Why the capability chip beside it refuses. A disabled control says
-             "not now" and nothing else; on a day whose file carries no solve
-             matrix the reader needs the sentence, and a reader who arrived with
-             ?view=capability needs to be told that the table under this strip is
-             NOT the view they asked for. Empty and [hidden] on every day the
-             view is available, so it costs nothing when there is nothing to
-             say. -->
-        <div class="tdb-shell-rail text-muted-foreground text-sm px-4 py-3"
-             id="view-note" role="status" hidden></div>
-
-        <div class="tdb-shell-rail" id="facet-box" hidden>
-          <div id="facets"></div>
-        </div>
-
-        <div class="tdb-shell-body">
-          <div data-slot="table-container" class="relative w-full overflow-x-auto"
-               data-tdb-primary-data>
-            <table data-slot="table" class="w-full caption-bottom">
-              <thead data-slot="table-header" id="head"></thead>
-              <tbody data-slot="table-body" id="body"></tbody>
-            </table>
-          </div>
-        </div>
-        <div id="foot" class="tdb-foot"></div>
-      </section>
-
+  <div class="tdb-page-container tdb-result-frame" data-tdb-canary-host>
+    <div class="tdb-page-heading tdb-result-heading">
+      <div class="tdb-heading-title"><h1 id="title">Leaderboard</h1><p id="result-subtitle" hidden></p></div>
+      <div class="tdb-heading-meta"><p id="count">Loading&hellip;</p><div id="daynav"></div></div>
     </div>
+    <section class="tdb-shell">
+      <div class="tdb-tablebar">
+        <div class="tdb-viewswitch" id="views" role="group" aria-label="Table view"></div>
+        <div id="facet-box" hidden><div id="facets"></div></div>
+        <label class="tdb-shell-search"><span class="sr-only">Search leaderboard</span>
+          <input id="q" type="search" placeholder="Search models" autocomplete="off">
+        </label>
+      </div>
+      <p id="view-note" class="tdb-view-note" role="status" hidden></p>
+      <div id="cap-legend" class="tdb-cap-legend" hidden></div>
+      <div class="tdb-shell-body">
+        <div id="task-explorer" hidden></div>
+        <div id="insights" class="tdb-insights" hidden></div>
+        <div id="results-scroll" data-slot="table-container" data-tdb-primary-data>
+          <table data-slot="table" class="tdb-results-table" id="results-table">
+            <thead data-slot="table-header" id="head"></thead>
+            <tbody data-slot="table-body" id="body"></tbody>
+          </table>
+        </div>
+      </div>
+      <p id="measurement-note" hidden></p>
+      <details class="tdb-methods">
+        <summary>Methods</summary>
+        <div id="foot" class="tdb-foot"></div>
+      </details>
+    </section>
   </div>
 </main>
 
-<script src="../assets/site.js?v=b1d8696d89" data-root=".." data-page="leaderboard"></script>
-<script src="../assets/tdb-data.js?v=b1d8696d89"></script>
+<script src="../assets/site.js?v=7d2e76d680" data-root=".." data-page="leaderboard"></script>
+<script src="../assets/tdb-data.js?v=7d2e76d680"></script>
+<script src="../assets/tdb-explorer.js?v=7d2e76d680"></script>
+<script src="../assets/tdb-insights.js?v=7d2e76d680"></script>
+<script src="../assets/tdb-share.js?v=7d2e76d680"></script>
 <script>
 (function () {
   "use strict";
   var T = window.TDB;
   var esc = T.esc, TD = T.TD, TR = T.TR, TH = T.TH;
   var byId = function (id) { return document.getElementById(id); };
+  var taskExplorer = T.createTaskExplorer(byId("task-explorer"), function (counts) {
+    if (MODE === "tasks" && loadState === "idle") {
+      byId("count").innerHTML = (counts.available ? counts.models + " models · " + counts.tasks + " tasks" : "Task outcomes") + officialBadge(DAY);
+    }
+  });
+  var loadSequence = 0, loadState = "idle";
+  T.currentTaskExplorer = taskExplorer;
+  var insights = T.createInsights(byId("insights"), {
+    onChange: function (snapshot) {
+      if (isInsightMode()) {
+        var unit = MODE === "efficiency" ? "setting" : MODE === "profile" ? "capability" : "matching task";
+        byId("count").textContent = snapshot.rows.length ? snapshot.rows.length + " " + unit + (snapshot.rows.length === 1 ? "" : "s") : "";
+      }
+      resultsChanged();
+    },
+    onNavigate: navigateInsight,
+    onSetting: function (scaffold) { var parts = splitScaffold(scaffold); facet.agent = parts.agent; facet.effort = parts.effort || "default"; }
+  });
+  function isInsightMode() { return ["compare", "profile", "efficiency", "history"].indexOf(MODE) >= 0; }
+  function resultsChanged() { document.dispatchEvent(new CustomEvent("tdb:results")); }
+  function navigateInsight(view, model) {
+    if (model) insights.select(model);
+    MODE = view; byId("q").value = ""; applyFilter();
+  }
+  T.leaderboardContext = function () { return { day: DAY, site: siteData, cap: capData }; };
+  T.leaderboardSnapshot = function () {
+    if (loadState !== "idle" || !DAY || !DAY.date || (MODE === "capability" && !CAP)) return { date: "", view: MODE, title: "Results unavailable", columns: [], rows: [], notes: ["Results are loading."] };
+    if (isInsightMode()) return insights.snapshot();
+    if (MODE === "tasks" && taskExplorer.snapshot) return taskExplorer.snapshot();
+    var columns = COLS.map(function (c) { return { key: c.key, label: c.label, type: c.key === "rate" || c.axis || c.key === "overall" ? "percent" : ["rank", "n", "solved", "fa"].includes(c.key) ? "number" : "text" }; });
+    var extra = [{key: "effort", label: "Effort", type: "text"}, {key: "evaluated", label: "Evaluated tasks", type: "number"}, {key: "row_type", label: "Row type", type: "text"}];
+    columns.filter(function (c) { return c.type === "percent"; }).forEach(function (c) {
+      extra.push({key: c.key + "_sd", label: c.label + " run standard deviation", type: "percent"});
+      extra.push({key: c.key + "_runs", label: c.label + " runs", type: "number"});
+    });
+    if (MODE === "capability") {
+      extra.unshift({key: "agent", label: "Agent", type: "text"});
+      COLS.filter(function (c) { return c.axis; }).forEach(function (c) {
+        extra.push({key: c.key + ":n", label: c.label + " tasks", type: "number"});
+        extra.push({key: c.key + ":labels", label: c.label + " labels", type: "text"});
+      });
+    }
+    var setting = splitScaffold(MODE === "capability" ? CAP.summary.scaffold || "" : "");
+    var exportRows = sortRows(VIEW).flatMap(function (r) {
+      return MODE !== "capability" && expandedModels.has(r.model) ? [r].concat((r.variants || []).map(function (v) {
+        return Object.assign({}, v, {rank: null, exportVariant: true});
+      })) : [r];
+    });
+    return { date: DAY.date, view: MODE, title: MODE === "capability" ? "Capability results" : "Overall results", columns: columns.concat(extra),
+      imageColumns: MODE === "capability" ? undefined : ["rank", "model", "agent", "effort", "rate", "n"],
+      rows: exportRows.map(function (r) {
+        var out = {}; COLS.forEach(function (c) { out[c.key] = c.value ? c.value(r) : r[c.key]; });
+        COLS.filter(function (c) { return c.key === "rate" || c.key === "overall" || c.axis; }).forEach(function (c) {
+          var tally = MODE === "capability" ? (c.axis ? r.axis[c.axis.code] : r.overall) : r;
+          var estimate = pointEstimate(tally);
+          out[c.key] = estimate ? estimate.p : null;
+          out[c.key + "_sd"] = estimate ? estimate.sd : null;
+          out[c.key + "_runs"] = estimate ? estimate.runs : null;
+        });
+        out.agent = MODE === "capability" ? setting.agent : r.agent;
+        out.effort = MODE === "capability" ? (setting.effort || "default") : (r.effort || "default");
+        out.evaluated = MODE === "capability" ? r.overall.n : r.n;
+        out.row_type = r.exportVariant ? "Effort detail" : "Model summary";
+        COLS.filter(function (c) { return c.axis; }).forEach(function (c) {
+          out[c.key + ":n"] = r.axis[c.axis.code].n;
+          out[c.key + ":labels"] = c.axis.nDeclared ? "Preliminary" : "Verified";
+        });
+        return out;
+      }),
+      notes: [byId("measurement-note").textContent, byId("result-subtitle").textContent].filter(Boolean) };
+  };
 
   /* Two published files besides the day itself, and BOTH of them are
      day-independent by construction.
@@ -171,7 +214,7 @@
     'coverage, <a href="../guide/quality-methods/#outcomes">not a failure</a>.';
 
   var LINK_QUALITY =
-    '<a href="../quality/#discrimination">Selection quality</a>';
+    '<a href="../quality/#discrimination">Benchmark quality</a>';
 
   /* One row per (model, scaffold). A scaffold id is "<agent>" or
      "<agent>@<effort>" -- claude-code@high, codex@low, terminus-2 -- so the
@@ -197,21 +240,13 @@
         if (!cell || typeof cell !== "object" || typeof cell.n !== "number") return;
         if (!cell.n) return;                       /* never measured: not a row */
         var s = splitScaffold(k);
+        var repeat = T.resultStats(day, entry.model, k);
+        if (repeat && repeat.n !== cell.n) repeat = null;
         out.push({
           model: entry.model, agent: s.agent, effort: s.effort, scaffold: k,
           n: cell.n, solved: cell.solved,
-          /* solved/n, at full precision, and NEVER the day file's own `rate`.
-             That field is rounded to three decimals before it is published, and
-             show() ranks with a tie-skipping loop that treats equal rates as one
-             rank -- so two rows that are distinct at full precision (17/50 and
-             0.34 arrived at from a different denominator, or 173/500 against
-             346/1000) were being handed the same rank by the rounding alone, and
-             the rank that followed them skipped as though a real tie had
-             happened. It also disagreed with this page's own Accuracy column,
-             which never reads `rate`: accuracyCell goes through pointEstimate ->
-             T.wilson(r.solved, r.n). One page cannot rank on one quantity and
-             print another beside it. The home page ranks on solved/n with the
-             same loop, so this is also what makes the two orders agree. */
+          /* Rank and display use the same unrounded estimate. */
+          repeat: repeat,
           rate: cell.solved / cell.n,
           fa: cell.fa, fa_n: cell.fa_n, fa_evidence: cell.fa_evidence
         });
@@ -262,47 +297,14 @@
   function pointEstimate(r) {
     if (!r || typeof r.n !== "number" || !isFinite(r.n) || !r.n) { return null; }
     if (typeof r.solved !== "number" || !isFinite(r.solved)) { return null; }
-    var w = T.wilson(r.solved, r.n);
+    var w = T.scoreEstimate(r.solved, r.n, r.repeat);
     if (!w || typeof w.p !== "number" || !isFinite(w.p)) { return null; }
     return w;
   }
 
-  /* The point estimate carried with its uncertainty: the number is the claim,
-     the interval is how much to trust it. At n=50 the half-width is around 13
-     points, and a reader who cannot see that will read a two-point gap as a
-     ranking.
-
-     The number sits BESIDE the track, never over it. Text over a partly filled
-     bar has two grounds under it, and the half that lands on the fill cannot be
-     brought to 7:1 without dimming the fill until it stops reading as a bar.
-
-     ONE LINE, NOT THREE. Bar, rate and interval were stacked, which made this
-     the only cell in the table whose text did not sit on the row's own
-     baseline -- measured 12px above every other cell in the same row, so a
-     reader tracking a row across the table stepped up and back down at the
-     accuracy column, and every row stood 80px tall to hold it. They share one
-     line now. The container is .tdb-acc-row alone and NOT .tdb-acc: .tdb-acc
-     declares flex-direction column, and combining the two would have left the
-     later rule silently winning on direction while the earlier one won on
-     nothing. The mono tabular face the cell needs comes from .tabular-nums on
-     the number and from .tdb-acc-ci on the interval, both of which are already
-     in the stylesheet's mono opt-in list. */
+  /* Keep mean and observed run variation beside the same full-width bar. */
   function accuracyCell(r) {
-    var w = pointEstimate(r);
-    if (w === null) {
-      return '<span class="text-muted-foreground">&mdash;</span>';
-    }
-    var half = ((w.hi - w.lo) / 2) * 100;
-    /* Built before the markup expression, not inside it: the repository's
-       escaping scan reads every concatenation that produces a '<' and reports
-       any property access it cannot see run through a safe formatter. `w.p` is
-       a validated float, but a scanner that took the author's word for that
-       would protect nothing. */
-    var bar = barCell(w.p);
-    return '<p class="tdb-acc-row" title="' + esc(r.solved) + "/" + esc(r.n) +
-      " — 95% CI [" + T.pct(w.lo) + ", " + T.pct(w.hi) + ']">' + bar +
-      '<strong class="font-medium tabular-nums">' + T.pct(w.p) + "</strong>" +
-      '<span class="tdb-acc-ci">&plusmn; ' + half.toFixed(1) + "%</span></p>";
+    return T.scoreCell(r.solved, r.n, r.repeat);
   }
 
   /* Rank is sortable. It was the one inert header, and it is the column a
@@ -323,20 +325,11 @@
      where the truth is "we did not measure". The foot says so in a sentence
      instead. */
   var COLS_BASE = [
-    { key: "rank",   label: "Rank",   right: true, dir: "asc",
-      value: function (r) { return r.rank; } },
-    { key: "agent",  label: "Agent",  dir: "asc",
-      value: function (r) { return r.agent; } },
-    { key: "model",  label: "Model",  dir: "asc",
-      value: function (r) { return r.model; } },
-    { key: "effort", label: "Effort", dir: "asc",
-      value: function (r) { return r.effort; } },
-    { key: "rate",   label: "Accuracy", right: true, dir: "desc",
-      value: function (r) { return r.rate; } },
-    { key: "solved", label: "Solved",   right: true, dir: "desc",
-      value: function (r) { return r.solved; } },
-    { key: "n",      label: "Tasks",    right: true, dir: "desc",
-      value: function (r) { return r.n; } }
+    { key: "rank", label: "Rank", right: true, dir: "asc", value: function (r) { return r.rank; } },
+    { key: "model", label: "Model", dir: "asc", value: function (r) { return r.model; } },
+    { key: "agent", label: "Agent", dir: "asc", value: function (r) { return r.agent; } },
+    { key: "rate", label: "Success rate", dir: "desc", value: function (r) { return r.rate; } },
+    { key: "n", label: "Tasks", right: true, dir: "desc", value: function (r) { return r.n; } }
   ];
   var COL_FA = { key: "fa", label: "False accepts", right: true, dir: "desc",
       value: function (r) { return (typeof r.fa === "number") ? r.fa : null; } };
@@ -352,6 +345,8 @@
   }
 
   var ALL = [], VIEW = [], DAYS = [], DAY = {};
+  var expandedModels = new Set();
+  var capAxis = "all", capColor = "rate", capColors = null;
 
   /* Which of the two views of this table is on screen. "overall" is every
      measured (model, scaffold) row of the day; "capability" is the solve
@@ -362,7 +357,10 @@
   var MODE = MODE_DEFAULT;
   var VIEWS = [
     { key: "overall", label: "Overall" },
-    { key: "capability", label: "By capability" }
+    { key: "capability", label: "Capabilities" },
+    { key: "tasks", label: "Task outcomes" },
+    { key: "compare", label: "Compare" },
+    { key: "efficiency", label: "Efficiency" }
   ];
 
   function capMode() { return MODE === "capability" && !!CAP; }
@@ -396,26 +394,27 @@
      now lives on the cell, which is the same element the header is aligned
      from, so a column cannot be flush right in the body and flush left in the
      head. */
-  function cell(cls, html) {
-    return '<td data-slot="table-cell" class="' + TD + cls + '">' + html + "</td>";
+  function cell(cls, html, label) {
+    return '<td data-slot="table-cell" class="' + TD + cls + '"' +
+      (label == null ? "" : ' data-label="' + esc(label) + '"') + '>' + html + "</td>";
   }
 
-  function render(r) {
-    /* Rank is assigned once, over the whole day by accuracy, and then travels
-       with the row. Re-ranking on every sort would make "rank" mean "position
-       in whatever order you last clicked", which is not a rank. */
-    var out = '<tr data-slot="table-row" class="' + TR + '">' +
-      cell(" text-right tabular-nums text-muted-foreground", esc(r.rank)) +
-      cell("", esc(r.agent)) +
-      cell(" font-medium", esc(r.model)) +
-      cell(" text-muted-foreground", esc(r.effort || "default")) +
-      cell(" text-right", accuracyCell(r)) +
-      cell(" text-right tabular-nums", esc(r.solved)) +
-      cell(" text-right tabular-nums text-muted-foreground", esc(r.n));
-    if (COLS.length > COLS_BASE.length) {
-      out += cell(" text-right tabular-nums", faCell(r));
+  function render(r, child) {
+    var modelHtml = child ? '<span class="tdb-effort-label">' + esc(r.effort || "default") + '</span>'
+      : T.modelToggle(r, expandedModels.has(r.model));
+    var attrs = child ? ' class="tdb-effort-row"'
+      : ' class="' + TR + '" data-model-group="' + esc(r.model) + '"';
+    var out = '<tr data-slot="table-row"' + attrs + '>' +
+      cell(" tdb-num text-muted-foreground", child ? "" : esc(r.rank)) +
+      cell("", modelHtml) + cell(" text-muted-foreground", esc(T.agentLabel(r.agent))) +
+      cell(" tdb-score-cell", accuracyCell(r)) +
+      cell(" tdb-num text-muted-foreground", esc(r.n));
+    if (COLS.length > COLS_BASE.length) { out += cell(" tdb-num", faCell(r)); }
+    out += "</tr>";
+    if (!child && expandedModels.has(r.model)) {
+      out += r.variants.map(function (v) { return render(v, true); }).join("");
     }
-    return out + "</tr>";
+    return out;
   }
 
   /* ------------------------------------------------------------------ *
@@ -497,21 +496,25 @@
      the same interval down a column is noise, and one at the top is the
      reading the whole column has to be taken under. */
   function headCell(col) {
-    var key = col.key, label = col.label;
+    var key = col.key, label = capMode() ? (col.shortLabel || col.label) : col.label;
     var stat = !!col.static;
     var on = !stat && (key === sortKey);
     var icon = !on ? I_SORT_NONE : (sortDir === "asc" ? I_SORT_ASC : I_SORT_DESC);
     var aria = on ? (sortDir === "asc" ? "ascending" : "descending") : "none";
     var side = col.right ? "right" : "left";
+    var colClass = { rank: "tdb-col-rank", model: "tdb-col-model", agent: "tdb-col-agent", n: "tdb-col-count", solved: "tdb-col-count", overall: "tdb-col-overall" }[key] || (col.axis ? "tdb-col-capability" : "");
+    var description = col.axis ? capAxisDescription(col.axis) : col.label;
     var control = stat
       ? '<span class="tdb-sort" data-static="true">' + esc(label) + "</span>"
       : '<button type="button" class="tdb-sort" data-key="' + esc(key) + '"' +
         (on ? ' data-active="true"' : "") +
-        ' aria-label="Sort by ' + esc(label) + '">' + esc(label) + icon + "</button>";
+        ' aria-label="Sort by ' + esc(col.label) + '">' + esc(label) + icon + "</button>";
     var note = col.noteHtml
       ? '<span class="tdb-col-note" data-align="' + side + '">' + col.noteHtml + "</span>"
       : "";
-    return '<th data-slot="table-head" class="' + TH + '" aria-sort="' + aria + '">' +
+    var axisAttr = col.axis ? ' data-capability="' + esc(col.axis.code) + '"' : '';
+    return '<th data-slot="table-head" scope="col" class="' + TH + ' ' + colClass + '" aria-sort="' + aria +
+      '" title="' + esc(description) + '"' + axisAttr + '>' +
       '<span class="tdb-sort-wrap" data-align="' + side + '">' + control + "</span>" +
       note + "</th>";
   }
@@ -552,7 +555,7 @@
      under the cursor on every click. Nothing here names a `bg-*` colour, so
      nothing here can pick that rule up again. The focus ring is the site's
      one global `button:focus-visible` outline; it needed no classes. */
-  var CHIP_BASE = "inline-flex shrink-0 items-center h-8 px-3 border text-sm " +
+  var CHIP_BASE = "tdb-chip inline-flex shrink-0 items-center h-8 px-3 border text-sm " +
     "whitespace-nowrap transition-colors disabled:pointer-events-none " +
     "disabled:opacity-50 ";
   var CHIP_IDLE = "text-muted-foreground hover:text-foreground";
@@ -588,20 +591,21 @@
      name plus two fields that are the same on every row. */
   function matchesQuery(r, q) {
     if (!q) { return true; }
+    var model = r.model + " " + T.modelLabel(r.model);
     var hay = capMode()
-      ? r.model
-      : (r.model + " " + r.agent + " " + (r.effort || "default"));
+      ? model
+      : (model + " " + r.agent + " " + T.agentLabel(r.agent) + " " + (r.effort || "default"));
     return hay.toLowerCase().indexOf(q) >= 0;
   }
 
   function looCount(group, value, q) {
-    var n = 0;
+    var models = new Set();
     ALL.forEach(function (r) {
       if (!matchesQuery(r, q)) { return; }
       if (!matchesOther(r, group)) { return; }
-      if (facetValue(r, group) === value) { n += 1; }
+      if (facetValue(r, group) === value) { models.add(r.model); }
     });
-    return n;
+    return models.size;
   }
 
   function collectFacets(rows) {
@@ -626,31 +630,38 @@
   function paintFacets(q) {
     var box = byId("facet-box"), rail = byId("facets");
     if (!box || !rail) { return; }
-    /* Agent and effort are the only two facets this page has, and in the
-       capability view both are constant: one scaffold, one configuration.
-       Pills reading "claude-code 12 / default 12" would be two controls that
-       cannot change anything, so the rail is not painted rather than painted
-       inert. */
-    if (capMode()) { rail.innerHTML = ""; box.hidden = true; return; }
-    var html = "", painted = 0;
+    if (MODE === "tasks" || (isInsightMode() && MODE !== "efficiency")) { rail.innerHTML = ""; box.hidden = true; return; }
+    if (capMode()) {
+      var optionsHtml = CAP.axes.map(function (a) {
+        var selected = capAxis === a.code ? ' selected' : '';
+        return '<option value="' + esc(a.code) + '"' + selected + '>' +
+          esc(a.name + " (" + a.n + ")") + '</option>';
+      }).join("");
+      var capSelectHtml = '<label class="tdb-filter-label"><span class="sr-only">Capability</span>' +
+        '<select id="cap-axis"><option value="all"' +
+        (capAxis === "all" ? ' selected' : '') + '>All capabilities</option>' + optionsHtml + '</select></label>';
+      var capColorHtml = '<label class="tdb-filter-label"><span class="sr-only">Cell colors</span>' +
+        '<select id="cap-color"><option value="rate"' + (capColor === "rate" ? ' selected' : '') +
+        '>Success rate</option><option value="peers"' + (capColor === "peers" ? ' selected' : '') +
+        '>Relative to peers</option></select></label>';
+      rail.innerHTML = capSelectHtml + capColorHtml;
+      box.hidden = false;
+      return;
+    }
+    var html = "";
     GROUPS.forEach(function (g) {
       var values = facetValues[g] || [];
-      if (!values.length) { return; }
-      var label = GROUP_LABEL[g] || g;
-      var row = '<span class="tdb-facet-label">' + esc(label) + "</span>";
-      values.forEach(function (v) {
-        row += chip(g, v, facet[g] === v, looCount(g, v, q));
-      });
-      var top = painted ? " border-t" : "";
-      html += '<div class="flex flex-wrap items-center gap-1 px-4 py-3' + top +
-        '">' + row + "</div>";
-      painted += 1;
+      if (values.length < 2) { return; }
+      var optionsHtml = values.map(function (v) {
+        var selected = facet[g] === v ? ' selected' : '';
+        var disabled = !looCount(g, v, q) && !selected ? ' disabled' : '';
+        return '<option value="' + esc(v) + '"' + selected + disabled + '>' + esc(v) + '</option>';
+      }).join("");
+      html += '<label class="tdb-filter-label"><span class="sr-only">' + esc(GROUP_LABEL[g]) + '</span>' +
+        '<select data-group="' + esc(g) + '"><option value="">' +
+        esc(g === "effort" ? (MODE === "efficiency" ? "All efforts" : "Highest effort") : "All agents") + '</option>' + optionsHtml + '</select></label>';
     });
-    if (html && (facet.agent || facet.effort || q)) {
-      html += '<div class="flex flex-wrap items-center gap-1 border-t px-4 py-3">' +
-        '<button type="button" id="facet-reset" class="' + chipClass(false) +
-        '">reset</button></div>';
-    }
+    if (facet.agent || facet.effort || q) { html += '<button type="button" id="facet-reset">Reset</button>'; }
     rail.innerHTML = html;
     box.hidden = !html;
   }
@@ -703,47 +714,11 @@
    * ------------------------------------------------------------------ */
   function capNoteHtml(day, refused) {
     if (CAP) { return ""; }
-    var matrix = day && day.matrix;
-    var ids = (matrix && matrix.tasks) || [];
-    var rows = (matrix && matrix.rows) || [];
-    var nLb = ((day && day.leaderboard) || []).length;
-    /* Built as a *Html local rather than inlined so the branch a reader is
-       being shown can be read in one place, the way the foot's copy is. */
-    var whyHtml;
-    if (!capData) {
-      whyHtml = "the capability axis catalogue could not be read, so there is " +
-        "no axis to join this day's tasks onto";
-    } else if (!ids.length || !rows.length) {
-      /* 2026-09-06 publishes a single leaderboard row, so the plural is
-         conditional rather than assumed: "1 rows" in the sentence that is
-         explaining a data limitation reads as a second, smaller one. */
-      whyHtml = "the published file for " + esc((day && day.date) || "this day") +
-        " carries no per-cell solve matrix. The board above it is built from " +
-        "that day's " + esc(nLb) + " per-model leaderboard row" +
-        (nLb === 1 ? ", which gives " : "s, which give ") +
-        "one rate per model and cannot " +
-        "say which task separated which model";
-    } else {
-      whyHtml = "the capability catalogue publishes no axis, so the join has " +
-        "no columns to draw";
-    }
-    /* The leading clause exists only for the reader who asked. Shown to
-       everyone it would read as an error on a day where nothing went wrong.
-
-       It does NOT say "the view you linked to". `refused` is true for two
-       different arrivals -- a ?view=capability URL, and a reader who was
-       already in the capability view and moved the day picker onto a day that
-       cannot build it -- and only the first followed a link. Naming a link the
-       second reader never used is a small false statement inside a paragraph
-       whose entire job is to explain, accurately, why something is missing.
-       What both readers have in common is the only thing worth saying: they
-       asked for this view and are not getting it. */
-    var leadHtml = refused
-      ? "<strong>The capability view is not available on this day.</strong> " +
-        "You are looking at the overall board instead. "
-      : "<strong>The capability view is unavailable on this day.</strong> ";
-    return "<p>" + leadHtml + "It is unavailable because " + whyHtml +
-      ". No capability figures are shown rather than another day's.</p>";
+    var reason = !capData ? "Capability definitions could not be loaded."
+      : (!day.matrix || !day.matrix.tasks || !day.matrix.rows || !day.matrix.rows.length)
+        ? "Task-level outcomes are unavailable for this date."
+        : "Capability definitions are unavailable.";
+    return (refused ? "Showing overall results. " : "Capability results unavailable. ") + reason;
   }
 
   function paintCapNote(day, refused) {
@@ -759,18 +734,24 @@
   function writeUrl(q) {
     try {
       var u = new window.URL(window.location.href), sp = u.searchParams;
-      if (q) { sp.set("q", q); } else { sp.delete("q"); }
+      ["q", "cap", "capColor", "dir"].forEach(function (key) { sp.delete(key); });
+      if (q) { sp.set("query", q); } else { sp.delete("query"); }
+      if (capAxis !== "all") { sp.set("capability", capAxis); } else { sp.delete("capability"); }
+      if (capColor !== "rate") { sp.set("color", capColor); } else { sp.delete("color"); }
       if (MODE !== MODE_DEFAULT) { sp.set("view", MODE); } else { sp.delete("view"); }
+      sp.delete("expanded");
+      if (typeof expandedModels !== "undefined") Array.from(expandedModels).sort().forEach(function (model) { sp.append("expanded", model); });
       GROUPS.forEach(function (g) {
         if (facet[g]) { sp.set(g, facet[g]); } else { sp.delete(g); }
       });
       if (sortKey !== SORT_KEY_DEFAULT || sortDir !== SORT_DIR_DEFAULT) {
         sp.set("sort", sortKey);
-        sp.set("dir", sortDir);
+        sp.set("order", sortDir);
       } else {
         sp.delete("sort");
-        sp.delete("dir");
+        sp.delete("order");
       }
+      sp.sort();
       window.history.replaceState(window.history.state, "", u);
     } catch (e) { /* file:// has no URL API for this; the table is unaffected */ }
   }
@@ -778,16 +759,22 @@
   function readUrl() {
     try {
       var sp = new window.URL(window.location.href).searchParams;
+      capAxis = sp.get("capability") || sp.get("cap") || "all";
+      capColor = (sp.get("color") || sp.get("capColor")) === "peers" ? "peers" : "rate";
       var v = sp.get("view");
-      if (v === "capability") { MODE = v; }
-      var k = sp.get("sort"), d = sp.get("dir");
-      if (k && colByKey(k)) {
+      MODE = ["capability", "tasks", "compare", "profile", "efficiency", "history"].includes(v) ? v : MODE_DEFAULT;
+      if (typeof expandedModels !== "undefined") expandedModels = new Set(sp.getAll("expanded"));
+      var k = sp.get("sort"), d = sp.get("order") || sp.get("dir");
+      sortKey = SORT_KEY_DEFAULT;
+      sortDir = SORT_DIR_DEFAULT;
+      if (k && (colByKey(k) || (MODE === "capability" && (k === "overall" || /^cap:[\w-]+$/.test(k))))) {
         sortKey = k;
         sortDir = (d === "asc") ? "asc" : "desc";
       }
       GROUPS.forEach(function (g) { facet[g] = sp.get(g) || null; });
-      var q = sp.get("q");
-      if (q && byId("q")) { byId("q").value = q; }
+      var q = sp.get("query") || sp.get("q");
+      if (byId("q")) { byId("q").value = q || ""; }
+      insights.readUrl();
     } catch (e) { /* no URL API: the defaults above stand */ }
   }
 
@@ -890,35 +877,96 @@
      -- so the counts come from the grid the reader is looking at. The official
      badge is a property of the DAY and stays either way. */
   function countHtml(q) {
-    var rows = activeRows(), unit = capMode() ? " models" : " entries";
-    var shown = (VIEW.length === rows.length)
-      ? "Showing " + esc(rows.length) + unit
-      : "Showing " + esc(VIEW.length) + " of " + esc(rows.length) + unit;
-    var tasks = capMode()
-      ? esc(CAP.summary.nTasks) + " tasks in this grid"
-      : boardTaskScope(DAY);
-    var scope = capMode()
-      ? esc(CAP.summary.scaffold || "one scaffold")
-      : esc(distinctModels(rows)) + " models";
-    return shown +
-      '<span class="tdb-count-sep">&middot;</span>' + tasks +
-      '<span class="tdb-count-sep">&middot;</span>' + scope +
-      '<span class="tdb-count-sep">&middot;</span>' + officialBadge(DAY);
+    var total = capMode() ? CAP.rows.length : distinctModels(ALL);
+    return esc(VIEW.length) + (VIEW.length === total ? "" : "/" + esc(total)) +
+      (VIEW.length === 1 && total === 1 ? " model " : " models ") + officialBadge(DAY);
   }
 
   function applyFilter() {
+    if (loadState !== "idle") return;
     var q = byId("q").value.trim().toLowerCase();
-    var rowHtml = capMode() ? renderCap : render;
-    COLS = capMode() ? CAP.cols : COLS;
-    VIEW = activeRows().filter(function (r) {
-      return matchesQuery(r, q) && (capMode() || matchesOther(r, null));
+    var taskMode = MODE === "tasks";
+    var insightMode = isInsightMode();
+    byId("title").textContent = MODE === "profile" ? "Model profile" : MODE === "history" ? "Release comparison" : "Leaderboard";
+    byId("task-explorer").hidden = !taskMode;
+    byId("insights").hidden = !insightMode;
+    byId("results-scroll").hidden = taskMode || insightMode;
+    document.querySelector(".tdb-methods").hidden = taskMode || insightMode;
+    byId("measurement-note").hidden = true;
+    byId("result-subtitle").hidden = taskMode || insightMode;
+    byId("q").placeholder = MODE === "compare" || MODE === "history" ? "Search tasks" : "Search models";
+    byId("q").closest("label").hidden = MODE === "profile";
+    paintViews();
+    paintFacets(q);
+    if (insightMode) {
+      byId("cap-legend").hidden = true;
+      byId("view-note").hidden = true;
+      writeUrl(q);
+      insights.update({ day: DAY, site: siteData, cap: capData, days: DAYS, rows: ALL, mode: MODE, query: q, agent: facet.agent, effort: facet.effort });
+      return;
+    }
+    if (taskMode) {
+      byId("cap-legend").hidden = true;
+      byId("view-note").hidden = true;
+      taskExplorer.update(DAY, siteData, q);
+      writeUrl(q);
+      resultsChanged();
+      return;
+    }
+    paintCapNote(DAY, false);
+    var rows;
+    if (capMode()) {
+      COLS = CAP.cols.filter(function (c) { return !c.axis || capAxis === "all" || c.axis.code === capAxis; });
+      rows = CAP.rows;
+    } else {
+      COLS = faColumn(ALL) ? COLS_BASE.concat([COL_FA]) : COLS_BASE.slice();
+      var preferred = splitScaffold((DAY.matrix && DAY.matrix.scaffold) || "").agent;
+      rows = T.groupModelEfforts(ALL.filter(function (r) { return matchesOther(r, null); }), preferred);
+    }
+    if (!colByKey(sortKey) || colByKey(sortKey).static) { sortKey = SORT_KEY_DEFAULT; sortDir = SORT_DIR_DEFAULT; }
+    VIEW = rows.filter(function (r) {
+      return (r.variants || [r]).some(function (v) { return matchesQuery(v, q); });
     });
     byId("count").innerHTML = countHtml(q);
     paintViews();
     paintFacets(q);
     byId("head").innerHTML = headHtml();
-    byId("body").innerHTML = sortRows(VIEW).map(rowHtml).join("");
+    faUnlinked = false;
+    byId("body").innerHTML = VIEW.length ? sortRows(VIEW).map(function (r) {
+      return capMode() ? renderCap(r) : render(r, false);
+    }).join("") : '<tr class="tdb-results-message"><td colspan="' + COLS.length +
+      '" class="tdb-empty" role="status">No models match these filters. Change your search or reset the filters.</td></tr>';
     writeUrl(q);
+    byId("results-table").setAttribute("data-view", capMode() ? (capAxis === "all" ? "all-capabilities" : "capability") : "overall");
+    byId("results-table").setAttribute("data-cap-color", capMode() ? capColor : "");
+    var scroll = byId("results-scroll");
+    scroll.setAttribute("data-cap-matrix", capMode() && capAxis === "all" ? "true" : "false");
+    if (capMode() && capAxis === "all") {
+      scroll.setAttribute("tabindex", "0");
+      scroll.setAttribute("role", "region");
+      scroll.setAttribute("aria-label", "Capability results. Scroll to compare all skills.");
+    } else {
+      scroll.removeAttribute("tabindex");
+      scroll.removeAttribute("role");
+      scroll.removeAttribute("aria-label");
+    }
+    paintCapLegend();
+    var note;
+    byId("result-subtitle").hidden = !capMode();
+    if (capMode()) {
+      var config = splitScaffold(CAP.summary.scaffold || "");
+      byId("result-subtitle").textContent = T.agentLabel(config.agent || "Published agent") + " / " + (config.effort || "default");
+      note = "Each cell shows success rate and task count. Skills may overlap. ";
+    } else {
+      note = facet.effort ? facet.effort + " effort selected. " : "Each model shows its highest tested effort. ";
+      note += "Expand a model to compare settings. ";
+    }
+    if (!capMode()) note += aggregationDescription(DAY);
+    byId("measurement-note").textContent = note;
+    byId("measurement-note").hidden = true;
+    bindReproduce(DAY);
+    renderFoot(DAY);
+    resultsChanged();
   }
 
   /* The reference names the benchmark version in the title -- "terminal-bench@2.1
@@ -926,7 +974,7 @@
      the day IS the version. Counts that were four cards are one line above the
      table, next to the entry count they belong with. */
   function heading(day) {
-    byId("title").textContent = "Suite terminal-daily@" + day.date;
+    byId("title").textContent = "Leaderboard";
     /* The command has to be one a reader can actually run. This block used to
        print `tdb run --suite <date> -a <agent> -m <model>`, invented by analogy
        with the reference site: `tdb run` takes a positional MODEL and TASK plus
@@ -1101,7 +1149,7 @@
   function officialBadge(day) {
     return formalAuthority(day)
       ? '<span class="tdb-badge" data-official="true">Official</span>'
-      : '<span class="tdb-badge" data-official="false">Unofficial</span>';
+      : '<span class="tdb-badge" data-official="false">Preliminary</span>';
   }
 
   /* ------------------------------------------------------------------ *
@@ -1166,7 +1214,9 @@
   }
 
   function bindReproduce(day) {
-    var bound = reproduce(day, siteData, ALL[0]);
+    var top = sortRows(VIEW)[0];
+    if (top && capMode()) { top = Object.assign({}, top, splitScaffold(CAP.summary.scaffold || "")); }
+    var bound = reproduce(day, siteData, top);
     var code = byId("cmd"), warn = byId("cmd-warn"), copy = byId("copy");
     if (code) { code.textContent = bound.cmd || cmdPlaceholder; }
     if (warn) { warn.textContent = bound.why; }
@@ -1393,8 +1443,8 @@
    *     from here: one function produces both halves or produces neither.
    *
    *   * NO RANK BELOW THE PUBLISHED FLOOR. capability.json ships its own
-   *     publish gate, min_tasks. An axis under it shows counts and NO
-   *     percentage, and its header is inert -- the table cannot be sorted by a
+   *     publish gate, min_tasks. An axis under it shows observed accuracy and
+   *     sample size, and its header is inert -- the table cannot be sorted by a
    *     column whose data cannot order it. That is the mechanism chosen over
    *     greying the cell or printing an interval inside it: grey is a
    *     decoration a reader can ignore, and a control that still works while
@@ -1402,9 +1452,8 @@
    *     the file, never chosen here; a file publishing none leaves every axis
    *     unranked, which is the fail-closed direction.
    *
-   *   * NO AXIS DROPPED. The axes with no task are listed, named, and drawn as
-   *     an em dash. An axis missing from the table reads as an axis that does
-   *     not exist, which is a different and false claim.
+   *   * Every axis remains available in the selector and in the all-columns
+   *     view. An axis with no measured task shows an em dash, never zero.
    *
    *   * NO RATE WITHOUT ITS PROVENANCE. This is the same refusal as the first
    *     one, applied to the other half of the denominator: a reader who cannot
@@ -1438,7 +1487,7 @@
   /* One model's tally over a set of matrix columns. The two counters move
      together or not at all: a cell that was never run leaves both alone, so
      `n` is what was measured and never what was scheduled. */
-  function axisTally(row, cols) {
+  function axisTally(row, cols, declaredRuns) {
     var k = 0, n = 0, g = null;
     for (var i = 0; i < cols.length; i++) {
       g = (row && row.g) ? row.g[cols[i]] : null;
@@ -1446,7 +1495,9 @@
       n += 1;
       if (g) { k += 1; }
     }
-    return { solved: k, n: n };
+    var repeat = T.repeatStats(row, cols);
+    if (repeat && declaredRuns != null && repeat.runs !== declaredRuns) repeat = null;
+    return repeat ? { solved: k, n: n, repeat: repeat } : { solved: k, n: n };
   }
 
   /* The widest 95% Wilson half-width a column of this length can produce, in
@@ -1488,6 +1539,12 @@
      the cell, because the moment they are added into one number nothing
      downstream can tell a checked label from a claimed one. */
   function capabilityAxes(board, cap) {
+    var CAPABILITY_NAMES = {
+      C1: "Files and folders", C2: "Building software", C3: "Debugging", C4: "Implementation",
+      C5: "Testing", C6: "Data processing", C7: "Networking", C8: "Security",
+      C9: "System administration", C10: "Version control", C11: "Performance",
+      C12: "Reverse engineering", C13: "Machine learning", C14: "Workflow automation"
+    };
     var matrix = board && board.matrix;
     var ids = matrix && matrix.tasks;
     var axes = cap && cap.axes;
@@ -1516,12 +1573,14 @@
       });
       return {
         code: String((a && a.code) || ""),
-        name: String((a && a.name) || ""),
+        name: a && hasOwn(CAPABILITY_NAMES, a.code)
+          ? CAPABILITY_NAMES[a.code] : String((a && a.name) || ""),
         cols: cols,
         n: cols.length,
         nVerified: nVerified,
         nDeclared: nDeclared,
         /* No published floor means no defensible ranking, not a default one. */
+        minTasks: floor,
         ranked: (floor !== null) && (cols.length >= floor),
         half: resolution(cols.length)
       };
@@ -1536,10 +1595,11 @@
     var all = ids.map(function (id, i) { return i; });
     var out = rows.map(function (row) {
       var by = {};
-      axes.forEach(function (a) { by[a.code] = axisTally(row, a.cols); });
+      var declared = board.aggregation && board.aggregation.trials_per_cell;
+      axes.forEach(function (a) { by[a.code] = axisTally(row, a.cols, declared); });
       return {
         model: String((row && row.model) || ""),
-        overall: axisTally(row, all),
+        overall: axisTally(row, all, declared),
         axis: by
       };
     });
@@ -1562,7 +1622,8 @@
   }
 
   function overallPoint(r) {
-    return (r && r.overall && r.overall.n) ? (r.overall.solved / r.overall.n) : null;
+    var estimate = r && pointEstimate(r.overall);
+    return estimate ? estimate.p : null;
   }
 
   /* Whether a column's task set is fully re-derived, and the word the cell
@@ -1577,47 +1638,129 @@
     return (axis && axis.nDeclared) ? "declared" : "";
   }
 
-  /* An axis cell. Three outcomes and no fourth, and only the third prints a
-     percentage. The provenance word rides in the same span as the counts and
-     is produced by the same call that produces them, for the reason the counts
-     themselves are: a rate that can be lifted out of this function without its
-     denominator or without its provenance is the failure the view exists to
-     expose, so there is no code path here that emits one alone. */
-  function capCell(t, axis) {
+  /* The peer mean is an unweighted mean of measured model rates in this
+     date's matrix. Search and sorting never change its reference population.
+     Small samples contribute observed rates, but never receive a comparison
+     color or determine the comparison scale. */
+  function capabilityColors(rows, axes) {
+    var columns = {}, span = 0;
+    [OVERALL_AXIS].concat(axes).forEach(function (axis) {
+      var rates = [];
+      rows.forEach(function (row) {
+        var tally = axis.code === "overall" ? row.overall : row.axis[axis.code];
+        var estimate = pointEstimate(tally);
+        if (estimate !== null) { rates.push({ rate: estimate.p, n: tally.n }); }
+      });
+      var mean = rates.length ? rates.reduce(function (sum, item) { return sum + item.rate; }, 0) / rates.length : null;
+      columns[axis.code] = { mean: mean, models: rates.length };
+      if (axis.ranked && rates.length > 1) {
+        rates.forEach(function (item) {
+          if (typeof axis.minTasks === "number" && item.n < axis.minTasks) { return; }
+          span = Math.max(span, Math.abs(item.rate - mean));
+        });
+      }
+    });
+    return { columns: columns, span: Math.max(0.05, Math.ceil(span * 20) / 20) };
+  }
+
+  function capColorStyle(amount, below) {
+    var base = below === null ? [239, 246, 255] : [247, 247, 247];
+    var end = below ? [173, 69, 7] : [30, 64, 175];
+    var rgb = base.map(function (channel, i) {
+      return Math.round(channel + (end[i] - channel) * Math.max(0, Math.min(1, amount)));
+    });
+    var linear = rgb.map(function (channel) {
+      var value = channel / 255;
+      return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    });
+    var light = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    var ink = light > 0.179 ? "#000000" : "#ffffff";
+    return "background-color:rgb(" + rgb.join(",") + ");color:" + ink;
+  }
+
+  function capHeatCell(t, axis, colors, mode) {
+    var name = axis.name || "Overall";
     if (!t || !t.n) {
-      return '<span class="text-muted-foreground">&mdash;</span>';
+      return '<span class="tdb-cap-heat" data-state="missing" data-ranked="false" title="' +
+        esc(name + ": no evaluated tasks. Missing results are not zero scores.") + '">&mdash;</span>';
     }
-    var word = provenanceWord(axis);
-    var counts = esc(t.solved) + "/" + esc(t.n) + (word ? " " + word : "");
-    /* The machine-readable attribute is read off the axis's OWN provenance
-       counts, not off whether the human-readable word came back empty. It
-       used to be `word ? "declared" : "rederived"`, which asserted
-       re-derivation for every cell that simply had nothing to warn about --
-       and the worst case was the whole Overall column, which is drawn through
-       this function with OVERALL_AXIS, an axis carrying neither nDeclared nor
-       nVerified because it is not built from capability labels at all. Every
-       Overall cell therefore shipped data-provenance="rederived" while, on
-       2026-09-10, only 4 of the 342 tasks under it carry a re-derived label
-       (5 of 366 on 2026-09-03, 4 of 338 on 2026-09-04 and on 2026-09-05, and
-       the other three published days have no matrix and so no capability view
-       at all). An absent provenance is now absent: no attribute is emitted,
-       because a scraper reading one is entitled to have it mean something,
-       and "I was not told" must not be spelled the same way as "checked". */
-    var prov = "";
-    if (axis && axis.nDeclared) { prov = ' data-provenance="declared"'; }
-    else if (axis && axis.nVerified) { prov = ' data-provenance="rederived"'; }
-    if (!axis || !axis.ranked) {
-      return '<p class="tdb-cap-cell" data-ranked="false"' + prov + '>' +
-        '<span class="tdb-cap-n">' + counts + "</span></p>";
+    var rate = pointEstimate(t).p;
+    var small = typeof axis.minTasks === "number" && t.n < axis.minTasks;
+    var ranked = !!axis.ranked && !small;
+    var peer = colors && colors.columns[axis.code];
+    var comparable = ranked && peer && peer.models > 1;
+    var state = !ranked ? "small" : mode === "peers" && !comparable ? "uncompared" : "measured";
+    var tooltip = name + ": " + T.pct(rate) + " across " + t.n + " evaluated tasks. ";
+    if (axis.nDeclared) {
+      tooltip += axis.nDeclared + " task labels have not been independently checked. ";
     }
-    var w = pointEstimate(t);
-    if (w === null) {
-      return '<span class="text-muted-foreground">&mdash;</span>';
+    if (!ranked) {
+      tooltip += typeof axis.minTasks === "number"
+        ? "Small sample: at least " + axis.minTasks + " evaluated tasks are required for ranking. Color is neutral. "
+        : "The minimum sample size is unpublished. This result is not ranked; color is neutral. ";
     }
-    var rate = T.pct(w.p);
-    return '<p class="tdb-cap-cell" data-ranked="true"' + prov + '>' +
-      '<strong class="tabular-nums">' + rate + "</strong>" +
-      '<span class="tdb-cap-n">' + counts + "</span></p>";
+    var style = "";
+    if (mode === "peers") {
+      if (peer && peer.mean !== null) {
+        tooltip += "Peer mean: " + T.pct(peer.mean) + " across " + peer.models + " measured models in this date's matrix. ";
+      }
+      if (comparable) {
+        var delta = rate - peer.mean;
+        tooltip += (delta > 0 ? "+" : "") + (delta * 100).toFixed(1) + " percentage points " +
+          (delta > 0 ? "above" : delta < 0 ? "below" : "from") + " the peer mean. ";
+        style = capColorStyle(Math.abs(delta) / colors.span, delta < 0);
+      } else if (ranked) {
+        tooltip += "At least two measured models are needed for a peer comparison. Color is neutral. ";
+      }
+      tooltip += "Color scale: -" + (colors.span * 100).toFixed(0) + " to +" + (colors.span * 100).toFixed(0) +
+        " percentage points. The displayed value remains success rate. Differences do not establish statistical significance.";
+    } else {
+      if (ranked) { style = capColorStyle(rate, null); }
+      tooltip += "Color scale: 0% to 100% success rate.";
+    }
+    var provenance = axis.nDeclared ? "declared" : axis.nVerified ? "rederived" : "";
+    return '<span class="tdb-cap-heat" data-state="' + esc(state) + '" data-ranked="' + (ranked ? "true" : "false") +
+      '" data-rate="' + esc(rate) + '" data-n="' + esc(t.n) + '" data-provenance="' + esc(provenance) +
+      '" title="' + esc(tooltip) + '" aria-label="' + esc(tooltip) + '"' + (style ? ' style="' + esc(style) + '"' : '') + '>' +
+      '<span class="tdb-cap-estimate"><strong>' + esc(T.pct(rate)) + '</strong></span></span>';
+  }
+
+  function capAxisDescription(axis) {
+    var text = axis.name + ". " + axis.n + " tasks";
+    if (axis.nDeclared) { text += ", " + axis.nVerified + " checked labels and " + axis.nDeclared + " declared labels"; }
+    text += ". ";
+    if (!axis.ranked) {
+      return text + (typeof axis.minTasks === "number" ? "At least " + axis.minTasks + " tasks are required for ranking." : "The minimum ranking sample is unpublished.");
+    }
+    return text + "Select to sort models by success rate; all displayed skills remain visible.";
+  }
+
+  function paintCapLegend() {
+    var box = byId("cap-legend");
+    box.hidden = !capMode();
+    if (!capMode()) { box.innerHTML = ""; return; }
+    var peers = capColor === "peers";
+    var extent = capColors ? (capColors.span * 100).toFixed(0) : "0";
+    var title = peers ? "Difference from this date's mean model success rate. A shared symmetric scale is used for every skill."
+      : "The same 0% to 100% success-rate scale is used for every skill.";
+    var legendHtml = '<span class="tdb-cap-key" title="' + esc(title + ' Gray: insufficient evidence. Dash: not evaluated.') + '"><span>' +
+      (peers ? '-' + esc(extent) + ' pp' : '0%') + '</span><span class="tdb-cap-ramp" data-color="' +
+      esc(capColor) + '" aria-hidden="true"></span><span>' + (peers ? '+' + esc(extent) + ' pp' : '100%') + '</span></span>';
+    box.innerHTML = legendHtml;
+  }
+
+  function capCell(t, axis, display) {
+    if (display) { return capHeatCell(t, axis, display.colors, display.mode); }
+    if (!t || !t.n) { return '<span class="text-muted-foreground">&mdash;</span>'; }
+    var small = axis && axis.minTasks !== null && t.n < axis.minTasks;
+    var ranked = axis && axis.ranked && !small;
+    var prov = axis && axis.nDeclared ? ' data-provenance="declared"' :
+      (axis && axis.nVerified ? ' data-provenance="rederived"' : "");
+    var counts = esc(t.n) + " tasks";
+    var scoreHtml = T.scoreCell(t.solved, t.n, t.repeat);
+    return '<div class="tdb-cap-cell" data-ranked="' + (ranked ? "true" : "false") + '"' + prov + '>' +
+      scoreHtml + '<span class="tdb-cap-n">' + counts +
+      (small ? '<span class="tdb-sample-note">small sample</span>' : '') + '</span></div>';
   }
 
   /* The column head's second line. Not a sentence -- a reading: what this
@@ -1634,20 +1777,12 @@
      line. */
   function axisNoteHtml(a) {
     if (!a.n) { return "no task"; }
-    var tasks = esc(a.n) + " task" + (a.n === 1 ? "" : "s");
-    var band = (a.half === null) ? "" : " &plusmn;" + a.half.toFixed(0) + "%";
-    var prov = "";
-    if (a.nDeclared) {
-      prov = a.nVerified
-        ? " &middot; " + esc(a.nVerified) + " re-derived, " +
-          esc(a.nDeclared) + " declared"
-        : " &middot; all declared";
-    }
-    var verdict = a.ranked ? "" : " &middot; unranked";
-    return tasks + band + prov + verdict;
+    return esc(a.n) + (a.n === 1 ? " task" : " tasks") + (a.ranked ? "" : " · unranked");
   }
 
   function capColumns(axes, nTasks) {
+    var shortNames = { C1: "Files", C2: "Build", C3: "Debug", C4: "Coding", C5: "Tests", C6: "Data",
+      C7: "Network", C8: "Security", C9: "System", C10: "Version control", C11: "Speed", C12: "Reverse", C13: "Machine learning", C14: "Workflow" };
     var cols = [
       { key: "rank", label: "Rank", right: true, dir: "asc",
         value: function (r) { return r.rank; } },
@@ -1660,7 +1795,8 @@
     axes.forEach(function (a) {
       cols.push({
         key: "cap:" + a.code,
-        label: a.code + " " + a.name,
+        label: a.name,
+        shortLabel: shortNames[a.code] || a.name,
         right: true, dir: "desc", axis: a,
         static: !a.ranked,
         noteHtml: axisNoteHtml(a),
@@ -1670,7 +1806,9 @@
         value: function (r) {
           if (!a.ranked) { return null; }
           var t = r.axis[a.code];
-          return (t && t.n) ? (t.solved / t.n) : null;
+          if (t && a.minTasks !== null && t.n < a.minTasks) { return null; }
+          var estimate = pointEstimate(t);
+          return estimate ? estimate.p : null;
         }
       });
     });
@@ -1688,20 +1826,7 @@
       : esc(r.rank);
   }
 
-  /* The overall column is drawn with the SAME cell as every axis, bar and all
-     -- meaning no bar. Two reasons, and the second is the important one.
-
-     It fits: the score bar is a 5rem track plus a 3.5rem number, and spending
-     nearly nine of a seventeen-column table's rems on the one column that is
-     already legible pushes four axes off the right edge on a 1440px screen.
-
-     And it compares. The whole claim this view makes about itself is that the
-     C4 and C5 columns ARE the overall column with a different heading. A
-     reader can only see that by reading the three columns against each other,
-     and three columns are only comparable when they are drawn the same way.
-     The interval the bar's neighbour used to carry has not been dropped: it is
-     in the column head, where it applies to the column rather than to one
-     cell. */
+  /* Capability cells show majority scores; evaluated counts are in tooltips. */
   function renderCap(r) {
     /* Built before the markup expression rather than inside it, for the same
        reason accuracyCell() builds its bar first: the repository's escaping
@@ -1709,13 +1834,15 @@
        property access it cannot see run through a safe formatter. `r.overall`
        is a validated tally and OVERALL_AXIS is a constant, but a scanner that
        took the author's word for either would protect nothing. */
-    var overall = capCell(r.overall, OVERALL_AXIS);
+    var display = { colors: capColors, mode: capColor };
+    var overall = capCell(r.overall, OVERALL_AXIS, display);
+    var nameHtml = '<span class="tdb-cap-model" title="' + esc(r.model) + '">' + esc(T.modelLabel(r.model)) + '</span>';
     var out = '<tr data-slot="table-row" class="' + TR + '">' +
-      cell(" text-right tabular-nums text-muted-foreground", rankCell(r)) +
-      cell(" font-medium", esc(r.model)) +
-      cell(" text-right", overall);
-    CAP.axes.forEach(function (a) {
-      out += cell(" text-right", capCell(r.axis[a.code], a));
+      cell(" tdb-cap-rank text-right tabular-nums text-muted-foreground", rankCell(r)) +
+      cell(" tdb-cap-model-cell", nameHtml) +
+      cell(" tdb-overall-cell", overall, "Overall");
+    COLS.forEach(function (c) {
+      if (c.axis) { out += cell(" tdb-score-cell", capCell(r.axis[c.axis.code], c.axis, display), c.axis.name); }
     });
     return out + "</tr>";
   }
@@ -1802,142 +1929,17 @@
   function capFootHtml(day) {
     if (!CAP) { return ""; }
     var d = CAP.summary;
-    var scaffold = d.scaffold ? esc(d.scaffold) : "one scaffold";
-    var names = d.carriers.map(function (a) {
-      return esc(a.code) + " " + esc(a.name) + " carries " + esc(a.n);
-    }).join(" and ");
-    var floorTxt = (CAP.floor === null)
-      ? "The catalogue publishes no task floor, so no axis is ranked here."
-      : "An axis is ranked only where it carries at least " + esc(CAP.floor) +
-        " of this grid's tasks, which is the catalogue's own publish gate. " +
-        "Below it a cell shows counts and no rate, and the column head is " +
-        "inert: an order the data cannot support is refused rather than " +
-        "footnoted.";
-    var nScaf = Object.keys(day.pooled || {}).length;
-    /* The second half of this sentence describes the OTHER view, one click
-       away, so it is counted from that view's rows for the same reason
-       countHtml is: a reader can switch back and count the models. The day
-       file's n_models stood here and disagreed with the table it named. */
-    var scopeTxt = "Rates are for " + esc(d.models) + " models under " + scaffold +
-      " on " + esc(d.date) + ", over " + esc(d.nTasks) + " tasks. The overall " +
-      "view ranks " + esc(distinctModels(ALL)) + " models across " + esc(nScaf) +
-      " agent and effort configurations; the two are different measurements, " +
-      "and a cell here cannot be read against a row there.";
-    /* Both fractions are recomputed from the join drawn above -- the labelled
-       share AND the re-derived share. The catalogue publishes a coverage_share
-       per axis, but it is taken over the 38 packages that ship an oracle patch
-       (C5 reads 1.000 there), so it describes a corpus of 38 and not the grid
-       of this size on screen. Printing it here would be a rate borrowed from
-       another denominator, which is the one thing this page refuses hardest. */
-    /* The remainder clause, counted three ways because the remainder is not
-       always plural and is not always non-empty. It read "All " + n + " of
-       the rest are live" for every day where the unlabelled tasks are all
-       live, and on 2026-09-03 exactly one task in the grid is unlabelled, so
-       the site published "All 1 of the rest are live" -- a foot that cannot
-       count to one, sitting above 326 counts a reader is being asked to
-       trust. Checked across every day that HAS a capability view: the
-       unlabelled remainder is 1 on 2026-09-03, 15 on 2026-09-04 and
-       2026-09-05, 16 on 2026-09-10, and on all four every unlabelled task is
-       live; 2026-07-23, 2026-08-19 and 2026-09-06 publish no matrix, so this
-       foot never renders on them. The empty case has not been seen on any
-       published day, but it is written out anyway rather than left to print
-       "All 0 of the rest are live, and none of the unlabelled tasks names a
-       capability code" -- two clauses about a set with no members. The
-       not-all-live branch stays for the same reason: it is reachable the day
-       a task in the grid stops being live, and it must not need a rewrite to
-       be correct when it first renders. */
-    var restTxt;
-    if (!d.unlabelled) {
-      restTxt = "Every task in this grid carries a label, so there is no " +
-        "unlabelled remainder to account for. ";
-    } else {
-      restTxt = ((d.unlabelled === 1)
-        ? ((d.unlabelledLive === 1)
-            ? "The one remaining task is live, and it does not name"
-            : "The one remaining task is not live, and it does not name")
-        : ((d.unlabelled === d.unlabelledLive)
-            ? "All " + esc(d.unlabelled) + " of the rest are live, and none " +
-              "of the unlabelled tasks names"
-            : esc(d.unlabelledLive) + " of the other " + esc(d.unlabelled) +
-              " are live, and none of the unlabelled tasks names")) +
-        " a capability code in its task.toml, so nothing places " +
-        ((d.unlabelled === 1) ? "it" : "them") +
-        " on an axis by either route -- not a withheld measurement but an " +
-        "absent declaration. ";
-    }
-    var coverTxt = esc(d.nLabelled) + " of " + esc(d.nTasks) +
-      " tasks in this grid carry a capability label, and " + esc(d.nDerived) +
-      " of those " + esc(d.nLabelled) + " had that label re-derived from the " +
-      "package. " + restTxt +
-      "The shares here are counted from the join in " +
-      "this table; the catalogue's own coverage_share is measured over the " +
-      "packages that ship an oracle patch and does not describe this grid.";
-    /* The provenance term is reader-facing copy and deliberately says the
-       uncomfortable half first. It names the mechanism -- the tagger's only
-       inputs are the oracle patch and the protected test diff, and a live
-       package ships neither -- because "declared" without the reason reads as
-       sloppiness rather than as the deliberate withholding that it is. */
-    var provTxt = esc(d.axesDeclared) + " of the " + esc(d.nAxes) +
-      " axes are built partly or wholly from labels DECLARED by the task " +
-      "package -- the axis code sits in its task.toml keywords -- and never " +
-      "re-derived by this site. Only " +
-      esc(d.nDerived) + " of the " + esc(d.nTasks) + " tasks in this grid " +
-      "could be checked: the tagger reads a package's oracle patch and " +
-      "protected test diff, a live package withholds both, and the catalogue " +
-      "publishes a re-derived label only where it could recompute one and " +
-      "match it against both stored copies. Every cell over a column with any " +
-      "declared task is marked <em>declared</em> beside its counts, and each " +
-      "column head gives the split. A declared label is a claim by the task, " +
-      "not a measurement by the benchmark; the solve counts either side of it " +
-      "are measured either way.";
-    /* The empty-axis sentence is conditional now because the join can leave
-       none: with the declared labels folded in, thirteen of the fourteen axes
-       carry something on this board and "The remaining 0 axes carry no task at
-       all" is a sentence about nothing. The clause is also singular-safe -- it
-       used to be able to print "1 axes", and a foot that cannot count to one
-       is not a foot a reader should believe about 342. The refusal it
-       describes is unchanged: the empty axis is still drawn, still an em dash,
-       still not dropped. */
-    var emptyTxt = d.empty
-      ? " The remaining " + esc(d.empty) + " " +
-        (d.empty === 1 ? "axis carries" : "axes carry") + " no task at all " +
-        "and " + (d.empty === 1 ? "is" : "are") + " drawn as an em dash " +
-        "rather than dropped, because an axis missing from a table reads as " +
-        "an axis that does not exist."
-      : " Every axis the catalogue publishes carries at least one task in " +
-        "this grid, and an axis that carried none would still be drawn, as " +
-        "an em dash rather than dropped.";
-    var spread = names
-      ? "<p><strong>What the axes separate.</strong> Of the " +
-        esc(d.nLabelled) + " labelled tasks in this grid, " + names +
-        ", so those columns reproduce the overall ranking rather than " +
-        "splitting it. Every other axis that " +
-        "carries anything carries " + esc(d.gestures) + " tasks or fewer, " +
-        "and has to be read at the interval its own column head quotes " +
-        "rather than at the precision its digits suggest." + emptyTxt + "</p>"
-      : "";
-    var angles = "<p><strong>The angles that are not here.</strong> " +
-      "<code>capability_profile()</code> decomposes a model into four " +
-      "conditional rates: builds the environment, starts the fix given a " +
-      "build, completes the fix given a start, and completes it without " +
-      "breaking an already-passing test. Those four are the truest " +
-      "multi-angle reading this benchmark has, and none of them can be " +
-      "computed from anything published here. They read graded gate states " +
-      "0&ndash;4, and every cell shipped in the matrix is 1, 0 or null.</p>";
-    return '<dl class="tdb-limits">' +
-        "<dt>Cells</dt><dd>A model's solve rate over the tasks carrying that " +
-          "axis, with solved/n beside it, and the word <em>declared</em> where " +
-          "the label placing those tasks on the axis was not re-derived. An " +
-          "axis with no measured task is an em dash, never a zero.</dd>" +
-        "<dt>Provenance</dt><dd>" + provTxt + "</dd>" +
-        "<dt>Ranking floor</dt><dd>" + floorTxt + "</dd>" +
-        "<dt>Resolution</dt><dd>Each column head carries the widest 95% Wilson " +
-          "half-width its task count admits, so a column is read at the " +
-          "precision it has rather than the precision its digits suggest.</dd>" +
-        "<dt>Coverage</dt><dd>" + coverTxt + "</dd>" +
-        "<dt>Scope</dt><dd>" + scopeTxt + "</dd>" +
-        "<dt>Report</dt><dd>" + LINK_QUALITY + "</dd>" +
-      "</dl>" + spread + angles;
+    var settings = splitScaffold(d.scaffold || "");
+    var sample = CAP.floor === null ? "Small groups should be interpreted with care."
+      : "At least " + esc(CAP.floor) + " evaluated tasks are needed to rank a capability.";
+    return '<dl class="tdb-limits"><dt>Success rate</dt><dd>The share of evaluated tasks solved in each category. A task passes when more than half its runs succeed. Missing results are left out.</dd>' +
+      '<dt>Coverage</dt><dd>' + esc(d.models) + ' models and ' + esc(d.nTasks) + ' tasks using ' +
+      esc(T.agentLabel(settings.agent || "the published agent")) + '. Agent and effort settings may differ from the overall view.</dd>' +
+      '<dt>Categories</dt><dd>' + esc(d.nLabelled) + ' of ' + esc(d.nTasks) + ' tasks have category labels. Unlabeled tasks do not imply missing skills. Some labels have not been independently checked.' +
+      (d.carriers.length ? ' Broad categories can closely follow the overall score.' : '') + '</dd>' +
+      '<dt>Small samples</dt><dd>' + sample + ' Gray cells remain visible but are not ranked.</dd>' +
+      '<dt>Colors</dt><dd>Success rate uses a shared 0% to 100% scale. Relative to peers compares each rate with the unweighted mean for that skill among measured models in this date\'s matrix. Search does not change the reference group. Colors describe observed differences, not statistical significance.</dd></dl>' +
+      '<p><a href="../guide/quality-methods/">Evaluation methods</a></p>';
   }
 
   /* Where the numbers came from, who produced them, how to add to them, and
@@ -1966,94 +1968,41 @@
   function faTerm(nRows) {
     if (colByKey("fa")) {
       return "<dt>False accepts</dt><dd>" + (faUnlinked
-        ? "Unlinked counts have no published evidence record."
-        : "Every non-zero count links the record that produced it.") + "</dd>";
+        ? "Some displayed non-zero counts have no published evidence record."
+        : "Displayed non-zero counts link to their evidence records.") + "</dd>";
     }
-    return "<dt>False accepts</dt><dd>Semantic false-accept is unmeasured: no " +
-      "trial has been run for any of the " + esc(nRows) + " published rows, so " +
-      "the column is omitted rather than drawn as " + esc(nRows) +
-      " em dashes. Each task page reports the same field, also unmeasured.</dd>";
+    return "<dt>False accepts</dt><dd>No semantic false-accept measurements are reported for the " +
+      esc(nRows) + " evaluated model configurations.</dd>";
   }
 
   function renderFoot(day) {
-    if (capMode()) {
-      byId("foot").innerHTML = capFootHtml(day);
-      return;
-    }
-    var faNote = faTerm(ALL.length);
-    var defCells = DEF_CELLS, defOutcomes = DEF_OUTCOMES, defReport = LINK_QUALITY;
-    /* `day`, not the global snapshot. The digest describes one solve matrix,
-       and the matrix a reader is entitled to read under this header is the one
-       in the file the day picker just loaded. On a day that publishes no
-       matrix discriminationDigest returns null and digestHtml returns the
-       empty string, so the paragraph is absent rather than borrowed. */
-    var digest = digestHtml(discriminationDigest(day, siteData));
-    /* Both counted from ALL -- the rows this page drew -- and not from the day
-       file's n_cells / n_models headline fields; see distinctModels() above for
-       what those two fields claimed on 2026-09-10 and what the table under them
-       actually held. `tasks` is still the day's own n_tasks, which is NOT the
-       size of the suite: it is the primary scaffold's reduced grid, and the
-       suite roster is `day.suite.n_tasks`. See boardTaskScope() above for
-       where each of the two comes from and for the four days on which they
-       disagree or cannot be compared; the phrase printed here is built there
-       so that this page and /benchmarks/<date>/ cannot show two different
-       numbers that both read as "tasks". */
-    var cells = esc(totalAttempts(ALL));
-    var models = esc(distinctModels(ALL)), tasks = boardTaskScope(day);
-    /* The attempt count is a sum over (model x scaffold x task). Describing it as
-       "across <models> models on <tasks> tasks" claimed 16387 attempts over a
-       152 x 50 grid that has 7600 intersections -- an impossible decomposition
-       printed inside the block that invites the reader to check the
-       arithmetic. The missing factor is the scaffold, and the count of
-       scaffolds is whatever `pooled` turns out to carry. `across N
-       configurations` is descriptive, not multiplicative: coverage is
-       deliberately ragged, so it asserts no ceiling. An empty pooled map is
-       legitimate (build_day_data writes `pooled: board.get("pooled") or {}`),
-       and there the pre-change wording -- which was not wrong -- stands. */
-    var nScaf = Object.keys(day.pooled || {}).length;
-    var span = nScaf
-      ? cells + " model &times; scaffold &times; task attempts: " + models +
-        " models, " + esc(nScaf) + " agent/effort configuration" +
-        (nScaf === 1 ? "" : "s") + ", " + tasks
-      : cells + " model &times; task attempts: " + models + " models, " + tasks;
-    /* One sentence saying which of the three cases boardTaskScope() found, so
-       a reader holding this page next to /benchmarks/<date>/ is told why the
-       two totals differ instead of discovering it. Computed per day: the day
-       on screen decides which sentence is true, and a day whose suite record
-       publishes no roster size gets the sentence that says so rather than a
-       comparison invented out of the board figure. */
-    var suiteN = suiteTaskCount(day);
-    var scopeNote = (suiteN === null)
-      ? "A board task is one the day's primary scaffold ran. This day's " +
-        "catalogue record publishes no roster size, so there is no suite " +
-        "total to set beside it here."
-      : (suiteN === day.n_tasks)
-        ? "A board task is one the day's primary scaffold ran, and on this " +
-          "day that is every task in the published suite, so the total on " +
-          "the suite page is the same number."
-        : "A board task is one the day's primary scaffold ran; the suite " +
-          "page counts the published roster instead, which is why it says " +
-          esc(suiteN) + " where this line says " + esc(day.n_tasks) + ".";
-    var h50 = halfWidth(0.5, day.n_tasks);
-    byId("foot").innerHTML =
-      '<dl class="tdb-limits">' +
-        "<dt>Cells</dt><dd>" + defCells + "</dd>" +
-        "<dt>Coverage</dt><dd>" + span + ". " + scopeNote + "</dd>" +
-        "<dt>Accuracy</dt><dd>Solved / Tasks; &plusmn; is the 95% Wilson " +
-          "half-width, about " + h50 + " points at 50% on " +
-          esc(day.n_tasks) + " board tasks.</dd>" +
-        "<dt>Outcomes</dt><dd>" + defOutcomes + "</dd>" +
-        faNote +
-        "<dt>Report</dt><dd>" + defReport + "</dd>" +
-      "</dl>" +
-      digest;
+    if (capMode()) { byId("foot").innerHTML = capFootHtml(day); return; }
+    var effort = facet.effort ? "The selected reasoning effort is shown. "
+      : "Each model starts at its highest tested reasoning effort. ";
+    byId("foot").innerHTML = '<dl class="tdb-limits">' +
+      '<dt>Success rate</dt><dd>The share of evaluated tasks solved. A task passes when more than half its runs succeed. Missing results are left out.</dd>' +
+      '<dt>Run variation</dt><dd>The ± value is the sample standard deviation of accuracy across repeated runs on the same tasks. Thin lines show one standard deviation around the majority score. Results without complete repeat records omit the error bar.</dd>' +
+      '<dt>Model settings</dt><dd>' + effort + 'Expand a model to compare its settings.</dd>' +
+      '<dt>Comparisons</dt><dd>Models may have been tested on different task sets. Check the task counts before comparing scores. Preliminary results have not completed the full validation process.</dd></dl>' +
+      '<p><a href="../guide/quality-methods/">Evaluation methods</a></p>';
+  }
+
+  function aggregationDescription(day) {
+    var aggregation = day && day.aggregation;
+    var rows = day && day.matrix && day.matrix.rows || [];
+    if (!aggregation || !rows.some(function (row) { return T.repeatStats(row); })) return "Repeat records are unavailable for this date.";
+    return "Tasks pass with at least " + (Math.floor(aggregation.trials_per_cell / 2) + 1) + " of " + aggregation.trials_per_cell + " successful runs. ± shows run standard deviation.";
   }
 
   function show(day) {
     DAY = day;
+    expandedModels.clear();
     faUnlinked = false;
     heading(day);
     ALL = flatten(day);
+    new URL(window.location.href).searchParams.getAll("expanded").forEach(function (model) {
+      if (ALL.some(function (r) { return r.model === model; })) expandedModels.add(model);
+    });
     ALL.sort(function (a, b) { return b.rate - a.rate; });
     /* Ties share a rank and the next rank skips, as the reference does.
        Stamped ONTO THE ROW rather than kept in a side table keyed by
@@ -2087,6 +2036,10 @@
        code, which is the worst of the two ways to be wrong, because it is the
        one that stops the next reader from looking. */
     CAP = capData ? buildCapability(day, capData, siteData) : null;
+    capColors = CAP ? capabilityColors(CAP.rows, CAP.axes) : null;
+    if (CAP && capAxis !== "all" && !CAP.axes.some(function (a) { return a.code === capAxis; })) {
+      capAxis = "all";
+    }
     /* A refused view has to SAY it was refused. Falling silently back to the
        board view hands a reader who followed a ?view=capability link a
        different table under the URL they clicked, with nothing on screen to
@@ -2117,15 +2070,65 @@
   }
 
   function load(id) {
-    byId("count").textContent = "loading…";
+    var request = ++loadSequence;
+    loadState = "loading";
+    byId("count").textContent = "Loading…";
+    byId("body").innerHTML = '<tr class="tdb-results-message"><td colspan="17" class="tdb-empty" role="status">Loading results…</td></tr>';
+    byId("cap-legend").hidden = true;
+    byId("view-note").hidden = true;
+    byId("result-subtitle").hidden = true;
+    byId("measurement-note").textContent = "";
+    byId("foot").innerHTML = "";
+    taskExplorer.clear("Loading task results…");
+    insights.clear("Loading results…");
+    resultsChanged();
     T.dayNav(byId("daynav"), { days: DAYS, active: id, onChange: load });
-    T.dayData(id).then(show).catch(function (e) {
-      T.loadError(byId("body").parentNode.parentNode.parentNode, "day " + id, e);
-      byId("count").textContent = "";
+    T.dayData(id).then(function (day) {
+      if (request !== loadSequence) return;
+      loadState = "idle";
+      show(day);
+    }).catch(function (e) {
+      if (request !== loadSequence) return;
+      loadState = "error";
+      byId("body").innerHTML = '<tr class="tdb-results-message"><td colspan="17" class="tdb-empty" role="status">Results could not be loaded. Choose another date or reload the page.</td></tr>';
+      taskExplorer.clear("Results could not be loaded. Choose another date or reload the page.");
+      insights.clear("Results could not be loaded. Choose another date or reload the page.");
+      byId("count").textContent = "Results unavailable";
+      console.error("Daily results could not be loaded", e);
+      resultsChanged();
     });
   }
 
   byId("q").addEventListener("input", applyFilter);
+  byId("body").addEventListener("click", function (ev) {
+    if (capMode() || ev.target.closest("a")) { return; }
+    var row = ev.target.closest("tr[data-model-group]");
+    if (!row || !row.querySelector("button[data-model]")) { return; }
+    var model = row.getAttribute("data-model-group");
+    if (expandedModels.has(model)) { expandedModels.delete(model); }
+    else { expandedModels.add(model); }
+    applyFilter();
+    var button = Array.from(byId("body").querySelectorAll("button[data-model]")).find(function (b) {
+      return b.getAttribute("data-model") === model;
+    });
+    if (button) { button.focus({ preventScroll: true }); }
+  });
+  byId("facets").addEventListener("change", function (ev) {
+    if (ev.target.id === "cap-axis") {
+      capAxis = ev.target.value;
+      applyFilter();
+      byId("cap-axis").focus();
+    } else if (ev.target.id === "cap-color") {
+      capColor = ev.target.value === "peers" ? "peers" : "rate";
+      applyFilter();
+      byId("cap-color").focus();
+    } else if (ev.target.matches("select[data-group]")) {
+      var group = ev.target.getAttribute("data-group");
+      facet[group] = ev.target.value || null;
+      applyFilter();
+      byId("facets").querySelector('select[data-group="' + group + '"]').focus();
+    }
+  });
   /* Delegated, because both the header row and the pill rail are rebuilt by
      innerHTML on every keystroke; a listener bound to a button would be thrown
      away with it and the control would work exactly once. */
@@ -2173,19 +2176,10 @@
     applyFilter();
   });
   readUrl();
-  byId("copy").addEventListener("click", function () {
-    var b = byId("copy");
-    navigator.clipboard.writeText(byId("cmd").textContent).then(function () {
-      /* Restored to "Copy", which is what the markup ships. It restored a
-         lowercase "copy", so the label was correct exactly once: the first
-         click renamed the button permanently, and the button that told you it
-         had worked was the evidence that something had not. */
-      b.textContent = "Copied";
-      setTimeout(function () { b.textContent = "Copy"; }, 1200);
-    });
-  });
+
   window.addEventListener("popstate", function () {
-    var d = T.dayFromUrl(); if (d) load(d);
+    readUrl();
+    var d = T.dayFromUrl() || DAYS[0]; if (d) load(d);
   });
 
   /* The two catalogues are fetched alongside the day index, so the first table

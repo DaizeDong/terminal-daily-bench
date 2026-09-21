@@ -158,8 +158,8 @@ def test_retired_copy_gate_is_wired(monkeypatch):
 
 def test_unofficial_marker_gate_is_wired(monkeypatch):
     monkeypatch.setattr(
-        verify_site, "UNOFFICIAL_MARKER_PAGES", ("guide/index.html",))
-    assert any("the `unofficial` marker is gone" in p
+        verify_site, "PRELIMINARY_MARKER_PAGES", ("guide/index.html",))
+    assert any("preliminary results need a visible Preliminary label" in p
                for p in verify_site.check_public_frontend())
 
 
@@ -268,4 +268,3 @@ def test_losing_the_unofficial_marker_fires():
         return raw.replace('data-official="false"', "").replace("unofficial", "")
     assert len(verify_site.check_unofficial_marker(blanked)) == len(
         verify_site.UNOFFICIAL_MARKER_PAGES)
-

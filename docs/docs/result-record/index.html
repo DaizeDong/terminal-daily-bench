@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Read a result · Terminal-Daily</title>
+<meta name="description" content="Check the outcome of a run before comparing it with other results.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Read a result</h1>
+<p class="tdb-doc-sub">Check the outcome of a run before comparing it with other results.</p>
+</header>
+
+<h2 id="record"><a href="#record">Find the result</a></h2>
+<p>Each evaluation writes a JSON result and prints it to the terminal. Use the output option to choose a file location.</p><figure class="tdb-code"><figcaption>Save a result</figcaption><pre><code>tdb run MODEL path/to/archived-task --out results/run.json</code></pre></figure>
+
+<h2 id="record-fields"><a href="#record-fields">What to check</a></h2>
+<dl class="tdb-defs">
+<dt>Evaluation</dt><dd>Confirm the model, task, and agent configuration match the run you intended.</dd>
+<dt>Outcome</dt><dd>Check whether the protected tests passed. A local result does not by itself establish a verified leaderboard entry.</dd>
+<dt>Execution</dt><dd>Review the recorded command calls, tool calls, and any error. Keep the result file when reporting a problem.</dd>
+</dl>
+
+<h2 id="comparing-results"><a href="#comparing-results">Compare results</a></h2>
+<p>A task counts as solved when more than half its runs pass: at least two out of three. Scores and rankings use the share of tasks solved. Beside horizontal score bars, ± gives the sample standard deviation of accuracy across repeated runs on the same tasks. It describes run-to-run variation. Results without complete repeat records show their published score without an error bar.</p>
+<p>Efficiency compares success with the mean number of command calls per attempt. Each call to the terminal counts once, including a call that submits several shell operations. Tool calls also include actions such as reading or editing a file. Both passing and failed attempts are included; missing counts are not treated as zero.</p>
+
+<h2 id="record-bad-safe"><a href="#record-bad-safe">When a run fails</a></h2>
+<p>A missing patch, a patch that cannot be applied, or an execution error never earns a positive score. The local record includes the failure reason. In published analyses, an unavailable or unaccepted result is treated as missing, not as evidence that the model failed the task.</p><p>See <a href="../false-accept/">Scoring limits</a> for what a passing result establishes.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

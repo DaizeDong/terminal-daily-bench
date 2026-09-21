@@ -3,70 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>terminal-daily-bench — measured solve rates</title>
-<meta name="description" content="Measured solve rates on the current terminal-daily-bench suite.">
-<link rel="stylesheet" href="./assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="./assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<title>Terminal-Daily</title>
+<meta name="description" content="Compare AI agents on real software tasks, explore their capabilities, and follow results over time.">
+<link rel="stylesheet" href="./assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="./assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
 </head>
-<body>
-
-<!-- The two inner `flex-1` are gone. Only `main` needs it (verify_site.py
-     pins that class string), and nothing inside a single-column page was ever
-     going to grow to fill it: three nested stretch declarations for one
-     column. Measured identical at 390/768/1440 x 768/900/1600.
-
-     This page carries 940px of content and the leaderboard-to-footer step is
-     88px, the same on all 13 screens. The residual stretch that opens under
-     it on a window taller than ~1030px is `mt-auto` on the footer that
-     assets/site.js injects as a child of <body>, not markup on this page. -->
+<body class="tdb-results">
 <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
-  <div class="flex flex-col items-center px-4 py-6">
-    <div class="flex w-full max-w-7xl flex-col" data-tdb-canary-host>
-
-      <!-- The whole page above the table is a title, a line, and two ways in.
-           What used to sit between them - a seven-row status grid, an
-           integrity callout with a details disclosure, and a three-task
-           preview of a list that has its own page - pushed the only measured
-           numbers on the site below the fold. None of those claims were
-           dropped: they live on /benchmarks/, the page the nav calls
-           "status". -->
-      <div class="tdb-masthead" data-tdb-section="intro">
-        <p class="text-muted-foreground font-mono text-sm">Living coding-agent benchmark</p>
-        <h1 class="font-mono text-4xl font-medium tracking-tighter text-balance"><span>Terminal</span> <span>Daily</span></h1>
-        <p class="text-fd-muted-foreground max-w-3xl font-mono tracking-tight text-balance">Fresh merged pull requests become executable tasks.</p>
-        <div class="flex flex-wrap gap-3">
-          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline bg-primary text-primary-foreground" href="./guide/quickstart/">Run the benchmark</a>
-          <a class="inline-flex items-center justify-center border px-4 py-2 font-mono no-underline hover:bg-muted" href="./benchmarks/">Status &amp; limits</a>
-        </div>
+  <div class="tdb-page-container tdb-result-frame" data-tdb-canary-host>
+    <div class="tdb-page-heading tdb-masthead" data-tdb-section="intro">
+      <h1>Terminal-Daily</h1>
+      <p>Measure how well AI agents solve real software tasks.</p>
+      <div class="tdb-hero-actions">
+        <a class="tdb-action-primary" href="./leaderboard/">Explore results</a>
+        <a href="./registry/">Browse tasks</a>
       </div>
-
-      <section class="tdb-block" data-tdb-section="leaderboard">
-        <div class="tdb-block-head">
-          <!-- The UNOFFICIAL pill and its `why` link are appended to this
-               heading by officialBadge(). That pill is the disclosure,
-               printed at the point where the claim is made, which is the
-               only place a qualifier is read. -->
-          <h2 id="hp-board-title">Leaderboard</h2>
-          <p id="hp-board-sub">&mdash;</p>
-          <div class="tdb-block-tools">
-            <div id="daynav"></div>
-            <a href="./leaderboard/">Full leaderboard &rarr;</a>
-            <a href="./registry/">Browse tasks &rarr;</a>
-          </div>
-        </div>
-        <div class="tdb-plain-table" id="hp-board">
-          <p class="tdb-empty">Loading&hellip;</p>
-        </div>
-        <p class="tdb-block-foot tdb-foot" id="hp-board-foot">Only publishable rows can appear here.</p>
-      </section>
-
     </div>
+    <section class="tdb-block" data-tdb-section="leaderboard">
+      <div class="tdb-preview-toolbar">
+        <h2 id="hp-board-title">Leaderboard</h2>
+        <p id="hp-board-sub"></p>
+        <div id="daynav"></div>
+        <a href="./leaderboard/">Full leaderboard</a>
+      </div>
+      <div class="tdb-plain-table" id="hp-board"><p class="tdb-empty">Loading results&hellip;</p></div>
+      <p id="hp-board-foot" hidden></p>
+    </section>
+    <section class="tdb-release-digest" data-tdb-section="release" data-release-digest="latest" aria-live="polite"><p class="tdb-empty">Loading latest release&hellip;</p></section>
+    <section class="tdb-block" data-tdb-section="cases">
+      <div class="tdb-case-heading"><h2>Example tasks</h2><p data-case-date>Loading observed results&hellip;</p></div>
+      <div class="tdb-case-grid">
+<!-- TDB_CASES_START -->
+<article class="tdb-case" data-case-task="td-a1e719fced6e790d" data-case-observed-date="2026-09-17"><p class="tdb-case-project">ollama-python</p><h3>Recognize image paths in any letter case</h3><p>Treat recognized image extensions as file paths regardless of letter case, even when the string could also decode as base64.</p><p class="tdb-case-outcome">Loading observed results&hellip;</p><a href="./registry/td-a1e719fced6e790d/" data-case-link>Task and model outcomes &rarr;</a></article>
+<article class="tdb-case" data-case-task="td-c3d8f979a1b6446f" data-case-observed-date="2026-09-17"><p class="tdb-case-project">nirimod</p><h3>Save configuration without breaking symbolic links</h3><p>Write configuration changes through each symbolic link to its real target, preserving the link and the target file's permissions.</p><p class="tdb-case-outcome">Loading observed results&hellip;</p><a href="./registry/td-c3d8f979a1b6446f/" data-case-link>Task and model outcomes &rarr;</a></article>
+<article class="tdb-case" data-case-task="td-a12f9e85169e6c4b" data-case-observed-date="2026-09-17"><p class="tdb-case-project">photon-docker</p><h3>Resume downloads without corrupting the file</h3><p>Decide whether to resume from the server's actual HTTP response, validating range headers before appending bytes.</p><p class="tdb-case-outcome">Loading observed results&hellip;</p><a href="./registry/td-a12f9e85169e6c4b/" data-case-link>Task and model outcomes &rarr;</a></article>
+<article class="tdb-case" data-case-task="td-fd876514b9fadbb9" data-case-observed-date="2026-09-17"><p class="tdb-case-project">nginx-config-formatter</p><h3>Keep quoted configuration values intact</h3><p>Split configuration directives at unquoted separators while preserving semicolons, braces, whitespace, and opposite-kind quotes inside quoted values.</p><p class="tdb-case-outcome">Loading observed results&hellip;</p><a href="./registry/td-fd876514b9fadbb9/" data-case-link>Task and model outcomes &rarr;</a></article>
+<!-- TDB_CASES_END -->
+      </div>
+    </section>
+    <section class="tdb-about" data-tdb-section="about" aria-label="About Terminal-Daily">
+      <div><h2>Real software work</h2><p>Tasks come from changes in open-source projects, with tests to check whether a solution works.</p></div>
+      <div><h2>More than one score</h2><p>Explore results by capability and see how a model performs at different reasoning efforts.</p></div>
+      <div><h2>Progress over time</h2><p>Browse evaluation dates and task releases as the benchmark grows.</p></div>
+    </section>
   </div>
 </main>
 
-<script src="./assets/site.js?v=b1d8696d89" data-root="." data-page="home"></script>
-<script src="./assets/tdb-data.js?v=b1d8696d89"></script>
+<script src="./assets/site.js?v=7d2e76d680" data-root="." data-page="home"></script>
+<script src="./assets/tdb-data.js?v=7d2e76d680"></script>
+<script src="./assets/tdb-releases.js?v=7d2e76d680"></script>
 <script>
 (function () {
   "use strict";
@@ -125,25 +111,13 @@
    * day changes this page too. The v3 gate is still here and still decides
    * whether the numbers may call themselves a ranking -- see officialBadge.
    * ------------------------------------------------------------------ */
-  var BOARD_PREVIEW_LIMIT = 5;
+  var BOARD_PREVIEW_LIMIT = 10;
   var DAYS = [];
+  var expandedModels = new Set();
+  var currentDay = null, currentSite = null;
 
-  /* One row per scaffold cell. A cell key is either a scaffold on its own
-     ("single_shot", "codex", "terminus-2", "oracle") or that scaffold at one
-     reasoning effort ("single_shot@xhigh"). Both shapes are kept; what
-     changed is that the effort is no longer thrown away.
-
-     It used to be `agent: at < 0 ? key : key.slice(0, at)`, which printed
-     "single_shot" for the mainline cell AND for all four of its effort
-     sweeps. On 2026-09-10 that put gpt-5.6-sol on the preview twice under
-     byte-identical labels, once at 103/342 and once at 103/293 -- two rows
-     that differ only in a denominator the reader has no way to attribute.
-     That is precisely the confusion the rest of this site is built to
-     refuse, so `agent` is now the full key and the effort survives to the
-     screen. `effort` is null only for a scaffold's own mainline cell; that
-     null is a real distinction (no effort sweep was requested), not a
-     missing value, and renderBoard partitions on it rather than defaulting
-     it to anything. */
+  /* Keep agent, effort and the full scaffold key separate so the shared
+     grouping selects a representative without changing any measurement. */
   function flattenDay(day) {
     var out = [];
     (day.leaderboard || []).forEach(function (entry) {
@@ -152,12 +126,15 @@
         if (key === "model" || !cell || typeof cell !== "object") return;
         if (typeof cell.n !== "number" || cell.n <= 0) return;
         var at = key.indexOf("@");
+        var repeat = T.resultStats(day, entry.model, key);
+        if (repeat && repeat.n !== cell.n) repeat = null;
         out.push({
           model: entry.model,
-          agent: key,
-          scaffold: at < 0 ? key : key.slice(0, at),
+          agent: at < 0 ? key : key.slice(0, at),
+          scaffold: key,
           effort: at < 0 ? null : key.slice(at + 1),
           solved: cell.solved, n: cell.n,
+          repeat: repeat,
           rate: cell.solved / cell.n
         });
       });
@@ -165,32 +142,6 @@
     return out;
   }
 
-  /* How many distinct models are in `rows`. Used only to say, in the foot,
-     how many models the preview's own filter excluded -- a model that was
-     measured under an effort sweep and never at the scaffold's default
-     effort has no mainline row, and dropping it without saying so would be
-     exactly the silent-empty-row failure this site exists to prevent.
-
-     Counted over all seven published days, not one: 2026-09-03, 2026-09-04,
-     2026-09-05 and 2026-09-10 each hide exactly one model, gpt-5.2-codex,
-     which on those days was measured only under single_shot@xhigh/@high and
-     never at single_shot's default effort. The other three days hide none --
-     2026-07-23 and 2026-08-19 carry no effort sweeps at all, and 2026-09-06
-     is a two-task day whose only model (oracle-agent) has mainline cells --
-     so the difference is 0 there and the foot clause never prints. An
-     earlier version of this comment said "2026-09-03 through 2026-09-10 each
-     have one", which swept 2026-09-06 into a range it does not belong to;
-     the range was written after looking at one day and assuming the rest. */
-  function countModels(rows) {
-    var seen = {}, n = 0;
-    rows.forEach(function (r) {
-      if (!Object.prototype.hasOwnProperty.call(seen, r.model)) {
-        seen[r.model] = true;
-        n++;
-      }
-    });
-    return n;
-  }
 
   function officialBadge(day, site) {
     /* THE OFFICIAL/UNOFFICIAL CONTRACT. This badge and the identically named
@@ -231,7 +182,7 @@
     var ranked = formalModelRatings(relativeReport(day), (site && site.scoring) || {});
     return ranked.length
       ? '<span class="tdb-badge" data-official="true">Official</span>'
-      : '<span class="tdb-badge" data-official="false">Unofficial</span>';
+      : '<span class="tdb-badge" data-official="false">Preliminary</span>';
   }
 
   /* Every cell on this table used to carry a ~120-character utility chain and
@@ -240,198 +191,41 @@
      already had the class) styles bare <th>/<td>; `.tdb-num` right-aligns and
      sets the numeric face. Same table, same numbers, no wrappers. */
   function renderBoard(day, site) {
+    currentDay = day; currentSite = site;
+    T.renderSelectedCases(day);
     var rows = flattenDay(day);
-
     if (!rows.length) {
-      set("hp-board", '<p class="tdb-empty">No measured cells on ' +
-        esc(day.date) + ".</p>");
+      set("hp-board", '<p class="tdb-empty">No evaluated tasks on ' + esc(day.date) + '.</p>');
       set("hp-board-sub", esc(day.date));
-      set("hp-board-foot", "Nothing was scored on this day.");
+      set("hp-board-foot", "");
       return;
     }
-
-    /* WHAT THE PREVIEW RANKS, AND WHY IT IS NOT EVERYTHING.
-       This sorted five rows out of every flattened cell on the day, mainline
-       and effort sweep together, on solved/n alone. Effort sweeps are run
-       over a smaller slice of the roster than the mainline pass, so they sit
-       at a smaller denominator, and a rate at a smaller denominator wins a
-       naive sort without having measured more. Measured on 2026-09-10: 70
-       flattened rows at four different denominators (293, 322, 324, 342);
-       four of the five preview rows were @xhigh at n=293 and the fifth, in
-       fourth place, was gpt-5.6-sol single_shot@high at 105/322 = 0.326 --
-       an earlier version of this comment said "all five were @xhigh at
-       n=293", which is wrong and was never recomputed after the sort changed
-       -- and the actual mainline leader, Claude-Opus-4.7 at 104/342 = 0.304,
-       was not on the page at all. On 2026-09-05 the top row was
-       gpt-5.2-codex@xhigh at 45/82 = 0.549 -- an 82-task sweep printed above
-       every 338-task result on the day. A five-row teaser cannot carry the
-       caveat that would make those comparable, so it must not make them.
-
-       So the preview shows the mainline cells only -- the cells whose key
-       carries no @effort, one per scaffold per model -- and the effort
-       sweeps stay reachable on /leaderboard/, which shows every row with its
-       own denominator and effort and has the room to say what a sweep is.
-       They are NOT dropped quietly: the foot below counts them and says
-       where they went, and it separately counts the models that have no
-       mainline cell at all (see countModels above for the per-day census)
-       so that a model vanishing from this preview is a stated fact rather
-       than an absence.
-
-       WHAT THE FOOT MAY NOT SAY ABOUT THE SWEEPS. It used to say the
-       excluded rows "are measured over a smaller task slice". That is a
-       causal justification, it was checked on 2026-09-10 and 2026-09-05
-       only, and it is false on two of the seven days. On 2026-08-19, 144 of
-       the 151 excluded sweep rows sit at an n at least as large as their own
-       model+scaffold mainline n -- gpt-5.6-sol codex@low/@medium/@high are
-       all n=50 against a codex mainline of n=37 -- and the highest rate on
-       the whole day, gpt-5.6-sol codex@low at 15/50 = 0.300, is an excluded
-       row with the identical denominator and the identical rate as
-       openai/gpt-5.5 terminus-2 15/50, which the preview shows. On
-       2026-09-03, 24 of the 40 excluded sweeps are at n=372 against a
-       mainline denominator of 366 -- a LARGER slice, under a foot saying
-       "smaller". No n comparison was ever performed in this function, so the
-       sentence was an assumption printed as a fact.
-       The clause is therefore gone rather than recomputed: a per-day
-       n-relationship sentence would be four different sentences (all smaller
-       / some larger / mixed / equal), and the honest statement needs none of
-       them. The rows are not ranked here and they are listed in full, with
-       their own denominators, one click away; that is true on all seven
-       days and is all the foot now claims.
-
-       WHY THE SHOWN ROWS CAN STILL FAIL TO BE A RANKING. Partitioning to
-       mainline does not make what is left mutually comparable. On 2026-08-19
-       the mainline denominators run 24..50, because models entered the suite
-       on different days, and the rank loop below printed gpt-5.4 codex 9/37
-       = 24.32% above openai/gemini-3.1-pro-preview terminus-2 12/50 =
-       24.00%; on 2026-07-23 the mainline n is 4 or 6 and DeepSeek-V4-Flash
-       2/4 and Claude-Opus-4.8 3/6 both printed rank 1. The previous round
-       admitted this in a comment, which no reader of the page can see -- an
-       admission only the next editor gets is not a disclosure.
-       So the refusal applied to the sweeps is applied to the shown rows too:
-       `comparable` below is computed on the day being rendered, and when the
-       shown denominators are not all equal the Rank column is WITHHELD --
-       not merely annotated -- and the foot says so and names the actual
-       range on that day. Withholding beats a caveat because the rank number
-       is the comparison: a reader who sees "1, 2, 3" has already been told
-       these are ordered by the same measurement, and no sentence underneath
-       unsays it, whereas a table with no rank column and rows in rate order
-       is a list, which is what the day supports. The rows stay sorted by
-       rate so the order is deterministic and the strongest rows are the ones
-       previewed; the denominator is printed on every row and must stay.
-       Only 2026-07-23 (n 4,6) and 2026-08-19 (n 24..50) trip this; the four
-       matrix days and 2026-09-06 have a single mainline denominator each
-       (366 / 338 / 338 / 342 / 2), so on them the table is unchanged. */
-    var main = [];
-    var i;
-    for (i = 0; i < rows.length; i++) {
-      if (rows[i].effort === null) main.push(rows[i]);
-    }
-    var swept = rows.length - main.length;
-    var hiddenModels = countModels(rows) - countModels(main);
-
-    /* A day can in principle be all sweep and no mainline (nothing in the
-       schema forbids it). Blanking the preview then would render a scored
-       day exactly like an unscored one, so rank the sweeps instead and say
-       so -- every row prints its effort and its denominator either way. */
-    var sweepsOnly = false;
-    if (!main.length) {
-      main = rows;
-      sweepsOnly = true;
-      swept = 0;
-      hiddenModels = 0;
-    }
-
-    main.sort(function (a, b) { return b.rate - a.rate; });
-
-    /* Are the rows this table is about to show measured over the same number
-       of tasks? This is computed over the rows actually shown -- `main`,
-       which is the mainline partition, or every row on a sweeps-only day --
-       because it is those rows a Rank column would be making a claim about,
-       not the day as a whole. `main` is non-empty here: the empty-day case
-       returned above and the sweeps-only fallback refilled it. */
-    var nMin = main[0].n, nMax = main[0].n;
-    for (i = 1; i < main.length; i++) {
-      if (main[i].n < nMin) nMin = main[i].n;
-      if (main[i].n > nMax) nMax = main[i].n;
-    }
+    var preferred = String((day.matrix && day.matrix.scaffold) || "").split("@")[0];
+    var main = T.groupModelEfforts(rows, preferred);
+    var nMin = Math.min.apply(null, main.map(function (r) { return r.n; }));
+    var nMax = Math.max.apply(null, main.map(function (r) { return r.n; }));
     var comparable = nMin === nMax;
-
-    /* Ranks are assigned only when a rank means something. The tie-skipping
-       is the ordinary competition rule (two rows at the same rate share a
-       rank and the next row takes the position it actually occupies), and it
-       is reached only on days whose shown denominators are uniform. */
-    if (comparable) {
-      var last = null, lastRank = 0;
-      main.forEach(function (r, k) {
-        if (last === null || r.rate !== last) { lastRank = k + 1; last = r.rate; }
-        r.rank = lastRank;
-      });
+    var head = '<tr><th class="tdb-col-rank">Rank</th><th class="tdb-col-model">Model</th>' +
+      '<th class="tdb-col-agent">Agent</th><th>Success rate</th><th class="tdb-col-count tdb-num">Tasks</th></tr>';
+    function rowHtml(r, child) {
+      var nameHtml = child ? '<span class="tdb-effort-label">' + esc(r.effort || "default") + '</span>'
+        : T.modelToggle(r, expandedModels.has(r.model));
+      return '<tr' + (child ? ' class="tdb-effort-row"' : ' data-model-group="' + esc(r.model) + '"') + '>' +
+        '<td class="tdb-num tdb-muted">' + (child || !comparable ? '' : esc(r.rank)) + '</td>' +
+        '<td>' + nameHtml + '</td><td class="tdb-muted">' + esc(T.agentLabel(r.agent)) + '</td>' +
+        '<td class="tdb-score-cell">' + T.scoreCell(r.solved, r.n, r.repeat) + '</td>' +
+        '<td class="tdb-num tdb-muted">' + esc(r.n) + '</td></tr>';
     }
-
-    var head = "<tr>" +
-      (comparable ? '<th class="tdb-num">Rank</th>' : "") +
-      '<th>Agent</th><th>Model</th>' +
-      '<th class="tdb-num">Accuracy</th><th class="tdb-num">Solved</th></tr>';
     var body = main.slice(0, BOARD_PREVIEW_LIMIT).map(function (r) {
-      return "<tr>" +
-        (comparable
-          ? '<td class="tdb-num tdb-muted">' + esc(r.rank) + "</td>"
-          : "") +
-        '<td class="tdb-muted">' + esc(r.agent) + "</td>" +
-        '<td><span class="tdb-id">' + esc(r.model) + "</span></td>" +
-        '<td class="tdb-num">' + esc(T.pct(r.rate)) + "</td>" +
-        '<td class="tdb-num tdb-muted">' + esc(r.solved) + "/" + esc(r.n) + "</td>" +
-        "</tr>";
+      return rowHtml(r, false) + (expandedModels.has(r.model)
+        ? r.variants.map(function (v) { return rowHtml(v, true); }).join("") : "");
     }).join("");
-
-    set("hp-board", '<table class="w-full caption-bottom">' +
-      "<thead>" + head + "</thead><tbody>" + body + "</tbody></table>");
-    set("hp-board-title", "Suite terminal-daily@" + esc(day.date) + " " + officialBadge(day, site));
-    set("hp-board-sub", esc(rows.length) + " entries \u00b7 " + esc(day.n_tasks) + " tasks");
-
-    /* The foot has to account for every flattened row on the day, including
-       the ones this table did not show. "Top 5 of 33" alone would leave the
-       reader believing the day had 33 measured cells when it had 70. */
-    var foot = main.length > BOARD_PREVIEW_LIMIT
-      ? "Top " + BOARD_PREVIEW_LIMIT + " of " + main.length
-      : String(main.length);
-    if (sweepsOnly) {
-      foot += (main.length === 1 ? " entry" : " entries") +
-        ", all of them effort sweeps: no cell on this day was run at a " +
-        "scaffold's default effort. Each row prints its own effort and " +
-        "denominator; the full leaderboard has the rest.";
-    } else {
-      foot += (main.length === 1 ? " mainline entry." : " mainline entries.");
-      if (swept) {
-        /* States the exclusion and its destination, and nothing about WHY
-           the sweeps are different -- see the long note in this function for
-           the two days on which the old "smaller task slice" claim is false.
-           Both halves of what is left are checkable on all seven days: the
-           rows are excluded from this table, and /leaderboard/ lists every
-           flattened cell with its own effort and its own solved/n. */
-        foot += " " + swept + (swept === 1 ? " effort-sweep row is"
-                                           : " effort-sweep rows are") +
-          " not ranked here; the full leaderboard lists each one with its " +
-          "own effort and its own denominator.";
-      }
-      if (hiddenModels) {
-        foot += " " + hiddenModels +
-          (hiddenModels === 1 ? " model has" : " models have") +
-          " no mainline cell on this day and so cannot appear here at all.";
-      }
-    }
-    /* The reader is told, on the day it is true, that the table above is a
-       list and not a ranking -- with the actual span of denominators on that
-       day, because "denominators differ" without the numbers is a caveat the
-       reader cannot check against the n printed on each row. This is the
-       visible half of withholding the Rank column; a missing column with no
-       explanation would read as an oversight. */
-    if (!comparable) {
-      foot += " No rank is shown: these rows were not measured over the same" +
-        " number of tasks (n runs from " + nMin + " to " + nMax +
-        " here), so they are listed in rate order and each rate has to be" +
-        " read against the denominator beside it.";
-    }
+    set("hp-board", '<table class="tdb-results-table" data-ranked="' + (comparable ? 'true' : 'false') + '"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>');
+    set("hp-board-title", "Leaderboard " + officialBadge(day, site));
+    set("hp-board-sub", esc(main.length) + " models");
+    var foot = "Each model shows its highest tested effort. Expand a model to compare settings. " +
+      (rows.some(function (r) { return r.repeat; }) ? "Scores use majority outcomes. ± shows run standard deviation." : "Repeat records are unavailable for this date.");
+    if (!comparable) { foot += " Models were evaluated on different task sets."; }
     set("hp-board-foot", foot);
   }
 
@@ -441,9 +235,23 @@
      nothing published. Nobody can tell those apart from the outside, so a
      broken deploy looked like an empty one. Failures are loud now. */
   function load(id, site) {
+    expandedModels.clear();
     T.dayNav(byId("daynav"), { days: DAYS, active: id, onChange: function (d) { load(d, site); } });
     return T.dayData(id).then(function (day) { renderBoard(day, site); });
   }
+
+  byId("hp-board").addEventListener("click", function (ev) {
+    var row = ev.target.closest("tr[data-model-group]");
+    if (!row || !row.querySelector("button[data-model]")) { return; }
+    var model = row.getAttribute("data-model-group");
+    if (expandedModels.has(model)) { expandedModels.delete(model); }
+    else { expandedModels.add(model); }
+    renderBoard(currentDay, currentSite);
+    var button = Array.from(byId("hp-board").querySelectorAll("button[data-model]")).find(function (b) {
+      return b.getAttribute("data-model") === model;
+    });
+    if (button) { button.focus({ preventScroll: true }); }
+  });
 
   T.getJSON("site_data.json").then(function (site) {
     return T.dayIndex().then(function (idx) {
@@ -451,6 +259,7 @@
       var want = T.dayFromUrl();
       var active = (want && DAYS.indexOf(want) >= 0) ? want : idx.latest;
       if (!active) {
+        T.renderSelectedCases(null);
         T.dayNav(byId("daynav"), { days: [], active: null, onChange: function () {} });
         set("hp-board", '<p class="tdb-empty">No day has been published yet.</p>');
         /* Do not name the publishing command here: whoever runs it is not
@@ -462,13 +271,14 @@
       return load(active, site);
     });
   }).catch(function (e) {
+    T.renderSelectedCases(null);
     T.loadError(byId("hp-board"), "the site data", e);
     set("hp-board-foot", "");
   });
 
   window.addEventListener("popstate", function () {
-    var d = T.dayFromUrl();
-    if (d) T.getJSON("site_data.json").then(function (site) { load(d, site); });
+    var d = T.dayFromUrl() || DAYS[0];
+    if (d && currentSite) load(d, currentSite);
   });
 })();
 </script>

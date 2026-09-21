@@ -1,47 +1,31 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>reading the discrimination report — terminal-daily-bench docs</title>
-<meta name="description" content="Standing methodology for the selection-quality report: what its numbers are, and which of its rows may be compared with which.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Read the quality report · Terminal-Daily</title>
+<meta name="description" content="Use the report to inspect the evidence behind a comparison.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../../docs/quality-methods/reports/">
 </head>
 <body>
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
-    <h1>Reading the discrimination report</h1>
-    <p class="tdb-doc-sub">Standing methodology for the <a href="../../../quality/">selection-quality report</a>, so it does not have to sit beside every figure.</p>
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Read the quality report</h1>
+<p class="tdb-doc-sub">Use the report to inspect the evidence behind a comparison.</p>
+</header>
 
-    <h2 id="report-discrimination"><a href="#report-discrimination">What the numbers on that page are</a></h2>
-    <dl class="tdb-defs">
-      <dt>Provisional readings</dt>
-      <dd>Provisional readings, not properties &mdash; every number on that page is recomputed from the published matrix at page load.</dd>
-      <dt>Scaffold scope</dt>
-      <dd>The solve matrix is <strong>one scaffold</strong>, one model family, one day. It is never the whole model suite, and its cells are not independent trials.</dd>
-      <dt>Hollow squares</dt>
-      <dd>A hollow square is a task <strong>from another suite</strong>, not a skipped run. Where a run really was skipped under the reported scaffold, the note on the figure says so instead and names the count.</dd>
-      <dt>Overlapping intervals</dt>
-      <dd>Overlapping Wilson intervals are <strong>not a significance test</strong>. Where a figure paints a shaded band, that band marks the range every count in that group still allows.</dd>
-    </dl>
+<h2 id="report-discrimination"><a href="#report-discrimination">Start with scope and coverage</a></h2>
+<p>The <a href="../../../quality/">quality report</a> presents provisional measurements from the available results. Check which date, tasks, models, and agent configuration each figure covers. A figure for one configuration does not describe every run in the benchmark.</p><p>A blank or hollow cell is not automatically a failed attempt. Read the figure’s coverage note. Overlapping confidence intervals alone are not a test of statistical significance.</p>
 
-    <h2 id="report-comparisons"><a href="#report-comparisons">Which rows may be compared with which</a></h2>
-    <dl class="tdb-defs">
-      <dt>The level rows</dt>
-      <dd>The difficulty rows are a <strong>partition</strong> of the publication-mode row above them, not peer groups. They are compared inside one publication mode only: pooling the modes puts structurally-zero tasks into the comparison and the result is an artifact of pooling.</dd>
-      <dt>Publication mode</dt>
-      <dd><strong>Live vs archive is a difference in what is withheld, not measured difficulty.</strong> Live withholds gold patches, protected test bodies and merge provenance; archive publishes them. Harder, newer and measured differently cannot be told apart. Any other publication mode likewise differs in what the task package publishes, so those rows are coverage facts, not difficulty findings.</dd>
-      <dt>Declared difficulty</dt>
-      <dd><strong>Declared difficulty is editorial</strong> &mdash; the <code>task.toml</code> label, never measured.</dd>
-      <dt>Authority</dt>
-      <dd>Nothing on that page is ranked or certified: no publication bundle is approved, no matrix digest is trusted, and receipt authority is inactive &mdash; which is why the registry&rsquo;s <strong>Official solves</strong> column is a dash.</dd>
-    </dl>
-  </article>
+<h2 id="report-comparisons"><a href="#report-comparisons">Compare like with like</a></h2>
+<p>Keep publication mode and evaluation conditions consistent. Live and archived packages differ in what they reveal; that distinction does not itself establish task difficulty. Author-assigned difficulty is also separate from measured success rate.</p><p>Capability labels overlap, and tasks from the same project may be related. These reports help inspect a task set; they do not certify a model ranking.</p>
+</article>
 </main>
 
-<script src="../../../assets/site.js?v=b1d8696d89" data-root="../../.." data-page="docs"></script>
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

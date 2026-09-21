@@ -308,12 +308,14 @@ def test_atif_telemetry_is_additive_and_best_effort(tmp_path):
         },
     }))
 
-    telemetry = ev.read_harness_telemetry(str(tmp_path))
+    telemetry = ev.read_harness_telemetry(str(tmp_path), complete_attempt=True)
 
     assert telemetry["version"] == "1.2.3"
     assert telemetry["n_turns"] == 2
     assert telemetry["n_llm_calls"] == 2
     assert telemetry["n_tool_calls"] == 1
+    assert telemetry["n_command_calls"] == 1
+    assert telemetry["trajectory_complete"] is True
     assert telemetry["total_tokens"] == 14
 
 
@@ -589,7 +591,7 @@ def test_atif_telemetry_is_strictly_bounded_and_drops_nested_data(tmp_path):
     assert "cost_usd" not in telemetry
     assert "total_tokens" not in telemetry
     assert set(telemetry) <= {
-        "trajectory_model", "n_turns", "n_llm_calls", "n_tool_calls",
+        "trajectory_model", "n_turns", "n_llm_calls", "n_tool_calls", "n_command_calls", "trajectory_complete",
         "completion_tokens", "trajectory_path",
     }
 
@@ -1556,3 +1558,32 @@ def test_oracle_node_tmp_cleanup_failure_is_fail_closed(tmp_path, monkeypatch):
         )
 
     assert node_tmp.is_dir()
+
+
+@pytest.mark.parametrize("case,commands,tools", [("complete", 2, 3), ("empty", 0, 0), ("unknown", None, 4), ("terminus", 1, 2), ("raw", None, None), ("partial", None, None), ("continued", None, None)])
+def test_harness_call_counts_need_complete_and_classifiable_trajectory(tmp_path, case, commands, tools):
+    from tools.make_fixtures import call_telemetry_fixture
+    path = tmp_path / "trajectory.json"
+    path.write_text(json.dumps(call_telemetry_fixture()[case]))
+    result = ev.read_harness_telemetry(str(tmp_path), complete_attempt=True)
+    assert result["n_command_calls"] == commands
+    assert result["n_tool_calls"] == tools
+    assert result["trajectory_complete"] is (tools is not None)
+    assert ev.read_harness_telemetry(str(tmp_path))["n_tool_calls"] is None
+
+
+def test_harness_rejects_malformed_calls_instead_of_counting_invalid_entries(tmp_path):
+    from tools.make_fixtures import call_telemetry_fixture
+    (tmp_path / "trajectory.json").write_text(json.dumps(call_telemetry_fixture()["malformed"]))
+    assert ev.read_harness_telemetry(str(tmp_path), complete_attempt=True) == {}
+
+
+def test_finalized_harness_counts_reach_public_run_details(tmp_path):
+    from tools.make_fixtures import call_telemetry_fixture, run_details_fixture
+    from web.gen_run_details import reconstruct_board
+    (tmp_path / "trajectory.json").write_text(json.dumps(call_telemetry_fixture()["complete"]))
+    sample = run_details_fixture()
+    sample["board"]["results"][0]["harness"] = ev.read_harness_telemetry(str(tmp_path), complete_attempt=True)
+    _, details, _ = reconstruct_board(sample["published"], sample["board"])
+    assert (details["runs"][0]["command_count"], details["runs"][0]["tool_call_count"]) == (2, 3)
+    assert "trajectory_path" not in json.dumps(details)

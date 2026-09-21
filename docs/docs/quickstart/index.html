@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Quickstart · Terminal-Daily</title>
+<meta name="description" content="Install the tools and check what you can run today.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="quickstart">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Quickstart</h1>
+<p class="tdb-doc-sub">Install the tools and check what you can run today.</p>
+</header>
+
+<h2 id="how-scoring-works"><a href="#how-scoring-works">What an evaluation does</a></h2>
+<p>A model proposes a code change for a task. The evaluator applies it and runs protected tests. The result records whether those tests passed.</p>
+
+<h2 id="requirements"><a href="#requirements">Requirements</a></h2>
+<ul>
+<li>Python 3.11 or later.</li>
+<li>For model calls, an OpenAI-compatible API endpoint and its credentials.</li>
+<li>For scoring, an Apptainer or Singularity host and access to the required evaluation environment.</li>
+</ul>
+
+<h2 id="availability"><a href="#availability">Current availability</a></h2>
+<p>The required evaluation environment includes unpublished changes to Harbor, the task runner. The public commands cannot yet score a task end to end without it. Installing the standard Harbor package does not provide those changes.</p><p>Task inspection, setup checks, task publication, and analysis of existing results remain available.</p>
+
+<h2 id="install"><a href="#install">Install</a></h2>
+<p>From a checkout of the <a href="https://github.com/DaizeDong/terminal-daily-bench">project repository</a>, run:</p><figure class="tdb-code"><figcaption>Install from source</figcaption><pre><code>pip install -e .
+tdb --help</code></pre></figure>
+
+<h2 id="endpoint"><a href="#endpoint">Connect a model</a></h2>
+<p>Use the API address and credentials for your provider or local model server. Replace the example values below.</p><figure class="tdb-code"><figcaption>Model connection</figcaption><pre><code>export OPENAI_BASE_URL=https://api.openai.com/v1
+export OPENAI_API_KEY=YOUR_API_KEY</code></pre></figure>
+
+<h2 id="doctor"><a href="#doctor">Check your setup</a></h2>
+<p>Replace the path with a task directory. The check identifies missing requirements before you make a model call.</p><figure class="tdb-code"><figcaption>Check a task environment</figcaption><pre><code>tdb doctor path/to/task</code></pre></figure><p>With the required environment available, continue to <a href="../run/">Run a task</a>.</p>
+</article>
+</main>
+
+<script data-page="quickstart" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
+<script>
+/* Eleven section ids moved off this page when it was split. Nothing on the
+   site links to them -- only #requirements was ever deep-linked, and it did
+   not move -- but a reader's bookmark is a referrer nobody can grep for, so
+   the old URL still has to land on the content rather than on a page that
+   silently ignores its own fragment.
+
+   Guarded on getElementById: if an id ever comes BACK to this page, the
+   forward stops firing for it rather than bouncing a live anchor away. */
+(function forwardMovedAnchors() {
+  var MOVED = {
+    "image": "../run/",
+    "score": "../run/",
+    "score-scaffold": "../run/",
+    "oracle": "../run/",
+    "task-ids": "../run/",
+    "record": "../result-record/",
+    "record-bad-safe": "../result-record/",
+    "fa-block": "../false-accept/",
+    "quality": "../quality-card/",
+    "quality-output": "../quality-card/",
+    "submitting": "../quality-card/"
+  };
+  var frag = String(location.hash || "").slice(1);
+  if (!frag || !MOVED[frag]) return;
+  if (document.getElementById(frag)) return;
+  location.replace(MOVED[frag] + "#" + frag);
+})();
+</script>
+</body>
+</html>

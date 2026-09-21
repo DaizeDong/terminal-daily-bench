@@ -12,6 +12,7 @@ Reads (all optional, degrades to whatever exists):
     <release>/registry.json          suite declarations
     <release>/tasks/{archive,live}/  the shipped task packages
     <release>/docs/leaderboard_data.json   optional formal v3 report + task matrix
+    <release>/docs/data/catalogue-additions.json  reviewed metadata without local packages
 
 Emits:
     { generated, scoring, suites: [{id, status, n_tasks, languages, note}],
@@ -394,6 +395,104 @@ def _add_membership(
     task_ids_by_suite.setdefault(sid, set()).add(task_id)
 
 
+def validate_catalogue_additions(data: dict) -> dict:
+    """Validate public metadata; additions cannot carry scores or private artifacts."""
+    if not isinstance(data, dict) or set(data) - {"tasks", "suites"}:
+        raise ValueError("catalogue additions must contain only tasks and suites")
+    safe = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+    fields = {
+        "tasks": {"id", "title", "repo", "pr_number", "base_sha", "merge_sha", "license", "language",
+                  "n_fail_to_pass", "declared_difficulty", "status", "suite", "suites", "suite_memberships",
+                  "also_in", "solved_by", "n_models", "difficulty"},
+        "suites": {"id", "status", "n_tasks", "note", "languages", "task_ids", "catalogued_tasks",
+                   "target_tasks", "complete", "publish_shortfall", "fresh_tasks", "carried_tasks", "unknown_origin_tasks"},
+    }
+    for key in ("tasks", "suites"):
+        rows = data.get(key, [])
+        if not isinstance(rows, list):
+            raise ValueError(f"catalogue {key} must be a list")
+        seen = set()
+        for row in rows:
+            if not isinstance(row, dict) or set(row) - fields[key]:
+                raise ValueError("unsupported catalogue metadata fields")
+            identity = row.get("id")
+            if not isinstance(identity, str) or not safe.fullmatch(identity) or identity in seen:
+                raise ValueError("invalid or duplicate catalogue identity")
+            seen.add(identity)
+            for name in ("title", "repo", "base_sha", "merge_sha", "license", "language", "declared_difficulty", "status", "suite", "note", "difficulty"):
+                if name in row and not isinstance(row[name], str):
+                    raise ValueError("catalogue text fields must be strings")
+            if row.get("status", "live") not in {"live", "archive"}:
+                raise ValueError("invalid catalogue status")
+            for name in ("pr_number", "n_fail_to_pass", "n_tasks", "catalogued_tasks", "target_tasks", "publish_shortfall", "fresh_tasks", "carried_tasks", "unknown_origin_tasks"):
+                value = row.get(name)
+                if value is not None and (type(value) is not int or value < 0):
+                    raise ValueError("catalogue counts must be nonnegative integers")
+            for name in ("suites", "task_ids", "also_in", "languages"):
+                values = row.get(name, [])
+                if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
+                    raise ValueError("catalogue lists must contain strings")
+                if name in {"suites", "task_ids"} and not all(safe.fullmatch(value) for value in values):
+                    raise ValueError("invalid catalogue membership identity")
+            memberships = row.get("suite_memberships", [])
+            if not isinstance(memberships, list):
+                raise ValueError("catalogue memberships must be a list")
+            for member in memberships:
+                if not isinstance(member, dict) or set(member) - {"suite", "mode", "origin", "certified_date", "age_days"}:
+                    raise ValueError("unsupported catalogue membership metadata")
+                if not isinstance(member.get("suite"), str) or not safe.fullmatch(member["suite"]):
+                    raise ValueError("invalid catalogue membership identity")
+            if key == "tasks" and (row.get("solved_by") is not None or row.get("n_models") is not None or row.get("difficulty")):
+                raise ValueError("catalogue additions cannot supply measured scores or difficulty")
+    return data
+
+
+def merge_catalogue_additions(candidate: dict, additions: dict, existing: dict) -> dict:
+    """Preserve publication history, with package metadata taking precedence."""
+    validate_catalogue_additions(additions)
+    tasks, suites = {}, {}
+    memberships, rosters = {}, {}
+    totals: dict[str, int] = {}
+    # Existing published metadata may be newer than the additive seed. Local
+    # packages are the primary source when they are present.
+    for source in (additions, existing, candidate):
+        for row in source.get("tasks", []):
+            tid = row["id"]
+            tasks.setdefault(tid, {}).update(row)
+            explicit = {str(item["suite"]): item for item in row.get("suite_memberships", []) if item.get("suite")}
+            ids = set(row.get("suites") or []) | set(explicit)
+            if row.get("suite"):
+                ids.add(row["suite"])
+            for sid in ids:
+                _add_membership(memberships, rosters, tid, explicit.get(sid) or {"suite": sid, "mode": row.get("status", "live")})
+                if sid in explicit:
+                    memberships[tid][sid].update(explicit[sid])
+        for row in source.get("suites", []):
+            sid = row["id"]
+            suites.setdefault(sid, {}).update(row)
+            if type(row.get("n_tasks")) is int:
+                totals[sid] = max(totals.get(sid, 0), row["n_tasks"])
+            for tid in row.get("task_ids", []):
+                _add_membership(memberships, rosters, tid, {"suite": sid, "mode": row.get("status", "live")})
+    for tid, task in tasks.items():
+        task["suite_memberships"] = [memberships[tid][sid] for sid in sorted(memberships.get(tid, {}))]
+        task["suites"] = sorted(memberships.get(tid, {}))
+        task["suite"] = primary_suite(task["suites"])
+    for sid in set(suites) | set(rosters):
+        suite = suites.setdefault(sid, {"id": sid, "status": "live", "note": ""})
+        ids = sorted(rosters.get(sid, set()))
+        suite["task_ids"] = ids
+        suite["catalogued_tasks"] = len(ids)
+        suite["n_tasks"] = max(totals.get(sid, 0), len(ids))
+        suite["languages"] = sorted(set(suite.get("languages", [])) | {tasks[tid]["language"] for tid in ids if tid in tasks and tasks[tid].get("language")})
+        origins = [memberships[tid][sid].get("origin") for tid in ids]
+        suite["fresh_tasks"] = origins.count("fresh")
+        suite["carried_tasks"] = origins.count("carried")
+        suite["unknown_origin_tasks"] = len(ids) - suite["fresh_tasks"] - suite["carried_tasks"]
+    return {**candidate, "tasks": sorted(tasks.values(), key=lambda row: (row["suite"], row["id"])),
+            "suites": sorted(suites.values(), key=lambda row: row["id"])}
+
+
 def collect(release: Path, board: dict) -> dict:
     # A legacy/fixture matrix remains useful as an input artifact, but never as
     # public score authority. Only the formal v3 + exactly-50 gate admits it.
@@ -591,12 +690,24 @@ def collect(release: Path, board: dict) -> dict:
             task_by_id[t["id"]] = keep
     tasks = sorted(task_by_id.values(), key=lambda t: (t["suite"], t["id"]))
 
-    return {
+    result = {
         "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "scoring": score_status,
         "suites": sorted(suite_rows.values(), key=lambda s: str(s["id"])),
         "tasks": tasks,
     }
+    additions_path = release / "docs" / "data" / "catalogue-additions.json"
+    if additions_path.is_file():
+        additions = json.loads(additions_path.read_text(encoding="utf-8"))
+        existing_path = release / "docs" / "site_data.json"
+        existing = json.loads(existing_path.read_text(encoding="utf-8")) if existing_path.is_file() else {}
+        result = merge_catalogue_additions(result, additions, existing)
+        # Persisted metadata cannot bypass the current publication authority.
+        for task in result["tasks"]:
+            sb = solved_by.get(task["id"])
+            task.update(solved_by=sb, n_models=n_models if sb is not None else None,
+                        difficulty=_difficulty(sb, n_models))
+    return result
 
 
 _UTC_SECOND = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

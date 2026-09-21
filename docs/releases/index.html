@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Releases · Terminal-Daily</title>
+<meta name="description" content="Explore task releases by date, availability, and programming language.">
+<link rel="stylesheet" href="../assets/tw.css?v=7d2e76d680">
+<link rel="stylesheet" href="../assets/site.css?v=7d2e76d680">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body class="tdb-catalog tdb-suite-catalog">
+
+<main id="nd-home-layout" class="tdb-catalog-main">
+  <div class="tdb-page-container tdb-catalog-frame" data-tdb-canary-host>
+    <header class="tdb-page-heading tdb-catalog-heading">
+      <h1>Releases</h1>
+      <p class="tdb-catalog-meta" id="suite-meta">Loading releases&hellip;</p>
+    </header>
+
+    <section class="tdb-release-digest" data-release-digest="latest" aria-live="polite"><p class="tdb-empty">Loading latest release&hellip;</p></section>
+
+    <div class="tdb-catalog-toolbar">
+      <label class="tdb-catalog-search" for="suite-search">
+        <span>Search</span>
+        <input id="suite-search" type="search" placeholder="Search releases or languages" autocomplete="off" disabled>
+      </label>
+      <div class="tdb-catalog-filters">
+        <label for="suite-status"><span>Status</span>
+          <select id="suite-status" disabled><option value="">All statuses</option></select>
+        </label>
+        <label for="suite-period"><span>Month</span>
+          <select id="suite-period" disabled><option value="">All months</option></select>
+        </label>
+      </div>
+    </div>
+
+    <nav class="tdb-pagination" aria-label="Benchmark pages">
+      <p id="suite-range" role="status" aria-live="polite"></p>
+      <div class="tdb-page-controls">
+        <button id="suite-prev" type="button" aria-label="Previous page" title="Previous page" disabled>&larr;</button>
+        <span id="suite-page">Page 1 of 1</span>
+        <button id="suite-next" type="button" aria-label="Next page" title="Next page" disabled>&rarr;</button>
+      </div>
+    </nav>
+
+    <div class="tdb-catalog-table-wrap" id="suites" data-tdb-primary-data aria-busy="true">
+      <p class="tdb-empty">Loading releases&hellip;</p>
+    </div>
+    <nav class="tdb-pagination tdb-pagination-bottom" id="suite-bottom" aria-label="Release pages at end of results" hidden>
+      <p id="suite-bottom-range"></p>
+      <div class="tdb-page-controls">
+        <button id="suite-bottom-prev" type="button" aria-label="Previous release page" disabled>&larr; Previous</button>
+        <span id="suite-bottom-page"></span>
+        <button id="suite-bottom-next" type="button" aria-label="Next release page" disabled>Next &rarr;</button>
+      </div>
+    </nav>
+
+    <details class="tdb-catalog-disclosure" data-tdb-section="policy">
+      <summary>Release and scoring policy</summary>
+      <div class="tdb-catalog-disclosure-body">
+        <dl class="tdb-catalog-defs">
+          <dt>Active</dt><dd>Solutions stay private while tasks are in use.</dd>
+          <dt>Archived</dt><dd>Solutions and task materials are available for study.</dd>
+        </dl>
+        <p>Published results are preliminary. The evaluation environment is not yet publicly available. <a href="../docs/quickstart/">Getting started</a></p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<script src="../assets/site.js?v=7d2e76d680" data-root=".." data-page="benchmarks"></script>
+<script src="../assets/tdb-data.js?v=7d2e76d680"></script>
+<script src="../assets/tdb-releases.js?v=7d2e76d680"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.TDB;
+  if (T.redirecting) return;
+  var ENT = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"]/g, function (c) { return ENT[c]; });
+  }
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+  function byId(id) { return document.getElementById(id); }
+  function set(id, html) { var el = byId(id); if (el) el.innerHTML = html; }
+
+  function orderedSuites(site) {
+    var suites = ((site && site.suites) || []).slice();
+    suites.sort(function (a, b) {
+      var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(a.id));
+      var bd = /^\d{4}-\d{2}-\d{2}$/.test(String(b.id));
+      if (ad !== bd) return ad ? -1 : 1;
+      return String(b.id).localeCompare(String(a.id));
+    });
+    return suites;
+  }
+
+  function suiteLanguages(suite, tasks) {
+    var langs = (suite.languages || []).filter(Boolean);
+    if (!langs.length) {
+      tasks.forEach(function (task) {
+        if (T.taskInSuite(task, suite.id) && task.language && langs.indexOf(task.language) < 0) {
+          langs.push(task.language);
+        }
+      });
+    }
+    return langs;
+  }
+
+  function suitePeriod(suite) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(suite.id))
+      ? String(suite.id).slice(0, 7) : "undated";
+  }
+
+  function filterSuites(suites, state) {
+    var query = String(state.q || "").trim().toLowerCase();
+    return suites.filter(function (suite) {
+      if (state.status && (suite.status || "unknown") !== state.status) return false;
+      if (state.period && suitePeriod(suite) !== state.period) return false;
+      var text = [suite.id, suite.status, suite.note, (suite.languages || []).join(" ")].join(" ");
+      return !query || text.toLowerCase().indexOf(query) >= 0;
+    });
+  }
+
+  /* Infer languages once across all memberships. Search covers the same
+     languages as the rows without rescanning every task on each keystroke. */
+  function catalogueSuites(site) {
+    var inferred = Object.create(null);
+    var history = new Map((T.releaseHistory ? T.releaseHistory(site) : []).map(function (release) { return [release.id, release]; }));
+    ((site && site.tasks) || []).forEach(function (task) {
+      if (!task.language) return;
+      T.taskSuites(task).forEach(function (id) {
+        var langs = inferred[id] || (inferred[id] = []);
+        if (langs.indexOf(task.language) < 0) langs.push(task.language);
+      });
+    });
+    return orderedSuites(site).map(function (suite) {
+      var row = Object.assign({}, suite);
+      row._changes = history.get(suite.id);
+      var published = (suite.languages || []).filter(Boolean);
+      row.languages = published.length ? published : (inferred[suite.id] || []);
+      return row;
+    });
+  }
+
+  /* Rows are rendered only for the current page. Reported totals remain
+     authoritative; a missing total is not reconstructed from visible tasks. */
+  function suiteRows(suites, tasks) {
+    var head = '<tr><th scope="col">Release</th><th scope="col">Status</th><th scope="col" class="tdb-num">Tasks</th>' +
+      '<th scope="col" class="tdb-num">New</th><th scope="col" class="tdb-num">Retained</th><th scope="col" class="tdb-num">Returning</th><th scope="col" class="tdb-num">Removed</th></tr>';
+    var body = suites.map(function (suite) {
+      var langs = suiteLanguages(suite, tasks);
+      var path = "benchmarks/" + encodeURIComponent(suite.id) + "/";
+      return "<tr>" +
+        '<td><a class="tdb-suitecell" href="' + esc(T.routeUrl ? T.routeUrl(path) : "./" + encodeURIComponent(suite.id) + "/") + '">' +
+          esc(suite.id) + '</a>' + (langs.length ? '<span class="tdb-task-meta">' + esc(langs.join(", ")) + '</span>' : '') + '</td>' +
+        "<td>" + esc(T.releaseStatus(suite.status)) + "</td>" +
+        '<td class="tdb-num">' + (suite.n_tasks != null ? esc(suite.n_tasks) : "&mdash;") + "</td>" +
+        ["new", "retained", "returned", "removed"].map(function (scope) {
+          if (!suite._changes) return '<td class="tdb-num">&mdash;</td>';
+          var href = (T.routeUrl ? T.routeUrl("registry/") : "../registry/") + "?release=" + encodeURIComponent(suite.id) + "&scope=" + scope;
+          return '<td class="tdb-num"><a href="' + esc(href) + '">' + suite._changes[scope].length + '</a></td>';
+        }).join("") +
+        "</tr>";
+    }).join("");
+    return '<table class="tdb-catalog-table" aria-label="Benchmark releases" tabindex="-1"><thead>' +
+      head + "</thead><tbody>" + body + "</tbody></table>";
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Status rows, moved verbatim from the home page.
+   *
+   * Every gate below is the one that shipped there; nothing was relaxed in
+   * the move. The board argument is still the second parameter so a future
+   * caller can pass a published report without rewriting the reducer.
+   * ------------------------------------------------------------------ */
+  function datedSuites(site) {
+    var all = ((site && site.suites) || []).slice();
+    all.sort(function (a, b) {
+      var ad = /^\d{4}-\d{2}-\d{2}$/.test(String(a.id));
+      var bd = /^\d{4}-\d{2}-\d{2}$/.test(String(b.id));
+      if (ad !== bd) return ad ? -1 : 1;
+      return String(b.id).localeCompare(String(a.id));
+    });
+    return all;
+  }
+
+  function relativeReport(board) {
+    var candidates = [board, board && board.relative_capability,
+      board && board.relative_scoring];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i] &&
+          candidates[i].schema_version === "td-relative-capability-v3") {
+        return candidates[i];
+      }
+    }
+    return null;
+  }
+
+  function codeApproved(scoring) {
+    return scoring && scoring.official_ranking === true &&
+      scoring.publication_registry_mode === "code-controlled-allowlist" &&
+      scoring.publication_bundle_approved === true &&
+      scoring.relative_report_digest_matches === true &&
+      scoring.anti_cheat_deployment_active === true;
+  }
+
+  function formalModelRatings(report, scoring) {
+    var input = (report && report.input) || {};
+    var authority = codeApproved(scoring) &&
+      input.frozen_task_roster_n === 50 &&
+      input.task_roster_digest_trusted === true &&
+      input.cell_manifest_digest_trusted === true;
+    if (!authority) return [];
+    var axes = (report && report.axes) || [];
+    for (var i = 0; i < axes.length; i++) {
+      if (axes[i].axis !== "overall" || axes[i].dimension !== "overall") continue;
+      var table = axes[i].entities && axes[i].entities.model;
+      return ((table && table.ratings) || []).filter(function (row) {
+        return row && row.publishable === true &&
+          typeof row.relative_score === "number" && Array.isArray(row.ci);
+      });
+    }
+    return [];
+  }
+
+  /* A status line, not a card.
+     Six bordered rounded rectangles took a whole screen to carry twelve words
+     and six numbers. The same information as label / value / note reads in one
+     pass. */
+  function statRow(label, value, note) {
+    return '<div class="tdb-statrow">' +
+      '<span class="tdb-statrow-k">' + esc(label) + "</span>" +
+      '<p data-tdb-stat-value class="tdb-statrow-v">' +
+        (value == null || value === "" ? "&mdash;" : esc(value)) + "</p>" +
+      '<span class="tdb-statrow-n">' + esc(note || "") + "</span></div>";
+  }
+
+  /* Catalogue composition, and nothing else.
+
+     No solve-derived number is rendered here. What CAN be said without a
+     qualifier is what the catalogue is made of: the editorial difficulty the
+     task author recorded in task.toml when the task was minted.
+
+     Counted at render time, never written into the markup, and the buckets are
+     whatever the catalogue turns out to carry. If the field is not published,
+     the row says so rather than inventing a total.
+
+     SCOPED, and the scope travels back with the numbers so the caller can name
+     it. This used to count every task in `site.tasks` while the row directly
+     above it printed the LATEST SUITE's task count: two adjacent rows
+     disagreed about how many tasks exist, 50 above and a split summing to 61
+     below. A composition with no denominator is not readable, and an unnamed
+     denominator that contradicts the one two lines up is worse than none.
+
+     `suiteId` restricts the count to one suite. A falsy `suiteId` falls back to
+     the whole catalogue rather than returning null -- "no declared difficulty is
+     published" would be a false claim about the DATA in order to describe a
+     missing SCOPE. `total` is reduced from the same counts the text is built
+     from, never `site.tasks.length`, which would include tasks carrying no
+     label and make the printed split fail to add up all over again. */
+  function declaredComposition(site, suiteId) {
+    var counts = {}, names = [];
+    ((site && site.tasks) || []).filter(function (task) {
+      return suiteId ? T.taskInSuite(task, suiteId) : true;
+    }).forEach(function (task) {
+      var label = task && task.declared_difficulty;
+      if (typeof label !== "string" || !label) return;
+      if (!counts[label]) { counts[label] = 0; names.push(label); }
+      counts[label] += 1;
+    });
+    if (!names.length) return null;
+    names.sort(function (a, b) {
+      return (counts[b] - counts[a]) || (a < b ? -1 : (a > b ? 1 : 0));
+    });
+    return {
+      text: names.map(function (name) {
+        return name + " " + counts[name];
+      }).join(" \u00b7 "),
+      total: names.reduce(function (n, k) { return n + counts[k]; }, 0),
+      scoped: !!suiteId
+    };
+  }
+
+  function renderStatus(site, board) {
+    var suites = datedSuites(site);
+    var latest = suites[0] || {};
+    var report = relativeReport(board);
+    var input = (report && report.input) || {};
+    var scoring = (site && site.scoring) || {};
+    var ratings = formalModelRatings(report, scoring);
+    var composition = declaredComposition(site, latest.id);
+    /* Name the denominator the split is over. Derived from the counts, so
+       regenerating the catalogue moves the number instead of falsifying it. */
+    var compScope = !composition ? "" :
+      (composition.scoped
+        ? plural(composition.total, "labelled task", "labelled tasks") +
+          " in suite " + latest.id
+        : plural(composition.total, "labelled task", "labelled tasks") +
+          " across the whole catalogue");
+    var stats = [
+      ["Latest release", latest.id, "Published task set"],
+      ["Tasks", latest.n_tasks, T.releaseStatus(latest.status)],
+      ["Results", ratings.length ? "Validated" : "Preliminary",
+        ratings.length ? ratings.length + " models" : "See the leaderboard for available evaluations"]
+    ];
+    set("hp-status", stats.map(function (s) { return statRow(s[0], s[1], s[2]); }).join(""));
+
+    var fa = document.querySelector("[data-tdb-fa]");
+    if (fa) {
+      fa.textContent = ratings.length && board && typeof board.total_fa === "number" &&
+        typeof board.total_fa_n === "number" && board.total_fa_n > 0
+        ? String(board.total_fa) + "/" + String(board.total_fa_n) : "\u2014";
+    }
+
+  }
+
+  var PAGE_SIZE = 20;
+  var collection = [];
+  var statuses = [];
+  var periods = [];
+  var state = { q: "", status: "", period: "", page: 1 };
+
+  function readState() {
+    var params = new URLSearchParams(window.location.search);
+    var status = params.get("status") || "";
+    var period = params.get("period") || "";
+    state = {
+      q: params.get("query") || params.get("q") || "",
+      status: statuses.indexOf(status) >= 0 ? status : "",
+      period: periods.indexOf(period) >= 0 ? period : "",
+      page: Number(params.get("page") || 1)
+    };
+    byId("suite-search").value = state.q;
+    byId("suite-status").value = state.status;
+    byId("suite-period").value = state.period;
+  }
+
+  function writeState(push) {
+    var url = new URL(window.location.href);
+    ["q", "status", "period"].forEach(function (key) {
+      var publicKey = key === "q" ? "query" : key;
+      if (publicKey !== key) url.searchParams.delete(key);
+      if (state[key]) url.searchParams.set(publicKey, state[key]);
+      else url.searchParams.delete(publicKey);
+    });
+    if (state.page > 1) url.searchParams.set("page", String(state.page));
+    else url.searchParams.delete("page");
+    if (url.href !== window.location.href) {
+      window.history[push ? "pushState" : "replaceState"](null, "", url.href);
+    }
+  }
+
+  function renderSuites(push) {
+    var matches = filterSuites(collection, state);
+    var page = T.pageSlice(matches, state.page, PAGE_SIZE);
+    state.page = page.page;
+    set("suites", matches.length
+      ? suiteRows(page.items, [])
+      : '<p class="tdb-empty">' + (collection.length
+        ? "No releases match these filters." : "No releases are available.") + "</p>");
+    byId("suites").setAttribute("aria-busy", "false");
+    byId("suite-range").textContent = page.total
+      ? page.start + "\u2013" + page.end + " of " + plural(page.total, "release", "releases")
+      : "0 releases";
+    byId("suite-page").textContent = "Page " + page.page + " of " + page.pages;
+    byId("suite-prev").disabled = page.page <= 1;
+    byId("suite-next").disabled = page.page >= page.pages;
+    byId("suite-bottom").hidden = page.pages <= 1;
+    byId("suite-bottom-range").textContent = byId("suite-range").textContent;
+    byId("suite-bottom-page").textContent = byId("suite-page").textContent;
+    byId("suite-bottom-prev").disabled = page.page <= 1;
+    byId("suite-bottom-next").disabled = page.page >= page.pages;
+    writeState(push);
+  }
+
+  function configureFilters() {
+    collection.forEach(function (suite) {
+      var status = suite.status || "unknown";
+      var period = suitePeriod(suite);
+      if (statuses.indexOf(status) < 0) statuses.push(status);
+      if (periods.indexOf(period) < 0) periods.push(period);
+    });
+    statuses.sort();
+    periods.sort(function (a, b) {
+      if (a === "undated") return 1;
+      if (b === "undated") return -1;
+      return b.localeCompare(a);
+    });
+    set("suite-status", '<option value="">All statuses</option>' + statuses.map(function (status) {
+      return '<option value="' + esc(status) + '">' +
+        esc(T.releaseStatus(status)) + "</option>";
+    }).join(""));
+    set("suite-period", '<option value="">All months</option>' + periods.map(function (period) {
+      return '<option value="' + esc(period) + '">' +
+        (period === "undated" ? "Undated" : esc(period)) + "</option>";
+    }).join(""));
+    ["suite-search", "suite-status", "suite-period"].forEach(function (id) {
+      byId(id).disabled = false;
+    });
+  }
+
+  T.getJSON("site_data.json").catch(T.fetchFailed("the task catalogue")).then(function (site) {
+    if (!site) {
+      byId("suite-meta").textContent = "Catalogue unavailable";
+      set("suites", '<p class="tdb-empty">Reload to try again.</p>');
+      byId("suites").setAttribute("aria-busy", "false");
+      set("hp-status", "<p>Evaluation status unavailable.</p>");
+      return;
+    }
+    collection = catalogueSuites(site);
+    var generated = /^\d{4}-\d{2}-\d{2}/.exec(String(site.generated || ""));
+    set("suite-meta", '<span>' + plural(collection.length, "release", "releases") + "</span>" +
+      (generated ? '<span>Updated <time datetime="' + esc(site.generated) + '">' +
+        esc(generated[0]) + "</time></span>" : ""));
+    configureFilters();
+    readState();
+    renderSuites(false);
+    renderStatus(site, null);
+
+    byId("suite-search").addEventListener("input", function () {
+      state.q = this.value;
+      state.page = 1;
+      renderSuites(false);
+    });
+    [["suite-status", "status"], ["suite-period", "period"]].forEach(function (entry) {
+      byId(entry[0]).addEventListener("change", function () {
+        state[entry[1]] = this.value;
+        state.page = 1;
+        renderSuites(true);
+      });
+    });
+    [["suite-prev", -1], ["suite-next", 1]].forEach(function (entry) {
+      byId(entry[0]).addEventListener("click", function () {
+        state.page += entry[1];
+        renderSuites(true);
+      });
+    });
+    [["suite-bottom-prev", -1], ["suite-bottom-next", 1]].forEach(function (entry) {
+      byId(entry[0]).addEventListener("click", function () {
+        state.page += entry[1];
+        renderSuites(true);
+        var pager = document.querySelector('.tdb-pagination:not(.tdb-pagination-bottom)');
+        var masthead = document.getElementById("nd-nav");
+        window.scrollTo({ top: pager.getBoundingClientRect().top + window.scrollY - (masthead ? masthead.getBoundingClientRect().height : 56) - 16, behavior: "instant" });
+        byId("suites").querySelector("table").focus({ preventScroll: true });
+      });
+    });
+    window.addEventListener("popstate", function () {
+      readState();
+      renderSuites(false);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

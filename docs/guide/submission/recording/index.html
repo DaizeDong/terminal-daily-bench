@@ -1,65 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recording a submission — terminal-daily-bench docs</title>
-<meta name="description" content="The submit_result CLI, the eight required fields it validates, and the content id that makes one submission one immutable cell.">
-<link rel="stylesheet" href="../../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Prepare a submission · Terminal-Daily</title>
+<meta name="description" content="Check that a contribution includes the patch and the details needed to evaluate it.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../../docs/submission/recording/">
 </head>
 <body>
-
-<!-- Split out of guide/submission/, which keeps the schema itself at #schema
-     because docs/guide/task-format links to it. This page is the three things
-     that happen to a submission after the schema is satisfied: the commands,
-     the checks, and the identity the store gives it. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Prepare a submission</h1>
+<p class="tdb-doc-sub">Check that a contribution includes the patch and the details needed to evaluate it.</p>
+</header>
 
-    <h1>Recording a submission</h1>
-    <p class="tdb-doc-sub">The recorder writes a pending row; nothing it does can write a score.</p>
+<h2 id="cli"><a href="#cli">Check the submission file</a></h2>
+<p>Prepare a submission file using the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">contribution instructions</a>. From the project checkout, validate its structure before sharing it.</p><figure class="tdb-code"><figcaption>Validate a submission</figcaption><pre><code>python web/submit_result.py validate &lt; submission.json</code></pre></figure>
 
-    <h2 id="cli"><a href="#cli">The recording CLI</a></h2>
-    <p><code>web/submit_result.py</code> reads a submission JSON from <strong>stdin</strong>, in the
-      <a href="../#schema">shape the schema fixes</a>.</p>
-    <figure class="tdb-code">
-      <figcaption><code>validate</code>, <code>record</code>, <code>rebuild</code></figcaption>
-      <pre><code># 1. Validate structure (exit 0 = valid, 1 = errors)
-python web/submit_result.py validate &lt; submission.json
+<h2 id="rules"><a href="#rules">Include the full evaluation details</a></h2>
+<p>Identify the task, model release, agent version, evaluation date, and contributor, and include the proposed code patch. Keep these details consistent with the run you are reporting. Validation checks the file format; operators must still evaluate the patch.</p>
 
-# 2. Record as pending (appends to &lt;store&gt;/&lt;date&gt;.jsonl)
-python web/submit_result.py record --store community_submissions \
-  --authenticated-submitter github:YOUR_LOGIN &lt; submission.json
-
-# 3. After an operator replay receipt exists, rebuild the two public views
-python web/submit_result.py rebuild --store community_submissions \
-  --manifest /read-only/suite-manifest.json \
-  --trusted-keys /read-only/replay-authorities.json \
-  --out web/leaderboard_data.json</code></pre>
-    </figure>
-
-    <h2 id="rules"><a href="#rules">Validation rules</a></h2>
-    <p>All eight of <code>date</code>, <code>submitter</code>, <code>model</code>,
-      <code>model_build</code>, <code>scaffold</code>, <code>harness_version</code>,
-      <code>task</code> and <code>patch</code> must be present and non-empty; <code>patch</code>
-      must be a unified-diff <strong>string</strong> and <code>task</code> must start with
-      <code>td-</code>. <code>reward_claimed</code> is advisory only: it is validated against nothing, and it never
-      becomes a score.
-      Receipt signatures come only from the official signer, and the authenticated submitter comes
-      from the deployment auth layer, never the JSON body.</p>
-
-    <h2 id="content-id"><a href="#content-id">One immutable cell per submission</a></h2>
-    <p><code>record</code> computes a full SHA-256 content id over patch, authenticated submitter,
-      model build, harness version and task, which yields one immutable authenticated cell per
-      suite/build/harness/task. Partial, duplicate and cross-date sets are left unranked, and every
-      <code>rebuild</code> re-verifies the receipt signature and content binding.</p>
-
-  </article>
+<h2 id="content-id"><a href="#content-id">Keep submissions comparable</a></h2>
+<p>Use one model and agent configuration across the complete task set for a reported evaluation. Partial, duplicate, or mixed-date submissions do not establish a complete result. A corrected patch needs to be evaluated again.</p><p>See <a href="../">Submit results</a> for what happens after recording.</p>
+</article>
 </main>
 
-<script src="../../../assets/site.js?v=b1d8696d89" data-root="../../.." data-page="docs"></script>
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
 </body>
 </html>

@@ -479,6 +479,25 @@ def axis_rows(verified: list, unverified: list) -> list:
     return rows
 
 
+def merge_declared_metadata(by_id: dict, labels: dict) -> int:
+    """Add published task labels without upgrading their verification status."""
+    if not isinstance(labels, dict):
+        raise ValueError("Task capability metadata must be an object")
+    codes = {row[0] for row in CAPABILITY_TAXONOMY}
+    added = 0
+    for task_id, declared in labels.items():
+        if (not isinstance(task_id, str) or not task_id or
+                not isinstance(declared, list) or
+                any(not isinstance(code, str) or code not in codes for code in declared)):
+            raise ValueError("Invalid declared task capability metadata")
+        if task_id in by_id:
+            continue
+        by_id[task_id] = {"id": task_id, "declared": sorted(set(declared)),
+                          "verifiable": False, "n_f2p": 0, "repo": ""}
+        added += 1
+    return added
+
+
 def collect(release: Path) -> dict:
     packages = read_packages(release)
     verification = check_no_drift(packages)
@@ -490,6 +509,8 @@ def collect(release: Path) -> dict:
         prev = by_id.get(pkg["id"])
         if prev is None or (pkg["verifiable"] and not prev["verifiable"]):
             by_id[pkg["id"]] = pkg
+    metadata_path = release / "docs" / "data" / "task-capabilities.json"
+    n_metadata = merge_declared_metadata(by_id, json.loads(metadata_path.read_text(encoding="utf-8"))) if metadata_path.exists() else 0
     tasks = sorted(by_id.values(), key=lambda p: p["id"])
     verified = [p for p in tasks if p["verifiable"]]
     unverified = [p for p in tasks if not p["verifiable"]]
@@ -511,6 +532,7 @@ def collect(release: Path) -> dict:
         "verification": verification,
         "catalogue": {
             "n_packages_scanned": len(packages),
+            "n_metadata_tasks": n_metadata,
             "n_tasks": len(tasks),
             "n_tasks_verifiable": len(verified),
             "n_tasks_unverifiable": len(unverified),

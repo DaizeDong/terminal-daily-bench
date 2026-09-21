@@ -1,165 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Submission — terminal-daily-bench docs</title>
-<meta name="description" content="How a candidate patch becomes a verified score: the execution gate, the pending record, the submission schema and the operator-only replay authority.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Submit results · Terminal-Daily</title>
+<meta name="description" content="Contribute a patch with enough information for an independent evaluation.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/submission/">
 </head>
 <body>
-
-<!-- This page carried 29 h2 and 12466px. It is five pages now, and this is the
-     spine: what makes a reward real. The other four are running/, recording/,
-     replay-integrity/ and adapters/, reached from the sidebar site.js builds.
-
-     THE THREE IDS THAT MAY NOT MOVE are #scoring (the four docs/benchmarks
-     pages, and web/gen_pages.py writes it), #operator-replay (docs/leaderboard
-     and docs/submit) and #schema (docs/guide/task-format). All three are still
-     real sections here, so nothing off this page had to be edited.
-
-     The unit is the reference's: h2, one to three sentences, at most one code
-     figure. No h3, no table, no definition list, no rule. Every field and flag
-     that used to sit in a two-column list is now either a sentence or a
-     comment inside the block that runs it. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <article class="tdb-doc">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Submit results</h1>
+<p class="tdb-doc-sub">Contribute a patch with enough information for an independent evaluation.</p>
+</header>
 
-    <h1>Submitting to terminal-daily-bench</h1>
-    <p class="tdb-doc-sub">A scaffold produces a candidate patch; the execution gate is the sole reward authority.</p>
+<h2 id="scoring"><a href="#scoring">What to submit</a></h2>
+<p>Provide the proposed code patch, the task it addresses, and the model and agent configuration that produced it. Keep the original run record for reference.</p>
 
-    <h2 id="scoring"><a href="#scoring">How scoring works</a></h2>
-    <p>The reward comes from Harbor&rsquo;s <code>result.json</code>, read by
-      <code>harbor_score._read_harbor_reward</code> &mdash; the same reader the private admission
-      gate uses. Harbor applies the patch inside the task container, re-lays the protected
-      <code>tests/</code> and runs them under a network cut, which is why scoring requires an
-      apptainer/singularity host. No external service or hidden API is required to score a patch.</p>
+<h2 id="no-cheat"><a href="#no-cheat">How a result is checked</a></h2>
+<p>Operators apply the submitted patch and run the protected tests in the required environment. They use that test outcome to determine the result. A claimed score does not establish a verified score.</p>
 
-    <h2 id="no-cheat"><a href="#no-cheat">Why a patch cannot cheat the score</a></h2>
-    <p>The protected <code>tests/</code> are re-laid by Harbor from the trusted task package
-      <em>after</em> the patch is applied, so a patch that edits <code>tests/</code> only changes an
-      agent-side workspace that is discarded before scoring. Runtime egress is cut &mdash;
-      <code>--network=none</code>, or the offline <code>--ek</code> switch injected by
-      <code>harbor_score._maybe_inject_offline_eks</code>. The reward is byte-for-byte execution
-      truth from <code>result.json</code>, not any string the model emitted: the model is the
-      subject under test; it is never the judge.</p>
+<h2 id="ingest"><a href="#ingest">After submission</a></h2>
+<p>A recorded submission is pending until the operators evaluate it. The public release does not include an operational verification service, so recording a patch alone does not produce a verified result.</p>
 
-    <h2 id="ingest"><a href="#ingest">Recording is not replay</a></h2>
-    <p><code>web/submit_result.py</code> records the patch; it does not score it. The stored entry
-      carries <code>verify_status="pending"</code>, <code>verified_reward=null</code> and no
-      <code>false_accept</code> value, because only an execution-gate receipt can set a verified
-      reward. A claimed reward is never trusted: only an official protected-test replay receipt can
-      enter the verified ranking.</p>
+<h2 id="schema"><a href="#schema">Required information</a></h2>
+<ul>
+<li>The evaluation date and your contributor identity.</li>
+<li>The model name and the exact model release or build.</li>
+<li>The agent used and its exact version.</li>
+<li>The task identifier and proposed patch.</li>
+</ul><p><a href="recording/">Prepare a submission</a> explains how to check the package before sharing it.</p>
 
-    <h2 id="schema"><a href="#schema">Submission schema</a></h2>
-    <p>JSONL, one line per <code>(model, task)</code> cell; every key except
-      <code>reward_claimed</code> is required, and the
-      <a href="recording/">validation rules and the recording CLI</a> have their own page.</p>
-    <figure class="tdb-code">
-      <figcaption><code>submit_result.validate</code> &mdash; the REQUIRED tuple</figcaption>
-      <pre><code>{
-  "date": "2026-07-22",
-  "submitter": "your-handle",
-  "model": "your-model",
-  "model_build": "your-model@immutable-build-id",
-  "scaffold": "your-scaffold",
-  "harness_version": "your-scaffold@immutable-version",
-  "task": "td-fc90ea8b76d5f6b6",
-  "patch": "diff --git a/... b/...\n--- a/...\n+++ b/...\n@@ ...",
-  "reward_claimed": 1.0        # advisory only; it never becomes a score
-}</code></pre>
-    </figure>
+<h2 id="operator-replay"><a href="#operator-replay">Validation</a></h2>
+<p>Operators check the task, patch, model, and evaluation conditions together. Ranking also requires evaluated results for the complete published task set; a few selected tasks are insufficient. These checks are separate from the contributor’s local run.</p>
 
-    <h2 id="operator-replay"><a href="#operator-replay">Operator-only replay authority</a></h2>
-    <p>Receipt signing and verification are operator-only, and they use Python
-      <code>cryptography</code>&rsquo;s in-process Ed25519 primitives:
-      <code>web/receipt_auth.py</code> does not search <code>PATH</code> and does not invoke an
-      external OpenSSL process. A missing or invalid replay extra fails closed before signing or
-      acceptance, and what the worker has to prove before it may sign is on
-      <a href="replay-integrity/">replay integrity</a>.</p>
-    <figure class="tdb-code">
-      <figcaption>The replay-only receipt dependency, on the operator image</figcaption>
-      <pre><code>pip install -e '.[replay]'</code></pre>
-    </figure>
-
-    <h2 id="community-submissions"><a href="#community-submissions">Community submissions</a></h2>
-    <p>The public bundle does not run a replay worker, so pending rows remain in
-      <code>community_pending</code>, a separate audit view excluded from ranking; a row enters
-      <code>community_verified</code> only with an Ed25519-signed v2 receipt bound to the frozen
-      suite, runner, Harbor, runtime image, enforced offline canary and pinned authority key, and
-      ranking also requires the complete frozen roster.</p>
-    <div id="community"></div>
-
-  </article>
+<h2 id="community-submissions"><a href="#community-submissions">View submissions</a></h2>
+<p id="community">The <a href="../../submit/">submission page</a> keeps pending contributions separate from verified results. Follow the <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/CONTRIBUTING.md">contribution instructions</a> when preparing a package.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="docs"></script>
-<script>
-(async function () {
-  var T = window.TDB;
-  var el = document.getElementById("community");
-
-  /* Shared metadata badge; the caller appends the semantic colour pair. */
-  var BADGE =
-    "inline-flex items-center justify-center border px-2 py-0.5 text-sm sm:text-xs " +
-    "font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 " +
-    "[&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 " +
-    "focus-visible:ring-[3px] aria-invalid:ring-destructive/20 " +
-    "dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive " +
-    "transition-[color,box-shadow] overflow-hidden border-transparent ";
-  var PRIMARY = "bg-primary text-primary-foreground [a&]:hover:bg-primary/90 font-mono";
-  var SECONDARY = "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90 font-mono";
-  var NOTE =
-    "tdb-panel bg-card text-card-foreground border px-6 py-6 " +
-    "text-sm/relaxed text-muted-foreground";
-
-  var board = await T.getJSON("leaderboard_data.json").catch(T.fetchFailed("the results snapshot"));
-
-  if (!board) {
-    el.innerHTML = '<div class="' + NOTE + '">No leaderboard data published yet ' +
-      '(<code>leaderboard_data.json</code> is missing).</div>';
-    return;
-  }
-
-  var rows = board.community || [];
-  if (!rows.length) {
-    el.innerHTML = '<div class="' + NOTE + '">No community submissions on the ' + board.date +
-      ' board yet. Yours would land here as <code>verify_status="pending"</code> and start ' +
-      'counting once the gate has replayed the patch.</div>';
-    return;
-  }
-
-  /* row shape is submit_result.rebuild_leaderboard():
-     {submitter, model, scaffold, n, solved, pending, false_accept, rate} */
-  el.innerHTML =
-    '<div class="bg-card text-card-foreground overflow-x-auto border ' +
-      'border-x-0 font-mono text-sm sm:border-x">' +
-    '<table class="w-full"><thead class="text-muted-foreground"><tr class="border-b">' +
-      '<th class="px-4 py-3 text-left font-medium">Submitter</th>' +
-      '<th class="px-4 py-3 text-left font-medium">Model</th>' +
-      '<th class="px-4 py-3 text-left font-medium">Scaffold</th>' +
-      '<th class="px-4 py-3 text-right font-medium">Verified rate</th>' +
-      '<th class="px-4 py-3 text-right font-medium">Re-scored</th>' +
-      '<th class="px-4 py-3 text-left font-medium">State</th>' +
-    "</tr></thead><tbody>" +
-    rows.map(function (r) {
-      var n = r.n || 0, pending = r.pending || 0;
-      return '<tr class="border-b">' +
-        '<th class="px-4 py-3 text-left font-medium">' + (r.submitter || "&mdash;") + "</th>" +
-        '<td class="px-4 py-3">' + (r.model || "&mdash;") + "</td>" +
-        '<td class="px-4 py-3"><span class="' + BADGE +
-          SECONDARY + '">' + (r.scaffold || "&mdash;") + "</span></td>" +
-        '<td class="px-4 py-3">' + T.rateCell({ n: n, solved: r.solved || 0 }) + "</td>" +
-        '<td class="px-4 py-3 text-right tabular-nums">' + (n - pending) + "/" + n + "</td>" +
-        '<td class="px-4 py-3"><span class="' + BADGE +
-          (pending ? SECONDARY : PRIMARY) +
-          '">' + (pending ? pending + " pending" : "all verified") + "</span></td></tr>";
-    }).join("") + "</tbody></table></div>";
-})();
-</script>
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 <script>
 /* Fragments that moved when this page was split.
 

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-10T06:11:46Z",
+ "generated": "2026-09-19T21:45:05Z",
  "scoring": {
   "schema_version": "td-public-scoring-status-v1",
   "relative_schema": "td-relative-capability-v3",
@@ -1696,6 +1696,84 @@
    "fresh_tasks": 0,
    "carried_tasks": 0,
    "unknown_origin_tasks": 0
+  },
+  {
+   "id": "2026-09-17",
+   "status": "live",
+   "n_tasks": 65,
+   "note": "Published task set for this evaluation date.",
+   "languages": [],
+   "task_ids": [
+    "td-05c5de2bb990d139",
+    "td-0667f41c830de26b",
+    "td-0a4c3d30bcad3651",
+    "td-0e0911d980675cb3",
+    "td-14a268d498129959",
+    "td-15de98a794ba8112",
+    "td-215529f1255d9b3d",
+    "td-23334546970c5de0",
+    "td-2430537af4b4cb7d",
+    "td-25cceb3b9de8a600",
+    "td-25ef372608020d70",
+    "td-2c5b76e3d15a7260",
+    "td-415cbe190bcfd66d",
+    "td-42da1c5dc37cb47a",
+    "td-45815ec8eb09e65c",
+    "td-4ec48cede5878846",
+    "td-52c419bdf0f25aa8",
+    "td-580b22ad12ab39c6",
+    "td-5d73078aacbbb36c",
+    "td-5dc85b7da591412a",
+    "td-5e2d24c2bda82748",
+    "td-600c95a477170d36",
+    "td-63849d24555f3850",
+    "td-645f816ef37c9874",
+    "td-703875d00986ab8d",
+    "td-717ed5ee3d3830b1",
+    "td-72183c45996e3314",
+    "td-7463e8639d790381",
+    "td-781453e813c11941",
+    "td-7e8acdc90e80d7de",
+    "td-7e8c5773ec7bd71e",
+    "td-80c689759b94cc5e",
+    "td-8ea1c4a1eded4486",
+    "td-8f1fbd70511437ce",
+    "td-8f59d5e9c8b20275",
+    "td-9b882fe0cd708e25",
+    "td-a0d4191b528f7af6",
+    "td-a12f9e85169e6c4b",
+    "td-a1911b3d52732b76",
+    "td-a1e719fced6e790d",
+    "td-a7c4763872b851d5",
+    "td-b0382b8a8cd4b91e",
+    "td-b9c2f4985f23372a",
+    "td-bcbf96710cfb78fb",
+    "td-c3260b703b18c5a2",
+    "td-c3d8f979a1b6446f",
+    "td-c4110721dde09485",
+    "td-c4dee063008d4258",
+    "td-c6cf5f3f7f44dce6",
+    "td-cb8efbcff9d9c6cb",
+    "td-ceb8dc21bc04b086",
+    "td-d04e1c7846f80ddb",
+    "td-d6eefda2e4d83b65",
+    "td-e1f9b973b55f7dfc",
+    "td-e3fec75b79351fe9",
+    "td-e6cd0c9806cf9201",
+    "td-ea295d6cb7470995",
+    "td-ea3bbb6bc76ab668",
+    "td-efda4ed917d716f8",
+    "td-f005ad9a6cd62590",
+    "td-f0c67ff256ef055d",
+    "td-f456b3708841860e",
+    "td-fb6818423e93d217",
+    "td-fc1f353b207fa884",
+    "td-fd876514b9fadbb9"
+   ],
+   "catalogued_tasks": 65,
+   "fresh_tasks": 0,
+   "carried_tasks": 0,
+   "unknown_origin_tasks": 65
   }
  ],
  "tasks": [
@@ -2732,7 +2810,7 @@
    "merge_sha": "ef1d4bb8474afa65834c108d4050a5778a8092ed",
    "license": "",
    "language": "python",
-   "title": "\u7edf\u4e00\u524d\u540e\u7aef\u4e0a\u4f20\u89c6\u9891\u683c\u5f0f\u5951\u7ea6",
+   "title": "统一前后端上传视频格式契约",
    "n_fail_to_pass": 2,
    "solved_by": null,
    "n_models": null,
@@ -3196,7 +3274,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u2728 Add ROC bands and DeLong",
+   "title": "✨ Add ROC bands and DeLong",
    "n_fail_to_pass": 16,
    "solved_by": null,
    "n_models": null,
@@ -3386,7 +3464,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u2728 Add regplot equation annotations",
+   "title": "✨ Add regplot equation annotations",
    "n_fail_to_pass": 2,
    "solved_by": null,
    "n_models": null,
@@ -3428,7 +3506,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "Add Royal Poker game, deck, etc.  Add Notebook illustrating Royal Pok\u2026",
+   "title": "Add Royal Poker game, deck, etc.  Add Notebook illustrating Royal Pok…",
    "n_fail_to_pass": 2,
    "solved_by": null,
    "n_models": null,
@@ -3512,7 +3590,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "The `fully_commutes_with_sum` property was incorrectly using `sum()` on the flattened commuting structure, which does not yield a boolean. Changed to \u2026",
+   "title": "The `fully_commutes_with_sum` property was incorrectly using `sum()` on the flattened commuting structure, which does not yield a boolean. Changed to …",
    "n_fail_to_pass": 1,
    "solved_by": null,
    "n_models": null,
@@ -3853,7 +3931,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\ud83d\udc1b Separate bar labels and p-values",
+   "title": "🐛 Separate bar labels and p-values",
    "n_fail_to_pass": 1,
    "solved_by": null,
    "n_models": null,
@@ -4379,7 +4457,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "feat: author \u5b57\u6bb5\uff0cname\u5305\u542b\u591a\u4e2a\u4eba\u540d",
+   "title": "feat: author 字段，name包含多个人名",
    "n_fail_to_pass": 3,
    "solved_by": null,
    "n_models": null,
@@ -4967,7 +5045,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\ud83d\udc1b Inherit panel label fonts",
+   "title": "🐛 Inherit panel label fonts",
    "n_fail_to_pass": 5,
    "solved_by": null,
    "n_models": null,
@@ -5093,7 +5171,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u2728 Add ridgeplot hue and overlap",
+   "title": "✨ Add ridgeplot hue and overlap",
    "n_fail_to_pass": 6,
    "solved_by": null,
    "n_models": null,
@@ -5261,7 +5339,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u2728 Support Spearman in regplot",
+   "title": "✨ Support Spearman in regplot",
    "n_fail_to_pass": 3,
    "solved_by": null,
    "n_models": null,
@@ -5303,7 +5381,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "feat: \u65b0\u589e\u4e09\u7ef4\u8def\u9762\u79fb\u52a8\u8f7d\u8377 DLOAD",
+   "title": "feat: 新增三维路面移动载荷 DLOAD",
    "n_fail_to_pass": 8,
    "solved_by": null,
    "n_models": null,
@@ -7937,7 +8015,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "fix: \u907f\u514d Abaqus MCP \u79bb\u7ebf\u65f6\u6301\u7eed\u7b49\u5f85",
+   "title": "fix: 避免 Abaqus MCP 离线时持续等待",
    "n_fail_to_pass": 11,
    "solved_by": null,
    "n_models": null,
@@ -11096,7 +11174,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "feat(knowledge-graph): architecture knowledge graph - persistent, que\u2026",
+   "title": "feat(knowledge-graph): architecture knowledge graph - persistent, que…",
    "n_fail_to_pass": 91,
    "solved_by": null,
    "n_models": null,
@@ -14962,7 +15040,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u26a1\ufe0f perf(quantity): answer the angular-unit check once per unit",
+   "title": "⚡️ perf(quantity): answer the angular-unit check once per unit",
    "n_fail_to_pass": 2,
    "solved_by": null,
    "n_models": null,
@@ -16192,7 +16270,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\u2728 Align @string values according to BibtexFormat.value_column",
+   "title": "✨ Align @string values according to BibtexFormat.value_column",
    "n_fail_to_pass": 2,
    "solved_by": null,
    "n_models": null,
@@ -16254,7 +16332,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "Add slm.evaluate() \u2014 a standalone eval harness (SDK + CLI)",
+   "title": "Add slm.evaluate() — a standalone eval harness (SDK + CLI)",
    "n_fail_to_pass": 14,
    "solved_by": null,
    "n_models": null,
@@ -19039,7 +19117,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "\ud83d\udc1b Support Python 3.10+ union syntax (T | None), [redacted-ref]",
+   "title": "🐛 Support Python 3.10+ union syntax (T | None), [redacted-ref]",
    "n_fail_to_pass": 1,
    "solved_by": null,
    "n_models": null,
@@ -20527,7 +20605,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "fix: \u691c\u7d22\u306e sensitiveContents \u4fee\u6b63 \u3068 \u30b7\u30e7\u30fc\u30c8\u52d5\u753b\u306e\u7d5e\u308a\u8fbc\u307f\u5bfe\u5fdc",
+   "title": "fix: 検索の sensitiveContents 修正 と ショート動画の絞り込み対応",
    "n_fail_to_pass": 3,
    "solved_by": null,
    "n_models": null,
@@ -21985,7 +22063,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "feat: complete IMAP support \u2014 persistence, Trash detection, undo UX (v0.4.0)",
+   "title": "feat: complete IMAP support — persistence, Trash detection, undo UX (v0.4.0)",
    "n_fail_to_pass": 25,
    "solved_by": null,
    "n_models": null,
@@ -24648,7 +24726,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "feat(email): \u65b0\u589e Inbucket \u81ea\u5efa\u90ae\u7bb1\u63d0\u4f9b\u65b9",
+   "title": "feat(email): 新增 Inbucket 自建邮箱提供方",
    "n_fail_to_pass": 14,
    "solved_by": null,
    "n_models": null,
@@ -25020,7 +25098,7 @@
    "merge_sha": "",
    "license": "",
    "language": "",
-   "title": "fix: consistent provider resolution \u2014 Gmail mode fully isolates IMAP state",
+   "title": "fix: consistent provider resolution — Gmail mode fully isolates IMAP state",
    "n_fail_to_pass": 24,
    "solved_by": null,
    "n_models": null,
@@ -26864,6 +26942,1761 @@
    "difficulty": "",
    "declared_difficulty": "medium",
    "also_in": []
+  },
+  {
+   "id": "td-a1e719fced6e790d",
+   "repo": "ollama/ollama-python",
+   "pr_number": 696,
+   "license": "",
+   "language": "",
+   "title": "Image string values must detect file extensions case-insensitively",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-fc1f353b207fa884",
+   "repo": "markhedleyjones/dmenu-extended",
+   "pr_number": 184,
+   "license": "",
+   "language": "",
+   "title": "Replace URL-based plugin index handling with repository bases and SHA-256 verification",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 22,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-8ea1c4a1eded4486",
+   "repo": "HarleyCoops/Math-To-Manim",
+   "pr_number": 71,
+   "license": "",
+   "language": "",
+   "title": "Reverse-tree validation, tool-calling client loop, and live key doctor check",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 19,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-215529f1255d9b3d",
+   "repo": "j6k4m8/goosepaper",
+   "pr_number": 128,
+   "license": "",
+   "language": "",
+   "title": "RSS story provider must skip failing entries instead of losing the feed",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-415cbe190bcfd66d",
+   "repo": "runesleo/x-reader",
+   "pr_number": 20,
+   "license": "",
+   "language": "",
+   "title": "Add an X/Twitter fetcher with URL normalization, oEmbed fallback, and opt-in cookies",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 8,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-9b882fe0cd708e25",
+   "repo": "wolverdude/GenSON",
+   "pr_number": 91,
+   "license": "",
+   "language": "",
+   "title": "Preserve empty tuple-style array items and deduplicate builder strategies in order",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 10,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-ea295d6cb7470995",
+   "repo": "tuva-health/tuva-core",
+   "pr_number": 1450,
+   "license": "",
+   "language": "",
+   "title": "Declare require-dbt-version as a YAML list in the bundled dbt project",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-23334546970c5de0",
+   "repo": "onnx/sklearn-onnx",
+   "pr_number": 1249,
+   "license": "",
+   "language": "",
+   "title": "Support user-defined subclasses of scikit-learn estimators during [redacted-repo] conversion",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-72183c45996e3314",
+   "repo": "kodemore/kink",
+   "pr_number": 71,
+   "license": "",
+   "language": "",
+   "title": "Support deleting registered services from the DI container via `del`",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 11,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-14a268d498129959",
+   "repo": "dfm/emcee",
+   "pr_number": 571,
+   "license": "",
+   "language": "",
+   "title": "Gaussian proposal with full covariance must draw an independent step per walker",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-25cceb3b9de8a600",
+   "repo": "astronomer/dag-factory",
+   "pr_number": 889,
+   "license": "",
+   "language": "",
+   "title": "Exclude the defaults configuration file when scanning a folder for DAG YAMLs",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-52c419bdf0f25aa8",
+   "repo": "ZyphrZero/z.ai2api_python",
+   "pr_number": 69,
+   "license": "",
+   "language": "",
+   "title": "Declare the HTTP client dependency with SOCKS proxy support enabled",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-ceb8dc21bc04b086",
+   "repo": "lonr-6/cc-desktop-switch",
+   "pr_number": 62,
+   "license": "",
+   "language": "",
+   "title": "Run the silent upgrade uninstall synchronously and clean up its leftovers",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-efda4ed917d716f8",
+   "repo": "tkarabela/pysubs2",
+   "pr_number": 113,
+   "license": "",
+   "language": "",
+   "title": "MicroDVD writer must emit `{1}{1}` fps declaration without mutating input",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-d6eefda2e4d83b65",
+   "repo": "mohamed-chs/convoviz",
+   "pr_number": 67,
+   "license": "",
+   "language": "",
+   "title": "Add `#` stripping and an opt-in Unicode-preserving mode to `sanitize`",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 5,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-645f816ef37c9874",
+   "repo": "xlwings/jsondiff",
+   "pr_number": 93,
+   "license": "",
+   "language": "",
+   "title": "Support multi-character escape strings when marshalling and patching diffs",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-b9c2f4985f23372a",
+   "repo": "wendlers/mpfshell",
+   "pr_number": 116,
+   "license": "",
+   "language": "",
+   "title": "Tokenizer must treat backslashes as literal characters in unquoted words",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-a1911b3d52732b76",
+   "repo": "knowsuchagency/mcp2cli",
+   "pr_number": 106,
+   "license": "",
+   "language": "",
+   "title": "GraphQL fields that collapse to the same CLI name must stay uniquely addressable",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 8,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-e3fec75b79351fe9",
+   "repo": "toluaina/pgsync",
+   "pr_number": 651,
+   "license": "",
+   "language": "",
+   "title": "`Sync.pull` must support a polling mode that bypasses logical replication",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-781453e813c11941",
+   "repo": "mailgun/talon",
+   "pr_number": 260,
+   "license": "",
+   "language": "",
+   "title": "Recognize K-9 Mail \"sent from\" footers as signatures",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 3,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-c3d8f979a1b6446f",
+   "repo": "srinivasr/nirimod",
+   "pr_number": 42,
+   "license": "",
+   "language": "",
+   "title": "Preserve symlinks and file permissions when saving KDL configuration files",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 6,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-42da1c5dc37cb47a",
+   "repo": "erpalma/throttled",
+   "pr_number": 421,
+   "license": "",
+   "language": "",
+   "title": "Reject zero power-limit values when encoding the package power limit MSR",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-0e0911d980675cb3",
+   "repo": "devbisme/skidl",
+   "pr_number": 323,
+   "license": "",
+   "language": "",
+   "title": "KiCad 8 library symbol definitions must use legacy S-expression grammar",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-a0d4191b528f7af6",
+   "repo": "nilmtk/nilmtk",
+   "pr_number": 1020,
+   "license": "",
+   "language": "",
+   "title": "Temporary HDF data store must close its descriptor and clean up its file",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 3,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-e1f9b973b55f7dfc",
+   "repo": "Thysrael/Horizon",
+   "pr_number": 156,
+   "license": "",
+   "language": "",
+   "title": "Treat RSS pubDate values without a timezone as UTC",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-45815ec8eb09e65c",
+   "repo": "EthanYoQ/Invoice-Downloader",
+   "pr_number": 169,
+   "license": "",
+   "language": "",
+   "title": "Update frontend footer link and version label to current canonical values",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-fb6818423e93d217",
+   "repo": "runesleo/x-reader",
+   "pr_number": 24,
+   "license": "",
+   "language": "",
+   "title": "MCP server must configure SSE host/port via FastMCP settings and pin MCP to major version 1",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-4ec48cede5878846",
+   "repo": "googleads/google-ads-mcp",
+   "pr_number": 121,
+   "license": "",
+   "language": "",
+   "title": "Make the developer token optional when constructing the Ads API client",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 4,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-8f59d5e9c8b20275",
+   "repo": "open-spaced-repetition/py-fsrs",
+   "pr_number": 155,
+   "license": "",
+   "language": "",
+   "title": "Same-day reviews must never reduce a card's stability",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-05c5de2bb990d139",
+   "repo": "datnguye/dbterd",
+   "pr_number": 157,
+   "license": "",
+   "language": "",
+   "title": "Provide select_tables on the algo base class with DAG dependency resolution",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 15,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-2430537af4b4cb7d",
+   "repo": "stephenhillier/starlette_exporter",
+   "pr_number": 108,
+   "license": "",
+   "language": "",
+   "title": "Resolve grouped request paths through Host, Mount and nested routers correctly",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 8,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-a7c4763872b851d5",
+   "repo": "sbidy/pywizlight",
+   "pr_number": 209,
+   "license": "",
+   "language": "",
+   "title": "Per-head state tracking for dual-head lights in `[redacted-repo].bulb`",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 11,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-a12f9e85169e6c4b",
+   "repo": "rtuszik/photon-docker",
+   "pr_number": 386,
+   "license": "",
+   "language": "",
+   "title": "Validate server range responses when resuming partial downloads",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 5,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-7463e8639d790381",
+   "repo": "readthedocs/sphinx-autoapi",
+   "pr_number": 568,
+   "license": "",
+   "language": "",
+   "title": "Render `...` correctly inside subscripted type annotations",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-0667f41c830de26b",
+   "repo": "kyuridenamida/atcoder-tools",
+   "pr_number": 326,
+   "license": "",
+   "language": "",
+   "title": "Strip LaTeX layout/spacing macros from input-format text before format prediction",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 6,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-5dc85b7da591412a",
+   "repo": "hetznercloud/hcloud-python",
+   "pr_number": 687,
+   "license": "",
+   "language": "",
+   "title": "Add member listing support to the networks client",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 3,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-25ef372608020d70",
+   "repo": "executablebooks/MyST-Parser",
+   "pr_number": 1168,
+   "license": "",
+   "language": "",
+   "title": "✨ NEW: `docutils` heading-anchor slug preset, and a versioned anchor contract",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 8,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-63849d24555f3850",
+   "repo": "devbisme/skidl",
+   "pr_number": 327,
+   "license": "",
+   "language": "",
+   "title": "Fix get_fp_lib_tbl_dir versioned preference paths",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 3,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-b0382b8a8cd4b91e",
+   "repo": "cognizant-ai-lab/neuro-san-studio",
+   "pr_number": 1410,
+   "license": "",
+   "language": "",
+   "title": "Never persist or trust an empty vector store in RAG coded tools",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 9,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-15de98a794ba8112",
+   "repo": "cheran-senthil/PyRival",
+   "pr_number": 97,
+   "license": "",
+   "language": "",
+   "title": "Provide an extensible lazy-propagating segment tree with overridable update hooks",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-c3260b703b18c5a2",
+   "repo": "PythonNest/PyNest",
+   "pr_number": 138,
+   "license": "",
+   "language": "",
+   "title": "Add first-class background worker support with a supervising host and standalone runner",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 32,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-80c689759b94cc5e",
+   "repo": "BeamusWayne/simp-skill",
+   "pr_number": 4,
+   "license": "",
+   "language": "",
+   "title": "Add photo EXIF and social-media content analysis tools plus JSONL/frontmatter robustness",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 74,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-f005ad9a6cd62590",
+   "repo": "walles/px",
+   "pr_number": 131,
+   "license": "",
+   "language": "",
+   "title": "Report the script name for Guile command lines in `get_command`",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-580b22ad12ab39c6",
+   "repo": "slomkowski/nginx-config-formatter",
+   "pr_number": 32,
+   "license": "",
+   "language": "",
+   "title": "Configurable cap on consecutive empty lines in nginx config formatting",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 4,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-fd876514b9fadbb9",
+   "repo": "slomkowski/nginx-config-formatter",
+   "pr_number": 30,
+   "license": "",
+   "language": "",
+   "title": "Preserve quoted strings when splitting config directives onto separate lines",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-ea3bbb6bc76ab668",
+   "repo": "ncclient/ncclient",
+   "pr_number": 661,
+   "license": "",
+   "language": "",
+   "title": "Preserve RSA SHA-2 host key algorithms when pinning an ssh-rsa host key",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 3,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-717ed5ee3d3830b1",
+   "repo": "mobilityhouse/ocpp",
+   "pr_number": 683,
+   "license": "",
+   "language": "",
+   "title": "Support injecting the handler's response into `after` route handlers",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-0a4c3d30bcad3651",
+   "repo": "lonr-6/cc-desktop-switch",
+   "pr_number": 57,
+   "license": "",
+   "language": "",
+   "title": "Synchronize the application version to 1.0.26 across runtime and packaging",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-d04e1c7846f80ddb",
+   "repo": "kayak/pypika",
+   "pr_number": 721,
+   "license": "",
+   "language": "",
+   "title": "Add a JQL dialect for building Jira-style query strings",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 4,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-8f1fbd70511437ce",
+   "repo": "erikrose/parsimonious",
+   "pr_number": 250,
+   "license": "",
+   "language": "",
+   "title": "PEG grammar parser must group multi-term alternatives inside ordered choices correctly",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-600c95a477170d36",
+   "repo": "Nandaka/PixivUtil2",
+   "pr_number": 1536,
+   "license": "",
+   "language": "",
+   "title": "Track per-artwork statistics: parse, configure, and persist them",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 5,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-cb8efbcff9d9c6cb",
+   "repo": "tkarabela/pysubs2",
+   "pr_number": 116,
+   "license": "",
+   "language": "",
+   "title": "Robust colour parsing for SubStation styles: raise ValueError, warn and use default",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-c4110721dde09485",
+   "repo": "tfranzel/drf-spectacular",
+   "pr_number": 1514,
+   "license": "",
+   "language": "",
+   "title": "OpenAPI schema must mark optional FileField as nullable in responses only",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 2,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-c4dee063008d4258",
+   "repo": "mohamed-chs/convoviz",
+   "pr_number": 68,
+   "license": "",
+   "language": "",
+   "title": "Prefer YAML front matter when detecting a conversation ID in existing Markdown files",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-7e8c5773ec7bd71e",
+   "repo": "Lazarus-AI/clearwing",
+   "pr_number": 229,
+   "license": "",
+   "language": "",
+   "title": "Normalize and validate the `format` field in machine-mode requests",
+   "declared_difficulty": "medium",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-e6cd0c9806cf9201",
+   "repo": "HackUnderway/WhatsOSINT",
+   "pr_number": 7,
+   "license": "",
+   "language": "",
+   "title": "Configurable WhatsApp number lookup client with live/cache lookup modes",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 44,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-f456b3708841860e",
+   "repo": "astronomer/astronomer-cosmos",
+   "pr_number": 2978,
+   "license": "",
+   "language": "",
+   "title": "Support dbt FQN selector semantics for bare selectors with graph operators",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 8,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-c6cf5f3f7f44dce6",
+   "repo": "ncclient/ncclient",
+   "pr_number": 667,
+   "license": "",
+   "language": "",
+   "title": "Raise on RPC replies only when an rpc-error has severity \"error\"",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 6,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-f0c67ff256ef055d",
+   "repo": "karask/python-bitcoin-utils",
+   "pr_number": 177,
+   "license": "",
+   "language": "",
+   "title": "Provide safe in-place input/output mutation methods on Transaction",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 15,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-5e2d24c2bda82748",
+   "repo": "HarleyCoops/Math-To-Manim",
+   "pr_number": 72,
+   "license": "",
+   "language": "",
+   "title": "Move the animation pipeline and MCP server onto a Grok-backed core",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 10,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-2c5b76e3d15a7260",
+   "repo": "vertexproject/synapse",
+   "pr_number": 5010,
+   "license": "",
+   "language": "",
+   "title": "Add it:app:sigma:rule and it:app:sigma:matched forms (SYN-11294)",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-5d73078aacbbb36c",
+   "repo": "kyuridenamida/atcoder-tools",
+   "pr_number": 322,
+   "license": "",
+   "language": "",
+   "title": "Add a lossless input-format specification model preserving block and token structure",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 5,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-7e8acdc90e80d7de",
+   "repo": "reefyai/reefy",
+   "pr_number": 26,
+   "license": "",
+   "language": "",
+   "title": "Enforce container restart policies during app stop and start reconciliation",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 13,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-bcbf96710cfb78fb",
+   "repo": "avast/pytest-docker",
+   "pr_number": 129,
+   "license": "",
+   "language": "",
+   "title": "Default compose startup command must use `--wait` instead of `-d`",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 6,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
+  },
+  {
+   "id": "td-703875d00986ab8d",
+   "repo": "vertexproject/synapse",
+   "pr_number": 5012,
+   "license": "",
+   "language": "",
+   "title": "Add a Windows scheduled task form to the information technology data model",
+   "declared_difficulty": "hard",
+   "n_fail_to_pass": 1,
+   "status": "live",
+   "base_sha": "",
+   "merge_sha": "",
+   "solved_by": null,
+   "n_models": null,
+   "difficulty": "",
+   "suites": [
+    "2026-09-17"
+   ],
+   "suite_memberships": [
+    {
+     "suite": "2026-09-17",
+     "mode": "live"
+    }
+   ],
+   "also_in": [],
+   "suite": "2026-09-17"
   }
  ]
 }

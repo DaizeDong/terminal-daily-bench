@@ -1,99 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quickstart — terminal-daily-bench docs</title>
-<meta name="description" content="What terminal-daily-bench needs on your host, how to install it, how to point it at an OpenAI-compatible endpoint, and how to check the host before spending a model call.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Quickstart · Terminal-Daily</title>
+<meta name="description" content="Install the tools and check what you can run today.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/quickstart/">
 </head>
 <body>
-
-<!-- ONE TOPIC PER PAGE. This file used to carry 22 <h2>: requirements,
-     install, configure, run, the result record, the quality card, submitting,
-     and a six-card task-id grid, all under one title. It is now the SETUP
-     page and nothing else, and the four topics that were living here have
-     their own pages:
-
-       ../run/            #image #score #score-scaffold #oracle #task-ids
-       ../result-record/  #record #record-bad-safe
-       ../false-accept/   #fa-block
-       ../quality-card/   #quality #quality-output #submitting
-
-     #requirements STAYS HERE. It is deep-linked from docs/index.html,
-     docs/guide/index.html, docs/submit/index.html, docs/benchmarks/sample/
-     and from every archived suite/task page web/gen_pages.py writes, and
-     web/verify_site.py pins the execution-dependency caveat to this file by
-     path. The moved ids are forwarded by the script at the foot of this page,
-     so a bookmark on #oracle still lands on the oracle.
-
-     THE UNIT IS: h2 -> one to three sentences -> at most one code figure.
-     No <h3> (the site has zero and keeps zero), no table (article.tdb-doc is
-     not .prose, so a <table> here would ship unstyled -- and the three-row
-     requirements grid reads as three definitions anyway), no <hr>. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="quickstart">
-  <article class="tdb-doc">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Quickstart</h1>
+<p class="tdb-doc-sub">Install the tools and check what you can run today.</p>
+</header>
 
-    <h1>Quickstart</h1>
-    <p class="tdb-doc-sub">terminal-daily-bench is a living, execution-graded coding-agent benchmark.</p>
+<h2 id="how-scoring-works"><a href="#how-scoring-works">What an evaluation does</a></h2>
+<p>A model proposes a code change for a task. The evaluator applies it and runs protected tests. The result records whether those tests passed.</p>
 
-    <h2 id="how-scoring-works"><a href="#how-scoring-works">How a run is scored</a></h2>
-    <p>The model sees the task instruction and produces a patch. Harbor re-lays a protected test
-      suite the model never sees. The suite runs under a network cut; the reward is its outcome.</p>
-    <p>The reward is the test outcome, never a model&rsquo;s opinion.</p>
+<h2 id="requirements"><a href="#requirements">Requirements</a></h2>
+<ul>
+<li>Python 3.11 or later.</li>
+<li>For model calls, an OpenAI-compatible API endpoint and its credentials.</li>
+<li>For scoring, an Apptainer or Singularity host and access to the required evaluation environment.</li>
+</ul>
 
-    <h2 id="requirements"><a href="#requirements">Requirements</a></h2>
-    <p>Three pieces, and <code>tdb quality</code> is the exception that needs none of them: it needs
-      neither Harbor nor a model.</p>
-    <dl class="tdb-defs">
-      <dt>Python <strong>&ge; 3.11</strong></dt>
-      <dd>Needed by everything. The scoring core is pure stdlib; there are no runtime
-        dependencies.</dd>
-      <dt>An <strong>apptainer/singularity</strong> host</dt>
-      <dd>Needed by <code>tdb run</code> and <code>tdb oracle</code>. Both invoke
-        <code>harbor run ... -e singularity</code>, which executes each task&rsquo;s SIF image.</dd>
-      <dt>An <strong>OpenAI-compatible endpoint</strong></dt>
-      <dd>Needed by <code>tdb run</code> with a real model. <code>tdb oracle</code> needs no
-        model.</dd>
-    </dl>
+<h2 id="availability"><a href="#availability">Current availability</a></h2>
+<p>The required evaluation environment includes unpublished changes to Harbor, the task runner. The public commands cannot yet score a task end to end without it. Installing the standard Harbor package does not provide those changes.</p><p>Task inspection, setup checks, task publication, and analysis of existing results remain available.</p>
 
-    <h2 id="availability"><a href="#availability">Current availability</a></h2>
-    <p>Our scored runs use a private, locally patched Harbor 0.13.1 fork. Stock upstream Harbor
-      rejects this bundle&rsquo;s singularity backend options, so a third party cannot currently run
-      <code>tdb run</code> or <code>tdb oracle</code> end to end.</p>
-    <p>The task packages, <code>tdb doctor</code>, <code>tdb quality</code> and
-      <code>tdb publish</code> remain usable without that fork. No publication date is promised.</p>
+<h2 id="install"><a href="#install">Install</a></h2>
+<p>From a checkout of the <a href="https://github.com/DaizeDong/terminal-daily-bench">project repository</a>, run:</p><figure class="tdb-code"><figcaption>Install from source</figcaption><pre><code>pip install -e .
+tdb --help</code></pre></figure>
 
-    <h2 id="install"><a href="#install">Install</a></h2>
-    <p>Either route installs the <code>tdb</code> console script
-      (<code>terminal_daily_bench.cli:main</code> in <code>pyproject.toml</code>).</p>
-    <figure class="tdb-code"><pre><code>uv tool install terminal-daily-bench   # with uv
-pip install -e .                       # from a checkout of the release bundle
+<h2 id="endpoint"><a href="#endpoint">Connect a model</a></h2>
+<p>Use the API address and credentials for your provider or local model server. Replace the example values below.</p><figure class="tdb-code"><figcaption>Model connection</figcaption><pre><code>export OPENAI_BASE_URL=https://api.openai.com/v1
+export OPENAI_API_KEY=YOUR_API_KEY</code></pre></figure>
 
-tdb --version                          # -&gt; terminal-daily-bench 0.1.0</code></pre></figure>
-
-    <h2 id="endpoint"><a href="#endpoint">Configure the model endpoint</a></h2>
-    <p>The model call goes to a <strong>generic OpenAI-compatible</strong> endpoint: OpenAI,
-      OpenRouter, vLLM, LiteLLM, or a local server.</p>
-    <figure class="tdb-code"><pre><code>export OPENAI_BASE_URL=https://api.openai.com/v1   # the default; any OpenAI-compatible endpoint
-export OPENAI_API_KEY=sk-...                       # bearer key, read from env, never stored</code></pre></figure>
-    <p>Requests go to <code>&lt;base&gt;/chat/completions</code>. There is no default key. If the
-      upstream rejects <code>max_tokens</code>, the client automatically retries with
-      <code>max_completion_tokens</code>.</p>
-
-    <h2 id="doctor"><a href="#doctor">Run tdb doctor first</a></h2>
-    <p>It reports which of the pieces above your host is missing, before you spend a model call
-      finding out.</p>
-    <figure class="tdb-code"><pre><code>tdb doctor tasks/archive/td-fc90ea8b76d5f6b6</code></pre></figure>
-    <p>With the host answering, <a href="../run/">run a task</a>.</p>
-
-  </article>
+<h2 id="doctor"><a href="#doctor">Check your setup</a></h2>
+<p>Replace the path with a task directory. The check identifies missing requirements before you make a model call.</p><figure class="tdb-code"><figcaption>Check a task environment</figcaption><pre><code>tdb doctor path/to/task</code></pre></figure><p>With the required environment available, continue to <a href="../run/">Run a task</a>.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="quickstart"></script>
+<script data-page="quickstart" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 <script>
 /* Eleven section ids moved off this page when it was split. Nothing on the
    site links to them -- only #requirements was ever deep-linked, and it did

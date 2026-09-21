@@ -1135,8 +1135,8 @@ def _agent_budget_failure_class(
     return _AGENT_BUDGET_FAILURE_CLASS
 
 
-def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
-    """Read a fixed, bounded telemetry whitelist from untrusted ATIF JSON."""
+def read_harness_telemetry(jobs_dir: str, *, complete_attempt: bool = False) -> Dict[str, Any]:
+    """Read bounded ATIF metrics; whole-attempt call totals need caller proof."""
     try:
         paths = sorted(Path(jobs_dir).rglob("trajectory.json"))
         claude_stream_paths = sorted(Path(jobs_dir).rglob("claude-code.txt"))
@@ -1158,6 +1158,8 @@ def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
 
         n_llm_calls = 0
         n_tool_calls = 0
+        n_command_calls = 0
+        commands_classified = True
         counts_valid = True
         for step in steps:
             if "llm_call_count" in step:
@@ -1168,10 +1170,23 @@ def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
                 n_llm_calls += count
             if "tool_calls" in step:
                 calls = step.get("tool_calls")
-                if not isinstance(calls, list) or len(calls) > _MAX_TELEMETRY_STEPS:
+                if (not isinstance(calls, list) or len(calls) > _MAX_TELEMETRY_STEPS
+                        or any(not isinstance(call, dict) for call in calls)):
                     counts_valid = False
                     break
                 n_tool_calls += len(calls)
+                # ATIF records invocations. A shell string containing multiple
+                # commands is still one invocation; unknown tools count above.
+                for call in calls:
+                    name = call.get("function_name") or call.get("name")
+                    if (isinstance(name, str) and name.rsplit(".", 1)[-1].lower() in
+                            {"terminal", "bash", "shell", "exec_command", "run_command", "shell_command", "bash_command"}):
+                        n_command_calls += 1
+                    elif (not isinstance(name, str) or name.rsplit(".", 1)[-1].lower() not in
+                            {"read_file", "list_files", "apply_patch", "write_file", "run_tests",
+                             "read", "edit", "multiedit", "write", "glob", "grep", "webfetch", "websearch",
+                             "todowrite", "todoread", "notebookedit", "mark_task_complete", "update_plan"}):
+                        commands_classified = False
             if (n_llm_calls > _MAX_TELEMETRY_COUNT
                     or n_tool_calls > _MAX_TELEMETRY_COUNT):
                 counts_valid = False
@@ -1179,10 +1194,23 @@ def read_harness_telemetry(jobs_dir: str) -> Dict[str, Any]:
         if not counts_valid:
             continue
 
+        # Terminus writes final_metrics after every episode. Only the caller's
+        # completed harness result can establish a whole attempt. Continued or
+        # nested traces need a separate binding before they can supply totals.
+        reported_steps = final.get("total_steps")
+        complete = (complete_attempt is True and len(paths) == 1
+                    and not data.get("continued_trajectory_ref")
+                    and not data.get("subagent_trajectories")
+                    and (reported_steps is None or
+                         _bounded_telemetry_int(reported_steps) == len(steps))
+                    and not (agent.get("name") == "terminus-2" and steps and not n_tool_calls))
+
         telemetry: Dict[str, Any] = {
             "n_turns": len(steps),
             "n_llm_calls": n_llm_calls,
-            "n_tool_calls": n_tool_calls,
+            "n_tool_calls": n_tool_calls if complete else None,
+            "n_command_calls": n_command_calls if complete and commands_classified else None,
+            "trajectory_complete": complete,
             "trajectory_path": str(path),
         }
         version = _bounded_telemetry_text(agent.get("version"), 128)
@@ -1625,7 +1653,9 @@ def main(argv=None) -> int:
                     )
                     result["error"] = "harbor aggregate reports agent/trial errors"
             telemetry = _redact_credentials(
-                read_harness_telemetry(jobs_dir), spec
+                read_harness_telemetry(jobs_dir, complete_attempt=(
+                    aggregate_status is not None and aggregate_status.clean
+                )), spec
             )
             result["harness"].update(telemetry)
             # Harbor stdout/stderr, trajectories, and agent-authored files are

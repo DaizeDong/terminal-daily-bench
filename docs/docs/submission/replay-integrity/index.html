@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>How submissions are checked · Terminal-Daily</title>
+<meta name="description" content="Operator evaluation connects a submitted patch to a reproducible test outcome.">
+<link href="../../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="./">
+</head>
+<body>
+<main id="nd-home-layout" class="tdb-docs" data-page="docs">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>How submissions are checked</h1>
+<p class="tdb-doc-sub">Operator evaluation connects a submitted patch to a reproducible test outcome.</p>
+</header>
+
+<h2 id="frozen-policy"><a href="#frozen-policy">Use consistent conditions</a></h2>
+<p>Operators evaluate a submission against a specified task set and evaluation environment. A result must identify those conditions before it can support a comparison.</p>
+
+<h2 id="image-checks"><a href="#image-checks">Check the task environment</a></h2>
+<p>The evaluator checks that the task image and runtime match the required environment. Unexpected changes stop verification rather than producing an accepted score.</p>
+
+<h2 id="harbor-binding"><a href="#harbor-binding">Check the evaluator</a></h2>
+<p>The task runner is checked before and after execution so a result cannot silently come from a different evaluator.</p>
+
+<h2 id="result-binding"><a href="#result-binding">Read the actual result</a></h2>
+<p>The published outcome must come from the protected test run for the submitted patch. A replacement result file or a contributor’s claimed score is insufficient.</p>
+
+<h2 id="canary"><a href="#canary">Verify network restrictions</a></h2>
+<p>For offline tasks, operators check that the environment can reach the network normally and cannot reach it during isolated evaluation. An inconclusive check is an infrastructure problem, not a failed task.</p>
+
+<h2 id="deployment"><a href="#deployment">Separate checking from publication</a></h2>
+<p>The systems that evaluate results and publish accepted results have separate permissions. Contributors cannot approve their own submissions.</p>
+
+<h2 id="evidence"><a href="#evidence">Current limits</a></h2>
+<p>The public release does not provide an operational verification service. Production verification remains pending until operators demonstrate the required execution, isolation, and deployment checks in the real environment.</p><p>Tests of the verification code alone do not demonstrate that deployment. Protected tests may also miss incorrect solutions; that error rate remains unmeasured.</p>
+</article>
+</main>
+
+<script data-page="docs" data-root="../../.." src="../../../assets/site.js?v=7d2e76d680"></script>
+</body>
+</html>

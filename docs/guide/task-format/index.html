@@ -1,108 +1,41 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Task format — terminal-daily-bench docs</title>
-<meta name="description" content="What a terminal-daily-bench task package is, the two release modes it ships in, and what each mode withholds.">
-<link rel="stylesheet" href="../../assets/tw.css?v=b1d8696d89">
-<link rel="stylesheet" href="../../assets/site.css?v=b1d8696d89">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#9622;</text></svg>">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Task packages · Terminal-Daily</title>
+<meta name="description" content="Each package describes a code repair and the environment used to evaluate it.">
+<link href="../../assets/tw.css?v=7d2e76d680" rel="stylesheet"/>
+<link href="../../assets/site.css?v=7d2e76d680" rel="stylesheet"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23315aba' stroke-width='1.6'><rect x='2' y='3' width='20' height='18'/><path d='M6 8l4 4-4 4 M13 16h5'/></svg>">
+<link rel="canonical" href="../../docs/task-format/">
 </head>
 <body>
-
-<!-- This page was one of four monoliths: 20 h2 and 10257px. It is now five
-     pages of four to seven sections each, in the shell's unit -- h2, one to
-     three sentences, at most one code figure.
-
-     THREE IDS MAY NOT LEAVE THIS FILE. #archive-vs-live is written into
-     generated output by web/gen_pages.py and appears on four benchmark day
-     pages, /guide/, /guide/quickstart/ and /guide/submission/; #layout and
-     #shipped are named as deep-link targets. They stay here; everything else
-     moved, and the sidebar (DOCNAV in assets/site.js) is the way to the rest. -->
-
 <main id="nd-home-layout" class="tdb-docs" data-page="docs">
-  <!-- `wrap-anywhere` is load-bearing, not decorative: unbreakable identifiers
-       in body copy are wider than a 390px content box, and body{overflow-x:
-       hidden} clips the tail with no scrollbar rather than scrolling. Code
-       figures are unaffected -- white-space:pre suppresses wrapping outright. -->
-  <article class="tdb-doc prose-no-margin wrap-anywhere">
+<article class="tdb-doc">
+<header class="tdb-page-heading tdb-doc-heading">
+<h1>Task packages</h1>
+<p class="tdb-doc-sub">Each package describes a code repair and the environment used to evaluate it.</p>
+</header>
 
-    <h1>Task format</h1>
-    <p class="tdb-doc-sub">Self-contained, harbor-native packages under <code>tasks/{archive|live}/&lt;task-id&gt;/</code>.</p>
+<h2 id="layout"><a href="#layout">What a package contains</a></h2>
+<p>Start with the task description. The package also includes an environment recipe and evaluation settings. Archived packages add the reference solution and the tests needed to reproduce the result.</p><p><a href="files/">Read a task package</a> explains the files. The <a href="../../registry/">task catalogue</a> lists available packages.</p>
 
-    <h2 id="layout"><a href="#layout">Package layout</a></h2>
-    <p>Everything here reflects the code in this bundle; no APIs are invented. Task ids look like
-      <code>td-fc90ea8b76d5f6b6</code>.</p>
-    <p>The canonical short schema is
-      <a href="https://github.com/DaizeDong/terminal-daily-bench/blob/main/tasks/SCHEMA.md"><code>tasks/SCHEMA.md</code></a>;
-      the code is <code>terminal_daily_bench/</code>, <code>tasks/publish_tasks.py</code> and
-      <code>web/submit_result.py</code>.</p>
-    <figure class="tdb-code">
-      <figcaption><code>tasks/archive/&lt;task-id&gt;/</code></figcaption>
-      <pre><code>task.toml           environment.docker_image &middot; environment.allow_internet &middot; timeouts
-instruction.md      the natural-language task shown to the model (de-identified)
-tests/              test.sh (runner) &middot; test_outputs.py (protected assertions) &middot; test_patch.diff
-environment/        Dockerfile (build recipe: base image + repo @ base_sha + deps)
-solution/           solve.sh (git apply driver) &middot; oracle.patch (the gold fix)
-PROVENANCE.json     source_repo &middot; source_ref &middot; source_license_spdx
-record.json         machine metadata (task_id, repo, pr_number, SHAs, f2p selectors)</code></pre>
-    </figure>
-    <p>The schema above is the whole contract &mdash; a task directory is valid on its own. Published
-      task directories are listed in the <a href="../../registry/">task registry</a>, one row per task
-      id, with its release mode and its failing-test count.</p>
+<h2 id="archive-vs-live"><a href="#archive-vs-live">Live and archived tasks</a></h2>
+<p>A task is live for the first two weeks after its source pull request is merged. During that period, its reference solution and protected test bodies are withheld. After two weeks, the package is archived and those materials are published.</p>
 
-    <h2 id="archive-vs-live"><a href="#archive-vs-live">Archive vs. live</a></h2>
-    <p>A task is archived two weeks after its source PR merged. Live withholding blocks memorization
-      and test-editing; releasing archived tasks in full supports local reproduction.</p>
-    <figure class="tdb-code">
-      <figcaption><code>tasks/publish_tasks.py::publish</code></figcaption>
-      <pre><code><span class="text-muted-foreground"># ARCHIVE_WEEKS = 2</span>
-(today - merge_date).days &gt;= 14   -&gt;  archive
-(today - merge_date).days &lt;  14   -&gt;  live</code></pre>
-    </figure>
+<h2 id="shipped"><a href="#shipped">Choose the right package</a></h2>
+<dl class="tdb-defs">
+<dt>Live</dt><dd>Use it to inspect a current task and prepare a patch. Operators run the withheld tests before a submission can enter verified results.</dd>
+<dt>Archived</dt><dd>Use it to inspect the full task, reference solution, and tests. Local scoring still requires the <a href="../quickstart/#availability">evaluation environment</a>.</dd>
+</dl>
 
-    <h2 id="shipped"><a href="#shipped">What ships in each mode</a></h2>
-    <p>Every row is one path in the package; the two columns are the two release modes.</p>
-    <div class="tdb-plain-table">
-      <table>
-        <thead><tr>
-          <th>Package path</th>
-          <th>Shipped in archive</th>
-          <th>Shipped in live</th>
-        </tr></thead>
-        <tbody>
-          <tr><th class="tdb-id">task.toml</th><td>yes (sanitized)</td><td>yes (sanitized)</td></tr>
-          <tr><th class="tdb-id">instruction.md</th><td>yes</td><td>yes</td></tr>
-          <tr><th class="tdb-id">PROVENANCE.json</th><td>yes</td><td>yes</td></tr>
-          <tr><th class="tdb-id">environment/</th><td>yes</td><td>yes</td></tr>
-          <tr><th class="tdb-id">tests/test.sh</th><td>yes</td><td>yes</td></tr>
-          <tr><th><span class="tdb-id">tests/test_outputs.py</span> (protected body)</th>
-              <td>yes</td><td>withheld</td></tr>
-          <tr><th class="tdb-id">tests/test_patch.diff</th>
-              <td>yes</td><td>withheld</td></tr>
-          <tr><th><span class="tdb-id">solution/ (solve.sh, oracle.patch)</span></th>
-              <td>yes</td><td>withheld</td></tr>
-          <tr><th class="tdb-id">record.json</th><td>yes (sanitized)</td>
-              <td>replaced by <span class="tdb-id">FAILING_TESTS.json</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h2 id="failing-tests"><a href="#failing-tests">Inside <span class="tdb-id">FAILING_TESTS.json</span> (live only)</a></h2>
-    <p>Live submissions stay unranked until an official replay receipt exists.</p>
-    <figure class="tdb-code">
-      <figcaption>The failing-test IDs only, from the F2P selectors (<code>publish_tasks.py::_failing_test_ids</code>)</figcaption>
-      <pre><code>{
-  "failing_test_ids": ["tests/test_add_option_format.py::test_invalid_format_key_..."],
-  "note": "protected assertions + gold solution withheld; pending official replay"
-}</code></pre>
-    </figure>
-
-  </article>
+<h2 id="failing-tests"><a href="#failing-tests">Tests listed in a live package</a></h2>
+<p>A live package lists the tests associated with the repair. Their names help describe the task; the protected assertions are withheld. A test name alone is not enough to reproduce or verify a score.</p>
+</article>
 </main>
 
-<script src="../../assets/site.js?v=b1d8696d89" data-root="../.." data-page="docs"></script>
+<script data-page="docs" data-root="../.." src="../../assets/site.js?v=7d2e76d680"></script>
 <script>
 /* Fragments that moved when this page was split.
 
