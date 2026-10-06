@@ -1,0 +1,12 @@
+*.py[co]
+docs/build
+dist/
+build/
+MANIFEST
+.coverage
+.cache/
+*.egg-info/
+htmlcov/
+.pytest_cache# pixi environments
+.pixi/*
+!.pixi/config.toml
