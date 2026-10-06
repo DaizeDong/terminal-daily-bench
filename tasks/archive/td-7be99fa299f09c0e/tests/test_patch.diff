@@ -1,0 +1,52 @@
+diff --git a/test/unittests/tools/cmake/test_cmake_install.py b/test/unittests/tools/cmake/test_cmake_install.py
+index 9b7f51bba84..2203070dbe9 100644
+--- a/test/unittests/tools/cmake/test_cmake_install.py
++++ b/test/unittests/tools/cmake/test_cmake_install.py
+@@ -10,7 +10,6 @@
+ from conan.test.utils.tools import redirect_output
+ 
+ 
+-
+ def test_run_install_component():
+     """
+     Testing that the proper component is installed.
+@@ -80,6 +79,7 @@ def test_run_install_strip(config, deprecated):
+         assert "tools.cmake:install_strip" not in stderr
+     assert "--strip" in conanfile.command
+ 
++
+ def test_run_install_cli_args():
+     """
+     Testing that the passing cli_args to install works
+diff --git a/test/unittests/tools/cmake/test_cmake_test.py b/test/unittests/tools/cmake/test_cmake_test.py
+index 8caf8603a66..f29f1ef0f51 100644
+--- a/test/unittests/tools/cmake/test_cmake_test.py
++++ b/test/unittests/tools/cmake/test_cmake_test.py
+@@ -58,3 +58,27 @@ def test_cli_args_configure():
+     cmake = CMake(conanfile)
+     cmake.configure(cli_args=["--graphviz=foo.dot"])
+     assert "--graphviz=foo.dot" in conanfile.command
++
++
++def test_run_ctest():
++    settings = Settings.loads(default_settings_yml)
++    settings.os = "Windows"
++    settings.arch = "x86"
++    settings.build_type = "Release"
++    settings.compiler = "msvc"
++    settings.compiler.runtime = "dynamic"
++    settings.compiler.version = "193"
++
++    conanfile = ConanFileMock()
++    conanfile.conf = Conf()
++    conanfile.conf.define("tools.cmake:ctest_args", ["--debug", "--output-junit myfile"])
++    conanfile.conf.define("tools.build:verbosity", "verbose")
++
++    conanfile.folders.generators = "."
++    conanfile.folders.set_base_generators(temp_folder())
++    conanfile.settings = settings
++
++    write_cmake_presets(conanfile, "toolchain", "Ninja", {})
++    cmake = CMake(conanfile)
++    cmake.ctest(cli_args=["--schedule-random", "--quiet"])
++    assert "--schedule-random --quiet --verbose --debug --output-junit myfile" in conanfile.command
