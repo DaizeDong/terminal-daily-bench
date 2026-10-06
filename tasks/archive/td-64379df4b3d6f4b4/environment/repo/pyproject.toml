@@ -1,0 +1,151 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "param"
+dynamic = ["version"]
+description = "Make your Python code clearer and more reliable by declaring Parameters."
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.10"
+authors = [
+    { name = "HoloViz", email = "developers@holoviz.org" },
+]
+maintainers = [
+    { name = "HoloViz", email = "developers@holoviz.org" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.optional-dependencies]
+examples = [
+    "aiohttp",
+    "pandas",
+    "panel",
+]
+tests = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+]
+tests-deser = [
+    "xlrd",
+    "openpyxl",
+    "odfpy",
+    "pyarrow",
+    "tables",
+]
+tests-examples = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-xdist",
+    "nbval",
+    "param[examples]",
+]
+# Set of dependencies that work with pypy and are quick to install.
+tests-pypy = [
+    "cloudpickle",
+    "ipython",
+    "jsonschema",
+    "nest-asyncio",
+    "numpy",
+]
+tests-full = [
+    "param[tests]",
+    "param[tests-examples]",
+    "param[tests-deser]",
+    "numpy",
+    "pandas",
+    "ipython",
+    "jsonschema",
+    "gmpy2",
+    "cloudpickle",
+    "nest_asyncio",
+]
+all = [
+    "param[tests-full]",
+]
+
+[project.urls]
+Homepage = "https://param.holoviz.org/"
+Tracker = "https://github.com/holoviz/param/issues"
+Releases = "https://github.com/holoviz/param/releases"
+Source = "https://github.com/holoviz/param"
+HoloViz = "https://holoviz.org/"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { version_scheme = "no-guess-dev" }
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/param",
+    "/numbergen",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/param",
+    "/numbergen",
+    "/tests",
+]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "param/_version.py"
+
+[tool.pytest.ini_options]
+addopts = "--color=yes"
+python_files = "test*.py"
+filterwarnings = [
+  "error",
+]
+xfail_strict = true
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope="function"
+
+[tool.coverage.report]
+omit = ["param/version.py", "tests/testimports.py"]
+
+[tool.ruff]
+fix = true
+include = ["*.py"]
+exclude = ["version.py"]
+
+[tool.ruff.lint]
+select = ["D", "W", "E", "F"]
+ignore = [
+    "D100", # Missing docstring in public module"
+    "D101", # Missing docstring in public class"
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D105", # Missing docstring in magic method"
+    "D205", # 1 blank line required between summary line and description
+    "D415", # First line should end with a period, question mark, or exclamation point
+    "D417", # Missing argument description in the docstring for `param_union`: `*parameterizeds`
+    "E402", # Module level import not at top of file
+    "E501", # Line too long
+    "E701", # Multiple statements on one line
+    "E712", # Comparison to true should be is
+    "E731", # Do not assign a lambda expression, use a def
+    "E741", # Ambiguous variable name
+    "F405", # From star imports
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
