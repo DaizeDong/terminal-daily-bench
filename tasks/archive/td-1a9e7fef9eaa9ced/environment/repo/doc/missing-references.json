@@ -1,0 +1,344 @@
+{
+  "py:class": {
+    "HashableList[_HT]": [
+      "<unknown>:1"
+    ],
+    "matplotlib.axes._base._AxesBase": [
+      "doc/api/artist_api.rst:202"
+    ],
+    "matplotlib.backend_bases._Backend": [
+      "lib/matplotlib/backend_bases.py:docstring of matplotlib.backend_bases.ShowBase:1"
+    ],
+    "matplotlib.backends._backend_pdf_ps.RendererPDFPSBase": [
+      "lib/matplotlib/backends/backend_pdf.py:docstring of matplotlib.backends.backend_pdf.RendererPdf:1",
+      "lib/matplotlib/backends/backend_ps.py:docstring of matplotlib.backends.backend_ps.RendererPS:1"
+    ],
+    "matplotlib.backends._backend_tk.FigureCanvasTk": [
+      "lib/matplotlib/backends/backend_tkagg.py:docstring of matplotlib.backends.backend_tkagg.FigureCanvasTkAgg:1",
+      "lib/matplotlib/backends/backend_tkcairo.py:docstring of matplotlib.backends.backend_tkcairo.FigureCanvasTkCairo:1"
+    ],
+    "matplotlib.image._ImageBase": [
+      "doc/api/artist_api.rst:202",
+      "lib/matplotlib/image.py:docstring of matplotlib.image.AxesImage:1",
+      "lib/matplotlib/image.py:docstring of matplotlib.image.BboxImage:1",
+      "lib/matplotlib/image.py:docstring of matplotlib.image.FigureImage:1"
+    ],
+    "matplotlib.patches.ArrowStyle._Base": [
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.Fancy:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.Simple:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.Wedge:1"
+    ],
+    "matplotlib.patches.ArrowStyle._Curve": [
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.BarAB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.BracketA:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.BracketAB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.BracketB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.BracketCurve:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.Curve:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveA:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveAB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveBracket:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveFilledA:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveFilledAB:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle.CurveFilledB:1"
+    ],
+    "matplotlib.patches.ConnectionStyle._Base": [
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle.Angle3:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle.Angle:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle.Arc3:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle.Arc:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle.Bar:1"
+    ],
+    "matplotlib.patches._Style": [
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ArrowStyle:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.BoxStyle:1",
+      "lib/matplotlib/patches.py:docstring of matplotlib.patches.ConnectionStyle:1",
+      "lib/mpl_toolkits/axisartist/axisline_style.py:docstring of mpl_toolkits.axisartist.axisline_style.AxislineStyle:1"
+    ],
+    "matplotlib.projections.geo._GeoTransform": [
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.AitoffAxes.AitoffTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.AitoffAxes.InvertedAitoffTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.HammerAxes.HammerTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.HammerAxes.InvertedHammerTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.LambertAxes.InvertedLambertTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.LambertAxes.LambertTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.MollweideAxes.InvertedMollweideTransform:1",
+      "lib/matplotlib/projections/geo.py:docstring of matplotlib.projections.geo.MollweideAxes.MollweideTransform:1"
+    ],
+    "matplotlib.text._AnnotationBase": [
+      "doc/api/artist_api.rst:202",
+      "lib/matplotlib/offsetbox.py:docstring of matplotlib.offsetbox.AnnotationBbox:1",
+      "lib/matplotlib/text.py:docstring of matplotlib.text.Annotation:1"
+    ],
+    "matplotlib.transforms._BlendedMixin": [
+      "lib/matplotlib/transforms.py:docstring of matplotlib.transforms.BlendedAffine2D:1",
+      "lib/matplotlib/transforms.py:docstring of matplotlib.transforms.BlendedGenericTransform:1"
+    ],
+    "matplotlib.widgets._SelectorWidget": [
+      "lib/matplotlib/widgets.py:docstring of matplotlib.widgets.LassoSelector:1",
+      "lib/matplotlib/widgets.py:docstring of matplotlib.widgets.PolygonSelector:1",
+      "lib/matplotlib/widgets.py:docstring of matplotlib.widgets.RectangleSelector:1",
+      "lib/matplotlib/widgets.py:docstring of matplotlib.widgets.SpanSelector:1"
+    ],
+    "mpl_toolkits.axes_grid1.axes_size._Base": [
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.Add:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.AxesX:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.AxesY:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.Fixed:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.Fraction:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.MaxExtent:1",
+      "lib/mpl_toolkits/axes_grid1/axes_size.py:docstring of mpl_toolkits.axes_grid1.axes_size.Scaled:1"
+    ],
+    "mpl_toolkits.axes_grid1.parasite_axes.AxesHostAxes": [
+      "<unknown>:1",
+      "doc/api/_as_gen/mpl_toolkits.axes_grid1.parasite_axes.rst:30:<autosummary>:1"
+    ],
+    "mpl_toolkits.axes_grid1.parasite_axes.AxesParasite": [
+      "<unknown>:1",
+      "doc/api/_as_gen/mpl_toolkits.axes_grid1.parasite_axes.rst:30:<autosummary>:1"
+    ],
+    "mpl_toolkits.axisartist.axisline_style.AxislineStyle._Base": [
+      "lib/mpl_toolkits/axisartist/axisline_style.py:docstring of mpl_toolkits.axisartist.axisline_style.AxislineStyle.SimpleArrow:1"
+    ],
+    "mpl_toolkits.axisartist.axisline_style._FancyAxislineStyle.FilledArrow": [
+      "<unknown>:1"
+    ],
+    "mpl_toolkits.axisartist.axisline_style._FancyAxislineStyle.SimpleArrow": [
+      "<unknown>:1"
+    ],
+    "mpl_toolkits.axisartist.axislines._FixedAxisArtistHelperBase": [
+      "<unknown>:1",
+      "lib/mpl_toolkits/axisartist/axislines.py:docstring of mpl_toolkits.axisartist.axislines.FixedAxisArtistHelperRectilinear:1",
+      "lib/mpl_toolkits/axisartist/grid_helper_curvelinear.py:docstring of mpl_toolkits.axisartist.grid_helper_curvelinear.FixedAxisArtistHelper:1"
+    ],
+    "mpl_toolkits.axisartist.axislines._FloatingAxisArtistHelperBase": [
+      "<unknown>:1",
+      "lib/mpl_toolkits/axisartist/axislines.py:docstring of mpl_toolkits.axisartist.axislines.FloatingAxisArtistHelperRectilinear:1",
+      "lib/mpl_toolkits/axisartist/grid_helper_curvelinear.py:docstring of mpl_toolkits.axisartist.grid_helper_curvelinear.FloatingAxisArtistHelper:1"
+    ],
+    "mpl_toolkits.axisartist.floating_axes.FloatingAxesHostAxes": [
+      "<unknown>:1",
+      "doc/api/_as_gen/mpl_toolkits.axisartist.floating_axes.rst:32:<autosummary>:1"
+    ],
+    "numpy.float64": [
+      "doc/docstring of matplotlib.ft2font.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1.set_text:1",
+      "doc/docstring of matplotlib.ft2font.PyCapsule.set_text:1"
+    ],
+    "numpy.typing.NDArray": [
+      "doc/docstring of matplotlib.ft2font.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1.set_text:1"
+    ],
+    "numpy.uint8": [
+      "<unknown>:1"
+    ]
+  },
+  "py:obj": {
+    "Image": [
+      "lib/matplotlib/pyplot.py:docstring of matplotlib.pyplot.gci:4"
+    ],
+    "active": [
+      "lib/matplotlib/widgets.py:docstring of matplotlib.widgets.AxesWidget:21"
+    ],
+    "matplotlib.animation.ArtistAnimation.new_frame_seq": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.new_saved_frame_seq": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.pause": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.resume": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.save": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.to_html5_video": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.ArtistAnimation.to_jshtml": [
+      "doc/api/_as_gen/matplotlib.animation.ArtistAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.finish": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.frame_format": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FFMpegFileWriter.supported_formats:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FFMpegFileWriter.supported_formats:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.grab_frame": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.isAvailable": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.output_args": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FFMpegFileWriter.supported_formats:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegFileWriter.setup": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.finish": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.frame_size": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:34:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.grab_frame": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.isAvailable": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.output_args": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:34:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.setup": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FFMpegWriter.supported_formats": [
+      "doc/api/_as_gen/matplotlib.animation.FFMpegWriter.rst:34:<autosummary>:1"
+    ],
+    "matplotlib.animation.FileMovieWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.FileMovieWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FileMovieWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FileMovieWriter.finish:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FileMovieWriter.isAvailable": [
+      "doc/api/_as_gen/matplotlib.animation.FileMovieWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FileMovieWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.FileMovieWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.FileMovieWriter.supported_formats": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FileMovieWriter.finish:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FuncAnimation.pause": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FuncAnimation.new_frame_seq:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FuncAnimation.resume": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FuncAnimation.new_frame_seq:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FuncAnimation.save": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FuncAnimation.new_frame_seq:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FuncAnimation.to_html5_video": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FuncAnimation.new_frame_seq:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.FuncAnimation.to_jshtml": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.FuncAnimation.new_frame_seq:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.HTMLWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.HTMLWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.HTMLWriter.frame_format": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.HTMLWriter.finish:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.HTMLWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.HTMLWriter.finish:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.HTMLWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.HTMLWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.finish": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.frame_format": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.ImageMagickFileWriter.input_names:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.ImageMagickFileWriter.input_names:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.grab_frame": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.isAvailable": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickFileWriter.setup": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickFileWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.bin_path": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.finish": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.ImageMagickWriter.input_names:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.grab_frame": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.isAvailable": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.setup": [
+      "doc/api/_as_gen/matplotlib.animation.ImageMagickWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.ImageMagickWriter.supported_formats": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.ImageMagickWriter.input_names:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.MovieWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.MovieWriter.bin_path:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.MovieWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.MovieWriter.rst:27:<autosummary>:1"
+    ],
+    "matplotlib.animation.PillowWriter.frame_size": [
+      "lib/matplotlib/animation.py:docstring of matplotlib.animation.PillowWriter.finish:1:<autosummary>:1"
+    ],
+    "matplotlib.animation.PillowWriter.saving": [
+      "doc/api/_as_gen/matplotlib.animation.PillowWriter.rst:26:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.new_frame_seq": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.new_saved_frame_seq": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.pause": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.resume": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.save": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.to_html5_video": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.animation.TimedAnimation.to_jshtml": [
+      "doc/api/_as_gen/matplotlib.animation.TimedAnimation.rst:23:<autosummary>:1"
+    ],
+    "matplotlib.typing._HT": [
+      "<unknown>:1"
+    ]
+  }
+}

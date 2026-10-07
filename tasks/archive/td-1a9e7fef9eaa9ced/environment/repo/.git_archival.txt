@@ -1,0 +1,4 @@
+node: 1ab3332e4e724e8a0c84d1ff1bfdc14b49bb60e8
+node-date: 2025-11-09T23:48:30+01:00
+describe-name: %(describe:tags=true)
+ref-names: grafted, HEAD
