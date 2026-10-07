@@ -1,0 +1,3 @@
+--requirement testing.txt
+--requirement ../docs/requirements.txt
+--requirement packaging.txt
