@@ -1,0 +1,132 @@
+"""Utilities for working with Github Codespaces."""
+
+from __future__ import annotations
+
+import os
+
+from starlette.requests import Request
+from starlette.responses import HTMLResponse
+
+from reflex.components.base.script import Script
+from reflex.components.component import Component
+from reflex.components.core.banner import has_connection_errors
+from reflex.components.core.cond import cond
+from reflex.constants import Endpoint
+from reflex.utils.decorator import once
+
+
+@once
+def redirect_script() -> str:
+    """Get the redirect script for Github Codespaces.
+
+    Returns:
+        The redirect script as a string.
+    """
+    return f"""
+const thisUrl = new URL(window.location.href);
+const params = new URLSearchParams(thisUrl.search)
+
+function sameHostnameDifferentPort(one, two) {{
+    const hostnameOne = one.hostname;
+    const hostnameTwo = two.hostname;
+    const partsOne = hostnameOne.split(".");
+    const partsTwo = hostnameTwo.split(".");
+    if (partsOne.length !== partsTwo.length) {{ return false;  }}
+    for (let i = 1; i < partsOne.length; i++) {{
+        if (partsOne[i] !== partsTwo[i]) {{ return false; }}
+    }}
+    const uniqueNameOne = partsOne[0];
+    const uniqueNameTwo = partsTwo[0];
+    const uniqueNamePartsOne = uniqueNameOne.split("-");
+    const uniqueNamePartsTwo = uniqueNameTwo.split("-");
+    if (uniqueNamePartsOne.length !== uniqueNamePartsTwo.length) {{ return false;  }}
+    for (let i = 0; i < uniqueNamePartsOne.length - 1; i++) {{
+        if (uniqueNamePartsOne[i] !== uniqueNamePartsTwo[i]) {{ return false;  }}
+    }}
+    return true;
+}}
+
+function doRedirect(url) {{
+    if (!window.sessionStorage.getItem("authenticated_github_codespaces")) {{
+        const a = document.createElement("a");
+        if (params.has("redirect_to")) {{
+            const redirect_to = new URL(params.get("redirect_to"));
+            if (!sameHostnameDifferentPort(thisUrl, redirect_to)) {{
+                console.warn("Reflex: Not redirecting to different hostname");
+                return;
+            }}
+            if (!redirect_to.hostname.endsWith(".app.github.dev")) {{
+                console.warn("Reflex: Not redirecting to non .app.github.dev hostname");
+                return;
+            }}
+            a.href = redirect_to.href;
+        }} else if (!window.location.href.startsWith(url)) {{
+            a.href = url + `?redirect_to=${{window.location.href}}`
+        }} else {{
+            return
+        }}
+        a.hidden = true;
+        a.click();
+        a.remove();
+        window.sessionStorage.setItem("authenticated_github_codespaces", "true")
+    }}
+}}
+doRedirect("{Endpoint.AUTH_CODESPACE.get_url()}")
+"""
+
+
+def codespaces_port_forwarding_domain() -> str | None:
+    """Get the domain for port forwarding in Github Codespaces.
+
+    Returns:
+        The domain for port forwarding in Github Codespaces, or None if not running in Codespaces.
+    """
+    return os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
+
+
+def is_running_in_codespaces() -> bool:
+    """Check if the app is running in Github Codespaces.
+
+    Returns:
+        True if running in Github Codespaces, False otherwise.
+    """
+    return codespaces_port_forwarding_domain() is not None
+
+
+def codespaces_auto_redirect() -> list[Component]:
+    """Get the components for automatically redirecting back to the app after authenticating a codespace port forward.
+
+    Returns:
+        A list containing the conditional redirect component, or empty list.
+    """
+    if is_running_in_codespaces():
+        return [cond(has_connection_errors, Script.create(redirect_script()))]
+    return []
+
+
+def auth_codespace(_request: Request) -> HTMLResponse:
+    """Page automatically redirecting back to the app after authenticating a codespace port forward.
+
+    Args:
+        _request: The request object.
+
+    Returns:
+        An HTML response with an embedded script to redirect back to the app.
+    """
+    return HTMLResponse(
+        f"""
+    <html>
+        <head>
+            <title>Reflex Github Codespace Forward Successfully Authenticated</title>
+        </head>
+        <body>
+            <center>
+                <h2>Successfully Authenticated</h2>
+            </center>
+            <script language="javascript">
+                {redirect_script()}
+            </script>
+        </body>
+    </html>
+    """
+    )
