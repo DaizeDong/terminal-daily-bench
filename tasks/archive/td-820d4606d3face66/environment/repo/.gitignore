@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+# Distribution / packaging
+dist/
+
+# Unit test / coverage reports
+.nox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+.hypothesis/
+.pytest_cache/
+.mypy_cache
+
+# Documentation
+site/
+todo.md
+docs/this.md
+docs/api-completeness/*.md
+!docs/api-completeness/index.md
+
+# Lock files
+*.lock
+
+# Environments
+.venv
+
+# TPC-H data
+tpch/data/*
+
+# VSCode
+.vscode/
+
+# IntelliJ IDEA / PyCharm
+.idea/
+
+# MacOS
+.DS_Store
