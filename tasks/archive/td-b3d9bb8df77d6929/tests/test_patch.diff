@@ -1,0 +1,41 @@
+diff --git a/tests/test_specifiers.py b/tests/test_specifiers.py
+index b0f878190..a9fb83feb 100644
+--- a/tests/test_specifiers.py
++++ b/tests/test_specifiers.py
+@@ -46,6 +46,10 @@ class TestSpecifier:
+     def test_specifiers_valid(self, specifier: str) -> None:
+         Specifier(specifier)
+ 
++    def test_match_args(self) -> None:
++        assert Specifier.__match_args__ == ("_str",)
++        assert Specifier(">=1.0")._str == ">=1.0"
++
+     @pytest.mark.parametrize(
+         "specifier",
+         [
+@@ -829,6 +833,10 @@ def test_create_from_specifiers(self) -> None:
+         spec = SpecifierSet(iter(specs))
+         assert set(spec) == set(specs)
+ 
++    def test_match_args(self) -> None:
++        assert SpecifierSet.__match_args__ == ("_str",)
++        assert SpecifierSet(">=1.0,<2")._str == str(SpecifierSet(">=1.0,<2"))
++
+     @pytest.mark.parametrize(
+         (
+             "initial_prereleases",
+diff --git a/tests/test_version.py b/tests/test_version.py
+index 1778705d7..c14537053 100644
+--- a/tests/test_version.py
++++ b/tests/test_version.py
+@@ -108,6 +108,10 @@ class TestVersion:
+     def test_valid_versions(self, version: str) -> None:
+         Version(version)
+ 
++    def test_match_args(self) -> None:
++        assert Version.__match_args__ == ("_str",)
++        assert Version("1.2")._str == "1.2"
++
+     @pytest.mark.parametrize(
+         "version",
+         [
