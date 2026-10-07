@@ -1,0 +1,37 @@
+diff --git a/sympy/printing/pretty/tests/test_pretty.py b/sympy/printing/pretty/tests/test_pretty.py
+index 6293d393171c..9c4ad9e4e37e 100644
+--- a/sympy/printing/pretty/tests/test_pretty.py
++++ b/sympy/printing/pretty/tests/test_pretty.py
+@@ -7825,12 +7825,15 @@ def test_imaginary_unit():
+ 
+ def test_str_special_matrices():
+     from sympy.matrices import Identity, ZeroMatrix, OneMatrix
++    from sympy.matrices.expressions.special import MatrixUnit
+     assert pretty(Identity(4)) == 'I'
+     assert upretty(Identity(4)) == '𝕀'
+     assert pretty(ZeroMatrix(2, 2)) == '0'
+     assert upretty(ZeroMatrix(2, 2)) == '𝟘'
+     assert pretty(OneMatrix(2, 2)) == '1'
+     assert upretty(OneMatrix(2, 2)) == '𝟙'
++    assert pretty(MatrixUnit(3, 3, 1, 2)) == 'E_12'
++    assert upretty(MatrixUnit(3, 3, 1, 2)) == '𝔼₁₂'
+ 
+ 
+ def test_pretty_misc_functions():
+diff --git a/sympy/printing/tests/test_latex.py b/sympy/printing/tests/test_latex.py
+index 527751cf55ae..04d5a8a9f459 100644
+--- a/sympy/printing/tests/test_latex.py
++++ b/sympy/printing/tests/test_latex.py
+@@ -2222,6 +2222,12 @@ def test_ElementwiseApplyFunction():
+     assert latex(expr) == r'{\left( x \mapsto \frac{1}{x} \right)}_{\circ}\left({X}\right)'
+ 
+ 
++def test_MatrixUnit():
++    from sympy.matrices.expressions.special import MatrixUnit
++    assert latex(MatrixUnit(3, 3, 1, 2), mat_symbol_style='plain') == 'E_{1,2}'
++    assert latex(MatrixUnit(3, 3, 1, 2), mat_symbol_style='bold') == r'\mathcal{E}_{1,2}'
++
++
+ def test_ZeroMatrix():
+     from sympy.matrices.expressions.special import ZeroMatrix
+     assert latex(ZeroMatrix(1, 1), mat_symbol_style='plain') == r"0"
