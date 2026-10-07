@@ -1,0 +1,105 @@
+[project]
+name = "environs"
+version = "14.4.0"
+description = "simplified environment variable parsing"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Steven Loria", email = "sloria1@gmail.com" }]
+classifiers = [
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "python-dotenv",
+  "marshmallow>=3.18.0",
+  "typing-extensions; python_version < '3.11'",
+]
+
+[project.urls]
+Changelog = "https://github.com/sloria/environs/blob/master/CHANGELOG.md"
+Issues = "https://github.com/sloria/environs/issues"
+Source = "https://github.com/sloria/environs"
+
+[project.optional-dependencies]
+django = ["dj-database-url", "dj-email-url", "django-cache-url"]
+tests = [
+  "environs[django]",
+  "pytest",
+  "packaging",
+  "backports.strenum; python_version < '3.11'",
+]
+dev = ["environs[tests]", "tox", "pre-commit>=4.0,<5.0"]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = ["tests/", "CHANGELOG.md", "CONTRIBUTING.md", "tox.ini"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 90
+fix = true
+show-fixes = true
+output-format = "full"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "A005",    # "module {name} shadows a Python standard-library module"
+  "ANN",     # let mypy handle annotation checks
+  "ARG",     # unused arguments are common w/ interfaces
+  "COM",     # let formatter take care commas
+  "C901",    # don't enforce complexity level
+  "D",       # don't require docstrings
+  "E501",    # leave line-length enforcement to formatter
+  "EM",      # allow string messages in exceptions
+  "FIX",     # allow "FIX" comments in code
+  "INP001",  # allow Python files outside of packages
+  "PLR0913", # "Too many arguments"
+  "PLR2004", # "Magic value used in comparison"
+  "PTH",     # don't require using pathlib instead of os
+  "SIM105",  # "Use `contextlib.suppress(...)` instead of `try`-`except`-`pass`"
+  "TD",      # allow TODO comments to be whatever we want
+  "TRY003",  # allow long messages passed to exceptions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "ARG",    # unused arguments are fine in tests
+  "DTZ",    # allow naive datetimes
+  "S",      # allow asserts
+  "SIM117", # allow nested with statements because it's more readable sometimes
+]
+"examples/*" = [
+  "S", # allow asserts
+  "T", # allow prints
+]
+
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.mypy]
+files = ["src", "tests"]
+ignore_missing_imports = true
+warn_unreachable = true
+warn_redundant_casts = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+check_untyped_defs = true
