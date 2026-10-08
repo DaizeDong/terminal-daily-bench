@@ -1,0 +1,22 @@
+diff --git a/tests/io/test_qasm.py b/tests/io/test_qasm.py
+index bf095f17af0..5a7bc3db2ff 100644
+--- a/tests/io/test_qasm.py
++++ b/tests/io/test_qasm.py
+@@ -716,7 +716,7 @@ def test_multiple_mcms(self):
+                             include "qelib1.inc";
+                             qreg q[3];
+                             creg c[3];
+-                            creg mcms[3]
++                            creg mcms[3];
+                             x q[0];
+                             measure q[0] -> mcms[0];
+                             measure q[1] -> mcms[1];
+@@ -745,7 +745,7 @@ def test_conditional(self, precision):
+                     include "qelib1.inc";
+                     qreg q[1];
+                     creg c[1];
+-                    creg mcms[1]
++                    creg mcms[1];
+                     measure q[0] -> mcms[0];
+                     if(mcms[0]==1) rx({p}) q[0];
+                     measure q[0] -> c[0];
