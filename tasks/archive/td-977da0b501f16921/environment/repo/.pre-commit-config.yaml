@@ -1,0 +1,23 @@
+ci:
+  autoupdate_schedule: monthly
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.13.3
+  hooks:
+    - id: ruff-check
+    - id: ruff-format
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.34.0
+  hooks:
+    - id: check-github-workflows
+- repo: https://github.com/asottile/blacken-docs
+  rev: 1.20.0
+  hooks:
+  - id: blacken-docs
+    additional_dependencies: [black==25.1.0]
+- repo: https://github.com/thlorenz/doctoc.git
+  rev: v2.2.0
+  hooks:
+    - id: doctoc
+      name: Add TOC for Markdown and RST files
+      files: README\.md

@@ -1,0 +1,20 @@
+diff --git a/pandas/tests/frame/indexing/test_setitem.py b/pandas/tests/frame/indexing/test_setitem.py
+index c0fead4889932..906c7654ef11f 100644
+--- a/pandas/tests/frame/indexing/test_setitem.py
++++ b/pandas/tests/frame/indexing/test_setitem.py
+@@ -1002,6 +1002,15 @@ def test_loc_expansion_with_timedelta_type(self):
+         )
+         tm.assert_frame_equal(result, expected)
+ 
++    def test_setitem_tuple_key_in_empty_frame(self):
++        # GH#54385
++        df = DataFrame()
++        df[(0, 0)] = [1, 2, 3]
++
++        cols = Index([(0, 0)], tupleize_cols=False)
++        expected = DataFrame({(0, 0): [1, 2, 3]}, columns=cols)
++        tm.assert_frame_equal(df, expected)
++
+ 
+ class TestDataFrameSetItemSlicing:
+     def test_setitem_slice_position(self):

@@ -1,0 +1,37 @@
+# `narwhals.LazyFrame`
+
+::: narwhals.dataframe.LazyFrame
+    handler: python
+    options:
+      members:
+        - collect
+        - collect_schema
+        - columns
+        - drop
+        - drop_nulls
+        - explode
+        - filter
+        - gather_every
+        - group_by
+        - head
+        - implementation
+        - join
+        - join_asof
+        - lazy
+        - pipe
+        - rename
+        - schema
+        - select
+        - sink_parquet
+        - sort
+        - tail
+        - to_native
+        - top_k
+        - unique
+        - unpivot
+        - with_columns
+        - with_row_index
+      show_root_heading: false
+      show_source: false
+      show_bases: false
+      inherited_members: true

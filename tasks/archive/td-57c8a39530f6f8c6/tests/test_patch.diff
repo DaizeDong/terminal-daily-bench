@@ -1,0 +1,19 @@
+diff --git a/Tests/feaLib/parser_test.py b/Tests/feaLib/parser_test.py
+index 0ce0df442c..aad7e8fcda 100644
+--- a/Tests/feaLib/parser_test.py
++++ b/Tests/feaLib/parser_test.py
+@@ -1440,6 +1440,14 @@ def test_rsub_multiple_replacement_glyphs(self):
+             "feature test {rsub f_i by f i;} test;",
+         )
+ 
++    def test_rsub_deletion(self):
++        self.assertRaisesRegex(
++            FeatureLibError,
++            "Reverse chaining substitutions do not support glyph deletion",
++            self.parse,
++            "lookup test { rsub a b c' e by NULL; } test;",
++        )
++
+     def test_script(self):
+         doc = self.parse("feature test {script cyrl;} test;")
+         s = doc.statements[0].statements[0]

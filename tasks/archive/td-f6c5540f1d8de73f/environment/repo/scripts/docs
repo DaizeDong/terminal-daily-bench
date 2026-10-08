@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+set -x
+
+uv run mkdocs serve

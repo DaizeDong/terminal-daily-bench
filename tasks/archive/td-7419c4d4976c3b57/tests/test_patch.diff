@@ -1,0 +1,17 @@
+diff --git a/tests/dialects/test_redshift.py b/tests/dialects/test_redshift.py
+index fbbb7d2b99..9383834721 100644
+--- a/tests/dialects/test_redshift.py
++++ b/tests/dialects/test_redshift.py
+@@ -347,6 +347,12 @@ def test_identity(self):
+         self.validate_identity("CREATE TABLE datetable (start_date DATE, end_date DATE)")
+         self.validate_identity("SELECT APPROXIMATE AS y")
+         self.validate_identity("CREATE TABLE t (c BIGINT IDENTITY(0, 1))")
++        self.validate_identity(
++            "COPY test_staging_tbl FROM 's3://your/bucket/prefix/here' IAM_ROLE default FORMAT AS AVRO 'auto'"
++        )
++        self.validate_identity(
++            "COPY test_staging_tbl FROM 's3://your/bucket/prefix/here' IAM_ROLE default FORMAT AS JSON 's3://jsonpaths_file'"
++        )
+         self.validate_identity(
+             "SELECT * FROM venue WHERE (venuecity, venuestate) IN (('Miami', 'FL'), ('Tampa', 'FL')) ORDER BY venueid"
+         )

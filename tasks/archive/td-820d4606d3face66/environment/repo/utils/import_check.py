@@ -1,0 +1,95 @@
+from __future__ import annotations
+
+import ast
+import sys
+from pathlib import Path
+
+BANNED_IMPORTS = {
+    "cudf",
+    "cupy",
+    "dask",
+    "dask.dataframe",
+    "dask_expr",
+    "duckdb",
+    "ibis",
+    "modin",
+    "numpy",
+    "pandas",
+    "polars",
+    "pyarrow",
+    "pyspark",
+}
+
+ALLOWED_IMPORTS = {
+    "_pandas_like": {"pandas", "numpy"},
+    "_arrow": {"pyarrow", "pyarrow.compute", "pyarrow.parquet"},
+    "_dask": {"dask.dataframe", "pandas", "dask_expr"},
+    "_polars": {"polars"},
+    "_duckdb": {"duckdb"},
+    "_ibis": {"ibis", "ibis._", "ibis.expr.types"},
+}
+
+
+class ImportPandasChecker(ast.NodeVisitor):
+    def __init__(self, file_name: str, lines: list[str]) -> None:
+        self.file_name = file_name
+        self.lines = lines
+        self.found_import = False
+        for key, val in ALLOWED_IMPORTS.items():
+            if key in self.file_name:
+                self.allowed_imports: set[str] = val
+                break
+        else:
+            self.allowed_imports = set()
+
+    def visit_If(self, node: ast.If) -> None:
+        # Check if the condition is `if TYPE_CHECKING`
+        if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+            # Skip the body of this if statement
+            return
+        self.generic_visit(node)
+
+    def visit_Import(self, node: ast.Import) -> None:
+        for alias in node.names:
+            if (
+                alias.name in BANNED_IMPORTS
+                and alias.name not in self.allowed_imports
+                and "# ignore-banned-import" not in self.lines[node.lineno - 1]
+            ):
+                print(
+                    f"{self.file_name}:{node.lineno}:{node.col_offset}: found {alias.name} import"
+                )
+                self.found_import = True
+
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if (
+            node.module in BANNED_IMPORTS
+            and "# ignore-banned-import" not in self.lines[node.lineno - 1]
+            and node.module not in self.allowed_imports
+        ):
+            print(
+                f"{self.file_name}:{node.lineno}:{node.col_offset}: found {node.module} import"
+            )
+            self.found_import = True
+        self.generic_visit(node)
+
+
+def check_import_pandas(filename: str) -> bool:
+    content = Path(filename).read_text("utf-8")
+    tree = ast.parse(content, filename=filename)
+
+    checker = ImportPandasChecker(filename, content.splitlines())
+    checker.visit(tree)
+
+    return checker.found_import
+
+
+if __name__ == "__main__":
+    ret = 0
+    for filename in sys.argv[1:]:
+        if not filename.endswith(".py"):
+            continue
+        ret |= check_import_pandas(filename)
+    sys.exit(ret)

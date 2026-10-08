@@ -1,0 +1,130 @@
+diff --git a/tests/testdeprecations.py b/tests/testdeprecations.py
+index 467b84f43..35a4e93ef 100644
+--- a/tests/testdeprecations.py
++++ b/tests/testdeprecations.py
+@@ -20,6 +20,26 @@ def test_deprecate_Parameter_pickle_default_value(self):
+         with pytest.raises(param._utils.ParamDeprecationWarning):
+             param.Parameter(pickle_default_value=False)
+ 
++    def test_deprecate_Selector_compute_default_fn(self):
++        with pytest.raises(param._utils.ParamDeprecationWarning):
++            param.Selector(compute_default_fn=lambda: 0)
++
++    def test_deprecate_Selector_compute_default(self):
++        class P(param.Parameterized):
++            s = param.Selector()
++
++        P.param['s'].compute_default_fn = lambda: 0
++        with pytest.raises(param._utils.ParamDeprecationWarning):
++            P().param['s'].compute_default()
++
++    def test_deprecate_ListSelector_compute_default(self):
++        class P(param.Parameterized):
++            ls = param.ListSelector()
++
++        P.param['ls'].compute_default_fn = lambda: [0]
++        with pytest.raises(param._utils.ParamDeprecationWarning):
++            P().param['ls'].compute_default()
++
+ 
+ class TestDeprecateParameterizedModule:
+ 
+diff --git a/tests/testlistselector.py b/tests/testlistselector.py
+index 2588c81f6..548b7b248 100644
+--- a/tests/testlistselector.py
++++ b/tests/testlistselector.py
+@@ -1,5 +1,6 @@
+ import re
+ import unittest
++import warnings
+ 
+ import param
+ import pytest
+@@ -197,20 +198,28 @@ class Q(param.Parameterized):
+             Q.r = 6
+ 
+     def test_compute_default(self):
+-        class Q(param.Parameterized):
+-            r = param.ListSelector(default=None, compute_default_fn=lambda: [1,2,3])
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default_fn', category=param._utils.ParamDeprecationWarning)
++            class Q(param.Parameterized):
++                r = param.ListSelector(default=None, compute_default_fn=lambda: [1,2,3])
+ 
+         self.assertEqual(Q.r, None)
+-        Q.param['r'].compute_default()
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default', category=param._utils.ParamDeprecationWarning)
++            Q.param['r'].compute_default()
+         self.assertEqual(Q.r, [1,2,3])
+         self.assertEqual(Q.param['r'].objects, [1,2,3])
+ 
+     def test_bad_compute_default(self):
+-        class Q(param.Parameterized):
+-            r = param.ListSelector(default=None,compute_default_fn=lambda:1)
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default_fn', category=param._utils.ParamDeprecationWarning)
++            class Q(param.Parameterized):
++                r = param.ListSelector(default=None,compute_default_fn=lambda:1)
+ 
+-        with self.assertRaises(TypeError):
+-            Q.param['r'].compute_default()
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default', category=param._utils.ParamDeprecationWarning)
++            with self.assertRaises(TypeError):
++                Q.param['r'].compute_default()
+ 
+     def test_initialization_bad_iterable(self):
+         with self.assertRaises(ValueError):
+diff --git a/tests/testobjectselector.py b/tests/testobjectselector.py
+index 2d03f3891..4bdc3cbd4 100644
+--- a/tests/testobjectselector.py
++++ b/tests/testobjectselector.py
+@@ -7,6 +7,7 @@
+ 
+ import re
+ import unittest
++import warnings
+ 
+ from collections import OrderedDict
+ 
+@@ -550,12 +551,16 @@ class Q(param.Parameterized):
+             raise AssertionError("ObjectSelector created without range.")
+ 
+     def test_compute_default_fn_in_objects(self):
+-        class P(param.Parameterized):
+-            o = param.ObjectSelector(objects=[0, 1], compute_default_fn=lambda: 1)
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default_fn', category=param._utils.ParamDeprecationWarning)
++            class P(param.Parameterized):
++                o = param.ObjectSelector(objects=[0, 1], compute_default_fn=lambda: 1)
+ 
+         assert P.param.o.default is None
+ 
+-        P.param.o.compute_default()
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default', category=param._utils.ParamDeprecationWarning)
++            P.param.o.compute_default()
+ 
+         assert P.param.o.default == 1
+ 
+@@ -565,12 +570,16 @@ class P(param.Parameterized):
+ 
+ 
+     def test_compute_default_fn_not_in_objects(self):
+-        class P(param.Parameterized):
+-            o = param.ObjectSelector(objects=[0, 1], compute_default_fn=lambda: 2)
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default_fn', category=param._utils.ParamDeprecationWarning)
++            class P(param.Parameterized):
++                o = param.ObjectSelector(objects=[0, 1], compute_default_fn=lambda: 2)
+ 
+         assert P.param.o.default is None
+ 
+-        P.param.o.compute_default()
++        with warnings.catch_warnings():
++            warnings.filterwarnings('ignore', message='compute_default', category=param._utils.ParamDeprecationWarning)
++            P.param.o.compute_default()
+ 
+         assert P.param.o.default == 2
+ 

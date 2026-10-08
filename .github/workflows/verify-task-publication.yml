@@ -1,0 +1,23 @@
+name: Verify task publication
+on:
+  push:
+    branches: ['publication/**']
+  pull_request:
+    paths:
+      - 'tasks/archive/**'
+      - 'publication-manifests/**'
+      - '.github/publication_inventory.py'
+      - '.github/workflows/verify-task-publication.yml'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    name: Verify public package inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify exact public inventory without executing task code
+        run: python3 -B .github/publication_inventory.py
